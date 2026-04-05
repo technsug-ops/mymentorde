@@ -21,6 +21,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // all-inkl / paylaşımlı hosting: HTTPS proxy arkasında çalışıyoruz
         $middleware->trustProxies(at: '*');
 
+        // CSRF — login/forgot-password muaf (session cookie debug)
+        // TODO: Sorun çözülünce bu satırı kaldır
+        $middleware->validateCsrfTokens(except: [
+            'login',
+            'forgot-password',
+        ]);
+
         // Giriş yapmış kullanıcılar guest route'larına erişirse /config'e yönlendir
         $middleware->redirectUsersTo('/auth/redirect');
 
