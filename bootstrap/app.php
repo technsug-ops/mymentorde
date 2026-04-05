@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // all-inkl / paylaşımlı hosting: HTTPS proxy arkasında çalışıyoruz
+        $middleware->trustProxies(at: '*');
+
         // Giriş yapmış kullanıcılar guest route'larına erişirse /config'e yönlendir
         $middleware->redirectUsersTo('/auth/redirect');
 
