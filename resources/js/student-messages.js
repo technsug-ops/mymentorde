@@ -1,0 +1,1 @@
+function filterMsg(e,t){document.querySelectorAll(".msg-filter-pills button").forEach(function(e){e.classList.remove("active")}),t&&t.classList.add("active"),document.querySelectorAll(".bubble-wrap").forEach(function(t){var a="1"===t.dataset.read,c="1"===t.dataset.quick,l=!0;"unread"===e&&(l=!a),"quick"===e&&(l=c),t.style.display=l?"":"none"})}

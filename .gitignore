@@ -1,0 +1,42 @@
+*.log
+*.bak
+*.rar
+.DS_Store
+.env
+.env.backup
+.env.production
+.env.testing
+/database/e2e.sqlite
+/test-results
+/playwright-report
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
+
+# Claude Code memory (kişiye özel, repo'ya eklenmemeli)
+/.claude/
+
+# Debug screenshots
+*.png
+
+# Exports
+/exports/
+
+# Login credentials (GÜVENLİK)
+DEV_LOGIN_CREDENTIALS.md

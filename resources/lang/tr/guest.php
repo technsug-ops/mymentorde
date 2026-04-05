@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'dashboard'         => 'Ana Sayfa',
+    'profile'           => 'Profilim',
+    'documents'         => 'Belgelerim',
+    'registration_form' => 'Kayıt Formu',
+    'services'          => 'Hizmetler',
+    'messages'          => 'Mesajlar',
+    'tickets'           => 'Destek',
+    'settings'          => 'Ayarlar',
+    'contract'          => 'Sözleşmem',
+    'timeline'          => 'Süreç Takibi',
+    'welcome'           => 'Hoş Geldiniz',
+    'logout'            => 'Çıkış Yap',
+    'save'              => 'Kaydet',
+    'cancel'            => 'İptal',
+    'submit'            => 'Gönder',
+    'back'              => 'Geri',
+    'next'              => 'İleri',
+    'loading'           => 'Yükleniyor...',
+    'success'           => 'İşlem başarılı!',
+    'error'             => 'Bir hata oluştu.',
+    'required_field'    => 'Bu alan zorunludur.',
+    'language'          => 'Dil',
+];

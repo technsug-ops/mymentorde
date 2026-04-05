@@ -1,0 +1,1393 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MentorDE Kullanıcı Kılavuzu</title><style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f7fb;color:#1a2233;padding:40px 20px;line-height:1.75;}
+.wrap{max-width:900px;margin:0 auto;background:#fff;border-radius:12px;padding:48px 56px;box-shadow:0 4px 32px rgba(0,0,0,.08);}
+h1,h2{font-size:1.3rem;font-weight:800;color:#1f66d1;margin:2.5rem 0 .6rem;padding-bottom:.4rem;border-bottom:2px solid #e2e8f0;}
+h3{font-size:1.05rem;font-weight:700;color:#1a2233;margin:1.8rem 0 .5rem;}
+h4{font-size:.95rem;font-weight:600;color:#4b5563;margin:1.3rem 0 .4rem;}
+p{margin-bottom:.8rem;}ul,ol{margin:.4rem 0 1rem 1.6rem;}li{margin-bottom:.3rem;}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem;}
+th{background:#1f66d1;color:#fff;padding:9px 12px;text-align:left;font-weight:600;}
+td{padding:8px 12px;border-bottom:1px solid #e2e8f0;}
+tr:nth-child(even) td{background:#f8faff;}
+code{background:#f1f5f9;border:1px solid #e2e8f0;padding:2px 6px;border-radius:4px;font-size:.85rem;}
+pre{background:#f1f5f9;padding:16px;border-radius:8px;overflow-x:auto;margin:1rem 0;}
+blockquote{border-left:3px solid #1f66d1;padding-left:16px;color:#6b7280;margin:1rem 0;}
+hr{border:none;border-top:1px solid #e2e8f0;margin:2rem 0;}
+.footer{text-align:center;margin-top:48px;padding-top:24px;border-top:1px solid #e2e8f0;font-size:.82rem;color:#9ca3af;}
+@media print{body{background:#fff;padding:0;} .wrap{box-shadow:none;padding:24px;}}
+</style></head><body><div class="wrap"><h1>MentorDE — Sistem El Kitabı (Türkçe)</h1>
+<p><strong>Versiyon 1.0 | 2026</strong></p>
+<blockquote>
+<p>Bu belge MentorDE ERP sisteminin tüm modüllerini, kullanıcı rollerini ve iş akışlarını kapsar.
+Teknik personel, yöneticiler ve son kullanıcılar için hazırlanmıştır.</p>
+</blockquote>
+<hr />
+<h2>İçindekiler</h2>
+<ol>
+<li><a href="#1-sistem-genel-bak%C4%B1%C5%9F">Sistem Genel Bakış</a></li>
+<li><a href="#2-kullan%C4%B1c%C4%B1-rolleri-ve-yetkiler">Kullanıcı Rolleri ve Yetkiler</a></li>
+<li><a href="#3-portal-k%C4%B1lavuzlar%C4%B1">Portal Kılavuzları</a>
+<ul>
+<li>3.1 Manager Portalı</li>
+<li>3.2 Senior / Danışman Portalı</li>
+<li>3.3 Guest Portalı</li>
+<li>3.4 Student Portalı</li>
+<li>3.5 Dealer Portalı</li>
+<li>3.6 Marketing Admin Portalı</li>
+</ul>
+</li>
+<li><a href="#4-mod%C3%BCl-dok%C3%BCmantasyonu">Modül Dokümantasyonu</a></li>
+<li><a href="#5-entegrasyonlar">Entegrasyonlar</a></li>
+<li><a href="#6-admin-y%C3%B6netimi">Admin Yönetimi</a></li>
+<li><a href="#7-g%C3%BCvenlik-ve-gdpr">Güvenlik ve GDPR</a></li>
+<li><a href="#8-s%C4%B1k-sorulan-sorular">Sık Sorulan Sorular</a></li>
+</ol>
+<hr />
+<h2>1. Sistem Genel Bakış</h2>
+<h3>MentorDE Nedir?</h3>
+<p>MentorDE, Almanya'daki üniversitelere başvuru süreçlerini yöneten <strong>çok portalı bir ERP sistemidir</strong>. Danışmanlık firmaları, öğrenci adayları, senior danışmanlar, bayiler ve pazarlama ekipleri için ayrı ayrı özelleştirilmiş çalışma alanları sunar.</p>
+<h3>Temel İş Akışı</h3>
+<pre><code>Aday Başvurur (Guest)
+       ↓
+Senior Danışman Atanır
+       ↓
+Belgeler Toplanır &amp; İncelenir
+       ↓
+Sözleşme İmzalanır
+       ↓
+Öğrenci Statüsüne Geçiş
+       ↓
+Üniversite Başvuruları Takip Edilir
+       ↓
+Kabul &amp; Ödeme Takibi
+</code></pre>
+<h3>Teknoloji Altyapısı</h3>
+<table>
+<thead>
+<tr>
+<th>Bileşen</th>
+<th>Teknoloji</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backend</td>
+<td>PHP 8.4 / Laravel 12</td>
+</tr>
+<tr>
+<td>Veritabanı</td>
+<td>MySQL</td>
+</tr>
+<tr>
+<td>Ödeme</td>
+<td>Stripe (EUR)</td>
+</tr>
+<tr>
+<td>Bildirim</td>
+<td>WhatsApp (Meta Cloud API), E-posta</td>
+</tr>
+<tr>
+<td>2FA</td>
+<td>Google Authenticator (TOTP)</td>
+</tr>
+<tr>
+<td>Depolama</td>
+<td>Yerel disk / AWS S3</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Kullanıcı Rolleri ve Yetkiler</h2>
+<h3>Rol Hiyerarşisi</h3>
+<pre><code>Manager / System Admin          → En yüksek yetki
+├── Operations Admin/Staff      → Operasyon yönetimi
+├── Finance Admin/Staff         → Finans yönetimi
+├── Marketing Admin/Staff       → Pazarlama &amp; CMS
+├── Sales Admin/Staff           → Satış &amp; lead yönetimi
+Senior / Mentor                 → Danışmanlık
+Dealer                          → Bayi ağı
+Guest                           → Aday başvuru sahibi
+Student                         → Kabul edilmiş öğrenci
+</code></pre>
+<h3>Rol Tablosu</h3>
+<table>
+<thead>
+<tr>
+<th>Rol</th>
+<th>Kod</th>
+<th>Portal</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yönetici</td>
+<td><code>manager</code></td>
+<td>Manager</td>
+<td>Tam sistem erişimi</td>
+</tr>
+<tr>
+<td>Sistem Admin</td>
+<td><code>system_admin</code></td>
+<td>Manager</td>
+<td>Teknik yönetim</td>
+</tr>
+<tr>
+<td>Operasyon Admin</td>
+<td><code>operations_admin</code></td>
+<td>Manager</td>
+<td>Süreç yönetimi</td>
+</tr>
+<tr>
+<td>Finans Admin</td>
+<td><code>finance_admin</code></td>
+<td>Manager</td>
+<td>Ödeme &amp; gelir</td>
+</tr>
+<tr>
+<td>Sistem Personel</td>
+<td><code>system_staff</code></td>
+<td>Manager</td>
+<td>Sınırlı teknik erişim</td>
+</tr>
+<tr>
+<td>Operasyon Personel</td>
+<td><code>operations_staff</code></td>
+<td>Manager</td>
+<td>Sınırlı operasyon</td>
+</tr>
+<tr>
+<td>Finans Personel</td>
+<td><code>finance_staff</code></td>
+<td>Manager</td>
+<td>Sınırlı finans</td>
+</tr>
+<tr>
+<td>Senior Danışman</td>
+<td><code>senior</code></td>
+<td>Senior</td>
+<td>Öğrenci takibi</td>
+</tr>
+<tr>
+<td>Mentor</td>
+<td><code>mentor</code></td>
+<td>Senior</td>
+<td>Senior ile aynı panel</td>
+</tr>
+<tr>
+<td>Misafir Aday</td>
+<td><code>guest</code></td>
+<td>Guest</td>
+<td>Başvuru &amp; belgeler</td>
+</tr>
+<tr>
+<td>Öğrenci</td>
+<td><code>student</code></td>
+<td>Student</td>
+<td>Takip &amp; ödeme</td>
+</tr>
+<tr>
+<td>Bayi</td>
+<td><code>dealer</code></td>
+<td>Dealer</td>
+<td>Referans &amp; komisyon</td>
+</tr>
+<tr>
+<td>Pazarlama Admin</td>
+<td><code>marketing_admin</code></td>
+<td>Marketing</td>
+<td>Kampanya &amp; içerik</td>
+</tr>
+<tr>
+<td>Satış Admin</td>
+<td><code>sales_admin</code></td>
+<td>Marketing</td>
+<td>Lead &amp; satış</td>
+</tr>
+<tr>
+<td>Pazarlama Personel</td>
+<td><code>marketing_staff</code></td>
+<td>Marketing</td>
+<td>Sınırlı pazarlama</td>
+</tr>
+<tr>
+<td>Satış Personel</td>
+<td><code>sales_staff</code></td>
+<td>Marketing</td>
+<td>Sınırlı satış</td>
+</tr>
+</tbody>
+</table>
+<h3>Yetki Özet Tablosu</h3>
+<table>
+<thead>
+<tr>
+<th>İşlem</th>
+<th>Manager</th>
+<th>Senior</th>
+<th>Guest</th>
+<th>Student</th>
+<th>Dealer</th>
+<th>Marketing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tüm kullanıcıları gör</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Guest atama</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Belge onayı</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Sözleşme oluştur</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Ödeme oluştur</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Öğrenci göster</td>
+<td>✅</td>
+<td>✅*</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅*</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Kendi profilini gör</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>İçerik yönet</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Komisyon gör</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅*</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><code>*</code> Sadece kendi atanmış kayıtları</p>
+</blockquote>
+<hr />
+<h2>3. Portal Kılavuzları</h2>
+<hr />
+<h3>3.1 Manager Portalı</h3>
+<p><strong>Erişim:</strong> <code>/manager/dashboard</code>
+<strong>Roller:</strong> manager, system_admin, operations_admin, finance_admin, system_staff, operations_staff, finance_staff</p>
+<h4>Dashboard</h4>
+<p>Giriş yapınca şunları görürsünüz:</p>
+<ul>
+<li><strong>KPI Kartları:</strong> Toplam guest, aktif öğrenci, bu ay gelir, bekleyen belgeler</li>
+<li><strong>Son Aktiviteler:</strong> Son başvurular, son belgeler, son biletler</li>
+<li><strong>Finans Özeti</strong> (finance_admin/finance_staff için): Bu ay EUR tahsilatı, vadesi geçen faturalar, bekleyen ödemeler</li>
+<li><strong>Hızlı Linkler:</strong> Yeni guest ekle, rapor al, GDPR dashboard</li>
+</ul>
+<h4>Öğrenci &amp; Guest Yönetimi</h4>
+<table>
+<thead>
+<tr>
+<th>Menü</th>
+<th>İşlev</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Başvurular</td>
+<td>Tüm guest başvurularını listele, filtrele, detay gör</td>
+</tr>
+<tr>
+<td>Öğrenciler</td>
+<td>Aktif öğrencileri yönet</td>
+</tr>
+<tr>
+<td>Öğrenci Ata</td>
+<td>Guest → Öğrenci geçişini başlat</td>
+</tr>
+<tr>
+<td>Senior Ata</td>
+<td>Gues'e danışman ata</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Guest Arama &amp; Filtreleme:</strong></p>
+<ul>
+<li>Adı, e-posta, takip kodu ile ara</li>
+<li>Başvuru türüne göre filtrele (bachelor, master, dil kursu)</li>
+<li>Statüye göre filtrele (yeni, incelemede, kabul, red)</li>
+<li>Ülkeye, şehre, üniversiteye göre filtrele</li>
+</ul>
+<h4>Personel Yönetimi</h4>
+<p><code>/manager/staff</code></p>
+<ul>
+<li>Yeni personel ekle (ad, e-posta, rol, şifre)</li>
+<li>Personeli düzenle / devre dışı bırak</li>
+<li>Rol şablonu ata (izin seti)</li>
+<li>İzin geçmişini gör</li>
+</ul>
+<h4>Belge Yönetimi</h4>
+<ul>
+<li><strong>Belge Kategorileri:</strong> Kategorileri yönet, zorunlu/isteğe bağlı işaretle</li>
+<li><strong>Belge İnceleme:</strong> Yüklenen belgeleri onayla / red et / yorum yaz</li>
+<li><strong>Belge Şablonları:</strong> Standart belge setleri oluştur</li>
+</ul>
+<h4>Sözleşme Yönetimi</h4>
+<ul>
+<li>Sözleşme şablonu oluştur (HTML editör)</li>
+<li>Sözleşme gönder → öğrenci imzalar</li>
+<li>İmzalı sözleşmeleri görüntüle / indir</li>
+<li>Sözleşme versiyonlarını takip et</li>
+</ul>
+<h4>Ödeme &amp; Gelir</h4>
+<p><code>/manager/payments</code></p>
+<ul>
+<li>Fatura oluştur (öğrenci, miktar EUR, vade tarihi)</li>
+<li>Ödeme durumunu takip et (bekliyor / ödendi / vadesi geçti)</li>
+<li>Gelir milestone'larını yönet</li>
+<li>Dealer komisyonlarını hesapla</li>
+<li>Aylık / yıllık gelir raporu</li>
+</ul>
+<h4>Görev Yönetimi (Task Board)</h4>
+<p><code>/manager/tasks</code></p>
+<ul>
+<li>Görev oluştur, ata, öncelik belirle</li>
+<li>Kanban görünümü (Yapılacak / Devam / Tamamlandı)</li>
+<li>Tekrarlayan görev kuralları</li>
+<li>Zaman takibi (başlat / durdur)</li>
+<li>Görev bağımlılıkları</li>
+</ul>
+<h4>Ticket (Destek Talepleri)</h4>
+<p><code>/manager/tickets</code></p>
+<ul>
+<li>Tüm guest ve öğrenci taleplerini gör</li>
+<li>Departmana yönlendir (teknik, finans, operasyon)</li>
+<li>Öncelik belirle (düşük / normal / yüksek / acil)</li>
+<li>İç not ekle (müşteriye görünmez)</li>
+<li>SLA takibi</li>
+</ul>
+<h4>Raporlar</h4>
+<ul>
+<li><strong>Snapshot Raporları:</strong> Haftalık / aylık özet</li>
+<li><strong>Audit Raporu:</strong> Kim ne yaptı, ne zaman</li>
+<li><strong>Güvenlik Anomalileri:</strong> Şüpheli giriş, yetki ihlali denemeleri</li>
+<li><strong>GDPR Dashboard:</strong> Veri silme talepleri, onay kayıtları</li>
+</ul>
+<hr />
+<h3>3.2 Senior / Danışman Portalı</h3>
+<p><strong>Erişim:</strong> <code>/senior/dashboard</code>
+<strong>Roller:</strong> senior, mentor</p>
+<h4>Dashboard</h4>
+<ul>
+<li>Atanmış guest listesi (KPI: toplam, aktif, bu ay yeni)</li>
+<li>Pipeline durumu (kaçı hangi aşamada)</li>
+<li>Bugünkü görevler ve hatırlatmalar</li>
+<li>Okunmamış mesajlar</li>
+<li>Performans hedefleri (aylık kabul hedefi vs gerçekleşen)</li>
+</ul>
+<h4>Öğrenci 360° Görünümü</h4>
+<p>Her öğrenci için 9 sekme:</p>
+<table>
+<thead>
+<tr>
+<th>Sekme</th>
+<th>İçerik</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Genel</td>
+<td>Kişisel bilgiler, başvuru durumu</td>
+</tr>
+<tr>
+<td>Belgeler</td>
+<td>Yüklenen belgeler, onay durumu</td>
+</tr>
+<tr>
+<td>Sözleşme</td>
+<td>Sözleşme durumu, imza tarihi</td>
+</tr>
+<tr>
+<td>Başvurular</td>
+<td>Üniversite başvuru takibi</td>
+</tr>
+<tr>
+<td>Ödemeler</td>
+<td>Ödeme planı, gecikme durumu</td>
+</tr>
+<tr>
+<td>Mesajlar</td>
+<td>Öğrenci ile yazışma</td>
+</tr>
+<tr>
+<td>Notlar</td>
+<td>İç notlar (öğrenciye görünmez)</td>
+</tr>
+<tr>
+<td>Zaman Çizelgesi</td>
+<td>Tüm aktivite geçmişi</td>
+</tr>
+<tr>
+<td>Kargo</td>
+<td>Belge gönderim takibi</td>
+</tr>
+</tbody>
+</table>
+<h4>Pipeline Kanban</h4>
+<p><code>/senior/guest-pipeline</code></p>
+<p>6 sütunlu drag-drop Kanban board:</p>
+<ol>
+<li><strong>Yeni Başvuru</strong> — Atanmış, henüz görüşülmedi</li>
+<li><strong>İlk Görüşme</strong> — İlk temas yapıldı</li>
+<li><strong>Belge Toplama</strong> — Belgeler istendi / toplanıyor</li>
+<li><strong>Değerlendirme</strong> — Başvuru dosyası hazırlanıyor</li>
+<li><strong>Başvuru Yapıldı</strong> — Üniversiteye gönderildi</li>
+<li><strong>Sonuç Bekleniyor</strong> — Kabul / red bekleniyor</li>
+</ol>
+<p>Kartı sütunlar arasında sürükle → durum otomatik güncellenir.</p>
+<h4>Toplu İnceleme (Batch Review)</h4>
+<p><code>/senior/batch-review</code></p>
+<p>Klavye kısayollarıyla hızlı inceleme:</p>
+<ul>
+<li><code>A</code> → Onayla</li>
+<li><code>R</code> → Reddet</li>
+<li><code>N</code> → Sonraki</li>
+</ul>
+<h4>Mesajlaşma</h4>
+<p><code>/senior/messages</code></p>
+<ul>
+<li>WhatsApp benzeri split-panel arayüz</li>
+<li>Öğrenci / guest ile gerçek zamanlı mesajlaşma</li>
+<li>Dosya paylaşımı</li>
+<li>Mesaj iletme, tepki ekleme, düzenleme</li>
+<li>10 saniyede bir otomatik yenileme</li>
+</ul>
+<h4>Performans Takibi</h4>
+<ul>
+<li>Aylık hedef vs gerçekleşen</li>
+<li>Lead skoru (8 faktör: belge tamamlama, yanıt süresi, vb.)</li>
+<li>Geçmiş performans grafikleri</li>
+</ul>
+<hr />
+<h3>3.3 Guest Portalı</h3>
+<p><strong>Erişim:</strong> <code>/guest/dashboard</code>
+<strong>Roller:</strong> guest</p>
+<h4>Başvuru Süreci</h4>
+<ol>
+<li><code>/apply</code> — Genel başvuru formu doldur (kayıt olmadan)</li>
+<li>Sistem otomatik kullanıcı oluşturur, şifre e-posta ile gönderilir</li>
+<li>Giriş yap → <code>/guest/dashboard</code></li>
+</ol>
+<h4>Dashboard</h4>
+<ul>
+<li><strong>İlerleme Çubuğu:</strong> Başvuru → Belgeler → Sözleşme → Öğrenci aşamaları</li>
+<li><strong>Sonraki Adım CTA:</strong> Ne yapman gerektiğini gösterir</li>
+<li><strong>Atanmış Danışman:</strong> Senior'ın adı, iletişim</li>
+<li><strong>Aktif Kampanyalar:</strong> Güncel duyurular</li>
+</ul>
+<h4>Başvuru Formu</h4>
+<p><code>/guest/registration/form</code></p>
+<ul>
+<li>Kişisel bilgiler (ad, soyad, doğum tarihi, uyruk)</li>
+<li>Eğitim geçmişi</li>
+<li>Hedef üniversite / bölüm / şehir</li>
+<li>Dil sertifikaları</li>
+<li>Motivasyon notu</li>
+<li>Otomatik kayıt (her 30 saniyede bir)</li>
+</ul>
+<h4>Belge Yükleme</h4>
+<p><code>/guest/registration/documents</code></p>
+<ul>
+<li>Zorunlu belge listesi (danışman tarafından belirlenir)</li>
+<li>Belge başına yükleme (PDF, JPG, PNG — maks 10MB)</li>
+<li>Yükleme durumu: Bekleniyor / İncelemede / Onaylandı / Reddedildi</li>
+<li>Red edilirse danışman yorumu görünür</li>
+</ul>
+<h4>Sözleşme</h4>
+<p><code>/guest/contract</code></p>
+<ul>
+<li>Sözleşme metni görüntüle</li>
+<li>Dijital imzala (ad, tarih, onay kutusu)</li>
+<li>İmzalı PDF indir</li>
+</ul>
+<h4>Keşfet (Content Hub)</h4>
+<p><code>/guest/discover</code></p>
+<ul>
+<li>Blog yazıları, videolar, podcast'ler, sunumlar</li>
+<li>Kategori filtreleri: Öğrenci Hayatı / Kariyer / Kültür / İpuçları</li>
+<li>Şehir rehberleri (Berlin, Münih, Hamburg...)</li>
+<li>Üniversite rehberi</li>
+</ul>
+<h4>Destek Talebi</h4>
+<p><code>/guest/tickets</code></p>
+<ul>
+<li>Yeni talep aç (konu, açıklama, öncelik)</li>
+<li>Talep durumunu takip et</li>
+<li>Danışmanla yazışma</li>
+</ul>
+<h4>Maliyet Hesaplayıcı</h4>
+<p><code>/guest/cost-calculator</code></p>
+<ul>
+<li>Hedef şehre göre yaşam maliyeti tahmini</li>
+<li>Kira, yemek, ulaşım, eğlence kalemleri</li>
+<li>EUR cinsinden gösterim</li>
+</ul>
+<hr />
+<h3>3.4 Student Portalı</h3>
+<p><strong>Erişim:</strong> <code>/student/dashboard</code>
+<strong>Roller:</strong> student</p>
+<blockquote>
+<p>Guest başvurusu onaylandığında ve sözleşme imzalandığında hesap otomatik olarak Student statüsüne geçer.</p>
+</blockquote>
+<h4>Dashboard</h4>
+<ul>
+<li>Ödeme planı özeti (ödenen / bekleyen / geciken)</li>
+<li>Üniversite başvuru durumu</li>
+<li>Son belgeler</li>
+<li>Danışman mesajları</li>
+<li>Döviz kuru (TRY chip)</li>
+</ul>
+<h4>Ödeme Takibi</h4>
+<p><code>/student/payments</code></p>
+<ul>
+<li>Fatura listesi (fatura no, tutar EUR, vade, durum)</li>
+<li><strong>💳 Öde butonu</strong> — Stripe Checkout'a yönlendirir</li>
+<li>Ödeme geçmişi</li>
+<li>Milestone takibi (örn. kayıt ücreti, ilk dönem...)</li>
+</ul>
+<h4>Stripe ile Ödeme Süreci</h4>
+<ol>
+<li>&quot;💳 Öde&quot; butonuna tıkla</li>
+<li>Stripe'ın güvenli ödeme sayfasına yönlendir</li>
+<li>Kart bilgilerini gir</li>
+<li>Ödeme onaylanır → sistem otomatik güncellenir</li>
+<li>Fatura durumu &quot;Ödendi&quot; olarak işaretlenir</li>
+</ol>
+<h4>Belge Merkezi</h4>
+<p><code>/student/documents</code></p>
+<ul>
+<li>Danışmanın paylaştığı belgeleri gör / indir</li>
+<li>Kendi belgelerini yükle</li>
+<li>Kurum belgelerini takip et (öğrenci kartı, sigorta, vb.)</li>
+</ul>
+<h4>Üniversite Başvuru Takibi</h4>
+<p><code>/student/university-applications</code></p>
+<ul>
+<li>Başvurulan üniversiteler listesi</li>
+<li>Her başvurunun durumu (gönderildi / bekliyor / kabul / red)</li>
+<li>Başvuru tarihleri ve son günler</li>
+</ul>
+<h4>Kargo Takibi</h4>
+<p><code>/student/shipments</code></p>
+<ul>
+<li>Fiziksel belge gönderimlerini takip et</li>
+<li>Kargo takip numarası</li>
+<li>Tahmini teslimat tarihi</li>
+</ul>
+<h4>Randevu Takvimi</h4>
+<p><code>/student/appointments</code></p>
+<ul>
+<li>Danışmanla randevu görüntüle</li>
+<li>Harici takvim entegrasyonu (Google Calendar)</li>
+<li>Hatırlatma bildirimi</li>
+</ul>
+<h4>Keşfet (Content Hub)</h4>
+<p><code>/student/discover</code></p>
+<ul>
+<li>Guest discover ile aynı içerikler + öğrenciye özel</li>
+<li>Kariyer rehberleri, kültür içerikleri, şehir videoları</li>
+</ul>
+<hr />
+<h3>3.5 Dealer Portalı</h3>
+<p><strong>Erişim:</strong> <code>/dealer/dashboard</code>
+<strong>Roller:</strong> dealer</p>
+<h4>Dashboard</h4>
+<ul>
+<li>Referans ettiği öğrenci sayısı</li>
+<li>Bu ay kazanılan komisyon (EUR)</li>
+<li>Ödeme milestone'ları</li>
+<li>Aktif öğrenci listesi</li>
+</ul>
+<h4>Referans Yönetimi</h4>
+<ul>
+<li>Kendi üzerinden kaydolan öğrencileri gör</li>
+<li>Öğrenci başvuru durumu (izin verilen bilgiler)</li>
+<li>Belge durumu takibi</li>
+</ul>
+<h4>Komisyon Takibi</h4>
+<p><code>/dealer/commissions</code></p>
+<ul>
+<li>Her öğrenci için komisyon tutarı</li>
+<li>Ödeme zamanlaması (öğrenci ödeme yaptığında tetiklenir)</li>
+<li>Toplam kazanç özeti</li>
+<li>Komisyon dökümü indir</li>
+</ul>
+<h4>Milestone Takibi</h4>
+<p><code>/dealer/milestones</code></p>
+<ul>
+<li>Gelir milestone hedefleri</li>
+<li>Gerçekleşen vs hedef</li>
+<li>Bir sonraki milestone'a kalan miktar</li>
+</ul>
+<h4>Eğitim &amp; Kaynaklar</h4>
+<ul>
+<li>Sistem kullanım videoları</li>
+<li>Satış materyalleri</li>
+<li>Kampanya duyuruları</li>
+</ul>
+<h4>Sözleşme</h4>
+<p><code>/dealer/contract</code></p>
+<ul>
+<li>Bayi sözleşmesini görüntüle</li>
+<li>İmzalı sözleşme indir</li>
+</ul>
+<hr />
+<h3>3.6 Marketing Admin Portalı</h3>
+<p><strong>Erişim:</strong> <code>/mktg-admin/dashboard</code>
+<strong>Roller:</strong> marketing_admin, sales_admin, marketing_staff, sales_staff</p>
+<h4>Panel Modu Seçimi</h4>
+<p>Sidebar'da <strong>&quot;Panel Modu&quot;</strong> butonu:</p>
+<ul>
+<li>📣 <strong>Pazarlama Modu</strong> — Kampanya, içerik, sosyal medya</li>
+<li>💼 <strong>Satış Modu</strong> — Lead, CRM, satış takibi</li>
+</ul>
+<p>Tüm 4 rol her iki paneli kullanabilir.</p>
+<h4>Pazarlama Modu</h4>
+<p><strong>Kampanyalar</strong> (<code>/mktg-admin/campaigns</code>)</p>
+<ul>
+<li>Kampanya oluştur (e-posta, WhatsApp, sosyal medya)</li>
+<li>Hedef kitle tanımla (ülke, yaş, eğitim durumu)</li>
+<li>Zamanlanmış gönderim</li>
+<li>Açılma / tıklanma oranları</li>
+</ul>
+<p><strong>CMS &amp; İçerik</strong> (<code>/mktg-admin/content</code>)</p>
+<ul>
+<li>Blog yazısı, video, podcast, sunum ekle</li>
+<li>Kategori: Öğrenci Hayatı, Kariyer, Kültür...</li>
+<li>Hedef kitle: Guest / Student / Hepsi</li>
+<li>Öne çıkan içerik işaretle</li>
+<li>Yayınla / taslak / arşivle</li>
+</ul>
+<p><strong>E-posta Şablonları</strong> (<code>/mktg-admin/email-templates</code>)</p>
+<ul>
+<li>HTML e-posta şablonu oluştur</li>
+<li>Değişkenler: <code>{first_name}</code>, <code>{tracking_code}</code>, <code>{university}</code> vb.</li>
+<li>Önizleme &amp; test gönderimi</li>
+</ul>
+<p><strong>Takip Linkleri</strong> (<code>/mktg-admin/tracking-links</code>)</p>
+<ul>
+<li>UTM parametreli link oluştur</li>
+<li>Tıklanma, dönüşüm takibi</li>
+</ul>
+<h4>Satış Modu</h4>
+<p><strong>Lead Yönetimi</strong> (<code>/mktg-admin/leads</code>)</p>
+<ul>
+<li>Gelen lead'leri listele (kaynak: web, referans, kampanya)</li>
+<li>Lead skoru görüntüle (0-100)</li>
+<li>Satış temsilcisine ata</li>
+<li>Durum güncelle (yeni → iletişim kuruldu → nitelikli → kaybedildi)</li>
+</ul>
+<p><strong>Etkinlikler</strong> (<code>/mktg-admin/events</code>)</p>
+<ul>
+<li>Üniversite fuarı, webinar, bilgilendirme toplantısı ekle</li>
+<li>Kayıt yönetimi</li>
+<li>Katılımcı listesi indir</li>
+</ul>
+<hr />
+<h2>4. Modül Dokümantasyonu</h2>
+<hr />
+<h3>4.1 Kullanıcı Kimlik Doğrulama</h3>
+<h4>Giriş</h4>
+<p>URL: <code>/login</code></p>
+<ul>
+<li>E-posta ve şifre ile giriş</li>
+<li>10 başarısız denemede hesap 30 dakika kilitlenir</li>
+<li>Kilitlenme süresi ekranda gösterilir</li>
+</ul>
+<h4>Şifre Sıfırlama</h4>
+<ol>
+<li><code>/forgot-password</code> → e-posta gir</li>
+<li>Gelen linkten şifreyi sıfırla (<code>/reset-password/{token}</code>)</li>
+<li>Link 60 dakika geçerlidir</li>
+</ol>
+<h4>İki Faktörlü Doğrulama (2FA)</h4>
+<p>Manager, system_admin, operations_admin, finance_admin rolleri için <strong>zorunludur</strong>.</p>
+<p><strong>İlk kurulum:</strong></p>
+<ol>
+<li>Giriş yapınca otomatik <code>/2fa/setup</code> sayfasına yönlendirilirsin</li>
+<li>Google Authenticator / Microsoft Authenticator / Authy uygulamasını aç</li>
+<li>QR kodu tara (veya secret'ı manuel gir)</li>
+<li>Uygulamada görünen 6 haneli kodu gir</li>
+<li>Kurulum tamamlandı — bir daha sorulmaz (oturum başına)</li>
+</ol>
+<p><strong>Sonraki girişlerde:</strong></p>
+<ul>
+<li>Şifreni girdikten sonra 6 haneli kod ekranı açılır</li>
+<li>Uygulamandan kodu yaz → giriş tamamlanır</li>
+<li>Kod 30 saniyede bir değişir</li>
+</ul>
+<h4>E-posta Doğrulama</h4>
+<p>Yeni hesap açıldığında sistem otomatik doğrulama yapır (tüm hesaplar admin tarafından oluşturulur). Manuel doğrulama gerekirse <code>/email/verify</code> sayfasından bağlantı yeniden gönderilebilir.</p>
+<hr />
+<h3>4.2 Belge Yönetimi</h3>
+<h4>Belge Kategorileri</h4>
+<p>Manager tarafından oluşturulur. Her kategori:</p>
+<ul>
+<li>Ad ve açıklama</li>
+<li>Zorunlu / isteğe bağlı işareti</li>
+<li>Hedef kitle (guest / student)</li>
+</ul>
+<h4>Belge Yükleme (Guest/Student)</h4>
+<ul>
+<li>Desteklenen formatlar: PDF, JPG, JPEG, PNG</li>
+<li>Maksimum dosya boyutu: 10 MB</li>
+<li>Her belge kategori bazında yüklenir</li>
+<li>Aynı kategoriye yeni dosya yükleme eskisinin üzerine yazar</li>
+</ul>
+<h4>Belge İnceleme (Senior/Manager)</h4>
+<table>
+<thead>
+<tr>
+<th>Durum</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bekleniyor</td>
+<td>Henüz yüklenmedi</td>
+</tr>
+<tr>
+<td>İncelemede</td>
+<td>Yüklendi, onay bekleniyor</td>
+</tr>
+<tr>
+<td>Onaylandı</td>
+<td>✅ Belge kabul edildi</td>
+</tr>
+<tr>
+<td>Reddedildi</td>
+<td>❌ Gerekçe ile birlikte iade edildi</td>
+</tr>
+</tbody>
+</table>
+<p>Red edilince otomatik bildirim gider, gerekçe öğrenciye görünür.</p>
+<h4>Güvenlik</h4>
+<ul>
+<li>Dosya tipi sunucu tarafında magic byte kontrolü ile doğrulanır</li>
+<li>Dosya adı hash'lenerek depolanır (orijinal ad görünmez)</li>
+<li>Sadece yetkili kullanıcılar belgeye erişebilir</li>
+</ul>
+<hr />
+<h3>4.3 Sözleşme Sistemi</h3>
+<h4>Sözleşme Şablonu Oluşturma (Manager)</h4>
+<p><code>/manager/contract-templates</code></p>
+<ol>
+<li>Şablon adı ve içerik gir (HTML editör)</li>
+<li>Değişkenler kullan: <code>{student_name}</code>, <code>{date}</code>, <code>{package_name}</code> vb.</li>
+<li>Aktif / pasif işaretle</li>
+<li>Rol bazlı şablon atama (hangi guest türüne)</li>
+</ol>
+<h4>Sözleşme Gönderme</h4>
+<ol>
+<li>Guest/Öğrenci profilinden &quot;Sözleşme Gönder&quot;</li>
+<li>Şablon seç → önizle → gönder</li>
+<li>Guest/Öğrenciye bildirim gider</li>
+</ol>
+<h4>İmzalama (Guest/Student)</h4>
+<ol>
+<li>Portal'da bildirim / menü linki</li>
+<li>Sözleşme metnini oku</li>
+<li>Ad-soyadını yaz, tarihi onayla, kutucuğu işaretle</li>
+<li>&quot;İmzala&quot; butonuna tıkla</li>
+<li>İmzalı PDF otomatik oluşturulur</li>
+</ol>
+<h4>Versiyon Takibi</h4>
+<p>Her sözleşme değişikliği loglanır:</p>
+<ul>
+<li>Değişiklik tarihi</li>
+<li>Değiştiren kullanıcı</li>
+<li>Ne değişti (önceki → yeni)</li>
+</ul>
+<hr />
+<h3>4.4 Dahili Mesajlaşma</h3>
+<p><strong>Erişim:</strong> <code>/im</code> (tüm iç roller)</p>
+<h4>Özellikler</h4>
+<ul>
+<li>WhatsApp benzeri split-panel arayüz</li>
+<li>Konuşma listesi (sol) + mesaj alanı (sağ)</li>
+<li>10 saniyede bir otomatik yenileme</li>
+<li>Dosya paylaşımı (belge gönderme)</li>
+<li>Mesaj iletme</li>
+<li>Emoji tepkisi</li>
+<li>Mesaj düzenleme (gönderildikten sonra)</li>
+<li>Sabitlenmiş mesajlar</li>
+</ul>
+<h4>Konuşma Oluşturma</h4>
+<ol>
+<li>Sol panelde &quot;+&quot; ikonuna tıkla</li>
+<li>Kullanıcı ara (ad veya e-posta)</li>
+<li>Konuşmayı başlat</li>
+</ol>
+<hr />
+<h3>4.5 Ticket (Destek Talebi) Sistemi</h3>
+<h4>Guest / Student Talebi Açma</h4>
+<ol>
+<li>Portal'da &quot;Destek Talebi&quot; menüsü</li>
+<li>Konu gir (örn. &quot;Belge onay gecikmesi&quot;)</li>
+<li>Açıklama yaz</li>
+<li>Dosya ekle (isteğe bağlı)</li>
+<li>Gönder</li>
+</ol>
+<h4>Otomatik Yönlendirme</h4>
+<p>Ticket konusuna göre otomatik departman atanır:</p>
+<ul>
+<li>Teknik sorunlar → Teknik Destek</li>
+<li>Ödeme sorunları → Finans</li>
+<li>Belge sorunları → Operasyon</li>
+</ul>
+<h4>Manager/Senior Tarafında</h4>
+<ul>
+<li>Ticket listesi (filtreli: departman, öncelik, durum)</li>
+<li>İç not ekle (müşteriye görünmez)</li>
+<li>Başka bir personele devret</li>
+<li>Kapat / yeniden aç</li>
+</ul>
+<h4>Durum Akışı</h4>
+<pre><code>Açık → İşlemde → Yanıt Bekleniyor → Çözüldü → Kapalı
+</code></pre>
+<hr />
+<h3>4.6 Ödeme Sistemi</h3>
+<h4>Fatura Oluşturma (Manager)</h4>
+<ol>
+<li><code>Manager → Ödemeler → Yeni Fatura</code></li>
+<li>Öğrenci seç</li>
+<li>Tutar (EUR), açıklama, vade tarihi gir</li>
+<li>Kaydet → öğrenciye bildirim gider</li>
+</ol>
+<h4>Stripe ile Ödeme (Student)</h4>
+<ol>
+<li>Student portalında &quot;💳 Öde&quot; butonuna tıkla</li>
+<li>Stripe'ın güvenli sayfasına yönlendirilir</li>
+<li>Kart bilgilerini gir (Visa, Mastercard)</li>
+<li>Ödeme onaylanır</li>
+<li>Sistem otomatik güncellenir: <code>status=paid</code>, ödeme tarihi kaydedilir</li>
+</ol>
+<h4>Webhook Akışı</h4>
+<pre><code>Stripe → POST /webhooks/stripe
+       → Sistem imzayı doğrular
+       → StudentPayment.status = &quot;paid&quot;
+       → StudentPayment.paid_at = şimdiki zaman
+</code></pre>
+<h4>Ödeme Durumları</h4>
+<table>
+<thead>
+<tr>
+<th>Durum</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pending</code></td>
+<td>Fatura oluşturuldu, ödeme bekleniyor</td>
+</tr>
+<tr>
+<td><code>paid</code></td>
+<td>Ödeme alındı</td>
+</tr>
+<tr>
+<td><code>overdue</code></td>
+<td>Vade tarihi geçti, ödeme yapılmadı</td>
+</tr>
+<tr>
+<td><code>cancelled</code></td>
+<td>Fatura iptal edildi</td>
+</tr>
+</tbody>
+</table>
+<h4>Döviz Kuru</h4>
+<ul>
+<li>EUR/TRY kuru günlük otomatik güncellenir</li>
+<li>Student panelinde TRY karşılığı bilgi amaçlı gösterilir</li>
+<li>Tüm işlemler EUR üzerinden yapılır</li>
+</ul>
+<hr />
+<h3>4.7 İçerik Hub (Keşfet)</h3>
+<p><strong>Guest erişimi:</strong> <code>/guest/discover</code>
+<strong>Student erişimi:</strong> <code>/student/discover</code></p>
+<h4>İçerik Tipleri</h4>
+<table>
+<thead>
+<tr>
+<th>Tip</th>
+<th>Gösterim</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Blog</td>
+<td>HTML metin, kapak görseli</td>
+</tr>
+<tr>
+<td>Video</td>
+<td>YouTube embed</td>
+</tr>
+<tr>
+<td>Podcast</td>
+<td>Spotify / SoundCloud embed</td>
+</tr>
+<tr>
+<td>Sunum</td>
+<td>Google Slides / Canva iframe</td>
+</tr>
+<tr>
+<td>Deneyim</td>
+<td>Kişisel hikaye kartı</td>
+</tr>
+<tr>
+<td>Kariyer Rehberi</td>
+<td>Bölümlü metin</td>
+</tr>
+<tr>
+<td>Hızlı İpucu</td>
+<td>Kompakt kart</td>
+</tr>
+</tbody>
+</table>
+<h4>Kategoriler</h4>
+<ul>
+<li>🎓 Öğrenci Hayatı</li>
+<li>🎭 Kültür &amp; Eğlence</li>
+<li>💼 Kariyer &amp; Meslekler</li>
+<li>💡 Pratik İpuçları</li>
+<li>🏙 Şehir İçerikleri</li>
+<li>🏛 Üniversite Rehberi</li>
+<li>⭐ Başarı Hikayeleri</li>
+</ul>
+<h4>Arama</h4>
+<p>Arama kutusuna yaz → 500ms sonra sunucu taraflı arama → tüm sayfalardaki içerikler aranır.</p>
+<h4>Tekil İçerik Sayfası</h4>
+<p><code>/guest/content/{slug}</code></p>
+<ul>
+<li>Kapak görseli (tam genişlik, başlık overlay)</li>
+<li>Meta bilgi (tarih, kategori, görüntülenme sayısı)</li>
+<li>İçerik (tipe göre: metin / video / audio / iframe)</li>
+<li>İlgili içerikler (aynı kategori)</li>
+</ul>
+<h4>İçerik Yönetimi (Marketing Admin)</h4>
+<p><code>/mktg-admin/content</code></p>
+<ol>
+<li>Yeni içerik ekle</li>
+<li>Tip ve kategori seç</li>
+<li>Türkçe içerik yaz</li>
+<li>Video/podcast için URL gir</li>
+<li>Etiketler ekle (şehir slug'ı eklenirse şehir sayfasında da görünür)</li>
+<li>Hedef kitle: Guest / Student / Hepsi</li>
+<li>Yayınla</li>
+</ol>
+<hr />
+<h3>4.8 Lead Yönetimi</h3>
+<h4>Lead Skoru (0-100)</h4>
+<p>Her lead 8 faktöre göre otomatik skorlanır:</p>
+<ol>
+<li>Belge tamamlama oranı</li>
+<li>Form yanıt süresi</li>
+<li>İletişim aktivitesi</li>
+<li>Başvuru kalitesi</li>
+<li>Hedef uyumu</li>
+<li>Referans kaynağı</li>
+<li>Bütçe uygunluğu</li>
+<li>Zamanlama</li>
+</ol>
+<p>Günlük gece 02:30'da otomatik yeniden hesaplanır.</p>
+<h4>Lead Kaynakları</h4>
+<ul>
+<li>Web formu (<code>/apply</code>)</li>
+<li>Dealer referansı</li>
+<li>Kampanya UTM</li>
+<li>Manuel girişi (sales ekibi)</li>
+</ul>
+<hr />
+<h3>4.9 Senior Performans Takibi</h3>
+<p>Aylık snapshot alınır (1. gün, 03:30):</p>
+<ul>
+<li>Atanan guest sayısı</li>
+<li>Tamamlanan başvurular</li>
+<li>Kabul oranı</li>
+<li>Ortalama yanıt süresi</li>
+<li>Öğrenci memnuniyet skoru</li>
+</ul>
+<p>Geçmiş performanslar grafik olarak görüntülenir.</p>
+<hr />
+<h3>4.10 Bildirim Sistemi</h3>
+<h4>Kanallar</h4>
+<table>
+<thead>
+<tr>
+<th>Kanal</th>
+<th>Ne Zaman</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>E-posta</td>
+<td>Önemli işlemler (belge onayı, sözleşme, ödeme)</td>
+</tr>
+<tr>
+<td>In-App</td>
+<td>Portal içi bildirim (anlık)</td>
+</tr>
+<tr>
+<td>WhatsApp</td>
+<td>Hatırlatmalar, acil bildirimler</td>
+</tr>
+</tbody>
+</table>
+<h4>Otomatik Bildirimler</h4>
+<table>
+<thead>
+<tr>
+<th>Olay</th>
+<th>Alıcı</th>
+<th>Kanal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yeni başvuru</td>
+<td>Manager, Senior</td>
+<td>E-posta + In-App</td>
+</tr>
+<tr>
+<td>Belge yüklendi</td>
+<td>Senior</td>
+<td>In-App</td>
+</tr>
+<tr>
+<td>Belge onaylandı</td>
+<td>Guest/Student</td>
+<td>E-posta + In-App</td>
+</tr>
+<tr>
+<td>Belge reddedildi</td>
+<td>Guest/Student</td>
+<td>E-posta + In-App</td>
+</tr>
+<tr>
+<td>Sözleşme gönderildi</td>
+<td>Guest/Student</td>
+<td>E-posta</td>
+</tr>
+<tr>
+<td>Sözleşme imzalandı</td>
+<td>Manager, Senior</td>
+<td>In-App</td>
+</tr>
+<tr>
+<td>Ödeme yapıldı</td>
+<td>Manager</td>
+<td>In-App</td>
+</tr>
+<tr>
+<td>Ödeme gecikti</td>
+<td>Student</td>
+<td>E-posta + WhatsApp</td>
+</tr>
+<tr>
+<td>Ticket açıldı</td>
+<td>İlgili departman</td>
+<td>In-App</td>
+</tr>
+<tr>
+<td>Ticket yanıtlandı</td>
+<td>Talep sahibi</td>
+<td>E-posta + In-App</td>
+</tr>
+</tbody>
+</table>
+<h4>Zamanlanmış Bildirimler</h4>
+<ul>
+<li><strong>Doğum günü dilekleri</strong> — Sabah 09:00</li>
+<li><strong>Vade tarihi hatırlatması</strong> — 3 gün önce</li>
+<li><strong>İnaktivite hatırlatması</strong> — 7 gün aktivite yoksa</li>
+<li><strong>Senior hatırlatmaları</strong> — Hafta içi sabah 08:30</li>
+</ul>
+<hr />
+<h3>4.11 Zamanlanmış Görevler (Cron)</h3>
+<p>Sunucuda <code>php artisan schedule:run</code> her dakika çalışmalıdır.</p>
+<table>
+<thead>
+<tr>
+<th>Görev</th>
+<th>Sıklık</th>
+<th>İşlev</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>notifications:dispatch</code></td>
+<td>Her dakika</td>
+<td>Bekleyen bildirimleri gönder</td>
+</tr>
+<tr>
+<td><code>gdpr:enforce-retention</code></td>
+<td>Günlük 03:00</td>
+<td>Eski verileri temizle</td>
+</tr>
+<tr>
+<td><code>currency:sync-rates</code></td>
+<td>Günlük 06:00</td>
+<td>EUR/TRY kuru güncelle</td>
+</tr>
+<tr>
+<td><code>leads:recalculate-scores</code></td>
+<td>Günlük 02:30</td>
+<td>Lead puanlarını yeniden hesapla</td>
+</tr>
+<tr>
+<td><code>senior:snapshot-performance</code></td>
+<td>Aylık 1. gün</td>
+<td>Performans kaydı al</td>
+</tr>
+<tr>
+<td><code>security:anomaly-check</code></td>
+<td>Saatlik</td>
+<td>Güvenlik anomalilerini tara</td>
+</tr>
+<tr>
+<td><code>archive:inactive-records</code></td>
+<td>Günlük 01:30</td>
+<td>180+ gün inaktif guest'leri arşivle</td>
+</tr>
+<tr>
+<td><code>contract:send-reminders</code></td>
+<td>Günlük</td>
+<td>İmzalanmamış sözleşme hatırlatması</td>
+</tr>
+<tr>
+<td><code>email:process-drip</code></td>
+<td>Günlük</td>
+<td>Drip e-posta kampanyaları</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Entegrasyonlar</h2>
+<h3>5.1 Stripe (Ödeme)</h3>
+<p><strong>Kurulum:</strong></p>
+<pre><code>STRIPE_KEY=pk_live_xxxx
+STRIPE_SECRET=sk_live_xxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxx
+</code></pre>
+<p><strong>Stripe Dashboard'da yapılacak:</strong></p>
+<ol>
+<li>Webhook endpoint ekle: <code>https://siteniz.com/webhooks/stripe</code></li>
+<li>Event seç: <code>checkout.session.completed</code></li>
+<li>Webhook secret'ı kopyala → <code>.env</code>'e yapıştır</li>
+</ol>
+<p><strong>Test:</strong>
+Stripe CLI ile: <code>stripe listen --forward-to localhost:8000/webhooks/stripe</code></p>
+<hr />
+<h3>5.2 WhatsApp (Meta Cloud API)</h3>
+<p><strong>Kurulum:</strong></p>
+<pre><code>WHATSAPP_PHONE_NUMBER_ID=xxxx
+WHATSAPP_ACCESS_TOKEN=xxxx
+WHATSAPP_VERIFY_TOKEN=mentorde_verify
+WHATSAPP_API_VERSION=v19.0
+</code></pre>
+<p><strong>Meta Business Suite'te yapılacak:</strong></p>
+<ol>
+<li>WhatsApp Business App oluştur</li>
+<li>Phone Number ID ve Access Token al</li>
+<li>Webhook doğrulama token'ını eşleştir</li>
+</ol>
+<hr />
+<h3>5.3 SMTP (E-posta)</h3>
+<p><strong>Kurulum:</strong></p>
+<pre><code>MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailgun.org       # veya smtp.sendgrid.net
+MAIL_PORT=587
+MAIL_USERNAME=postmaster@...
+MAIL_PASSWORD=xxxx
+MAIL_FROM_ADDRESS=noreply@mentorde.com
+MAIL_FROM_NAME=&quot;MentorDE&quot;
+</code></pre>
+<hr />
+<h3>5.4 Queue Worker (Bildirimler)</h3>
+<p>Bildirimler ve WhatsApp mesajları için queue worker çalışmalıdır.</p>
+<p><strong>Supervisor konfigürasyonu:</strong></p>
+<pre><code class="language-ini">[program:mentorde-worker]
+command=php /var/www/mentorde/artisan queue:work --sleep=3 --tries=3
+autostart=true
+autorestart=true
+</code></pre>
+<hr />
+<h3>5.5 2FA (Google Authenticator)</h3>
+<p>Kullanıcının telefonunda kurulacak:</p>
+<ul>
+<li>Google Authenticator (iOS / Android)</li>
+<li>Microsoft Authenticator</li>
+<li>Authy</li>
+</ul>
+<p>QR kodu tara veya 32 karakterlik secret'ı manuel gir.</p>
+<hr />
+<h2>6. Admin Yönetimi</h2>
+<h3>Yeni Personel Ekleme</h3>
+<p><code>Manager → Personel → Yeni Ekle</code></p>
+<ol>
+<li>Ad-soyad, e-posta, rol seç</li>
+<li>Şifre belirle (kullanıcı giriş yapınca değiştirebilir)</li>
+<li>Kaydet → kullanıcı sisteme otomatik eklenir, e-posta doğrulanmış sayılır</li>
+</ol>
+<h3>Yeni Senior Ekleme</h3>
+<p><code>Manager → Danışmanlar → Yeni Senior</code></p>
+<ol>
+<li>Kişisel bilgiler</li>
+<li>Senior kodu otomatik oluşturulur (örn. <code>SR-2026-0001</code>)</li>
+<li>Kapasite (maksimum guest sayısı)</li>
+<li>Otomatik atama açık/kapalı</li>
+</ol>
+<h3>Yeni Dealer Ekleme</h3>
+<p><code>Manager → Bayiler → Yeni Bayi</code></p>
+<ol>
+<li>Firma adı, yetkili kişi, e-posta</li>
+<li>Bayi türü (bireysel / kurumsal)</li>
+<li>Komisyon oranı</li>
+<li>Bölge / ülke</li>
+</ol>
+<h3>Sistem Ayarları</h3>
+<p><code>Manager → Ayarlar</code></p>
+<ul>
+<li>Şirket bilgileri</li>
+<li>E-posta şablonları</li>
+<li>Bildirim kuralları</li>
+<li>Dosya yükleme limitleri</li>
+<li>GDPR ayarları</li>
+</ul>
+<hr />
+<h2>7. Güvenlik ve GDPR</h2>
+<h3>Güvenlik Katmanları</h3>
+<table>
+<thead>
+<tr>
+<th>Katman</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Oturum kilitleme</td>
+<td>10 başarısız giriş → 30 dk kilit</td>
+</tr>
+<tr>
+<td>2FA</td>
+<td>Manager/Admin rolleri için zorunlu TOTP</td>
+</tr>
+<tr>
+<td>Rate limiting</td>
+<td>API endpoint başına istek limiti</td>
+</tr>
+<tr>
+<td>Security headers</td>
+<td>CSP, HSTS, X-Frame-Options</td>
+</tr>
+<tr>
+<td>Dosya doğrulama</td>
+<td>Magic byte kontrolü</td>
+</tr>
+<tr>
+<td>Audit trail</td>
+<td>Her kritik işlem loglanır</td>
+</tr>
+</tbody>
+</table>
+<h3>Güvenlik Anomali Tespiti</h3>
+<p>Saatlik tarama şunları kontrol eder:</p>
+<ul>
+<li>Aynı IP'den çok sayıda başarısız giriş</li>
+<li>Alışılmadık saatte yönetici erişimi</li>
+<li>Toplu veri erişimi</li>
+</ul>
+<h3>GDPR</h3>
+<p><strong>Dashboard:</strong> <code>Manager → GDPR Dashboard</code></p>
+<ul>
+<li>Veri silme talepleri</li>
+<li>Veri dışa aktarma talepleri</li>
+<li>Onay kayıtları (cookie, KVKK)</li>
+<li>Otomatik temizleme (180 gün inaktif → arşivle → 365 gün → sil)</li>
+</ul>
+<p><strong>Kullanıcı hakları:</strong></p>
+<ul>
+<li><strong>Veri erişimi:</strong> Guest/Student kendi verilerini JSON olarak indirebilir (<code>/guest/gdpr/export</code>)</li>
+<li><strong>Veri silme:</strong> Talep açabilir → Manager onaylar → sistem temizler</li>
+</ul>
+<hr />
+<h2>8. Sık Sorulan Sorular</h2>
+<p><strong>S: Şifremi unuttum, ne yapmalıyım?</strong>
+C: Giriş sayfasında &quot;Şifremi Unuttum&quot; linkine tıkla, e-posta adresini gir. 60 dakika geçerli bir bağlantı gelecek.</p>
+<p><strong>S: 2FA telefonumu kaybettim, ne yapmalıyım?</strong>
+C: Manager ile iletişime geç. Manager hesabındaki 2FA'yı sıfırlayabilir.</p>
+<p><strong>S: Belge yükleme neden başarısız oluyor?</strong>
+C: Desteklenen formatlar: PDF, JPG, PNG. Maksimum boyut: 10 MB. Dosya boyutunu kontrol et.</p>
+<p><strong>S: Stripe ödeme neden başarısız oldu?</strong>
+C: Kart limitini, son kullanma tarihini ve CVV'yi kontrol et. Sorun devam ederse bankana ulaş veya farklı kart dene.</p>
+<p><strong>S: WhatsApp bildirimleri gelmiyor.</strong>
+C: WhatsApp Business hesabının aktif ve entegrasyonun kurulu olduğunu kontrol et. <code>.env</code>'de <code>WHATSAPP_PHONE_NUMBER_ID</code> ve <code>WHATSAPP_ACCESS_TOKEN</code> dolu olmalı.</p>
+<p><strong>S: Yeni kullanıcı ekliyorum ama e-posta gitmiyor.</strong>
+C: Mail sürücüsünün production'da SMTP olarak ayarlandığını doğrula (<code>.env</code>: <code>MAIL_MAILER=smtp</code>).</p>
+<p><strong>S: Sistemde hata görüyorum, ne yapmalıyım?</strong>
+C: Hatanın ekran görüntüsünü al, tarayıcı konsolunu kontrol et (F12), geliştiriciyle paylaş.</p>
+<hr />
+<p><em>MentorDE System Handbook — Türkçe Versiyon 1.0</em>
+<em>Son güncelleme: 2026</em></p>
+<div class="footer">MentorDE &copy; 2026 — MentorDE Kullanıcı Kılavuzu</div></div></body></html>

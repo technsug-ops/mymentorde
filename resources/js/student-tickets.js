@@ -1,0 +1,1 @@
+function filterTickets(t){document.querySelectorAll(".item[data-status]").forEach(e=>{const s=e.dataset.status,o=e.dataset.priority;let a=!0;"open"===t&&(a="open"===s),"closed"===t&&(a="closed"===s),"high"===t&&(a="high"===o||"urgent"===o),e.style.display=a?"":"none"})}

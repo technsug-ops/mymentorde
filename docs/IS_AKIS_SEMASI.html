@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MentorDE — İş Akış Şeması</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; padding: 24px; }
+  h1 { font-size: 22px; font-weight: 800; margin-bottom: 6px; color: #0f172a; }
+  .sub { font-size: 13px; color: #64748b; margin-bottom: 28px; }
+  .flow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px; }
+  @media(max-width:900px){ .flow-grid { grid-template-columns: 1fr; } }
+  .flow-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; }
+  .flow-header { padding: 14px 18px; font-weight: 800; font-size: 14px; color: #fff; }
+  .flow-body { padding: 16px 18px; }
+  .step { display: flex; gap: 10px; margin-bottom: 14px; align-items: flex-start; }
+  .step:last-child { margin-bottom: 0; }
+  .step-num { width: 26px; height: 26px; border-radius: 50%; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-content { flex: 1; }
+  .step-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .step-desc { font-size: 12px; color: #64748b; line-height: 1.5; }
+  .actors { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .actor { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; border: 1px solid; }
+  .actor.senior  { background: #f0fdf4; border-color: #86efac; color: #15803d; }
+  .actor.student { background: #eff6ff; border-color: #93c5fd; color: #1d4ed8; }
+  .actor.manager { background: #fef3c7; border-color: #fcd34d; color: #92400e; }
+  .actor.dealer  { background: #fdf4ff; border-color: #e879f9; color: #86198f; }
+  .actor.guest   { background: #f0fdfa; border-color: #5eead4; color: #0f766e; }
+  .actor.system  { background: #f1f5f9; border-color: #94a3b8; color: #475569; }
+  .arrow { text-align: center; color: #94a3b8; font-size: 16px; margin: -6px 0; }
+  .portal-map { margin-top: 32px; }
+  .portal-map h2 { font-size: 16px; font-weight: 800; margin-bottom: 16px; }
+  .portal-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  @media(max-width:1000px){ .portal-grid { grid-template-columns: 1fr 1fr; } }
+  .portal-col { border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
+  .portal-head { padding: 10px 12px; font-weight: 800; font-size: 13px; color: #fff; }
+  .portal-items { padding: 10px 12px; }
+  .portal-item { font-size: 12px; padding: 4px 0; border-bottom: 1px solid #f1f5f9; color: #334155; }
+  .portal-item:last-child { border-bottom: none; }
+  .legend { margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .legend-title { font-size: 12px; font-weight: 700; color: #64748b; }
+  .visibility-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 16px; }
+  .visibility-table th { background: #f8fafc; padding: 8px 12px; text-align: left; font-weight: 700; border: 1px solid #e2e8f0; }
+  .visibility-table td { padding: 8px 12px; border: 1px solid #e2e8f0; }
+  .tick { color: #16a34a; font-weight: 800; }
+  .cross { color: #dc2626; font-weight: 800; }
+  .partial { color: #d97706; font-weight: 800; }
+  h2.section { font-size: 16px; font-weight: 800; margin: 28px 0 16px; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<h1>MentorDE — İş Akış Şeması</h1>
+<p class="sub">Tüm ana süreçlerin adım adım akışı ve portal görünürlükleri · Güncel: 2026-03-23</p>
+
+<!-- ===================== ANA SÜREÇ: BAŞVURU & ÖĞRENCİ DÖNÜŞÜMÜ ===================== -->
+<h2 class="section">1. Aday Başvuru → Öğrenci Dönüşüm Süreci</h2>
+<div class="flow-grid">
+
+  <div class="flow-card">
+    <div class="flow-header" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)">🚀 A — Aday Kayıt & Ön Başvuru</div>
+    <div class="flow-body">
+      <div class="step">
+        <div class="step-num" style="background:#0284c7;color:#fff">1</div>
+        <div class="step-content">
+          <div class="step-title">Landing Page / UTM Link Ziyareti</div>
+          <div class="step-desc">Aday MentorDE'yi keşfeder. Dealer UTM linki ile geldiyse otomatik atanır.</div>
+          <div class="actors"><span class="actor system">Sistem</span><span class="actor dealer">Bayi UTM</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#0284c7;color:#fff">2</div>
+        <div class="step-content">
+          <div class="step-title">Başvuru Formu Doldurulur</div>
+          <div class="step-desc">/apply URL'inde kişisel bilgiler, hedef ülke, program tercihleri girilir. Kayıt olunmadan yapılır.</div>
+          <div class="actors"><span class="actor guest">Aday</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#0284c7;color:#fff">3</div>
+        <div class="step-content">
+          <div class="step-title">Guest Application Oluşur</div>
+          <div class="step-desc">Form verisi GuestApplication kaydı açar. Dealer kodu + UTM varsa atanır. Operasyon task'ı tetiklenir.</div>
+          <div class="actors"><span class="actor system">Otomatik</span><span class="actor manager">Manager bildirim</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#0284c7;color:#fff">4</div>
+        <div class="step-content">
+          <div class="step-title">Gerekli Belgeler Yüklenir</div>
+          <div class="step-desc">Pasaport, diploma, transkript, dil belgesi vb. Guest portal üzerinden yüklenir.</div>
+          <div class="actors"><span class="actor guest">Aday</span><span class="actor senior">Senior doğrular</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#0284c7;color:#fff">5</div>
+        <div class="step-content">
+          <div class="step-title">Sözleşme İmzalanır</div>
+          <div class="step-desc">Manager/Senior PDF sözleşmesi oluşturur. Aday imzalar ve yükler. Onay verilir.</div>
+          <div class="actors"><span class="actor senior">Senior hazırlar</span><span class="actor guest">Aday imzalar</span><span class="actor manager">Manager onaylar</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#16a34a;color:#fff">✓</div>
+        <div class="step-content">
+          <div class="step-title">Öğrenci Kaydına Dönüştürülür</div>
+          <div class="step-desc">Manager guest'i student'a dönüştürür. converted_student_id atanır. Student portalına erişim açılır.</div>
+          <div class="actors"><span class="actor manager">Manager</span><span class="actor system">Student account oluşur</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-card">
+    <div class="flow-header" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)">🎓 B — Üniversite Başvuru Süreci (Uni-Assist / Direkt)</div>
+    <div class="flow-body">
+      <div class="step">
+        <div class="step-num" style="background:#7c3aed;color:#fff">1</div>
+        <div class="step-content">
+          <div class="step-title">Üniversite & Program Seçimi</div>
+          <div class="step-desc">Senior öğrenciyle görüşerek tercih listesi oluşturur. Süreç Takibi > Başvurular tabına eklenir.</div>
+          <div class="actors"><span class="actor senior">Senior girer</span><span class="actor student">Student görür (toggle ile)</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#7c3aed;color:#fff">2</div>
+        <div class="step-content">
+          <div class="step-title">Başvuru Portalı Belirlenir</div>
+          <div class="step-desc">Uni-Assist, Hochschulstart, Direkt veya diğer portal. Başvuru numarası girilir.</div>
+          <div class="actors"><span class="actor senior">Senior</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#7c3aed;color:#fff">3</div>
+        <div class="step-content">
+          <div class="step-title">Başvuru Gönderilir</div>
+          <div class="step-desc">Durum "Gönderildi" olarak güncellenir. Submitted_at tarihi girilir. Pipeline adımı ilerler.</div>
+          <div class="actors"><span class="actor senior">Senior günceller</span><span class="actor student">Student görür</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#7c3aed;color:#fff">4</div>
+        <div class="step-content">
+          <div class="step-title">Üniversiteden Belgeler Gelir</div>
+          <div class="step-desc">Kabul/red mektupları kurumsal belgeler (Gelen Belgeler) sekmesine eklenir.</div>
+          <div class="actors"><span class="actor senior">Senior ekler</span><span class="actor student">Görünürlük toggle</span><span class="actor dealer">Bayi toggle</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#7c3aed;color:#fff">5</div>
+        <div class="step-content">
+          <div class="step-title">Sonuç Girilir</div>
+          <div class="step-desc">Kabul / Şartlı Kabul / Red → ProcessOutcome eklenir. Başvuru status güncellenir. Lead skoru yeniden hesaplanır.</div>
+          <div class="actors"><span class="actor senior">Senior</span><span class="actor system">LeadScore otomatik</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#16a34a;color:#fff">✓</div>
+        <div class="step-content">
+          <div class="step-title">Kabul Alındı</div>
+          <div class="step-desc">Pipeline "Üniversite Kararı" adımı tamamlanır. Vize süreci başlar. Dealer komisyon milestone tetiklenebilir.</div>
+          <div class="actors"><span class="actor manager">Manager görür</span><span class="actor dealer">Bayi milestone</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-card">
+    <div class="flow-header" style="background:linear-gradient(135deg,#0891b2,#0e7490)">🛂 C — Vize Başvuru Süreci</div>
+    <div class="flow-body">
+      <div class="step">
+        <div class="step-num" style="background:#0891b2;color:#fff">1</div>
+        <div class="step-content">
+          <div class="step-title">Kabul Sonrası Vize Kaydı Açılır</div>
+          <div class="step-desc">Senior, Süreç Takibi > Vize tabında veya /senior/visa sayfasında yeni vize kaydı ekler.</div>
+          <div class="actors"><span class="actor senior">Senior girer</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#0891b2;color:#fff">2</div>
+        <div class="step-content">
+          <div class="step-title">Belge Listesi & Randevu</div>
+          <div class="step-desc">Konsolosluk seçilir, randevu tarihi girilir. Sunulan belgeler checkboxları işaretlenir.</div>
+          <div class="actors"><span class="actor senior">Senior günceller</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#0891b2;color:#fff">3</div>
+        <div class="step-content">
+          <div class="step-title">Vize Başvurusu Yapılır</div>
+          <div class="step-desc">Durum "Gönderildi" → "İncelemede" olarak güncellenir. Öğrenci görünürlüğü açılırsa student portalında görünür.</div>
+          <div class="actors"><span class="actor senior">Senior</span><span class="actor student">Görünürlük toggle</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#0891b2;color:#fff">4</div>
+        <div class="step-content">
+          <div class="step-title">Karar</div>
+          <div class="step-desc">Onay → valid_from/valid_until tarihleri girilir. Red → rejection_reason eklenir. Süreç pipeline "Vize" tamamlanır.</div>
+          <div class="actors"><span class="actor senior">Senior</span><span class="actor student">Student görür</span><span class="actor manager">Manager görür</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-card">
+    <div class="flow-header" style="background:linear-gradient(135deg,#059669,#047857)">🏠 D — Konut & Yerleşim Süreci</div>
+    <div class="flow-body">
+      <div class="step">
+        <div class="step-num" style="background:#059669;color:#fff">1</div>
+        <div class="step-content">
+          <div class="step-title">Konut Arama Başlar</div>
+          <div class="step-desc">Vize onayı sonrası Senior, Süreç Takibi > Konut tabında konut kaydı açar. Tip: Yurt / WG / Aile / Diğer.</div>
+          <div class="actors"><span class="actor senior">Senior</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#059669;color:#fff">2</div>
+        <div class="step-content">
+          <div class="step-title">Başvuru & Rezervasyon</div>
+          <div class="step-desc">Durum "Başvuruldu" → "Rezerve" güncellenir. Adres, şehir, kira bilgisi, ev sahibi iletişimi girilir.</div>
+          <div class="actors"><span class="actor senior">Senior günceller</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#059669;color:#fff">3</div>
+        <div class="step-content">
+          <div class="step-title">Konut Onaylanır</div>
+          <div class="step-desc">Durum "Onaylandı" olur. Taşınma tarihi girilir. Görünürlük açılırsa student portalında görünür.</div>
+          <div class="actors"><span class="actor senior">Senior</span><span class="actor student">Görünürlük toggle</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#059669;color:#fff">4</div>
+        <div class="step-content">
+          <div class="step-title">Yerleşim Tamamlanır</div>
+          <div class="step-desc">Pipeline son adımı tamamlanır. Öğrenci Almanya'ya yerleşmiştir. Kargo takibi, ikamet kaydı süreçleri devam eder.</div>
+          <div class="actors"><span class="actor senior">Senior</span><span class="actor student">Student görür</span><span class="actor manager">Manager görür</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===================== DİĞER SÜREÇLER ===================== -->
+<h2 class="section">2. Operasyonel Süreçler</h2>
+<div class="flow-grid">
+
+  <div class="flow-card">
+    <div class="flow-header" style="background:linear-gradient(135deg,#f59e0b,#d97706)">📦 E — Kargo Takip Süreci</div>
+    <div class="flow-body">
+      <div class="step">
+        <div class="step-num" style="background:#d97706;color:#fff">1</div>
+        <div class="step-content">
+          <div class="step-title">Kargo Oluşturulur</div>
+          <div class="step-desc">Senior /senior/shipments'ta yeni kargo kaydı açar: takip no, kargo firması, gönderim tarihi.</div>
+          <div class="actors"><span class="actor senior">Senior</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#d97706;color:#fff">2</div>
+        <div class="step-content">
+          <div class="step-title">Durum Güncellenir</div>
+          <div class="step-desc">Kargoya verildi → Yolda → Teslim edildi adımları izlenir.</div>
+          <div class="actors"><span class="actor senior">Senior günceller</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#d97706;color:#fff">3</div>
+        <div class="step-content">
+          <div class="step-title">Öğrenciye Görünür</div>
+          <div class="step-desc">is_visible_to_student=true yapılır. /student/shipments sayfasında takip numarasıyla görünür.</div>
+          <div class="actors"><span class="actor student">Student görür</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-card">
+    <div class="flow-header" style="background:linear-gradient(135deg,#dc2626,#b91c1c)">🎫 F — Ticket / Destek Süreci</div>
+    <div class="flow-body">
+      <div class="step">
+        <div class="step-num" style="background:#dc2626;color:#fff">1</div>
+        <div class="step-content">
+          <div class="step-title">Ticket Açılır</div>
+          <div class="step-desc">Öğrenci, Guest veya Dealer tarafından konu + mesaj ile ticket oluşturulur.</div>
+          <div class="actors"><span class="actor student">Öğrenci</span><span class="actor guest">Aday</span><span class="actor dealer">Bayi</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#dc2626;color:#fff">2</div>
+        <div class="step-content">
+          <div class="step-title">Senior / Manager Yanıtlar</div>
+          <div class="step-desc">Birleşik gelen kutusu (senior) veya ticket merkezi üzerinden yanıt verilir. SLA saati izlenir.</div>
+          <div class="actors"><span class="actor senior">Senior</span><span class="actor manager">Manager</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#dc2626;color:#fff">3</div>
+        <div class="step-content">
+          <div class="step-title">Eskalasyon (SLA Aşımı)</div>
+          <div class="step-desc">SLA süresi geçerse EscalationService otomatik eskalasyon olayı oluşturur ve bildirim gönderir.</div>
+          <div class="actors"><span class="actor system">Otomatik</span><span class="actor manager">Manager bildirim</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#16a34a;color:#fff">✓</div>
+        <div class="step-content">
+          <div class="step-title">Çözüldü / Kapatıldı</div>
+          <div class="step-desc">Ticket kapatılır, çözüm kaydedilir.</div>
+          <div class="actors"><span class="actor senior">Senior</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-card">
+    <div class="flow-header" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)">📝 G — Görev (Task) Süreci</div>
+    <div class="flow-body">
+      <div class="step">
+        <div class="step-num" style="background:#7c3aed;color:#fff">1</div>
+        <div class="step-content">
+          <div class="step-title">Task Oluşturulur</div>
+          <div class="step-desc">Manuel (Senior/Manager) veya otomatik tetikleyici ile (lead, ticket, belge). Başlık, bitiş, departman, öncelik girilir.</div>
+          <div class="actors"><span class="actor senior">Senior</span><span class="actor manager">Manager</span><span class="actor system">Otomatik</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#7c3aed;color:#fff">2</div>
+        <div class="step-content">
+          <div class="step-title">Kanban Board Takibi</div>
+          <div class="step-desc">/senior/student-pipeline kanban board'unda 6 sütun: Backlog → Yapılıyor → Bekliyor → İncelemede → Tamamlandı → İptal.</div>
+          <div class="actors"><span class="actor senior">Senior</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#7c3aed;color:#fff">3</div>
+        <div class="step-content">
+          <div class="step-title">Zaman Takibi</div>
+          <div class="step-desc">task_time_entries üzerinden süre başlatılır/durdurulur. Raporlanabilir.</div>
+          <div class="actors"><span class="actor senior">Senior</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#7c3aed;color:#fff">4</div>
+        <div class="step-content">
+          <div class="step-title">Tekrarlayan & Bağımlı Görevler</div>
+          <div class="step-desc">recurrence_rule ile periyodik task'lar. Bağımlı zincir (depth 5) otomatik çözülür.</div>
+          <div class="actors"><span class="actor system">Otomatik</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-card">
+    <div class="flow-header" style="background:linear-gradient(135deg,#0284c7,#0369a1)">💬 H — Mesajlaşma Süreci</div>
+    <div class="flow-body">
+      <div class="step">
+        <div class="step-num" style="background:#0369a1;color:#fff">1</div>
+        <div class="step-content">
+          <div class="step-title">DM Başlatılır</div>
+          <div class="step-desc">/im WhatsApp benzeri UI. Senior ↔ Student, Senior ↔ Guest arası konuşma. Thread oluşur.</div>
+          <div class="actors"><span class="actor senior">Senior</span><span class="actor student">Öğrenci</span><span class="actor guest">Aday</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#0369a1;color:#fff">2</div>
+        <div class="step-content">
+          <div class="step-title">Mesaj Gönderilir</div>
+          <div class="step-desc">10 sn polling ile anlık mesajlaşma. Tepki (react), iletme (forward), düzenleme (edit) desteklenir.</div>
+          <div class="actors"><span class="actor senior">Senior</span><span class="actor student">Öğrenci</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#0369a1;color:#fff">3</div>
+        <div class="step-content">
+          <div class="step-title">SLA Takibi</div>
+          <div class="step-desc">SLA süresi aşılırsa birleşik gelen kutusunda vurgulama yapılır.</div>
+          <div class="actors"><span class="actor system">Sistem</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===================== PORTAL GÖRÜNÜRLÜKLERİ ===================== -->
+<h2 class="section">3. Modül × Portal Görünürlük Matrisi</h2>
+
+<table class="visibility-table">
+  <thead>
+    <tr>
+      <th>Modül / Süreç</th>
+      <th>Senior (Giriş)</th>
+      <th>Student (Görüntüle)</th>
+      <th>Manager (Görüntüle)</th>
+      <th>Dealer (Görüntüle)</th>
+      <th>Guest (Görüntüle)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Üniversite Başvuruları</strong></td>
+      <td><span class="tick">✓</span> Tam CRUD — Süreç Takibi, 360°, /senior/university-applications</td>
+      <td><span class="tick">✓</span> is_visible_to_student toggle — /student/university-applications</td>
+      <td><span class="tick">✓</span> Read-only — student-detail sayfası</td>
+      <td><span class="tick">✓</span> is_visible_to_dealer toggle — lead-detail sayfası</td>
+      <td><span class="cross">✗</span> Yok</td>
+    </tr>
+    <tr>
+      <td><strong>Vize Takibi</strong></td>
+      <td><span class="tick">✓</span> Tam CRUD — Süreç Takibi Vize tab, /senior/visa, 360°</td>
+      <td><span class="tick">✓</span> is_visible_to_student — /student/visa</td>
+      <td><span class="tick">✓</span> Read-only — student-detail sayfası</td>
+      <td><span class="cross">✗</span> Yok</td>
+      <td><span class="cross">✗</span> Yok</td>
+    </tr>
+    <tr>
+      <td><strong>Konut Takibi</strong></td>
+      <td><span class="tick">✓</span> Tam CRUD — Süreç Takibi Konut tab, /senior/housing, 360°</td>
+      <td><span class="tick">✓</span> is_visible_to_student — /student/housing</td>
+      <td><span class="tick">✓</span> Read-only — student-detail sayfası</td>
+      <td><span class="cross">✗</span> Yok</td>
+      <td><span class="cross">✗</span> Yok</td>
+    </tr>
+    <tr>
+      <td><strong>Kargo Takibi</strong></td>
+      <td><span class="tick">✓</span> Tam CRUD — /senior/shipments</td>
+      <td><span class="tick">✓</span> is_visible_to_student — /student/shipments</td>
+      <td><span class="partial">~</span> Yok (JSON endpoint)</td>
+      <td><span class="cross">✗</span> Yok</td>
+      <td><span class="cross">✗</span> Yok</td>
+    </tr>
+    <tr>
+      <td><strong>Kurumsal Belgeler</strong></td>
+      <td><span class="tick">✓</span> Tam CRUD — Süreç Takibi Belgeler tab</td>
+      <td><span class="tick">✓</span> is_visible_to_student — /student/institution-documents</td>
+      <td><span class="partial">~</span> JSON endpoint var</td>
+      <td><span class="tick">✓</span> is_visible_to_dealer — lead-detail Gelen Belgeler</td>
+      <td><span class="cross">✗</span> Yok</td>
+    </tr>
+    <tr>
+      <td><strong>Belgeler (Kayıt Süreci)</strong></td>
+      <td><span class="tick">✓</span> /senior/registration-documents</td>
+      <td><span class="tick">✓</span> /student/registration-documents</td>
+      <td><span class="tick">✓</span> manager/guests + student-detail</td>
+      <td><span class="tick">✓</span> lead-detail belgeler bölümü</td>
+      <td><span class="tick">✓</span> /guest/registration-documents</td>
+    </tr>
+    <tr>
+      <td><strong>Sözleşme</strong></td>
+      <td><span class="tick">✓</span> /senior/contracts, student-detail</td>
+      <td><span class="tick">✓</span> /student/contract</td>
+      <td><span class="tick">✓</span> Yönetir, şablon oluşturur</td>
+      <td><span class="tick">✓</span> /dealer/contracts (kendi sözleşmeleri)</td>
+      <td><span class="tick">✓</span> /guest/contract</td>
+    </tr>
+    <tr>
+      <td><strong>Tickets</strong></td>
+      <td><span class="tick">✓</span> /senior/tickets + birleşik inbox</td>
+      <td><span class="tick">✓</span> /student/tickets</td>
+      <td><span class="tick">✓</span> /manager → ticket merkezi</td>
+      <td><span class="tick">✓</span> /dealer/advisor (destek ticket)</td>
+      <td><span class="tick">✓</span> /guest/tickets</td>
+    </tr>
+    <tr>
+      <td><strong>Mesajlaşma</strong></td>
+      <td><span class="tick">✓</span> /im (split-panel)</td>
+      <td><span class="tick">✓</span> /student/messages</td>
+      <td><span class="partial">~</span> Message center</td>
+      <td><span class="cross">✗</span> Ticket üzerinden</td>
+      <td><span class="tick">✓</span> /guest/messages</td>
+    </tr>
+    <tr>
+      <td><strong>Süreç Kararları (Outcome)</strong></td>
+      <td><span class="tick">✓</span> Süreç Takibi > Kararlar tab</td>
+      <td><span class="tick">✓</span> is_visible_to_student — /student/process-tracking</td>
+      <td><span class="tick">✓</span> /manager/students görünür</td>
+      <td><span class="partial">~</span> Lead milestone ile dolaylı</td>
+      <td><span class="cross">✗</span> Yok</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ===================== PORTAL GİRİŞ NOKTALARI ===================== -->
+<h2 class="section">4. Vize / Konut / Üniversite — Senior Giriş Noktaları</h2>
+<div class="flow-grid">
+  <div class="flow-card">
+    <div class="flow-header" style="background:#475569">🛂 Vize Takibi — Nereden Girilir?</div>
+    <div class="flow-body">
+      <div class="step">
+        <div class="step-num" style="background:#0891b2;color:#fff">A</div>
+        <div class="step-content">
+          <div class="step-title">Süreç Takibi → Öğrenci Seç → Vize Tab</div>
+          <div class="step-desc">/senior/process-tracking?student_id=XXX → 🛂 Vize tab. Kayıt varsa güncelle, yoksa yeni ekle.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#0891b2;color:#fff">B</div>
+        <div class="step-content">
+          <div class="step-title">Öğrenci 360° → Vize Sekmesi</div>
+          <div class="step-desc">/senior/students/XXX → 🛂 Vize tab. Aynı inline form.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#0891b2;color:#fff">C</div>
+        <div class="step-content">
+          <div class="step-title">Sidebar → Vize Takibi (Toplu Görünüm)</div>
+          <div class="step-desc">/senior/visa → tüm öğrencilerin vize kayıtlarını listeler + filtreler + CRUD.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-card">
+    <div class="flow-header" style="background:#475569">🏛 Üniversite Başvuruları — Nereden Girilir?</div>
+    <div class="flow-body">
+      <div class="step">
+        <div class="step-num" style="background:#7c3aed;color:#fff">A</div>
+        <div class="step-content">
+          <div class="step-title">Süreç Takibi → Öğrenci Seç → Başvurular Tab</div>
+          <div class="step-desc">/senior/process-tracking?student_id=XXX → 🏛 Başvurular tab → + Başvuru Ekle. Ana çalışma yüzeyi budur.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#7c3aed;color:#fff">B</div>
+        <div class="step-content">
+          <div class="step-title">Öğrenci 360° → Üniversite Sekmesi</div>
+          <div class="step-desc">/senior/students/XXX → 🎓 Üniversite tab. Mevcut başvurular listelenir + yeni ekle formu.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#7c3aed;color:#fff">C</div>
+        <div class="step-content">
+          <div class="step-title">Sidebar → Üniversite Başvuruları (Toplu)</div>
+          <div class="step-desc">/senior/university-applications → tüm öğrencilerin başvuruları. Durum, derece, öğrenci filtresi.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px;padding:14px 18px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;font-size:13px;color:#166534;">
+  <strong>Kural:</strong> Bir modülde geliştirilen her özellik ilgili tüm portallarda paralel görünüm sağlar.
+  Senior: tam CRUD · Student: is_visible_to_student toggle · Manager: read-only · Dealer: is_visible_to_dealer toggle
+</div>
+
+</body>
+</html>

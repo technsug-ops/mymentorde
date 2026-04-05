@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'dashboard'         => 'Startseite',
+    'profile'           => 'Mein Profil',
+    'documents'         => 'Meine Dokumente',
+    'registration_form' => 'Anmeldeformular',
+    'services'          => 'Dienstleistungen',
+    'messages'          => 'Nachrichten',
+    'tickets'           => 'Support',
+    'settings'          => 'Einstellungen',
+    'contract'          => 'Mein Vertrag',
+    'timeline'          => 'Prozessverfolgung',
+    'welcome'           => 'Willkommen',
+    'logout'            => 'Abmelden',
+    'save'              => 'Speichern',
+    'cancel'            => 'Abbrechen',
+    'submit'            => 'Absenden',
+    'back'              => 'Zurück',
+    'next'              => 'Weiter',
+    'loading'           => 'Wird geladen...',
+    'success'           => 'Erfolgreich!',
+    'error'             => 'Ein Fehler ist aufgetreten.',
+    'required_field'    => 'Dieses Feld ist erforderlich.',
+    'language'          => 'Sprache',
+];

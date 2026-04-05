@@ -1,0 +1,899 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MentorDE Developer Handbook</title><style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f7fb;color:#1a2233;padding:40px 20px;line-height:1.75;}
+.wrap{max-width:900px;margin:0 auto;background:#fff;border-radius:12px;padding:48px 56px;box-shadow:0 4px 32px rgba(0,0,0,.08);}
+h1,h2{font-size:1.3rem;font-weight:800;color:#1f66d1;margin:2.5rem 0 .6rem;padding-bottom:.4rem;border-bottom:2px solid #e2e8f0;}
+h3{font-size:1.05rem;font-weight:700;color:#1a2233;margin:1.8rem 0 .5rem;}
+h4{font-size:.95rem;font-weight:600;color:#4b5563;margin:1.3rem 0 .4rem;}
+p{margin-bottom:.8rem;}ul,ol{margin:.4rem 0 1rem 1.6rem;}li{margin-bottom:.3rem;}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem;}
+th{background:#1f66d1;color:#fff;padding:9px 12px;text-align:left;font-weight:600;}
+td{padding:8px 12px;border-bottom:1px solid #e2e8f0;}
+tr:nth-child(even) td{background:#f8faff;}
+code{background:#f1f5f9;border:1px solid #e2e8f0;padding:2px 6px;border-radius:4px;font-size:.85rem;}
+pre{background:#f1f5f9;padding:16px;border-radius:8px;overflow-x:auto;margin:1rem 0;}
+blockquote{border-left:3px solid #1f66d1;padding-left:16px;color:#6b7280;margin:1rem 0;}
+hr{border:none;border-top:1px solid #e2e8f0;margin:2rem 0;}
+.footer{text-align:center;margin-top:48px;padding-top:24px;border-top:1px solid #e2e8f0;font-size:.82rem;color:#9ca3af;}
+@media print{body{background:#fff;padding:0;} .wrap{box-shadow:none;padding:24px;}}
+</style></head><body><div class="wrap"><h1>MentorDE — Developer Handbook</h1>
+<p><strong>Version 1.0 | 2026</strong></p>
+<blockquote>
+<p>Geliştirici devri, onboarding ve teknik referans için hazırlanmıştır.
+Hem iş mantığını hem teknik implementasyonu kapsar.</p>
+</blockquote>
+<hr />
+<h2>İçindekiler</h2>
+<ol>
+<li><a href="#1-sistem-mimarisi">Sistem Mimarisi</a></li>
+<li><a href="#2-dizin-yap%C4%B1s%C4%B1">Dizin Yapısı</a></li>
+<li><a href="#3-veritaban%C4%B1-%C5%9Femas%C4%B1">Veritabanı Şeması</a></li>
+<li><a href="#4-kimlik-do%C4%9Frulama--g%C3%BCvenlik">Kimlik Doğrulama &amp; Güvenlik</a></li>
+<li><a href="#5-portal-yap%C4%B1lar%C4%B1-ve-routing">Portal Yapıları ve Routing</a></li>
+<li><a href="#6-temel-servisler">Temel Servisler</a></li>
+<li><a href="#7-queue--cron">Queue &amp; Cron</a></li>
+<li><a href="#8-d%C4%B1%C5%9F-entegrasyonlar">Dış Entegrasyonlar</a></li>
+<li><a href="#9-css--frontend-mimarisi">CSS / Frontend Mimarisi</a></li>
+<li><a href="#10-test-altyap%C4%B1s%C4%B1">Test Altyapısı</a></li>
+<li><a href="#11-deploy--ortam-de%C4%9Fi%C5%9Fkenleri">Deploy &amp; Ortam Değişkenleri</a></li>
+<li><a href="#12-s%C4%B1k-yap%C4%B1lan-hatalar">Sık Yapılan Hatalar</a></li>
+</ol>
+<hr />
+<h2>1. Sistem Mimarisi</h2>
+<h3>Genel Bakış</h3>
+<p>MentorDE, Almanya üniversite başvurularını yöneten <strong>çok-portal Laravel ERP</strong>'dir.
+Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır.</p>
+<pre><code>Browser → Nginx → PHP-FPM (Laravel 12 / PHP 8.4) → MySQL
+                                                   → Queue Worker (database driver)
+                                                   → Cron (Task Scheduler)
+                                                   → Stripe API (ödeme)
+                                                   → Meta Cloud API (WhatsApp)
+                                                   → SMTP (e-posta)
+</code></pre>
+<h3>Portal Grupları</h3>
+<table>
+<thead>
+<tr>
+<th>Portal</th>
+<th>URL Prefix</th>
+<th>Middleware</th>
+<th>Layout</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Manager</td>
+<td><code>/manager/</code></td>
+<td><code>manager.role</code> + <code>require.2fa</code></td>
+<td><code>manager.layouts.app</code></td>
+</tr>
+<tr>
+<td>Senior</td>
+<td><code>/senior/</code></td>
+<td><code>senior.role</code></td>
+<td><code>senior.layouts.app</code></td>
+</tr>
+<tr>
+<td>Guest</td>
+<td><code>/guest/</code></td>
+<td><code>guest.role</code> + <code>verified</code></td>
+<td><code>guest.layouts.app</code></td>
+</tr>
+<tr>
+<td>Student</td>
+<td><code>/student/</code></td>
+<td><code>student.role</code> + <code>verified</code></td>
+<td><code>student.layouts.app</code></td>
+</tr>
+<tr>
+<td>Dealer</td>
+<td><code>/dealer/</code></td>
+<td><code>dealer.role</code></td>
+<td><code>dealer.layouts.app</code></td>
+</tr>
+<tr>
+<td>Marketing</td>
+<td><code>/mktg-admin/</code></td>
+<td><code>marketing.access</code></td>
+<td><code>marketing-admin.layouts.app</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Temel İş Akışı</h3>
+<pre><code>1. Aday sisteme kayıt olur → guest rolü atanır
+2. Senior danışman atanır (manager veya sistem tarafından)
+3. Belgeler yüklenir → senior inceler → onaylar
+4. Sözleşme oluşturulur → PDF + dijital imza
+5. Ödeme tanımlanır → Stripe Checkout ile ödenir
+6. Student'a geçiş: guest_applications.status = 'converted'
+7. Üniversite başvuruları senior tarafından takip edilir
+8. Dealer referans komisyonu izler
+</code></pre>
+<hr />
+<h2>2. Dizin Yapısı</h2>
+<pre><code>mentorde/
+├── app/
+│   ├── Console/Commands/          # Artisan komutları (cron işleri)
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Api/               # REST API controller'ları
+│   │   │   ├── Auth/              # Login, 2FA, Email Verify
+│   │   │   ├── Dealer/            # Dealer portal controller'ları
+│   │   │   ├── Guest/             # Guest portal controller'ları
+│   │   │   ├── Hr/                # İK modülü
+│   │   │   ├── Manager/           # Manager panel controller'ları
+│   │   │   ├── MarketingAdmin/    # Pazarlama controller'ları
+│   │   │   ├── Senior/            # Senior portal controller'ları
+│   │   │   └── Student/           # Student portal controller'ları
+│   │   └── Middleware/            # RBAC, 2FA, güvenlik middleware'leri
+│   ├── Jobs/                      # Queue job'ları
+│   ├── Models/                    # Eloquent modeller
+│   ├── Observers/                 # Model observer'ları (AuditTrail)
+│   └── Services/                  # İş mantığı servisleri (35+)
+├── database/
+│   ├── migrations/                # Tüm tablo migrasyonları
+│   └── seeders/                   # ContentHubSeeder, ContentHubExtraSeeder
+├── public/
+│   ├── css/portal-unified-v2.css  # Tüm portallerin CSS'i
+│   └── js/                        # Statik JS dosyaları (30+)
+├── resources/
+│   ├── css/                       # premium.css, minimalist.css
+│   └── views/
+│       ├── auth/                  # Login, 2FA, email verify view'ları
+│       ├── dealer/                # Dealer portal view'ları
+│       ├── guest/                 # Guest portal view'ları
+│       ├── handbook/              # Handbook view'ları (tüm roller)
+│       ├── manager/               # Manager portal view'ları
+│       ├── marketing-admin/       # Pazarlama portal view'ları
+│       ├── senior/                # Senior portal view'ları
+│       └── student/              # Student portal view'ları
+├── routes/
+│   ├── web.php                   # Auth + genel rotalar
+│   ├── guest.php                 # Guest portal rotaları
+│   ├── student.php               # Student portal rotaları
+│   ├── senior.php                # Senior portal rotaları
+│   ├── dealer.php                # Dealer portal rotaları
+│   ├── manager.php               # Manager portal rotaları
+│   ├── marketing-admin.php       # Marketing portal rotaları
+│   └── api.php                   # REST API rotaları
+├── HANDBOOK_TR.md                # Kullanıcı el kitabı (Türkçe)
+├── HANDBOOK_EN.md                # Kullanıcı el kitabı (İngilizce)
+└── DEV_HANDBOOK.md               # Bu dosya
+</code></pre>
+<hr />
+<h2>3. Veritabanı Şeması</h2>
+<h3>Kullanıcı &amp; RBAC</h3>
+<table>
+<thead>
+<tr>
+<th>Tablo</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>users</code></td>
+<td>Ana kullanıcı tablosu — <code>role</code> string kolonu ile RBAC</td>
+</tr>
+<tr>
+<td><code>user_two_factor</code></td>
+<td>TOTP secret, enabled_at</td>
+</tr>
+<tr>
+<td><code>ip_access_rules</code></td>
+<td>IP whitelist/blacklist</td>
+</tr>
+<tr>
+<td><code>audit_trails</code></td>
+<td>Tüm kritik işlemlerin logu</td>
+</tr>
+<tr>
+<td><code>user_sessions</code></td>
+<td>Aktif oturum takibi</td>
+</tr>
+</tbody>
+</table>
+<p><em><em>Roller (User::ROLE_</em> sabitleri):</em>*
+<code>manager</code>, <code>system_admin</code>, <code>operations_admin</code>, <code>finance_admin</code>,
+<code>system_staff</code>, <code>operations_staff</code>, <code>finance_staff</code>,
+<code>senior</code>, <code>mentor</code>, <code>guest</code>, <code>student</code>, <code>dealer</code>,
+<code>marketing_admin</code>, <code>marketing_staff</code>, <code>sales_admin</code>, <code>sales_staff</code></p>
+<h3>Guest &amp; Başvuru</h3>
+<table>
+<thead>
+<tr>
+<th>Tablo</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>guest_applications</code></td>
+<td>Ana başvuru tablosu (<code>status</code>, <code>pipeline_stage</code>, <code>senior_id</code>)</td>
+</tr>
+<tr>
+<td><code>guest_pipeline_logs</code></td>
+<td>Pipeline aşama geçiş logu</td>
+</tr>
+<tr>
+<td><code>guest_documents</code></td>
+<td>Yüklenen belgeler + onay durumu</td>
+</tr>
+<tr>
+<td><code>guest_tickets</code></td>
+<td>Destek talepleri</td>
+</tr>
+<tr>
+<td><code>field_rules</code></td>
+<td>Dinamik form validasyon kuralları</td>
+</tr>
+<tr>
+<td><code>field_rule_approvals</code></td>
+<td>Kural onay akışı</td>
+</tr>
+</tbody>
+</table>
+<p><strong>guest_applications.pipeline_stage değerleri:</strong>
+<code>new</code> → <code>in_review</code> → <code>docs_pending</code> → <code>docs_complete</code> → <code>contract_sent</code> → <code>converted</code></p>
+<h3>Sözleşme</h3>
+<table>
+<thead>
+<tr>
+<th>Tablo</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>business_contracts</code></td>
+<td>Dealer + staff sözleşmeleri</td>
+</tr>
+<tr>
+<td><code>contract_templates</code></td>
+<td>PDF şablonları (JSON placeholder)</td>
+</tr>
+<tr>
+<td><code>document_builder_templates</code></td>
+<td>Belge builder şablonları</td>
+</tr>
+<tr>
+<td><code>consent_records</code></td>
+<td>GDPR onay kayıtları</td>
+</tr>
+</tbody>
+</table>
+<h3>Ödeme</h3>
+<table>
+<thead>
+<tr>
+<th>Tablo</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>student_payments</code></td>
+<td>Öğrenci ödeme faturaları</td>
+</tr>
+<tr>
+<td><code>student_payments.stripe_session_id</code></td>
+<td>Stripe Checkout Session ID</td>
+</tr>
+<tr>
+<td><code>student_payments.stripe_payment_intent_id</code></td>
+<td>Stripe Payment Intent ID</td>
+</tr>
+<tr>
+<td><code>student_payments.status</code></td>
+<td><code>pending</code> / <code>paid</code> / <code>overdue</code> / <code>cancelled</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Stripe webhook:</strong> <code>POST /webhooks/stripe</code> → <code>PaymentCheckoutController::handleWebhook()</code></p>
+<h3>İçerik (CMS)</h3>
+<table>
+<thead>
+<tr>
+<th>Tablo</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cms_contents</code></td>
+<td>Tüm içerik (blog, video, podcast, sunum)</td>
+</tr>
+<tr>
+<td><code>cms_categories</code></td>
+<td>İçerik kategorileri</td>
+</tr>
+<tr>
+<td><code>user_saved_contents</code></td>
+<td>Kullanıcı kaydetme</td>
+</tr>
+<tr>
+<td><code>user_content_reactions</code></td>
+<td>Beğeni/reaksiyon</td>
+</tr>
+</tbody>
+</table>
+<p><strong>cms_contents.type:</strong> <code>blog</code>, <code>video_feature</code>, <code>podcast</code>, <code>presentation</code>, <code>experience</code>, <code>career_guide</code>, <code>tip</code>
+<strong>cms_contents.category:</strong> <code>student-life</code>, <code>culture-fun</code>, <code>careers</code>, <code>tips-tricks</code>, <code>city-content</code>, <code>uni-content</code></p>
+<h3>Mesajlaşma &amp; Bildirimler</h3>
+<table>
+<thead>
+<tr>
+<th>Tablo</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>conversations</code></td>
+<td>Konuşma başlıkları</td>
+</tr>
+<tr>
+<td><code>conversation_participants</code></td>
+<td>Katılımcılar</td>
+</tr>
+<tr>
+<td><code>messages</code></td>
+<td>Mesaj içerikleri + <code>is_pinned</code>, <code>forwarded_from</code>, <code>edit_count</code></td>
+</tr>
+<tr>
+<td><code>notifications</code></td>
+<td>In-app bildirimler</td>
+</tr>
+<tr>
+<td><code>notification_preferences</code></td>
+<td>Kullanıcı bildirim tercihleri</td>
+</tr>
+</tbody>
+</table>
+<h3>Görev &amp; Proje</h3>
+<table>
+<thead>
+<tr>
+<th>Tablo</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tasks</code></td>
+<td>Ana görev tablosu (<code>recurrence_rule</code>, <code>depends_on_task_id</code>)</td>
+</tr>
+<tr>
+<td><code>task_time_entries</code></td>
+<td>Zaman takibi</td>
+</tr>
+<tr>
+<td><code>task_comments</code></td>
+<td>Görev yorumları</td>
+</tr>
+<tr>
+<td><code>escalation_rules</code></td>
+<td>Otomatik görev iletme kuralları</td>
+</tr>
+</tbody>
+</table>
+<h3>Performans &amp; Lead</h3>
+<table>
+<thead>
+<tr>
+<th>Tablo</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>senior_performance_snapshots</code></td>
+<td>Aylık snapshot (otomatik)</td>
+</tr>
+<tr>
+<td><code>lead_scores</code></td>
+<td>LeadScoreService çıktıları</td>
+</tr>
+<tr>
+<td><code>currency_rates</code></td>
+<td>EUR/TRY kur tablosu</td>
+</tr>
+</tbody>
+</table>
+<h3>Diğer Modüller</h3>
+<table>
+<thead>
+<tr>
+<th>Tablo</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>student_university_applications</code></td>
+<td>Üniversite başvuru takibi</td>
+</tr>
+<tr>
+<td><code>student_institution_documents</code></td>
+<td>Kurumsal belge takibi</td>
+</tr>
+<tr>
+<td><code>student_shipments</code></td>
+<td>Kargo takibi</td>
+</tr>
+<tr>
+<td><code>student_appointments</code></td>
+<td>Randevu + takvim entegrasyonu</td>
+</tr>
+<tr>
+<td><code>dealer_types</code></td>
+<td>Bayi tipi (3 katman: Standard, Premium, Elite)</td>
+</tr>
+<tr>
+<td><code>dealer_revenue_milestones</code></td>
+<td>Komisyon dönüm noktaları</td>
+</tr>
+<tr>
+<td><code>university_requirement_maps</code></td>
+<td>Üniversite belge haritası</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>4. Kimlik Doğrulama &amp; Güvenlik</h2>
+<h3>Login Akışı</h3>
+<pre><code>POST /login
+  → AuthController::login()
+  → Kredansiyel doğrulama
+  → Şirket context kontrolü (company_id)
+  → 2FA gerekli mi? (Require2FA middleware)
+    → Evet: /2fa/challenge
+    → Hayır: role'e göre dashboard'a yönlendir
+</code></pre>
+<h3>2FA</h3>
+<ul>
+<li>Kütüphane: <code>pragmarx/google2fa</code></li>
+<li>QR kod: <code>bacon/bacon-qr-code</code> → SVG</li>
+<li>Setup flow: <code>GET /2fa/setup</code> → QR göster → <code>POST /2fa/setup/confirm</code> → doğrula → <code>user_two_factor.enabled_at = now()</code></li>
+<li>Challenge: <code>GET /2fa/challenge</code> → 6 haneli kod → <code>POST /2fa/challenge</code> → <code>session('2fa_passed', true)</code></li>
+<li><strong>2FA zorunlu roller:</strong> <code>manager</code>, <code>system_admin</code>, <code>operations_admin</code>, <code>finance_admin</code></li>
+<li>Middleware: <code>App\Http\Middleware\Require2FA</code> → <code>bootstrap/app.php</code>'de <code>require.2fa</code> olarak kayıtlı</li>
+</ul>
+<h3>Email Doğrulama</h3>
+<ul>
+<li><code>User implements MustVerifyEmail</code></li>
+<li>Yeni kullanıcılar: <code>User::booted()</code> creating event → <code>email_verified_at = now()</code> (auto-verify)</li>
+<li><code>verified</code> middleware: guest + student route gruplarında aktif</li>
+<li>Controller: <code>Auth\EmailVerificationController</code> → <code>GET /email/verify</code>, <code>POST /email/verify/{id}/{hash}</code></li>
+</ul>
+<h3>RBAC Middleware</h3>
+<table>
+<thead>
+<tr>
+<th>Middleware</th>
+<th>Kontrol</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>manager.role</code></td>
+<td><code>User::ROLE_MANAGER</code> ve türevleri</td>
+</tr>
+<tr>
+<td><code>senior.role</code></td>
+<td><code>senior</code>, <code>mentor</code></td>
+</tr>
+<tr>
+<td><code>guest.role</code></td>
+<td><code>guest</code></td>
+</tr>
+<tr>
+<td><code>student.role</code></td>
+<td><code>student</code></td>
+</tr>
+<tr>
+<td><code>dealer.role</code></td>
+<td><code>dealer</code></td>
+</tr>
+<tr>
+<td><code>marketing.access</code></td>
+<td><code>marketing_admin</code>, <code>marketing_staff</code>, <code>sales_admin</code>, <code>sales_staff</code></td>
+</tr>
+<tr>
+<td><code>require.2fa</code></td>
+<td>Manager rolleri için 2FA zorunluluğu</td>
+</tr>
+</tbody>
+</table>
+<h3>Güvenlik Servisleri</h3>
+<ul>
+<li><code>SecurityAnomalyService</code> — 3 kontrol: anomalous_login, unusual_download, bulk_export (saatlik cron)</li>
+<li><code>RiskScoreService</code> — kullanıcı risk puanlama</li>
+<li><code>SecurityHeaders</code> middleware — global, her request'te CSP + nonce üretir</li>
+<li><code>ValidFileMagicBytes</code> — dosya yükleme magic byte doğrulaması</li>
+<li><code>EnsureGuestOwnsDocument</code> / <code>EnsureGuestOwnsTicket</code> — ownership middleware</li>
+</ul>
+<h3>CSP ve Inline Script</h3>
+<p><strong>ÖNEMLİ:</strong> SecurityHeaders her request'te rastgele nonce üretir.
+CSP Level 3'te <code>nonce-*</code> varsa <code>unsafe-inline</code> görmezden gelinir.
+Bu nedenle tüm <code>onclick=&quot;...&quot;</code> attribute'ları <strong>çalışmaz</strong>.</p>
+<p><strong>Doğru pattern:</strong></p>
+<pre><code class="language-html">&lt;script nonce=&quot;{{ $cspNonce ?? '' }}&quot;&gt;
+document.getElementById('btn')?.addEventListener('click', function() { ... });
+&lt;/script&gt;
+</code></pre>
+<hr />
+<h2>5. Portal Yapıları ve Routing</h2>
+<h3>Route Dosya Yapısı</h3>
+<p><code>bootstrap/app.php</code>'de tüm route dosyaları include edilir:</p>
+<pre><code class="language-php">-&gt;withRouting(
+    web: [
+        __DIR__.'/../routes/web.php',
+        __DIR__.'/../routes/guest.php',
+        __DIR__.'/../routes/student.php',
+        __DIR__.'/../routes/senior.php',
+        __DIR__.'/../routes/dealer.php',
+        __DIR__.'/../routes/manager.php',
+        __DIR__.'/../routes/marketing-admin.php',
+    ],
+    api: __DIR__.'/../routes/api.php',
+)
+</code></pre>
+<h3>ViewData Pattern</h3>
+<p>Her portal için <code>ViewDataService</code> sınıfı bulunur. Dashboard'dan view'a gönderilen data standart bir <code>build()</code> metodu üzerinden hazırlanır.</p>
+<pre><code class="language-php">// GuestViewDataService
+public function build(Request $request, GuestApplication $guest): array
+{
+    return [
+        'guest'       =&gt; $guest,
+        'progress'    =&gt; $this-&gt;calculateProgress($guest),
+        'nextStep'    =&gt; $this-&gt;determineNextStep($guest),
+        'unreadCount' =&gt; $this-&gt;getUnreadCount($guest),
+    ];
+}
+</code></pre>
+<h3>GuestResolver Pattern</h3>
+<p><code>GuestResolverService</code> — auth kullanıcısından <code>GuestApplication</code> modeline ulaşır.
+Senior portal'da: senior'ın atanmış guest'lerini filtreler.</p>
+<hr />
+<h2>6. Temel Servisler</h2>
+<h3>İş Mantığı Servisleri</h3>
+<table>
+<thead>
+<tr>
+<th>Servis</th>
+<th>Sorumluluk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NotificationService</code></td>
+<td>E-posta + WhatsApp bildirim gönderme</td>
+</tr>
+<tr>
+<td><code>WhatsAppService</code></td>
+<td>Meta Cloud API v19.0 entegrasyonu</td>
+</tr>
+<tr>
+<td><code>BusinessContractService</code></td>
+<td>PDF sözleşme oluşturma, imza akışı</td>
+</tr>
+<tr>
+<td><code>DocumentBuilderService</code></td>
+<td>Şablon bazlı belge üretimi</td>
+</tr>
+<tr>
+<td><code>WorkflowEngineService</code></td>
+<td>Pipeline geçiş kuralları</td>
+</tr>
+<tr>
+<td><code>LeadScoreService</code></td>
+<td>8 faktörlü lead puanlama</td>
+</tr>
+<tr>
+<td><code>SeniorPerformanceService</code></td>
+<td>Aylık performans snapshot</td>
+</tr>
+<tr>
+<td><code>DashboardKPIService</code></td>
+<td>Manager dashboard DB sorguları (<code>Cache::remember(300s)</code>)</td>
+</tr>
+<tr>
+<td><code>CurrencyRateService</code></td>
+<td>EUR/TRY kur çekme + cache (3600s)</td>
+</tr>
+<tr>
+<td><code>SecurityAnomalyService</code></td>
+<td>Güvenlik anomali tespiti</td>
+</tr>
+<tr>
+<td><code>ConversationService</code></td>
+<td>Dahili mesajlaşma iş mantığı</td>
+</tr>
+<tr>
+<td><code>TaskEscalationService</code></td>
+<td>Görev iletme kuralları</td>
+</tr>
+</tbody>
+</table>
+<h3>AuditTrail Observer</h3>
+<p><code>AuditTrail</code> model + <code>AuditTrailObserver</code> → kritik modellerde created/updated/deleted olayları loglanır.</p>
+<pre><code class="language-php">// Model'e eklemek için:
+use App\Observers\AuditTrailObserver;
+protected static function booted(): void {
+    static::observe(AuditTrailObserver::class);
+}
+</code></pre>
+<hr />
+<h2>7. Queue &amp; Cron</h2>
+<h3>Queue</h3>
+<ul>
+<li>Driver: <code>database</code> (<code>.env</code>: <code>QUEUE_CONNECTION=database</code>)</li>
+<li>Tablo: <code>jobs</code>, <code>failed_jobs</code></li>
+<li>Worker başlatma: <code>php artisan queue:work --sleep=3 --tries=3</code></li>
+</ul>
+<p><strong>Job'lar:</strong></p>
+<ul>
+<li><code>SendNotificationJob</code> — e-posta + WhatsApp bildirim</li>
+<li><code>ProcessDocumentJob</code> — belge işleme</li>
+<li><code>RecalculateLeadScoreJob</code> — lead skor hesaplama</li>
+</ul>
+<h3>Cron (Task Scheduler)</h3>
+<p><code>app/Console/Kernel.php</code> veya route-based scheduler:</p>
+<table>
+<thead>
+<tr>
+<th>Komut</th>
+<th>Zamanlama</th>
+<th>Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gdpr:enforce-retention</code></td>
+<td>Günlük 03:00</td>
+<td>Veri saklama politikası uygula</td>
+</tr>
+<tr>
+<td><code>security:anomaly-check</code></td>
+<td>Saatlik</td>
+<td>Güvenlik anomali tarama</td>
+</tr>
+<tr>
+<td><code>leads:recalculate-scores</code></td>
+<td>Günlük 02:30</td>
+<td>Lead skorları yenile</td>
+</tr>
+<tr>
+<td><code>senior:snapshot-performance</code></td>
+<td>Aylık 1. gün 03:30</td>
+<td>Performans snapshot</td>
+</tr>
+<tr>
+<td><code>currency:sync-rates</code></td>
+<td>6 saatte bir</td>
+<td>EUR/TRY kur güncelle</td>
+</tr>
+<tr>
+<td><code>integrations:health-check</code></td>
+<td>Günlük</td>
+<td>Entegrasyon sağlık kontrolü</td>
+</tr>
+<tr>
+<td><code>social:metrics-sync</code></td>
+<td>Günlük</td>
+<td>Sosyal medya metrik sync</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sunucuda cron ayarı:</strong></p>
+<pre><code>* * * * * cd /var/www/mentorde &amp;&amp; php artisan schedule:run &gt;&gt; /dev/null 2&gt;&amp;1
+</code></pre>
+<hr />
+<h2>8. Dış Entegrasyonlar</h2>
+<h3>Stripe</h3>
+<pre><code class="language-env">STRIPE_KEY=pk_live_...
+STRIPE_SECRET=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+</code></pre>
+<p><strong>Akış:</strong></p>
+<ol>
+<li><code>PaymentCheckoutController::checkout()</code> → Stripe Checkout Session oluştur</li>
+<li>Öğrenci Stripe'a yönlendirilir</li>
+<li>Başarılı ödeme → <code>POST /webhooks/stripe</code> → <code>handleWebhook()</code></li>
+<li><code>StudentPayment.status = 'paid'</code>, <code>paid_at = now()</code></li>
+</ol>
+<p><strong>Webhook CSRF muaf:</strong> <code>routes/web.php</code>'de <code>-&gt;withoutMiddleware([VerifyCsrfToken::class])</code></p>
+<h3>WhatsApp</h3>
+<pre><code class="language-env">WHATSAPP_PHONE_NUMBER_ID=...
+WHATSAPP_ACCESS_TOKEN=...
+WHATSAPP_TEMPLATE_NAMESPACE=...
+</code></pre>
+<p><strong>Kullanım:</strong> <code>WhatsAppService::sendTemplateMessage($phone, $templateName, $params)</code>
+Meta Cloud API v19.0 kullanılır.</p>
+<h3>SMTP</h3>
+<pre><code class="language-env">MAIL_MAILER=smtp
+MAIL_HOST=...
+MAIL_PORT=587
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@mentorde.de
+MAIL_FROM_NAME=&quot;MentorDE&quot;
+</code></pre>
+<h3>Google 2FA (TOTP)</h3>
+<p>Kütüphane: <code>pragmarx/google2fa</code> + <code>bacon/bacon-qr-code</code>
+Kullanıcı kendi authenticator uygulamasıyla (Google Auth, Authy) TOTP kurulumu yapar.</p>
+<hr />
+<h2>9. CSS / Frontend Mimarisi</h2>
+<h3>Ana CSS</h3>
+<p><code>public/css/portal-unified-v2.css</code> — tüm portallar bu dosyayı kullanır.</p>
+<p><strong>CSS Değişkenleri (namespace: <code>--u-*</code>):</strong></p>
+<pre><code class="language-css">--u-brand   /* Ana mavi */
+--u-bg      /* Sayfa arka planı */
+--u-card    /* Kart arka planı */
+--u-line    /* Kenarlık rengi */
+--u-text    /* Ana metin */
+--u-muted   /* İkincil metin */
+--u-ok      /* Yeşil */
+--u-warn    /* Sarı */
+--u-danger  /* Kırmızı */
+</code></pre>
+<p><strong>Layout bileşenleri:</strong></p>
+<ul>
+<li><code>.grid2</code>, <code>.grid3</code>, <code>.grid4</code> — grid layout (inline style kullanma)</li>
+<li><code>.kpi</code> — büyük KPI sayısı (font 26px)</li>
+<li><code>.badge.ok</code>, <code>.badge.warn</code>, <code>.badge.danger</code>, <code>.badge.info</code>, <code>.badge.pending</code></li>
+<li><code>.btn</code>, <code>.btn.alt</code>, <code>.btn.warn</code>, <code>.btn.ok</code></li>
+<li><code>.card</code> — standalone kart</li>
+<li><code>.list &gt; .item</code> — liste satırı (<code>.list &gt; .card</code> YANLIŞ)</li>
+</ul>
+<h3>Tema Sistemi</h3>
+<ul>
+<li><code>resources/css/premium.css</code> — light mode + <code>[data-theme=&quot;dark&quot;]</code> override</li>
+<li><code>resources/css/minimalist.css</code> — minimalist tema</li>
+<li>Toggle fonksiyonları: <code>__dmToggle()</code>, <code>__designToggle()</code> — layout'un nonce'lu script bloğunda tanımlanır</li>
+</ul>
+<h3>Statik JS</h3>
+<p><code>public/js/</code> klasöründe 30+ statik JS dosyası.
+Her portal kendi JS dosyasına sahip.</p>
+<p><strong>Vite sadece CSS için:</strong> <code>resources/css/</code> → build → <code>public/build/</code>
+JS dosyaları statik, Vite bundle'ına dahil değil.</p>
+<hr />
+<h2>10. Test Altyapısı</h2>
+<h3>PHPUnit</h3>
+<pre><code class="language-bash">php artisan test              # Tüm testler
+php artisan test --filter Foo # Belirli test
+</code></pre>
+<p><strong>Test durumu (2026-04-04):</strong> 123/123 test geçiyor.</p>
+<p><strong>Test dizinleri:</strong></p>
+<ul>
+<li><code>tests/Unit/</code> — model, servis unit testleri</li>
+<li><code>tests/Feature/</code> — controller, route feature testleri</li>
+</ul>
+<p><strong>Kritik test pattern:</strong></p>
+<pre><code class="language-php">// Sistem alanları ($fillable dışı) için:
+$app = new GuestApplication();
+$app-&gt;forceFill([
+    'status' =&gt; 'active',
+    'senior_id' =&gt; $senior-&gt;id,
+])-&gt;save();
+// create() kullanma — fillable kısıtlaması bypass etmez
+</code></pre>
+<p><strong>SQLite vs MySQL uyumluluk:</strong></p>
+<pre><code class="language-php">$isSqlite = config('database.default') === 'sqlite';
+$dateDiff = $isSqlite
+    ? DB::raw(&quot;CAST(julianday('now') - julianday(created_at) AS INTEGER)&quot;)
+    : DB::raw(&quot;DATEDIFF(NOW(), created_at)&quot;);
+</code></pre>
+<h3>Playwright E2E</h3>
+<pre><code class="language-bash">cd tests/e2e
+npx playwright test
+</code></pre>
+<p>7 rol, 6 spec dosyası. <code>.env.testing</code>'de <code>APP_DEBUG=false</code> (PHP 8.4 Ignition bug bypass).</p>
+<hr />
+<h2>11. Deploy &amp; Ortam Değişkenleri</h2>
+<h3>Gerekli <code>.env</code> Değişkenleri</h3>
+<pre><code class="language-env">APP_NAME=&quot;MentorDE&quot;
+APP_ENV=production
+APP_KEY=base64:...
+APP_DEBUG=false
+APP_URL=https://mentorde.de
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=mentorde
+DB_USERNAME=...
+DB_PASSWORD=...
+
+QUEUE_CONNECTION=database
+CACHE_DRIVER=redis        # veya file
+SESSION_DRIVER=database   # veya redis
+
+MAIL_MAILER=smtp
+MAIL_HOST=...
+MAIL_PORT=587
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@mentorde.de
+MAIL_FROM_NAME=&quot;MentorDE&quot;
+
+STRIPE_KEY=pk_live_...
+STRIPE_SECRET=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+WHATSAPP_PHONE_NUMBER_ID=...
+WHATSAPP_ACCESS_TOKEN=...
+WHATSAPP_TEMPLATE_NAMESPACE=...
+
+FILESYSTEM_DISK=local     # veya s3
+</code></pre>
+<h3>Deploy Komutları</h3>
+<pre><code class="language-bash"># Kod güncelleme
+git pull origin main
+
+# Bağımlılıklar
+composer install --no-dev --optimize-autoloader
+
+# Uygulama
+php artisan migrate --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan event:cache
+
+# CSS build (gerektiğinde)
+npm ci &amp;&amp; npm run build
+
+# Queue (systemd veya supervisor ile)
+php artisan queue:restart
+</code></pre>
+<h3>Supervisor Konfigürasyonu</h3>
+<pre><code class="language-ini">[program:mentorde-worker]
+command=php /var/www/mentorde/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+autostart=true
+autorestart=true
+user=www-data
+numprocs=2
+redirect_stderr=true
+stdout_logfile=/var/log/mentorde-worker.log
+</code></pre>
+<hr />
+<h2>12. Sık Yapılan Hatalar</h2>
+<h3>&quot;419 Page Expired&quot; (Production)</h3>
+<p><strong>Neden:</strong> Session cookie <code>SameSite=Lax</code>, cross-site POST form'ları veya HTTP → HTTPS redirect.</p>
+<p><strong>Çözüm:</strong></p>
+<pre><code class="language-php">// config/session.php
+'secure'    =&gt; true,   // HTTPS zorunlu
+'same_site' =&gt; 'lax',
+'domain'    =&gt; '.mentorde.de',
+</code></pre>
+<p><code>.env</code>'de <code>APP_URL=https://mentorde.de</code> (http değil, https).</p>
+<h3>&quot;Namespace declaration&quot; PHP Hatası</h3>
+<p><strong>Neden:</strong> PowerShell <code>Set-Content</code> UTF-8 BOM ekler → PHP &quot;unexpected namespace&quot; hatası.</p>
+<p><strong>Çözüm:</strong> Node.js ile BOM'u kaldır:</p>
+<pre><code class="language-js">const fs = require('fs');
+let content = fs.readFileSync('file.php', 'utf8');
+if (content.charCodeAt(0) === 0xFEFF) content = content.slice(1);
+fs.writeFileSync('file.php', content, 'utf8');
+</code></pre>
+<h3>CSP Inline Script Bloğu</h3>
+<p><strong>Neden:</strong> SecurityHeaders nonce üretir → <code>unsafe-inline</code> görmezden gelinir → <code>onclick=</code> çalışmaz.</p>
+<p><strong>Çözüm:</strong> Her zaman <code>addEventListener</code> kullan, nonce'lu script bloğu içinde.</p>
+<h3>Queue Job'ları Çalışmıyor</h3>
+<p><strong>Kontrol:</strong></p>
+<pre><code class="language-bash">php artisan queue:work   # Manual başlat ve logları izle
+php artisan queue:failed # Başarısız job'ları listele
+php artisan queue:retry all
+</code></pre>
+<h3>Edit Tool Cache Geçersizliği</h3>
+<p><strong>Neden:</strong> Harici araçla değiştirilmiş dosya → Edit tool önbelleği stale.</p>
+<p><strong>Çözüm:</strong> Önce <code>Read</code> tool ile dosyayı oku, sonra <code>Edit</code> yap.</p>
+<h3>Test: <code>$fillable</code> Kısıtlaması</h3>
+<p><strong>Neden:</strong> <code>Model::create([...])</code> <code>$fillable</code>'a dahil olmayan alanları yok sayar → test beklenmedik state'te başlar.</p>
+<p><strong>Çözüm:</strong> Test setup'ında sistem alanları için <code>$model-&gt;forceFill([...])-&gt;save()</code> kullan.</p>
+<hr />
+<p><em>MentorDE Developer Handbook — Güncelleme: Nisan 2026</em></p>
+<div class="footer">MentorDE Developer Handbook &copy; 2026</div></div></body></html>

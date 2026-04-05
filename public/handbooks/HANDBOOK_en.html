@@ -1,0 +1,1399 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MentorDE Handbook</title><style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f7fb;color:#1a2233;padding:40px 20px;line-height:1.75;}
+.wrap{max-width:900px;margin:0 auto;background:#fff;border-radius:12px;padding:48px 56px;box-shadow:0 4px 32px rgba(0,0,0,.08);}
+h1,h2{font-size:1.3rem;font-weight:800;color:#1f66d1;margin:2.5rem 0 .6rem;padding-bottom:.4rem;border-bottom:2px solid #e2e8f0;}
+h3{font-size:1.05rem;font-weight:700;color:#1a2233;margin:1.8rem 0 .5rem;}
+h4{font-size:.95rem;font-weight:600;color:#4b5563;margin:1.3rem 0 .4rem;}
+p{margin-bottom:.8rem;}ul,ol{margin:.4rem 0 1rem 1.6rem;}li{margin-bottom:.3rem;}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem;}
+th{background:#1f66d1;color:#fff;padding:9px 12px;text-align:left;font-weight:600;}
+td{padding:8px 12px;border-bottom:1px solid #e2e8f0;}
+tr:nth-child(even) td{background:#f8faff;}
+code{background:#f1f5f9;border:1px solid #e2e8f0;padding:2px 6px;border-radius:4px;font-size:.85rem;}
+pre{background:#f1f5f9;padding:16px;border-radius:8px;overflow-x:auto;margin:1rem 0;}
+blockquote{border-left:3px solid #1f66d1;padding-left:16px;color:#6b7280;margin:1rem 0;}
+hr{border:none;border-top:1px solid #e2e8f0;margin:2rem 0;}
+.footer{text-align:center;margin-top:48px;padding-top:24px;border-top:1px solid #e2e8f0;font-size:.82rem;color:#9ca3af;}
+@media print{body{background:#fff;padding:0;} .wrap{box-shadow:none;padding:24px;}}
+</style></head><body><div class="wrap"><h1>MentorDE — System Handbook (English)</h1>
+<p><strong>Version 1.0 | 2026</strong></p>
+<blockquote>
+<p>This document covers all modules, user roles, and workflows of the MentorDE ERP system.
+Prepared for technical staff, administrators, and end users.</p>
+</blockquote>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#1-system-overview">System Overview</a></li>
+<li><a href="#2-user-roles-and-permissions">User Roles and Permissions</a></li>
+<li><a href="#3-portal-guides">Portal Guides</a>
+<ul>
+<li>3.1 Manager Portal</li>
+<li>3.2 Senior / Advisor Portal</li>
+<li>3.3 Guest Portal</li>
+<li>3.4 Student Portal</li>
+<li>3.5 Dealer Portal</li>
+<li>3.6 Marketing Admin Portal</li>
+</ul>
+</li>
+<li><a href="#4-module-documentation">Module Documentation</a></li>
+<li><a href="#5-integrations">Integrations</a></li>
+<li><a href="#6-admin-management">Admin Management</a></li>
+<li><a href="#7-security-and-gdpr">Security and GDPR</a></li>
+<li><a href="#8-frequently-asked-questions">Frequently Asked Questions</a></li>
+</ol>
+<hr />
+<h2>1. System Overview</h2>
+<h3>What is MentorDE?</h3>
+<p>MentorDE is a <strong>multi-portal ERP system</strong> designed to manage the university application process in Germany. It provides separately customized workspaces for consulting firms, student applicants, senior advisors, dealers, and marketing teams.</p>
+<h3>Core Business Flow</h3>
+<pre><code>Applicant Submits Form (Guest)
+           ↓
+Senior Advisor Assigned
+           ↓
+Documents Collected &amp; Reviewed
+           ↓
+Contract Signed
+           ↓
+Promoted to Student Status
+           ↓
+University Applications Tracked
+           ↓
+Admission &amp; Payment Monitoring
+</code></pre>
+<h3>Technology Stack</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backend</td>
+<td>PHP 8.4 / Laravel 12</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>MySQL</td>
+</tr>
+<tr>
+<td>Payments</td>
+<td>Stripe (EUR)</td>
+</tr>
+<tr>
+<td>Notifications</td>
+<td>WhatsApp (Meta Cloud API), Email</td>
+</tr>
+<tr>
+<td>2FA</td>
+<td>Google Authenticator (TOTP)</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td>Local disk / AWS S3</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. User Roles and Permissions</h2>
+<h3>Role Hierarchy</h3>
+<pre><code>Manager / System Admin          → Highest authority
+├── Operations Admin/Staff      → Operations management
+├── Finance Admin/Staff         → Financial management
+├── Marketing Admin/Staff       → Marketing &amp; CMS
+├── Sales Admin/Staff           → Sales &amp; lead management
+Senior / Mentor                 → Advisory services
+Dealer                          → Reseller network
+Guest                           → Applicant (pre-enrollment)
+Student                         → Enrolled student
+</code></pre>
+<h3>Role Reference Table</h3>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Code</th>
+<th>Portal</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Manager</td>
+<td><code>manager</code></td>
+<td>Manager</td>
+<td>Full system access</td>
+</tr>
+<tr>
+<td>System Admin</td>
+<td><code>system_admin</code></td>
+<td>Manager</td>
+<td>Technical management</td>
+</tr>
+<tr>
+<td>Operations Admin</td>
+<td><code>operations_admin</code></td>
+<td>Manager</td>
+<td>Process management</td>
+</tr>
+<tr>
+<td>Finance Admin</td>
+<td><code>finance_admin</code></td>
+<td>Manager</td>
+<td>Payments &amp; revenue</td>
+</tr>
+<tr>
+<td>System Staff</td>
+<td><code>system_staff</code></td>
+<td>Manager</td>
+<td>Limited technical access</td>
+</tr>
+<tr>
+<td>Operations Staff</td>
+<td><code>operations_staff</code></td>
+<td>Manager</td>
+<td>Limited operations</td>
+</tr>
+<tr>
+<td>Finance Staff</td>
+<td><code>finance_staff</code></td>
+<td>Manager</td>
+<td>Limited finance</td>
+</tr>
+<tr>
+<td>Senior Advisor</td>
+<td><code>senior</code></td>
+<td>Senior</td>
+<td>Student tracking</td>
+</tr>
+<tr>
+<td>Mentor</td>
+<td><code>mentor</code></td>
+<td>Senior</td>
+<td>Same panel as senior</td>
+</tr>
+<tr>
+<td>Guest Applicant</td>
+<td><code>guest</code></td>
+<td>Guest</td>
+<td>Application &amp; documents</td>
+</tr>
+<tr>
+<td>Student</td>
+<td><code>student</code></td>
+<td>Student</td>
+<td>Tracking &amp; payments</td>
+</tr>
+<tr>
+<td>Dealer</td>
+<td><code>dealer</code></td>
+<td>Dealer</td>
+<td>Referrals &amp; commissions</td>
+</tr>
+<tr>
+<td>Marketing Admin</td>
+<td><code>marketing_admin</code></td>
+<td>Marketing</td>
+<td>Campaigns &amp; content</td>
+</tr>
+<tr>
+<td>Sales Admin</td>
+<td><code>sales_admin</code></td>
+<td>Marketing</td>
+<td>Leads &amp; sales</td>
+</tr>
+<tr>
+<td>Marketing Staff</td>
+<td><code>marketing_staff</code></td>
+<td>Marketing</td>
+<td>Limited marketing</td>
+</tr>
+<tr>
+<td>Sales Staff</td>
+<td><code>sales_staff</code></td>
+<td>Marketing</td>
+<td>Limited sales</td>
+</tr>
+</tbody>
+</table>
+<h3>Permission Summary</h3>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Manager</th>
+<th>Senior</th>
+<th>Guest</th>
+<th>Student</th>
+<th>Dealer</th>
+<th>Marketing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>View all users</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Assign guests</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Approve documents</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Create contracts</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Create invoices</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>View students</td>
+<td>✅</td>
+<td>✅*</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅*</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>View own profile</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Manage content</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>View commissions</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅*</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><code>*</code> Own assigned records only</p>
+</blockquote>
+<hr />
+<h2>3. Portal Guides</h2>
+<hr />
+<h3>3.1 Manager Portal</h3>
+<p><strong>URL:</strong> <code>/manager/dashboard</code>
+<strong>Roles:</strong> manager, system_admin, operations_admin, finance_admin, system_staff, operations_staff, finance_staff</p>
+<h4>Dashboard</h4>
+<p>Upon login you will see:</p>
+<ul>
+<li><strong>KPI Cards:</strong> Total guests, active students, monthly revenue, pending documents</li>
+<li><strong>Recent Activity:</strong> Latest applications, documents, tickets</li>
+<li><strong>Finance Summary</strong> (finance_admin/finance_staff): EUR collected this month, overdue invoices, pending payments</li>
+<li><strong>Quick Links:</strong> Add new guest, generate report, GDPR dashboard</li>
+</ul>
+<h4>Student &amp; Guest Management</h4>
+<table>
+<thead>
+<tr>
+<th>Menu</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Applications</td>
+<td>List, filter, and view all guest applications</td>
+</tr>
+<tr>
+<td>Students</td>
+<td>Manage active students</td>
+</tr>
+<tr>
+<td>Promote to Student</td>
+<td>Initiate Guest → Student transition</td>
+</tr>
+<tr>
+<td>Assign Senior</td>
+<td>Assign an advisor to a guest</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Guest Search &amp; Filtering:</strong></p>
+<ul>
+<li>Search by name, email, or tracking code</li>
+<li>Filter by application type (bachelor, master, language course)</li>
+<li>Filter by status (new, under review, accepted, rejected)</li>
+<li>Filter by country, city, or target university</li>
+</ul>
+<h4>Staff Management</h4>
+<p><code>/manager/staff</code></p>
+<ul>
+<li>Add new staff (name, email, role, password)</li>
+<li>Edit / deactivate staff</li>
+<li>Assign role template (permission set)</li>
+<li>View permission history</li>
+</ul>
+<h4>Document Management</h4>
+<ul>
+<li><strong>Document Categories:</strong> Create categories, mark as required/optional</li>
+<li><strong>Document Review:</strong> Approve / reject / comment on uploaded documents</li>
+<li><strong>Document Templates:</strong> Create standard document sets</li>
+</ul>
+<h4>Contract Management</h4>
+<ul>
+<li>Create contract templates (HTML editor)</li>
+<li>Send contracts → student signs digitally</li>
+<li>View / download signed contracts</li>
+<li>Track contract versions</li>
+</ul>
+<h4>Payments &amp; Revenue</h4>
+<p><code>/manager/payments</code></p>
+<ul>
+<li>Create invoices (student, amount in EUR, due date)</li>
+<li>Track payment status (pending / paid / overdue)</li>
+<li>Manage revenue milestones</li>
+<li>Calculate dealer commissions</li>
+<li>Monthly / yearly revenue reports</li>
+</ul>
+<h4>Task Management (Task Board)</h4>
+<p><code>/manager/tasks</code></p>
+<ul>
+<li>Create tasks, assign, set priority</li>
+<li>Kanban view (To Do / In Progress / Done)</li>
+<li>Recurring task rules</li>
+<li>Time tracking (start / stop)</li>
+<li>Task dependencies</li>
+</ul>
+<h4>Tickets (Support Requests)</h4>
+<p><code>/manager/tickets</code></p>
+<ul>
+<li>View all guest and student requests</li>
+<li>Route to department (technical, finance, operations)</li>
+<li>Set priority (low / normal / high / urgent)</li>
+<li>Add internal notes (invisible to customer)</li>
+<li>SLA tracking</li>
+</ul>
+<h4>Reports</h4>
+<ul>
+<li><strong>Snapshot Reports:</strong> Weekly / monthly summaries</li>
+<li><strong>Audit Report:</strong> Who did what and when</li>
+<li><strong>Security Anomalies:</strong> Suspicious logins, permission breach attempts</li>
+<li><strong>GDPR Dashboard:</strong> Data deletion requests, consent records</li>
+</ul>
+<hr />
+<h3>3.2 Senior / Advisor Portal</h3>
+<p><strong>URL:</strong> <code>/senior/dashboard</code>
+<strong>Roles:</strong> senior, mentor</p>
+<h4>Dashboard</h4>
+<ul>
+<li>Assigned guest list (KPI: total, active, new this month)</li>
+<li>Pipeline status (how many at each stage)</li>
+<li>Today's tasks and reminders</li>
+<li>Unread messages</li>
+<li>Performance targets (monthly acceptance goal vs actual)</li>
+</ul>
+<h4>Student 360° View</h4>
+<p>9 tabs for each student:</p>
+<table>
+<thead>
+<tr>
+<th>Tab</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Overview</td>
+<td>Personal info, application status</td>
+</tr>
+<tr>
+<td>Documents</td>
+<td>Uploaded documents, approval status</td>
+</tr>
+<tr>
+<td>Contract</td>
+<td>Contract status, signing date</td>
+</tr>
+<tr>
+<td>Applications</td>
+<td>University application tracking</td>
+</tr>
+<tr>
+<td>Payments</td>
+<td>Payment plan, overdue status</td>
+</tr>
+<tr>
+<td>Messages</td>
+<td>Correspondence with student</td>
+</tr>
+<tr>
+<td>Notes</td>
+<td>Internal notes (invisible to student)</td>
+</tr>
+<tr>
+<td>Timeline</td>
+<td>Full activity history</td>
+</tr>
+<tr>
+<td>Shipments</td>
+<td>Document delivery tracking</td>
+</tr>
+</tbody>
+</table>
+<h4>Pipeline Kanban</h4>
+<p><code>/senior/guest-pipeline</code></p>
+<p>6-column drag-and-drop Kanban board:</p>
+<ol>
+<li><strong>New Application</strong> — Assigned, not yet contacted</li>
+<li><strong>Initial Contact</strong> — First contact made</li>
+<li><strong>Document Collection</strong> — Documents requested / being collected</li>
+<li><strong>Under Review</strong> — Application file being prepared</li>
+<li><strong>Application Submitted</strong> — Sent to university</li>
+<li><strong>Awaiting Result</strong> — Waiting for acceptance / rejection</li>
+</ol>
+<p>Drag a card between columns → status automatically updated.</p>
+<h4>Batch Review</h4>
+<p><code>/senior/batch-review</code></p>
+<p>Quick review with keyboard shortcuts:</p>
+<ul>
+<li><code>A</code> → Approve</li>
+<li><code>R</code> → Reject</li>
+<li><code>N</code> → Next</li>
+</ul>
+<h4>Messaging</h4>
+<p><code>/senior/messages</code></p>
+<ul>
+<li>WhatsApp-style split-panel interface</li>
+<li>Real-time messaging with students / guests</li>
+<li>File sharing</li>
+<li>Message forwarding, reactions, editing</li>
+<li>Auto-refresh every 10 seconds</li>
+</ul>
+<h4>Performance Tracking</h4>
+<ul>
+<li>Monthly target vs actual</li>
+<li>Lead score (8 factors: document completion, response time, etc.)</li>
+<li>Historical performance charts</li>
+</ul>
+<hr />
+<h3>3.3 Guest Portal</h3>
+<p><strong>URL:</strong> <code>/guest/dashboard</code>
+<strong>Roles:</strong> guest</p>
+<h4>Application Process</h4>
+<ol>
+<li><code>/apply</code> — Fill out the general application form (no account needed)</li>
+<li>System automatically creates user account, password sent by email</li>
+<li>Log in → <code>/guest/dashboard</code></li>
+</ol>
+<h4>Dashboard</h4>
+<ul>
+<li><strong>Progress Bar:</strong> Application → Documents → Contract → Student stages</li>
+<li><strong>Next Step CTA:</strong> Shows what you need to do</li>
+<li><strong>Assigned Advisor:</strong> Senior's name and contact</li>
+<li><strong>Active Campaigns:</strong> Current announcements</li>
+</ul>
+<h4>Registration Form</h4>
+<p><code>/guest/registration/form</code></p>
+<ul>
+<li>Personal details (name, surname, date of birth, nationality)</li>
+<li>Educational background</li>
+<li>Target university / department / city</li>
+<li>Language certificates</li>
+<li>Motivation statement</li>
+<li>Auto-save (every 30 seconds)</li>
+</ul>
+<h4>Document Upload</h4>
+<p><code>/guest/registration/documents</code></p>
+<ul>
+<li>Required document list (defined by advisor)</li>
+<li>Per-document upload (PDF, JPG, PNG — max 10MB)</li>
+<li>Upload status: Pending / Under Review / Approved / Rejected</li>
+<li>If rejected, advisor's comment is shown</li>
+</ul>
+<h4>Contract</h4>
+<p><code>/guest/contract</code></p>
+<ul>
+<li>View contract text</li>
+<li>Sign digitally (name, date, confirmation checkbox)</li>
+<li>Download signed PDF</li>
+</ul>
+<h4>Discover (Content Hub)</h4>
+<p><code>/guest/discover</code></p>
+<ul>
+<li>Blog posts, videos, podcasts, presentations</li>
+<li>Category filters: Student Life / Careers / Culture / Tips</li>
+<li>City guides (Berlin, Munich, Hamburg...)</li>
+<li>University guide</li>
+</ul>
+<h4>Support Ticket</h4>
+<p><code>/guest/tickets</code></p>
+<ul>
+<li>Open a new ticket (subject, description, priority)</li>
+<li>Track ticket status</li>
+<li>Communicate with advisor</li>
+</ul>
+<h4>Cost Calculator</h4>
+<p><code>/guest/cost-calculator</code></p>
+<ul>
+<li>Estimated living cost based on target city</li>
+<li>Rent, food, transport, entertainment items</li>
+<li>Displayed in EUR</li>
+</ul>
+<hr />
+<h3>3.4 Student Portal</h3>
+<p><strong>URL:</strong> <code>/student/dashboard</code>
+<strong>Roles:</strong> student</p>
+<blockquote>
+<p>Account automatically transitions to Student status when the guest application is approved and the contract is signed.</p>
+</blockquote>
+<h4>Dashboard</h4>
+<ul>
+<li>Payment plan summary (paid / pending / overdue)</li>
+<li>University application status</li>
+<li>Recent documents</li>
+<li>Advisor messages</li>
+<li>Exchange rate (TRY chip)</li>
+</ul>
+<h4>Payment Tracking</h4>
+<p><code>/student/payments</code></p>
+<ul>
+<li>Invoice list (invoice no., amount EUR, due date, status)</li>
+<li><strong>💳 Pay button</strong> — Redirects to Stripe Checkout</li>
+<li>Payment history</li>
+<li>Milestone tracking (e.g. registration fee, first semester...)</li>
+</ul>
+<h4>Stripe Payment Process</h4>
+<ol>
+<li>Click &quot;💳 Pay&quot; button</li>
+<li>Redirected to Stripe's secure payment page</li>
+<li>Enter card details (Visa, Mastercard)</li>
+<li>Payment confirmed</li>
+<li>System automatically updates: <code>status=paid</code>, payment date recorded</li>
+</ol>
+<h4>Document Center</h4>
+<p><code>/student/documents</code></p>
+<ul>
+<li>View / download documents shared by advisor</li>
+<li>Upload own documents</li>
+<li>Track institutional documents (student card, insurance, etc.)</li>
+</ul>
+<h4>University Application Tracking</h4>
+<p><code>/student/university-applications</code></p>
+<ul>
+<li>List of applied universities</li>
+<li>Status of each application (submitted / pending / accepted / rejected)</li>
+<li>Application dates and deadlines</li>
+</ul>
+<h4>Shipment Tracking</h4>
+<p><code>/student/shipments</code></p>
+<ul>
+<li>Track physical document deliveries</li>
+<li>Cargo tracking number</li>
+<li>Estimated delivery date</li>
+</ul>
+<h4>Appointment Calendar</h4>
+<p><code>/student/appointments</code></p>
+<ul>
+<li>View appointments with advisor</li>
+<li>External calendar integration (Google Calendar)</li>
+<li>Reminder notifications</li>
+</ul>
+<h4>Discover (Content Hub)</h4>
+<p><code>/student/discover</code></p>
+<ul>
+<li>Same content as guest discover + student-specific</li>
+<li>Career guides, cultural content, city videos</li>
+</ul>
+<hr />
+<h3>3.5 Dealer Portal</h3>
+<p><strong>URL:</strong> <code>/dealer/dashboard</code>
+<strong>Roles:</strong> dealer</p>
+<h4>Dashboard</h4>
+<ul>
+<li>Number of referred students</li>
+<li>Commission earned this month (EUR)</li>
+<li>Payment milestones</li>
+<li>Active student list</li>
+</ul>
+<h4>Referral Management</h4>
+<ul>
+<li>View students registered through you</li>
+<li>Student application status (permitted information)</li>
+<li>Document status tracking</li>
+</ul>
+<h4>Commission Tracking</h4>
+<p><code>/dealer/commissions</code></p>
+<ul>
+<li>Commission amount per student</li>
+<li>Payment timing (triggered when student pays)</li>
+<li>Total earnings summary</li>
+<li>Download commission breakdown</li>
+</ul>
+<h4>Milestone Tracking</h4>
+<p><code>/dealer/milestones</code></p>
+<ul>
+<li>Revenue milestone targets</li>
+<li>Actual vs target</li>
+<li>Amount remaining to next milestone</li>
+</ul>
+<h4>Training &amp; Resources</h4>
+<ul>
+<li>System tutorial videos</li>
+<li>Sales materials</li>
+<li>Campaign announcements</li>
+</ul>
+<h4>Contract</h4>
+<p><code>/dealer/contract</code></p>
+<ul>
+<li>View dealer agreement</li>
+<li>Download signed contract</li>
+</ul>
+<hr />
+<h3>3.6 Marketing Admin Portal</h3>
+<p><strong>URL:</strong> <code>/mktg-admin/dashboard</code>
+<strong>Roles:</strong> marketing_admin, sales_admin, marketing_staff, sales_staff</p>
+<h4>Panel Mode Selection</h4>
+<p><strong>&quot;Panel Mode&quot;</strong> button in sidebar:</p>
+<ul>
+<li>📣 <strong>Marketing Mode</strong> — Campaigns, content, social media</li>
+<li>💼 <strong>Sales Mode</strong> — Leads, CRM, sales tracking</li>
+</ul>
+<p>All 4 roles can use both panels.</p>
+<h4>Marketing Mode</h4>
+<p><strong>Campaigns</strong> (<code>/mktg-admin/campaigns</code>)</p>
+<ul>
+<li>Create campaigns (email, WhatsApp, social media)</li>
+<li>Define target audience (country, age, education level)</li>
+<li>Scheduled sending</li>
+<li>Open / click-through rates</li>
+</ul>
+<p><strong>CMS &amp; Content</strong> (<code>/mktg-admin/content</code>)</p>
+<ul>
+<li>Add blog post, video, podcast, presentation</li>
+<li>Category: Student Life, Careers, Culture...</li>
+<li>Target audience: Guest / Student / All</li>
+<li>Mark as featured</li>
+<li>Publish / draft / archive</li>
+</ul>
+<p><strong>Email Templates</strong> (<code>/mktg-admin/email-templates</code>)</p>
+<ul>
+<li>Create HTML email templates</li>
+<li>Variables: <code>{first_name}</code>, <code>{tracking_code}</code>, <code>{university}</code> etc.</li>
+<li>Preview &amp; test send</li>
+</ul>
+<p><strong>Tracking Links</strong> (<code>/mktg-admin/tracking-links</code>)</p>
+<ul>
+<li>Create UTM-parametered links</li>
+<li>Click, conversion tracking</li>
+</ul>
+<h4>Sales Mode</h4>
+<p><strong>Lead Management</strong> (<code>/mktg-admin/leads</code>)</p>
+<ul>
+<li>List incoming leads (source: web, referral, campaign)</li>
+<li>View lead score (0-100)</li>
+<li>Assign to sales representative</li>
+<li>Update status (new → contacted → qualified → lost)</li>
+</ul>
+<p><strong>Events</strong> (<code>/mktg-admin/events</code>)</p>
+<ul>
+<li>Add university fair, webinar, info sessions</li>
+<li>Registration management</li>
+<li>Download attendee list</li>
+</ul>
+<hr />
+<h2>4. Module Documentation</h2>
+<hr />
+<h3>4.1 User Authentication</h3>
+<h4>Login</h4>
+<p>URL: <code>/login</code></p>
+<ul>
+<li>Login with email and password</li>
+<li>Account locked for 30 minutes after 10 failed attempts</li>
+<li>Lockout time displayed on screen</li>
+</ul>
+<h4>Password Reset</h4>
+<ol>
+<li><code>/forgot-password</code> → enter email</li>
+<li>Click link in email to reset password (<code>/reset-password/{token}</code>)</li>
+<li>Link valid for 60 minutes</li>
+</ol>
+<h4>Two-Factor Authentication (2FA)</h4>
+<p><strong>Mandatory</strong> for manager, system_admin, operations_admin, finance_admin roles.</p>
+<p><strong>Initial Setup:</strong></p>
+<ol>
+<li>After login, automatically redirected to <code>/2fa/setup</code></li>
+<li>Open Google Authenticator / Microsoft Authenticator / Authy</li>
+<li>Scan QR code (or enter secret manually)</li>
+<li>Enter the 6-digit code shown in the app</li>
+<li>Setup complete — not asked again (per session)</li>
+</ol>
+<p><strong>Subsequent Logins:</strong></p>
+<ul>
+<li>After entering password, 6-digit code screen opens</li>
+<li>Enter code from your app → login complete</li>
+<li>Code changes every 30 seconds</li>
+</ul>
+<h4>Email Verification</h4>
+<p>When new accounts are created, the system auto-verifies (all accounts are created by admins). If manual verification is needed, a link can be resent from <code>/email/verify</code>.</p>
+<hr />
+<h3>4.2 Document Management</h3>
+<h4>Document Categories</h4>
+<p>Created by manager. Each category has:</p>
+<ul>
+<li>Name and description</li>
+<li>Required / optional flag</li>
+<li>Target audience (guest / student)</li>
+</ul>
+<h4>Document Upload (Guest/Student)</h4>
+<ul>
+<li>Supported formats: PDF, JPG, JPEG, PNG</li>
+<li>Maximum file size: 10 MB</li>
+<li>Uploaded per document category</li>
+<li>New file uploaded to same category overwrites the previous one</li>
+</ul>
+<h4>Document Review (Senior/Manager)</h4>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pending</td>
+<td>Not yet uploaded</td>
+</tr>
+<tr>
+<td>Under Review</td>
+<td>Uploaded, awaiting approval</td>
+</tr>
+<tr>
+<td>Approved</td>
+<td>✅ Document accepted</td>
+</tr>
+<tr>
+<td>Rejected</td>
+<td>❌ Returned with reason</td>
+</tr>
+</tbody>
+</table>
+<p>Automatic notification sent when rejected; reason visible to student.</p>
+<h4>Security</h4>
+<ul>
+<li>File type verified server-side with magic byte check</li>
+<li>File name hashed for storage (original name not visible)</li>
+<li>Only authorized users can access documents</li>
+</ul>
+<hr />
+<h3>4.3 Contract System</h3>
+<h4>Creating a Contract Template (Manager)</h4>
+<p><code>/manager/contract-templates</code></p>
+<ol>
+<li>Enter template name and content (HTML editor)</li>
+<li>Use variables: <code>{student_name}</code>, <code>{date}</code>, <code>{package_name}</code> etc.</li>
+<li>Mark as active / inactive</li>
+<li>Role-based template assignment (which guest type it applies to)</li>
+</ol>
+<h4>Sending a Contract</h4>
+<ol>
+<li>From guest/student profile, click &quot;Send Contract&quot;</li>
+<li>Select template → preview → send</li>
+<li>Guest/student receives notification</li>
+</ol>
+<h4>Signing (Guest/Student)</h4>
+<ol>
+<li>Notification / menu link in portal</li>
+<li>Read contract text</li>
+<li>Type full name, confirm date, check the box</li>
+<li>Click &quot;Sign&quot;</li>
+<li>Signed PDF automatically generated</li>
+</ol>
+<h4>Version Tracking</h4>
+<p>Every contract change is logged:</p>
+<ul>
+<li>Change date</li>
+<li>User who made the change</li>
+<li>What changed (before → after)</li>
+</ul>
+<hr />
+<h3>4.4 Internal Messaging</h3>
+<p><strong>Access:</strong> <code>/im</code> (all internal roles)</p>
+<h4>Features</h4>
+<ul>
+<li>WhatsApp-style split-panel interface</li>
+<li>Conversation list (left) + message area (right)</li>
+<li>Auto-refresh every 10 seconds</li>
+<li>File sharing (document sending)</li>
+<li>Message forwarding</li>
+<li>Emoji reactions</li>
+<li>Message editing (after sending)</li>
+<li>Pinned messages</li>
+</ul>
+<h4>Starting a Conversation</h4>
+<ol>
+<li>Click &quot;+&quot; icon on left panel</li>
+<li>Search for user (name or email)</li>
+<li>Start conversation</li>
+</ol>
+<hr />
+<h3>4.5 Ticket (Support Request) System</h3>
+<h4>Opening a Ticket (Guest / Student)</h4>
+<ol>
+<li>&quot;Support&quot; menu in portal</li>
+<li>Enter subject (e.g. &quot;Document approval delay&quot;)</li>
+<li>Write description</li>
+<li>Attach file (optional)</li>
+<li>Submit</li>
+</ol>
+<h4>Automatic Routing</h4>
+<p>Tickets are automatically assigned to a department based on topic:</p>
+<ul>
+<li>Technical issues → Technical Support</li>
+<li>Payment issues → Finance</li>
+<li>Document issues → Operations</li>
+</ul>
+<h4>Manager/Senior Side</h4>
+<ul>
+<li>Ticket list (filtered by department, priority, status)</li>
+<li>Add internal note (invisible to customer)</li>
+<li>Transfer to another staff member</li>
+<li>Close / reopen</li>
+</ul>
+<h4>Status Flow</h4>
+<pre><code>Open → In Progress → Awaiting Response → Resolved → Closed
+</code></pre>
+<hr />
+<h3>4.6 Payment System</h3>
+<h4>Creating an Invoice (Manager)</h4>
+<ol>
+<li><code>Manager → Payments → New Invoice</code></li>
+<li>Select student</li>
+<li>Enter amount (EUR), description, due date</li>
+<li>Save → student receives notification</li>
+</ol>
+<h4>Stripe Payment (Student)</h4>
+<ol>
+<li>Click &quot;💳 Pay&quot; button in student portal</li>
+<li>Redirected to Stripe's secure page</li>
+<li>Enter card details (Visa, Mastercard)</li>
+<li>Payment confirmed</li>
+<li>System auto-updates: <code>status=paid</code>, payment date recorded</li>
+</ol>
+<h4>Webhook Flow</h4>
+<pre><code>Stripe → POST /webhooks/stripe
+       → System verifies signature
+       → StudentPayment.status = &quot;paid&quot;
+       → StudentPayment.paid_at = current timestamp
+</code></pre>
+<h4>Payment Statuses</h4>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pending</code></td>
+<td>Invoice created, awaiting payment</td>
+</tr>
+<tr>
+<td><code>paid</code></td>
+<td>Payment received</td>
+</tr>
+<tr>
+<td><code>overdue</code></td>
+<td>Due date passed, unpaid</td>
+</tr>
+<tr>
+<td><code>cancelled</code></td>
+<td>Invoice cancelled</td>
+</tr>
+</tbody>
+</table>
+<h4>Exchange Rate</h4>
+<ul>
+<li>EUR/TRY rate updated automatically daily</li>
+<li>TRY equivalent shown informally in student panel</li>
+<li>All transactions processed in EUR</li>
+</ul>
+<hr />
+<h3>4.7 Content Hub (Discover)</h3>
+<p><strong>Guest access:</strong> <code>/guest/discover</code>
+<strong>Student access:</strong> <code>/student/discover</code></p>
+<h4>Content Types</h4>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Display</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Blog</td>
+<td>HTML text, cover image</td>
+</tr>
+<tr>
+<td>Video</td>
+<td>YouTube embed</td>
+</tr>
+<tr>
+<td>Podcast</td>
+<td>Spotify / SoundCloud embed</td>
+</tr>
+<tr>
+<td>Presentation</td>
+<td>Google Slides / Canva iframe</td>
+</tr>
+<tr>
+<td>Experience</td>
+<td>Personal story card</td>
+</tr>
+<tr>
+<td>Career Guide</td>
+<td>Sectioned text</td>
+</tr>
+<tr>
+<td>Quick Tip</td>
+<td>Compact card</td>
+</tr>
+</tbody>
+</table>
+<h4>Categories</h4>
+<ul>
+<li>🎓 Student Life</li>
+<li>🎭 Culture &amp; Entertainment</li>
+<li>💼 Careers &amp; Professions</li>
+<li>💡 Practical Tips</li>
+<li>🏙 City Content</li>
+<li>🏛 University Guide</li>
+<li>⭐ Success Stories</li>
+</ul>
+<h4>Search</h4>
+<p>Type in search box → server-side search after 500ms → searches content across all pages.</p>
+<h4>Individual Content Page</h4>
+<p><code>/guest/content/{slug}</code></p>
+<ul>
+<li>Cover image (full width with title overlay)</li>
+<li>Meta info (date, category, view count)</li>
+<li>Content (by type: text / video / audio / iframe)</li>
+<li>Related content (same category)</li>
+</ul>
+<h4>Content Management (Marketing Admin)</h4>
+<p><code>/mktg-admin/content</code></p>
+<ol>
+<li>Add new content</li>
+<li>Select type and category</li>
+<li>Write content (Turkish)</li>
+<li>Enter URL for video/podcast</li>
+<li>Add tags (adding a city slug makes it appear on city page too)</li>
+<li>Target audience: Guest / Student / All</li>
+<li>Publish</li>
+</ol>
+<hr />
+<h3>4.8 Lead Management</h3>
+<h4>Lead Score (0-100)</h4>
+<p>Each lead is automatically scored on 8 factors:</p>
+<ol>
+<li>Document completion rate</li>
+<li>Form response time</li>
+<li>Communication activity</li>
+<li>Application quality</li>
+<li>Target compatibility</li>
+<li>Referral source</li>
+<li>Budget suitability</li>
+<li>Timing</li>
+</ol>
+<p>Automatically recalculated daily at 02:30.</p>
+<h4>Lead Sources</h4>
+<ul>
+<li>Web form (<code>/apply</code>)</li>
+<li>Dealer referral</li>
+<li>Campaign UTM</li>
+<li>Manual entry (sales team)</li>
+</ul>
+<hr />
+<h3>4.9 Senior Performance Tracking</h3>
+<p>Monthly snapshots taken (1st of month, 03:30):</p>
+<ul>
+<li>Number of assigned guests</li>
+<li>Completed applications</li>
+<li>Acceptance rate</li>
+<li>Average response time</li>
+<li>Student satisfaction score</li>
+</ul>
+<p>Historical performance displayed as charts.</p>
+<hr />
+<h3>4.10 Notification System</h3>
+<h4>Channels</h4>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>When Used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Email</td>
+<td>Important actions (document approval, contract, payment)</td>
+</tr>
+<tr>
+<td>In-App</td>
+<td>Portal notifications (real-time)</td>
+</tr>
+<tr>
+<td>WhatsApp</td>
+<td>Reminders, urgent notifications</td>
+</tr>
+</tbody>
+</table>
+<h4>Automatic Notifications</h4>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Recipient</th>
+<th>Channel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New application</td>
+<td>Manager, Senior</td>
+<td>Email + In-App</td>
+</tr>
+<tr>
+<td>Document uploaded</td>
+<td>Senior</td>
+<td>In-App</td>
+</tr>
+<tr>
+<td>Document approved</td>
+<td>Guest/Student</td>
+<td>Email + In-App</td>
+</tr>
+<tr>
+<td>Document rejected</td>
+<td>Guest/Student</td>
+<td>Email + In-App</td>
+</tr>
+<tr>
+<td>Contract sent</td>
+<td>Guest/Student</td>
+<td>Email</td>
+</tr>
+<tr>
+<td>Contract signed</td>
+<td>Manager, Senior</td>
+<td>In-App</td>
+</tr>
+<tr>
+<td>Payment made</td>
+<td>Manager</td>
+<td>In-App</td>
+</tr>
+<tr>
+<td>Payment overdue</td>
+<td>Student</td>
+<td>Email + WhatsApp</td>
+</tr>
+<tr>
+<td>Ticket opened</td>
+<td>Relevant department</td>
+<td>In-App</td>
+</tr>
+<tr>
+<td>Ticket answered</td>
+<td>Requester</td>
+<td>Email + In-App</td>
+</tr>
+</tbody>
+</table>
+<h4>Scheduled Notifications</h4>
+<ul>
+<li><strong>Birthday wishes</strong> — 09:00 AM</li>
+<li><strong>Due date reminder</strong> — 3 days before</li>
+<li><strong>Inactivity reminder</strong> — After 7 days of no activity</li>
+<li><strong>Senior reminders</strong> — Weekday mornings at 08:30</li>
+</ul>
+<hr />
+<h3>4.11 Scheduled Tasks (Cron)</h3>
+<p><code>php artisan schedule:run</code> must run every minute on the server.</p>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Frequency</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>notifications:dispatch</code></td>
+<td>Every minute</td>
+<td>Send pending notifications</td>
+</tr>
+<tr>
+<td><code>gdpr:enforce-retention</code></td>
+<td>Daily 03:00</td>
+<td>Clean up old data</td>
+</tr>
+<tr>
+<td><code>currency:sync-rates</code></td>
+<td>Daily 06:00</td>
+<td>Update EUR/TRY rate</td>
+</tr>
+<tr>
+<td><code>leads:recalculate-scores</code></td>
+<td>Daily 02:30</td>
+<td>Recalculate lead scores</td>
+</tr>
+<tr>
+<td><code>senior:snapshot-performance</code></td>
+<td>Monthly 1st</td>
+<td>Record performance snapshot</td>
+</tr>
+<tr>
+<td><code>security:anomaly-check</code></td>
+<td>Hourly</td>
+<td>Scan for security anomalies</td>
+</tr>
+<tr>
+<td><code>archive:inactive-records</code></td>
+<td>Daily 01:30</td>
+<td>Archive guests inactive 180+ days</td>
+</tr>
+<tr>
+<td><code>contract:send-reminders</code></td>
+<td>Daily</td>
+<td>Remind about unsigned contracts</td>
+</tr>
+<tr>
+<td><code>email:process-drip</code></td>
+<td>Daily</td>
+<td>Process drip email campaigns</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Integrations</h2>
+<h3>5.1 Stripe (Payments)</h3>
+<p><strong>Setup:</strong></p>
+<pre><code>STRIPE_KEY=pk_live_xxxx
+STRIPE_SECRET=sk_live_xxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxx
+</code></pre>
+<p><strong>In Stripe Dashboard:</strong></p>
+<ol>
+<li>Add webhook endpoint: <code>https://yoursite.com/webhooks/stripe</code></li>
+<li>Select event: <code>checkout.session.completed</code></li>
+<li>Copy webhook secret → paste into <code>.env</code></li>
+</ol>
+<p><strong>Testing:</strong>
+With Stripe CLI: <code>stripe listen --forward-to localhost:8000/webhooks/stripe</code></p>
+<hr />
+<h3>5.2 WhatsApp (Meta Cloud API)</h3>
+<p><strong>Setup:</strong></p>
+<pre><code>WHATSAPP_PHONE_NUMBER_ID=xxxx
+WHATSAPP_ACCESS_TOKEN=xxxx
+WHATSAPP_VERIFY_TOKEN=mentorde_verify
+WHATSAPP_API_VERSION=v19.0
+</code></pre>
+<p><strong>In Meta Business Suite:</strong></p>
+<ol>
+<li>Create a WhatsApp Business App</li>
+<li>Get Phone Number ID and Access Token</li>
+<li>Match the webhook verification token</li>
+</ol>
+<hr />
+<h3>5.3 SMTP (Email)</h3>
+<p><strong>Setup:</strong></p>
+<pre><code>MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailgun.org       # or smtp.sendgrid.net
+MAIL_PORT=587
+MAIL_USERNAME=postmaster@...
+MAIL_PASSWORD=xxxx
+MAIL_FROM_ADDRESS=noreply@mentorde.com
+MAIL_FROM_NAME=&quot;MentorDE&quot;
+</code></pre>
+<hr />
+<h3>5.4 Queue Worker (Notifications)</h3>
+<p>Queue worker must be running for notifications and WhatsApp messages.</p>
+<p><strong>Supervisor configuration:</strong></p>
+<pre><code class="language-ini">[program:mentorde-worker]
+command=php /var/www/mentorde/artisan queue:work --sleep=3 --tries=3
+autostart=true
+autorestart=true
+</code></pre>
+<hr />
+<h3>5.5 2FA (Google Authenticator)</h3>
+<p>Install one of the following on your phone:</p>
+<ul>
+<li>Google Authenticator (iOS / Android)</li>
+<li>Microsoft Authenticator</li>
+<li>Authy</li>
+</ul>
+<p>Scan the QR code or enter the 32-character secret manually.</p>
+<hr />
+<h2>6. Admin Management</h2>
+<h3>Adding New Staff</h3>
+<p><code>Manager → Staff → Add New</code></p>
+<ol>
+<li>Full name, email, select role</li>
+<li>Set password (user can change after first login)</li>
+<li>Save → user automatically added to system, email pre-verified</li>
+</ol>
+<h3>Adding a New Senior</h3>
+<p><code>Manager → Advisors → New Senior</code></p>
+<ol>
+<li>Personal information</li>
+<li>Senior code auto-generated (e.g. <code>SR-2026-0001</code>)</li>
+<li>Capacity (maximum number of guests)</li>
+<li>Auto-assignment on/off</li>
+</ol>
+<h3>Adding a New Dealer</h3>
+<p><code>Manager → Dealers → New Dealer</code></p>
+<ol>
+<li>Company name, contact person, email</li>
+<li>Dealer type (individual / corporate)</li>
+<li>Commission rate</li>
+<li>Region / country</li>
+</ol>
+<h3>System Settings</h3>
+<p><code>Manager → Settings</code></p>
+<ul>
+<li>Company information</li>
+<li>Email templates</li>
+<li>Notification rules</li>
+<li>File upload limits</li>
+<li>GDPR settings</li>
+</ul>
+<hr />
+<h2>7. Security and GDPR</h2>
+<h3>Security Layers</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Account lockout</td>
+<td>10 failed logins → 30-minute lock</td>
+</tr>
+<tr>
+<td>2FA</td>
+<td>Mandatory TOTP for Manager/Admin roles</td>
+</tr>
+<tr>
+<td>Rate limiting</td>
+<td>Request limit per API endpoint</td>
+</tr>
+<tr>
+<td>Security headers</td>
+<td>CSP, HSTS, X-Frame-Options</td>
+</tr>
+<tr>
+<td>File validation</td>
+<td>Magic byte check</td>
+</tr>
+<tr>
+<td>Audit trail</td>
+<td>Every critical action is logged</td>
+</tr>
+</tbody>
+</table>
+<h3>Security Anomaly Detection</h3>
+<p>Hourly scan checks for:</p>
+<ul>
+<li>Multiple failed logins from same IP</li>
+<li>Admin access at unusual hours</li>
+<li>Bulk data access</li>
+</ul>
+<h3>GDPR</h3>
+<p><strong>Dashboard:</strong> <code>Manager → GDPR Dashboard</code></p>
+<ul>
+<li>Data deletion requests</li>
+<li>Data export requests</li>
+<li>Consent records (cookie, KVKK)</li>
+<li>Automatic cleanup (180 days inactive → archive → 365 days → delete)</li>
+</ul>
+<p><strong>User rights:</strong></p>
+<ul>
+<li><strong>Data access:</strong> Guest/Student can download their data as JSON (<code>/guest/gdpr/export</code>)</li>
+<li><strong>Data deletion:</strong> User submits request → Manager approves → system cleans up</li>
+</ul>
+<hr />
+<h2>8. Frequently Asked Questions</h2>
+<p><strong>Q: I forgot my password, what should I do?</strong>
+A: Click &quot;Forgot Password&quot; on the login page and enter your email address. A link valid for 60 minutes will be sent.</p>
+<p><strong>Q: I lost my 2FA phone, what should I do?</strong>
+A: Contact your Manager. The Manager can reset 2FA on your account.</p>
+<p><strong>Q: Why is document upload failing?</strong>
+A: Supported formats: PDF, JPG, PNG. Maximum size: 10 MB. Check the file size and format.</p>
+<p><strong>Q: Why did my Stripe payment fail?</strong>
+A: Check your card limit, expiry date, and CVV. If the problem persists, contact your bank or try a different card.</p>
+<p><strong>Q: WhatsApp notifications are not arriving.</strong>
+A: Verify the WhatsApp Business account is active and the integration is set up. <code>WHATSAPP_PHONE_NUMBER_ID</code> and <code>WHATSAPP_ACCESS_TOKEN</code> must be filled in <code>.env</code>.</p>
+<p><strong>Q: I'm adding a new user but no email is being sent.</strong>
+A: Verify that the mail driver is set to SMTP in production (<code>.env</code>: <code>MAIL_MAILER=smtp</code>).</p>
+<p><strong>Q: I see an error in the system, what should I do?</strong>
+A: Take a screenshot of the error, check the browser console (F12), and share with your developer.</p>
+<p><strong>Q: How do I switch between Marketing and Sales mode?</strong>
+A: Use the &quot;Panel Mode&quot; toggle button in the sidebar. Click 📣 Marketing or 💼 Sales.</p>
+<p><strong>Q: Can a dealer see all students?</strong>
+A: No. Dealers can only see the students they referred. They cannot access other students' information.</p>
+<p><strong>Q: How is the commission calculated?</strong>
+A: Commission is calculated based on each student's payment. When a student makes a payment, the system automatically calculates the dealer's share according to the agreed commission rate.</p>
+<hr />
+<p><em>MentorDE System Handbook — English Version 1.0</em>
+<em>Last updated: 2026</em></p>
+<div class="footer">MentorDE &copy; 2026 — MentorDE Handbook</div></div></body></html>

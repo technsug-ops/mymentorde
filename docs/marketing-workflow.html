@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MentorDE — Marketing & Sales Modulu Is Akisi</title>
+<style>
+  :root {
+    --brand: #1e40af;
+    --brand2: #7c3aed;
+    --ok: #16a34a;
+    --warn: #d97706;
+    --danger: #dc2626;
+    --info: #0891b2;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --bg: #f0f4fb;
+    --card: #ffffff;
+    --text: #0f172a;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", Tahoma, sans-serif; font-size: 15px; line-height: 1.6; color: var(--text); background: var(--bg); }
+
+  header { background: linear-gradient(135deg, #0f172a 0%, #1e40af 60%, #7c3aed 100%); color: #fff; padding: 40px 32px 32px; position: relative; overflow: hidden; }
+  header::before { content:''; position:absolute; right:-60px; top:-60px; width:300px; height:300px; border-radius:50%; background:rgba(255,255,255,.05); }
+  header h1 { font-size: 30px; font-weight: 800; letter-spacing: -.5px; }
+  header .sub { font-size: 14px; opacity: .75; margin-top: 6px; }
+  header .meta-row { display: flex; gap: 16px; margin-top: 18px; flex-wrap: wrap; }
+  header .meta-pill { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 4px 14px; font-size: 12px; font-weight: 600; }
+
+  nav { background: #0f172a; padding: 0 32px; display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid rgba(255,255,255,.08); }
+  nav a { color: rgba(255,255,255,.6); text-decoration: none; padding: 12px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; transition: all .2s; }
+  nav a:hover { color: #fff; border-bottom-color: rgba(255,255,255,.4); }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  section { margin-bottom: 48px; }
+  section > h2 { font-size: 22px; font-weight: 800; color: var(--text); border-left: 4px solid var(--brand); padding-left: 14px; margin-bottom: 20px; }
+  section > .desc { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 18px; font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; margin-bottom: 14px; }
+  .card h3 { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+  .grid6 { display: grid; grid-template-columns: repeat(6,1fr); gap: 10px; }
+  @media(max-width:800px) { .grid2,.grid3,.grid4,.grid6 { grid-template-columns: 1fr; } }
+
+  .kpi { background: var(--card); border: 1px solid var(--line); border-top: 3px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+  .kpi.c1 { border-top-color: var(--brand); }
+  .kpi.c2 { border-top-color: var(--ok); }
+  .kpi.c3 { border-top-color: var(--info); }
+  .kpi.c4 { border-top-color: var(--warn); }
+  .kpi.c5 { border-top-color: var(--brand2); }
+  .kpi.c6 { border-top-color: var(--danger); }
+  .kpi .lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 5px; }
+  .kpi .val { font-size: 26px; font-weight: 900; color: var(--text); line-height: 1; }
+  .kpi .delta { font-size: 11px; margin-top: 4px; color: var(--ok); }
+
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .badge.ok     { background: #d1fae5; color: #065f46; }
+  .badge.warn   { background: #fef3c7; color: #78350f; }
+  .badge.danger { background: #fee2e2; color: #7f1d1d; }
+  .badge.info   { background: #e0f2fe; color: #075985; }
+  .badge.muted  { background: #f1f5f9; color: #475569; }
+  .badge.purple { background: #ede9fe; color: #4c1d95; }
+  .badge.brand  { background: #dbeafe; color: #1e40af; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 8px; }
+  th { background: #f8fafc; padding: 9px 12px; text-align: left; font-weight: 700; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--line); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--line); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fafc; }
+
+  .flow { display: flex; gap: 0; align-items: stretch; margin-bottom: 14px; flex-wrap: wrap; }
+  .flow-step { flex: 1; min-width: 100px; background: var(--card); border: 1px solid var(--line); padding: 10px 8px; text-align: center; position: relative; font-size: 11px; font-weight: 600; color: var(--muted); }
+  .flow-step:not(:last-child)::after { content: '▶'; position: absolute; right: -10px; top: 50%; transform: translateY(-50%); color: var(--line); font-size: 14px; z-index: 1; }
+  .flow-step:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+  .flow-step:last-child  { border-radius: 0 var(--radius) var(--radius) 0; }
+  .flow-step.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .flow-step.ok     { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+  .flow-step .snum  { display: block; font-size: 18px; font-weight: 800; line-height: 1; margin-bottom: 3px; }
+
+  .vstep { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--line); align-items: flex-start; }
+  .vstep:last-child { border-bottom: none; }
+  .vstep-num { width: 26px; height: 26px; border-radius: 50%; background: var(--brand); color: #fff; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .vstep-num.ok { background: var(--ok); }
+  .vstep-num.warn { background: var(--warn); }
+  .vstep-num.purple { background: var(--brand2); }
+  .vstep-num.info { background: var(--info); }
+  .vstep-body .title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .vstep-body .desc  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  .note { background: #fefce8; border: 1px solid #fde047; border-radius: 8px; padding: 10px 14px; font-size: 12.5px; color: #713f12; margin-bottom: 12px; }
+
+  .hdr-card { border-radius: var(--radius); padding: 18px 22px; color: #fff; margin-bottom: 16px; }
+  .hdr-card.brand  { background: linear-gradient(135deg, var(--brand), #1e3a8a); }
+  .hdr-card.purple { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+  .hdr-card.sales  { background: linear-gradient(135deg, #065f46, #16a34a); }
+  .hdr-card h3 { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+  .hdr-card p  { font-size: 12px; opacity: .78; }
+
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+
+  .intro { background: linear-gradient(135deg, #0f172a, #1e40af 50%, #7c3aed); border-radius: 14px; padding: 24px 28px; color: #fff; margin-bottom: 32px; }
+  .intro h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .intro p   { font-size: 13px; opacity: .82; line-height: 1.65; }
+  .intro .role-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-top: 16px; }
+  .intro .role-pill { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); border-radius: 8px; padding: 8px 12px; font-size: 12px; font-weight: 700; }
+  .intro .role-pill span { display: block; font-weight: 400; opacity: .75; font-size: 11px; margin-top: 2px; }
+
+  .mode-toggle { display: inline-flex; border: 2px solid var(--line); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+  .mode-btn { padding: 8px 20px; font-size: 12px; font-weight: 700; border: none; cursor: default; }
+  .mode-btn.mktg { background: var(--brand); color: #fff; }
+  .mode-btn.sales { background: var(--ok); color: #fff; }
+  .mode-btn.off { background: #f8fafc; color: var(--muted); }
+
+  .pipeline-funnel { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .funnel-row { display: flex; align-items: center; gap: 12px; }
+  .funnel-bar-wrap { flex: 1; height: 28px; background: var(--bg); border-radius: 6px; overflow: hidden; position: relative; }
+  .funnel-bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 10px; font-size: 11px; font-weight: 700; color: #fff; }
+  .funnel-label { width: 130px; font-size: 12px; font-weight: 700; color: var(--text); text-align: right; flex-shrink: 0; }
+  .funnel-count { width: 50px; font-size: 13px; font-weight: 700; color: var(--muted); text-align: right; flex-shrink: 0; }
+
+  .tier-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .tier-row:last-child { border-bottom: none; }
+  .tier-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .tier-bar-bg { flex: 1; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .tier-bar-fill { height: 100%; border-radius: 3px; }
+
+  .wf-step { display: flex; gap: 0; align-items: center; flex-wrap: wrap; }
+  .wf-node { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--text); text-align: center; min-width: 110px; }
+  .wf-node.trigger { background: #dbeafe; border-color: #93c5fd; color: #1e40af; }
+  .wf-node.action  { background: #d1fae5; border-color: #6ee7b7; color: #065f46; }
+  .wf-node.cond    { background: #fef3c7; border-color: #fcd34d; color: #78350f; }
+  .wf-arrow { padding: 0 8px; font-size: 16px; color: var(--muted); }
+
+  .ab-row { display: flex; gap: 12px; margin-bottom: 12px; }
+  .ab-variant { flex: 1; border: 2px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .ab-variant.winner { border-color: var(--ok); background: #f0fdf4; }
+
+  @media print { nav { display: none; } .wrap { padding: 16px; } section { page-break-inside: avoid; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>MentorDE — Marketing & Sales Modulu Is Akisi</h1>
+  <div class="sub">Pazarlama ve Satis portalinin tum ekranlari, is akislari, roller ve izin matrisi</div>
+  <div class="meta-row">
+    <span class="meta-pill">Laravel 12 / PHP 8.4</span>
+    <span class="meta-pill">Portal: /mktg-admin/*</span>
+    <span class="meta-pill">4 Rol: marketing_admin, marketing_staff, sales_admin, sales_staff</span>
+    <span class="meta-pill">2 Mod: Pazarlama / Satis</span>
+    <span class="meta-pill">Guncelleme: Mart 2026</span>
+  </div>
+</header>
+
+<nav>
+  <a href="#genel">Genel Bakis</a>
+  <a href="#dashboard">Dashboard</a>
+  <a href="#pipeline">Sales Pipeline</a>
+  <a href="#scoring">Lead Scoring</a>
+  <a href="#attribution">Attribution</a>
+  <a href="#kampanya">Kampanyalar</a>
+  <a href="#email">E-posta</a>
+  <a href="#sosyal">Sosyal Medya</a>
+  <a href="#icerik">CMS Icerik</a>
+  <a href="#events">Etkinlikler</a>
+  <a href="#workflow">Otomasyon</a>
+  <a href="#abtest">A/B Testler</a>
+  <a href="#kpi">KPI & Raporlar</a>
+  <a href="#butce">Butce</a>
+  <a href="#tracking">Tracking Linkler</a>
+  <a href="#bayiler">Bayi Iliskileri</a>
+  <a href="#entegrasyon">Entegrasyonlar</a>
+  <a href="#yonetim">Ekip & Yonetim</a>
+</nav>
+
+<div class="wrap">
+
+<div class="intro">
+  <h2>Marketing & Sales Portal — Kapsamli Rehber</h2>
+  <p>MentorDE'nin pazarlama ve satis ekiplerinin kullandigi cift modlu (Marketing / Sales) portal.
+     Lead yakalama, kampanya yonetimi, e-posta otomasyonu, sosyal medya, pipeline takibi ve KPI raporlamasi tek cerceve altinda.</p>
+  <div class="role-grid">
+    <div class="role-pill">marketing_admin
+      <span>Tam erisim — her iki mod, tum ozellikler</span>
+    </div>
+    <div class="role-pill">marketing_staff
+      <span>Pazarlama modu — kampanya, icerik, sosyal</span>
+    </div>
+    <div class="role-pill">sales_admin
+      <span>Satis modu — pipeline, scoring, bayiler</span>
+    </div>
+    <div class="role-pill">sales_staff
+      <span>Satis modu — kendi lead'leri, read-only analiz</span>
+    </div>
+  </div>
+</div>
+
+<!-- =============================== -->
+<!-- 1. GENEL BAKIS -->
+<!-- =============================== -->
+<section id="genel">
+  <h2>1. Genel Bakis — Modun Yapisi</h2>
+  <div class="desc">Portal iki modda calisir: Pazarlama (kampanya, icerik, sosyal) ve Satis (pipeline, scoring, bayiler). marketing_admin her iki modu kullanabilir. Mod session'da saklanir.</div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Mod Geciş Mekanizmasi</h3>
+      <div class="mode-toggle">
+        <div class="mode-btn mktg">Pazarlama</div>
+        <div class="mode-btn off">Satis</div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">GET /mktg-admin/switch-mode/{mode} — session('mktg_panel_mode') guncellenir</p>
+      <table>
+        <tr><th>Rol</th><th>Mod Tercihi</th><th>Toggle</th></tr>
+        <tr><td>marketing_admin</td><td>Her ikisi</td><td>Evet</td></tr>
+        <tr><td>marketing_staff</td><td>Yalniz Pazarlama</td><td>Hayir</td></tr>
+        <tr><td>sales_admin</td><td>Yalniz Satis</td><td>Hayir</td></tr>
+        <tr><td>sales_staff</td><td>Yalniz Satis</td><td>Hayir</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Izin Matrisi (v3.0 §2.7)</h3>
+      <table>
+        <tr><th>Ozellik</th><th>mktg_admin</th><th>mktg_staff</th><th>sales_admin</th><th>sales_staff</th></tr>
+        <tr><td>Kampanyalar</td><td><span class="badge ok">✓</span></td><td><span class="badge ok">✓</span></td><td>—</td><td>—</td></tr>
+        <tr><td>CMS Icerik</td><td><span class="badge ok">✓</span></td><td><span class="badge ok">✓</span></td><td>—</td><td>—</td></tr>
+        <tr><td>E-posta</td><td><span class="badge ok">✓</span></td><td><span class="badge ok">✓</span></td><td>—</td><td>—</td></tr>
+        <tr><td>Sosyal Medya</td><td><span class="badge ok">✓</span></td><td><span class="badge ok">✓</span></td><td>—</td><td>—</td></tr>
+        <tr><td>Otomasyon</td><td><span class="badge ok">✓</span></td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>Tracking</td><td><span class="badge ok">✓</span></td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>Pipeline</td><td><span class="badge ok">✓</span></td><td>—</td><td><span class="badge ok">✓</span></td><td><span class="badge warn">Read</span></td></tr>
+        <tr><td>Lead Scoring</td><td><span class="badge ok">✓</span></td><td>—</td><td><span class="badge ok">✓</span></td><td><span class="badge warn">Read</span></td></tr>
+        <tr><td>Bayi Iliskileri</td><td><span class="badge ok">✓</span></td><td>—</td><td><span class="badge ok">✓</span></td><td>—</td></tr>
+        <tr><td>Butce</td><td><span class="badge ok">✓</span></td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>Entegrasyonlar</td><td><span class="badge ok">✓</span></td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>Scoring Config</td><td><span class="badge ok">✓</span></td><td>—</td><td><span class="badge ok">✓</span></td><td>—</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Pazarlama Modu Menu Yapisi</h3>
+      <table>
+        <tr><th>Grup</th><th>Sayfalar</th></tr>
+        <tr><td>Dashboard</td><td>Marketing Dashboard</td></tr>
+        <tr><td>Iletisim Merkezi</td><td>Iletisim (/im), Gorevlerim</td></tr>
+        <tr><td>Icerik & Kampanya</td><td>Kampanyalar, CMS Icerik, E-posta, Sosyal Medya, Tracking Linkler, Etkinlikler, Otomasyon, A/B Testler</td></tr>
+        <tr><td>Analiz & Raporlar</td><td>Attribution, KPI & Raporlar, Zamanlanmis Raporlar, Butce</td></tr>
+        <tr><td>Yonetim</td><td>Entegrasyonlar, Ekip, Ayarlar</td></tr>
+        <tr><td>Hesap</td><td>Bildirimler, Sozlesmelerim, Profil</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Satis Modu Menu Yapisi</h3>
+      <table>
+        <tr><th>Grup</th><th>Sayfalar</th></tr>
+        <tr><td>Dashboard</td><td>Sales Dashboard</td></tr>
+        <tr><td>Iletisim Merkezi</td><td>Iletisim (/im), Gorevlerim</td></tr>
+        <tr><td>Satis Sureci</td><td>Sales Pipeline, Lead Scoring, Attribution, Lead Kaynaklari, Bayi Iliskileri</td></tr>
+        <tr><td>Analiz & Raporlar</td><td>KPI & Raporlar, Zamanlanmis Raporlar</td></tr>
+        <tr><td>Yonetim</td><td>Scoring Yapilandirma, Ekip, Ayarlar</td></tr>
+        <tr><td>Hesap</td><td>Bildirimler, Sozlesmelerim, Profil</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 2. DASHBOARD -->
+<!-- =============================== -->
+<section id="dashboard">
+  <h2>2. Dashboard (/mktg-admin/dashboard)</h2>
+  <div class="desc">Rol ve moda gore iki farkli dashboard: Marketing Dashboard (kampanya, kaynak, funnel) ve Sales Dashboard (pipeline, lead, donusum). Hero karti + 6-col KPI strip + hizli erisim linkleri.</div>
+
+  <div class="hdr-card brand">
+    <h3>Marketing Dashboard — Hero Karti</h3>
+    <p>Kullanici adi, rol badge, sirket secici (company switch), hero istatistikleri (toplam lead, donusum, haftalik yeni basvuru). Aksiyonlar: Yeni Kampanya, Rapor Gorus.</p>
+  </div>
+
+  <div class="grid6" style="margin-bottom:14px">
+    <div class="kpi c1"><div class="lbl">Toplam Guest</div><div class="val">1.240</div><div class="delta">+12% haftalk</div></div>
+    <div class="kpi c2"><div class="lbl">Donusturulen</div><div class="val">187</div><div class="delta">+8%</div></div>
+    <div class="kpi c3"><div class="lbl">Aktif Kampanya</div><div class="val">5</div><div class="delta">—</div></div>
+    <div class="kpi c4"><div class="lbl">Toplam Harcama</div><div class="val">€4.200</div><div class="delta">Bu ay</div></div>
+    <div class="kpi c5"><div class="lbl">CPL</div><div class="val">€3,39</div><div class="delta">-5% iyilesti</div></div>
+    <div class="kpi c6"><div class="lbl">Donusum %</div><div class="val">15,1%</div><div class="delta">Hedef: %18</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Hizli Erisim Linkleri (6-col grid)</h3>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 6px;text-align:center;font-size:11px;font-weight:600">
+          <div style="width:32px;height:32px;border-radius:8px;background:#dbeafe;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:16px">📢</div>Kampanya
+        </div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 6px;text-align:center;font-size:11px;font-weight:600">
+          <div style="width:32px;height:32px;border-radius:8px;background:#d1fae5;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:16px">📧</div>E-posta
+        </div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 6px;text-align:center;font-size:11px;font-weight:600">
+          <div style="width:32px;height:32px;border-radius:8px;background:#fef3c7;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:16px">📱</div>Sosyal
+        </div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 6px;text-align:center;font-size:11px;font-weight:600">
+          <div style="width:32px;height:32px;border-radius:8px;background:#ede9fe;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:16px">🔗</div>Tracking
+        </div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 6px;text-align:center;font-size:11px;font-weight:600">
+          <div style="width:32px;height:32px;border-radius:8px;background:#fee2e2;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:16px">📊</div>KPI
+        </div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 6px;text-align:center;font-size:11px;font-weight:600">
+          <div style="width:32px;height:32px;border-radius:8px;background:#e0f2fe;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:16px">⚡</div>Otomasyon
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Kaynak Performans (SVG Donut)</h3>
+      <div style="display:flex;gap:14px;align-items:center">
+        <svg width="120" height="120" viewBox="0 0 240 240" style="flex-shrink:0">
+          <circle cx="120" cy="120" r="90" fill="none" stroke="#e2e8f0" stroke-width="36"/>
+          <circle cx="120" cy="120" r="90" fill="none" stroke="#1e40af" stroke-width="36" stroke-dasharray="170 396" stroke-dashoffset="0" transform="rotate(-90 120 120)"/>
+          <circle cx="120" cy="120" r="90" fill="none" stroke="#10b981" stroke-width="36" stroke-dasharray="100 396" stroke-dashoffset="-170" transform="rotate(-90 120 120)"/>
+          <circle cx="120" cy="120" r="90" fill="none" stroke="#f59e0b" stroke-width="36" stroke-dasharray="80 396" stroke-dashoffset="-270" transform="rotate(-90 120 120)"/>
+          <text x="120" y="115" text-anchor="middle" font-size="22" font-weight="800" fill="#0f172a">1.240</text>
+          <text x="120" y="135" text-anchor="middle" font-size="11" fill="#64748b">Lead</text>
+        </svg>
+        <div style="flex:1">
+          <div class="tier-row"><div class="tier-dot" style="background:#1e40af"></div><span style="flex:1;font-size:12px">Google Ads</span><strong style="font-size:12px">43%</strong></div>
+          <div class="tier-row"><div class="tier-dot" style="background:#10b981"></div><span style="flex:1;font-size:12px">Instagram</span><strong style="font-size:12px">25%</strong></div>
+          <div class="tier-row"><div class="tier-dot" style="background:#f59e0b"></div><span style="flex:1;font-size:12px">Organik</span><strong style="font-size:12px">20%</strong></div>
+          <div class="tier-row"><div class="tier-dot" style="background:#8b5cf6"></div><span style="flex:1;font-size:12px">Bayi Ref.</span><strong style="font-size:12px">12%</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 3. SALES PIPELINE -->
+<!-- =============================== -->
+<section id="pipeline">
+  <h2>3. Sales Pipeline (/mktg-admin/pipeline)</h2>
+  <div class="desc">Lead huni takibi, durum dagilimi, kaynak analizi. 6 alt sayfa: Genel Bakis, Pipeline Value, Loss Analysis, Conversion Time, Re-Engagement, Score Analizi.</div>
+
+  <div class="card">
+    <h3>Pipeline Huni — 7 Asama</h3>
+    <div class="pipeline-funnel">
+      <div class="funnel-row">
+        <div class="funnel-label">Yeni (new)</div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="width:100%;background:#1e40af">420 lead</div></div>
+        <div class="funnel-count">420</div>
+      </div>
+      <div class="funnel-row">
+        <div class="funnel-label">Iletisime Gecildi</div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="width:78%;background:#3b82f6">325</div></div>
+        <div class="funnel-count">325</div>
+      </div>
+      <div class="funnel-row">
+        <div class="funnel-label">Nitelendirilen</div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="width:58%;background:#7c3aed">241</div></div>
+        <div class="funnel-count">241</div>
+      </div>
+      <div class="funnel-row">
+        <div class="funnel-label">Toplanti Planli</div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="width:40%;background:#0891b2">168</div></div>
+        <div class="funnel-count">168</div>
+      </div>
+      <div class="funnel-row">
+        <div class="funnel-label">Teklif Gonderildi</div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="width:28%;background:#d97706">117</div></div>
+        <div class="funnel-count">117</div>
+      </div>
+      <div class="funnel-row">
+        <div class="funnel-label">Donusturulen</div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="width:18%;background:#16a34a">74</div></div>
+        <div class="funnel-count">74</div>
+      </div>
+      <div class="funnel-row">
+        <div class="funnel-label">Kayip (lost)</div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="width:22%;background:#dc2626">92</div></div>
+        <div class="funnel-count">92</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Pipeline Alt Sayfalari</h3>
+      <div class="vstep"><div class="vstep-num c1" style="background:var(--brand)">1</div><div class="vstep-body"><div class="title">Genel Bakis</div><div class="desc">Huni ozeti, durum dagilimi, kaynak breakdown bar grafikleri</div></div></div>
+      <div class="vstep"><div class="vstep-num" style="background:#7c3aed">2</div><div class="vstep-body"><div class="title">Pipeline Value</div><div class="desc">Her asama icin toplam EUR degeri, agirlikli beklenen gelir hesabi</div></div></div>
+      <div class="vstep"><div class="vstep-num warn">3</div><div class="vstep-body"><div class="title">Loss Analysis</div><div class="desc">Kayip nedenleri (fiyat/zaman/rakip/ilgi yok), asama bazli kayip oranlari</div></div></div>
+      <div class="vstep"><div class="vstep-num info">4</div><div class="vstep-body"><div class="title">Conversion Time</div><div class="desc">Asama gecis sureleri (gun cinsinden), tikaniklik noktasi tespiti</div></div></div>
+      <div class="vstep"><div class="vstep-num ok">5</div><div class="vstep-body"><div class="title">Re-Engagement</div><div class="desc">30+ gun hareketsiz leadler, yeniden iletisim kuyrugu, toplu mesaj</div></div></div>
+      <div class="vstep"><div class="vstep-num purple">6</div><div class="vstep-body"><div class="title">Score Analizi</div><div class="desc">Score tier ile pipeline asama iliskisi, yuksek skorlu lead onceliklendirme</div></div></div>
+    </div>
+    <div class="card">
+      <h3>Pipeline KPI Strip</h3>
+      <div style="display:flex;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px">
+        <div style="flex:1;padding:12px 16px;border-right:1px solid var(--line)"><div style="font-size:22px;font-weight:700;color:var(--brand);line-height:1.1">1.240</div><div style="font-size:11px;color:var(--muted)">Toplam Lead</div></div>
+        <div style="flex:1;padding:12px 16px;border-right:1px solid var(--line)"><div style="font-size:22px;font-weight:700;color:var(--brand);line-height:1.1">892</div><div style="font-size:11px;color:var(--muted)">Aktif Pipeline</div></div>
+        <div style="flex:1;padding:12px 16px;border-right:1px solid var(--line)"><div style="font-size:22px;font-weight:700;color:var(--ok);line-height:1.1">187</div><div style="font-size:11px;color:var(--muted)">Donusturulen</div></div>
+        <div style="flex:1;padding:12px 16px"><div style="font-size:22px;font-weight:700;color:var(--danger);line-height:1.1">15,1%</div><div style="font-size:11px;color:var(--muted)">Donusum Orani</div></div>
+      </div>
+      <div class="note"><strong>Re-Engagement Kurali:</strong> 30+ gun hareketsiz lead otomatik "soguk" listesine eklenir. Sales staff tek tikla email/whatsapp siralama gonderebilir.</div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 4. LEAD SCORING -->
+<!-- =============================== -->
+<section id="scoring">
+  <h2>4. Lead Scoring (/mktg-admin/scoring)</h2>
+  <div class="desc">Her guest/lead icin 0-100 arasi otomatik skor hesabı. 5 tier: Champion, Sales Ready, Hot, Warm, Cold. 3 alt sayfa: Genel Bakis, Liderlik Tablosu, Kural Yapilandirma.</div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>5 Tier Dagilimi</h3>
+      <div class="tier-row">
+        <div class="tier-dot" style="background:#059669"></div>
+        <span style="flex:1;font-size:13px;font-weight:700">Champion (85-100)</span>
+        <div class="tier-bar-bg" style="width:180px"><div class="tier-bar-fill" style="width:8%;background:#059669"></div></div>
+        <strong style="font-size:13px;margin-left:10px;width:40px;text-align:right">98</strong>
+      </div>
+      <div class="tier-row">
+        <div class="tier-dot" style="background:#16a34a"></div>
+        <span style="flex:1;font-size:13px;font-weight:700">Sales Ready (70-84)</span>
+        <div class="tier-bar-bg" style="width:180px"><div class="tier-bar-fill" style="width:14%;background:#16a34a"></div></div>
+        <strong style="font-size:13px;margin-left:10px;width:40px;text-align:right">174</strong>
+      </div>
+      <div class="tier-row">
+        <div class="tier-dot" style="background:#f59e0b"></div>
+        <span style="flex:1;font-size:13px;font-weight:700">Hot (50-69)</span>
+        <div class="tier-bar-bg" style="width:180px"><div class="tier-bar-fill" style="width:25%;background:#f59e0b"></div></div>
+        <strong style="font-size:13px;margin-left:10px;width:40px;text-align:right">310</strong>
+      </div>
+      <div class="tier-row">
+        <div class="tier-dot" style="background:#d97706"></div>
+        <span style="flex:1;font-size:13px;font-weight:700">Warm (30-49)</span>
+        <div class="tier-bar-bg" style="width:180px"><div class="tier-bar-fill" style="width:35%;background:#d97706"></div></div>
+        <strong style="font-size:13px;margin-left:10px;width:40px;text-align:right">434</strong>
+      </div>
+      <div class="tier-row">
+        <div class="tier-dot" style="background:#94a3b8"></div>
+        <span style="flex:1;font-size:13px;font-weight:700">Cold (0-29)</span>
+        <div class="tier-bar-bg" style="width:180px"><div class="tier-bar-fill" style="width:18%;background:#94a3b8"></div></div>
+        <strong style="font-size:13px;margin-left:10px;width:40px;text-align:right">224</strong>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Scoring Faktörleri (LeadScoreService)</h3>
+      <table>
+        <tr><th>Faktor</th><th>Max Puan</th><th>Tetikleyici</th></tr>
+        <tr><td>Form Tamamlanmasi</td><td>+25</td><td>registration_form = complete</td></tr>
+        <tr><td>Belge Yukleme</td><td>+20</td><td>Her onaylanan belge +4</td></tr>
+        <tr><td>Aktivite Frekansi</td><td>+15</td><td>Son 7 gun login sayisi</td></tr>
+        <tr><td>Email Acma/Tiklama</td><td>+10</td><td>Email engagement skoru</td></tr>
+        <tr><td>Kaynak Kalitesi</td><td>+10</td><td>UTM/kaynak A/B agirlik</td></tr>
+        <tr><td>Sertifika Bilgisi</td><td>+10</td><td>Dil sertifikasi var mi</td></tr>
+        <tr><td>Tamamlanan Randevu</td><td>+5</td><td>appointments.status=done</td></tr>
+        <tr><td>Gecikme Cezasi</td><td>-10</td><td>30+ gun hareketsizlik</td></tr>
+      </table>
+      <div class="note" style="margin-top:8px"><strong>Zamanlama:</strong> leads:recalculate-scores komutu her gun 02:30'da calisir. senior:snapshot-performance her ayin 1'inde 03:30.</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Liderlik Tablosu (/scoring/leaderboard)</h3>
+      <table>
+        <tr><th>#</th><th>Lead</th><th>Tier</th><th>Skor</th><th>Kaynak</th><th>Senior</th></tr>
+        <tr><td>1</td><td>Mehmet Y.</td><td><span class="badge ok">Champion</span></td><td>94</td><td>Google</td><td>Ahmet K.</td></tr>
+        <tr><td>2</td><td>Selin T.</td><td><span class="badge ok">Champion</span></td><td>91</td><td>Instagram</td><td>Ayse M.</td></tr>
+        <tr><td>3</td><td>Can D.</td><td><span class="badge info">Sales Ready</span></td><td>78</td><td>Bayi Ref.</td><td>—</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Kural Yapilandirma (/scoring/config)</h3>
+      <div class="vstep"><div class="vstep-num purple">C</div><div class="vstep-body"><div class="title">config/risk_scoring.php</div><div class="desc">8 faktor agirlik ayari. Admin panelden guncellenip DB'ye kaydedilebilir.</div></div></div>
+      <div class="vstep"><div class="vstep-num purple">H</div><div class="vstep-body"><div class="title">Skor Gecmisi (/scoring/history)</div><div class="desc">Bir lead'in zaman icindeki skor degisimi grafigi. Hangi olay skoru artirdi/dusurdu.</div></div></div>
+      <div class="note"><strong>Sadece:</strong> marketing_admin ve sales_admin Scoring Config'e erisebilir. sales_staff yalniz okuyabilir.</div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 5. ATTRIBUTION -->
+<!-- =============================== -->
+<section id="attribution">
+  <h2>5. Attribution (/mktg-admin/attribution)</h2>
+  <div class="desc">Hangi pazarlama kanali kac donusum sagladigi analizi. 2 alt sayfa: Genel Bakis ve Kanal Karsilastirma.</div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Attribution Modelleri</h3>
+      <table>
+        <tr><th>Model</th><th>Aciklama</th></tr>
+        <tr><td>First Touch</td><td>Donusumu ilk temas noktasina baglar</td></tr>
+        <tr><td>Last Touch</td><td>Son temas noktasina tam kredi</td></tr>
+        <tr><td>Linear</td><td>Tum temas noktalarina esit agirlik</td></tr>
+        <tr><td>Time Decay</td><td>Donusume yakin temaslara daha fazla agirlik</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Kanal Karsilastirma (/attribution/compare)</h3>
+      <table>
+        <tr><th>Kanal</th><th>Impression</th><th>Click</th><th>Lead</th><th>Donusum</th><th>ROAS</th></tr>
+        <tr><td>Google Ads</td><td>48K</td><td>2.100</td><td>420</td><td>74</td><td>3.2x</td></tr>
+        <tr><td>Instagram</td><td>32K</td><td>1.400</td><td>280</td><td>38</td><td>2.1x</td></tr>
+        <tr><td>Facebook</td><td>22K</td><td>890</td><td>178</td><td>21</td><td>1.8x</td></tr>
+        <tr><td>E-posta</td><td>8K</td><td>640</td><td>128</td><td>24</td><td>4.8x</td></tr>
+        <tr><td>Organik</td><td>—</td><td>—</td><td>234</td><td>30</td><td>∞</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 6. KAMPANYALAR -->
+<!-- =============================== -->
+<section id="kampanya">
+  <h2>6. Kampanyalar (/mktg-admin/campaigns)</h2>
+  <div class="desc">Reklam kampanyalarinin (Google Ads, Instagram, Facebook, YouTube, TikTok, E-posta) butce ve donusum yonetimi. ROI Dashboard alt sayfasi.</div>
+
+  <div class="card">
+    <h3>Kampanya Durum Ozeti (Stat Bar)</h3>
+    <div style="display:flex;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px">
+      <div style="flex:1;padding:12px 16px;border-right:1px solid var(--line);border-left:3px solid var(--ok)"><div style="font-size:20px;font-weight:700;color:var(--ok)">3</div><div style="font-size:11px;color:var(--muted)">Aktif</div></div>
+      <div style="flex:1;padding:12px 16px;border-right:1px solid var(--line);border-left:3px solid var(--warn)"><div style="font-size:20px;font-weight:700;color:var(--warn)">1</div><div style="font-size:11px;color:var(--muted)">Duraklatildi</div></div>
+      <div style="flex:1;padding:12px 16px;border-right:1px solid var(--line);border-left:3px solid var(--muted)"><div style="font-size:20px;font-weight:700;color:var(--muted)">2</div><div style="font-size:11px;color:var(--muted)">Taslak</div></div>
+      <div style="flex:1;padding:12px 16px;border-left:3px solid #3b82f6"><div style="font-size:20px;font-weight:700;color:#3b82f6">5</div><div style="font-size:11px;color:var(--muted)">Tamamlandi</div></div>
+    </div>
+
+    <table>
+      <tr><th>Kampanya Adi</th><th>Kanal</th><th>Butce</th><th>Harcama</th><th>Lead</th><th>Don.</th><th>CPL</th><th>Durum</th></tr>
+      <tr><td>Almanya Egitim 2026</td><td>Google Ads</td><td>€2.000</td><td>€1.840</td><td>312</td><td>52</td><td>€5,90</td><td><span class="badge ok">Aktif</span></td></tr>
+      <tr><td>Instagram Hedefleme</td><td>Instagram</td><td>€800</td><td>€720</td><td>180</td><td>24</td><td>€4,00</td><td><span class="badge ok">Aktif</span></td></tr>
+      <tr><td>TikTok Genc Kitle</td><td>TikTok</td><td>€500</td><td>€210</td><td>64</td><td>8</td><td>€3,28</td><td><span class="badge warn">Duraklatildi</span></td></tr>
+    </table>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Yeni Kampanya Formu</h3>
+      <div style="display:grid;gap:8px;font-size:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><div style="font-weight:600;color:var(--muted);margin-bottom:4px">Kampanya Adi</div><div style="background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:7px 10px;color:var(--muted);font-style:italic">Kampanya adi...</div></div>
+          <div><div style="font-weight:600;color:var(--muted);margin-bottom:4px">Kanal</div><div style="background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:7px 10px;color:var(--muted)">Google Ads / Instagram / ...</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div><div style="font-weight:600;color:var(--muted);margin-bottom:4px">Butce (EUR)</div><div style="background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:7px 10px;color:var(--muted)">0.00</div></div>
+          <div><div style="font-weight:600;color:var(--muted);margin-bottom:4px">Baslangic</div><div style="background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:7px 10px;color:var(--muted)">GG.AA.YYYY</div></div>
+          <div><div style="font-weight:600;color:var(--muted);margin-bottom:4px">Bitis</div><div style="background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:7px 10px;color:var(--muted)">GG.AA.YYYY</div></div>
+        </div>
+        <div><div style="font-weight:600;color:var(--muted);margin-bottom:4px">Hedef KPI Metrikleri (JSON)</div><div style="background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:7px 10px;color:var(--muted);font-family:monospace">{"impressions": 50000, "clicks": 2000, "leads": 400}</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>ROI Dashboard (/campaigns/roi)</h3>
+      <div class="vstep"><div class="vstep-num ok">R</div><div class="vstep-body"><div class="title">ROAS Hesabi</div><div class="desc">Kampanya basi Reklam Harcama Getirisi. Donusumu kayit ucretiyle carp, harcamaya bol.</div></div></div>
+      <div class="vstep"><div class="vstep-num warn">C</div><div class="vstep-body"><div class="title">CPL & CPA Trendi</div><div class="desc">Aylik CPL (Cost per Lead) ve CPA (Cost per Acquisition) cizgi grafigi</div></div></div>
+      <div class="vstep"><div class="vstep-num info">M</div><div class="vstep-body"><div class="title">Metrics JSON</div><div class="desc">Her kampanyaya impressions, clicks, leads, conversions metrigi JSON olarak kaydedilir. Dinamik hesaplama.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 7. E-POSTA -->
+<!-- =============================== -->
+<section id="email">
+  <h2>7. E-posta (/mktg-admin/email)</h2>
+  <div class="desc">E-posta pazarlamasi: sablon olusturma, segment tanimlama, kampanya gonderimi, Drip otomasyon dizileri ve gonderim log takibi.</div>
+
+  <div class="grid3">
+    <div class="card">
+      <h3>Sablonlar (/email/templates)</h3>
+      <div class="vstep"><div class="vstep-num">1</div><div class="vstep-body"><div class="title">Sablon Olustur</div><div class="desc">Ad, konu satiri, HTML govde (inline editor). Degiskenler: {first_name}, {university}, {deadline}</div></div></div>
+      <div class="vstep"><div class="vstep-num">2</div><div class="vstep-body"><div class="title">Onizleme</div><div class="desc">Sahte veriyle masaüstü + mobil onizleme. Duz metin versiyonu otomatik uretilir.</div></div></div>
+      <div class="vstep"><div class="vstep-num">3</div><div class="vstep-body"><div class="title">Sablon Tipleri</div><div class="desc">hosgeldiniz, hatirlatici, onay, uyari, sozlesme, kampanya, bildirim</div></div></div>
+    </div>
+    <div class="card">
+      <h3>Segmentler (/email/segments)</h3>
+      <div class="vstep"><div class="vstep-num purple">S</div><div class="vstep-body"><div class="title">Filtre Kurallari</div><div class="desc">Score tier, kaynak, uyruk, bolum, dil seviyesi, asama — dinamik SQL sorgusu ile uye sayisi hesaplanir</div></div></div>
+      <div class="vstep"><div class="vstep-num purple">P</div><div class="vstep-body"><div class="title">Onizleme (/segments/preview)</div><div class="desc">Segment uyesi listesi: ilk 50 kayit, toplam kisi sayisi, ortalama skor</div></div></div>
+      <table style="margin-top:10px">
+        <tr><th>Segment</th><th>Kisi</th></tr>
+        <tr><td>Champion Tier Leadler</td><td>98</td></tr>
+        <tr><td>30+ Gün Hareketsiz</td><td>224</td></tr>
+        <tr><td>Bekleyen Belge Var</td><td>312</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Kampanyalar (/email/campaigns)</h3>
+      <div class="vstep"><div class="vstep-num ok">G</div><div class="vstep-body"><div class="title">Gonderim Planlama</div><div class="desc">Segmente sablon ata, tarih/saat planla veya aninda gonder. A/B test modu (iki konu satiri).</div></div></div>
+      <div class="vstep"><div class="vstep-num ok">L</div><div class="vstep-body"><div class="title">Send Log (/campaigns/send-log)</div><div class="desc">Kisi bazli teslim, acma, tiklama, bounce durumu. email_send_log tablosu.</div></div></div>
+      <div class="vstep"><div class="vstep-num ok">S</div><div class="vstep-body"><div class="title">Stats (/campaigns/stats)</div><div class="desc">Open Rate, Click Rate, Bounce Rate, Unsubscribe Rate grafikleri</div></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Drip Otomasyon (/email/drip)</h3>
+    <div class="vstep"><div class="vstep-num brand" style="background:var(--brand)">D</div><div class="vstep-body"><div class="title">Drip Dizisi Ornegi — Yeni Lead Karsilama</div><div class="desc">Tetikleyici: guest_created — Gun 0: Hosgeldiniz, Gun 3: Sistem tanitimi, Gun 7: Belge rehberi, Gun 14: Soru & SSS</div></div></div>
+    <div style="margin-top:10px">
+      <div class="wf-step" style="gap:6px;flex-wrap:wrap">
+        <div class="wf-node trigger">Tetik: Yeni Guest</div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-node action">Gun 0: Hosgeldiniz</div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-node cond">Acti mi?</div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-node action">Gun 3: Tanitim</div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-node action">Gun 7: Belgeler</div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-node action">Gun 14: SSS</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="note"><strong>Enrollments (/drip/enrollments):</strong> Hangi lead hangi drip'te, kacinci adimda oldugunu gosteren tablo.</div>
+      <div class="note"><strong>Show (/drip/{id}):</strong> Adim adim istatistik — her adimin acma/tiklama orani.</div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 8. SOSYAL MEDYA -->
+<!-- =============================== -->
+<section id="sosyal">
+  <h2>8. Sosyal Medya (/mktg-admin/social)</h2>
+  <div class="desc">Sosyal medya hesap baglantilari, metrik takibi, icerik takvimi ve post planlama. 5 alt sayfa.</div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Alt Sayfa Yapisi</h3>
+      <table>
+        <tr><th>Sayfa</th><th>Rota</th><th>Amaci</th></tr>
+        <tr><td>Metrik Ozeti</td><td>/social/metrics</td><td>Hesap bazli KPI ozeti, buyume grafigi</td></tr>
+        <tr><td>Hesaplar</td><td>/social/accounts</td><td>Instagram/FB/LinkedIn/TikTok baglantilari</td></tr>
+        <tr><td>Takvim</td><td>/social/calendar</td><td>Post planlama takvimi (aylik gorunum)</td></tr>
+        <tr><td>Postlar</td><td>/social/posts</td><td>Post listesi, durum, performans metrikleri</td></tr>
+        <tr><td>Aylik Rapor</td><td>/social/monthly</td><td>Aylik takipci/etkilesim ozet tablosu</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Metrik Takibi</h3>
+      <div class="grid2" style="gap:8px;margin-bottom:10px">
+        <div class="kpi c2" style="padding:10px 12px"><div class="lbl">Toplam Takipci</div><div class="val" style="font-size:20px">24.8K</div></div>
+        <div class="kpi c3" style="padding:10px 12px"><div class="lbl">Etkilesim Orani</div><div class="val" style="font-size:20px">3.2%</div></div>
+        <div class="kpi c4" style="padding:10px 12px"><div class="lbl">Bu Ay Post</div><div class="val" style="font-size:20px">18</div></div>
+        <div class="kpi c1" style="padding:10px 12px"><div class="lbl">Reach</div><div class="val" style="font-size:20px">42K</div></div>
+      </div>
+      <div class="note"><strong>social_media_monthly_metrics tablosu:</strong> Aylik snapshot — takipci sayisi, etkilesim, reach, impression. Trend hesabi burada yapilir.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Post Planlama Akisi</h3>
+    <div class="flow">
+      <div class="flow-step ok"><span class="snum">1</span>Icerik Yaz</div>
+      <div class="flow-step ok"><span class="snum">2</span>Gorsel Yukle</div>
+      <div class="flow-step active"><span class="snum">3</span>Hesap & Tarih Sec</div>
+      <div class="flow-step"><span class="snum">4</span>Onay (opsiyonel)</div>
+      <div class="flow-step"><span class="snum">5</span>Zamanla / Gonder</div>
+      <div class="flow-step"><span class="snum">6</span>Performans Izle</div>
+    </div>
+    <div class="note"><strong>Hesap Entegrasyon:</strong> social_media_accounts tablosu — platform, access_token, token_expires_at, sync_enabled. Token suresi dolunca uyari gonderilir.</div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 9. CMS ICERIK -->
+<!-- =============================== -->
+<section id="icerik">
+  <h2>9. CMS Icerik (/mktg-admin/content)</h2>
+  <div class="desc">Web sitesi icerik yonetimi: blog, landing page, SSS, haber. Versiyon gecmisi, kategori agaci, medya kutuphanesi.</div>
+
+  <div class="grid3">
+    <div class="card">
+      <h3>Icerik Listesi</h3>
+      <div class="vstep"><div class="vstep-num">E</div><div class="vstep-body"><div class="title">Durum Akisi</div><div class="desc">draft → under_review → published / archived. Her guncelleme cms_content_revisions kaydeder.</div></div></div>
+      <div class="vstep"><div class="vstep-num">S</div><div class="vstep-body"><div class="title">Stats (/content/stats)</div><div class="desc">Sayfa goruntulenme, ortalama okuma suresi, cikis orani. Harici metriklerle senkronizasyon.</div></div></div>
+    </div>
+    <div class="card">
+      <h3>Kategoriler (/content/categories)</h3>
+      <div class="vstep"><div class="vstep-num purple">K</div><div class="vstep-body"><div class="title">Agac Yapisi</div><div class="desc">Ust kategori → alt kategori. Her kategoriye varsayilan sablon ve etiket seti atanabilir.</div></div></div>
+      <div class="vstep"><div class="vstep-num purple">R</div><div class="vstep-body"><div class="title">Revizyonlar (/content/revisions)</div><div class="desc">Icerik gecmisi — kim, ne zaman, ne degistirdi. Eski versiyona geri donus.</div></div></div>
+    </div>
+    <div class="card">
+      <h3>Medya Kutuphanesi (/content/media)</h3>
+      <div class="vstep"><div class="vstep-num ok">M</div><div class="vstep-body"><div class="title">Dosya Yukleme</div><div class="desc">Gorsel, video, PDF yukleme. ValidFileMagicBytes kontrolu. Otomatik boyut optimizasyonu.</div></div></div>
+      <div class="vstep"><div class="vstep-num ok">T</div><div class="vstep-body"><div class="title">Kullanim Takibi</div><div class="desc">Hangi medya hangi icerik parcasinda kullaniliyor. Kullanilmayan medyalar periyodik temizlenir.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 10. ETKINLIKLER -->
+<!-- =============================== -->
+<section id="events">
+  <h2>10. Etkinlikler (/mktg-admin/events)</h2>
+  <div class="desc">Webinar, seminer, fuarlar icin etkinlik olusturma, kayit yonetimi, anket ve raporlama.</div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Etkinlik Yonetimi Akisi</h3>
+      <div class="vstep"><div class="vstep-num">1</div><div class="vstep-body"><div class="title">Etkinlik Olustur</div><div class="desc">Baslik, tarih/saat, konum/online link, kapasite, kategori, kayit formu alanları</div></div></div>
+      <div class="vstep"><div class="vstep-num">2</div><div class="vstep-body"><div class="title">Kayitlar (/events/registrations)</div><div class="desc">Katilimci listesi, ödeme durumu (ucretli etkinlik), devamsizlik takibi</div></div></div>
+      <div class="vstep"><div class="vstep-num">3</div><div class="vstep-body"><div class="title">Anket (/events/survey-results)</div><div class="desc">Etkinlik sonrasi anket — memnuniyet puanlari, yorumlar, Net Promoter Score</div></div></div>
+      <div class="vstep"><div class="vstep-num">4</div><div class="vstep-body"><div class="title">Rapor (/events/report)</div><div class="desc">Toplam katilimci, dolulukluk orani, lead donusum orani (etkinlikten gelen kayitlar)</div></div></div>
+    </div>
+    <div class="card">
+      <h3>Etkinlik Karti Ornegi</h3>
+      <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden">
+        <div style="padding:14px 16px;background:linear-gradient(135deg,#1e40af,#7c3aed);color:#fff">
+          <div style="font-size:14px;font-weight:800;margin-bottom:4px">Almanya'da Master Imkanlari Webinari</div>
+          <div style="font-size:12px;opacity:.8">15 Nisan 2026 — Sali 19:00 | Online (Zoom)</div>
+        </div>
+        <div style="padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+          <div><span style="color:var(--muted)">Kapasite:</span> <strong>200</strong></div>
+          <div><span style="color:var(--muted)">Kayit:</span> <strong>147</strong></div>
+          <div><span style="color:var(--muted)">Dolulukluk:</span> <strong>73%</strong></div>
+          <div><span style="color:var(--muted)">Durum:</span> <span class="badge ok">Aktif Kayit</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 11. OTOMASYON / WORKFLOW -->
+<!-- =============================== -->
+<section id="workflow">
+  <h2>11. Otomasyon Workflows (/mktg-admin/workflows)</h2>
+  <div class="desc">Tetikleyici bazli otomatik iletisim dizileri. Yeni guest, tier degisimi, belirli skora ulasma gibi olaylara bagli email/WhatsApp/bildirim zincirleri.</div>
+
+  <div class="card">
+    <h3>Tetikleyici Tipleri</h3>
+    <div class="grid3">
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Guest Olaylari</div>
+        <div class="vstep" style="padding:7px 0"><div class="vstep-num info" style="width:22px;height:22px;font-size:10px">T</div><div class="vstep-body" style="font-size:12px"><div class="title" style="font-size:12px">guest_created</div><div class="desc">Yeni guest kaydoldu</div></div></div>
+        <div class="vstep" style="padding:7px 0"><div class="vstep-num info" style="width:22px;height:22px;font-size:10px">T</div><div class="vstep-body" style="font-size:12px"><div class="title" style="font-size:12px">form_submitted</div><div class="desc">Basvuru formu gonderildi</div></div></div>
+        <div class="vstep" style="padding:7px 0"><div class="vstep-num info" style="width:22px;height:22px;font-size:10px">T</div><div class="vstep-body" style="font-size:12px"><div class="title" style="font-size:12px">document_approved</div><div class="desc">Belge onaylandi</div></div></div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Scoring Olaylari</div>
+        <div class="vstep" style="padding:7px 0"><div class="vstep-num warn" style="width:22px;height:22px;font-size:10px">T</div><div class="vstep-body" style="font-size:12px"><div class="title" style="font-size:12px">score_tier_changed</div><div class="desc">Cold → Warm gibi tier degisimi</div></div></div>
+        <div class="vstep" style="padding:7px 0"><div class="vstep-num warn" style="width:22px;height:22px;font-size:10px">T</div><div class="vstep-body" style="font-size:12px"><div class="title" style="font-size:12px">score_reached</div><div class="desc">Belirli puana ulasti (orn: 70)</div></div></div>
+        <div class="vstep" style="padding:7px 0"><div class="vstep-num warn" style="width:22px;height:22px;font-size:10px">T</div><div class="vstep-body" style="font-size:12px"><div class="title" style="font-size:12px">inactivity_30d</div><div class="desc">30 gun hareketsizlik</div></div></div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Aksiyon Tipleri</div>
+        <div class="vstep" style="padding:7px 0"><div class="vstep-num ok" style="width:22px;height:22px;font-size:10px">A</div><div class="vstep-body" style="font-size:12px"><div class="title" style="font-size:12px">send_email</div><div class="desc">E-posta sablon gonder</div></div></div>
+        <div class="vstep" style="padding:7px 0"><div class="vstep-num ok" style="width:22px;height:22px;font-size:10px">A</div><div class="vstep-body" style="font-size:12px"><div class="title" style="font-size:12px">send_whatsapp</div><div class="desc">WhatsApp template mesaj</div></div></div>
+        <div class="vstep" style="padding:7px 0"><div class="vstep-num ok" style="width:22px;height:22px;font-size:10px">A</div><div class="vstep-body" style="font-size:12px"><div class="title" style="font-size:12px">assign_tag / wait_days</div><div class="desc">Etiket ata / N gun bekle</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Workflow Ornek — Champion Lead</h3>
+      <div class="wf-step" style="gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <div class="wf-node trigger">score_tier_changed<br><small>→ champion</small></div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-node action">Email: Tebrik + Ozel Teklif</div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-node cond">2 Gun Bekle</div>
+        <div class="wf-arrow">→</div>
+        <div class="wf-node action">WhatsApp: Sales Temasi</div>
+      </div>
+      <p style="font-size:12px;color:var(--muted)">Workflow Builder (/workflows/builder) gorsel surukle-birak arayuzu ile adim dizisi olusturulur.</p>
+    </div>
+    <div class="card">
+      <h3>Analytics & Enrollments</h3>
+      <div class="vstep"><div class="vstep-num">A</div><div class="vstep-body"><div class="title">Analytics (/workflows/analytics)</div><div class="desc">Workflow basi tamamlanma orani, adim drop-off noktalari, A/B dallanma sonuclari</div></div></div>
+      <div class="vstep"><div class="vstep-num">E</div><div class="vstep-body"><div class="title">Enrollments (/workflows/enrollments)</div><div class="desc">Hangi lead hangi workflow'da, hangi adimda. Duraklatma/devam/cikarma</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 12. A/B TESTLER -->
+<!-- =============================== -->
+<section id="abtest">
+  <h2>12. A/B Testler (/mktg-admin/abtests)</h2>
+  <div class="desc">Konu satiri, icerik, landing page veya CTA varyantlarini test et. Istatistiksel anlamlilik hesabi ile kazanani belirle.</div>
+
+  <div class="card">
+    <h3>Aktif A/B Test Ornegi</h3>
+    <div style="margin-bottom:12px;padding:10px 14px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;font-size:12px;color:var(--muted)">
+      <strong style="color:var(--text)">Test: "Almanya Egitim 2026" Konu Satiri</strong> | Baslatma: 1 Mart | Trafik: %50/%50
+    </div>
+    <div class="ab-row">
+      <div class="ab-variant">
+        <div style="font-size:12px;font-weight:800;margin-bottom:8px">Varyant A (Kontrol)</div>
+        <div style="font-size:13px;color:var(--text);margin-bottom:10px;font-style:italic">"Almanya'da Master Hayalinizi Gerceklestirin"</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--brand)">24,3%</div><div style="font-size:10px;color:var(--muted)">Acma Orani</div></div>
+          <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--brand)">4,1%</div><div style="font-size:10px;color:var(--muted)">Tiklama</div></div>
+          <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--brand)">1,2%</div><div style="font-size:10px;color:var(--muted)">Donusum</div></div>
+        </div>
+      </div>
+      <div class="ab-variant winner">
+        <div style="font-size:12px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:6px">Varyant B <span class="badge ok">Kazanan</span></div>
+        <div style="font-size:13px;color:var(--text);margin-bottom:10px;font-style:italic">"2026'da Almanya'ya Git — Ucretsiz Danismanlik"</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--ok)">31,8%</div><div style="font-size:10px;color:var(--muted)">Acma Orani</div></div>
+          <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--ok)">6,7%</div><div style="font-size:10px;color:var(--muted)">Tiklama</div></div>
+          <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--ok)">2,1%</div><div style="font-size:10px;color:var(--muted)">Donusum</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><strong>Istatistiksel Anlamlilik:</strong> 95% guven seviyesine ulasinca test otomatik kapanir. Kazanan varyant aktif kampanyaya uygulanir.</div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 13. KPI & RAPORLAR -->
+<!-- =============================== -->
+<section id="kpi">
+  <h2>13. KPI & Raporlar (/mktg-admin/kpi)</h2>
+  <div class="desc">Pazarlama ve satis KPI'larinin izlenip raporlandigi ekran. Zamanlanmis rapor gonderimi, hedef vs. gercek karsilastirma.</div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>KPI Listesi (/kpi/list)</h3>
+      <table>
+        <tr><th>KPI Metrik</th><th>Hedef</th><th>Gercek</th><th>Durum</th></tr>
+        <tr><td>Aylik Yeni Lead</td><td>500</td><td>420</td><td><span class="badge warn">%84</span></td></tr>
+        <tr><td>Donusum Orani</td><td>%18</td><td>%15,1</td><td><span class="badge warn">Altinda</span></td></tr>
+        <tr><td>CPL</td><td>€5,00</td><td>€3,39</td><td><span class="badge ok">Ust</span></td></tr>
+        <tr><td>ROAS</td><td>3.0x</td><td>3.2x</td><td><span class="badge ok">Ust</span></td></tr>
+        <tr><td>Email Open Rate</td><td>%25</td><td>%28,4</td><td><span class="badge ok">Ust</span></td></tr>
+        <tr><td>Aktif Kampanya</td><td>5</td><td>3</td><td><span class="badge warn">Eksik</span></td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Zamanlanmis Raporlar (/kpi/scheduled)</h3>
+      <div class="vstep"><div class="vstep-num ok">H</div><div class="vstep-body"><div class="title">Haftalik Email Ozet</div><div class="desc">Her Pazartesi 08:00 — lead sayisi, donusum, harcama ozeti PDF + email</div></div></div>
+      <div class="vstep"><div class="vstep-num ok">A</div><div class="vstep-body"><div class="title">Aylik KPI Raporu</div><div class="desc">Her ayin 1'i — hedef karsilastirma, kanal bazli performans, tavsiyeler</div></div></div>
+      <div class="vstep"><div class="vstep-num ok">G</div><div class="vstep-body"><div class="title">Gercek Zamanli Dashboard</div><div class="desc">Manager ve marketing_admin ayni anda canli veriyi gorebilir (Cache 5 dk)</div></div></div>
+      <div class="note" style="margin-top:8px"><strong>Benchmark Karsilastirma:</strong> $benchmark degiskeni onceki doneme gore delta hesaplar. Yesillen/kizaran oklar.</div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 14. BUTCE -->
+<!-- =============================== -->
+<section id="butce">
+  <h2>14. Butce (/mktg-admin/budget)</h2>
+  <div class="desc">Pazarlama butcesinin kanal bazinda dagitimi, harcama takibi ve kalan butce yonetimi. Yalniz marketing_admin erisebilir.</div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Butce Dagilimi</h3>
+      <table>
+        <tr><th>Kanal</th><th>Planlanan</th><th>Harcanan</th><th>Kalan</th><th>Verimlilik</th></tr>
+        <tr><td>Google Ads</td><td>€3.000</td><td>€2.400</td><td>€600</td><td><span class="badge ok">Yuksek</span></td></tr>
+        <tr><td>Instagram</td><td>€1.500</td><td>€1.100</td><td>€400</td><td><span class="badge ok">Yuksek</span></td></tr>
+        <tr><td>Facebook</td><td>€800</td><td>€700</td><td>€100</td><td><span class="badge warn">Orta</span></td></tr>
+        <tr><td>TikTok</td><td>€500</td><td>€210</td><td>€290</td><td><span class="badge muted">Dusuk</span></td></tr>
+        <tr><td>Etkinlikler</td><td>€400</td><td>€240</td><td>€160</td><td><span class="badge ok">Yuksek</span></td></tr>
+        <tr><td><strong>Toplam</strong></td><td><strong>€6.200</strong></td><td><strong>€4.650</strong></td><td><strong>€1.550</strong></td><td>—</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Butce Modeli (marketing_budgets)</h3>
+      <div class="vstep"><div class="vstep-num">F</div><div class="vstep-body"><div class="title">Donem & Kategori</div><div class="desc">marketing_budgets tablosu: company_id, period_label, channel, allocated_amount, spent_amount, currency</div></div></div>
+      <div class="vstep"><div class="vstep-num">C</div><div class="vstep-body"><div class="title">Kampanyaya Baglama</div><div class="desc">Kampanya olusturulurken butce doneminden harcama kaydedilir. Asim uyarisi gonderilir.</div></div></div>
+      <div class="vstep"><div class="vstep-num warn">!</div><div class="vstep-body"><div class="title">Asim Uyarisi</div><div class="desc">Harcama butcenin %90'ini astiysa bildirim gider. %100 asiminda kampanya otomatik duraklatilmaz (uyari verir).</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 15. TRACKING LINKLER -->
+<!-- =============================== -->
+<section id="tracking">
+  <h2>15. Tracking Linkler (/mktg-admin/tracking-links)</h2>
+  <div class="desc">UTM parametreli kisa link olusturma ve tiklama analizi. Bayi ve kampanya bazli kaynak takibi. Yalniz marketing_admin erisebilir.</div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Link Olusturma Formu</h3>
+      <table>
+        <tr><th>Alan</th><th>Aciklama</th></tr>
+        <tr><td>Hedef URL</td><td>Yonlendirilecek sayfa</td></tr>
+        <tr><td>UTM Source</td><td>google, instagram, email, bayi</td></tr>
+        <tr><td>UTM Medium</td><td>cpc, social, referral, organic</td></tr>
+        <tr><td>UTM Campaign</td><td>kampanya kodu</td></tr>
+        <tr><td>UTM Content</td><td>A/B varyant tanimi</td></tr>
+        <tr><td>Kisa Kod</td><td>mentorde.de/r/ABC123 seklinde</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Tiklama Analizi</h3>
+      <div class="vstep"><div class="vstep-num ok">T</div><div class="vstep-body"><div class="title">marketing_tracking_clicks tablosu</div><div class="desc">IP, User-Agent, referrer, tiklanma zamani. Ayni IP'den ayni gun 1 tiklama sayilir (unique).</div></div></div>
+      <div class="vstep"><div class="vstep-num ok">C</div><div class="vstep-body"><div class="title">Donusum Iliskisi</div><div class="desc">Guest kayit formunda tracking_link_code alani → hangi linkten geldigini gosterir. Attribution akisi.</div></div></div>
+      <div class="vstep"><div class="vstep-num ok">B</div><div class="vstep-body"><div class="title">Bayi Baglantisi</div><td>dealer_utm_links tablosu — her bayi kendi UTM linkleri ile performans takibi yapar</td></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 16. BAYI ILISKILERI -->
+<!-- =============================== -->
+<section id="bayiler">
+  <h2>16. Bayi Iliskileri (/mktg-admin/dealers)</h2>
+  <div class="desc">Bayilerin pazarlama performansi, lead gonderim kalitesi ve komisyon iliskisinin izlendigi ekran. marketing_admin ve sales_admin erisebilir.</div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Bayi Listesi & Performans</h3>
+      <table>
+        <tr><th>Bayi</th><th>Tip</th><th>Gonderilen Lead</th><th>Donusum</th><th>Kalite Skoru</th></tr>
+        <tr><td>Istanbul Egitim Ltd.</td><td><span class="badge ok">Platin</span></td><td>142</td><td>28</td><td>8.4/10</td></tr>
+        <tr><td>Ankara Danismanlik</td><td><span class="badge info">Altin</span></td><td>87</td><td>14</td><td>7.1/10</td></tr>
+        <tr><td>Izmir Kariyer</td><td><span class="badge muted">Standart</span></td><td>34</td><td>4</td><td>5.8/10</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Performans Raporu (/dealers/performance)</h3>
+      <div class="vstep"><div class="vstep-num">K</div><div class="vstep-body"><div class="title">Komisyon Hesabi</div><div class="desc">dealer_student_revenues tablosu — her donusum icin komisyon orani x kayit ucreti</div></div></div>
+      <div class="vstep"><div class="vstep-num">U</div><div class="vstep-body"><div class="title">UTM Kalite Analizi</div><div class="desc">Bayinin gonderdigi leadlerin ortalama skoru, donusum orani, gecikme suresi</div></div></div>
+      <div class="vstep"><div class="vstep-num">T</div><div class="vstep-body"><div class="title">Tip Yukseltme Onerisi</div><div class="desc">3 ay art arda hedef dolduran bayi otomatik yukseltme onerisine girer</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 17. ENTEGRASYONLAR -->
+<!-- =============================== -->
+<section id="entegrasyon">
+  <h2>17. Entegrasyonlar (/mktg-admin/integrations)</h2>
+  <div class="desc">Dis servis baglantilari: e-posta saglayicilari, takvim sistemleri, proje yonetimi, video toplanti araclari. marketing_admin'e ozel.</div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Desteklenen Entegrasyonlar</h3>
+      <table>
+        <tr><th>Kategori</th><th>Araclari</th><th>Adapter</th></tr>
+        <tr><td>E-posta Pazarlama</td><td>Mailchimp, SendGrid, Zoho</td><td>EmailMarketingInterface</td></tr>
+        <tr><td>Takvim</td><td>Google Calendar, Cal.com, Calendly</td><td>CalendarIntegrationInterface</td></tr>
+        <tr><td>E-imza</td><td>DocuSign, HelloSign, PandaDoc</td><td>ElectronicSignatureInterface</td></tr>
+        <tr><td>Proje Yonetimi</td><td>ClickUp, Monday, Notion</td><td>ProjectManagementInterface</td></tr>
+        <tr><td>Video Toplanti</td><td>Zoom, Teams, Google Meet</td><td>VideoConferenceInterface</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Entegrasyon Durum Takibi</h3>
+      <div class="vstep"><div class="vstep-num ok">S</div><div class="vstep-body"><div class="title">Saglik Kontrolu</div><div class="desc">IntegrationHealthCheckCommand — her 15 dk API ping atar. Dususte bildirim gonderir.</div></div></div>
+      <div class="vstep"><div class="vstep-num warn">T</div><div class="vstep-body"><div class="title">Token Yenileme</div><div class="desc">OAuth token suresi dolmadan 7 gun once uyari. integration_configs tablosunda token_expires_at.</div></div></div>
+      <div class="vstep"><div class="vstep-num info">F</div><div class="vstep-body"><div class="title">IntegrationFactory</div><div class="desc">app/Services/Integrations/IntegrationFactory.php — make('calendar', $company_id) ile dog adapter secilir.</div></div></div>
+      <div class="vstep"><div class="vstep-num info">E</div><div class="vstep-body"><div class="title">Harici Metrik Sync</div><div class="desc">ExternalMetricsSyncService — sosyal medya metriklerini gunluk ceker. marketing_external_metrics tablosu.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- 18. EKIP & YONETIM -->
+<!-- =============================== -->
+<section id="yonetim">
+  <h2>18. Ekip & Yonetim</h2>
+  <div class="desc">Ekip uye yonetimi, sistem ayarlari, profil ve bildirim tercihleri.</div>
+
+  <div class="grid3">
+    <div class="card">
+      <h3>Ekip (/team)</h3>
+      <div class="vstep"><div class="vstep-num">D</div><div class="vstep-body"><div class="title">Davet Gonder</div><div class="desc">Email ile davet — rol ata (marketing_staff, sales_staff)</div></div></div>
+      <div class="vstep"><div class="vstep-num">R</div><div class="vstep-body"><div class="title">Rol Degistir</div><div class="desc">RBAC — role_change_audit tablosuna log kaydedilir</div></div></div>
+      <div class="vstep"><div class="vstep-num warn">!</div><div class="vstep-body"><div class="title">Pasif Yapma</div><div class="desc">Uye silme degil pasifletme — gecmis veriler korunur</div></div></div>
+    </div>
+    <div class="card">
+      <h3>Ayarlar (/settings)</h3>
+      <div class="vstep"><div class="vstep-num purple">M</div><div class="vstep-body"><div class="title">MarketingAdminSetting</div><div class="desc">Sirket bazli ayarlar — varsayilan kanal, bildirim tercihleri, raporlama dili</div></div></div>
+      <div class="vstep"><div class="vstep-num purple">T</div><div class="vstep-body"><div class="title">Tema Rengi</div><div class="desc">Portal tema rengi manager tarafindan belirlenebilir (PortalTheme sistemi)</div></div></div>
+    </div>
+    <div class="card">
+      <h3>Profil & Bildirimler</h3>
+      <div class="vstep"><div class="vstep-num">P</div><div class="vstep-body"><div class="title">Profil (/profile)</div><div class="desc">Ad, email, sifre, avatar, iletisim tercihleri</div></div></div>
+      <div class="vstep"><div class="vstep-num">N</div><div class="vstep-body"><div class="title">Bildirimler (/notifications)</div><div class="desc">KPI alarmları, workflow hatalari, entegrasyon durumu, gorev atamalari</div></div></div>
+      <div class="vstep"><div class="vstep-num ok">S</div><div class="vstep-body"><div class="title">Sozlesmelerim (/my-contracts)</div><div class="desc">Staff'in kendi danismanlik sozlesmesi (business_contracts)</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- OZET TABLO -->
+<!-- =============================== -->
+<section>
+  <h2>Ozet — Tum Sayfalar & Modeller</h2>
+  <div class="tbl-wrap">
+    <table>
+      <tr><th>Ekran</th><th>Rota</th><th>Birincil Model</th><th>Mod</th><th>Min Rol</th></tr>
+      <tr><td>Dashboard</td><td>/mktg-admin/dashboard</td><td>GuestApplication, MarketingCampaign</td><td>Her ikisi</td><td>marketing_staff</td></tr>
+      <tr><td>Sales Dashboard</td><td>/mktg-admin/dashboard?mode=sales</td><td>GuestApplication</td><td>Satis</td><td>sales_staff</td></tr>
+      <tr><td>Sales Pipeline</td><td>/mktg-admin/pipeline/*</td><td>GuestApplication</td><td>Satis</td><td>sales_staff</td></tr>
+      <tr><td>Lead Scoring</td><td>/mktg-admin/scoring/*</td><td>GuestApplication, LeadSourceDatum</td><td>Satis</td><td>sales_staff (read)</td></tr>
+      <tr><td>Attribution</td><td>/mktg-admin/attribution/*</td><td>MarketingTrackingClick</td><td>Her ikisi</td><td>sales_staff (read)</td></tr>
+      <tr><td>Kampanyalar</td><td>/mktg-admin/campaigns/*</td><td>MarketingCampaign</td><td>Pazarlama</td><td>marketing_staff</td></tr>
+      <tr><td>CMS Icerik</td><td>/mktg-admin/content/*</td><td>CmsContent, CmsCategory</td><td>Pazarlama</td><td>marketing_staff</td></tr>
+      <tr><td>E-posta</td><td>/mktg-admin/email/*</td><td>EmailCampaign, EmailTemplate, EmailSegment</td><td>Pazarlama</td><td>marketing_staff</td></tr>
+      <tr><td>Sosyal Medya</td><td>/mktg-admin/social/*</td><td>SocialMediaAccount, SocialMediaPost</td><td>Pazarlama</td><td>marketing_staff</td></tr>
+      <tr><td>Tracking Linkler</td><td>/mktg-admin/tracking-links</td><td>MarketingTrackingLink</td><td>Pazarlama</td><td>marketing_admin</td></tr>
+      <tr><td>Etkinlikler</td><td>/mktg-admin/events/*</td><td>MarketingEvent, EventRegistration</td><td>Pazarlama</td><td>marketing_staff</td></tr>
+      <tr><td>Otomasyon</td><td>/mktg-admin/workflows/*</td><td>MarketingWorkflow (drip)</td><td>Pazarlama</td><td>marketing_admin</td></tr>
+      <tr><td>A/B Testler</td><td>/mktg-admin/abtests/*</td><td>AbTest</td><td>Pazarlama</td><td>marketing_staff</td></tr>
+      <tr><td>KPI & Raporlar</td><td>/mktg-admin/kpi/*</td><td>MarketingReport</td><td>Her ikisi</td><td>sales_admin</td></tr>
+      <tr><td>Butce</td><td>/mktg-admin/budget</td><td>MarketingBudget</td><td>Pazarlama</td><td>marketing_admin</td></tr>
+      <tr><td>Lead Kaynaklari</td><td>/mktg-admin/lead-sources</td><td>LeadSourceOption, LeadSourceDatum</td><td>Satis</td><td>sales_staff (read)</td></tr>
+      <tr><td>Bayi Iliskileri</td><td>/mktg-admin/dealers/*</td><td>Dealer, DealerStudentRevenue</td><td>Satis</td><td>sales_admin</td></tr>
+      <tr><td>Entegrasyonlar</td><td>/mktg-admin/integrations</td><td>IntegrationConfig</td><td>Pazarlama</td><td>marketing_admin</td></tr>
+      <tr><td>Ekip</td><td>/mktg-admin/team</td><td>User, UserRoleAssignment</td><td>Her ikisi</td><td>sales_admin</td></tr>
+    </table>
+  </div>
+</section>
+
+</div>
+
+<script>
+  document.querySelectorAll('nav a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const el = document.getElementById(a.getAttribute('href').slice(1));
+      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+  });
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a');
+  new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.style.color = '');
+        const a = document.querySelector('nav a[href="#' + entry.target.id + '"]');
+        if (a) a.style.color = '#fff';
+      }
+    });
+  }, { rootMargin: '-50% 0px -40% 0px' }).observe(document.body);
+  sections.forEach(s => new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.style.color = '');
+        const a = document.querySelector('nav a[href="#' + entry.target.id + '"]');
+        if (a) a.style.color = '#fff';
+      }
+    });
+  }, { rootMargin: '-50% 0px -40% 0px' }).observe(s));
+</script>
+</body>
+</html>

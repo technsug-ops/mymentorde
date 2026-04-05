@@ -1,0 +1,58 @@
+@import "tailwindcss";
+/* build-bust: 2026-03-17 */
+
+#student-cv-builder-root .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all .2s ease;
+  box-sizing: border-box;
+}
+#student-cv-builder-root .btn-primary {
+  background: linear-gradient(90deg, #7c3aed, #6d28d9);
+  color: #fff;
+}
+#student-cv-builder-root .btn-primary:hover { filter: brightness(0.95); }
+#student-cv-builder-root .btn-secondary {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+#student-cv-builder-root .btn-secondary:hover { background: #ddd6fe; }
+#student-cv-builder-root .btn-success {
+  background: linear-gradient(90deg, #16a34a, #059669);
+  color: #fff;
+}
+#student-cv-builder-root .btn-success:hover { filter: brightness(0.95); }
+#student-cv-builder-root .card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(15,23,42,.06);
+  padding: 1.5rem;
+}
+#student-cv-builder-root .form-input {
+  width: 100%;
+  padding: .625rem .875rem;
+  border: 1px solid #cbd5e1;
+  border-radius: .5rem;
+  outline: none;
+  background: #fff;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+#student-cv-builder-root .form-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,.15);
+}
+#student-cv-builder-root .step-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  transition: all .2s ease;
+}

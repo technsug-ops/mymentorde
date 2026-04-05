@@ -1,0 +1,1 @@
+function fillLogin(e){var l=document.getElementById("email");l&&(l.value=e,l.focus())}

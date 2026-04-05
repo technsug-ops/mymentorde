@@ -1,0 +1,1 @@
+!function(){const e=document.getElementById("extraServiceSelect"),t=document.getElementById("extraServiceCode"),n=document.getElementById("extraServiceTitle");e&&t&&n&&e.addEventListener("change",function(){const c=e.options[e.selectedIndex];t.value=c?.value||"",n.value=c?.dataset?.title||""})}();

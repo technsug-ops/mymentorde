@@ -1,0 +1,1 @@
+document.addEventListener("DOMContentLoaded",function(){var e=document.getElementById("profilePhotoInput");e&&e.addEventListener("change",function(){e.files&&e.files[0]&&document.getElementById("photoForm").submit()})});

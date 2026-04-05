@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MentorDE — Senior Portal İş Akışı</title>
+<style>
+  :root {
+    --brand: #7c3aed;
+    --brand-dark: #6d28d9;
+    --ok: #16a34a;
+    --warn: #d97706;
+    --danger: #dc2626;
+    --info: #0891b2;
+    --bg: #f8f7ff;
+    --card: #ffffff;
+    --line: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6; }
+
+  /* ── Layout ── */
+  .page-wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px 60px; }
+
+  /* ── Cover ── */
+  .cover {
+    background: linear-gradient(135deg, #3b1a6e 0%, #7c3aed 60%, #0891b2 100%);
+    border-radius: 20px; padding: 48px 40px; color: #fff; margin-bottom: 36px;
+    position: relative; overflow: hidden;
+  }
+  .cover::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: rgba(255,255,255,.06); pointer-events: none;
+  }
+  .cover::after {
+    content: ''; position: absolute; bottom: -80px; left: 30%;
+    width: 320px; height: 320px; border-radius: 50%;
+    background: rgba(255,255,255,.04); pointer-events: none;
+  }
+  .cover-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; opacity: .7; margin-bottom: 10px; }
+  .cover-title { font-size: 36px; font-weight: 900; letter-spacing: -.5px; margin-bottom: 8px; line-height: 1.1; }
+  .cover-sub { font-size: 16px; opacity: .8; max-width: 600px; }
+  .cover-meta { margin-top: 28px; display: flex; gap: 24px; flex-wrap: wrap; }
+  .cover-chip { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 4px 14px; font-size: 12px; font-weight: 600; }
+
+  /* ── TOC ── */
+  .toc { background: var(--card); border: 1.5px solid var(--line); border-radius: 14px; padding: 24px 28px; margin-bottom: 32px; }
+  .toc-title { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 14px; }
+  .toc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .toc-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; text-decoration: none; color: var(--text); font-size: 13px; font-weight: 600; border: 1px solid var(--line); transition: background .15s, border-color .15s; }
+  .toc-item:hover { background: #f5f3ff; border-color: #c4b5fd; color: var(--brand); }
+  .toc-num { width: 22px; height: 22px; border-radius: 50%; background: var(--brand); color: #fff; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  /* ── Section ── */
+  .section { margin-bottom: 40px; }
+  .section-header {
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    border-radius: 14px 14px 0 0; padding: 18px 24px; color: #fff;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .section-icon { font-size: 24px; }
+  .section-title { font-size: 18px; font-weight: 800; }
+  .section-sub { font-size: 12px; opacity: .8; margin-top: 2px; }
+  .section-body { background: var(--card); border: 1.5px solid var(--line); border-top: none; border-radius: 0 0 14px 14px; padding: 24px; }
+
+  /* ── Pipeline ── */
+  .pipeline { display: flex; gap: 0; align-items: stretch; margin: 20px 0; overflow-x: auto; }
+  .pl-stage {
+    flex: 1; min-width: 120px; display: flex; flex-direction: column; align-items: center;
+    position: relative; padding: 0 4px;
+  }
+  .pl-stage::after {
+    content: '→'; position: absolute; right: -12px; top: 30px;
+    font-size: 18px; color: var(--muted); z-index: 1;
+  }
+  .pl-stage:last-child::after { display: none; }
+  .pl-circle {
+    width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 20px; font-weight: 800; color: #fff;
+    margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  }
+  .pl-label { font-size: 12px; font-weight: 700; text-align: center; color: var(--text); line-height: 1.3; }
+  .pl-sub { font-size: 11px; color: var(--muted); text-align: center; margin-top: 2px; }
+
+  /* ── Kanban columns ── */
+  .kanban { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 12px; margin: 16px 0; }
+  .kb-col { min-width: 160px; flex: 1; background: var(--bg); border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .kb-head { padding: 10px 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; border-bottom: 2px solid; display: flex; justify-content: space-between; align-items: center; }
+  .kb-body { padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .kb-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12px; border-left: 3px solid var(--brand); }
+  .kb-card-name { font-weight: 700; margin-bottom: 4px; }
+  .kb-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+  .kb-note { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ── Tabs ── */
+  .tab-list { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .tab-item { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; border: 1.5px solid var(--line); background: var(--bg); color: var(--muted); }
+  .tab-item.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+  /* ── Badge ── */
+  .badge { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .badge.ok      { background: #dcfce7; color: #166534; }
+  .badge.warn    { background: #fef3c7; color: #92400e; }
+  .badge.danger  { background: #fee2e2; color: #991b1b; }
+  .badge.info    { background: #e0f2fe; color: #075985; }
+  .badge.purple  { background: #ede9fe; color: #5b21b6; }
+
+  /* ── Grid helpers ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+  /* ── Card / Panel ── */
+  .card { background: var(--card); border: 1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .card-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+
+  /* ── List ── */
+  .row-list { display: flex; flex-direction: column; gap: 6px; }
+  .row-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; font-size: 13px; }
+  .row-icon { font-size: 16px; flex-shrink: 0; width: 24px; text-align: center; }
+  .row-body { flex: 1; }
+  .row-label { font-weight: 700; }
+  .row-desc { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  /* ── Action table ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--bg); padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); border-bottom: 2px solid var(--line); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+
+  /* ── Step flow ── */
+  .step-flow { counter-reset: steps; display: flex; flex-direction: column; gap: 0; }
+  .step { display: flex; gap: 0; }
+  .step-left { display: flex; flex-direction: column; align-items: center; width: 40px; flex-shrink: 0; }
+  .step-num {
+    counter-increment: steps; width: 32px; height: 32px; border-radius: 50%;
+    background: var(--brand); color: #fff; font-size: 13px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .step-line { width: 2px; background: var(--line); flex: 1; min-height: 20px; }
+  .step:last-child .step-line { display: none; }
+  .step-content { padding: 4px 0 20px 12px; flex: 1; }
+  .step-title { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .step-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: var(--line); margin: 24px 0; }
+
+  /* ── Highlight box ── */
+  .highlight { border-radius: 10px; padding: 14px 16px; margin: 14px 0; font-size: 13px; line-height: 1.6; }
+  .highlight.purple { background: #f5f3ff; border: 1px solid #c4b5fd; color: #4c1d95; }
+  .highlight.green  { background: #f0fdf4; border: 1px solid #86efac; color: #14532d; }
+  .highlight.blue   { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; }
+  .highlight.amber  { background: #fffbeb; border: 1px solid #fde68a; color: #78350f; }
+
+  /* ── Footer ── */
+  .footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); }
+
+  @media print {
+    body { background: #fff; }
+    .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .section-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+  @media (max-width: 700px) {
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+    .toc-grid { grid-template-columns: 1fr 1fr; }
+    .cover-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+<!-- ══════════════════════════════════════ COVER ══════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-label">MentorDE ERP — Dokümantasyon</div>
+  <div class="cover-title">Senior Portal<br>Detaylı İş Akışı</div>
+  <div class="cover-sub">Danışmanın öğrenci yönetiminde kullandığı tüm ekranlar, süreçler ve aksiyonlar</div>
+  <div class="cover-meta">
+    <span class="cover-chip">Versiyon 5.x</span>
+    <span class="cover-chip">Laravel 12 / PHP 8.4</span>
+    <span class="cover-chip">Tarih: Mart 2026</span>
+    <span class="cover-chip">Rol: Senior (Danışman)</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ TOC ══════════════════════════════════════ -->
+<div class="toc">
+  <div class="toc-title">İçindekiler</div>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">1</span> Senior Rolü & Genel Bakış</a>
+    <a class="toc-item" href="#s2"><span class="toc-num">2</span> Dashboard</a>
+    <a class="toc-item" href="#s3"><span class="toc-num">3</span> Öğrenci Listesi</a>
+    <a class="toc-item" href="#s4"><span class="toc-num">4</span> Pipeline Kanban</a>
+    <a class="toc-item" href="#s5"><span class="toc-num">5</span> Öğrenci 360° Detay</a>
+    <a class="toc-item" href="#s6"><span class="toc-num">6</span> Başvuru & Süreç Takibi</a>
+    <a class="toc-item" href="#s7"><span class="toc-num">7</span> Belgeler & Kayıt Evrakları</a>
+    <a class="toc-item" href="#s8"><span class="toc-num">8</span> Vize & Konut</a>
+    <a class="toc-item" href="#s9"><span class="toc-num">9</span> Randevular & Sözleşmeler</a>
+    <a class="toc-item" href="#s10"><span class="toc-num">10</span> Notlar, Ticket & Mesajlar</a>
+    <a class="toc-item" href="#s11"><span class="toc-num">11</span> Doküman Oluşturucu</a>
+    <a class="toc-item" href="#s12"><span class="toc-num">12</span> Toplu İnceleme & Performans</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ S1: ROL ══════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-icon">👤</div>
+    <div>
+      <div class="section-title">1. Senior Rolü & Genel Bakış</div>
+      <div class="section-sub">Kim, ne yapar, hangi verilere erişir</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="highlight purple">
+      <strong>Senior (Danışman):</strong> Yurtdışı eğitim sürecinde öğrencilere rehberlik eden yetkili kullanıcı. Her senior birden fazla öğrenciye atanabilir; öğrencilerin başvuru, belge, vize ve konaklama süreçlerini yönetir.
+    </div>
+
+    <div class="grid2" style="margin-top: 16px;">
+      <div class="card">
+        <div class="card-title">Sorumluluklar</div>
+        <div class="row-list">
+          <div class="row-item"><div class="row-icon">📋</div><div class="row-body"><div class="row-label">Süreç Takibi</div><div class="row-desc">Öğrencinin başvurudan yerleşimine kadar tüm adımlarını yönetir</div></div></div>
+          <div class="row-item"><div class="row-icon">📄</div><div class="row-body"><div class="row-label">Belge Kontrolü</div><div class="row-desc">Yüklenen evrakları onaylar/reddeder, eksikleri takip eder</div></div></div>
+          <div class="row-item"><div class="row-icon">🏛</div><div class="row-body"><div class="row-label">Üniversite Başvurusu</div><div class="row-desc">Başvuru listesini oluşturur, durum güncellemelerini kaydeder</div></div></div>
+          <div class="row-item"><div class="row-icon">🛂</div><div class="row-body"><div class="row-label">Vize Süreci</div><div class="row-desc">Vize başvuru dosyasını oluşturur ve takip eder</div></div></div>
+          <div class="row-item"><div class="row-icon">🏠</div><div class="row-body"><div class="row-label">Konaklama</div><div class="row-desc">Yurt/ev rezervasyonunu sisteme işler</div></div></div>
+          <div class="row-item"><div class="row-icon">📊</div><div class="row-body"><div class="row-label">Raporlama</div><div class="row-desc">Performans raporu oluşturur, hedefleri takip eder</div></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Erişim Kontrolü</div>
+        <div class="row-list">
+          <div class="row-item"><div class="row-icon">✅</div><div class="row-body"><div class="row-label">Sadece kendi öğrencileri</div><div class="row-desc">student_assignments tablosundaki atamaya göre filtrelenir</div></div></div>
+          <div class="row-item"><div class="row-icon">✅</div><div class="row-body"><div class="row-label">Belge görünürlüğü</div><div class="row-desc">is_visible_to_student bayrağını senior yönetir</div></div></div>
+          <div class="row-item"><div class="row-icon">✅</div><div class="row-body"><div class="row-label">Süreç kararları</div><div class="row-desc">Outcome kayıt yetkisi senior'a aittir</div></div></div>
+          <div class="row-item"><div class="row-icon">🚫</div><div class="row-body"><div class="row-label">Finansal veriler</div><div class="row-desc">Komisyon/gelir ekranları görünmez</div></div></div>
+          <div class="row-item"><div class="row-icon">🚫</div><div class="row-body"><div class="row-label">Sistem konfigürasyonu</div><div class="row-desc">RBAC, şirket ayarları erişimi yok</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="card-title" style="margin-bottom: 14px;">Öğrenci Süreç Özeti — Büyük Resim</div>
+
+    <div class="pipeline">
+      <div class="pl-stage">
+        <div class="pl-circle" style="background: #f59e0b;">1</div>
+        <div class="pl-label">Ön Kayıt</div>
+        <div class="pl-sub">Guest → Öğrenci dönüşümü</div>
+      </div>
+      <div class="pl-stage">
+        <div class="pl-circle" style="background: #6366f1;">2</div>
+        <div class="pl-label">Ön Değerlendirme</div>
+        <div class="pl-sub">Profil & belge kontrolü</div>
+      </div>
+      <div class="pl-stage">
+        <div class="pl-circle" style="background: #7c3aed;">3</div>
+        <div class="pl-label">Sözleşme</div>
+        <div class="pl-sub">İmza & ödeme</div>
+      </div>
+      <div class="pl-stage">
+        <div class="pl-circle" style="background: #0891b2;">4</div>
+        <div class="pl-label">Belgeler</div>
+        <div class="pl-sub">Başvuru evrakları</div>
+      </div>
+      <div class="pl-stage">
+        <div class="pl-circle" style="background: #059669;">5</div>
+        <div class="pl-label">Vize</div>
+        <div class="pl-sub">Konsolosluk süreci</div>
+      </div>
+      <div class="pl-stage">
+        <div class="pl-circle" style="background: #16a34a;">6</div>
+        <div class="pl-label">Kayıt / Yerleşim</div>
+        <div class="pl-sub">Almanya'da aktif</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ S2: DASHBOARD ══════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header" style="background: linear-gradient(135deg, #3b1a6e, #7c3aed);">
+    <div class="section-icon">🏠</div>
+    <div>
+      <div class="section-title">2. Dashboard — Komuta Merkezi</div>
+      <div class="section-sub">/senior/dashboard — Günlük operasyon başlangıç noktası</div>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <div class="grid3" style="margin-bottom: 16px;">
+      <div class="card" style="border-left: 4px solid var(--brand);">
+        <div class="card-title">KPI Kartları (üst sıra)</div>
+        <table>
+          <tr><td><strong>Aktif Öğrenci</strong></td><td>Atanmış toplam</td></tr>
+          <tr><td><strong>Bekleyen Belge</strong></td><td>İnceleme kuyruğu</td></tr>
+          <tr><td><strong>Risk Skoru</strong></td><td>Yüksek riskli sayısı</td></tr>
+          <tr><td><strong>Bu Ay Çıktı</strong></td><td>Tamamlanan süreç</td></tr>
+        </table>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--info);">
+        <div class="card-title">Hızlı Erişim (6 buton grid)</div>
+        <div class="row-list">
+          <div class="row-item" style="padding: 5px 8px;"><div class="row-icon">🎓</div><div class="row-body"><div class="row-label">Öğrenci Pipeline</div></div></div>
+          <div class="row-item" style="padding: 5px 8px;"><div class="row-icon">🗂</div><div class="row-body"><div class="row-label">Süreç Takibi</div></div></div>
+          <div class="row-item" style="padding: 5px 8px;"><div class="row-icon">📄</div><div class="row-body"><div class="row-label">Belgeler</div></div></div>
+          <div class="row-item" style="padding: 5px 8px;"><div class="row-icon">📅</div><div class="row-body"><div class="row-label">Randevular</div></div></div>
+          <div class="row-item" style="padding: 5px 8px;"><div class="row-icon">📊</div><div class="row-body"><div class="row-label">Performans</div></div></div>
+          <div class="row-item" style="padding: 5px 8px;"><div class="row-icon">💬</div><div class="row-body"><div class="row-label">Mesajlar</div></div></div>
+        </div>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--ok);">
+        <div class="card-title">Günlük Görev Listesi</div>
+        <div class="row-list">
+          <div class="row-item" style="padding: 5px 8px;"><span class="badge danger">Acil</span> <span style="font-size:12px;margin-left:6px;">Bekleyen belge onayları</span></div>
+          <div class="row-item" style="padding: 5px 8px;"><span class="badge warn">Bugün</span> <span style="font-size:12px;margin-left:6px;">Yaklaşan randevular</span></div>
+          <div class="row-item" style="padding: 5px 8px;"><span class="badge info">Yakın</span> <span style="font-size:12px;margin-left:6px;">Son başvuru tarihleri</span></div>
+          <div class="row-item" style="padding: 5px 8px;"><span class="badge purple">Yeni</span> <span style="font-size:12px;margin-left:6px;">Cevapsız ticket'lar</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight amber">
+      <strong>Akıllı Komuta Merkezi:</strong> Dashboard, son 24 saatte güncelleme olmayan öğrencileri, deadline yaklaşan başvuruları ve yüksek risk skorlu öğrencileri otomatik olarak vurgular. Accordion ile ilk 2 öğrenci gösterilir, "Tümünü Göster" ile açılır.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ S3: ÖĞRENCİ LİSTESİ ══════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header" style="background: linear-gradient(135deg, #0891b2, #0e7490);">
+    <div class="section-icon">🎓</div>
+    <div>
+      <div class="section-title">3. Öğrenci Listesi</div>
+      <div class="section-sub">/senior/students — Atanmış öğrencilerin filtrelenebilir tablosu</div>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <div class="grid2">
+      <div>
+        <div class="card-title" style="margin-bottom: 10px;">Filtreleme Seçenekleri</div>
+        <table>
+          <thead><tr><th>Alan</th><th>Seçenekler</th></tr></thead>
+          <tbody>
+            <tr><td>Aşama</td><td>Lead / Ön Değ. / Sözleşme / Belgeler / Vize / Kayıt</td></tr>
+            <tr><td>Risk Seviyesi</td><td>Düşük / Orta / Yüksek / Kritik</td></tr>
+            <tr><td>Ödeme Durumu</td><td>Ödenmedi / Kısmi / Tamamlandı</td></tr>
+            <tr><td>Şube</td><td>Dinamik liste (atama kaydından)</td></tr>
+            <tr><td>Arama</td><td>Ad, e-posta, öğrenci ID</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="card-title" style="margin-bottom: 10px;">Her Satırda Gösterilen</div>
+        <div class="row-list">
+          <div class="row-item"><div class="row-icon">👤</div><div class="row-body"><div class="row-label">Öğrenci adı + e-posta</div></div></div>
+          <div class="row-item"><div class="row-icon">📍</div><div class="row-body"><div class="row-label">Mevcut pipeline aşaması</div></div></div>
+          <div class="row-item"><div class="row-icon">⚠️</div><div class="row-body"><div class="row-label">Risk seviyesi badge'i</div></div></div>
+          <div class="row-item"><div class="row-icon">💳</div><div class="row-body"><div class="row-label">Ödeme durumu</div></div></div>
+          <div class="row-item"><div class="row-icon">✓</div><div class="row-body"><div class="row-label">Sözleşme var/yok</div></div></div>
+          <div class="row-item"><div class="row-icon">→</div><div class="row-body"><div class="row-label">360° Detay butonu</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight blue" style="margin-top: 16px;">
+      Liste görünümünden doğrudan Pipeline Kanban'a geçilebilir. Her öğrenci kartındaki "360° Detay" linki tüm sekmelerin olduğu detay sayfasına yönlendirir.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ S4: KANBAN ══════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header" style="background: linear-gradient(135deg, #7c3aed, #4338ca);">
+    <div class="section-icon">🗂</div>
+    <div>
+      <div class="section-title">4. Pipeline Kanban — Drag &amp; Drop</div>
+      <div class="section-sub">/senior/student-pipeline — 6 sütunlu görsel aşama yönetimi</div>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <div class="kanban">
+      <div class="kb-col">
+        <div class="kb-head" style="border-color: #f59e0b; color: #92400e; background: #fef3c7;">
+          <span>LEAD</span><span class="badge warn">N</span>
+        </div>
+        <div class="kb-body">
+          <div class="kb-card" style="border-left-color: #f59e0b;">
+            <div class="kb-card-name">Öğrenci Adı</div>
+            <div class="kb-badges"><span class="badge info">PLUS</span></div>
+            <div class="kb-note">Sürükle → aşama değiştir</div>
+          </div>
+        </div>
+      </div>
+      <div class="kb-col">
+        <div class="kb-head" style="border-color: #6366f1; color: #4338ca; background: #eef2ff;">
+          <span>ÖN DEĞ.</span><span class="badge purple">N</span>
+        </div>
+        <div class="kb-body">
+          <div class="kb-card" style="border-left-color: #6366f1;">
+            <div class="kb-card-name">Öğrenci Adı</div>
+            <div class="kb-badges"><span class="badge danger">⚠ Risk</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="kb-col">
+        <div class="kb-head" style="border-color: #7c3aed; color: #5b21b6; background: #ede9fe;">
+          <span>SÖZLEŞME</span><span class="badge purple">N</span>
+        </div>
+        <div class="kb-body">
+          <div class="kb-card" style="border-left-color: #7c3aed;">
+            <div class="kb-card-name">Öğrenci Adı</div>
+            <div class="kb-badges"><span class="badge ok">✓ Sözl.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="kb-col">
+        <div class="kb-head" style="border-color: #0891b2; color: #075985; background: #e0f2fe;">
+          <span>BELGELER</span><span class="badge info">N</span>
+        </div>
+        <div class="kb-body">
+          <div class="kb-card" style="border-left-color: #0891b2;">
+            <div class="kb-card-name">Öğrenci Adı</div>
+          </div>
+        </div>
+      </div>
+      <div class="kb-col">
+        <div class="kb-head" style="border-color: #059669; color: #065f46; background: #d1fae5;">
+          <span>VİZE</span><span class="badge ok">N</span>
+        </div>
+        <div class="kb-body">
+          <div class="kb-card" style="border-left-color: #059669;">
+            <div class="kb-card-name">Öğrenci Adı</div>
+          </div>
+        </div>
+      </div>
+      <div class="kb-col">
+        <div class="kb-head" style="border-color: #16a34a; color: #14532d; background: #dcfce7;">
+          <span>KAYIT</span><span class="badge ok">N</span>
+        </div>
+        <div class="kb-body">
+          <div class="kb-card" style="border-left-color: #16a34a;">
+            <div class="kb-card-name">Öğrenci Adı</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top: 16px;">
+      <div class="card">
+        <div class="card-title">Drag &amp; Drop İş Akışı</div>
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-left"><div class="step-num">1</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Kartı sürükle</div><div class="step-desc">Öğrenci kartını hedef sütuna bırak — sütun mavi parlar</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">2</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Not modalı açılır</div><div class="step-desc">Aşama değişikliği için opsiyonel not gir (Ctrl+Enter ile kaydet)</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">3</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">API çağrısı</div><div class="step-desc">POST /senior/student-pipeline/advance — student_id + new_step + note</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">4</div></div>
+            <div class="step-content"><div class="step-title">Kart yeni sütuna taşınır</div><div class="step-desc">Sayımlar güncellenir, audit log kaydedilir</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Kart Renk Kodları</div>
+        <table>
+          <thead><tr><th>Renk / Şerit</th><th>Anlam</th></tr></thead>
+          <tbody>
+            <tr><td><span style="display:inline-block;width:12px;height:12px;background:#dc2626;border-radius:2px;margin-right:6px;"></span>Kırmızı</td><td>Yüksek risk öğrenci</td></tr>
+            <tr><td><span style="display:inline-block;width:12px;height:12px;background:#f59e0b;border-radius:2px;margin-right:6px;"></span>Turuncu</td><td>Orta risk</td></tr>
+            <tr><td><span style="display:inline-block;width:12px;height:12px;background:#16a34a;border-radius:2px;margin-right:6px;"></span>Yeşil</td><td>Düşük risk</td></tr>
+            <tr><td><span class="badge ok">✓ Sözl.</span></td><td>Sözleşme imzalandı</td></tr>
+            <tr><td><span class="badge danger">⚠ Risk</span></td><td>Acil müdahale gerekli</td></tr>
+            <tr><td><span class="badge info">PLUS</span></td><td>Hizmet paketi tipi</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ S5: 360° DETAY ══════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header" style="background: linear-gradient(135deg, #0f766e, #0891b2);">
+    <div class="section-icon">🔭</div>
+    <div>
+      <div class="section-title">5. Öğrenci 360° Detay</div>
+      <div class="section-sub">/senior/students/{id} — 10 sekmeli tam görünüm</div>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <div class="highlight green">
+      <strong>Hero Bar:</strong> Sayfanın üstünde öğrenci adı, e-posta, atandığı şube, risk/ödeme badge'leri ve genel ilerleme çubuğu (%) gösterilir. İlerleme adımlarının her biri yeşil ✓ veya gri ○ ile işaretlenir.
+    </div>
+
+    <div class="tab-list" style="margin-top: 16px;">
+      <div class="tab-item active">👤 Profil</div>
+      <div class="tab-item">📁 Belgeler</div>
+      <div class="tab-item">🔄 Süreç</div>
+      <div class="tab-item">📅 Randevular</div>
+      <div class="tab-item">🎫 Tickets</div>
+      <div class="tab-item">📝 Notlar</div>
+      <div class="tab-item">🎓 Üniversite</div>
+      <div class="tab-item">📬 Gelen Bel.</div>
+      <div class="tab-item">🛂 Vize</div>
+      <div class="tab-item">🏠 Konut</div>
+    </div>
+
+    <table>
+      <thead><tr><th>Sekme</th><th>İçerik</th><th>Aksiyonlar</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>👤 Profil</strong></td>
+          <td>Kişisel bilgiler (ad, e-posta, tel, uyruk, pasaport) + Başvuru bilgileri (sözleşme, atanan danışman, bayi, şube)</td>
+          <td>Görüntüleme</td>
+        </tr>
+        <tr>
+          <td><strong>📁 Belgeler</strong></td>
+          <td>Öğrencinin yüklediği tüm evraklar, durum badge'leri (onaylandı/bekleme/reddedildi), kategori</td>
+          <td>"Tüm Belgeler" sayfasına yönlendirme</td>
+        </tr>
+        <tr>
+          <td><strong>🔄 Süreç</strong></td>
+          <td>ProcessOutcome kayıtları: hangi adımda, ne tür karar, Türkçe detay</td>
+          <td>"Süreç Takibi" sayfasına yönlendirme</td>
+        </tr>
+        <tr>
+          <td><strong>📅 Randevular</strong></td>
+          <td>Randevu tarihi, tipi, durumu (confirmed/pending/cancelled), notlar</td>
+          <td>"Randevu Yönetimi" sayfasına yönlendirme</td>
+        </tr>
+        <tr>
+          <td><strong>🎫 Tickets</strong></td>
+          <td>Destek talepleri, öncelik, durum, son yanıt tarihi</td>
+          <td>Ticket sayfasına yönlendirme</td>
+        </tr>
+        <tr>
+          <td><strong>📝 Notlar</strong></td>
+          <td>İç notlar (öğrenciye görünmez), oluşturma tarihi ve yazarı</td>
+          <td>Yeni not ekleme formu</td>
+        </tr>
+        <tr>
+          <td><strong>🎓 Üniversite</strong></td>
+          <td>Başvuru listesi: üniversite, bölüm, derece, dönem, portal, durum</td>
+          <td>Durum güncelleme, görünürlük toggle</td>
+        </tr>
+        <tr>
+          <td><strong>📬 Gelen Bel.</strong></td>
+          <td>Kurumdan gelen belgeler: kabul mektubu, vize onayı vb.</td>
+          <td>Durum güncelleme, öğrenciye göster/gizle</td>
+        </tr>
+        <tr>
+          <td><strong>🛂 Vize</strong></td>
+          <td>Vize başvuru durumu, randevu tarihi, konsolosluk</td>
+          <td>Vize kaydı oluşturma / güncelleme</td>
+        </tr>
+        <tr>
+          <td><strong>🏠 Konut</strong></td>
+          <td>Konaklama tipi, rezervasyon durumu, adres bilgileri</td>
+          <td>Konut kaydı oluşturma / güncelleme</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ S6: SÜREÇ TAKİBİ ══════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-header" style="background: linear-gradient(135deg, #1e40af, #6366f1);">
+    <div class="section-icon">🗂</div>
+    <div>
+      <div class="section-title">6. Başvuru &amp; Süreç Takibi</div>
+      <div class="section-sub">/senior/process-tracking — Üniversite başvuruları, kurumsal belgeler ve kararlar</div>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <div class="highlight blue">
+      <strong>İki Mod:</strong> Öğrenci seçilmediğinde tüm öğrencilerin belgelerini listeler (global görünüm). Öğrenci seçildiğinde o öğrenciye ait 5 sekme açılır ve süreç pipeline'ı gösterilir.
+    </div>
+
+    <div class="divider"></div>
+    <div class="card-title" style="margin-bottom: 10px;">Süreç Pipeline (öğrenci seçilince)</div>
+
+    <div class="pipeline" style="margin-bottom: 24px;">
+      <div class="pl-stage">
+        <div class="pl-circle" style="background: #16a34a; font-size:16px;">✓</div>
+        <div class="pl-label">Ön Kayıt</div>
+        <div class="pl-sub">Danışmanlık aktif</div>
+      </div>
+      <div class="pl-stage">
+        <div class="pl-circle" style="background: #f59e0b;">●</div>
+        <div class="pl-label">Başvuru Hazırlığı</div>
+        <div class="pl-sub">Üniversite seçimi</div>
+      </div>
+      <div class="pl-stage">
+        <div class="pl-circle" style="background: var(--line); color: var(--muted);">3</div>
+        <div class="pl-label">Gönderildi</div>
+        <div class="pl-sub">Uni-Assist / Direkt</div>
+      </div>
+      <div class="pl-stage">
+        <div class="pl-circle" style="background: var(--line); color: var(--muted);">4</div>
+        <div class="pl-label">Üniversite Kararı</div>
+        <div class="pl-sub">Kabul / Red</div>
+      </div>
+      <div class="pl-stage">
+        <div class="pl-circle" style="background: var(--line); color: var(--muted);">5</div>
+        <div class="pl-label">Vize</div>
+        <div class="pl-sub">Konsolosluk süreci</div>
+      </div>
+      <div class="pl-stage">
+        <div class="pl-circle" style="background: var(--line); color: var(--muted);">6</div>
+        <div class="pl-label">Yerleşim</div>
+        <div class="pl-sub">Konaklama &amp; Kayıt</div>
+      </div>
+    </div>
+
+    <div class="tab-list">
+      <div class="tab-item active">🏛 Başvurular</div>
+      <div class="tab-item">📄 Belgeler</div>
+      <div class="tab-item">⚖️ Kararlar</div>
+      <div class="tab-item">🛂 Vize</div>
+      <div class="tab-item">🏠 Konut</div>
+    </div>
+
+    <div class="grid2" style="margin-top: 16px;">
+      <div class="card">
+        <div class="card-title">Tab 1: Üniversite Başvuruları</div>
+        <table>
+          <thead><tr><th>Alan</th><th>Detay</th></tr></thead>
+          <tbody>
+            <tr><td>Üniversite Adı</td><td>ör. Technische Universität Berlin</td></tr>
+            <tr><td>Bölüm</td><td>ör. Maschinenbau (M.Sc.)</td></tr>
+            <tr><td>Derece</td><td>Bachelor / Master / PhD / Ausbildung</td></tr>
+            <tr><td>Portal</td><td>uni-assist / direkt / hochschulstart vb.</td></tr>
+            <tr><td>Dönem</td><td>WS2025/26, SS2026, WS2026/27…</td></tr>
+            <tr><td>Deadline</td><td>Son başvuru tarihi</td></tr>
+            <tr><td>Durum</td><td>Planlandı → Hazırlanıyor → Gönderildi → İnceleniyor → Kabul / Red / Koşullu / Bekleme</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Tab 2: Kurumdan Gelen Belgeler</div>
+        <div class="row-list">
+          <div class="row-item"><div class="row-icon">📬</div><div class="row-body"><div class="row-label">Kabul Mektubu</div><div class="row-desc">Üniversite kabulü</div></div></div>
+          <div class="row-item"><div class="row-icon">🏛</div><div class="row-body"><div class="row-label">Uni-Assist Belgesi</div><div class="row-desc">Değerlendirme sonucu</div></div></div>
+          <div class="row-item"><div class="row-icon">🏦</div><div class="row-body"><div class="row-label">Sperrkonto Belgesi</div><div class="row-desc">Bloke hesap onayı</div></div></div>
+          <div class="row-item"><div class="row-icon">🛂</div><div class="row-body"><div class="row-label">Vize Belgesi</div><div class="row-desc">Konsolosluk kararı</div></div></div>
+          <div class="row-item"><div class="row-icon">🏠</div><div class="row-body"><div class="row-label">Konaklama Belgesi</div><div class="row-desc">Yurt/ev rezervasyonu</div></div></div>
+        </div>
+        <div style="margin-top: 10px; font-size: 12px; color: var(--muted);">
+          Her belge: <span class="badge warn">Bekleniyor</span> <span class="badge ok">Alındı</span> <span class="badge warn">Aksiyon</span> <span class="badge ok">Tamamlandı</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 14px;">
+      <div class="card-title">Tab 3: Süreç Kararları (Process Outcomes)</div>
+      <table>
+        <thead><tr><th>Süreç Adımı</th><th>Karar Tipleri</th><th>Örnekler</th></tr></thead>
+        <tbody>
+          <tr><td>Başvuru Hazırlık</td><td>Kabul, Red, Koşullu Kabul, Düzeltme Talebi, Bekleme Listesi</td><td>Evrak eksikliği nedeniyle düzeltme talebi</td></tr>
+          <tr><td>Uni-Assist</td><td>Kabul, Red, Koşullu Kabul</td><td>Uni-Assist belgesi onaylandı</td></tr>
+          <tr><td>Vize Başvurusu</td><td>Kabul, Red, Ek Bilgi Talebi</td><td>Vize onaylandı</td></tr>
+          <tr><td>Dil Kursu</td><td>Tamamlandı, Devam Ediyor</td><td>B2 sertifikası alındı</td></tr>
+          <tr><td>İkamet</td><td>Kayıtlandı, Bekleniyor</td><td>Anmeldung tamamlandı</td></tr>
+          <tr><td>Resmi Hizmetler</td><td>Tamamlandı, Bekliyor</td><td>Gesundheitskarte aktif</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ S7: BELGELER ══════════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-header" style="background: linear-gradient(135deg, #0f766e, #059669);">
+    <div class="section-icon">📄</div>
+    <div>
+      <div class="section-title">7. Belgeler &amp; Kayıt Evrakları</div>
+      <div class="section-sub">/senior/registration-documents — Öğrenci belgelerinin incelenip onaylandığı merkez</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Senior'ın Yapabilecekleri</div>
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-left"><div class="step-num">1</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Belgeyi görüntüle</div><div class="step-desc">PDF / görsel önizleme, dosya adı ve yükleme tarihi</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">2</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Onayla / Reddet</div><div class="step-desc">PUT ile status=approved veya status=rejected; ret notu eklenebilir</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">3</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Öğrenciye gizle/göster</div><div class="step-desc">is_visible_to_student toggle — öğrenci portali etkilenir</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">4</div></div>
+            <div class="step-content"><div class="step-title">Belge talep et</div><div class="step-desc">Eksik evrak için öğrenciye bildirim gönderilir</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Belge Durum Akışı</div>
+        <div class="pipeline" style="margin: 0;">
+          <div class="pl-stage" style="min-width: 80px;">
+            <div class="pl-circle" style="background: #6b7280; width:40px; height:40px; font-size:16px;">⏳</div>
+            <div class="pl-label" style="font-size:11px;">Bekleniyor</div>
+          </div>
+          <div class="pl-stage" style="min-width: 80px;">
+            <div class="pl-circle" style="background: #f59e0b; width:40px; height:40px; font-size:16px;">👁</div>
+            <div class="pl-label" style="font-size:11px;">İnceleniyor</div>
+          </div>
+          <div class="pl-stage" style="min-width: 80px;">
+            <div class="pl-circle" style="background: #16a34a; width:40px; height:40px; font-size:16px;">✓</div>
+            <div class="pl-label" style="font-size:11px;">Onaylandı</div>
+          </div>
+          <div class="pl-stage" style="min-width: 80px;">
+            <div class="pl-circle" style="background: #dc2626; width:40px; height:40px; font-size:16px;">✕</div>
+            <div class="pl-label" style="font-size:11px;">Reddedildi</div>
+          </div>
+        </div>
+        <div style="margin-top: 16px;">
+          <div class="card-title" style="margin-bottom: 8px;">Belge Kategorileri</div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <span class="badge info">Kimlik</span>
+            <span class="badge info">Pasaport</span>
+            <span class="badge info">Diploma</span>
+            <span class="badge info">Transkript</span>
+            <span class="badge info">Dil Sertifikası</span>
+            <span class="badge info">Motivasyon Mektubu</span>
+            <span class="badge info">Referans</span>
+            <span class="badge info">Özgeçmiş</span>
+            <span class="badge info">Fotoğraf</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight amber" style="margin-top: 14px;">
+      <strong>Güvenlik:</strong> Dosya yükleme sırasında ValidFileMagicBytes kuralı çalışır — gerçek dosya içeriğini extension ile karşılaştırır. Sahte uzantılı dosyalar (ör. exe → pdf) reddedilir.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ S8: VİZE & KONUT ══════════════════════════════════════ -->
+<div class="section" id="s8">
+  <div class="section-header" style="background: linear-gradient(135deg, #065f46, #059669);">
+    <div class="section-icon">🛂</div>
+    <div>
+      <div class="section-title">8. Vize &amp; Konut</div>
+      <div class="section-sub">/senior/visa · /senior/housing — Almanya sürecinin kritik adımları</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Vize Takibi</div>
+        <table>
+          <thead><tr><th>Alan</th><th>Detay</th></tr></thead>
+          <tbody>
+            <tr><td>Başvuru Durumu</td><td>Hazırlanıyor / Gönderildi / İnceleniyor / Onaylandı / Reddedildi</td></tr>
+            <tr><td>Konsolosluk</td><td>Başvuru yapılan şehir/ülke</td></tr>
+            <tr><td>Randevu Tarihi</td><td>Konsolosluk görüşmesi</td></tr>
+            <tr><td>Vize Tipi</td><td>Öğrenci vizesi / Çalışma izni</td></tr>
+            <tr><td>Geçerlilik</td><td>Vize başlangıç-bitiş tarihleri</td></tr>
+            <tr><td>Notlar</td><td>Konsolosluk talepleri, eksik belgeler</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Konaklama Takibi</div>
+        <table>
+          <thead><tr><th>Alan</th><th>Detay</th></tr></thead>
+          <tbody>
+            <tr><td>Konaklama Tipi</td><td>Yurt / Özel Daire / Paylaşımlı Ev</td></tr>
+            <tr><td>Rezervasyon Durumu</td><td>Aranıyor / Rezerve / Onaylandı / İptal</td></tr>
+            <tr><td>Adres</td><td>Sokak, şehir, posta kodu</td></tr>
+            <tr><td>Giriş Tarihi</td><td>Almanya'ya varış / konaklama başlangıcı</td></tr>
+            <tr><td>Kira</td><td>Aylık tutar ve ödeme bilgisi</td></tr>
+            <tr><td>Notlar</td><td>Özel durumlar, iletişim kişisi</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="highlight green" style="margin-top: 14px;">
+      <strong>Entegrasyon:</strong> Vize ve konaklama kayıtları, Süreç Takibi sayfasının pipeline'ında otomatik olarak ilgili aşamayı "done" veya "active" olarak işaretler. Manuel güncelleme gerekmez.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ S9: RANDEVULAR & SÖZLEŞMELER ══════════════════════════════════════ -->
+<div class="section" id="s9">
+  <div class="section-header" style="background: linear-gradient(135deg, #b45309, #d97706);">
+    <div class="section-icon">📅</div>
+    <div>
+      <div class="section-title">9. Randevular &amp; Sözleşmeler</div>
+      <div class="section-sub">/senior/appointments · /senior/contracts</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Randevu Yönetimi</div>
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-left"><div class="step-num">1</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Randevu Oluştur</div><div class="step-desc">Tarih, saat, tip (görüşme/vize/diğer), öğrenci seçimi</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">2</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Onay Durumu</div><div class="step-desc">pending → confirmed → completed / cancelled</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">3</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Takvim Entegrasyonu</div><div class="step-desc">Google Calendar / Calendly / Cal.com (IntegrationFactory)</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">4</div></div>
+            <div class="step-content"><div class="step-title">Hatırlatma</div><div class="step-desc">SeniorRemindersCommand daily 08:30 — yaklaşan randevular bildirim</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Sözleşme İşlemleri</div>
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-left"><div class="step-num">1</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Şablon Seç</div><div class="step-desc">Manager'ın oluşturduğu şablonlardan birini seç</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">2</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Öğrenci Adına Oluştur</div><div class="step-desc">Değişkenler otomatik doldurulur (ad, tarih, paket)</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">3</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Dijital İmza</div><div class="step-desc">DocuSign / HelloSign / PandaDoc entegrasyonu</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">4</div></div>
+            <div class="step-content"><div class="step-title">PDF Arşiv</div><div class="step-desc">İmzalı sözleşme PDF Firebase Storage'a kaydedilir</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ S10: NOTLAR, TİCKET & MESAJLAR ══════════════════════════════════════ -->
+<div class="section" id="s10">
+  <div class="section-header" style="background: linear-gradient(135deg, #1e3a8a, #2563eb);">
+    <div class="section-icon">💬</div>
+    <div>
+      <div class="section-title">10. Notlar, Ticket &amp; Mesajlar</div>
+      <div class="section-sub">/senior/notes · /senior/tickets · /senior/inbox</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="grid3">
+      <div class="card">
+        <div class="card-title">İç Notlar</div>
+        <div class="row-list">
+          <div class="row-item"><div class="row-icon">🔒</div><div class="row-body"><div class="row-label">Öğrenciye görünmez</div><div class="row-desc">Sadece senior ve manager görür</div></div></div>
+          <div class="row-item"><div class="row-icon">📌</div><div class="row-body"><div class="row-label">Öğrenciye bağlı</div><div class="row-desc">student_id ile ilişkilendirilir</div></div></div>
+          <div class="row-item"><div class="row-icon">✏️</div><div class="row-body"><div class="row-label">Serbest metin</div><div class="row-desc">Görüşme notu, özel durum, hatırlatma</div></div></div>
+          <div class="row-item"><div class="row-icon">📋</div><div class="row-body"><div class="row-label">Hızlı Not FAB</div><div class="row-desc">Tüm sayfalarda sağ alt köşede kayan buton</div></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Ticket Yönetimi</div>
+        <div class="row-list">
+          <div class="row-item"><div class="row-icon">🎫</div><div class="row-body"><div class="row-label">Departman</div><div class="row-desc">advisory / documents / visa / finance / general</div></div></div>
+          <div class="row-item"><div class="row-icon">⚡</div><div class="row-body"><div class="row-label">Öncelik</div><div class="row-desc">low / normal / high / urgent</div></div></div>
+          <div class="row-item"><div class="row-icon">🔄</div><div class="row-body"><div class="row-label">Durum akışı</div><div class="row-desc">open → in_progress → resolved / closed</div></div></div>
+          <div class="row-item"><div class="row-icon">💬</div><div class="row-body"><div class="row-label">Yanıt şablonları</div><div class="row-desc">Sık yanıtlar için önceden hazır metinler</div></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Birleşik Gelen Kutusu</div>
+        <div class="row-list">
+          <div class="row-item"><div class="row-icon">📨</div><div class="row-body"><div class="row-label">DM Mesajlar</div><div class="row-desc">Öğrenci-senior ikili konuşmalar</div></div></div>
+          <div class="row-item"><div class="row-icon">🎫</div><div class="row-body"><div class="row-label">Ticket Bildirimleri</div><div class="row-desc">Yeni ve güncellenen talepler</div></div></div>
+          <div class="row-item"><div class="row-icon">🔔</div><div class="row-body"><div class="row-label">Sistem Bildirimleri</div><div class="row-desc">Belge onayı, deadline, eskalasyon</div></div></div>
+          <div class="row-item"><div class="row-icon">⏱</div><div class="row-body"><div class="row-label">SLA Takibi</div><div class="row-desc">Cevap süresi aşımında otomatik uyarı</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ S11: DOKÜMAN OLUŞTURUCU ══════════════════════════════════════ -->
+<div class="section" id="s11">
+  <div class="section-header" style="background: linear-gradient(135deg, #5b21b6, #7c3aed);">
+    <div class="section-icon">📝</div>
+    <div>
+      <div class="section-title">11. Doküman Oluşturucu</div>
+      <div class="section-sub">/senior/document-builder — AI destekli belge üretimi</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Desteklenen Belge Tipleri</div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: var(--bg); border-radius: 8px; border: 1px solid var(--line);">
+            <span class="badge purple">1</span><span style="font-size: 13px; font-weight: 600;">Motivasyon Mektubu</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: var(--bg); border-radius: 8px; border: 1px solid var(--line);">
+            <span class="badge purple">2</span><span style="font-size: 13px; font-weight: 600;">Niyet Mektubu</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: var(--bg); border-radius: 8px; border: 1px solid var(--line);">
+            <span class="badge purple">3</span><span style="font-size: 13px; font-weight: 600;">CV / Özgeçmiş</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: var(--bg); border-radius: 8px; border: 1px solid var(--line);">
+            <span class="badge purple">4</span><span style="font-size: 13px; font-weight: 600;">Referans Mektubu</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: var(--bg); border-radius: 8px; border: 1px solid var(--line);">
+            <span class="badge purple">5</span><span style="font-size: 13px; font-weight: 600;">Vize Başvuru Yazısı</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: var(--bg); border-radius: 8px; border: 1px solid var(--line);">
+            <span class="badge purple">6</span><span style="font-size: 13px; font-weight: 600;">Genel Dilekçe</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Üretim Akışı</div>
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-left"><div class="step-num">1</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Öğrenci & Belge Seç</div><div class="step-desc">Öğrenci profili ve hedef üniversite bilgileri otomatik yüklenir</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">2</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">AI İçerik Üretimi</div><div class="step-desc">AiWritingService (Claude API) ile taslak metin oluşturulur</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">3</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Kalite Skoru</div><div class="step-desc">qualityScore() — uzunluk, anahtar kelime, yapı kontrolü</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">4</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Düzenle &amp; Kaydet</div><div class="step-desc">WYSIWYG editör, şablon olarak kaydet, PDF indir</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">5</div></div>
+            <div class="step-content"><div class="step-title">Öğrenciye Gönder</div><div class="step-desc">Belge öğrenci portali belgeler sekmesinde görünür</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ S12: TOPLU İNCELEME & PERFORMANS ══════════════════════════════════════ -->
+<div class="section" id="s12">
+  <div class="section-header" style="background: linear-gradient(135deg, #0f4c75, #1b6ca8);">
+    <div class="section-icon">📊</div>
+    <div>
+      <div class="section-title">12. Toplu İnceleme &amp; Performans</div>
+      <div class="section-sub">/senior/batch-review · /senior/performance</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Toplu İnceleme (Batch Review)</div>
+        <div class="highlight blue" style="margin-bottom: 12px;">Klavye kısayolları ile çok sayıda öğrenci belgesini hızla işle: A=Onayla, R=Reddet, N=Atla</div>
+        <div class="step-flow">
+          <div class="step">
+            <div class="step-left"><div class="step-num">1</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Kuyruk Oluşturulur</div><div class="step-desc">Pending statüsündeki tüm belgeler sıraya alınır</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">2</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Büyük Önizleme</div><div class="step-desc">Belge tam ekranda görüntülenir, öğrenci bilgileri yanda</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">3</div><div class="step-line"></div></div>
+            <div class="step-content"><div class="step-title">Hızlı Karar</div><div class="step-desc">A / R / N tuşları — her karar sonrası otomatik sonraki belge</div></div>
+          </div>
+          <div class="step">
+            <div class="step-left"><div class="step-num">4</div></div>
+            <div class="step-content"><div class="step-title">Özet Rapor</div><div class="step-desc">Kaç belge onaylandı/reddedildi, kaç atlandı</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Performans Raporu</div>
+        <table>
+          <thead><tr><th>Metrik</th><th>Hesaplama</th></tr></thead>
+          <tbody>
+            <tr><td>Toplam Öğrenci</td><td>Atanmış aktif kayıtlar</td></tr>
+            <tr><td>Tamamlama Oranı</td><td>Enrolled aşamasına geçen / toplam</td></tr>
+            <tr><td>Ort. Süreç Süresi</td><td>Lead → Enrolled gün sayısı (ort.)</td></tr>
+            <tr><td>Belge Onay Hızı</td><td>Ortalama pending → approved süresi</td></tr>
+            <tr><td>Ticket Yanıt Süresi</td><td>SLA uyum yüzdesi</td></tr>
+            <tr><td>NPS / Memnuniyet</td><td>Öğrenci feedback ortalaması</td></tr>
+            <tr><td>Aylık Hedef</td><td>Performans hedeflerine kıyasla %</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top: 12px; font-size: 12px; color: var(--muted);">
+          📅 Anlık performans snapshot: senior:snapshot-performance komutu her ayın 1'i saat 03:30'da çalışır
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card">
+      <div class="card-title">Lead Skor Hesaplama (8 Faktör)</div>
+      <div class="grid2">
+        <table>
+          <thead><tr><th>Faktör</th><th>Ağırlık</th><th>Açıklama</th></tr></thead>
+          <tbody>
+            <tr><td>Belge Tamamlanma</td><td>25%</td><td>Yüklenen / toplam beklenen belge</td></tr>
+            <tr><td>Sözleşme Durumu</td><td>20%</td><td>İmzalı ise tam puan</td></tr>
+            <tr><td>Üniversite Başvuruları</td><td>15%</td><td>En az 1 kabul = tam puan</td></tr>
+            <tr><td>Randevu Katılımı</td><td>10%</td><td>Tamamlanan / toplam randevu</td></tr>
+          </tbody>
+        </table>
+        <table>
+          <thead><tr><th>Faktör</th><th>Ağırlık</th><th>Açıklama</th></tr></thead>
+          <tbody>
+            <tr><td>Ticket Yanıt Süresi</td><td>10%</td><td>Ortalama yanıt süresi puanı</td></tr>
+            <tr><td>Profil Doluluk</td><td>8%</td><td>Eksik alan oranı</td></tr>
+            <tr><td>Son Aktivite</td><td>7%</td><td>Son 7 gün içi işlem var mı</td></tr>
+            <tr><td>NPS / Feedback</td><td>5%</td><td>Ortalama memnuniyet puanı</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+        <span class="badge ok">80–100: Düşük Risk</span>
+        <span class="badge warn">50–79: Orta Risk</span>
+        <span class="badge danger">20–49: Yüksek Risk</span>
+        <span class="badge danger" style="background:#fef2f2; color:#7f1d1d;">0–19: Kritik</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ EKSTRA: SİSTEM KOMUTLARI ══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header" style="background: linear-gradient(135deg, #374151, #1f2937);">
+    <div class="section-icon">⚙️</div>
+    <div>
+      <div class="section-title">Arka Plan Komutları (Senior ile ilgili)</div>
+      <div class="section-sub">Otomatik çalışan Laravel Artisan komutları</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>Komut</th><th>Zamanlama</th><th>Açıklama</th></tr></thead>
+      <tbody>
+        <tr><td><code>senior:remind-tasks</code></td><td>Her gün 08:30</td><td>Yaklaşan randevular, bekleyen belgeler, deadline uyarıları senior'a bildirim</td></tr>
+        <tr><td><code>senior:snapshot-performance</code></td><td>Her ayın 1'i 03:30</td><td>Senior performans snapshot'ı alır — aylık kıyaslama için</td></tr>
+        <tr><td><code>leads:recalculate-scores</code></td><td>Her gün 02:30</td><td>Tüm öğrencilerin lead/risk skorlarını 8 faktörle yeniden hesaplar</td></tr>
+        <tr><td><code>gdpr:enforce-retention</code></td><td>Her gün 03:00</td><td>Veri saklama politikasına göre süresi dolan kayıtları siler</td></tr>
+        <tr><td><code>security:anomaly-check</code></td><td>Her saat</td><td>Anormal giriş, IP kuralı ihlali kontrolü</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ FOOTER ══════════════════════════════════════ -->
+<div class="footer">
+  <strong>MentorDE ERP</strong> — Senior Portal İş Akışı Dokümantasyonu<br>
+  Laravel 12 · PHP 8.4 · MySQL + Firestore · Mart 2026<br>
+  <span style="opacity:.6;">Bu belge mentorde/docs/senior-workflow.html</span>
+</div>
+
+</div><!-- /page-wrap -->
+</body>
+</html>

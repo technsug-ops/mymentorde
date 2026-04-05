@@ -1,0 +1,27 @@
+{
+    "name": "MentorDE — Almanya Eğitim Danışmanlığı",
+    "short_name": "MentorDE",
+    "description": "Almanya'da eğitim başvurusu için kişisel danışmanlık portalı",
+    "start_url": "/guest/dashboard",
+    "scope": "/guest/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#2563eb",
+    "lang": "tr",
+    "icons": [
+        {
+            "src": "/icons/guest-icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/guest-icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": [],
+    "categories": ["education", "productivity"]
+}

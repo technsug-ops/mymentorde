@@ -1,0 +1,524 @@
+
+  ANY             / .......................................................... Illuminate\Routing › RedirectController
+  GET|HEAD        api/v1/config/account-vault ....................................... Api\AccountVaultController@index
+  POST            api/v1/config/account-vault ....................................... Api\AccountVaultController@store
+  GET|HEAD        api/v1/config/account-vault-logs ................................... Api\AccountVaultController@logs
+  PUT             api/v1/config/account-vault/{accountVault} ....................... Api\AccountVaultController@update
+  DELETE          api/v1/config/account-vault/{accountVault} ...................... Api\AccountVaultController@destroy
+  GET|HEAD        api/v1/config/account-vault/{accountVault}/reveal ................ Api\AccountVaultController@reveal
+  GET|HEAD        api/v1/config/apply-form-settings .............................. Api\ApplyFormSettingController@show
+  POST            api/v1/config/apply-form-settings ............................ Api\ApplyFormSettingController@update
+  GET|HEAD        api/v1/config/batch-operations .................................. Api\BatchOperationController@index
+  POST            api/v1/config/batch-operations/notification-broadcast Api\BatchOperationController@broadcastNotific…
+  GET|HEAD        api/v1/config/companies ......................................... Api\CompanyContextController@index
+  POST            api/v1/config/companies ......................................... Api\CompanyContextController@store
+  POST            api/v1/config/companies/switch ................................. Api\CompanyContextController@switch
+  PUT             api/v1/config/companies/{company} .............................. Api\CompanyContextController@update
+  GET|HEAD        api/v1/config/dealer-revenue-milestones ................. Api\DealerRevenueMilestoneController@index
+  POST            api/v1/config/dealer-revenue-milestones ................. Api\DealerRevenueMilestoneController@store
+  PUT             api/v1/config/dealer-revenue-milestones/{dealerRevenueMilestone} Api\DealerRevenueMilestoneControll…
+  POST            api/v1/config/dealer-student-revenues/init ........... Api\DealerStudentRevenueController@initialize
+  GET|HEAD        api/v1/config/dealer-student-revenues/{dealerId}/{studentId} Api\DealerStudentRevenueController@show
+  GET|HEAD        api/v1/config/dealer-types .......................................... Api\DealerTypeController@index
+  POST            api/v1/config/dealer-types .......................................... Api\DealerTypeController@store
+  PUT             api/v1/config/dealer-types/{dealerType} ............................ Api\DealerTypeController@update
+  GET|HEAD        api/v1/config/dealers ................................................... Api\DealerController@index
+  POST            api/v1/config/dealers ................................................... Api\DealerController@store
+  GET|HEAD        api/v1/config/dealers/type-history ................................ Api\DealerController@typeHistory
+  PUT             api/v1/config/dealers/{dealer} ......................................... Api\DealerController@update
+  DELETE          api/v1/config/dealers/{dealer} ........................................ Api\DealerController@destroy
+  POST            api/v1/config/dealers/{dealer}/archive ................................ Api\DealerController@archive
+  POST            api/v1/config/dealers/{dealer}/unarchive ............................ Api\DealerController@unarchive
+  GET|HEAD        api/v1/config/document-categories ............................. Api\DocumentCategoryController@index
+  POST            api/v1/config/document-categories ............................. Api\DocumentCategoryController@store
+  GET|HEAD        api/v1/config/documents ............................................... Api\DocumentController@index
+  POST            api/v1/config/documents ............................................... Api\DocumentController@store
+  POST            api/v1/config/documents/preview-name ............................ Api\DocumentController@previewName
+  POST            api/v1/config/documents/{document}/approve .......................... Api\DocumentController@approve
+  POST            api/v1/config/documents/{document}/reject ............................ Api\DocumentController@reject
+  GET|HEAD        api/v1/config/entity-catalog ..................................... Api\EntityCatalogController@index
+  POST            api/v1/config/entity-catalog/suggest ........................... Api\EntityCatalogController@suggest
+  GET|HEAD        api/v1/config/escalation-rules .................................. Api\EscalationRuleController@index
+  POST            api/v1/config/escalation-rules .................................. Api\EscalationRuleController@store
+  POST            api/v1/config/escalation-rules/process-now ................. Api\EscalationRuleController@processNow
+  PUT             api/v1/config/escalation-rules/{escalationRule} ................ Api\EscalationRuleController@update
+  GET|HEAD        api/v1/config/external-provider-connections ......... Api\ExternalProviderConnectionController@index
+  POST            api/v1/config/external-provider-connections ......... Api\ExternalProviderConnectionController@store
+  PUT             api/v1/config/external-provider-connections/{externalProviderConnection} Api\ExternalProviderConnec…
+  GET|HEAD        api/v1/config/field-rule-approvals ........................... Api\FieldRuleApprovalController@index
+  POST            api/v1/config/field-rule-approvals/archive-bulk ........ Api\FieldRuleApprovalController@bulkArchive
+  DELETE          api/v1/config/field-rule-approvals/cleanup-bulk ........ Api\FieldRuleApprovalController@bulkCleanup
+  POST            api/v1/config/field-rule-approvals/{fieldRuleApproval}/approve Api\FieldRuleApprovalController@appr…
+  POST            api/v1/config/field-rule-approvals/{fieldRuleApproval}/reject Api\FieldRuleApprovalController@reject
+  GET|HEAD        api/v1/config/field-rules ............................................ Api\FieldRuleController@index
+  POST            api/v1/config/field-rules ............................................ Api\FieldRuleController@store
+  POST            api/v1/config/field-rules/evaluate ................................ Api\FieldRuleController@evaluate
+  PUT             api/v1/config/field-rules/{fieldRule} ............................... Api\FieldRuleController@update
+  GET|HEAD        api/v1/config/firebase-storage/status ......................... Api\FirebaseStorageController@status
+  POST            api/v1/config/firebase-storage/test-upload ................ Api\FirebaseStorageController@testUpload
+  GET|HEAD        api/v1/config/firestore/status ...................................... Api\FirestoreController@status
+  POST            api/v1/config/firestore/test-write ............................... Api\FirestoreController@testWrite
+  GET|HEAD        api/v1/config/guest-applications ......................... Api\GuestApplicationAdminController@index
+  POST            api/v1/config/guest-applications/archive-stale .... Api\GuestApplicationAdminController@archiveStale
+  POST            api/v1/config/guest-applications/{guestApplication}/approve-contract Api\GuestApplicationAdminContr…
+  GET|HEAD        api/v1/config/guest-applications/{guestApplication}/conversion-readiness Api\GuestApplicationAdminC…
+  POST            api/v1/config/guest-applications/{guestApplication}/convert Api\GuestApplicationAdminController@con…
+  POST            api/v1/config/guest-applications/{guestApplication}/reject-contract Api\GuestApplicationAdminContro…
+  GET|HEAD        api/v1/config/guest-ops/documents ................................. Api\GuestOpsController@documents
+  POST            api/v1/config/guest-ops/documents/{document}/decision ........ Api\GuestOpsController@decideDocument
+  GET|HEAD        api/v1/config/guest-ops/tickets ..................................... Api\GuestOpsController@tickets
+  POST            api/v1/config/guest-ops/tickets/{guestTicket}/reply ............. Api\GuestOpsController@replyTicket
+  POST            api/v1/config/guest-ops/tickets/{guestTicket}/status ..... Api\GuestOpsController@updateTicketStatus
+  GET|HEAD        api/v1/config/guest-registration-fields ................. Api\GuestRegistrationFieldController@index
+  POST            api/v1/config/guest-registration-fields ................. Api\GuestRegistrationFieldController@store
+  PUT             api/v1/config/guest-registration-fields/{guestRegistrationField} Api\GuestRegistrationFieldControll…
+  DELETE          api/v1/config/guest-registration-fields/{guestRegistrationField} Api\GuestRegistrationFieldControll…
+  POST            api/v1/config/guest-registration-fields/{guestRegistrationField}/clone Api\GuestRegistrationFieldCo…
+  POST            api/v1/config/guest-registration-fields/{guestRegistrationField}/move Api\GuestRegistrationFieldCon…
+  GET|HEAD        api/v1/config/guest-required-documents ................... Api\GuestRequiredDocumentController@index
+  POST            api/v1/config/guest-required-documents ................... Api\GuestRequiredDocumentController@store
+  POST            api/v1/config/guest-required-documents/publish ......... Api\GuestRequiredDocumentController@publish
+  PUT             api/v1/config/guest-required-documents/{guestRequiredDocument} Api\GuestRequiredDocumentController@…
+  DELETE          api/v1/config/guest-required-documents/{guestRequiredDocument} Api\GuestRequiredDocumentController@…
+  GET|HEAD        api/v1/config/integration-configs ............................ Api\IntegrationConfigController@index
+  POST            api/v1/config/integration-configs/{category} ................ Api\IntegrationConfigController@upsert
+  POST            api/v1/config/integration-configs/{category}/test ... Api\IntegrationConfigController@testConnection
+  GET|HEAD        api/v1/config/internal-notes ...................................... Api\InternalNoteController@index
+  POST            api/v1/config/internal-notes ...................................... Api\InternalNoteController@store
+  DELETE          api/v1/config/internal-notes/{internalNote} ..................... Api\InternalNoteController@destroy
+  POST            api/v1/config/internal-notes/{internalNote}/pin ..................... Api\InternalNoteController@pin
+  POST            api/v1/config/internal-notes/{internalNote}/unpin ................. Api\InternalNoteController@unpin
+  GET|HEAD        api/v1/config/knowledge-base ..................................... Api\KnowledgeBaseController@index
+  POST            api/v1/config/knowledge-base ..................................... Api\KnowledgeBaseController@store
+  PUT             api/v1/config/knowledge-base/{knowledgeBaseArticle} ............. Api\KnowledgeBaseController@update
+  GET|HEAD        api/v1/config/lead-source-options ............................. Api\LeadSourceOptionController@index
+  POST            api/v1/config/lead-source-options ............................. Api\LeadSourceOptionController@store
+  PUT             api/v1/config/lead-source-options/{leadSourceOption} ......... Api\LeadSourceOptionController@update
+  GET|HEAD        api/v1/config/message-templates ................................ Api\MessageTemplateController@index
+  POST            api/v1/config/message-templates ................................ Api\MessageTemplateController@store
+  PUT             api/v1/config/message-templates/{messageTemplate} ............. Api\MessageTemplateController@update
+  GET|HEAD        api/v1/config/notification-dispatches ..................... Api\NotificationDispatchController@index
+  POST            api/v1/config/notification-dispatches/dispatch-now .. Api\NotificationDispatchController@dispatchNow
+  POST            api/v1/config/notification-dispatches/retry-failed .. Api\NotificationDispatchController@retryFailed
+  POST            api/v1/config/notification-dispatches/{notificationDispatch}/mark-failed Api\NotificationDispatchCo…
+  POST            api/v1/config/notification-dispatches/{notificationDispatch}/mark-sent Api\NotificationDispatchCont…
+  GET|HEAD        api/v1/config/portal-users .......................................... Api\PortalUserController@index
+  POST            api/v1/config/portal-users .......................................... Api\PortalUserController@store
+  PUT             api/v1/config/portal-users/{user} .................................. Api\PortalUserController@update
+  DELETE          api/v1/config/portal-users/{user} ................................. Api\PortalUserController@destroy
+  POST            api/v1/config/portal-users/{user}/reset-password ............ Api\PortalUserController@resetPassword
+  GET|HEAD        api/v1/config/process-definitions ............................ Api\ProcessDefinitionController@index
+  POST            api/v1/config/process-definitions ............................ Api\ProcessDefinitionController@store
+  PUT             api/v1/config/process-definitions/{processDefinition} ....... Api\ProcessDefinitionController@update
+  GET|HEAD        api/v1/config/process-outcomes .................................. Api\ProcessOutcomeController@index
+  POST            api/v1/config/process-outcomes .................................. Api\ProcessOutcomeController@store
+  POST            api/v1/config/process-outcomes/{processOutcome}/make-visible Api\ProcessOutcomeController@makeVisib…
+  GET|HEAD        api/v1/config/rbac/assignments ...................................... Api\RbacController@assignments
+  POST            api/v1/config/rbac/assignments ................................... Api\RbacController@assignTemplate
+  POST            api/v1/config/rbac/assignments/{userRoleAssignment}/revoke ..... Api\RbacController@revokeAssignment
+  GET|HEAD        api/v1/config/rbac/permissions ...................................... Api\RbacController@permissions
+  POST            api/v1/config/rbac/permissions ................................. Api\RbacController@createPermission
+  GET|HEAD        api/v1/config/rbac/templates .......................................... Api\RbacController@templates
+  POST            api/v1/config/rbac/templates ..................................... Api\RbacController@createTemplate
+  PUT             api/v1/config/rbac/templates/{roleTemplate} ...................... Api\RbacController@updateTemplate
+  POST            api/v1/config/rbac/templates/{roleTemplate}/permissions/sync Api\RbacController@syncTemplatePermiss…
+  GET|HEAD        api/v1/config/rbac/users/{user}/effective-permissions ...... Api\RbacController@effectivePermissions
+  GET|HEAD        api/v1/config/revenue-milestones .............................. Api\RevenueMilestoneController@index
+  POST            api/v1/config/revenue-milestones .............................. Api\RevenueMilestoneController@store
+  PUT             api/v1/config/revenue-milestones/{revenueMilestone} .......... Api\RevenueMilestoneController@update
+  GET|HEAD        api/v1/config/role-catalog ......................................... Api\RoleCatalogController@index
+  GET|HEAD        api/v1/config/seniors ......................................... Api\SeniorManagementController@index
+  POST            api/v1/config/seniors ......................................... Api\SeniorManagementController@store
+  PUT             api/v1/config/seniors/{user} ................................. Api\SeniorManagementController@update
+  DELETE          api/v1/config/seniors/{user} ................................ Api\SeniorManagementController@destroy
+  POST            api/v1/config/seniors/{user}/reset-password ........... Api\SeniorManagementController@resetPassword
+  POST            api/v1/config/seniors/{user}/transfer ...................... Api\SeniorManagementController@transfer
+  GET|HEAD        api/v1/config/student-assignments ............................ Api\StudentAssignmentController@index
+  POST            api/v1/config/student-assignments ........................... Api\StudentAssignmentController@upsert
+  POST            api/v1/config/student-assignments/auto-assign ........... Api\StudentAssignmentController@autoAssign
+  GET|HEAD        api/v1/config/student-assignments/branches ................ Api\StudentAssignmentController@branches
+  POST            api/v1/config/student-assignments/bulk-assign ........... Api\StudentAssignmentController@bulkAssign
+  POST            api/v1/config/student-assignments/generate-id .... Api\StudentAssignmentController@generateStudentId
+  POST            api/v1/config/student-assignments/{studentAssignment}/archive Api\StudentAssignmentController@archi…
+  POST            api/v1/config/student-assignments/{studentAssignment}/unarchive Api\StudentAssignmentController@una…
+  GET|HEAD        api/v1/config/student-card/search ................................. Api\StudentCardController@search
+  GET|HEAD        api/v1/config/student-card/{studentId} .............................. Api\StudentCardController@show
+  POST            api/v1/config/student-revenues/confirm ........................ Api\StudentRevenueController@confirm
+  POST            api/v1/config/student-revenues/init ........................ Api\StudentRevenueController@initialize
+  POST            api/v1/config/student-revenues/pay ................................ Api\StudentRevenueController@pay
+  POST            api/v1/config/student-revenues/trigger ........................ Api\StudentRevenueController@trigger
+  GET|HEAD        api/v1/config/student-revenues/{studentId} ....................... Api\StudentRevenueController@show
+  GET|HEAD        api/v1/config/student-risk-scores ............................. Api\StudentRiskScoreController@index
+  POST            api/v1/config/student-risk-scores/calculate-now ........ Api\StudentRiskScoreController@calculateNow
+  GET|HEAD        api/v1/config/student-types ........................................ Api\StudentTypeController@index
+  POST            api/v1/config/student-types ........................................ Api\StudentTypeController@store
+  PUT             api/v1/config/student-types/{studentType} ......................... Api\StudentTypeController@update
+  GET|HEAD        api/v1/config/suggestions ........................................... Api\SuggestionController@index
+  GET|HEAD        api/v1/config/system-event-logs ................................. Api\SystemEventLogController@index
+  GET|HEAD        api/v1/config/system-health ....................................... Api\SystemHealthController@index
+  POST            api/v1/config/system-health/run-critical-check ......... Api\SystemHealthController@runCriticalCheck
+  GET|HEAD        api/v1/marketing-admin/analytics/external-performance Api\MarketingAnalyticsController@externalPerf…
+  GET|HEAD        api/v1/marketing-admin/analytics/kpis ........................ Api\MarketingAnalyticsController@kpis
+  GET|HEAD        api/v1/marketing-admin/analytics/source-performance Api\MarketingAnalyticsController@sourcePerforma…
+  GET|HEAD        api/v1/marketing-admin/campaigns ............................. Api\MarketingCampaignController@index
+  POST            api/v1/marketing-admin/campaigns ............................. Api\MarketingCampaignController@store
+  PUT             api/v1/marketing-admin/campaigns/{marketingCampaign} ........ Api\MarketingCampaignController@update
+  DELETE          api/v1/marketing-admin/campaigns/{marketingCampaign} ....... Api\MarketingCampaignController@destroy
+  GET|HEAD        api/v1/marketing-admin/companies ................................ Api\CompanyContextController@index
+  POST            api/v1/marketing-admin/companies/switch ........................ Api\CompanyContextController@switch
+  GET|HEAD        api/v1/marketing-admin/suggestions .................................. Api\SuggestionController@index
+  GET|HEAD        api/v1/public/apply-suggestions ............................. GuestApplicationController@suggestions
+  GET|HEAD        api/v1/public/lead-source-options ..................... GuestApplicationController@leadSourceOptions
+  GET|HEAD        api/v1/student/process-outcomes/{processOutcome} ....... Api\ProcessOutcomeController@showForStudent
+  GET|HEAD        apply ............................................. apply.create › GuestApplicationController@create
+  POST            apply ............................................... apply.store › GuestApplicationController@store
+  GET|HEAD        apply/status/{token} .............................. apply.status › GuestApplicationController@status
+  GET|HEAD        apply/success ................................... apply.success › GuestApplicationController@success
+  GET|HEAD        config ............................................................................................. 
+  GET|HEAD        config/export-code/full ............................................... ProjectExportController@full
+  GET|HEAD        config/export-code/safe ............................................... ProjectExportController@safe
+  GET|HEAD        dealer/advisor ...................................................... DealerPortalController@advisor
+  POST            dealer/advisor/ticket ..... dealer.advisor.ticket.store › DealerPortalController@createAdvisorTicket
+  GET|HEAD        dealer/advisor/tickets/{ticket} .. dealer.advisor.tickets.show › DealerPortalController@ticketDetail
+  POST            dealer/advisor/tickets/{ticket}/reply dealer.advisor.tickets.reply › DealerPortalController@replyTi…
+  GET|HEAD        dealer/dashboard ................................................... DealerDashboardController@index
+  GET|HEAD        dealer/earnings .................................................... DealerPortalController@earnings
+  GET|HEAD        dealer/earnings/export .............. dealer.earnings.export › DealerPortalController@earningsExport
+  GET|HEAD        dealer/lead-create ................................................. DealerPortalController@leadForm
+  POST            dealer/lead-create ..................... dealer.lead-create.store › DealerPortalController@storeLead
+  GET|HEAD        dealer/leads .......................................................... DealerPortalController@leads
+  GET|HEAD        dealer/leads/{lead} .......................... dealer.leads.show › DealerPortalController@leadDetail
+  GET|HEAD        dealer/payments .................................................... DealerPortalController@payments
+  POST            dealer/payments/accounts .. dealer.payments.accounts.store › DealerPortalController@addPayoutAccount
+  DELETE          dealer/payments/accounts/{id} dealer.payments.accounts.delete › DealerPortalController@deletePayout…
+  POST            dealer/payments/request ............. dealer.payments.request › DealerPortalController@requestPayout
+  GET|HEAD        dealer/profile ...................................................... DealerPortalController@profile
+  POST            dealer/profile ........................ dealer.profile.update › DealerPortalController@updateProfile
+  GET|HEAD        dealer/referral-links ......................................... DealerPortalController@referralLinks
+  POST            dealer/referral-links/utm .......... dealer.referral.utm.store › DealerPortalController@storeUtmLink
+  GET|HEAD        dealer/settings .................................................... DealerPortalController@settings
+  POST            dealer/settings ..................... dealer.settings.update › DealerPortalController@updateSettings
+  GET|HEAD        dealer/settings/data-export ........ dealer.settings.data-export › DealerPortalController@dataExport
+  POST            dealer/settings/password .......... dealer.settings.password › DealerPortalController@changePassword
+  GET|HEAD        dealer/training .................................................... DealerPortalController@training
+  GET|HEAD        demo ............................................................................................... 
+  GET|HEAD        demo/checklist ..................................................................................... 
+  GET|HEAD        demo/guest ......................................................................................... 
+  GET|HEAD        dm/attachment/{message} ................... dm.attachment.download › ConversationController@download
+  GET|HEAD        go/{code} .................................... tracked-link.redirect › TrackedLinkRedirectController
+  GET|HEAD        guest/contract .................................... guest.contract › Guest\PortalController@contract
+  POST            guest/contract/request ........... guest.contract.request › Guest\WorkflowController@requestContract
+  POST            guest/contract/update-request guest.contract.update-request › Guest\WorkflowController@requestContr…
+  POST            guest/contract/upload-signed guest.contract.upload-signed › Guest\WorkflowController@uploadSignedCo…
+  GET|HEAD        guest/dashboard ................................. guest.dashboard › Guest\PortalController@dashboard
+  GET|HEAD        guest/messages ....................................... guest.messages › ConversationController@guest
+  POST            guest/messages/send ......................... guest.messages.send › ConversationController@guestSend
+  GET|HEAD        guest/profile ....................................... guest.profile › Guest\PortalController@profile
+  POST            guest/profile ........................ guest.profile.update › Guest\WorkflowController@updateProfile
+  POST            guest/profile/photo .............. guest.profile.photo › Guest\WorkflowController@uploadProfilePhoto
+  GET|HEAD        guest/registration/documents guest.registration.documents › Guest\PortalController@registrationDocu…
+  POST            guest/registration/documents/upload guest.registration.documents.upload › Guest\WorkflowController@…
+  DELETE          guest/registration/documents/{document} guest.registration.documents.delete › Guest\WorkflowControl…
+  GET|HEAD        guest/registration/form .......... guest.registration.form › Guest\PortalController@registrationForm
+  POST            guest/registration/form/auto-save guest.registration.autosave › Guest\WorkflowController@autoSaveRe…
+  POST            guest/registration/form/submit guest.registration.submit › Guest\WorkflowController@submitRegistrat…
+  GET|HEAD        guest/services .................................... guest.services › Guest\PortalController@services
+  POST            guest/services/add-extra ....... guest.services.add-extra › Guest\WorkflowController@addExtraService
+  DELETE          guest/services/remove-extra/{extraCode} guest.services.remove-extra › Guest\WorkflowController@remo…
+  POST            guest/services/select-package guest.services.select-package › Guest\WorkflowController@selectPackage
+  GET|HEAD        guest/settings .................................... guest.settings › Guest\PortalController@settings
+  POST            guest/settings ..................... guest.settings.update › Guest\WorkflowController@updateSettings
+  POST            guest/settings/password .......... guest.settings.password › Guest\WorkflowController@changePassword
+  GET|HEAD        guest/tickets ....................................... guest.tickets › Guest\PortalController@tickets
+  POST            guest/tickets ........................... guest.tickets.store › Guest\WorkflowController@storeTicket
+  POST            guest/tickets/{ticket}/close ............ guest.tickets.close › Guest\WorkflowController@closeTicket
+  POST            guest/tickets/{ticket}/reopen ......... guest.tickets.reopen › Guest\WorkflowController@reopenTicket
+  POST            guest/tickets/{ticket}/reply ............ guest.tickets.reply › Guest\WorkflowController@replyTicket
+  GET|HEAD        landing/mentorde .................................................................. landing.mentorde
+  GET|HEAD        login ............................................................. login › AuthController@showLogin
+  POST            login ......................................................................... AuthController@login
+  POST            logout ....................................................................... AuthController@logout
+  GET|HEAD        manager/commissions .............. manager.commissions › Manager\ManagerPortalController@commissions
+  PATCH           manager/commissions/{payout}/approve manager.commissions.approve › Manager\ManagerPortalController@…
+  PATCH           manager/commissions/{payout}/mark-paid manager.commissions.mark-paid › Manager\ManagerPortalControl…
+  PATCH           manager/commissions/{payout}/reject manager.commissions.reject › Manager\ManagerPortalController@re…
+  GET|HEAD        manager/contract-template . manager.contract-template.show › Manager\ContractTemplateController@show
+  POST            manager/contract-template . manager.contract-template.save › Manager\ContractTemplateController@save
+  POST            manager/contract-template/company-settings manager.contract-template.company-settings › Manager\Con…
+  POST            manager/contract-template/decision manager.contract-template.decision › Manager\ContractTemplateCon…
+  POST            manager/contract-template/start-contract manager.contract-template.start-contract › Manager\Contrac…
+  POST            manager/contract-template/student-services manager.contract-template.student-services › Manager\Con…
+  GET|HEAD        manager/dashboard ................................................. ManagerDashboardController@index
+  GET|HEAD        manager/dashboard/export-csv .................................. ManagerDashboardController@exportCsv
+  GET|HEAD        manager/dashboard/report-print .............................. ManagerDashboardController@reportPrint
+  POST            manager/dashboard/snapshot ................................ ManagerDashboardController@storeSnapshot
+  POST            manager/dashboard/snapshot/mark-draft-bulk ... ManagerDashboardController@markFilteredSnapshotsDraft
+  POST            manager/dashboard/snapshot/mark-sent-bulk ..... ManagerDashboardController@markFilteredSnapshotsSent
+  GET|HEAD        manager/dashboard/snapshot/{managerReport} ................. ManagerDashboardController@showSnapshot
+  DELETE          manager/dashboard/snapshot/{managerReport} .............. ManagerDashboardController@destroySnapshot
+  GET|HEAD        manager/dashboard/snapshot/{managerReport}/export-csv . ManagerDashboardController@exportSnapshotCsv
+  POST            manager/dashboard/snapshot/{managerReport}/mark-draft . ManagerDashboardController@markSnapshotDraft
+  POST            manager/dashboard/snapshot/{managerReport}/mark-sent ... ManagerDashboardController@markSnapshotSent
+  GET|HEAD        manager/dashboard/snapshot/{managerReport}/print .......... ManagerDashboardController@printSnapshot
+  GET|HEAD        manager/dealers .......................... manager.dealers › Manager\ManagerPortalController@dealers
+  GET|HEAD        manager/dealers/{code} ........... manager.dealers.show › Manager\ManagerPortalController@dealerShow
+  GET|HEAD        manager/guests ............................. manager.guests › Manager\ManagerPortalController@guests
+  GET|HEAD        manager/guests/{guest} ............. manager.guests.show › Manager\ManagerPortalController@guestShow
+  PATCH           manager/guests/{guest}/assign manager.guests.assign › Manager\ManagerPortalController@guestAssignSe…
+  PATCH           manager/guests/{guest}/status manager.guests.status › Manager\ManagerPortalController@guestUpdateSt…
+  GET|HEAD        manager/preview/dealer/{dealerCode} .......................... ManagerPortalPreviewController@dealer
+  GET|HEAD        manager/preview/senior/{email} ............................... ManagerPortalPreviewController@senior
+  GET|HEAD        manager/preview/student/{studentId} ......................... ManagerPortalPreviewController@student
+  GET|HEAD        manager/requests .................................................... ManagerRequestController@index
+  POST            manager/requests .................................................... ManagerRequestController@store
+  POST            manager/requests/{managerRequest}/status ..................... ManagerRequestController@updateStatus
+  GET|HEAD        manager/seniors .......................... manager.seniors › Manager\ManagerPortalController@seniors
+  GET|HEAD        manager/seniors/{email} .......... manager.seniors.show › Manager\ManagerPortalController@seniorShow
+  GET|HEAD        manager/students ....................... manager.students › Manager\ManagerPortalController@students
+  GET|HEAD        manager/students/{studentId} ... manager.students.show › Manager\ManagerPortalController@studentShow
+  PATCH           manager/students/{studentId}/update manager.students.update › Manager\ManagerPortalController@stude…
+  GET|HEAD        manager/theme .................................... manager.theme.show › Manager\ThemeController@show
+  POST            manager/theme ................................ manager.theme.update › Manager\ThemeController@update
+  GET|HEAD        marketing-admin .................................................................................... 
+  GET|HEAD        messages-center .................................... messages.center › MessageCenterController@index
+  POST            messages-center/bulk-mark-read messages.center.bulk-mark-read › MessageCenterController@bulkMarkRead
+  POST            messages-center/bulk-update ....... messages.center.bulk-update › MessageCenterController@bulkUpdate
+  GET|HEAD        messages-center/{department} ............ messages.center.department › MessageCenterController@index
+  POST            messages-center/{thread}/assign-advisor messages.center.assign-advisor › MessageCenterController@as…
+  POST            messages-center/{thread}/convert-to-ticket messages.center.convert-ticket › MessageCenterController…
+  POST            messages-center/{thread}/send .................. messages.center.send › MessageCenterController@send
+  POST            messages-center/{thread}/status ...... messages.center.status › MessageCenterController@updateStatus
+  GET|HEAD        mktg-admin ............................................................................. mktg-admin.
+  GET|HEAD        mktg-admin/budget .............................. mktg-admin. › MarketingAdmin\BudgetController@index
+  POST            mktg-admin/budget .............................. mktg-admin. › MarketingAdmin\BudgetController@store
+  GET|HEAD        mktg-admin/budget/{period} ...................... mktg-admin. › MarketingAdmin\BudgetController@show
+  PUT             mktg-admin/budget/{period} .................... mktg-admin. › MarketingAdmin\BudgetController@update
+  GET|HEAD        mktg-admin/campaigns .......... mktg-admin.campaigns.index › MarketingAdmin\CampaignController@index
+  POST            mktg-admin/campaigns .......... mktg-admin.campaigns.store › MarketingAdmin\CampaignController@store
+  GET|HEAD        mktg-admin/campaigns/create . mktg-admin.campaigns.create › MarketingAdmin\CampaignController@create
+  GET|HEAD        mktg-admin/campaigns/{campaign} . mktg-admin.campaigns.show › MarketingAdmin\CampaignController@show
+  PUT|PATCH       mktg-admin/campaigns/{campaign} mktg-admin.campaigns.update › MarketingAdmin\CampaignController@upd…
+  DELETE          mktg-admin/campaigns/{campaign} mktg-admin.campaigns.destroy › MarketingAdmin\CampaignController@de…
+  GET|HEAD        mktg-admin/campaigns/{campaign}/edit mktg-admin.campaigns.edit › MarketingAdmin\CampaignController@…
+  GET|HEAD        mktg-admin/campaigns/{id}/daily-metrics mktg-admin. › MarketingAdmin\CampaignController@dailyMetrics
+  PUT             mktg-admin/campaigns/{id}/pause .............. mktg-admin. › MarketingAdmin\CampaignController@pause
+  GET|HEAD        mktg-admin/campaigns/{id}/report ............ mktg-admin. › MarketingAdmin\CampaignController@report
+  PUT             mktg-admin/campaigns/{id}/resume ............ mktg-admin. › MarketingAdmin\CampaignController@resume
+  GET|HEAD        mktg-admin/categories ..... mktg-admin.categories.index › MarketingAdmin\CMSCategoryController@index
+  POST            mktg-admin/categories ..... mktg-admin.categories.store › MarketingAdmin\CMSCategoryController@store
+  GET|HEAD        mktg-admin/categories/create mktg-admin.categories.create › MarketingAdmin\CMSCategoryController@cr…
+  GET|HEAD        mktg-admin/categories/{category} mktg-admin.categories.show › MarketingAdmin\CMSCategoryController@…
+  PUT|PATCH       mktg-admin/categories/{category} mktg-admin.categories.update › MarketingAdmin\CMSCategoryControlle…
+  DELETE          mktg-admin/categories/{category} mktg-admin.categories.destroy › MarketingAdmin\CMSCategoryControll…
+  GET|HEAD        mktg-admin/categories/{category}/edit mktg-admin.categories.edit › MarketingAdmin\CMSCategoryContro…
+  GET|HEAD        mktg-admin/content ............ mktg-admin.content.index › MarketingAdmin\CMSContentController@index
+  POST            mktg-admin/content ............ mktg-admin.content.store › MarketingAdmin\CMSContentController@store
+  GET|HEAD        mktg-admin/content/create ... mktg-admin.content.create › MarketingAdmin\CMSContentController@create
+  GET|HEAD        mktg-admin/content/{content} .... mktg-admin.content.show › MarketingAdmin\CMSContentController@show
+  PUT|PATCH       mktg-admin/content/{content} mktg-admin.content.update › MarketingAdmin\CMSContentController@update
+  DELETE          mktg-admin/content/{content} mktg-admin.content.destroy › MarketingAdmin\CMSContentController@destr…
+  GET|HEAD        mktg-admin/content/{content}/edit mktg-admin.content.edit › MarketingAdmin\CMSContentController@edit
+  PUT             mktg-admin/content/{id}/feature ... mktg-admin. › MarketingAdmin\CMSContentController@toggleFeatured
+  PUT             mktg-admin/content/{id}/publish .......... mktg-admin. › MarketingAdmin\CMSContentController@publish
+  GET|HEAD        mktg-admin/content/{id}/revisions ...... mktg-admin. › MarketingAdmin\CMSContentController@revisions
+  PUT             mktg-admin/content/{id}/schedule ........ mktg-admin. › MarketingAdmin\CMSContentController@schedule
+  GET|HEAD        mktg-admin/content/{id}/stats .............. mktg-admin. › MarketingAdmin\CMSContentController@stats
+  PUT             mktg-admin/content/{id}/unpublish ...... mktg-admin. › MarketingAdmin\CMSContentController@unpublish
+  GET|HEAD        mktg-admin/dashboard mktg-admin.marketing-admin.dashboard › MarketingAdmin\DashboardController@index
+  GET|HEAD        mktg-admin/dealers .................... mktg-admin. › MarketingAdmin\DealerRelationsController@index
+  POST            mktg-admin/dealers/broadcast ...... mktg-admin. › MarketingAdmin\DealerRelationsController@broadcast
+  POST            mktg-admin/dealers/materials .. mktg-admin. › MarketingAdmin\DealerRelationsController@shareMaterial
+  GET|HEAD        mktg-admin/dealers/{id}/performance mktg-admin. › MarketingAdmin\DealerRelationsController@performa…
+  GET|HEAD        mktg-admin/email/campaigns mktg-admin.email-campaigns.index › MarketingAdmin\EmailCampaignControlle…
+  POST            mktg-admin/email/campaigns mktg-admin.email-campaigns.store › MarketingAdmin\EmailCampaignControlle…
+  GET|HEAD        mktg-admin/email/campaigns/create mktg-admin.email-campaigns.create › MarketingAdmin\EmailCampaignC…
+  GET|HEAD        mktg-admin/email/campaigns/{campaign} mktg-admin.email-campaigns.show › MarketingAdmin\EmailCampaig…
+  PUT|PATCH       mktg-admin/email/campaigns/{campaign} mktg-admin.email-campaigns.update › MarketingAdmin\EmailCampa…
+  DELETE          mktg-admin/email/campaigns/{campaign} mktg-admin.email-campaigns.destroy › MarketingAdmin\EmailCamp…
+  GET|HEAD        mktg-admin/email/campaigns/{campaign}/edit mktg-admin.email-campaigns.edit › MarketingAdmin\EmailCa…
+  POST            mktg-admin/email/campaigns/{id}/schedule mktg-admin. › MarketingAdmin\EmailCampaignController@sched…
+  POST            mktg-admin/email/campaigns/{id}/send ..... mktg-admin. › MarketingAdmin\EmailCampaignController@send
+  GET|HEAD        mktg-admin/email/campaigns/{id}/stats ... mktg-admin. › MarketingAdmin\EmailCampaignController@stats
+  GET|HEAD        mktg-admin/email/log .................. mktg-admin. › MarketingAdmin\EmailCampaignController@sendLog
+  GET|HEAD        mktg-admin/email/segments .. mktg-admin.segments.index › MarketingAdmin\EmailSegmentController@index
+  POST            mktg-admin/email/segments .. mktg-admin.segments.store › MarketingAdmin\EmailSegmentController@store
+  GET|HEAD        mktg-admin/email/segments/create mktg-admin.segments.create › MarketingAdmin\EmailSegmentController…
+  GET|HEAD        mktg-admin/email/segments/{id}/preview mktg-admin. › MarketingAdmin\EmailSegmentController@previewM…
+  GET|HEAD        mktg-admin/email/segments/{segment} mktg-admin.segments.show › MarketingAdmin\EmailSegmentControlle…
+  PUT|PATCH       mktg-admin/email/segments/{segment} mktg-admin.segments.update › MarketingAdmin\EmailSegmentControl…
+  DELETE          mktg-admin/email/segments/{segment} mktg-admin.segments.destroy › MarketingAdmin\EmailSegmentContro…
+  GET|HEAD        mktg-admin/email/segments/{segment}/edit mktg-admin.segments.edit › MarketingAdmin\EmailSegmentCont…
+  GET|HEAD        mktg-admin/email/templates mktg-admin.templates.index › MarketingAdmin\EmailTemplateController@index
+  POST            mktg-admin/email/templates mktg-admin.templates.store › MarketingAdmin\EmailTemplateController@store
+  GET|HEAD        mktg-admin/email/templates/create mktg-admin.templates.create › MarketingAdmin\EmailTemplateControl…
+  POST            mktg-admin/email/templates/{id}/test-send mktg-admin. › MarketingAdmin\EmailTemplateController@test…
+  GET|HEAD        mktg-admin/email/templates/{template} mktg-admin.templates.show › MarketingAdmin\EmailTemplateContr…
+  PUT|PATCH       mktg-admin/email/templates/{template} mktg-admin.templates.update › MarketingAdmin\EmailTemplateCon…
+  DELETE          mktg-admin/email/templates/{template} mktg-admin.templates.destroy › MarketingAdmin\EmailTemplateCo…
+  GET|HEAD        mktg-admin/email/templates/{template}/edit mktg-admin.templates.edit › MarketingAdmin\EmailTemplate…
+  GET|HEAD        mktg-admin/events ................... mktg-admin.events.index › MarketingAdmin\EventController@index
+  POST            mktg-admin/events ................... mktg-admin.events.store › MarketingAdmin\EventController@store
+  GET|HEAD        mktg-admin/events/create .......... mktg-admin.events.create › MarketingAdmin\EventController@create
+  GET|HEAD        mktg-admin/events/{event} ............. mktg-admin.events.show › MarketingAdmin\EventController@show
+  PUT|PATCH       mktg-admin/events/{event} ......... mktg-admin.events.update › MarketingAdmin\EventController@update
+  DELETE          mktg-admin/events/{event} ....... mktg-admin.events.destroy › MarketingAdmin\EventController@destroy
+  GET|HEAD        mktg-admin/events/{event}/edit ........ mktg-admin.events.edit › MarketingAdmin\EventController@edit
+  PUT             mktg-admin/events/{id}/cancel .................. mktg-admin. › MarketingAdmin\EventController@cancel
+  PUT             mktg-admin/events/{id}/publish ................ mktg-admin. › MarketingAdmin\EventController@publish
+  GET|HEAD        mktg-admin/events/{id}/registrations mktg-admin. › MarketingAdmin\EventRegistrationController@index
+  PUT             mktg-admin/events/{id}/registrations/{regId}/status mktg-admin. › MarketingAdmin\EventRegistrationC…
+  GET|HEAD        mktg-admin/events/{id}/report .................. mktg-admin. › MarketingAdmin\EventController@report
+  POST            mktg-admin/events/{id}/send-reminder ..... mktg-admin. › MarketingAdmin\EventController@sendReminder
+  GET|HEAD        mktg-admin/events/{id}/survey-results ... mktg-admin. › MarketingAdmin\EventController@surveyResults
+  GET|HEAD        mktg-admin/integrations ................... mktg-admin. › MarketingAdmin\IntegrationController@index
+  PUT             mktg-admin/integrations .................. mktg-admin. › MarketingAdmin\IntegrationController@update
+  GET|HEAD        mktg-admin/integrations/oauth/{provider}/callback mktg-admin. › MarketingAdmin\IntegrationControlle…
+  GET|HEAD        mktg-admin/integrations/oauth/{provider}/start mktg-admin. › MarketingAdmin\IntegrationController@o…
+  POST            mktg-admin/integrations/refresh/{provider} mktg-admin. › MarketingAdmin\IntegrationController@refre…
+  POST            mktg-admin/integrations/test/{provider} .... mktg-admin. › MarketingAdmin\IntegrationController@test
+  GET|HEAD        mktg-admin/kpi .............................. mktg-admin. › MarketingAdmin\KPIReportController@index
+  GET|HEAD        mktg-admin/lead-sources .................... mktg-admin. › MarketingAdmin\LeadSourceController@index
+  GET|HEAD        mktg-admin/lead-sources/dropoff .. mktg-admin. › MarketingAdmin\LeadSourceController@dropoffAnalysis
+  GET|HEAD        mktg-admin/lead-sources/funnel ............ mktg-admin. › MarketingAdmin\LeadSourceController@funnel
+  GET|HEAD        mktg-admin/lead-sources/source-verify mktg-admin. › MarketingAdmin\LeadSourceController@sourceVerif…
+  GET|HEAD        mktg-admin/lead-sources/tracking-codes mktg-admin. › MarketingAdmin\LeadSourceController@trackingCo…
+  GET|HEAD        mktg-admin/lead-sources/tracking-codes/csv mktg-admin. › MarketingAdmin\LeadSourceController@tracki…
+  GET|HEAD        mktg-admin/lead-sources/utm ....... mktg-admin. › MarketingAdmin\LeadSourceController@utmPerformance
+  GET|HEAD        mktg-admin/manager-view/campaigns .................... MarketingAdmin\CampaignController@managerView
+  GET|HEAD        mktg-admin/manager-view/dashboard ................... MarketingAdmin\DashboardController@managerView
+  GET|HEAD        mktg-admin/manager-view/kpi ......................... MarketingAdmin\KPIReportController@managerView
+  GET|HEAD        mktg-admin/manager-view/pipeline ................ MarketingAdmin\SalesPipelineController@managerView
+  GET|HEAD        mktg-admin/media ............................. mktg-admin. › MarketingAdmin\CMSMediaController@index
+  POST            mktg-admin/media/upload ..................... mktg-admin. › MarketingAdmin\CMSMediaController@upload
+  DELETE          mktg-admin/media/{id} ...................... mktg-admin. › MarketingAdmin\CMSMediaController@destroy
+  GET|HEAD        mktg-admin/notifications ................. mktg-admin. › MarketingAdmin\NotificationController@index
+  POST            mktg-admin/notifications/dispatch-now mktg-admin. › MarketingAdmin\NotificationController@dispatchN…
+  POST            mktg-admin/notifications/retry-failed mktg-admin. › MarketingAdmin\NotificationController@retryFail…
+  POST            mktg-admin/notifications/{id}/mark-failed mktg-admin. › MarketingAdmin\NotificationController@markF…
+  POST            mktg-admin/notifications/{id}/mark-sent mktg-admin. › MarketingAdmin\NotificationController@markSent
+  PUT             mktg-admin/notifications/{id}/read .... mktg-admin. › MarketingAdmin\NotificationController@markRead
+  GET|HEAD        mktg-admin/pipeline ..................... mktg-admin. › MarketingAdmin\SalesPipelineController@index
+  GET|HEAD        mktg-admin/pipeline/conversion-time mktg-admin. › MarketingAdmin\SalesPipelineController@conversion…
+  GET|HEAD        mktg-admin/pipeline/loss-analysis mktg-admin. › MarketingAdmin\SalesPipelineController@lossAnalysis
+  GET|HEAD        mktg-admin/pipeline/value ....... mktg-admin. › MarketingAdmin\SalesPipelineController@pipelineValue
+  GET|HEAD        mktg-admin/profile ............................. mktg-admin. › MarketingAdmin\ProfileController@show
+  PUT             mktg-admin/profile ........................... mktg-admin. › MarketingAdmin\ProfileController@update
+  GET|HEAD        mktg-admin/reports ........................... mktg-admin. › MarketingAdmin\KPIReportController@list
+  POST            mktg-admin/reports/generate .............. mktg-admin. › MarketingAdmin\KPIReportController@generate
+  GET|HEAD        mktg-admin/reports/{id}/download/{format} mktg-admin. › MarketingAdmin\KPIReportController@download
+  GET|HEAD        mktg-admin/settings ........................... mktg-admin. › MarketingAdmin\SettingsController@show
+  PUT             mktg-admin/settings ......................... mktg-admin. › MarketingAdmin\SettingsController@update
+  GET|HEAD        mktg-admin/social/accounts mktg-admin.accounts.index › MarketingAdmin\SocialAccountController@index
+  POST            mktg-admin/social/accounts mktg-admin.accounts.store › MarketingAdmin\SocialAccountController@store
+  GET|HEAD        mktg-admin/social/accounts/create mktg-admin.accounts.create › MarketingAdmin\SocialAccountControll…
+  GET|HEAD        mktg-admin/social/accounts/{account} mktg-admin.accounts.show › MarketingAdmin\SocialAccountControl…
+  PUT|PATCH       mktg-admin/social/accounts/{account} mktg-admin.accounts.update › MarketingAdmin\SocialAccountContr…
+  DELETE          mktg-admin/social/accounts/{account} mktg-admin.accounts.destroy › MarketingAdmin\SocialAccountCont…
+  GET|HEAD        mktg-admin/social/accounts/{account}/edit mktg-admin.accounts.edit › MarketingAdmin\SocialAccountCo…
+  GET|HEAD        mktg-admin/social/calendar .............. mktg-admin. › MarketingAdmin\SocialPostController@calendar
+  GET|HEAD        mktg-admin/social/metrics ............... mktg-admin. › MarketingAdmin\SocialMetricsController@index
+  GET|HEAD        mktg-admin/social/metrics/monthly/{period} mktg-admin. › MarketingAdmin\SocialMetricsController@mon…
+  GET|HEAD        mktg-admin/social/posts ......... mktg-admin.posts.index › MarketingAdmin\SocialPostController@index
+  POST            mktg-admin/social/posts ......... mktg-admin.posts.store › MarketingAdmin\SocialPostController@store
+  GET|HEAD        mktg-admin/social/posts/create mktg-admin.posts.create › MarketingAdmin\SocialPostController@create
+  PUT             mktg-admin/social/posts/{id}/metrics mktg-admin. › MarketingAdmin\SocialPostController@updateMetrics
+  PUT             mktg-admin/social/posts/{id}/publish mktg-admin. › MarketingAdmin\SocialPostController@markPublished
+  GET|HEAD        mktg-admin/social/posts/{post} .... mktg-admin.posts.show › MarketingAdmin\SocialPostController@show
+  PUT|PATCH       mktg-admin/social/posts/{post} mktg-admin.posts.update › MarketingAdmin\SocialPostController@update
+  DELETE          mktg-admin/social/posts/{post} mktg-admin.posts.destroy › MarketingAdmin\SocialPostController@destr…
+  GET|HEAD        mktg-admin/social/posts/{post}/edit mktg-admin.posts.edit › MarketingAdmin\SocialPostController@edit
+  GET|HEAD        mktg-admin/tasks ................................. mktg-admin. › MarketingAdmin\TaskController@index
+  POST            mktg-admin/tasks ................................. mktg-admin. › MarketingAdmin\TaskController@store
+  PUT             mktg-admin/tasks/{id} ........................... mktg-admin. › MarketingAdmin\TaskController@update
+  DELETE          mktg-admin/tasks/{id} .......................... mktg-admin. › MarketingAdmin\TaskController@destroy
+  POST            mktg-admin/tasks/{id}/done .................... mktg-admin. › MarketingAdmin\TaskController@markDone
+  POST            mktg-admin/tasks/{id}/reopen .................... mktg-admin. › MarketingAdmin\TaskController@reopen
+  GET|HEAD        mktg-admin/team .................................. mktg-admin. › MarketingAdmin\TeamController@index
+  POST            mktg-admin/team/invite .......................... mktg-admin. › MarketingAdmin\TeamController@invite
+  DELETE          mktg-admin/team/{userId} ........................ mktg-admin. › MarketingAdmin\TeamController@remove
+  PUT             mktg-admin/team/{userId}/permissions . mktg-admin. › MarketingAdmin\TeamController@updatePermissions
+  GET|HEAD        mktg-admin/tracking-links ................ mktg-admin. › MarketingAdmin\TrackingLinkController@index
+  POST            mktg-admin/tracking-links ................ mktg-admin. › MarketingAdmin\TrackingLinkController@store
+  PUT             mktg-admin/tracking-links/{id} .......... mktg-admin. › MarketingAdmin\TrackingLinkController@update
+  GET|HEAD        senior/appointments ............................................ SeniorPortalController@appointments
+  GET|HEAD        senior/contracts .................................................. SeniorPortalController@contracts
+  GET|HEAD        senior/dashboard ................................................... SeniorDashboardController@index
+  GET|HEAD        senior/document-builder ........ senior.document-builder › SeniorDashboardController@documentBuilder
+  POST            senior/document-builder/generate senior.document-builder.generate › SeniorDashboardController@gener…
+  GET|HEAD        senior/knowledge-base ......................................... SeniorPortalController@knowledgeBase
+  GET|HEAD        senior/materials .................................................. SeniorPortalController@materials
+  GET|HEAD        senior/messages .................................... senior.messages › ConversationController@senior
+  POST            senior/messages/{thread}/send ............. senior.messages.send › ConversationController@seniorSend
+  GET|HEAD        senior/notes .......................................................... SeniorPortalController@notes
+  GET|HEAD        senior/performance .............................................. SeniorPortalController@performance
+  GET|HEAD        senior/process-tracking ..................................... SeniorPortalController@processTracking
+  GET|HEAD        senior/profile ...................................................... SeniorPortalController@profile
+  POST            senior/profile ........................ senior.profile.update › SeniorPortalController@updateProfile
+  GET|HEAD        senior/registration-documents ......................... SeniorPortalController@registrationDocuments
+  GET|HEAD        senior/registration/documents/{document}/download senior.registration.documents.download › SeniorDa…
+  GET|HEAD        senior/services .................................................... SeniorPortalController@services
+  GET|HEAD        senior/settings .................................................... SeniorPortalController@settings
+  POST            senior/settings ..................... senior.settings.update › SeniorPortalController@updateSettings
+  POST            senior/settings/password .......... senior.settings.password › SeniorPortalController@changePassword
+  GET|HEAD        senior/students .................................................... SeniorPortalController@students
+  GET|HEAD        senior/tickets ...................................................... SeniorPortalController@tickets
+  GET|HEAD        senior/vault .......................................................... SeniorPortalController@vault
+  GET|HEAD        student-card ........................................................... StudentCardController@index
+  GET|HEAD        student/appointments .......................................... StudentPortalController@appointments
+  POST            student/appointments ....... student.appointments.store › StudentWorkflowController@storeAppointment
+  POST            student/appointments/{appointment}/cancel student.appointments.cancel › StudentWorkflowController@c…
+  GET|HEAD        student/contract .................................................. StudentPortalController@contract
+  POST            student/contract/addendum-request student.contract.addendum-request › StudentWorkflowController@req…
+  GET|HEAD        student/contract/download-signed student.contract.download-signed › StudentWorkflowController@downl…
+  POST            student/contract/request ...... student.contract.request › StudentWorkflowController@requestContract
+  POST            student/contract/upload-signed student.contract.upload-signed › StudentWorkflowController@uploadSig…
+  GET|HEAD        student/dashboard ................................................. StudentDashboardController@index
+  GET|HEAD        student/document-builder ................................... StudentPortalController@documentBuilder
+  POST            student/document-builder/generate student.document-builder.generate › StudentWorkflowController@gen…
+  GET|HEAD        student/materials ................................................ StudentPortalController@materials
+  POST            student/materials/{article}/read student.materials.read › StudentWorkflowController@markMaterialRead
+  GET|HEAD        student/messages ................................. student.messages › ConversationController@student
+  POST            student/messages/send ................... student.messages.send › ConversationController@studentSend
+  GET|HEAD        student/notifications ................ student.notifications › StudentPortalController@notifications
+  GET|HEAD        student/payments ............................... student.payments › StudentPortalController@payments
+  GET|HEAD        student/process-tracking ................................... StudentPortalController@processTracking
+  GET|HEAD        student/profile .................................................... StudentPortalController@profile
+  POST            student/profile ................... student.profile.update › StudentWorkflowController@updateProfile
+  POST            student/profile/photo ......... student.profile.photo › StudentWorkflowController@uploadProfilePhoto
+  GET|HEAD        student/registration .......................................... StudentPortalController@registration
+  GET|HEAD        student/registration/documents student.registration.documents › StudentPortalController@registratio…
+  POST            student/registration/documents/upload student.registration.documents.upload › StudentWorkflowContro…
+  DELETE          student/registration/documents/{document} student.registration.documents.delete › StudentWorkflowCo…
+  GET|HEAD        student/registration/documents/{document}/download student.registration.documents.download › Studen…
+  POST            student/registration/form/auto-save student.registration.autosave › StudentWorkflowController@autoS…
+  POST            student/registration/form/submit student.registration.submit › StudentWorkflowController@submitRegi…
+  GET|HEAD        student/services .................................................. StudentPortalController@services
+  POST            student/services/add-extra .. student.services.add-extra › StudentWorkflowController@addExtraService
+  DELETE          student/services/remove-extra/{extraCode} student.services.remove-extra › StudentWorkflowController…
+  POST            student/services/select-package student.services.select-package › StudentWorkflowController@selectP…
+  GET|HEAD        student/settings .................................................. StudentPortalController@settings
+  POST            student/settings ................ student.settings.update › StudentWorkflowController@updateSettings
+  POST            student/settings/password ..... student.settings.password › StudentWorkflowController@changePassword
+  GET|HEAD        student/tickets .................................................... StudentPortalController@tickets
+  POST            student/tickets ...................... student.tickets.store › StudentWorkflowController@storeTicket
+  POST            student/tickets/{ticket}/close ....... student.tickets.close › StudentWorkflowController@closeTicket
+  POST            student/tickets/{ticket}/reopen .... student.tickets.reopen › StudentWorkflowController@reopenTicket
+  POST            student/tickets/{ticket}/reply ....... student.tickets.reply › StudentWorkflowController@replyTicket
+  POST            student/workflow/request-next-step ....................... StudentWorkflowController@requestNextStep
+  GET|HEAD        tasks .................................................................... TaskBoardController@index
+  POST            tasks .................................................................... TaskBoardController@store
+  POST            tasks/bulk-update ................................................... TaskBoardController@bulkUpdate
+  GET|HEAD        tasks/{department} ....................................................... TaskBoardController@index
+  PUT             tasks/{id} .............................................................. TaskBoardController@update
+  DELETE          tasks/{id} ............................................................. TaskBoardController@destroy
+  POST            tasks/{id}/done ....................................................... TaskBoardController@markDone
+  POST            tasks/{id}/reopen ....................................................... TaskBoardController@reopen
+  GET|HEAD        tickets-center ........................................................ TicketCenterController@index
+  POST            tickets-center/bulk-route ......................................... TicketCenterController@bulkRoute
+  POST            tickets-center/bulk-status ....................................... TicketCenterController@bulkStatus
+  GET|HEAD        tickets-center/{department} ........................................... TicketCenterController@index
+  POST            tickets-center/{ticket}/convert-to-dm tickets.center.convert-dm › TicketCenterController@convertToDm
+  POST            tickets-center/{ticket}/route ................................... TicketCenterController@routeTicket
+
+                                                                                                  Showing [520] routes
+

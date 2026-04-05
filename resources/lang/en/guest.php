@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'dashboard'         => 'Dashboard',
+    'profile'           => 'My Profile',
+    'documents'         => 'My Documents',
+    'registration_form' => 'Registration Form',
+    'services'          => 'Services',
+    'messages'          => 'Messages',
+    'tickets'           => 'Support',
+    'settings'          => 'Settings',
+    'contract'          => 'My Contract',
+    'timeline'          => 'Process Tracking',
+    'welcome'           => 'Welcome',
+    'logout'            => 'Log Out',
+    'save'              => 'Save',
+    'cancel'            => 'Cancel',
+    'submit'            => 'Submit',
+    'back'              => 'Back',
+    'next'              => 'Next',
+    'loading'           => 'Loading...',
+    'success'           => 'Success!',
+    'error'             => 'An error occurred.',
+    'required_field'    => 'This field is required.',
+    'language'          => 'Language',
+];
