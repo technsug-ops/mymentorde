@@ -54,6 +54,10 @@
 
     RewriteEngine On
 
+    # www → non-www redirect (cookie domain tutarlılığı için zorunlu)
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
     # Force HTTPS (all-inkl proxy arkasında X-Forwarded-Proto kontrol eder)
     RewriteCond %{HTTPS} !=on
     RewriteCond %{HTTP:X-Forwarded-Proto} !=https
