@@ -54,6 +54,15 @@
 
     RewriteEngine On
 
+    # Force HTTPS (all-inkl proxy arkasında X-Forwarded-Proto kontrol eder)
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Proxy arkasında HTTPS olduğunu PHP'ye bildir
+    RewriteCond %{HTTP:X-Forwarded-Proto} =https
+    RewriteRule .* - [E=HTTPS:on]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
