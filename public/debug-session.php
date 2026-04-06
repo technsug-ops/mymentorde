@@ -2,43 +2,76 @@
 // GEÇİCİ DEBUG — sorun çözülünce SİL
 header('Content-Type: text/plain; charset=utf-8');
 
-echo "=== MentorDE Session Debug ===\n\n";
+// Test 1: PHP düzeyinde cookie set edilebiliyor mu?
+$testOk = setcookie('debug_test', 'works_' . time(), [
+    'expires'  => time() + 3600,
+    'path'     => '/',
+    'secure'   => false,
+    'httponly'  => true,
+    'samesite'  => 'Lax',
+]);
+echo "=== MentorDE Cookie Debug ===\n\n";
+echo "1. PHP setcookie() result: " . ($testOk ? 'TRUE (header queued)' : 'FALSE (headers already sent?)') . "\n";
+echo "   headers_sent: " . (headers_sent($file, $line) ? "YES at {$file}:{$line}" : 'NO') . "\n\n";
 
-echo "SERVER:\n";
-echo "  HTTPS: " . ($_SERVER['HTTPS'] ?? 'NOT SET') . "\n";
-echo "  X-Forwarded-Proto: " . ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? 'NOT SET') . "\n";
-echo "  SERVER_PORT: " . ($_SERVER['SERVER_PORT'] ?? '?') . "\n";
-echo "  REQUEST_SCHEME: " . ($_SERVER['REQUEST_SCHEME'] ?? 'NOT SET') . "\n";
-echo "  HTTP_HOST: " . ($_SERVER['HTTP_HOST'] ?? '?') . "\n";
-echo "  SERVER_NAME: " . ($_SERVER['SERVER_NAME'] ?? '?') . "\n";
+// Test 2: Laravel boot + session start
+echo "2. Laravel Session Test:\n";
+try {
+    require_once __DIR__ . '/../vendor/autoload.php';
+    $app = require_once __DIR__ . '/../bootstrap/app.php';
+    $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 
-echo "\nPHP SESSION:\n";
-echo "  session.cookie_secure: " . ini_get('session.cookie_secure') . "\n";
-echo "  session.cookie_domain: " . ini_get('session.cookie_domain') . "\n";
-echo "  session.cookie_samesite: " . ini_get('session.cookie_samesite') . "\n";
-echo "  session.save_path: " . ini_get('session.save_path') . "\n";
+    // Fake request
+    $request = \Illuminate\Http\Request::create('/debug-session.php', 'GET');
+    $request->server->set('HTTPS', 'on');
 
-echo "\nCOOKIES RECEIVED:\n";
-foreach ($_COOKIE as $k => $v) {
-    echo "  {$k}: " . substr($v, 0, 20) . "...\n";
-}
+    // Boot app
+    $app->instance('request', $request);
+    $app->boot();
 
-echo "\nENV CHECK:\n";
-$env = @file_get_contents(dirname(__DIR__) . '/.env');
-if ($env) {
-    foreach (['APP_ENV', 'APP_URL', 'SESSION_DRIVER', 'SESSION_DOMAIN', 'SESSION_SECURE_COOKIE', 'SESSION_PATH', 'DB_CONNECTION', 'DB_HOST'] as $key) {
-        preg_match("/^{$key}=(.*)$/m", $env, $m);
-        echo "  {$key}: " . trim($m[1] ?? 'NOT FOUND') . "\n";
+    echo "   APP_ENV: " . config('app.env') . "\n";
+    echo "   SESSION_DRIVER: " . config('session.driver') . "\n";
+    echo "   SESSION_DOMAIN: " . var_export(config('session.domain'), true) . "\n";
+    echo "   SESSION_SECURE: " . var_export(config('session.secure'), true) . "\n";
+    echo "   SESSION_COOKIE: " . config('session.cookie') . "\n";
+    echo "   SESSION_PATH: " . config('session.path') . "\n";
+    echo "   SESSION_SAMESITE: " . var_export(config('session.same_site'), true) . "\n";
+    echo "   SESSION_LIFETIME: " . config('session.lifetime') . "\n";
+
+    // Try to start session manually
+    $session = $app->make('session');
+    $session->start();
+    $session->put('debug_test', 'hello');
+    $session->save();
+
+    echo "   Session ID: " . $session->getId() . "\n";
+    echo "   Session started: YES\n";
+    echo "   Session data: " . json_encode($session->all()) . "\n";
+
+    // Check if DB driver works
+    if (config('session.driver') === 'database') {
+        try {
+            $count = \Illuminate\Support\Facades\DB::table('sessions')->count();
+            echo "   DB sessions table rows: {$count}\n";
+
+            // Check table structure
+            $columns = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM sessions");
+            echo "   DB sessions columns: ";
+            foreach ($columns as $col) {
+                echo $col->Field . '(' . $col->Type . ') ';
+            }
+            echo "\n";
+        } catch (\Throwable $e) {
+            echo "   DB ERROR: " . $e->getMessage() . "\n";
+        }
     }
-} else {
-    echo "  .env okunamadi!\n";
+
+} catch (\Throwable $e) {
+    echo "   LARAVEL ERROR: " . $e->getMessage() . "\n";
+    echo "   File: " . $e->getFile() . ":" . $e->getLine() . "\n";
 }
 
-echo "\nSTORAGE WRITABLE:\n";
-$sessPath = dirname(__DIR__) . '/storage/framework/sessions';
-echo "  sessions dir exists: " . (is_dir($sessPath) ? 'YES' : 'NO') . "\n";
-echo "  sessions dir writable: " . (is_writable($sessPath) ? 'YES' : 'NO') . "\n";
-$testFile = $sessPath . '/_test_' . time();
-$ok = @file_put_contents($testFile, 'test');
-echo "  write test: " . ($ok ? 'OK' : 'FAIL') . "\n";
-if ($ok) @unlink($testFile);
+echo "\n3. Response Headers (should include Set-Cookie):\n";
+foreach (headers_list() as $h) {
+    echo "   {$h}\n";
+}
