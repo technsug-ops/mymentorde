@@ -112,38 +112,14 @@ class GuestApplicationController extends Controller
             ->whereNull('deleted_at')
             ->first(['id', 'tracking_token', 'email', 'guest_user_id']);
         if ($duplicate) {
-            // Duplicate başvuru: plain text şifre session'a konulmaz.
-            // Kullanıcıya şifre sıfırlama linki e-posta ile gönderilir.
-            if ($duplicate->guest_user_id) {
-                $guestUser = User::query()->where('id', $duplicate->guest_user_id)
-                    ->where('role', User::ROLE_GUEST)->first();
-                if ($guestUser) {
-                    try {
-                        $token    = Password::createToken($guestUser);
-                        $resetUrl = url(route('password.reset', ['token' => $token, 'email' => $guestUser->email], false));
-                        $body     = "Merhaba {$guestUser->name},\n\n"
-                            . "Daha önce başvurunuz bulunmaktadır. Takip kodunuz: {$duplicate->tracking_token}\n\n"
-                            . "Portala erişmek için şifrenizi aşağıdaki bağlantıdan belirleyiniz (24 saat geçerli):\n"
-                            . $resetUrl . "\n\nMentorDE Ekibi";
-                        $this->notificationService->send([
-                            'channel'         => 'email',
-                            'category'        => 'guest_welcome',
-                            'recipient_email' => (string) $guestUser->email,
-                            'subject'         => 'MentorDE — Portala Erişim',
-                            'body'            => $body,
-                            'variables'       => ['tracking_token' => (string) $duplicate->tracking_token],
-                            'source_type'     => 'guest_application',
-                            'source_id'       => (string) $duplicate->id,
-                            'triggered_by'    => 'system',
-                        ]);
-                    } catch (\Throwable $e) {
-                        report($e);
-                    }
-                }
-            }
-            return redirect()->route('apply.success', ['token' => $duplicate->tracking_token])
-                ->with('portal_email', $duplicate->email);
-            // portal_password intentionally omitted — plain text şifre session'da tutulmaz
+            // Duplicate başvuru: kullanıcıya açık mesaj ver
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'email' => 'Bu e-posta adresiyle zaten bir başvuru bulunmaktadır. '
+                        . 'Portala giriş yapmak için /login sayfasını kullanın. '
+                        . 'Şifrenizi hatırlamıyorsanız "Şifremi Unuttum" bağlantısını kullanabilirsiniz.',
+                ]);
         }
 
         $token = $this->generateTrackingToken();
