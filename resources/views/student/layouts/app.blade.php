@@ -95,6 +95,7 @@
     <meta name="theme-color" content="#2563eb">
 
     @stack('head')
+    @stack('styles')
 </head>
 <body>
 <div class="app">

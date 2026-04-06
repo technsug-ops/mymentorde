@@ -106,6 +106,7 @@
 
     <style>html:not(.jm-minimalist) .sidebar{background:linear-gradient(180deg,var(--theme-sidebar-from-manager,#162C4A),var(--theme-sidebar-to-manager,#1E3D6B));}</style>
     @stack('head')
+    @stack('styles')
 </head>
 <body>
 <div class="app">

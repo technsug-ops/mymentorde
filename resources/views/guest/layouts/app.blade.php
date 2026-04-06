@@ -94,6 +94,7 @@
     </style>
 
     @stack('head')
+    @stack('styles')
 </head>
 <body>
 <div class="app">
