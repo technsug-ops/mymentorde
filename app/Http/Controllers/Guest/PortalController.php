@@ -258,7 +258,7 @@ class PortalController extends Controller
                     'time_label' => $t->created_at?->diffForHumans() ?? '',
                     'sort_ts'    => $t->created_at?->timestamp ?? 0,
                 ]);
-            $activityFeed = $docActivities->merge($ticketActivities)->sortByDesc('sort_ts')->take(5)->values()->all();
+            $activityFeed = $docActivities->concat($ticketActivities)->sortByDesc('sort_ts')->take(5)->values()->all();
         }
         $data['activityFeed'] = $activityFeed;
 
