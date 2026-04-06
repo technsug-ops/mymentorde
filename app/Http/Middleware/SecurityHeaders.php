@@ -45,7 +45,8 @@ class SecurityHeaders
         //            'unsafe-inline' style-src'den kaldırılır, nonce eklenir.
         $csp = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'nonce-{$nonce}' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.qrserver.com",
+            // Production: nonce kaldırıldı — unsafe-inline aktif. Tüm view'lar nonce'a geçirildiğinde geri eklenecek.
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.qrserver.com",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
             "font-src 'self' https://fonts.gstatic.com data:",
             "img-src 'self' data: https: blob:",
