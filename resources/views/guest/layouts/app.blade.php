@@ -573,7 +573,7 @@ document.addEventListener('alpine:init',function(){
 }());
 </script>
 
-@include('partials.welcome-video-modal', ['wvPortal' => 'guest'])
+@stack('welcome-modal')
 
 {{-- PWA Service Worker --}}
 <script nonce="{{ $cspNonce ?? '' }}">
