@@ -331,7 +331,7 @@
         @endphp
         <div class="card gs-acc-card" style="margin:0;">
             <button type="button" class="gs-acc-head {{ $catHasSelected ? 'gs-acc-head--active' : '' }}"
-                    onclick="gsToggle('{{ $catId }}', this)"
+                    data-acc-target="{{ $catId }}"
                     style="border-left:3px solid {{ $cat['color'] }};">
                 <div style="display:flex;align-items:center;gap:8px;">
                     <span>{{ $cat['icon'] }}</span>
@@ -574,14 +574,16 @@
 
 <script defer src="{{ Vite::asset('resources/js/guest-services.js') }}"></script>
 <script nonce="{{ $cspNonce ?? '' }}">
-function gsToggle(id, btn) {
-    var body = document.getElementById(id);
-    var arrow = btn.querySelector('.gs-acc-arrow');
-    var open = body.style.display !== 'none';
-    body.style.display = open ? 'none' : 'block';
-    arrow.classList.toggle('open', !open);
-}
 (function(){
+    document.querySelectorAll('[data-acc-target]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var body = document.getElementById(btn.getAttribute('data-acc-target'));
+            var arrow = btn.querySelector('.gs-acc-arrow');
+            var open = body.style.display !== 'none';
+            body.style.display = open ? 'none' : 'block';
+            if(arrow) arrow.classList.toggle('open', !open);
+        });
+    });
     var _orig = window.__designToggle;
     window.__designToggle = function(d){
         if(_orig) _orig(d);
