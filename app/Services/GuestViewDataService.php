@@ -72,8 +72,8 @@ class GuestViewDataService
         $contractApproved = $contractStatus === 'approved';
 
         $progress = [
-            ['label' => 'Kayıt Formu',      'done' => $formCompleted,                        'url' => '/guest/registration-form'],
-            ['label' => 'Belgeler',          'done' => (bool) ($guest?->docs_ready ?? false), 'url' => '/guest/registration-documents'],
+            ['label' => 'Kayıt Formu',      'done' => $formCompleted,                        'url' => '/guest/registration/form'],
+            ['label' => 'Belgeler',          'done' => (bool) ($guest?->docs_ready ?? false), 'url' => '/guest/registration/documents'],
             ['label' => 'Paket Seçimi',      'done' => $packageSelected,                      'url' => '/guest/services'],
             ['label' => 'Sözleşme / Onay',  'done' => $contractApproved,                     'url' => '/guest/contract'],
             ['label' => 'Kayıt Tamamlandı', 'done' => $contractApproved && $formCompleted,    'url' => '/guest/dashboard'],
