@@ -18,9 +18,7 @@ class AuthController extends Controller
             return $this->redirectByRole();
         }
 
-        return response(view('auth.login'))
-            ->header('Cache-Control', 'no-store, no-cache, must-revalidate')
-            ->header('Pragma', 'no-cache');
+        return view('auth.login');
     }
 
     public function login(Request $request)
