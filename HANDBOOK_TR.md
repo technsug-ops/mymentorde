@@ -1037,26 +1037,77 @@ Saatlik tarama şunları kontrol eder:
 
 ## 8. Sık Sorulan Sorular
 
+### Hesap & Giriş
+
 **S: Şifremi unuttum, ne yapmalıyım?**
-C: Giriş sayfasında "Şifremi Unuttum" linkine tıkla, e-posta adresini gir. 60 dakika geçerli bir bağlantı gelecek.
+C: Giriş sayfasında "Şifremi Unuttum" linkine tıklayın, kayıtlı e-posta adresinizi girin. 60 dakika geçerli bir sıfırlama bağlantısı e-postanıza gelecektir.
 
 **S: 2FA telefonumu kaybettim, ne yapmalıyım?**
-C: Manager ile iletişime geç. Manager hesabındaki 2FA'yı sıfırlayabilir.
+C: Danışmanınız veya Manager ile iletişime geçin. Manager panelinden 2FA sıfırlama işlemi yapılabilir. Kurtarma kodlarınızı güvenli bir yerde saklayın.
+
+**S: Hesabım kilitlendi, ne yapmalıyım?**
+C: 10 başarısız giriş denemesinden sonra hesap 30 dakika kilitlenir. Süre dolmasını bekleyin veya Manager'dan kilit açmasını isteyin.
+
+### Başvuru & Belgeler
+
+**S: Başvuru formunu yarıda bırakabilir miyim?**
+C: Evet! Form her 30 saniyede otomatik kaydedilir. Taslak olarak bırakıp dilediğiniz zaman kaldığınız yerden devam edebilirsiniz.
 
 **S: Belge yükleme neden başarısız oluyor?**
-C: Desteklenen formatlar: PDF, JPG, PNG. Maksimum boyut: 10 MB. Dosya boyutunu kontrol et.
+C: Desteklenen formatlar: PDF, JPG, PNG, DOCX, WEBP. Maksimum dosya boyutu: 10 MB. Dosya boyutunu ve formatını kontrol edin.
+
+**S: Yüklediğim belge reddedildi, ne yapmalıyım?**
+C: Belgelerim sayfasında reddedilen belgenin altında red sebebi gösterilir. Sebebe göre belgeyi düzeltip aynı kategoriden yeniden yükleyin.
+
+**S: Hangi belgeler zorunlu?**
+C: Başvuru tipinize göre zorunlu belgeler kırmızı çerçeve ile işaretlenir. "Sadece Zorunlu" filtresini kullanarak eksik belgeleri hızlıca görebilirsiniz.
+
+### Sözleşme & Ödeme
+
+**S: Sözleşme nasıl imzalanır?**
+C: Danışmanınız sözleşme taslağını hazırlar, size onay için gönderir. Sözleşmem sayfasından inceleyip dijital olarak onaylayabilirsiniz.
 
 **S: Stripe ödeme neden başarısız oldu?**
-C: Kart limitini, son kullanma tarihini ve CVV'yi kontrol et. Sorun devam ederse bankana ulaş veya farklı kart dene.
+C: Kart limitini, son kullanma tarihini ve CVV'yi kontrol edin. 3D Secure doğrulamasını tamamlayın. Sorun devam ederse farklı kart deneyin veya banka havalesi yöntemini kullanın.
 
-**S: WhatsApp bildirimleri gelmiyor.**
-C: WhatsApp Business hesabının aktif ve entegrasyonun kurulu olduğunu kontrol et. `.env`'de `WHATSAPP_PHONE_NUMBER_ID` ve `WHATSAPP_ACCESS_TOKEN` dolu olmalı.
+**S: Taksit seçeneği var mı?**
+C: Ödeme planı danışmanınızla görüşülerek belirlenir. Banka havalesi ile taksitli ödeme yapılabilir.
 
-**S: Yeni kullanıcı ekliyorum ama e-posta gitmiyor.**
-C: Mail sürücüsünün production'da SMTP olarak ayarlandığını doğrula (`.env`: `MAIL_MAILER=smtp`).
+### Danışman & İletişim
+
+**S: Danışmanımla nasıl iletişime geçerim?**
+C: Mesajlar sayfasından doğrudan mesaj gönderebilirsiniz. Ayrıca Destek Talebi oluşturarak bilet açabilirsiniz.
+
+**S: Danışmanım ne kadar sürede cevap verir?**
+C: Danışmanlar genellikle 24 saat içinde yanıt verir. Acil durumlar için Destek Talebi açmanız önerilir.
+
+**S: Randevu nasıl alırım?**
+C: Süreç Takvimi sayfasından müsait saatleri görebilir ve online randevu oluşturabilirsiniz.
+
+### Almanya Süreci
+
+**S: Bloke hesap (Sperrkonto) nedir?**
+C: Almanya'da öğrenci vizesi için zorunlu olan banka hesabıdır. Aylık yaşam giderlerinizi karşılamak için belirli bir miktarı (yaklaşık 11.208€) bu hesaba yatırmanız gerekir. Bu para kaybolmaz, Almanya'ya geldiğinizde aylık olarak kullanırsınız.
+
+**S: Vize başvurusu ne kadar sürer?**
+C: Konsolosluğa göre değişir ancak genellikle 4-8 hafta sürer. Tüm belgelerin eksiksiz olması süreci hızlandırır. Konsolosluk kararını biz belirleyemeyiz.
+
+**S: Dil seviyem yeterli değilse ne olur?**
+C: Bazı üniversiteler dil kursu şartlı kabul verir. Studienkolleg programları da dil seviyesini geliştirmek için bir seçenektir. Danışmanınız size en uygun yolu önerecektir.
+
+**S: Uni-Assist nedir?**
+C: Uluslararası öğrenci başvurularını değerlendiren merkezi bir kurumdur. Birçok Alman üniversitesi başvuruları Uni-Assist üzerinden kabul eder. Başvuru ücreti yaklaşık 75€'dur.
+
+### Teknik
 
 **S: Sistemde hata görüyorum, ne yapmalıyım?**
-C: Hatanın ekran görüntüsünü al, tarayıcı konsolunu kontrol et (F12), geliştiriciyle paylaş.
+C: Hatanın ekran görüntüsünü alın, Destek Talebi oluşturup ekran görüntüsünü ekleyin. Tarayıcı konsolunu (F12) kontrol etmeniz de faydalı olabilir.
+
+**S: AI Asistan ne kadar doğru bilgi verir?**
+C: AI Asistan genel rehberlik sağlar. Kesin bilgi ve güncel kurallar için mutlaka danışmanınıza danışın. AI önerileri hukuki taahhüt niteliği taşımaz.
+
+**S: Mobil cihazdan kullanabilir miyim?**
+C: Evet, MentorDE tamamen responsive tasarıma sahiptir. Tüm sayfalar mobil, tablet ve masaüstü cihazlarda düzgün çalışır.
 
 ---
 
