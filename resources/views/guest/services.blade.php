@@ -573,7 +573,7 @@
 </div>
 
 <script defer src="{{ Vite::asset('resources/js/guest-services.js') }}"></script>
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 function gsToggle(id, btn) {
     var body = document.getElementById(id);
     var arrow = btn.querySelector('.gs-acc-arrow');
@@ -581,8 +581,6 @@ function gsToggle(id, btn) {
     body.style.display = open ? 'none' : 'block';
     arrow.classList.toggle('open', !open);
 }
-</script>
-<script>
 (function(){
     var _orig = window.__designToggle;
     window.__designToggle = function(d){
