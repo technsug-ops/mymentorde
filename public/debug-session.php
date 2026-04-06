@@ -1,77 +1,69 @@
 <?php
 // GEÇİCİ DEBUG — sorun çözülünce SİL
 header('Content-Type: text/plain; charset=utf-8');
+echo "=== MentorDE Debug v3 ===\n\n";
 
-// Test 1: PHP düzeyinde cookie set edilebiliyor mu?
-$testOk = setcookie('debug_test', 'works_' . time(), [
-    'expires'  => time() + 3600,
-    'path'     => '/',
-    'secure'   => false,
-    'httponly'  => true,
-    'samesite'  => 'Lax',
-]);
-echo "=== MentorDE Cookie Debug ===\n\n";
-echo "1. PHP setcookie() result: " . ($testOk ? 'TRUE (header queued)' : 'FALSE (headers already sent?)') . "\n";
-echo "   headers_sent: " . (headers_sent($file, $line) ? "YES at {$file}:{$line}" : 'NO') . "\n\n";
+// 1. Laravel log dosyasını oku
+echo "1. LARAVEL LOG (son 40 satır):\n";
+echo str_repeat('-', 60) . "\n";
+$logFile = dirname(__DIR__) . '/storage/logs/laravel.log';
+if (file_exists($logFile)) {
+    $lines = file($logFile);
+    $last = array_slice($lines, -40);
+    echo implode('', $last);
+} else {
+    echo "   laravel.log BULUNAMADI\n";
+    // Glob ile herhangi bir log dosyası ara
+    $logs = glob(dirname(__DIR__) . '/storage/logs/*.log');
+    echo "   Bulunan log dosyaları: " . (empty($logs) ? 'HİÇ YOK' : implode(', ', $logs)) . "\n";
+}
+echo "\n" . str_repeat('-', 60) . "\n";
 
-// Test 2: Laravel boot + session start
-echo "2. Laravel Session Test:\n";
-try {
-    require_once __DIR__ . '/../vendor/autoload.php';
-    $app = require_once __DIR__ . '/../bootstrap/app.php';
-    $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
-
-    // Fake request
-    $request = \Illuminate\Http\Request::create('/debug-session.php', 'GET');
-    $request->server->set('HTTPS', 'on');
-
-    // Boot app
-    $app->instance('request', $request);
-    $app->boot();
-
-    echo "   APP_ENV: " . config('app.env') . "\n";
-    echo "   SESSION_DRIVER: " . config('session.driver') . "\n";
-    echo "   SESSION_DOMAIN: " . var_export(config('session.domain'), true) . "\n";
-    echo "   SESSION_SECURE: " . var_export(config('session.secure'), true) . "\n";
-    echo "   SESSION_COOKIE: " . config('session.cookie') . "\n";
-    echo "   SESSION_PATH: " . config('session.path') . "\n";
-    echo "   SESSION_SAMESITE: " . var_export(config('session.same_site'), true) . "\n";
-    echo "   SESSION_LIFETIME: " . config('session.lifetime') . "\n";
-
-    // Try to start session manually
-    $session = $app->make('session');
-    $session->start();
-    $session->put('debug_test', 'hello');
-    $session->save();
-
-    echo "   Session ID: " . $session->getId() . "\n";
-    echo "   Session started: YES\n";
-    echo "   Session data: " . json_encode($session->all()) . "\n";
-
-    // Check if DB driver works
-    if (config('session.driver') === 'database') {
-        try {
-            $count = \Illuminate\Support\Facades\DB::table('sessions')->count();
-            echo "   DB sessions table rows: {$count}\n";
-
-            // Check table structure
-            $columns = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM sessions");
-            echo "   DB sessions columns: ";
-            foreach ($columns as $col) {
-                echo $col->Field . '(' . $col->Type . ') ';
-            }
-            echo "\n";
-        } catch (\Throwable $e) {
-            echo "   DB ERROR: " . $e->getMessage() . "\n";
-        }
-    }
-
-} catch (\Throwable $e) {
-    echo "   LARAVEL ERROR: " . $e->getMessage() . "\n";
-    echo "   File: " . $e->getFile() . ":" . $e->getLine() . "\n";
+// 2. PHP error log
+echo "\n2. PHP ERROR LOG:\n";
+$phpLog = ini_get('error_log');
+echo "   error_log path: " . ($phpLog ?: 'NOT SET') . "\n";
+if ($phpLog && file_exists($phpLog)) {
+    $lines = file($phpLog);
+    $last = array_slice($lines, -20);
+    echo implode('', $last);
 }
 
-echo "\n3. Response Headers (should include Set-Cookie):\n";
-foreach (headers_list() as $h) {
-    echo "   {$h}\n";
+// 3. Bootstrap cache kontrol
+echo "\n3. BOOTSTRAP CACHE:\n";
+$cacheDir = dirname(__DIR__) . '/bootstrap/cache/';
+foreach (glob($cacheDir . '*.php') as $f) {
+    echo "   " . basename($f) . " (" . filesize($f) . " bytes)\n";
+}
+
+// 4. Middleware kontrol
+echo "\n4. KEY FILES CHECK:\n";
+$checks = [
+    'vendor/autoload.php',
+    'vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php',
+    'vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php',
+    'vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php',
+];
+foreach ($checks as $f) {
+    $full = dirname(__DIR__) . '/' . $f;
+    echo "   " . $f . ": " . (file_exists($full) ? 'OK' : 'MISSING!') . "\n";
+}
+
+// 5. Composer autoload kontrol
+echo "\n5. VENDOR STATUS:\n";
+$vendorDir = dirname(__DIR__) . '/vendor';
+echo "   vendor/ exists: " . (is_dir($vendorDir) ? 'YES' : 'NO!') . "\n";
+$installed = $vendorDir . '/composer/installed.json';
+echo "   installed.json exists: " . (file_exists($installed) ? 'YES' : 'NO!') . "\n";
+
+// 6. .env okunabilirlik
+echo "\n6. ENV RAW CHECK:\n";
+$env = @file_get_contents(dirname(__DIR__) . '/.env');
+if ($env) {
+    foreach (['APP_ENV', 'APP_DEBUG', 'APP_URL', 'SESSION_DRIVER', 'SESSION_DOMAIN', 'SESSION_SECURE_COOKIE', 'SESSION_COOKIE', 'DB_CONNECTION'] as $key) {
+        preg_match("/^{$key}=(.*)$/m", $env, $m);
+        echo "   {$key}=" . trim($m[1] ?? 'NOT FOUND') . "\n";
+    }
+} else {
+    echo "   .env OKUNAMADI!\n";
 }
