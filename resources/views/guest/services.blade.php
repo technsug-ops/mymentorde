@@ -4,7 +4,7 @@
 @section('page_title', 'Servisler')
 
 @push('head')
-<script>if(localStorage.getItem('mentorde_design')==='minimalist'){document.documentElement.classList.add('jm-minimalist');}</script>
+<script nonce="{{ $cspNonce ?? '' }}">if(localStorage.getItem('mentorde_design')==='minimalist'){document.documentElement.classList.add('jm-minimalist');}</script>
 <style>
 /* ── gs-* Guest Services — compact redesign ── */
 
@@ -371,7 +371,7 @@
                                         <input type="hidden" name="extra_code"  value="{{ $svc['code'] }}">
                                         <input type="hidden" name="extra_title" value="{{ $svc['title'] }}">
                                         <button type="submit" class="btn alt"
-                                                onclick="this.disabled=true;this.form.submit();"
+                                                data-submit-once="true"
                                                 style="font-size:11px;padding:4px 12px;white-space:nowrap;">+ Ekle</button>
                                     </form>
                                 @endif
@@ -414,7 +414,7 @@
         {{-- Comparison Table --}}
         @if(!empty($comparisonTable['packages']))
         <div class="card" style="margin:0;">
-            <div class="card-head" style="cursor:pointer;" onclick="var b=document.getElementById('gs-compare-body');var i=document.getElementById('gs-compare-icon');var open=b.style.display!=='none';b.style.display=open?'none':'block';i.textContent=open?'▸':'▾;">
+            <div class="card-head" style="cursor:pointer;" id="gs-compare-head">
                 <div class="card-title">Paket Karşılaştırması</div>
                 <div style="display:flex;align-items:center;gap:10px;">
                     @if(!empty($eurTryRate) && $eurTryRate > 0)
@@ -501,7 +501,7 @@
                     @endif
                 @else
                     <div style="font-size:var(--tx-sm);color:var(--u-muted);">Henüz paket seçilmedi.</div>
-                    <a href="#" onclick="window.scrollTo(0,0);return false;" style="font-size:var(--tx-xs);color:var(--u-brand);font-weight:600;margin-top:6px;display:block;">Yukarıdan seç →</a>
+                    <a href="#" data-scroll-top style="font-size:var(--tx-xs);color:var(--u-brand);font-weight:600;margin-top:6px;display:block;">Yukarıdan seç →</a>
                 @endif
             </div>
         </div>
@@ -575,6 +575,7 @@
 <script defer src="{{ Vite::asset('resources/js/guest-services.js') }}"></script>
 <script nonce="{{ $cspNonce ?? '' }}">
 (function(){
+    // Akordiyonlar
     document.querySelectorAll('[data-acc-target]').forEach(function(btn){
         btn.addEventListener('click', function(){
             var body = document.getElementById(btn.getAttribute('data-acc-target'));
@@ -584,6 +585,24 @@
             if(arrow) arrow.classList.toggle('open', !open);
         });
     });
+    // Submit-once butonlar
+    document.querySelectorAll('[data-submit-once]').forEach(function(btn){
+        btn.addEventListener('click', function(){ btn.disabled=true; btn.form.submit(); });
+    });
+    // Paket karşılaştırma toggle
+    var cHead = document.getElementById('gs-compare-head');
+    if(cHead) cHead.addEventListener('click', function(){
+        var b=document.getElementById('gs-compare-body');
+        var i=document.getElementById('gs-compare-icon');
+        var open=b.style.display!=='none';
+        b.style.display=open?'none':'block';
+        if(i) i.textContent=open?'▸':'▾';
+    });
+    // Scroll top linkleri
+    document.querySelectorAll('[data-scroll-top]').forEach(function(a){
+        a.addEventListener('click', function(e){ e.preventDefault(); window.scrollTo(0,0); });
+    });
+    // Design toggle
     var _orig = window.__designToggle;
     window.__designToggle = function(d){
         if(_orig) _orig(d);
