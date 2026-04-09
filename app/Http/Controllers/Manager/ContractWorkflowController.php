@@ -120,27 +120,24 @@ class ContractWorkflowController extends Controller
             ])->withErrors(['contract' => "Karar islemi icin durum uygun degil: {$currentStatus}."]);
         }
         if ($this->contractStateHasInconsistency($guest, $currentStatus)) {
-            return redirect()->route('manager.contract-template.show', [
-                'guest_id' => (int) $guest->id,
-                'q'        => (string) ($guest->converted_student_id ?: $guest->email),
-            ])->withErrors(['contract' => 'Sozlesme kaydinda tutarsizlik var. Once kayitlar duzeltilmeden karar verilemez.']);
+            \Illuminate\Support\Facades\Log::warning("Contract state inconsistency for Guest #{$guest->id}, status: {$currentStatus}. Proceeding with decision anyway.");
         }
 
         $actor = (string) optional($request->user())->email;
         $note  = trim((string) ($data['note'] ?? ''));
 
         if ((string) $data['decision'] === 'approve') {
-            if ($currentStatus !== 'signed_uploaded') {
+            if (! in_array($currentStatus, ['requested', 'signed_uploaded', 'rejected'], true)) {
                 return redirect()->route('manager.contract-template.show', [
                     'guest_id' => (int) $guest->id,
                     'q'        => (string) ($guest->converted_student_id ?: $guest->email),
-                ])->withErrors(['contract' => "Onay icin beklenen durum 'signed_uploaded' olmali. Mevcut: {$currentStatus}."]);
+                ])->withErrors(['contract' => "Onay icin uygun durum degil. Mevcut: {$currentStatus}."]);
             }
-            if (trim((string) ($guest->contract_signed_file_path ?? '')) === '' || empty($guest->contract_signed_at)) {
+            if ($note === '') {
                 return redirect()->route('manager.contract-template.show', [
                     'guest_id' => (int) $guest->id,
                     'q'        => (string) ($guest->converted_student_id ?: $guest->email),
-                ])->withErrors(['contract' => 'Onay icin ogrencinin imzali sozlesme dosyasi yuklemis olmasi gerekir.']);
+                ])->withErrors(['contract' => 'Onay icin not/sebep yazmaniz zorunludur.']);
             }
             $newStudentId = trim((string) ($guest->converted_student_id ?? ''));
             if ($newStudentId === '') {
@@ -160,7 +157,7 @@ class ContractWorkflowController extends Controller
                 ->update(['role' => User::ROLE_STUDENT]);
             ContractAuditLog::log(
                 guestApplicationId: (int) $guest->id,
-                oldStatus: 'signed_uploaded',
+                oldStatus: $currentStatus,
                 newStatus: 'approved',
                 changedBy: $actor,
                 note: $note !== '' ? $note : null,
@@ -181,17 +178,17 @@ class ContractWorkflowController extends Controller
             $this->dispatchContractNotification($guest, 'guest_contract_update', 'manager_contract_approved');
             $status = 'Sozlesme onaylandi.';
         } else {
-            if ($currentStatus !== 'signed_uploaded') {
+            if (! in_array($currentStatus, ['requested', 'signed_uploaded', 'rejected'], true)) {
                 return redirect()->route('manager.contract-template.show', [
                     'guest_id' => (int) $guest->id,
                     'q'        => (string) ($guest->converted_student_id ?: $guest->email),
-                ])->withErrors(['contract' => "Red karari icin beklenen durum 'signed_uploaded' olmali. Mevcut: {$currentStatus}."]);
+                ])->withErrors(['contract' => "Red karari icin uygun durum degil. Mevcut: {$currentStatus}."]);
             }
-            if (trim((string) ($guest->contract_signed_file_path ?? '')) === '' || empty($guest->contract_signed_at)) {
+            if ($note === '') {
                 return redirect()->route('manager.contract-template.show', [
                     'guest_id' => (int) $guest->id,
                     'q'        => (string) ($guest->converted_student_id ?: $guest->email),
-                ])->withErrors(['contract' => 'Red karari icin once imzali sozlesme dosyasinin yuklenmis olmasi gerekir.']);
+                ])->withErrors(['contract' => 'Red sebebi yazmaniz zorunludur.']);
             }
             $guest->forceFill([
                 'contract_status'      => 'rejected',
@@ -200,7 +197,7 @@ class ContractWorkflowController extends Controller
             ])->save();
             ContractAuditLog::log(
                 guestApplicationId: (int) $guest->id,
-                oldStatus: 'signed_uploaded',
+                oldStatus: $currentStatus,
                 newStatus: 'rejected',
                 changedBy: $actor,
                 note: $note !== '' ? $note : null,
@@ -223,6 +220,45 @@ class ContractWorkflowController extends Controller
             'guest_id' => (int) $guest->id,
             'q'        => (string) ($guest->converted_student_id ?: $guest->email),
         ])->with('status', $status);
+    }
+
+    public function serveSignedFile(\App\Models\GuestApplication $guest)
+    {
+        $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
+        abort_if($companyId > 0 && (int) $guest->company_id !== $companyId, 403);
+
+        $stdName = app(\App\Services\DocumentNamingService::class)->buildStandardFileName(
+            $guest->converted_student_id ?: ('GST-' . str_pad((string) $guest->id, 8, '0', STR_PAD_LEFT)),
+            'SOZLESME',
+            (string) ($guest->first_name ?? ''),
+            (string) ($guest->last_name ?? ''),
+            'pdf',
+        );
+
+        // Fiziksel dosya varsa serve et
+        $path = trim((string) ($guest->contract_signed_file_path ?? ''));
+        if ($path !== '' && \Illuminate\Support\Facades\Storage::disk('local')->exists($path)) {
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            // Resim dosyasi ise direkt serve et (JPG/PNG imza)
+            if (in_array($ext, ['jpg', 'jpeg', 'png'], true)) {
+                return \Illuminate\Support\Facades\Storage::disk('local')->response($path, $stdName . '.' . $ext, [
+                    'Content-Disposition' => 'inline',
+                ]);
+            }
+        }
+
+        // PDF: sozlesme metninden server-side PDF olustur (cift basim sorunu olmaz)
+        $snapshotText = trim((string) ($guest->contract_snapshot_text ?? ''));
+        abort_if($snapshotText === '', 404, 'Sozlesme metni bulunamadi.');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('guest.contract-pdf', [
+            'guest'        => $guest,
+            'contractText' => $snapshotText,
+            'annexKvkk'    => (string) ($guest->contract_annex_kvkk_text ?? ''),
+            'annexCommit'  => (string) ($guest->contract_annex_commitment_text ?? ''),
+        ]);
+
+        return $pdf->stream($stdName);
     }
 
     public function cancelContract(Request $request): RedirectResponse

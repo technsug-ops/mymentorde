@@ -9,7 +9,8 @@
 <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div>
         <h1 class="page-title">📖 {{ $lang === 'en' ? 'Student Guide' : 'Öğrenci Kılavuzu' }}</h1>
-        <p class="page-subtitle" style="margin:0;">{{ $lang === 'en' ? 'Everything about your student journey on MentorDE.' : 'MentorDE öğrenci deneyiminiz hakkında her şey.' }}</p>
+        @php $hbBrand = config('brand.name', 'MentorDE'); @endphp
+        <p class="page-subtitle" style="margin:0;">{{ $lang === 'en' ? 'Everything about your student journey on ' . $hbBrand . '.' : $hbBrand . ' öğrenci deneyiminiz hakkında her şey.' }}</p>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
         <div class="handbook-lang">

@@ -385,17 +385,18 @@ select.f-input   { cursor:pointer; }
                 <label class="f-label">Yetkili Mahkeme</label>
                 <input type="text" name="meta[yetkili_mahkeme]" class="f-input" value="{{ old('meta.yetkili_mahkeme', 'İstanbul') }}">
             </div>
+            @php $bcBrand = config('brand.name', 'MentorDE'); @endphp
             <div class="f-group">
-                <label class="f-label">MentorDE Yetkili</label>
+                <label class="f-label">{{ $bcBrand }} Yetkili</label>
                 <input type="text" name="meta[mentorde_yetkili]" class="f-input" value="{{ old('meta.mentorde_yetkili') }}">
             </div>
             <div class="f-group">
-                <label class="f-label">MentorDE Adres</label>
-                <input type="text" name="meta[mentorde_adres]" class="f-input" value="{{ old('meta.mentorde_adres', 'İstanbul, Türkiye') }}">
+                <label class="f-label">{{ $bcBrand }} Adres</label>
+                <input type="text" name="meta[mentorde_adres]" class="f-input" value="{{ old('meta.mentorde_adres', config('brand.address', 'İstanbul, Türkiye')) }}">
             </div>
             <div class="f-group">
-                <label class="f-label">MentorDE Vergi No</label>
-                <input type="text" name="meta[mentorde_vergi_no]" class="f-input" value="{{ old('meta.mentorde_vergi_no') }}">
+                <label class="f-label">{{ $bcBrand }} Vergi No</label>
+                <input type="text" name="meta[mentorde_vergi_no]" class="f-input" value="{{ old('meta.mentorde_vergi_no', config('brand.tax_id', '')) }}">
             </div>
         </div>
 
@@ -475,10 +476,11 @@ select.f-input   { cursor:pointer; }
 
         {{-- ─── STAFF META ─── --}}
         <div id="staffMetaBlock" class="sub-block">
-            <div class="f-divider">🏢 İşveren (MentorDE)</div>
+            @php $bcBrand2 = config('brand.name', 'MentorDE'); @endphp
+            <div class="f-divider">🏢 İşveren ({{ $bcBrand2 }})</div>
             <div class="f-row col2">
                 <div class="f-group"><label class="f-label">İşveren Adı</label>
-                    <input type="text" name="meta[isverenler_adi]" class="f-input" value="{{ old('meta.isverenler_adi','MentorDE') }}"></div>
+                    <input type="text" name="meta[isverenler_adi]" class="f-input" value="{{ old('meta.isverenler_adi', $bcBrand2) }}"></div>
                 <div class="f-group"><label class="f-label">İşveren Adresi</label>
                     <input type="text" name="meta[isverenler_adres]" class="f-input" value="{{ old('meta.isverenler_adres','İstanbul, Türkiye') }}"></div>
                 <div class="f-group"><label class="f-label">İşveren Vergi No</label>

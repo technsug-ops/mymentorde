@@ -13,7 +13,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'MentorDE — Bayi Portalı')</title>
+    <title>@yield('title', config('brand.name', 'MentorDE') . ' — Bayi Portalı')</title>
 
     {{-- Premium Design System --}}
     <link id="mentorde-theme-css" rel="stylesheet" href="{{ Vite::asset('resources/css/premium.css') }}">
@@ -109,9 +109,14 @@
                         {{ $tierPerms->tierLabel() }} · {{ $dealerUser?->dealer_code ?: '-' }}
                     </div>
                 </div>
-                <div class="brand-logo" style="width:28px;height:28px;font-size:11px;flex-shrink:0;" title="MentorDE">M</div>
+                @php $dlBrandName = config('brand.name', 'MentorDE'); $dlBrandLogo = config('brand.logo_url') ?: config('brand.logo_path'); @endphp
+                @if($dlBrandLogo)
+                    <div class="brand-logo" style="width:28px;height:28px;flex-shrink:0;background:transparent;padding:0;" title="{{ $dlBrandName }}"><img src="{{ $dlBrandLogo }}" alt="{{ $dlBrandName }}" style="max-height:28px;max-width:28px;object-fit:contain;"></div>
+                @else
+                    <div class="brand-logo" style="width:28px;height:28px;font-size:11px;flex-shrink:0;" title="{{ $dlBrandName }}">{{ strtoupper(mb_substr($dlBrandName, 0, 1)) }}</div>
+                @endif
             </div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">MentorDE · Bayi Portalı</div>
+            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">{{ $dlBrandName }} · Bayi Portalı</div>
             <div style="height:1px;background:rgba(255,255,255,.12);margin-top:12px;"></div>
         </div>
 

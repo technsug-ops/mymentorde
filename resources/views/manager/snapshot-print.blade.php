@@ -26,7 +26,7 @@
         <a href="/manager/dashboard/snapshot/{{ $report->id }}">Detaya Don</a>
     </div>
 
-    <h1>MentorDE Snapshot Raporu #{{ $report->id }}</h1>
+    <h1>{{ config('brand.name', 'MentorDE') }} Snapshot Raporu #{{ $report->id }}</h1>
     <div class="meta">Tip: {{ $report->report_type }} | Dönem: {{ optional($report->period_start)->toDateString() }} - {{ optional($report->period_end)->toDateString() }}</div>
     <div class="meta">Advisory: {{ $report->senior_email ?: 'tum advisoryler' }} | Oluşturan: {{ $report->created_by ?: '-' }} | Tarih: {{ $report->created_at }}</div>
     <div class="meta">Alicilar: {{ is_array($report->sent_to) && count($report->sent_to) ? implode(', ', $report->sent_to) : '-' }}</div>

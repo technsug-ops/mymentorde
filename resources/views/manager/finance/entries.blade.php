@@ -1,6 +1,6 @@
 @extends('manager.layouts.app')
 
-@section('title', 'Gelir & Gider Kayıtları — MentorDE')
+@section('title', 'Gelir & Gider Kayıtları — ' . config('brand.name', 'MentorDE'))
 @section('page_title', 'Gelir & Gider Kayıtları')
 @section('page_subtitle', 'Manuel kayıt, CSV import · ' . $month)
 

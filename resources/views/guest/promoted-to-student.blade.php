@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tebrikler — MentorDE</title>
+<title>Tebrikler — {{ config('brand.name', 'MentorDE') }}</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -306,7 +306,7 @@ body{
         </div>
         <div class="hero-sub">
             Sözleşmeniz onaylandı — artık resmi bir<br>
-            <strong>MentorDE Öğrencisisiniz 🇩🇪</strong>
+            <strong>{{ config('brand.name', 'MentorDE') }} Öğrencisisiniz 🇩🇪</strong>
         </div>
     </div>
 
@@ -352,7 +352,7 @@ body{
                 <div class="jdot done">✓</div>
                 <div class="jbody">
                     <div class="jlabel">Sözleşme İmzalandı ve Onaylandı</div>
-                    <div class="jdesc">MentorDE danışmanlık sözleşmesi geçerlilik kazandı.</div>
+                    <div class="jdesc">{{ config('brand.name', 'MentorDE') }} danışmanlık sözleşmesi geçerlilik kazandı.</div>
                 </div>
             </div>
             <div class="jstep">

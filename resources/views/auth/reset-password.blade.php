@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MentorDE — Şifre Sıfırla</title>
+    <title>{{ config('brand.name', 'MentorDE') }} — Şifre Sıfırla</title>
     <style>
         :root {
             --bg: #eef3fb; --panel: #ffffff; --line: #d8e2f0;

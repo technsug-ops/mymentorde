@@ -195,7 +195,7 @@
     <div class="fb-card" style="margin-bottom:0;">
         <div class="fb-card-title">Bizi Tavsiye Eder misiniz?</div>
         <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-bottom:10px;">
-            Arkadaşlarınıza MentorDE'yi önerme olasılığınız nedir?<br>
+            Arkadaşlarınıza {{ config('brand.name', 'MentorDE') }}'yi önerme olasılığınız nedir?<br>
             <span style="font-weight:700;">0</span> = Kesinlikle hayır &nbsp;·&nbsp; <span style="font-weight:700;">10</span> = Kesinlikle evet
         </div>
 
@@ -231,7 +231,7 @@
             @foreach([
                 ['✅','Geri bildirimleriniz danışmanınıza iletilir ve süreç iyileştirmelerinde kullanılır.'],
                 ['🔒','Değerlendirmeleriniz gizlidir, adınız paylaşılmadan analiz edilir.'],
-                ['📊','NPS skorunuz MentorDE hizmet kalitesini ölçmemize yardımcı olur.'],
+                ['📊','NPS skorunuz ' . config('brand.name', 'MentorDE') . ' hizmet kalitesini ölçmemize yardımcı olur.'],
             ] as [$ico,$txt])
             <div style="display:flex;gap:8px;align-items:flex-start;">
                 <span style="font-size:var(--tx-sm);flex-shrink:0;">{{ $ico }}</span>

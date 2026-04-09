@@ -148,20 +148,45 @@
     .gc-sign-grid { grid-template-columns:1fr; }
 }
 
-/* Print */
+/* Print — sadece contractHtmlPrintLayout goster, geri kalan her sey gizli */
 @@media print {
-    .shell .side { display:none !important; }
+    /* 1. Tum sayfa icerigini gizle */
+    .sidebar, .side, .topbar, .shell .side, .trust-bar,
+    .gc-funnel, .gc-hero, .gc-sign-grid, .gc-help, .gc-tip,
+    .gc-alert, .gc-proc, .gc-info-grid, .gc-celebrate,
+    .gc-viewer, .gc-popup-overlay, .dm-widget-container,
+    .no-print, nav, header, footer,
+    #contractTextSection,
+    #digitalSignSection,
+    #signedUploadSection,
+    #quickDecisionForm { display:none !important; }
+
+    /* 2. Print layout'u goster */
+    #contractHtmlPrintLayout {
+        display:block !important;
+        position:static !important;
+        width:100% !important;
+    }
+    #contractPrintBody {
+        max-height:none !important;
+        overflow:visible !important;
+        border:none !important;
+        padding:0 !important;
+    }
+
+    /* 3. Layout sifirlama */
     .shell { display:block !important; }
-    .shell > .main { padding:0 !important; width:100% !important; }
-    .no-print { display:none !important; }
-    body:has(#contractHtmlPrintLayout) .card, body:has(#contractHtmlPrintLayout) .panel { display:none !important; }
-    body:has(#contractHtmlPrintLayout) #contractHtmlPrintLayout { display:block !important; }
-    #contractPrintBody { max-height:none !important; overflow:visible !important; border:none !important; padding:0 !important; }
-    details { display:block !important; }
-    details > div { display:block !important; }
-    details summary { display:none !important; }
-    @@page { margin:20mm; }
-    body { font-size:11pt; }
+    .shell > .main { padding:0 !important; width:100% !important; margin:0 !important; }
+    .main { padding:0 !important; }
+
+    /* 4. Ekler */
+    #contractHtmlPrintLayout details { display:block !important; }
+    #contractHtmlPrintLayout details > div { display:block !important; }
+    #contractHtmlPrintLayout details summary { display:none !important; }
+
+    /* 5. Sayfa */
+    @@page { margin:20mm; size:A4; }
+    body { font-size:11pt; background:#fff !important; }
 }
 
 .jm-minimalist .gc-read-fill { background:var(--u-ok); }
@@ -215,7 +240,7 @@
     $funnelSteps = [
         ['name' => 'Talep Et',      'sub' => match(true) { $stepActive > 0 => 'Tamamlandi', default => 'Simdi baslat' }],
         ['name' => 'Hazirlanma',     'sub' => match(true) { $stepActive > 1 => 'Tamamlandi', $stepActive === 1 => 'Hazirlaniyor...', default => 'Talep sonrasi' }],
-        ['name' => 'Oku & Imzala',   'sub' => match(true) { $stepActive > 2 => 'Imzalandi', $stepActive === 2 => 'Imzani bekliyor', default => 'Imza sonrasi' }],
+        ['name' => 'Oku & Imzala',   'sub' => match(true) { $status === 'rejected' => 'Reddedildi - tekrar imzala', $stepActive > 2 => 'Imzalandi', $stepActive === 2 => 'Imzani bekliyor', default => 'Imza sonrasi' }],
         ['name' => 'Firma Onayi',    'sub' => match(true) { $stepActive > 3 => 'Onaylandi', $stepActive === 3 => 'Onay bekleniyor', default => '—' }],
     ];
 
@@ -277,11 +302,15 @@
 
 {{-- ── Rejected / Cancelled / Reopen uyarilari ── --}}
 @if($status === 'rejected')
-    <div class="gc-alert warn">
-        <span class="gc-alert-icon">✕</span>
-        <div class="gc-alert-body">
-            <strong>Reddedildi</strong>
-            {{ $guest?->status_message ?? '-' }} — Duzenleyip tekrar imzali dosya yukleyebilirsiniz.
+    <div class="gc-hero red" style="margin-bottom:14px;">
+        <div style="font-size:28px;margin-bottom:8px;">⚠️</div>
+        <div class="gc-hero-title">Sozlesmeniz reddedildi</div>
+        <div class="gc-hero-sub" style="max-width:100%;">
+            <strong>Red sebebi:</strong> {{ $guest?->status_message ?? 'Belirtilmedi.' }}
+        </div>
+        <div style="margin-top:10px;padding:10px 14px;background:rgba(255,255,255,.12);border-radius:8px;font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;">
+            Sozlesmenizi duzeltip tekrar imzalayabilir veya yeni imzali dosya yukleyebilirsiniz.<br>
+            Asagidaki imza seceneklerini kullanarak tekrar gonderebilirsiniz.
         </div>
     </div>
 @endif
@@ -400,10 +429,10 @@
      STATE 3: requested — Oku & Imzala
 ══════════════════════════════════════════ --}}
 @if(in_array($status, ['requested', 'rejected'], true))
-    <div class="gc-hero purple">
-        <div class="gc-hero-badge"><span class="pulse"></span> Senin siran</div>
-        <div class="gc-hero-title">Sozlesmeni oku ve imzala</div>
-        <div class="gc-hero-sub">Danismanin sozlesmeyi hazirladi. Asagida okuyup imzalayabilir veya imzali dosyayi yukleyebilirsin.</div>
+    <div class="gc-hero {{ $status === 'rejected' ? 'purple' : 'purple' }}">
+        <div class="gc-hero-badge"><span class="pulse"></span> {{ $status === 'rejected' ? 'Duzeltme gerekli' : 'Senin siran' }}</div>
+        <div class="gc-hero-title">{{ $status === 'rejected' ? 'Sozlesmeni duzelt ve tekrar imzala' : 'Sozlesmeni oku ve imzala' }}</div>
+        <div class="gc-hero-sub">{{ $status === 'rejected' ? 'Sozlesmen reddedildi. Asagidaki imza seceneklerini kullanarak duzeltilmis sozlesmeyi tekrar gonderebilirsin.' : 'Danismanin sozlesmeyi hazirladi. Asagida okuyup imzalayabilir veya imzali dosyayi yukleyebilirsin.' }}</div>
     </div>
 
     {{-- Contract viewer --}}
@@ -417,7 +446,7 @@
                     · Olusturulma: <strong>{{ $contractGeneratedAt ? \Carbon\Carbon::parse($contractGeneratedAt)->format('d.m.Y H:i') : '-' }}</strong>
                 </div>
             </div>
-            <div style="display:flex;gap:6px;">
+            <div style="display:flex;gap:6px;" class="no-print">
                 <a href="#" class="gc-viewer-btn" onclick="event.preventDefault();window.print()">⬇ Indir</a>
                 <button type="button" class="gc-viewer-btn" onclick="window.print()">🖨 Yazdir</button>
             </div>
@@ -547,7 +576,7 @@
     <div class="gc-hero amber">
         <div class="gc-hero-badge"><span class="pulse"></span> Firma inceliyor</div>
         <div class="gc-hero-title">Imzali sozlesmen gonderildi</div>
-        <div class="gc-hero-sub">Danismanin imzali sozlesmeni inceliyor. Onaylandiginda resmi MentorDE ogrencisi olacaksin!</div>
+        <div class="gc-hero-sub">Danismanin imzali sozlesmeni inceliyor. Onaylandiginda resmi {{ config('brand.name', 'MentorDE') }} ogrencisi olacaksin!</div>
         <div class="gc-hero-meta">
             <span>⏱️ Tahmini: 1-2 is gunu</span>
             <span>📧 Sonuc e-posta ile bildirilecek</span>
@@ -580,7 +609,7 @@
     <div class="gc-celebrate">
         <div class="emoji">🎓</div>
         <h2>Tebrikler!</h2>
-        <p>Sozlesmen onaylandi. Artik resmi MentorDE ogrencisisin! Almanya yolculugun resmen basladi.</p>
+        <p>Sozlesmen onaylandi. Artik resmi {{ config('brand.name', 'MentorDE') }} ogrencisisin! Almanya yolculugun resmen basladi.</p>
     </div>
 
     <div class="gc-info-grid">
@@ -656,18 +685,44 @@
     <a href="{{ route('guest.messages') }}" class="gc-help-btn">Danismana Sor</a>
 </div>
 
-{{-- ── HTML Print Layout ── --}}
-@if(($printHeaderHtml ?? '') !== '' || ($printFooterHtml ?? '') !== '')
-<div id="contractHtmlPrintLayout" style="display:none;font-family:inherit;">
-    @if(($printHeaderHtml ?? '') !== ''){!! $printHeaderHtml !!}@endif
-    <div id="contractPrintBody" style="white-space:pre-wrap;font-size:10pt;line-height:1.6;">{{ $contractSnapshotText ?? '' }}</div>
-    @if($contractAnnexKvkkText !== '')
-        <div style="margin-top:24px;page-break-before:auto;"><h4 style="margin:0 0 8px;font-size:12pt;">Ek-1 — KVKK Aydinlatma Metni</h4><div style="white-space:pre-wrap;font-size:10pt;line-height:1.6;">{{ $contractAnnexKvkkText }}</div></div>
+{{-- ── HTML Print Layout (antetli kagit) ── --}}
+@if(($contractSnapshotText ?? '') !== '')
+<div id="contractHtmlPrintLayout" style="display:none;font-family:'Times New Roman',Times,serif;color:#000;">
+    {{-- Antet --}}
+    @if(($printHeaderHtml ?? '') !== '')
+        {!! $printHeaderHtml !!}
+    @else
+        <div style="text-align:center;padding-bottom:16px;border-bottom:2px solid #333;margin-bottom:24px;">
+            <div style="font-size:18pt;font-weight:700;letter-spacing:1px;">{{ config('brand.name', 'MentorDE') }}</div>
+            <div style="font-size:9pt;color:#666;margin-top:4px;">{{ config('brand.tagline', 'Yurt Disi Egitim Danismanligi') }}</div>
+        </div>
     @endif
-    @if($contractAnnexCommitmentText !== '')
-        <div style="margin-top:24px;"><h4 style="margin:0 0 8px;font-size:12pt;">Ek-2 — Taahhutname</h4><div style="white-space:pre-wrap;font-size:10pt;line-height:1.6;">{{ $contractAnnexCommitmentText }}</div></div>
+
+    {{-- Sozlesme metni --}}
+    <div id="contractPrintBody" style="white-space:pre-wrap;font-size:11pt;line-height:1.7;">{{ $contractSnapshotText }}</div>
+
+    {{-- Ekler --}}
+    @if(($contractAnnexKvkkText ?? '') !== '')
+        <div style="margin-top:24px;page-break-before:auto;">
+            <h4 style="margin:0 0 8px;font-size:12pt;border-bottom:1px solid #999;padding-bottom:4px;">Ek-1 — KVKK Aydinlatma Metni</h4>
+            <div style="white-space:pre-wrap;font-size:10pt;line-height:1.6;">{{ $contractAnnexKvkkText }}</div>
+        </div>
     @endif
-    @if(($printFooterHtml ?? '') !== ''){!! $printFooterHtml !!}@endif
+    @if(($contractAnnexCommitmentText ?? '') !== '')
+        <div style="margin-top:24px;">
+            <h4 style="margin:0 0 8px;font-size:12pt;border-bottom:1px solid #999;padding-bottom:4px;">Ek-2 — Taahhutname</h4>
+            <div style="white-space:pre-wrap;font-size:10pt;line-height:1.6;">{{ $contractAnnexCommitmentText }}</div>
+        </div>
+    @endif
+
+    {{-- Alt bilgi --}}
+    @if(($printFooterHtml ?? '') !== '')
+        {!! $printFooterHtml !!}
+    @else
+        <div style="margin-top:32px;padding-top:12px;border-top:1px solid #ccc;font-size:8pt;color:#999;text-align:center;">
+            Bu belge {{ config('brand.name', 'MentorDE') }} sistemi uzerinden olusturulmustur. · {{ now()->format('d.m.Y') }}
+        </div>
+    @endif
 </div>
 @endif
 

@@ -2,7 +2,7 @@
     $wvCfg     = config('welcome_video.' . ($wvPortal ?? 'guest'), []);
     $wvEnabled = $wvCfg['enabled'] ?? false;
     $wvVid     = $wvCfg['youtube_id'] ?? '';
-    $wvTitle   = $wvCfg['title']    ?? 'MentorDE\'ye Hoş Geldin!';
+    $wvTitle   = $wvCfg['title']    ?? (config('brand.name', 'MentorDE') . '\'ye Hoş Geldin!');
     $wvSub     = $wvCfg['subtitle'] ?? '';
 
     // Her kullanıcı için benzersiz key: user_id yedek olarak session id kullan

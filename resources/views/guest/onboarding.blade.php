@@ -96,7 +96,7 @@
         {{-- WELCOME --}}
         @if($currentStep === 'welcome')
         <div class="ob-card-icon">🎉</div>
-        <div class="ob-card-title">MentorDE'ye Hoş Geldiniz!</div>
+        <div class="ob-card-title">{{ config('brand.name', 'MentorDE') }}'ye Hoş Geldiniz!</div>
         <div class="ob-card-desc">
             Almanya'da eğitim yolculuğunuz burada başlıyor.<br>
             Sistemi tanımanıza yardımcı olacak birkaç hızlı adım var.<br>

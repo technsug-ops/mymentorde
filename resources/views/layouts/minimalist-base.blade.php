@@ -1,5 +1,5 @@
 {{--
-    MentorDE Minimalist Layout
+    Minimalist Layout (white-label, brand.php config)
     resources/views/layouts/minimalist-base.blade.php
 
     Kullanım:
@@ -14,7 +14,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'MentorDE — ' . ($portalTitle ?? 'Portal'))</title>
+    <title>@yield('title', config('brand.name', 'MentorDE') . ' — ' . ($portalTitle ?? 'Portal'))</title>
 
     {{-- Minimalist CSS --}}
     <link rel="stylesheet" href="{{ Vite::asset('resources/css/minimalist.css') }}">
@@ -30,11 +30,20 @@
 <div class="app">
 
     {{-- Sidebar --}}
+    @php
+        $mbBrandName = config('brand.name', 'MentorDE');
+        $mbBrandLogo = config('brand.logo_url') ?: config('brand.logo_path');
+        $mbBrandInit = strtoupper(mb_substr($mbBrandName, 0, 1));
+    @endphp
     <aside class="sidebar" id="min-sidebar">
         <div class="sidebar-brand">
-            <div class="brand-logo">M</div>
+            @if($mbBrandLogo)
+                <div class="brand-logo" style="background:transparent;padding:0;"><img src="{{ $mbBrandLogo }}" alt="{{ $mbBrandName }}" style="max-height:{{ (int) config('brand.logo_height', 40) }}px;width:auto;"></div>
+            @else
+                <div class="brand-logo">{{ $mbBrandInit }}</div>
+            @endif
             <div>
-                <div class="brand-name">MentorDE</div>
+                <div class="brand-name">{{ $mbBrandName }}</div>
                 <div class="brand-sub">{{ $portalTitle ?? 'Portal' }}</div>
             </div>
         </div>

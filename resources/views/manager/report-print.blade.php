@@ -48,7 +48,7 @@
         <a href="/manager/dashboard">Dashboard'a Don</a>
     </div>
 
-    <h1>MentorDE Manager Raporu</h1>
+    <h1>{{ config('brand.name', 'MentorDE') }} Manager Raporu</h1>
     <div class="meta">Dönem: {{ $filters['start_date'] }} - {{ $filters['end_date'] }} | Advisory: {{ $filters['senior_email'] !== '' ? $filters['senior_email'] : 'tum advisoryler' }}</div>
     <div class="meta">Uretim zamani: {{ $generatedAt }}</div>
     <div class="meta">Risk: {{ strtoupper($stats['risk_level']) }} ({{ $stats['risk_score'] }}) | pending %{{ number_format($stats['risk_breakdown']['pending_rate'], 1, ',', '.') }} | overdue %{{ number_format($stats['risk_breakdown']['overdue_rate'], 1, ',', '.') }} | tahsilat riski %{{ number_format($stats['risk_breakdown']['collection_rate'], 1, ',', '.') }}</div>

@@ -172,7 +172,7 @@
         <div class="adv-senior-sub">{{ $s->total_students }} öğrenci takibinde</div>
         <div class="adv-senior-actions">
             <a class="adv-btn-wa"
-               href="https://wa.me/?text={{ urlencode('Merhaba, MentorDE dealer portalından yazıyorum.') }}"
+               href="https://wa.me/?text={{ urlencode('Merhaba, ' . config('brand.name', 'MentorDE') . ' dealer portalından yazıyorum.') }}"
                target="_blank">
                 💬 WhatsApp
             </a>

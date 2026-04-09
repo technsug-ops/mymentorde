@@ -1,6 +1,6 @@
 ﻿@extends('manager.layouts.app')
 
-@section('title', 'MentorDE Config Panel')
+@section('title', config('brand.name', 'MentorDE') . ' Config Panel')
 @section('page_title', 'Sistem Ayarları')
 
 @push('head')

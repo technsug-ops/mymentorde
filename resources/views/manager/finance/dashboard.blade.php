@@ -1,6 +1,6 @@
 @extends('manager.layouts.app')
 
-@section('title', 'Finans Özeti — MentorDE')
+@section('title', 'Finans Özeti — ' . config('brand.name', 'MentorDE'))
 @section('page_title', 'Finans Özeti')
 @section('page_subtitle', 'Sözleşme gelirleri + manuel kayıtlar · ' . $period)
 

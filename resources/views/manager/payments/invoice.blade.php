@@ -106,8 +106,8 @@
             <div class="inv-party-label">Gönderen</div>
             <div class="inv-party-name">{{ $brandName }}</div>
             <div class="inv-party-detail">
-                Eğitim Danışmanlık<br>
-                info@mentorde.com
+                {{ config('brand.tagline', 'Eğitim Danışmanlık') }}<br>
+                {{ config('brand.email', 'info@example.com') }}
             </div>
         </div>
         <div class="inv-party" style="text-align:right;">

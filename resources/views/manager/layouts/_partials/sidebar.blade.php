@@ -4,7 +4,7 @@
         $mgrInitials = strtoupper(substr(preg_replace('/\s+/', '', ($mgrUser?->name ?? 'MG')), 0, 2));
     @endphp
     <div class="avatar"><span>{{ $mgrInitials }}</span></div>
-    <div class="brand">MentorDE Manager</div>
+    <div class="brand">{{ config('brand.name', 'MentorDE') }} Manager</div>
     <div class="meta">{{ $mgrUser?->email }}</div>
     <nav class="nav">
         <a class="{{ request()->is('manager/dashboard*') ? 'active' : '' }}" href="/manager/dashboard">Dashboard</a>

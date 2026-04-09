@@ -15,7 +15,7 @@ class BrandSettingController extends Controller
 
         $brandName    = MarketingAdminSetting::where('company_id', $cid)
                             ->where('setting_key', 'brand_name')
-                            ->value('setting_value') ?? 'MentorDE';
+                            ->value('setting_value') ?? config('brand.name', 'MentorDE');
 
         $brandLogoUrl = MarketingAdminSetting::where('company_id', $cid)
                             ->where('setting_key', 'brand_logo_url')

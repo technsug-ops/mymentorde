@@ -83,7 +83,7 @@
 {{-- Başlık --}}
 <div class="card" style="background:linear-gradient(to right,#0891b2,#16a34a);color:#fff;margin-bottom:20px;">
     <div class="card-body" style="padding:28px 28px 24px;">
-        <div style="font-size:var(--tx-sm);opacity:.85;margin-bottom:6px;">MentorDE Ailesi</div>
+        <div style="font-size:var(--tx-sm);opacity:.85;margin-bottom:6px;">{{ config('brand.name', 'MentorDE') }} Ailesi</div>
         <div style="font-size:var(--tx-2xl);font-weight:800;margin-bottom:8px;">⭐ Başarı Hikayeleri</div>
         <div style="font-size:var(--tx-sm);opacity:.85;max-width:560px;line-height:1.6;">
             Türkiye'den Almanya'ya hayallerini gerçekleştiren öğrencilerimizin gerçek deneyimleri.
@@ -102,7 +102,7 @@ $heroYtId  = ssExtractYtId($heroVideo?->video_url ?? null);
 $heroThumb = $heroVideo?->video_thumbnail_url
     ?: ($heroYtId ? "https://img.youtube.com/vi/{$heroYtId}/hqdefault.jpg" : null);
 $heroTitle = $heroVideo?->title_tr ?: 'Almanya hayali nasıl gerçeğe dönüşür?';
-$heroDesc  = $heroVideo?->summary_tr ?: 'MentorDE ile Almanya\'ya yerleşen öğrencilerin gerçek hikayeleri — başvurudan kabule, vizeden kayıta kadar tüm süreç.';
+$heroDesc  = $heroVideo?->summary_tr ?: (config('brand.name', 'MentorDE') . ' ile Almanya\'ya yerleşen öğrencilerin gerçek hikayeleri — başvurudan kabule, vizeden kayıta kadar tüm süreç.');
 @endphp
 <div class="card" style="margin-bottom:24px;overflow:hidden;">
     <div class="card-body" style="padding:0;">
@@ -161,10 +161,11 @@ $heroDesc  = $heroVideo?->summary_tr ?: 'MentorDE ile Almanya\'ya yerleşen öğ
 
 {{-- ── CMS Kaynak Renk Haritası ─────────────────────────────────────────── --}}
 @php
+$brandName = config('brand.name', 'MentorDE');
 $srcMeta = [
     'Google'     => ['color'=>'#4285F4','bg'=>'#e8f0fe'],
     'Trustpilot' => ['color'=>'#00b67a','bg'=>'#e5f7f1'],
-    'MentorDE'   => ['color'=>'#e11d48','bg'=>'#fff1f2'],
+    $brandName   => ['color'=>'#e11d48','bg'=>'#fff1f2'],
 ];
 $avatarGradients = [
     'linear-gradient(to right,#7c3aed,#2563eb)',
@@ -181,16 +182,16 @@ $hasCms = isset($cmsStories) && $cmsStories->isNotEmpty();
 // --- Statik fallback ---
 $staticStories = [
     ['initials'=>'AK','name'=>'Ahmet K.','program'=>'TU München — Mak. Müh.','source'=>'Google',
-     'quote'=>'"MentorDE olmadan bu süreci tek başıma yönetemezdim. Uni-assist başvurusundan vize sürecine kadar her adımda yanımda oldular. Şu an TU München\'de 2. yılımdayım."'],
+     'quote'=>'"' . $brandName . ' olmadan bu süreci tek başıma yönetemezdim. Uni-assist başvurusundan vize sürecine kadar her adımda yanımda oldular. Şu an TU München\'de 2. yılımdayım."'],
     ['initials'=>'ZY','name'=>'Zeynep Y.','program'=>'TU Berlin — Bilgisayar Müh.','source'=>'Trustpilot',
      'quote'=>'"Belge sürecinde çok zorlandım. Apostil ve yeminli tercüme için nereye gideceğimi bilmiyordum. Danışmanım adım adım rehberlik etti. TU Berlin\'e kabul aldım!"'],
-    ['initials'=>'MS','name'=>'Murat S.','program'=>'HAW Hamburg — İşletme','source'=>'MentorDE',
-     'quote'=>'"Almanca B2 sınavına hazırlanırken hem çalışıyor hem de başvuru sürecini yürütmek çok zordu. MentorDE\'nin sistematik takibi sayesinde hiçbir belge eksik kalmadı."'],
+    ['initials'=>'MS','name'=>'Murat S.','program'=>'HAW Hamburg — İşletme','source'=>$brandName,
+     'quote'=>'"Almanca B2 sınavına hazırlanırken hem çalışıyor hem de başvuru sürecini yürütmek çok zordu. ' . $brandName . '\'nin sistematik takibi sayesinde hiçbir belge eksik kalmadı."'],
     ['initials'=>'EA','name'=>'Elif A.','program'=>'Uni Stuttgart — Elektrik Müh.','source'=>'Google',
      'quote'=>'"Türkiye\'de lise mezunuydum. Studienkolleg süreci çok karmaşık görünüyordu. Danışmanım doğrudan üniversiteye geçiş için alternatif bir yol gösterdi. Harika!"'],
     ['initials'=>'KD','name'=>'Kemal D.','program'=>'Goethe Uni — Finans','source'=>'Trustpilot',
      'quote'=>'"Goethe Uni\'ye kabul aldığımda inanamadım. Motivasyon mektubum için AI asistan ve danışman birlikte çok yardımcı oldu. Keşke daha önce başlasaydım."'],
-    ['initials'=>'NT','name'=>'Neslihan T.','program'=>'TH Köln — Medya Tasarımı','source'=>'MentorDE',
+    ['initials'=>'NT','name'=>'Neslihan T.','program'=>'TH Köln — Medya Tasarımı','source'=>$brandName,
      'quote'=>'"Portfolyo hazırlığı ve yetenek sınavına danışmanımla birlikte hazırlandım. TH Köln tasarım programına kabul — çok mutluyum!"'],
 ];
 @endphp
@@ -209,7 +210,7 @@ $staticStories = [
     @foreach($cmsStories as $i => $story)
     @php
         $tags      = is_array($story->tags) ? $story->tags : [];
-        $source    = $tags[0] ?? 'MentorDE';
+        $source    = $tags[0] ?? $brandName;
         $sm        = $srcMeta[$source] ?? ['color'=>'#6366f1','bg'=>'#eef2ff'];
         $initials  = $story->cover_image_alt ?: strtoupper(substr($story->title_tr ?? 'M', 0, 2));
         $gradient  = $avatarGradients[$i % count($avatarGradients)];
@@ -335,7 +336,7 @@ $staticStories = [
     @foreach([
         ['Ahmet K. — TU München','Uni-assist sürecini ve vize deneyimini anlatıyor'],
         ['Zeynep Y. — TU Berlin','TU Berlin\'e kabul aldıktan sonra ilk günlerini paylaşıyor'],
-        ['Murat S. — HAW Hamburg','Belge hazırlık sürecinde MentorDE deneyimi'],
+        ['Murat S. — HAW Hamburg','Belge hazırlık sürecinde ' . $brandName . ' deneyimi'],
     ] as [$vTitle, $vDesc])
     <div class="card" style="overflow:hidden;">
         <div style="aspect-ratio:16/9;background:linear-gradient(to right,#1e293b,#334155);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;">

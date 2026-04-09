@@ -206,7 +206,13 @@ trait GuestContractTrait
         $allowedSignedExts = ['pdf', 'jpg', 'jpeg', 'png'];
         $rawExt = strtolower((string) $file->getClientOriginalExtension());
         $ext = in_array($rawExt, $allowedSignedExts, true) ? $rawExt : 'pdf';
-        $name = 'signed_contract_' . now()->format('Ymd_His') . '.' . $ext;
+        $ownerId = trim((string) ($guest->converted_student_id ?? '')) !== ''
+            ? (string) $guest->converted_student_id
+            : 'GST-' . str_pad((string) $guest->id, 8, '0', STR_PAD_LEFT);
+        $name = app(\App\Services\DocumentNamingService::class)->buildStandardFileName(
+            $ownerId, 'SOZLESME-IMZALI',
+            (string) ($guest->first_name ?? ''), (string) ($guest->last_name ?? ''), $ext,
+        );
         $path = $file->storeAs("guest-contracts/{$guest->id}", $name, 'local');
 
         $guest->forceFill([

@@ -51,7 +51,8 @@
         // Sales pipeline: admin=full, sales_staff=own leads only
         $canSeePipeline     = $isMktgAdmin || $isSalesAdmin || $isSalesStaff;
 
-        $brandLabel = $panelMode === 'sales' ? 'MentorDE Sales' : 'MentorDE Marketing';
+        $maSidebarBrand = config('brand.name', 'MentorDE');
+        $brandLabel = $panelMode === 'sales' ? $maSidebarBrand . ' Sales' : $maSidebarBrand . ' Marketing';
         $roleLabel  = $isAdmin ? 'Admin' : 'Staff';
     @endphp
 

@@ -172,8 +172,8 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
                     <textarea name="body_tr" placeholder="Body TR" required>{{ old('body_tr', $editing->body_tr ?? '') }}</textarea>
                 </div>
                 <div class="fm-row">
-                    <input name="from_name" placeholder="From name" value="{{ old('from_name', $editing->from_name ?? 'MentorDE') }}">
-                    <input type="email" name="from_email" placeholder="From email" value="{{ old('from_email', $editing->from_email ?? 'noreply@mentorde.com') }}">
+                    <input name="from_name" placeholder="From name" value="{{ old('from_name', $editing->from_name ?? config('brand.mail_from_name', config('brand.name', 'MentorDE'))) }}">
+                    <input type="email" name="from_email" placeholder="From email" value="{{ old('from_email', $editing->from_email ?? config('brand.mail_from_address', 'noreply@example.com')) }}">
                 </div>
                 <div class="fm-row">
                     <input type="email" name="reply_to" placeholder="Reply-to (opsiyonel)" value="{{ old('reply_to', $editing->reply_to ?? '') }}">

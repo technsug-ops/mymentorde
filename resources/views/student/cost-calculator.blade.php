@@ -58,7 +58,7 @@ $depositTotal  = $calc['depositTotal'] ?? 0;
 
             @if($pkgPrice > 0)
             <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--u-line);">
-                <span style="font-size:var(--tx-sm);">MentorDE Danışmanlık Paketi</span>
+                <span style="font-size:var(--tx-sm);">{{ config('brand.name', 'MentorDE') }} Danışmanlık Paketi</span>
                 <strong>€ {{ number_format($pkgPrice,0,',','.') }}</strong>
             </div>
             @endif

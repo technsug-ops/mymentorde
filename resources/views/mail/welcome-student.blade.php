@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MentorDE'ye Hoş Geldiniz!</title>
+<title>{{ config('brand.name', 'MentorDE') }}'ye Hoş Geldiniz!</title>
 <style>
   body { margin:0; padding:0; background:#f4f6fa; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
   .wrapper { max-width:600px; margin:32px auto; background:#ffffff; border-radius:8px; overflow:hidden; border:1px solid #e2e8f0; }
@@ -20,12 +20,12 @@
 <body>
 <div class="wrapper">
   <div class="header">
-    <h1>MentorDE</h1>
-    <p>Almanya Danışmanlık Platformu</p>
+    <h1>{{ config('brand.name', 'MentorDE') }}</h1>
+    <p>{{ config('brand.tagline', 'Almanya Danışmanlık Platformu') }}</p>
   </div>
   <div class="body">
     <h2>Hoş Geldiniz, {{ $student->name }}!</h2>
-    <p>MentorDE öğrenci platformuna başarıyla kaydoldunuz. Artık Almanya'daki eğitim yolculuğunuzu adım adım takip edebilirsiniz.</p>
+    <p>{{ config('brand.name', 'MentorDE') }} öğrenci platformuna başarıyla kaydoldunuz. Artık Almanya'daki eğitim yolculuğunuzu adım adım takip edebilirsiniz.</p>
     <p>Platformumuzda şunları yapabilirsiniz:</p>
     <ul>
       <li>Kayıt formunuzu doldurun ve belgelerinizi yükleyin</li>
@@ -36,7 +36,7 @@
     <a class="cta" href="{{ config('app.url') }}/student/dashboard">Portala Giriş Yap</a>
   </div>
   <div class="footer">
-    Bu e-posta MentorDE platformu tarafından otomatik olarak gönderilmiştir.<br>
+    Bu e-posta {{ config('brand.name', 'MentorDE') }} platformu tarafından otomatik olarak gönderilmiştir.<br>
     <a href="{{ config('app.url') }}">{{ config('app.url') }}</a>
   </div>
 </div>

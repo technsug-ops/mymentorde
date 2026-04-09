@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MentorDE — Şifremi Unuttum</title>
+    <title>{{ config('brand.name', 'MentorDE') }} — Şifremi Unuttum</title>
     <style>
         :root {
             --bg: #eef3fb; --panel: #ffffff; --line: #d8e2f0;

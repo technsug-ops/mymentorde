@@ -13,7 +13,7 @@
 
 <div class="card" style="background:linear-gradient(to right,#0891b2,#16a34a);color:#fff;margin-bottom:20px;">
     <div class="card-body" style="padding:28px 28px 24px;">
-        <div style="font-size:var(--tx-sm);opacity:.85;margin-bottom:6px;">MentorDE Ailesi</div>
+        <div style="font-size:var(--tx-sm);opacity:.85;margin-bottom:6px;">{{ config('brand.name', 'MentorDE') }} Ailesi</div>
         <div style="font-size:var(--tx-2xl);font-weight:800;margin-bottom:8px;">⭐ Başarı Hikayeleri</div>
         <div style="font-size:var(--tx-sm);opacity:.85;max-width:560px;line-height:1.6;">
             Türkiye'den Almanya'ya hayallerini gerçekleştiren öğrencilerimizin gerçek deneyimleri.
@@ -34,10 +34,11 @@
 </div>
 
 @php
+$brandName = config('brand.name', 'MentorDE');
 $srcMeta = [
     'Google'     => ['color'=>'#4285F4','bg'=>'#e8f0fe'],
     'Trustpilot' => ['color'=>'#00b67a','bg'=>'#e5f7f1'],
-    'MentorDE'   => ['color'=>'#e11d48','bg'=>'#fff1f2'],
+    $brandName   => ['color'=>'#e11d48','bg'=>'#fff1f2'],
 ];
 $avatarGradients = [
     'linear-gradient(to right,#7c3aed,#2563eb)',
@@ -50,16 +51,16 @@ $avatarGradients = [
 $hasCms = isset($cmsStories) && $cmsStories->isNotEmpty();
 $staticStories = [
     ['initials'=>'AK','name'=>'Ahmet K.','program'=>'TU München — Mak. Müh.','source'=>'Google',
-     'quote'=>'"MentorDE olmadan bu süreci tek başıma yönetemezdim. Şu an TU München\'de 2. yılımdayım."'],
+     'quote'=>'"' . $brandName . ' olmadan bu süreci tek başıma yönetemezdim. Şu an TU München\'de 2. yılımdayım."'],
     ['initials'=>'ZY','name'=>'Zeynep Y.','program'=>'TU Berlin — Bilgisayar Müh.','source'=>'Trustpilot',
      'quote'=>'"Apostil ve yeminli tercüme için nereye gideceğimi bilmiyordum. Danışmanım adım adım rehberlik etti."'],
-    ['initials'=>'MS','name'=>'Murat S.','program'=>'HAW Hamburg — İşletme','source'=>'MentorDE',
-     'quote'=>'"MentorDE\'nin sistematik takibi sayesinde hiçbir belge eksik kalmadı."'],
+    ['initials'=>'MS','name'=>'Murat S.','program'=>'HAW Hamburg — İşletme','source'=>$brandName,
+     'quote'=>'"' . $brandName . '\'nin sistematik takibi sayesinde hiçbir belge eksik kalmadı."'],
     ['initials'=>'EA','name'=>'Elif A.','program'=>'Uni Stuttgart — Elektrik Müh.','source'=>'Google',
      'quote'=>'"Danışmanım doğrudan üniversiteye geçiş için alternatif bir yol gösterdi. Harika!"'],
     ['initials'=>'KD','name'=>'Kemal D.','program'=>'Goethe Uni — Finans','source'=>'Trustpilot',
      'quote'=>'"Goethe Uni\'ye kabul aldığımda inanamadım. Motivasyon mektubum için danışmanım çok yardımcı oldu."'],
-    ['initials'=>'NT','name'=>'Neslihan T.','program'=>'TH Köln — Medya Tasarımı','source'=>'MentorDE',
+    ['initials'=>'NT','name'=>'Neslihan T.','program'=>'TH Köln — Medya Tasarımı','source'=>$brandName,
      'quote'=>'"TH Köln tasarım programına kabul — çok mutluyum! Almanya\'da yaşam beklediğimden güzel."'],
 ];
 @endphp
@@ -70,7 +71,7 @@ $staticStories = [
 @if($hasCms)
     @foreach($cmsStories as $i => $story)
     @php
-        $tags=$story->tags??[];$source=$tags[0]??'MentorDE';
+        $tags=$story->tags??[];$source=$tags[0]??$brandName;
         $sm=$srcMeta[$source]??['color'=>'#6366f1','bg'=>'#eef2ff'];
         $initials=$story->cover_image_alt?:strtoupper(substr($story->title_tr??'M',0,2));
         $gradient=$avatarGradients[$i%count($avatarGradients)];

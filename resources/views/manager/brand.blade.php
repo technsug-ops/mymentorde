@@ -51,9 +51,9 @@
             <div style="margin-bottom:20px;">
                 <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Firma / Sistem Adı <span style="color:var(--c-danger)">*</span></label>
                 <input type="text" name="brand_name" id="inp-name" value="{{ old('brand_name', $brandName) }}"
-                       placeholder="Örn: MentorDE, AcademiX, EduPro..."
+                       placeholder="Örn: {{ config('brand.name', 'MentorDE') }}, AcademiX, EduPro..."
                        style="width:100%;padding:10px 14px;border-radius:8px;font-size:15px;"
-                       oninput="document.getElementById('prev-name').textContent=this.value||'MentorDE';
+                       oninput="document.getElementById('prev-name').textContent=this.value||'{{ config('brand.name', 'MentorDE') }}';
                                 var ini=this.value?this.value[0].toUpperCase():'M';
                                 document.getElementById('prev-initial').textContent=ini;
                                 document.getElementById('sidebar-initial').textContent=ini;">

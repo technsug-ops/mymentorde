@@ -12,7 +12,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'MentorDE Staff')</title>
+    <title>@yield('title', config('brand.name', 'MentorDE') . ' Staff')</title>
 
     <link id="mentorde-theme-css" rel="stylesheet" href="{{ Vite::asset('resources/css/premium.css') }}">
 
@@ -97,11 +97,11 @@
                     <img src="{{ $brandLogoUrl }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                     <span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">{{ $brandInitial ?? 'M' }}</span>
                 @else
-                    {{ $brandInitial ?? 'M' }}
+                    {{ $brandInitial ?? strtoupper(mb_substr(config('brand.name', 'MentorDE'), 0, 1)) }}
                 @endif
             </div>
             <div>
-                <div class="brand-name">{{ $brandName ?? 'MentorDE' }}</div>
+                <div class="brand-name">{{ $brandName ?? config('brand.name', 'MentorDE') }}</div>
                 <div class="brand-sub">Staff Panel</div>
             </div>
         </div>

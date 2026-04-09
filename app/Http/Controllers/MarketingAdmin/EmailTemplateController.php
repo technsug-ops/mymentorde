@@ -188,8 +188,8 @@ class EmailTemplateController extends Controller
             'body_de' => Arr::get($data, 'body_de'),
             'body_en' => Arr::get($data, 'body_en'),
             'available_placeholders' => $placeholders,
-            'from_name' => trim((string) Arr::get($data, 'from_name', '')) ?: 'MentorDE',
-            'from_email' => trim((string) Arr::get($data, 'from_email', '')) ?: 'noreply@mentorde.com',
+            'from_name' => trim((string) Arr::get($data, 'from_name', '')) ?: (string) config('brand.mail_from_name', config('brand.name', 'MentorDE')),
+            'from_email' => trim((string) Arr::get($data, 'from_email', '')) ?: (string) config('brand.mail_from_address', 'noreply@example.com'),
             'reply_to' => trim((string) Arr::get($data, 'reply_to', '')) ?: null,
             'is_active' => $request->boolean('is_active', true),
         ];

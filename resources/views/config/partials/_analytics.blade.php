@@ -146,7 +146,7 @@
             <div class="row">
                 <input id="seniorId" list="seniorIdSuggestions" placeholder="Danışman ID (düzenleme için)" value="">
                 <input id="seniorName" placeholder="Ad Soyad" value="Senior Demo">
-                <input id="seniorEmail" placeholder="Email" value="senior@mentorde.local">
+                <input id="seniorEmail" placeholder="Email" value="">
             </div>
             <div class="row">
                 <input id="seniorPassword" placeholder="Sifre (bos birak = random)">

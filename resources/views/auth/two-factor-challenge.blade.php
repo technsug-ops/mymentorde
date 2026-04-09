@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>İki Faktörlü Doğrulama — MentorDE</title>
+    <title>İki Faktörlü Doğrulama — {{ config('brand.name', 'MentorDE') }}</title>
     <style>
         :root{--bg:#eef3fb;--panel:#ffffff;--line:#d8e2f0;--ink:#11243d;--muted:#5f7392;--primary:#1f66d1;}
         *{box-sizing:border-box;margin:0;padding:0;}

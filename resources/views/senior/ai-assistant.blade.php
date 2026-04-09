@@ -45,7 +45,7 @@
         <div style="display:flex;align-items:center;gap:10px;">
             <div style="width:36px;height:36px;border-radius:50%;background:var(--u-brand);display:flex;align-items:center;justify-content:center;color:#fff;font-size:var(--tx-lg);flex-shrink:0;">🤖</div>
             <div>
-                <div style="font-size:var(--tx-sm);font-weight:700;color:var(--u-text);">MentorDE Danışman Asistanı</div>
+                <div style="font-size:var(--tx-sm);font-weight:700;color:var(--u-text);">{{ config('brand.name', 'MentorDE') }} Danışman Asistanı</div>
                 <div style="font-size:var(--tx-xs);color:var(--u-muted);">Almanya eğitim sistemi · öğrenci analizi · süreç rehberliği</div>
             </div>
         </div>
@@ -64,7 +64,7 @@
         <div style="display:flex;gap:8px;align-items:flex-start;">
             <div style="width:28px;height:28px;border-radius:50%;background:var(--u-brand);display:flex;align-items:center;justify-content:center;color:#fff;font-size:var(--tx-sm);flex-shrink:0;">🤖</div>
             <div style="background:var(--u-bg,#f8fafc);border:1px solid var(--u-line);padding:10px 14px;border-radius:0 12px 12px 12px;max-width:85%;font-size:var(--tx-sm);line-height:1.6;">
-                Merhaba! Ben MentorDE Danışman Asistanı. Öğrencilerinizle ilgili süreçlerde, Almanya eğitim sistemi sorularında ve yanıt taslakları hazırlamada size yardımcı olabilirim.<br><br>
+                Merhaba! Ben {{ config('brand.name', 'MentorDE') }} Danışman Asistanı. Öğrencilerinizle ilgili süreçlerde, Almanya eğitim sistemi sorularında ve yanıt taslakları hazırlamada size yardımcı olabilirim.<br><br>
                 @if($studentId)
                     <strong>Aktif bağlam:</strong> <code>{{ $studentId }}</code> öğrencisinin verileri yüklendi. Bu öğrenciyle ilgili sorularınızı sorabilirsiniz.
                 @else

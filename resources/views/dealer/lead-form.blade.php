@@ -171,7 +171,7 @@
 {{-- KVKK --}}
 <label class="lf-kvkk">
     <input type="checkbox" name="kvkk_consent" value="1" @checked(old('kvkk_consent'))>
-    <span>Öğrencinin <strong>KVKK onayı</strong> alınmıştır. Kişisel verilerinin MentorDE bünyesinde işlenmesine rıza gösterdiğini beyan ediyorum.</span>
+    <span>Öğrencinin <strong>KVKK onayı</strong> alınmıştır. Kişisel verilerinin {{ config('brand.name', 'MentorDE') }} bünyesinde işlenmesine rıza gösterdiğini beyan ediyorum.</span>
 </label>
 
 {{-- Submit --}}

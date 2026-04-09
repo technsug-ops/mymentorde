@@ -37,7 +37,7 @@
 
     <section class="search">
         <div class="row">
-            <input id="q" list="studentCardSuggestions" placeholder="MentorDE ID / e-posta / isim (min 2 karakter)">
+            <input id="q" list="studentCardSuggestions" placeholder="{{ config('brand.name', 'MentorDE') }} ID / e-posta / isim (min 2 karakter)">
             <button onclick="runSearch()">Ara</button>
         </div>
         <datalist id="studentCardSuggestions"></datalist>

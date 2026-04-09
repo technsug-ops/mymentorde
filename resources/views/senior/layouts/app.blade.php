@@ -13,7 +13,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'MentorDE — Senior Portalı')</title>
+    <title>@yield('title', config('brand.name', 'MentorDE') . ' — Senior Portalı')</title>
 
     {{-- Premium Design System --}}
     <link id="mentorde-theme-css" rel="stylesheet" href="{{ Vite::asset('resources/css/premium.css') }}">

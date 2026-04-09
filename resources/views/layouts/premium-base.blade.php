@@ -1,5 +1,5 @@
 {{--
-    MentorDE Premium Layout
+    Premium Layout (white-label, brand.php config)
     resources/views/layouts/premium-base.blade.php
 
     Kullanım:
@@ -15,7 +15,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'MentorDE — ' . ($portalTitle ?? 'Portal'))</title>
+    <title>@yield('title', config('brand.name', 'MentorDE') . ' — ' . ($portalTitle ?? 'Portal'))</title>
 
     {{-- Premium Design System CSS --}}
     <link rel="stylesheet" href="{{ Vite::asset('resources/css/premium.css') }}">
@@ -52,11 +52,20 @@
 <div class="app">
 
     {{-- ─── Sidebar ─── --}}
+    @php
+        $pbBrandName = config('brand.name', 'MentorDE');
+        $pbBrandLogo = config('brand.logo_url') ?: config('brand.logo_path');
+        $pbBrandInit = strtoupper(mb_substr($pbBrandName, 0, 1));
+    @endphp
     <aside class="sidebar" id="premium-sidebar">
         <div class="sidebar-brand">
-            <div class="brand-logo">M</div>
+            @if($pbBrandLogo)
+                <div class="brand-logo" style="background:transparent;padding:0;"><img src="{{ $pbBrandLogo }}" alt="{{ $pbBrandName }}" style="max-height:{{ (int) config('brand.logo_height', 40) }}px;width:auto;"></div>
+            @else
+                <div class="brand-logo">{{ $pbBrandInit }}</div>
+            @endif
             <div>
-                <div class="brand-name">MentorDE</div>
+                <div class="brand-name">{{ $pbBrandName }}</div>
                 <div class="brand-sub">{{ $portalTitle ?? 'Portal' }}</div>
             </div>
         </div>

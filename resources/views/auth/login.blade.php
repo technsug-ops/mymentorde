@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MentorDE Login</title>
+    <title>{{ config('brand.name', 'MentorDE') }} Login</title>
     <style>
         :root {
             --bg: #eef3fb;
@@ -249,7 +249,7 @@
 <body>
     <div class="shell">
         <section class="panel brand" aria-label="Platform bilgisi">
-            <div class="badge">MentorDE — Almanya Üniversite Danışmanlığı</div>
+            <div class="badge">{{ config('brand.name', 'MentorDE') }} — {{ config('brand.tagline', 'Almanya Üniversite Danışmanlığı') }}</div>
             <h1>Almanya'da üniversite hayalinizi gerçeğe dönüştürün</h1>
             <p>
                 Doğru üniversite seçiminden vize başvurusuna, barınmadan burs rehberine kadar her adımda yanınızdayız.
@@ -281,7 +281,7 @@
                     <div class="feature-icon">✅</div>
                     <div class="feature-text">
                         <div class="ft">Yüzlerce Başarılı Öğrenci</div>
-                        <div class="fd">MentorDE ile Almanya'ya yerleşen öğrenciler arasına siz de katılın.</div>
+                        <div class="fd">{{ config('brand.name', 'MentorDE') }} ile Almanya'ya yerleşen öğrenciler arasına siz de katılın.</div>
                     </div>
                 </div>
             </div>
@@ -291,7 +291,7 @@
         </section>
 
         <section class="panel auth" aria-label="Giriş formu">
-            <h2>MentorDE Login</h2>
+            <h2>{{ config('brand.name', 'MentorDE') }} Login</h2>
             <p class="sub">Hesabınla giriş yap. Sistem seni rolüne göre ilgili panele yönlendirir.</p>
 
             @if (session('status'))
@@ -307,7 +307,7 @@
 
                 <div class="field">
                     <label for="email">E-posta</label>
-                    <input id="email" type="email" name="email" placeholder="ornek@mentorde.local" value="{{ old('email') }}" required autofocus>
+                    <input id="email" type="email" name="email" placeholder="ornek@example.com" value="{{ old('email') }}" required autofocus>
                 </div>
 
                 <div class="field">

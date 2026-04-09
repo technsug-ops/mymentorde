@@ -13,7 +13,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'MentorDE — Öğrenci Portalı')</title>
+    <title>@yield('title', config('brand.name', 'MentorDE') . ' — Öğrenci Portalı')</title>
 
     {{-- Preconnect: CDN (twemoji, chart.js) + Tenor GIF --}}
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -84,7 +84,7 @@
     <link rel="manifest" href="{{ asset('manifest-guest.json') }}">
     <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="MentorDE">
+    <meta name="apple-mobile-web-app-title" content="{{ config('brand.name', 'MentorDE') }}">
 
     {{-- Guest portal sidebar: per-portal tema renklerini kullan --}}
     <style>
@@ -130,9 +130,14 @@
                     <div class="user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $sideDisplayName }}</div>
                     <div class="user-role">Aday Öğrenci</div>
                 </div>
-                <div class="brand-logo" style="width:28px;height:28px;font-size:11px;flex-shrink:0;" title="MentorDE">M</div>
+                @php $glBrandName = config('brand.name', 'MentorDE'); $glBrandLogo = config('brand.logo_url') ?: config('brand.logo_path'); @endphp
+                @if($glBrandLogo)
+                    <div class="brand-logo" style="width:28px;height:28px;flex-shrink:0;background:transparent;padding:0;" title="{{ $glBrandName }}"><img src="{{ $glBrandLogo }}" alt="{{ $glBrandName }}" style="max-height:28px;max-width:28px;object-fit:contain;"></div>
+                @else
+                    <div class="brand-logo" style="width:28px;height:28px;font-size:11px;flex-shrink:0;" title="{{ $glBrandName }}">{{ strtoupper(mb_substr($glBrandName, 0, 1)) }}</div>
+                @endif
             </div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">MentorDE · Öğrenci Portalı</div>
+            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">{{ $glBrandName }} · Öğrenci Portalı</div>
             @if($profilePct > 0)
             <div style="margin-top:8px;">
                 <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px;">
@@ -207,12 +212,28 @@
 
             <div class="nav-section">
                 <div class="nav-section-label">Keşfet</div>
+                <a href="{{ route('guest.university-guide') }}"
+                   class="nav-link {{ request()->routeIs('guest.university-guide') ? 'active' : '' }}">
+                    <span class="nav-icon">🎓</span> Üniversite Rehberi
+                </a>
+                <a href="{{ route('guest.document-guide') }}"
+                   class="nav-link {{ request()->routeIs('guest.document-guide') ? 'active' : '' }}">
+                    <span class="nav-icon">📋</span> Belge Hazırlama
+                </a>
+                <a href="{{ route('guest.success-stories') }}"
+                   class="nav-link {{ request()->routeIs('guest.success-stories') ? 'active' : '' }}">
+                    <span class="nav-icon">⭐</span> Başarı Hikayeleri
+                </a>
                 <a href="{{ route('guest.living-guide') }}"
                    class="nav-link {{ request()->routeIs('guest.living-guide') ? 'active' : '' }}">
-                    <span class="nav-icon">🧭</span> Keşfet
+                    <span class="nav-icon">🏠</span> Almanya'da Yaşam
+                </a>
+                <a href="{{ route('guest.vize-guide') }}"
+                   class="nav-link {{ request()->routeIs('guest.vize-guide') ? 'active' : '' }}">
+                    <span class="nav-icon">🛂</span> Vize & Sperrkonto
                 </a>
                 <a href="{{ route('guest.discover') }}"
-                   class="nav-link {{ request()->routeIs('guest.discover') && !request()->get('cat') ? 'active' : '' }}">
+                   class="nav-link {{ request()->routeIs('guest.discover') ? 'active' : '' }}">
                     <span class="nav-icon">📚</span> Tüm İçerikler
                 </a>
                 <a href="{{ route('guest.saved') }}"
@@ -254,7 +275,7 @@
                         style="display:none;">☰</button>
                 <button class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
                 <div>
-                    <div class="topbar-title">@yield('page_title', 'MentorDE')</div>
+                    <div class="topbar-title">@yield('page_title', config('brand.name', 'MentorDE'))</div>
                     @hasSection('page_subtitle')
                         <div class="topbar-sub">@yield('page_subtitle')</div>
                     @endif

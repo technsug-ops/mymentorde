@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MentorDE Demo</title>
+    <title>{{ config('brand.name', 'MentorDE') }} Demo</title>
     <style>
         :root {
             --bg: #eef3f9;
@@ -89,7 +89,7 @@
 </head>
 <body>
 <div class="wrap">
-    <h1>MentorDE Demo Akisi</h1>
+    <h1>{{ config('brand.name', 'MentorDE') }} Demo Akisi</h1>
     <div class="meta">Master v5.0 demo stratejisine uygun 4 ekranlik hizli gecis.</div>
 
     <div class="top">

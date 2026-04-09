@@ -32,7 +32,7 @@
 
 @if($contract->status === 'signed_uploaded')
 <div style="padding:12px 16px;background:var(--badge-warn-bg,#fef9c3);border-radius:6px;margin-bottom:16px;font-size:var(--tx-sm);color:var(--badge-warn-fg,#92400e);">
-    ⏳ İmzalı sözleşmeniz MentorDE tarafından inceleniyor. Onay için bekleyiniz.
+    ⏳ İmzalı sözleşmeniz {{ config('brand.name', 'MentorDE') }} tarafından inceleniyor. Onay için bekleyiniz.
 </div>
 @endif
 

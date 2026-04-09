@@ -13,7 +13,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'MentorDE — Öğrenci Portalı')</title>
+    <title>@yield('title', config('brand.name', 'MentorDE') . ' — Öğrenci Portalı')</title>
 
     {{-- Preconnect: CDN (chart.js, fullcalendar) + Tenor GIF --}}
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -131,9 +131,14 @@
                     <div class="user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $user?->name ?? 'Öğrenci' }}</div>
                     <div class="user-role">Öğrenci</div>
                 </div>
-                <div class="brand-logo" style="width:28px;height:28px;font-size:11px;flex-shrink:0;" title="MentorDE">M</div>
+                @php $slBrandName = config('brand.name', 'MentorDE'); $slBrandLogo = config('brand.logo_url') ?: config('brand.logo_path'); @endphp
+                @if($slBrandLogo)
+                    <div class="brand-logo" style="width:28px;height:28px;flex-shrink:0;background:transparent;padding:0;" title="{{ $slBrandName }}"><img src="{{ $slBrandLogo }}" alt="{{ $slBrandName }}" style="max-height:28px;max-width:28px;object-fit:contain;"></div>
+                @else
+                    <div class="brand-logo" style="width:28px;height:28px;font-size:11px;flex-shrink:0;" title="{{ $slBrandName }}">{{ strtoupper(mb_substr($slBrandName, 0, 1)) }}</div>
+                @endif
             </div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">MentorDE · Öğrenci Portalı</div>
+            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">{{ $slBrandName }} · Öğrenci Portalı</div>
             @if($sideProgressPct > 0)
             <div style="margin-top:8px;">
                 <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px;">
@@ -150,110 +155,99 @@
             <div class="nav-section">
                 <a href="/student/dashboard"
                    class="nav-link {{ request()->is('student/dashboard') ? 'active' : '' }}">
-                    <span class="nav-icon">🏠</span> Dashboard
+                    <span class="nav-icon">🏠</span> Ana Sayfa
                 </a>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-label">Kayıt & Süreç</div>
+                <div class="nav-section-label">Kayit Sureci</div>
                 <a href="/student/registration"
                    class="nav-link {{ request()->is('student/registration') ? 'active' : '' }}">
-                    <span class="nav-icon">📋</span> Kayıt Formu
+                    <span class="nav-icon">📝</span> Kayit Formu
+                    @if(!empty($guestApplication?->registration_form_submitted_at))
+                        <span class="nav-badge" style="background:rgba(22,163,74,.15);color:#16a34a;font-size:9px;padding:1px 6px;border-radius:6px;margin-left:auto;">✓</span>
+                    @endif
                 </a>
                 <a href="/student/registration/documents"
                    class="nav-link {{ request()->is('student/registration/documents') ? 'active' : '' }}">
-                    <span class="nav-icon">📂</span> Belgeler
+                    <span class="nav-icon">📄</span> Belgelerim
+                    @if(isset($docSummary))
+                        <span class="nav-badge" style="background:{{ ($guestApplication?->docs_ready ?? false) ? 'rgba(22,163,74,.15)' : 'rgba(217,119,6,.15)' }};color:{{ ($guestApplication?->docs_ready ?? false) ? '#16a34a' : '#d97706' }};font-size:9px;padding:1px 6px;border-radius:6px;margin-left:auto;">{{ $docSummary['approved'] ?? 0 }}/{{ $docSummary['total'] ?? 0 }}</span>
+                    @endif
+                </a>
+                <a href="/student/contract"
+                   class="nav-link {{ request()->is('student/contract*') ? 'active' : '' }}">
+                    <span class="nav-icon">📜</span> Sozlesme
+                    @if(($guestApplication?->contract_status ?? '') === 'approved')
+                        <span class="nav-badge" style="background:rgba(22,163,74,.15);color:#16a34a;font-size:9px;padding:1px 6px;border-radius:6px;margin-left:auto;">✓</span>
+                    @endif
+                </a>
+                <a href="/student/process-tracking"
+                   class="nav-link {{ request()->is('student/process-tracking*') ? 'active' : '' }}">
+                    <span class="nav-icon">📊</span> Surec Takibi
+                </a>
+                <a href="/student/university-applications"
+                   class="nav-link {{ request()->is('student/university-applications*','student/institution-documents*') ? 'active' : '' }}">
+                    <span class="nav-icon">🎓</span> Universiteler
                 </a>
                 <a href="/student/appointments"
                    class="nav-link {{ request()->is('student/appointments*') ? 'active' : '' }}">
                     <span class="nav-icon">📅</span> Randevular
                 </a>
-                <a href="/student/process-tracking"
-                   class="nav-link {{ request()->is('student/process-tracking*') ? 'active' : '' }}">
-                    <span class="nav-icon">🔄</span> Süreç Takibi
-                </a>
-                <a href="/student/services"
-                   class="nav-link {{ request()->is('student/services*') ? 'active' : '' }}">
-                    <span class="nav-icon">🎓</span> Servisler
-                </a>
-                <a href="/student/contract"
-                   class="nav-link {{ request()->is('student/contract*') ? 'active' : '' }}">
-                    <span class="nav-icon">📜</span> Sözleşme
-                </a>
-                <a href="/student/university-applications"
-                   class="nav-link {{ request()->is('student/university-applications*','student/institution-documents*') ? 'active' : '' }}">
-                    <span class="nav-icon">🏛️</span> Alınan Belgelerim
-                </a>
-                <a href="/student/visa"
-                   class="nav-link {{ request()->is('student/visa*') ? 'active' : '' }}">
-                    <span class="nav-icon">🛂</span> Vize Takibi
-                </a>
-                <a href="/student/housing"
-                   class="nav-link {{ request()->is('student/housing*') ? 'active' : '' }}">
-                    <span class="nav-icon">🏠</span> Konut & Barınma
-                </a>
-                <a href="/student/checklist"
-                   class="nav-link {{ request()->is('student/checklist*') ? 'active' : '' }}">
-                    <span class="nav-icon">✅</span> Yapılacaklar
-                </a>
-                <a href="/student/calendar"
-                   class="nav-link {{ request()->is('student/calendar*') ? 'active' : '' }}">
-                    <span class="nav-icon">📅</span> Takvimim
-                </a>
-                <a href="/student/vault"
-                   class="nav-link {{ request()->is('student/vault*') ? 'active' : '' }}">
-                    <span class="nav-icon">🔐</span> Hesap Kasam
-                </a>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-label">İletişim</div>
+                <div class="nav-section-label">Iletisim</div>
                 <a href="/student/messages"
                    class="nav-link {{ request()->is('student/messages*') ? 'active' : '' }}">
-                    <span class="nav-icon">💬</span> Danışman İletişim
+                    <span class="nav-icon">💬</span> Mesajlar
                     @if((int)($dmUnread ?? 0) > 0)
                         <span class="nav-badge">{{ (int)$dmUnread }}</span>
                     @endif
                 </a>
                 <a href="/student/tickets"
                    class="nav-link {{ request()->is('student/tickets*') ? 'active' : '' }}">
-                    <span class="nav-icon">🎫</span> Ticket
+                    <span class="nav-icon">📞</span> Destek
                 </a>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-label">Araçlar & İçerik</div>
-                <a href="/student/document-builder"
-                   class="nav-link {{ request()->is('student/document-builder*') ? 'active' : '' }}">
-                    <span class="nav-icon">📝</span> Doküman Oluştur
-                </a>
-                <a href="/student/materials"
-                   class="nav-link {{ request()->is('student/materials*') ? 'active' : '' }}">
-                    <span class="nav-icon">📚</span> Materyaller
-                </a>
-                <a href="/student/cost-calculator"
-                   class="nav-link {{ request()->is('student/cost-calculator*') ? 'active' : '' }}">
-                    <span class="nav-icon">🧮</span> Maliyet Hesapla
+                <div class="nav-section-label">Araclar</div>
+                <a href="/student/services"
+                   class="nav-link {{ request()->is('student/services*') ? 'active' : '' }}">
+                    <span class="nav-icon">📦</span> Servisler
                 </a>
                 <a href="/student/ai-assistant"
                    class="nav-link {{ request()->is('student/ai-assistant*') ? 'active' : '' }}">
                     <span class="nav-icon">🤖</span> AI Asistan
                 </a>
-                <a href="/student/help-center"
-                   class="nav-link {{ request()->is('student/help-center*') ? 'active' : '' }}">
-                    <span class="nav-icon">❓</span> Yardım Merkezi
+                <a href="/student/document-builder"
+                   class="nav-link {{ request()->is('student/document-builder*') ? 'active' : '' }}">
+                    <span class="nav-icon">📝</span> Dokuman Olustur
+                </a>
+                <a href="/student/cost-calculator"
+                   class="nav-link {{ request()->is('student/cost-calculator*') ? 'active' : '' }}">
+                    <span class="nav-icon">🧮</span> Maliyet Hesapla
                 </a>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-label">Keşfet</div>
-                <a href="{{ route('student.discover') }}"
-                   class="nav-link {{ request()->routeIs('student.content-detail') ? 'active' : '' }}">
-                    <span class="nav-icon">🧭</span> Keşfet
+                <div class="nav-section-label">Kesfet</div>
+                <a href="/student/visa"
+                   class="nav-link {{ request()->is('student/visa*') ? 'active' : '' }}">
+                    <span class="nav-icon">🛂</span> Vize Takibi
+                </a>
+                <a href="/student/housing"
+                   class="nav-link {{ request()->is('student/housing*') ? 'active' : '' }}">
+                    <span class="nav-icon">🏠</span> Konut & Barinma
+                </a>
+                <a href="/student/materials"
+                   class="nav-link {{ request()->is('student/materials*') ? 'active' : '' }}">
+                    <span class="nav-icon">📚</span> Materyaller
                 </a>
                 <a href="{{ route('student.discover') }}"
                    class="nav-link {{ request()->routeIs('student.discover') ? 'active' : '' }}">
-                    <span class="nav-icon">📚</span> Tüm İçerikler
+                    <span class="nav-icon">🧭</span> Icerikler
                 </a>
                 <a href="{{ route('student.saved') }}"
                    class="nav-link {{ request()->routeIs('student.saved') ? 'active' : '' }}">
@@ -265,11 +259,7 @@
                 <div class="nav-section-label">Hesap</div>
                 <a href="/student/payments"
                    class="nav-link {{ request()->is('student/payments*') ? 'active' : '' }}">
-                    <span class="nav-icon">💳</span> Ödeme Durumum
-                </a>
-                <a href="/student/notifications"
-                   class="nav-link {{ request()->is('student/notifications*') ? 'active' : '' }}">
-                    <span class="nav-icon">🔔</span> Bildirimler
+                    <span class="nav-icon">💳</span> Odeme Durumum
                 </a>
                 <a href="/student/profile"
                    class="nav-link {{ request()->is('student/profile*') ? 'active' : '' }}">
@@ -278,10 +268,6 @@
                 <a href="/student/settings"
                    class="nav-link {{ request()->is('student/settings*') ? 'active' : '' }}">
                     <span class="nav-icon">⚙️</span> Ayarlar
-                </a>
-                <a href="/student/feedback"
-                   class="nav-link {{ request()->is('student/feedback*') ? 'active' : '' }}">
-                    <span class="nav-icon">💡</span> Geri Bildirim
                 </a>
             </div>
         </nav>

@@ -135,7 +135,7 @@ input[type="range"] { width:100%; accent-color:#1e40af; }
                 <div class="th-card-head">🗂 Hazır Tema</div>
                 <div class="th-card-body">
                     <div class="th-presets">
-                        <button type="button" class="th-chip" data-preset="mentorde"><span class="th-dot" style="background:#1e40af"></span>MentorDE</button>
+                        <button type="button" class="th-chip" data-preset="mentorde"><span class="th-dot" style="background:#1e40af"></span>Klasik Mavi</button>
                         <button type="button" class="th-chip" data-preset="violet"><span class="th-dot" style="background:#7c3aed"></span>Mor</button>
                         <button type="button" class="th-chip" data-preset="emerald"><span class="th-dot" style="background:#059669"></span>Yeşil</button>
                         <button type="button" class="th-chip" data-preset="rose"><span class="th-dot" style="background:#e11d48"></span>Kırmızı</button>
@@ -384,7 +384,7 @@ input[type="range"] { width:100%; accent-color:#1e40af; }
             </div>
             <div class="prev-shell">
                 <div class="prev-sidebar">
-                    <div class="prev-sb-logo">MentorDE</div>
+                    <div class="prev-sb-logo">{{ $brandName ?? config('brand.name', 'MentorDE') }}</div>
                     <div class="prev-sb-active">📊 Dashboard</div>
                     <div class="prev-sb-item">👥 Öğrenciler</div>
                     <div class="prev-sb-item">📄 Belgeler</div>
@@ -466,7 +466,7 @@ input[type="range"] { width:100%; accent-color:#1e40af; }
                         <label style="font-size:11px;font-weight:700;color:var(--muted,#64748b);display:block;margin-bottom:4px;">Marka Adı</label>
                         <input type="text" name="brand_name" value="{{ $brand['name'] }}"
                                style="width:100%;box-sizing:border-box;border:1.5px solid var(--border,#e2e8f0);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--surface,#fff);color:var(--text,#0f172a);"
-                               placeholder="MentorDE">
+                               placeholder="{{ config('brand.name', 'MentorDE') }}">
                         <div style="font-size:10px;color:var(--muted,#94a3b8);margin-top:4px;">Başvuru formu sol panelinde görünür</div>
                     </div>
                     <div>
@@ -511,7 +511,7 @@ input[type="range"] { width:100%; accent-color:#1e40af; }
 
             <div class="prev-shell">
                 <div class="prev-sidebar">
-                    <div class="prev-sb-logo">MentorDE</div>
+                    <div class="prev-sb-logo">{{ $brandName ?? config('brand.name', 'MentorDE') }}</div>
                     <div class="prev-sb-active">📊 Dashboard</div>
                     <div class="prev-sb-item">👥 Öğrenciler</div>
                     <div class="prev-sb-item">📄 Belgeler</div>

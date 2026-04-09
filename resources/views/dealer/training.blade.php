@@ -216,7 +216,7 @@
     <div class="tr-skel-card">
         <div class="tr-skel-icon">🚀</div>
         <div class="tr-skel-title">Onboarding</div>
-        <div class="tr-skel-desc">MentorDE süreç tanıtımı, lead kalite kriterleri.</div>
+        <div class="tr-skel-desc">{{ config('brand.name', 'MentorDE') }} süreç tanıtımı, lead kalite kriterleri.</div>
     </div>
     <div class="tr-skel-card">
         <div class="tr-skel-icon">🔗</div>

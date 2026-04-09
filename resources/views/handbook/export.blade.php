@@ -36,13 +36,13 @@ strong{color:#1a2233;}
 <div class="wrap">
     <div class="cover">
         <h1>📖 {{ $title }}</h1>
-        <div class="meta">MentorDE ERP &nbsp;·&nbsp; {{ date('Y') }} &nbsp;·&nbsp; {{ strtoupper($lang) }}</div>
+        <div class="meta">{{ config('brand.name', 'MentorDE') }} ERP &nbsp;·&nbsp; {{ date('Y') }} &nbsp;·&nbsp; {{ strtoupper($lang) }}</div>
     </div>
 
     {!! $html !!}
 
     <div class="footer">
-        MentorDE — {{ date('Y') }} — {{ $lang === 'en' ? 'Generated automatically' : 'Otomatik oluşturuldu' }}
+        {{ config('brand.name', 'MentorDE') }} — {{ date('Y') }} — {{ $lang === 'en' ? 'Generated automatically' : 'Otomatik oluşturuldu' }}
     </div>
 </div>
 </body>

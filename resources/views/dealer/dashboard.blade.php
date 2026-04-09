@@ -331,8 +331,8 @@
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;">
             <button type="button" class="btn" onclick="copyDealerLink()">Kopyala</button>
-            <a class="btn" target="_blank" href="https://wa.me/?text={{ urlencode('MentorDE ile Almanyada egitim firsatlari! '.($dealerLink ?? '')) }}">WhatsApp</a>
-            <a class="btn" target="_blank" href="mailto:?subject={{ urlencode('Almanya Eğitim Danışmanlığı') }}&body={{ urlencode('Merhaba! MentorDE başvuru linkim: '.($dealerLink ?? '')) }}">E-posta</a>
+            <a class="btn" target="_blank" href="https://wa.me/?text={{ urlencode(config('brand.name', 'MentorDE') . ' ile Almanyada egitim firsatlari! '.($dealerLink ?? '')) }}">WhatsApp</a>
+            <a class="btn" target="_blank" href="mailto:?subject={{ urlencode('Almanya Eğitim Danışmanlığı') }}&body={{ urlencode('Merhaba! ' . config('brand.name', 'MentorDE') . ' başvuru linkim: '.($dealerLink ?? '')) }}">E-posta</a>
             <a class="btn alt" href="/dealer/referral-links">UTM Linkler →</a>
         </div>
         @if($dealerLink)

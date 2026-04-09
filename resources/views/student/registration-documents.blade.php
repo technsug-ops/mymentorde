@@ -1,438 +1,765 @@
-﻿@extends('student.layouts.app')
+@extends('student.layouts.app')
 
 @section('title', 'Student - Belgeler')
 @section('page_title', 'Kayıt Belgeleri')
 
 @push('head')
 <style>
-    .docs-page { --docs-font:13px; --docs-gap:8px; font-size:var(--docs-font); }
-    .docs-page * { box-sizing: border-box; }
-    .docs-page section.panel { min-height:auto !important; }
-    .docs-page .panel {
-        padding:10px 12px !important; border-radius:12px !important;
-        background:var(--u-card) !important; border:1px solid var(--u-line) !important;
-        margin-bottom:10px;
-    }
-    .docs-page .btn { min-height:32px !important; padding:6px 10px !important; font-size:12px !important; border-radius:10px !important; }
-    .docs-page .doc-header-panel { padding:8px 10px !important; min-height:auto !important; margin-bottom:8px; }
-    .docs-page .doc-header-panel::before,
-    .docs-page .doc-header-panel::after { display:none !important; content:none !important; }
-    .docs-page .doc-header-row { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; flex-wrap:wrap; margin:0 !important; }
-    .docs-page .doc-header-row > * { min-height:auto !important; margin:0 !important; }
-    .docs-page .doc-header-main { flex:1 1 320px; min-width:260px; }
-    .doc-header-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    .docs-page .doc-header-actions .btn { margin:0 !important; }
-    .docs-page .doc-note { margin-top:2px; font-size:11px; line-height:1.25; }
-    .docs-page .doc-subtle { font-size:12px; color:#5a6f8f; line-height:1.2; }
-    .docs-page .docs-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-bottom:8px; }
-    .docs-page .metric .v { font-size:20px; font-weight:800; color:var(--u-brand); }
-    .docs-page .metric.panel {
-        padding:14px 18px !important; min-height:auto !important;
-        background:var(--u-card) !important; border:1px solid var(--u-line) !important;
-        border-radius:14px !important; box-shadow:var(--u-shadow) !important;
-    }
-    .docs-page .metric .muted { font-size:11px !important; line-height:1.1; margin-bottom:2px; }
-    .docs-page .group { border:1px solid var(--u-line); border-radius:12px; margin-bottom:10px; background:var(--u-card); overflow:hidden; }
-    .docs-page .group-h { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 10px; border-bottom:none; background:var(--u-bg); }
-    .docs-page .group-h strong { font-size:16px; color:var(--u-text); }
-    .docs-page .group-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px; }
-    .docs-page .empty-group-note { margin:0 10px 10px; padding:8px 10px; border:1px dashed #cfdcf0; border-radius:10px; background:#f8fbff; color:#4e678a; font-size:12px; }
-    .docs-page .doc { border:1px solid var(--u-line); border-radius:10px; padding:10px; background:var(--u-card); }
-    .docs-page .doc.missing { border-color:#f0d4d4; background:#fffefe; }
-    .docs-page .dchip { display:inline-flex; align-items:center; justify-content:center; gap:4px; padding:2px 7px; min-height:22px; line-height:1; border-radius:999px; border:1px solid #d6dfeb; font-size:10px; font-weight:600; white-space:nowrap; background:#fff; }
-    .docs-page .dchip.ok { border-color:#bfe2ca; color:#1e6a40; background:#eefcf2; }
-    .docs-page .dchip.wait { border-color:#f1d5a8; color:#8a5a15; background:#fff8ee; }
-    .docs-page .dchip.danger { border-color:#efc8c8; color:#b4232b; background:#fff8f8; }
-    .docs-page .code { display:inline-block; font-size:11px; font-weight:700; color:var(--u-brand); background:var(--u-bg); border:1px solid var(--u-line); border-radius:999px; padding:2px 7px; }
-    .docs-page .drop { margin-top:8px; border:1px dashed var(--u-line); border-radius:8px; padding:8px; background:var(--u-bg); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    .docs-page .drop input[type="file"] { max-width:280px; }
-    .docs-page .drop label.btn {
-        display:inline-flex; align-items:center; padding:5px 12px; min-height:30px;
-        background:var(--u-card); border:1px solid var(--u-line) !important;
-        border-radius:8px; color:var(--u-text) !important; font-size:12px;
-        font-weight:600; cursor:pointer; transition:all .15s;
-    }
-    .docs-page .drop label.btn:hover { border-color:var(--u-brand) !important; color:var(--u-brand) !important; }
-    .docs-page .drop button.btn.primary {
-        background:var(--u-brand) !important; color:#fff !important;
-        border-color:transparent !important; border-radius:8px;
-        padding:5px 12px; min-height:30px; font-size:12px; font-weight:600;
-    }
-    .docs-page .drop button.btn.primary:hover { opacity:.88; }
-    .docs-page .list { max-height:260px; overflow:auto; border:1px solid #d6dfeb; border-radius:10px; }
-    .docs-page .uploaded-row { padding:8px; border-bottom:none; }
-    .docs-page .uploaded-row:last-child { border-bottom:none; }
-    .docs-page .bar { height:8px; border-radius:999px; background:var(--u-line); overflow:hidden; }
-    .docs-page .bar > span { display:block; height:100%; background:var(--u-brand); }
-    .docs-page .tools { display:flex; gap:6px; flex-wrap:wrap; margin:0; align-items:center; }
-    .docs-page .tools button { border:1px solid var(--u-line); background:var(--u-card); color:var(--u-text); border-radius:999px; padding:4px 9px; min-height:28px; font-size:11px; cursor:pointer; line-height:1; }
-    .docs-page .docs-legend { display:flex; gap:6px; flex-wrap:wrap; margin:0; align-items:center; justify-content:flex-end; }
-    .docs-page .docs-legend .dchip {
-        display:inline-flex !important; width:auto !important; height:auto !important; min-width:0 !important;
-        min-height:22px !important; padding:2px 8px !important; font-size:10px !important; line-height:1 !important;
-        border-radius:999px !important; white-space:nowrap !important; margin:0 !important;
-    }
-    .docs-page .progress-line { display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:center; }
-    .docs-page .progress-line .muted { margin:0 !important; font-size:12px; }
-    .docs-page .hidden { display:none !important; }
-    .docs-page .filters-panel { padding:8px 10px !important; min-height:auto !important; }
-    .docs-page .filters-top { display:flex; align-items:center; gap:10px; margin:0 0 8px 0; min-height:auto !important; flex-wrap:wrap; }
-    .docs-page .filters-top .progress-line { flex:1 1 520px; min-width:220px; }
-    .docs-page .filters-inline { display:grid; gap:8px; min-height:auto !important; }
-    .docs-page .filter-row { display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; align-items:center; }
-    .docs-page .filter-row .tools-wrap { min-width:0; overflow:auto hidden; padding-bottom:2px; }
-    .docs-page .filter-row .tools { min-width:max-content; flex-wrap:nowrap; }
-    .docs-page .filters-inline .tools, .docs-page .filters-inline .docs-legend { margin-top:0; }
-    .docs-page .doc-cat-nav { position:sticky; top:8px; z-index:25; display:flex; gap:10px; align-items:center; overflow:hidden; padding:8px 10px 10px; border:1px solid var(--u-line); border-radius:12px; background:var(--u-card); box-shadow:0 2px 8px rgba(0,0,0,.06); margin-bottom:10px; }
-    .docs-page .doc-cat-nav .row-label { font-size:11px; font-weight:700; color:var(--u-muted); text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
-    .docs-page .doc-cat-nav .category-tabs-wrap { flex:1; min-width:0; overflow:auto hidden; padding-bottom:2px; }
-    .docs-page .category-tabs { display:flex; gap:6px; flex-wrap:nowrap; margin:0; min-width:max-content; }
-    .docs-page .category-tabs button { border:1px solid var(--u-line); background:var(--u-card); color:var(--u-text); border-radius:999px; padding:5px 12px; min-height:28px; font-size:12px; cursor:pointer; line-height:1; }
-    .docs-page .category-tabs button:hover { background:var(--u-bg); border-color:var(--u-brand); color:var(--u-brand); }
-    .docs-page .category-tabs button.active { background:var(--u-brand); border-color:var(--u-brand); color:#fff; font-weight:700; }
-    .docs-page .docs-legend.compact { justify-content:flex-end; }
-    .docs-page .filters-inline .tools button.active-filter { background:var(--u-bg); border-color:var(--u-brand); color:var(--u-brand); font-weight:700; }
-    .docs-page .group-summary { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
-    .docs-page .filters-panel > * { min-height:auto !important; }
-    .docs-page .filters-panel .panel,
-    .docs-page .filters-panel .row { min-height:auto !important; }
-    .docs-page .list .btn { min-height:28px !important; padding:4px 8px !important; font-size:11px !important; }
-    .docs-page .row strong { font-size:13px; line-height:1.25; }
-    .docs-page .group-h strong { font-size:14px; }
-    .docs-page .group-h { padding:7px 9px; }
-    .docs-page .doc h3 { font-size:14px !important; line-height:1.25; }
-    .docs-page .muted { font-size:12px !important; }
-    .docs-page .doc-header-row form { margin:0; }
-    @media (max-width:1024px) { .docs-page .docs-kpis { grid-template-columns:1fr 1fr; } }
-    @media (max-width:980px) { .docs-page .docs-legend{justify-content:flex-start;} }
-    @media (max-width:900px) {
-        .docs-page .doc-cat-nav { flex-direction:column; align-items:flex-start; gap:6px; }
-        .docs-page .doc-cat-nav .category-tabs-wrap { width:100%; }
-        .docs-page .filter-row { grid-template-columns:1fr; gap:6px; }
-        .docs-page .docs-legend.compact { justify-content:flex-start; }
-    }
-    @media (max-width:740px) { .docs-page .group-grid,.docs-page .docs-kpis { grid-template-columns:1fr; } }
+/* ═══ Mockup CSS Variable Bridge ═══ */
+.sdoc {
+    --bg: var(--u-bg, #f0f2f5);
+    --card: var(--surface, #ffffff);
+    --text: var(--u-text, #0f172a);
+    --muted: var(--u-muted, #64748b);
+    --light: #94a3b8;
+    --line: var(--border, #e2e8f0);
+    --line-light: #f1f5f9;
+    --brand: var(--c-accent, #7c3aed);
+    --brand-light: #ede9fe;
+    --brand-dark: #4c1d95;
+    --brand-mid: #6d28d9;
+    --ok: var(--c-ok, #16a34a);
+    --ok-light: #dcfce7;
+    --warn: var(--c-warn, #d97706);
+    --warn-light: #fef3c7;
+    --danger: var(--c-danger, #dc2626);
+    --danger-light: #fee2e2;
+    --blue: #2563eb;
+    --blue-light: #dbeafe;
+    --teal: #0891b2;
+    --teal-light: #cffafe;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.1);
+    --radius: 16px;
+    --radius-sm: 12px;
+    --radius-xs: 8px;
+}
+
+/* ═══ JOURNEY ═══ */
+.sdoc .journey {
+    background:var(--card); border-radius:var(--radius);
+    box-shadow:var(--shadow-md); border:1px solid var(--line-light);
+    overflow:hidden; margin-bottom:24px;
+}
+.sdoc .journey-top { padding:16px 24px 12px; display:flex; align-items:center; justify-content:space-between; }
+.sdoc .journey-title h3 { font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; margin:0; }
+.sdoc .journey-tag { font-size:11px; font-weight:600; padding:2px 10px; border-radius:10px; }
+.sdoc .journey-tag.progress { background:var(--brand-light); color:var(--brand); }
+.sdoc .journey-tag.done { background:var(--ok-light); color:var(--ok); }
+.sdoc .journey-pct { font-size:24px; font-weight:800; color:var(--brand); letter-spacing:-1px; }
+.sdoc .journey-pct span { font-size:13px; font-weight:500; color:var(--muted); }
+.sdoc .journey-bar-wrap { padding:0 24px; margin-bottom:12px; }
+.sdoc .journey-bar { height:6px; background:var(--line-light); border-radius:3px; overflow:hidden; }
+.sdoc .journey-bar-fill { height:100%; background:linear-gradient(90deg,var(--brand),#a78bfa); border-radius:3px; transition:width 0.8s cubic-bezier(0.4,0,0.2,1); }
+.sdoc .journey-steps { display:grid; grid-template-columns:repeat(6,1fr); border-top:1px solid var(--line-light); }
+.sdoc .j-step { padding:12px 8px; display:flex; flex-direction:column; align-items:center; gap:5px; cursor:default; border-right:1px solid var(--line-light); text-align:center; position:relative; }
+.sdoc .j-step:last-child { border-right:none; }
+.sdoc .j-step-num { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; border:2px solid var(--line); background:var(--bg); color:var(--muted); transition:all 0.3s; }
+.sdoc .j-step.done .j-step-num { background:var(--ok); border-color:var(--ok); color:#fff; }
+.sdoc .j-step.active .j-step-num { background:var(--brand-light); border-color:var(--brand); color:var(--brand); box-shadow:0 0 0 3px rgba(124,58,237,0.1); animation:sdoc-pulse-j 2s infinite; }
+@keyframes sdoc-pulse-j { 0%,100%{box-shadow:0 0 0 3px rgba(124,58,237,0.1);} 50%{box-shadow:0 0 0 6px rgba(124,58,237,0.05);} }
+.sdoc .j-step.locked .j-step-num { opacity:0.35; }
+.sdoc .j-step-name { font-size:10px; font-weight:600; line-height:1.2; }
+.sdoc .j-step.done .j-step-name { color:var(--ok); }
+.sdoc .j-step.active .j-step-name { color:var(--brand); }
+.sdoc .j-step.locked .j-step-name { color:var(--light); }
+.sdoc .j-step.active::after { content:''; position:absolute; top:-1px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-top:5px solid var(--brand); }
+
+/* ═══ HERO TASK ═══ */
+.sdoc .hero-task {
+    border-radius:var(--radius); padding:28px 32px; margin-bottom:24px;
+    color:#fff; box-shadow:var(--shadow-lg); overflow:hidden; position:relative;
+    display:flex; align-items:center; justify-content:space-between; gap:32px;
+}
+.sdoc .hero-content { flex:1; min-width:0; }
+.sdoc .hero-task.blue { background:linear-gradient(135deg,#1e3a8a,var(--blue)); }
+.sdoc .hero-task.purple { background:linear-gradient(135deg,var(--brand-dark),var(--brand)); }
+.sdoc .hero-task.green { background:linear-gradient(135deg,#065f46,var(--ok)); }
+.sdoc .hero-badge { display:inline-flex; align-items:center; gap:6px; font-size:11px; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,0.6); margin-bottom:8px; }
+.sdoc .hero-badge .pulse { width:8px; height:8px; border-radius:50%; background:#34d399; box-shadow:0 0 6px rgba(52,211,153,0.6); animation:sdoc-pulse-dot 1.5s infinite; }
+@keyframes sdoc-pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+.sdoc .hero-title { font-size:22px; font-weight:700; margin-bottom:6px; line-height:1.3; }
+.sdoc .hero-sub { font-size:14px; color:rgba(255,255,255,0.75); line-height:1.5; margin-bottom:16px; }
+
+/* ═══ GRID ═══ */
+.sdoc .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
+
+/* ═══ STAT CARD ═══ */
+.sdoc .stat-card { background:var(--card); border-radius:var(--radius-sm); padding:18px 20px; box-shadow:var(--shadow); border:1px solid var(--line-light); display:flex; align-items:center; gap:14px; }
+.sdoc .stat-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.sdoc .stat-icon.green { background:var(--ok-light); }
+.sdoc .stat-icon.amber { background:var(--warn-light); }
+.sdoc .stat-icon.red { background:var(--danger-light); }
+.sdoc .stat-icon.blue { background:var(--blue-light); }
+.sdoc .stat-label { font-size:11px; color:var(--muted); margin-bottom:2px; }
+.sdoc .stat-value { font-size:20px; font-weight:700; line-height:1.2; }
+
+/* ═══ ALERT BAR ═══ */
+.sdoc .alert-bar { display:flex; align-items:center; gap:12px; padding:12px 18px; border-radius:var(--radius-xs); margin-bottom:20px; font-size:13px; }
+.sdoc .alert-bar.danger { background:var(--danger-light); border:1px solid rgba(220,38,38,0.15); color:#991b1b; }
+.sdoc .alert-bar.warn { background:var(--warn-light); border:1px solid rgba(217,119,6,0.15); color:#78350f; }
+.sdoc .alert-bar .alert-icon { font-size:18px; flex-shrink:0; }
+
+/* ═══ SECTION CARD ═══ */
+.sdoc .section-card { background:var(--card); border-radius:var(--radius-sm); box-shadow:var(--shadow); border:1px solid var(--line-light); overflow:hidden; margin-bottom:20px; }
+.sdoc .section-header { padding:16px 20px; border-bottom:1px solid var(--line-light); display:flex; align-items:center; justify-content:space-between; }
+.sdoc .section-header h4 { font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; margin:0; }
+.sdoc .section-body { padding:0; }
+.sdoc .section-link { font-size:11px; font-weight:600; color:var(--brand); text-decoration:none; cursor:pointer; background:none; border:none; font-family:inherit; }
+
+/* ═══ FILTER PILLS ═══ */
+.sdoc .filter-pills { display:flex; gap:8px; padding:14px 20px; border-bottom:1px solid var(--line-light); flex-wrap:wrap; align-items:center; }
+.sdoc .filter-pill { padding:5px 14px; border-radius:999px; font-size:11px; font-weight:600; border:1px solid var(--line); background:var(--card); color:var(--muted); cursor:pointer; font-family:inherit; transition:all 0.15s; }
+.sdoc .filter-pill:hover { border-color:var(--brand); color:var(--brand); }
+.sdoc .filter-pill.active { background:var(--brand); border-color:var(--brand); color:#fff; }
+.sdoc .filter-pill .cnt { margin-left:4px; opacity:0.6; }
+.sdoc .filter-label { font-size:10px; font-weight:700; color:var(--light); text-transform:uppercase; letter-spacing:1px; margin-right:6px; }
+
+/* ═══ CATEGORY TABS ═══ */
+.sdoc .cat-tabs { display:flex; gap:0; padding:0 20px; border-bottom:1px solid var(--line-light); overflow-x:auto; }
+.sdoc .cat-tab { padding:10px 16px; font-size:12px; font-weight:600; color:var(--muted); border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; font-family:inherit; transition:all 0.15s; position:relative; }
+.sdoc .cat-tab:hover { color:var(--text); }
+.sdoc .cat-tab.active { color:var(--brand); border-bottom-color:var(--brand); }
+.sdoc .cat-tab .tab-badge { display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; border-radius:9px; font-size:9px; font-weight:700; margin-left:6px; padding:0 5px; }
+.sdoc .cat-tab .tab-badge.red { background:var(--danger-light); color:var(--danger); }
+.sdoc .cat-tab .tab-badge.green { background:var(--ok-light); color:var(--ok); }
+
+/* ═══ DOCUMENT CARD ═══ */
+.sdoc .doc-list { padding:8px 20px 20px; }
+.sdoc .doc-group-title { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; padding:16px 0 8px; border-bottom:1px solid var(--line-light); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; }
+.sdoc .doc-group-title .grp-stats { font-size:11px; font-weight:500; color:var(--light); text-transform:none; letter-spacing:0; }
+
+.sdoc .doc-card {
+    display:grid; grid-template-columns:44px 1fr auto; gap:16px;
+    align-items:center; padding:14px 16px; border-bottom:1px solid var(--line-light);
+    transition:all 0.15s; border-radius:var(--radius-xs); margin:0 -4px;
+}
+.sdoc .doc-card:last-child { border-bottom:none; }
+.sdoc .doc-card:hover { background:var(--line-light); }
+.sdoc .doc-card.urgent { background:linear-gradient(90deg, rgba(220,38,38,0.03), transparent); }
+
+.sdoc .doc-icon-wrap { width:44px; height:44px; border-radius:var(--radius-xs); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.sdoc .doc-icon-wrap.uploaded { background:var(--ok-light); }
+.sdoc .doc-icon-wrap.waiting { background:var(--warn-light); }
+.sdoc .doc-icon-wrap.missing { background:var(--danger-light); }
+.sdoc .doc-icon-wrap.approved { background:var(--ok-light); border:2px solid var(--ok); }
+.sdoc .doc-icon-wrap.rejected { background:var(--danger-light); border:2px solid var(--danger); }
+
+.sdoc .doc-info { min-width:0; }
+.sdoc .doc-name { font-size:13px; font-weight:600; margin-bottom:2px; display:flex; align-items:center; gap:8px; }
+.sdoc .doc-name .required-dot { width:6px; height:6px; border-radius:50%; background:var(--danger); flex-shrink:0; }
+.sdoc .doc-meta { font-size:11px; color:var(--light); display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.sdoc .doc-meta .chip { padding:1px 8px; border-radius:999px; font-size:10px; font-weight:600; }
+.sdoc .doc-meta .chip.ok { background:var(--ok-light); color:var(--ok); }
+.sdoc .doc-meta .chip.wait { background:var(--warn-light); color:var(--warn); }
+.sdoc .doc-meta .chip.danger { background:var(--danger-light); color:var(--danger); }
+.sdoc .doc-meta .chip.rejected { background:var(--danger-light); color:var(--danger); border:1px solid rgba(220,38,38,0.2); }
+.sdoc .doc-meta .chip.approved { background:var(--ok-light); color:var(--ok); border:1px solid rgba(22,163,74,0.2); }
+.sdoc .doc-meta .chip.generated { background:var(--blue-light); color:var(--blue); }
+
+.sdoc .doc-actions { display:flex; gap:8px; align-items:center; flex-shrink:0; }
+.sdoc .doc-btn { padding:7px 16px; border-radius:var(--radius-xs); font-size:12px; font-weight:600; border:1px solid var(--line); background:var(--card); color:var(--text); cursor:pointer; font-family:inherit; transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; text-decoration:none; }
+.sdoc .doc-btn:hover { border-color:var(--brand); color:var(--brand); text-decoration:none; }
+.sdoc .doc-btn.primary { background:var(--brand); border-color:var(--brand); color:#fff; }
+.sdoc .doc-btn.primary:hover { background:var(--brand-mid); }
+.sdoc .doc-btn.danger { border-color:var(--danger); color:var(--danger); }
+.sdoc .doc-btn.small { padding:5px 10px; font-size:11px; }
+
+/* ═══ UPLOAD ZONE (INLINE EXPAND) ═══ */
+.sdoc .upload-zone {
+    grid-column:1/-1; padding:16px; margin-top:8px;
+    background:var(--line-light); border-radius:var(--radius-xs);
+    border:2px dashed var(--line);
+    display:none; transition:all 0.2s;
+}
+.sdoc .upload-zone.open { display:block; }
+.sdoc .upload-zone-inner { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.sdoc .upload-zone .uz-icon { font-size:28px; opacity:0.3; }
+.sdoc .upload-zone .uz-text { font-size:12px; color:var(--muted); }
+.sdoc .upload-zone .uz-text strong { color:var(--brand); cursor:pointer; }
+.sdoc .upload-zone .selected-file { font-size:12px; color:var(--text); font-weight:600; display:none; align-items:center; gap:6px; }
+.sdoc .upload-zone .selected-file.show { display:flex; }
+
+/* ═══ PROGRESS RING ═══ */
+.sdoc .ring-wrap { display:flex; align-items:center; gap:16px; }
+.sdoc .ring { width:64px; height:64px; position:relative; }
+.sdoc .ring svg { width:100%; height:100%; transform:rotate(-90deg); }
+.sdoc .ring-bg { fill:none; stroke:rgba(255,255,255,0.15); stroke-width:5; }
+.sdoc .ring-fill { fill:none; stroke:#fff; stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset 0.8s ease; }
+.sdoc .ring-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; color:#fff; }
+
+/* ═══ CELEBRATION ═══ */
+.sdoc .celebration { text-align:center; padding:48px 24px; }
+.sdoc .celebration .cel-icon { font-size:56px; margin-bottom:16px; animation:sdoc-bounce-cel 1s infinite; }
+@keyframes sdoc-bounce-cel { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.sdoc .celebration h2 { font-size:24px; font-weight:800; margin-bottom:8px; }
+.sdoc .celebration p { font-size:14px; color:var(--muted); max-width:520px; margin:0 auto 24px; line-height:1.6; }
+.sdoc .cel-btn { display:inline-flex; align-items:center; gap:8px; padding:12px 28px; border-radius:var(--radius-xs); background:linear-gradient(135deg,var(--brand),#a78bfa); color:#fff; font-size:15px; font-weight:700; text-decoration:none; border:none; cursor:pointer; font-family:inherit; box-shadow:0 4px 14px rgba(124,58,237,0.3); }
+.sdoc .cel-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(124,58,237,0.35); color:#fff; text-decoration:none; }
+
+/* ═══ HIDDEN ═══ */
+.sdoc .sdoc-hidden { display:none !important; }
+.sdoc .sdoc-collapsed { display:none !important; }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width:1024px) { .sdoc .grid-4 { grid-template-columns:1fr 1fr; } }
+@media (max-width:740px) {
+    .sdoc .grid-4 { grid-template-columns:1fr; }
+    .sdoc .journey-steps { grid-template-columns:repeat(3,1fr); }
+    .sdoc .doc-card { grid-template-columns:36px 1fr; }
+    .sdoc .doc-card .doc-actions { grid-column:1/-1; }
+    .sdoc .hero-task { padding:20px; }
+}
 </style>
 @endpush
 
 @section('content')
-    <div class="docs-page">
-    <section class="panel doc-header-panel">
-        <div class="doc-header-row">
-            <div class="doc-header-main">
-                <div class="doc-subtle">Her karttan ilgili belgeyi yükleyebilirsin. Zorunlu belgeler kırmızı çerçeve ile gösterilir.</div>
-                @if(!empty($builderOnly))
-                    <div class="doc-note muted">
-                        Aktif filtre: <span class="dchip" style="border-color:#bfd5f2;color:#1d4f8f;">Builder Çıktıları</span>
-                    </div>
-                @endif
+@php
+    // ── Checklist stats ──
+    $check = collect($requiredDocumentChecklist ?? []);
+    $allCount = $check->count();
+    $uploadedCount = $check->where('uploaded', true)->count();
+    $requiredTotal = $check->where('is_required', true)->count();
+    $requiredUploaded = $check->where('is_required', true)->where('uploaded', true)->count();
+    $missingRequired = max(0, $requiredTotal - $requiredUploaded);
+    $pct = $allCount > 0 ? (int) round(($uploadedCount / $allCount) * 100) : 0;
+
+    // ── Document status stats ──
+    $docs = collect($documents ?? []);
+    $approvedCount = $docs->where('status', 'approved')->count();
+    $rejectedDocs = $docs->where('status', 'rejected')->values();
+    $rejectedCount = $rejectedDocs->count();
+    $pendingCount = max(0, $docs->count() - $approvedCount - $rejectedCount);
+
+    // ── Uploaded docs lookup by category_code ──
+    $docByCode = [];
+    foreach ($docs as $d) {
+        $code = (string) ($d->category->code ?? '');
+        if ($code !== '' && !isset($docByCode[$code])) $docByCode[$code] = $d;
+    }
+
+    // ── Scenario detection ──
+    $allRequiredDone = $missingRequired === 0 && $requiredTotal > 0;
+    $allDocsApproved = $approvedCount > 0 && $pendingCount === 0 && $rejectedCount === 0 && $allRequiredDone;
+    if ($allDocsApproved) { $scenario = 'done'; }
+    elseif ($allRequiredDone && $rejectedCount === 0) { $scenario = 'waiting'; }
+    elseif ($pct >= 35) { $scenario = 'progress'; }
+    else { $scenario = 'start'; }
+
+    // ── Journey steps ──
+    $formDone = !empty($guestApplication?->registration_form_submitted_at);
+    $contractDone = !empty($guestApplication?->contract_signed_at);
+    $docsDone = $scenario === 'done';
+
+    // ── Group checklist items ──
+    $missingRequiredItems = $check->filter(fn($x) => !empty($x['is_required']) && empty($x['uploaded']))->values();
+    $uploadedItems = $check->filter(fn($x) => !empty($x['uploaded']))->values();
+    $otherItems = $check->filter(fn($x) => empty($x['is_required']) && empty($x['uploaded']))->values();
+
+    // ── Category counts for tabs ──
+    $categoryMissing = $check->filter(fn($x) => !empty($x['is_required']) && empty($x['uploaded']))
+        ->groupBy(fn($x) => (string) ($x['top_category_code'] ?? 'diger'))
+        ->map->count();
+    $topCats = $check->pluck('top_category_code')->filter()->unique()->values();
+
+    // ── Progress ring: circumference = 2*π*18 ≈ 113.1 ──
+    $circumference = 113.1;
+    $ringOffset = round($circumference - ($circumference * $pct / 100), 1);
+@endphp
+
+<div class="sdoc">
+
+    {{-- ═══ JOURNEY BAR ═══ --}}
+    <div class="journey">
+        <div class="journey-top">
+            <div class="journey-title">
+                <h3>🎓 Almanya Yolculuğun <span class="journey-tag {{ $docsDone ? 'done' : 'progress' }}">Belgeler</span></h3>
             </div>
-            <div class="doc-header-actions">
-                @if(!empty($builderOnly))
-                    <a class="btn alt" href="/student/registration/documents">Tüm Belgeleri Göster</a>
-                @else
-                    <a class="btn alt" href="/student/registration/documents?builder_only=1">Builder Çıktıları</a>
-                @endif
-                <a class="btn alt" href="/student/registration">Forma Dön</a>
-            </div>
+            <div class="journey-pct">{{ $pct }}%</div>
         </div>
-    </section>
-
-    @php
-        $check = collect($requiredDocumentChecklist ?? []);
-        $all = $check->count();
-        $uploaded = $check->where('uploaded', true)->count();
-        $requiredTotal = $check->where('is_required', true)->count();
-        $requiredUploaded = $check->where('is_required', true)->where('uploaded', true)->count();
-        $missingRequired = max(0, $requiredTotal - $requiredUploaded);
-        $pct = $all > 0 ? (int) round(($uploaded / $all) * 100) : 0;
-        $groupedRaw = $check->groupBy(fn($x) => (string) ($x['top_category_code'] ?? 'diger_dokumanlar'));
-        $preferredGroupOrder = [
-            'uni_assist_dokumanlari',
-            'kisisel_dokumanlar',
-            'vize_dokumanlari',
-            'dil_okulu_dokumanlari',
-            'ikamet_kaydi_dokumanlari',
-            'almanya_burokrasi_dokumanlari',
-            'partner_dokumanlari',
-            'diger_dokumanlar',
-        ];
-        $grouped = collect();
-        foreach ($preferredGroupOrder as $code) {
-            if ($groupedRaw->has($code)) {
-                $grouped->put($code, $groupedRaw->get($code));
-            }
-        }
-        foreach ($groupedRaw as $code => $items) {
-            if (!$grouped->has($code)) {
-                $grouped->put($code, $items);
-            }
-        }
-    @endphp
-
-    <section class="docs-kpis">
-        <div class="panel metric"><div class="muted">Toplam</div><div class="v">{{ $all }}</div></div>
-        <div class="panel metric"><div class="muted">Yüklenen</div><div class="v">{{ $uploaded }}</div></div>
-        <div class="panel metric"><div class="muted">Zorunlu</div><div class="v">{{ $requiredUploaded }}/{{ $requiredTotal }}</div></div>
-        <div class="panel metric"><div class="muted">Eksik Zorunlu</div><div class="v" style="color:#b4232b;">{{ $missingRequired }}</div></div>
-    </section>
-    <section class="panel filters-panel">
-        <div class="filters-top">
-            <div class="progress-line">
-                <div class="muted">Genel ilerleme: %{{ $pct }}</div>
-                <div class="bar"><span style="width: {{ $pct }}%"></span></div>
-            </div>
-            <div class="docs-legend compact">
-                <span class="dchip ok">Yüklendi</span>
-                <span class="dchip wait">Bekliyor</span>
-                <span class="dchip danger">Zorunlu</span>
-            </div>
+        <div class="journey-bar-wrap"><div class="journey-bar"><div class="journey-bar-fill" style="width:{{ $pct }}%"></div></div></div>
+        <div class="journey-steps">
+            <div class="j-step {{ $formDone ? 'done' : 'locked' }}"><div class="j-step-num">{{ $formDone ? '✓' : '1' }}</div><div class="j-step-name">Başvuru</div></div>
+            <div class="j-step {{ $contractDone ? 'done' : ($formDone ? 'active' : 'locked') }}"><div class="j-step-num">{{ $contractDone ? '✓' : '2' }}</div><div class="j-step-name">Sözleşme</div></div>
+            <div class="j-step {{ $docsDone ? 'done' : 'active' }}"><div class="j-step-num">{{ $docsDone ? '✓' : '3' }}</div><div class="j-step-name">Belgeler</div></div>
+            <div class="j-step {{ $docsDone ? 'active' : 'locked' }}"><div class="j-step-num">4</div><div class="j-step-name">Uni-Assist</div></div>
+            <div class="j-step locked"><div class="j-step-num">5</div><div class="j-step-name">Vize</div></div>
+            <div class="j-step locked"><div class="j-step-num">6</div><div class="j-step-name">Almanya</div></div>
         </div>
-        <div class="filters-inline">
-            <div class="filter-row">
-                <div class="row-label">Filtre</div>
-                <div class="tools-wrap">
-                    <div class="tools">
-                        <button type="button" class="active-filter" data-doc-filter="all">Tüm Belgeler</button>
-                        <button type="button" data-doc-filter="required">Sadece Zorunlu</button>
-                        <button type="button" data-doc-filter="missing">Sadece Eksik</button>
-                        <button type="button" data-doc-filter="missing_required">Zorunlu + Eksik</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    @if(empty($builderOnly) && $grouped->count() > 0)
-    <section class="doc-cat-nav">
-        <div class="row-label">Kategori</div>
-        <div class="category-tabs-wrap">
-            <div class="category-tabs" id="categoryTabs">
-                @foreach($grouped as $top => $items)
-                    <button type="button" data-cat-tab="{{ $top }}">
-                        {{ $documentTopCategoryLabels[$top] ?? $top }}
-                    </button>
-                @endforeach
-                <button type="button" data-cat-tab="all">Tüm Kategoriler</button>
-            </div>
-        </div>
-    </section>
-    @endif
-
-    @if(empty($builderOnly))
-    @foreach($grouped as $top => $items)
-        @php $label = $documentTopCategoryLabels[$top] ?? $top; @endphp
-        @php
-            $groupMissingRequired = $items->where('is_required', true)->where('uploaded', false)->count();
-            $startCollapsed = false; // Varsayilan acik: öğrenci belge sutunlarini hemen gorsun.
-        @endphp
-        <section class="group" data-group data-group-code="{{ $top }}" data-start-collapsed="0">
-            <header class="group-h">
-                <strong>{{ $label }}</strong>
-                <div class="group-summary">
-                    <span class="dchip">{{ $items->count() }} belge alanı</span>
-                    <span class="dchip">{{ $items->where('uploaded', true)->count() }}/{{ $items->count() }} yüklendi</span>
-                    @if($groupMissingRequired > 0)
-                        <span class="dchip danger">Eksik zorunlu: {{ $groupMissingRequired }}</span>
-                    @endif
-                    <span class="dchip" style="font-weight:700;">Açık</span>
-                </div>
-            </header>
-            <div class="group-grid">
-                @foreach($items as $doc)
-                    <article class="doc {{ (!empty($doc['is_required']) && empty($doc['uploaded'])) ? 'missing' : '' }}"
-                        data-required="{{ !empty($doc['is_required']) ? '1' : '0' }}"
-                        data-uploaded="{{ !empty($doc['uploaded']) ? '1' : '0' }}">
-                        <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">
-                            <div>
-                                <span class="code">{{ $doc['document_code'] ?: $doc['category_code'] }}</span>
-                                <h3 style="margin:6px 0 4px;font-size:var(--tx-base);">{{ $doc['name'] ?: '-' }}</h3>
-                                <div class="muted">Kabul: {{ $doc['accepted'] ?? 'pdf,jpg,png' }} | Max {{ (int)($doc['max_mb'] ?? 10) }}MB</div>
-                            </div>
-                            <div>
-                                @if(!empty($doc['uploaded']))
-                                    <span class="dchip ok">Yüklendi</span>
-                                @else
-                                    <span class="dchip wait">Bekliyor</span>
-                                @endif
-                                @if(!empty($doc['is_required']))
-                                    <span class="dchip danger" style="margin-left:4px;">Zorunlu</span>
-                                @endif
-                            </div>
-                        </div>
-                        <form method="post" action="{{ route('student.registration.documents.upload') }}" enctype="multipart/form-data" class="drop">
-                            @csrf
-                            @php $fid = 'f-'.preg_replace('/[^a-z0-9\-]/', '-', strtolower((string) ($doc['category_code'] ?? 'doc'))); @endphp
-                            <input type="hidden" name="category_code" value="{{ $doc['category_code'] }}">
-                            <label class="btn" for="{{ $fid }}" style="cursor:pointer;">Dosya Seç</label>
-                            <input type="file" name="file" id="{{ $fid }}" required style="display:none;"
-                                onchange="document.getElementById('{{ $fid }}-name').textContent = this.files[0]?.name || 'Seçilmedi'">
-                            <span id="{{ $fid }}-name" class="muted" style="font-size:var(--tx-xs);">Seçilmedi</span>
-                            <button class="btn primary" type="submit">{{ !empty($doc['uploaded']) ? 'Güncelle' : 'Yükle' }}</button>
-                        </form>
-                    </article>
-                @endforeach
-            </div>
-            <div class="empty-group-note hidden">Bu kategoride aktif filtreye uygun belge görünmüyor. "Tüm Belgeler" filtresine dön.</div>
-        </section>
-    @endforeach
-    @endif
-
-    <section class="panel">
-        <h3 style="margin:0 0 8px;">Yüklenen Belgelerim</h3>
-        <div class="list">
-            @forelse($documents as $d)
-                @php
-                    $tags = collect(is_array($d->process_tags ?? null) ? $d->process_tags : [])->map(fn($x) => strtolower((string)$x));
-                    $isBuilder = $tags->contains('student_document_builder') || \Illuminate\Support\Str::startsWith(strtolower((string)($d->document_id ?? '')), 'doc-stb-');
-                    $isRejected = (string) $d->status === 'rejected';
-                @endphp
-                <div class="uploaded-row" @if($isRejected) style="border-left:3px solid #f87171;background:#fff8f8;border-radius:0 8px 8px 0;padding-left:10px;" @endif>
-                    <strong>
-                        {{ $d->document_id ?: ($d->document_code ?: ($d->category->code ?? '-')) }}
-                        - {{ $d->title ?: ($d->category->name_tr ?? '-') }}
-                    </strong>
-                    <div class="muted">
-                        @if($isRejected)
-                            <span class="dchip danger">Reddedildi</span>
-                        @elseif((string) $d->status === 'approved')
-                            <span class="dchip ok">Onaylandı</span>
-                        @elseif((string) $d->status === 'generated')
-                            <span class="dchip" style="border-color:#bfd5f2;color:#1d4f8f;">Oluşturuldu</span>
-                        @else
-                            <span class="dchip wait">{{ $d->status }}</span>
-                        @endif
-                        | {{ $d->updated_at }}
-                        @if($isBuilder)
-                            | <span class="dchip" style="border-color:#bfd5f2;color:#1d4f8f;">Builder Çıktısı</span>
-                        @endif
-                    </div>
-                    @if($isRejected)
-                        <div style="margin-top:5px;font-size:12px;color:#b4232b;line-height:1.5;">
-                            ❌ <strong>Red sebebi:</strong> {{ $d->review_note ?: 'İnceleme notu girilmedi.' }}
-                        </div>
-                        <div style="margin-top:4px;font-size:11px;color:#78350f;background:#fef3c7;border-radius:6px;padding:5px 10px;display:inline-block;">
-                            ↑ Yukarıdaki ilgili belgeden yeniden yükleyebilirsiniz.
-                        </div>
-                    @endif
-                    <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
-                        <a class="btn alt" href="{{ route('student.registration.documents.download', $d->id) }}">Aç / İndir</a>
-                        @php $previewable = in_array(strtolower((string)($d->mime_type??'')), ['application/pdf','image/jpeg','image/png','image/webp','image/gif'], true) || str_starts_with(strtolower((string)($d->mime_type??'')), 'image/'); @endphp
-                        @if($previewable)
-                        <button class="btn alt" type="button" onclick="previewDoc({{ $d->id }})">👁 Önizle</button>
-                        @endif
-                        <form method="post" action="{{ route('student.registration.documents.delete', $d->id) }}" style="margin:0;">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn warn" type="submit">Sil</button>
-                        </form>
-                    </div>
-                </div>
-            @empty
-                <div class="row muted">Belge yok.</div>
-            @endforelse
-        </div>
-    </section>
-
-    <section class="panel">
-        <h3 style="margin:0 0 8px;">Kullanım Kılavuzu</h3>
-        <ol class="muted" style="margin:0;padding-left:18px;">
-            <li>Zorunlu belgeleri önce tamamla; "Sadece Zorunlu" filtresiyle hızlı ilerle.</li>
-            <li>Her kartta doğrudan yükle/güncelle yapabilirsin, ekstra belge için alttaki listeyi kullan.</li>
-            <li>Sözleşme adımına geçebilmek için zorunlu belgelerin tümü yüklenmiş olmalıdır.</li>
-        </ol>
-    </section>
-
-    <script defer src="{{ Vite::asset('resources/js/student-registration-documents.js') }}"></script>
     </div>
 
-{{-- Belge Önizleme Modal --}}
-<div id="preview-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;align-items:center;justify-content:center;padding:16px;">
-    <div style="background:#fff;border-radius:16px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #e5e7eb;">
-            <strong id="preview-filename" style="font-size:var(--tx-sm);color:#111827;"></strong>
-            <button onclick="closePreview()" style="background:none;border:none;font-size:var(--tx-xl);cursor:pointer;color:#6b7280;line-height:1;">✕</button>
+    {{-- ═══ SCENARIO: TAMAMLANDI ═══ --}}
+    @if($scenario === 'done')
+        <div class="section-card">
+            <div class="celebration">
+                <div class="cel-icon">🎉</div>
+                <h2>Tüm Belgeler Onaylandı!</h2>
+                <p>Harika iş çıkardın! Tüm zorunlu belgelerin danışman tarafından onaylandı. Şimdi Uni-Assist sürecine geçebilirsin.</p>
+                <a class="cel-btn" href="{{ route('student.services') }}">🏫 Uni-Assist Adımına Geç →</a>
+            </div>
+        </div>
+        <div class="grid-4">
+            <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-label">Onaylı</div><div class="stat-value" style="color:var(--ok);">{{ $approvedCount }}</div></div></div>
+            <div class="stat-card"><div class="stat-icon amber">⏳</div><div><div class="stat-label">Bekliyor</div><div class="stat-value">0</div></div></div>
+            <div class="stat-card"><div class="stat-icon red">⚠️</div><div><div class="stat-label">Eksik Zorunlu</div><div class="stat-value" style="color:var(--ok);">0</div></div></div>
+            <div class="stat-card"><div class="stat-icon blue">📄</div><div><div class="stat-label">Toplam</div><div class="stat-value">{{ $allCount }}</div></div></div>
+        </div>
+        <div class="section-card">
+            <div class="section-header">
+                <h4>✅ Tüm Belgeler ({{ $approvedCount }} onaylı)</h4>
+                <button class="section-link" type="button" id="toggle-done-list">Göster / Gizle</button>
+            </div>
+            <div class="doc-list" id="done-list" style="display:none;">
+                @foreach($uploadedItems as $ui)
+                    @php $uiDoc = $docByCode[$ui['category_code'] ?? ''] ?? null; @endphp
+                    <div class="doc-card"><div class="doc-icon-wrap approved">✅</div><div class="doc-info"><div class="doc-name">{{ $ui['name'] ?: '-' }}</div><div class="doc-meta"><span class="chip approved">Onaylandı</span><span>{{ $documentTopCategoryLabels[$ui['top_category_code'] ?? ''] ?? '' }}</span></div></div><div class="doc-actions">@if($uiDoc)<button class="doc-btn small" type="button" data-preview="{{ $uiDoc->id }}">👁</button><a class="doc-btn small" href="{{ route('student.registration.documents.download', $uiDoc->id) }}">⬇</a>@endif</div></div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    {{-- ═══ SCENARIO: BEKLEMEDE ═══ --}}
+    @if($scenario === 'waiting')
+        <div class="hero-task purple">
+            <div class="hero-content">
+                <div class="hero-badge"><span class="pulse"></span> Adım 3/6</div>
+                <div class="hero-title">Zorunlu belgeler tamam!</div>
+                <div class="hero-sub">Tüm zorunlu belgelerin yüklendi. Danışmanın belgeleri kontrol ediyor. Onay sonrası Uni-Assist adımı açılacak.</div>
+            </div>
+            <div class="ring-wrap">
+                <div class="ring"><svg viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fill" cx="22" cy="22" r="18" stroke-dasharray="{{ $circumference }}" stroke-dashoffset="{{ $ringOffset }}" style="stroke:var(--ok)"/></svg><div class="ring-text" style="color:var(--ok)">{{ $pct }}%</div></div>
+                <div><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);">{{ $uploadedCount }} / {{ $allCount }}</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">belge yüklendi</div></div>
+            </div>
+        </div>
+        <div class="grid-4">
+            <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-label">Onaylı</div><div class="stat-value">{{ $approvedCount }}</div></div></div>
+            <div class="stat-card"><div class="stat-icon amber">⏳</div><div><div class="stat-label">İnceleniyor</div><div class="stat-value">{{ $pendingCount }}</div></div></div>
+            <div class="stat-card"><div class="stat-icon red">⚠️</div><div><div class="stat-label">Eksik Zorunlu</div><div class="stat-value" style="color:var(--ok);">0</div></div></div>
+            <div class="stat-card"><div class="stat-icon blue">📄</div><div><div class="stat-label">Toplam</div><div class="stat-value">{{ $allCount }}</div></div></div>
+        </div>
+        {{-- Waiting section --}}
+        @php $waitingDocs = $docs->filter(fn($d) => !in_array($d->status, ['approved','rejected']))->values(); @endphp
+        @if($waitingDocs->count() > 0)
+        <div class="section-card">
+            <div class="section-header"><h4>⏳ İnceleme Bekleyen ({{ $waitingDocs->count() }})</h4></div>
+            <div class="doc-list">
+                @foreach($waitingDocs->take(5) as $wd)
+                    @php $wdCatLabel = ''; foreach ($check as $ci) { if (($ci['category_code'] ?? '') === (string)($wd->category->code ?? '')) { $wdCatLabel = $documentTopCategoryLabels[$ci['top_category_code'] ?? ''] ?? ''; break; } } @endphp
+                    <div class="doc-card"><div class="doc-icon-wrap uploaded">⏳</div><div class="doc-info"><div class="doc-name">{{ $wd->title ?: ($wd->category->name_tr ?? $wd->document_id) }}</div><div class="doc-meta"><span class="chip wait">İnceleniyor</span>@if($wdCatLabel)<span>{{ $wdCatLabel }}</span>@endif<span>Yükleme: {{ $wd->updated_at?->format('d M Y') ?? '' }}</span></div></div><div class="doc-actions"><button class="doc-btn small" type="button" data-preview="{{ $wd->id }}">👁</button></div></div>
+                @endforeach
+                @if($waitingDocs->count() > 5)
+                    <div style="text-align:center;padding:8px;"><span style="font-size:11px;color:var(--light);">+ {{ $waitingDocs->count() - 5 }} belge daha inceleniyor</span></div>
+                @endif
+            </div>
+        </div>
+        @endif
+        {{-- Calm waiting --}}
+        <div class="section-card">
+            <div style="padding:32px;text-align:center;">
+                <div style="font-size:36px;margin-bottom:12px;">☕</div>
+                <h3 style="font-size:16px;font-weight:700;margin-bottom:6px;">Rahatla, danışmanın çalışıyor</h3>
+                <p style="font-size:13px;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.6;">Belgelerinin incelenmesi genellikle 1-3 iş günü sürer. Sonuç çıkınca seni bilgilendireceğiz.</p>
+            </div>
+        </div>
+        {{-- Optional uploads --}}
+        @if($otherItems->count() > 0)
+        <div class="section-card">
+            <div class="section-header"><h4>📝 İsteğe Bağlı Belgeler ({{ $otherItems->count() }} eksik)</h4><button class="section-link" type="button" id="toggle-optional">Göster</button></div>
+            <div class="doc-list" id="optional-list" style="display:none;">
+                @foreach($otherItems as $oi)
+                    @php $oiFid = 'oi-' . preg_replace('/[^a-z0-9]/', '-', strtolower((string)($oi['category_code'] ?? 'x'))); @endphp
+                    <div class="doc-card"><div class="doc-icon-wrap waiting">📄</div><div class="doc-info"><div class="doc-name">{{ $oi['name'] ?: '-' }}</div><div class="doc-meta"><span>{{ $documentTopCategoryLabels[$oi['top_category_code'] ?? ''] ?? '' }}</span><span>{{ $oi['accepted'] ?? 'pdf,jpg,png' }} — max {{ (int)($oi['max_mb'] ?? 10) }}MB</span></div></div><div class="doc-actions"><form method="post" action="{{ route('student.registration.documents.upload') }}" enctype="multipart/form-data" style="display:flex;align-items:center;gap:6px;margin:0;">@csrf<input type="hidden" name="category_code" value="{{ $oi['category_code'] }}"><label class="doc-btn small" for="{{ $oiFid }}" style="cursor:pointer;">Dosya Seç</label><input type="file" name="file" id="{{ $oiFid }}" required style="display:none;" data-fname-target="sf-{{ $oiFid }}"><span id="sf-{{ $oiFid }}" style="font-size:11px;color:var(--muted);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span><button class="doc-btn small primary" type="submit">📤 Yükle</button></form></div></div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+    @endif
+
+    {{-- ═══ SCENARIO: START veya PROGRESS ═══ --}}
+    @if($scenario === 'start' || $scenario === 'progress')
+        {{-- Hero --}}
+        @php
+            $heroClass = $scenario === 'start' ? 'blue' : 'purple';
+            $heroTitle = $scenario === 'start' ? 'Belgelerini yükle' : 'Harika gidiyorsun!';
+            $heroSub = $scenario === 'start'
+                ? 'Sözleşme tamamlandı! Şimdi gerekli belgelerini yükleyerek kayıt sürecini ilerlet. Önce zorunlu belgelere odaklan.'
+                : "Belgelerin büyük kısmı tamam. Kalan {$missingRequired} zorunlu belgeyi yükleyince bir sonraki adıma geçebilirsin.";
+        @endphp
+        <div class="hero-task {{ $heroClass }}">
+            <div class="hero-content">
+                <div class="hero-badge"><span class="pulse"></span> Adım 3/6</div>
+                <div class="hero-title">{{ $heroTitle }}</div>
+                <div class="hero-sub">{{ $heroSub }}</div>
+            </div>
+            <div class="ring-wrap">
+                <div class="ring"><svg viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fill" cx="22" cy="22" r="18" stroke-dasharray="{{ $circumference }}" stroke-dashoffset="{{ $ringOffset }}"/></svg><div class="ring-text">{{ $pct }}%</div></div>
+                <div><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);">{{ $uploadedCount }} / {{ $allCount }}</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">belge yüklendi</div></div>
+            </div>
+        </div>
+
+        {{-- Stats --}}
+        <div class="grid-4">
+            <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-label">Onaylı</div><div class="stat-value">{{ $approvedCount }}</div></div></div>
+            <div class="stat-card"><div class="stat-icon amber">⏳</div><div><div class="stat-label">Bekliyor</div><div class="stat-value">{{ $pendingCount }}</div></div></div>
+            <div class="stat-card"><div class="stat-icon red">⚠️</div><div><div class="stat-label">Eksik Zorunlu</div><div class="stat-value" style="color:var(--danger);">{{ $missingRequired }}</div></div></div>
+            <div class="stat-card"><div class="stat-icon blue">📄</div><div><div class="stat-label">Toplam</div><div class="stat-value">{{ $allCount }}</div></div></div>
+        </div>
+
+        {{-- Alert bar --}}
+        @if($missingRequired > 0 && $missingRequired <= 3)
+            <div class="alert-bar warn"><span class="alert-icon">⚡</span><div><strong>{{ $missingRequired }} zorunlu belge kaldı!</strong> Tamamladığında Uni-Assist adımı açılacak.</div></div>
+        @elseif($missingRequired > 3)
+            <div class="alert-bar danger"><span class="alert-icon">🔴</span><div><strong>{{ $missingRequired }} zorunlu belge eksik.</strong> Uni-Assist adımına geçmek için tüm zorunlu belgeleri yüklemen gerekiyor.</div></div>
+        @endif
+
+        {{-- Rejected docs --}}
+        @if($rejectedCount > 0)
+        <div class="section-card">
+            <div class="section-header"><h4>🔴 Reddedilen Belge ({{ $rejectedCount }})</h4></div>
+            <div class="doc-list">
+                @foreach($rejectedDocs as $rd)
+                    @php $rdName = $rd->title ?: ($rd->category->name_tr ?? ($rd->category->code ?? '-')); $rdCatLabel = ''; foreach ($check as $ci) { if (($ci['category_code'] ?? '') === (string)($rd->category->code ?? '')) { $rdCatLabel = $documentTopCategoryLabels[$ci['top_category_code'] ?? ''] ?? ''; break; } } @endphp
+                    <div class="doc-card" style="background:linear-gradient(90deg,rgba(220,38,38,0.04),transparent);">
+                        <div class="doc-icon-wrap rejected">❌</div>
+                        <div class="doc-info">
+                            <div class="doc-name">{{ $rdName }}</div>
+                            <div class="doc-meta"><span class="chip rejected">Reddedildi</span>@if($rdCatLabel)<span>{{ $rdCatLabel }}</span>@endif</div>
+                            @if($rd->review_note)<div style="font-size:11px;color:var(--danger);margin-top:4px;line-height:1.4;">💬 Red sebebi: "{{ $rd->review_note }}"</div>@endif
+                        </div>
+                        <div class="doc-actions">
+                            @php $rejFid = 'rej-' . preg_replace('/[^a-z0-9]/', '-', strtolower((string)($rd->category->code ?? 'x'))); @endphp
+                            <form method="post" action="{{ route('student.registration.documents.upload') }}" enctype="multipart/form-data" style="display:flex;align-items:center;gap:6px;margin:0;">@csrf<input type="hidden" name="category_code" value="{{ $rd->category->code ?? '' }}"><label class="doc-btn small" for="{{ $rejFid }}" style="cursor:pointer;">Dosya Seç</label><input type="file" name="file" id="{{ $rejFid }}" required style="display:none;" data-fname-target="sf-{{ $rejFid }}"><span id="sf-{{ $rejFid }}" style="font-size:11px;color:var(--muted);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span><button class="doc-btn danger" type="submit">🔄 Yeniden Yükle</button></form>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        {{-- Main documents section --}}
+        <div class="section-card" id="docsSection">
+            <div class="section-header">
+                <h4>📂 Belgelerim</h4>
+                <span style="font-size:11px;color:var(--light);">{{ $uploadedCount }}/{{ $allCount }} tamamlandı</span>
+            </div>
+
+            {{-- Filters --}}
+            <div class="filter-pills">
+                <span class="filter-label">Filtre</span>
+                <button class="filter-pill active" data-filter="urgent">Önce Zorunlu<span class="cnt">({{ $missingRequired }})</span></button>
+                <button class="filter-pill" data-filter="all">Tümü<span class="cnt">({{ $allCount }})</span></button>
+                <button class="filter-pill" data-filter="uploaded">Yüklenen<span class="cnt">({{ $uploadedCount }})</span></button>
+                <button class="filter-pill" data-filter="missing">Eksik<span class="cnt">({{ $allCount - $uploadedCount }})</span></button>
+            </div>
+
+            {{-- Category tabs --}}
+            @if($topCats->count() > 1)
+            <div class="cat-tabs">
+                <button class="cat-tab active" data-cattab="all">Tümü</button>
+                @foreach($topCats as $tc)
+                    <button class="cat-tab" data-cattab="{{ $tc }}">{{ $documentTopCategoryLabels[$tc] ?? $tc }}@if(($categoryMissing[$tc] ?? 0) > 0)<span class="tab-badge red">{{ $categoryMissing[$tc] }}</span>@endif</button>
+                @endforeach
+            </div>
+            @endif
+
+            {{-- Document list --}}
+            <div class="doc-list" id="docList">
+                {{-- 🔴 ZORUNLU — EKSİK --}}
+                @if($missingRequiredItems->count() > 0)
+                <div class="doc-group-title" data-grp="missing-required"><span>🔴 Zorunlu — Eksik ({{ $missingRequiredItems->count() }})</span><span class="grp-stats">Hemen yükle</span></div>
+                @foreach($missingRequiredItems as $mi)
+                    @php $miFid = 'mi-' . preg_replace('/[^a-z0-9]/', '-', strtolower((string)($mi['category_code'] ?? 'x'))); @endphp
+                    <div class="doc-card urgent" data-cat="{{ $mi['top_category_code'] ?? '' }}" data-req="1" data-up="0">
+                        <div class="doc-icon-wrap missing">📋</div>
+                        <div class="doc-info">
+                            <div class="doc-name"><span class="required-dot"></span>{{ $mi['name'] ?: '-' }}</div>
+                            <div class="doc-meta"><span class="chip danger">Zorunlu</span><span>{{ $documentTopCategoryLabels[$mi['top_category_code'] ?? ''] ?? '' }}</span><span>{{ $mi['accepted'] ?? 'pdf,jpg,png' }} — max {{ (int)($mi['max_mb'] ?? 10) }}MB</span></div>
+                        </div>
+                        <div class="doc-actions"><button class="doc-btn primary" type="button" data-upload="{{ $miFid }}">📤 Yükle</button></div>
+                        <div class="upload-zone" id="uz-{{ $miFid }}">
+                            <form method="post" action="{{ route('student.registration.documents.upload') }}" enctype="multipart/form-data" style="margin:0;">@csrf<input type="hidden" name="category_code" value="{{ $mi['category_code'] }}">
+                                <div class="upload-zone-inner">
+                                    <span class="uz-icon">📎</span>
+                                    <div class="uz-text">Dosyanı buraya sürükle veya <strong><label for="{{ $miFid }}" style="cursor:pointer;">bilgisayarından seç</label></strong></div>
+                                    <input type="file" name="file" id="{{ $miFid }}" required style="display:none;" data-fname-target="sf-{{ $miFid }}">
+                                    <div class="selected-file" id="sf-{{ $miFid }}">📄 <span class="sf-name"></span> <button class="doc-btn small primary" type="submit">Gönder</button></div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                @endforeach
+                @endif
+
+                {{-- ✅ YÜKLENEN --}}
+                @if($uploadedItems->count() > 0)
+                <div class="doc-group-title" data-grp="uploaded" @if($missingRequiredItems->count() > 0) style="margin-top:8px;" @endif><span>✅ Yüklenen ({{ $uploadedItems->count() }})</span><span class="grp-stats">İnceleme durumunu takip et</span></div>
+                @foreach($uploadedItems as $ui)
+                    @php
+                        $uiCode = (string) ($ui['category_code'] ?? '');
+                        $uiDoc = $docByCode[$uiCode] ?? null;
+                        $uiStatus = (string) ($uiDoc->status ?? 'uploaded');
+                        $uiIconClass = match($uiStatus) { 'approved' => 'approved', 'rejected' => 'rejected', default => 'uploaded' };
+                        $uiIcon = match($uiStatus) { 'approved' => '✅', 'rejected' => '❌', default => '⏳' };
+                        $uiChipClass = match($uiStatus) { 'approved' => 'approved', 'rejected' => 'rejected', 'generated' => 'generated', default => 'wait' };
+                        $uiChipLabel = match($uiStatus) { 'approved' => 'Onaylandı', 'rejected' => 'Reddedildi', 'generated' => 'Oluşturuldu', default => 'İnceleniyor' };
+                        $uiFid = 'ui-' . preg_replace('/[^a-z0-9]/', '-', strtolower($uiCode));
+                    @endphp
+                    <div class="doc-card" data-cat="{{ $ui['top_category_code'] ?? '' }}" data-req="{{ !empty($ui['is_required']) ? '1' : '0' }}" data-up="1">
+                        <div class="doc-icon-wrap {{ $uiIconClass }}">{{ $uiIcon }}</div>
+                        <div class="doc-info">
+                            <div class="doc-name">{{ $ui['name'] ?: '-' }}</div>
+                            <div class="doc-meta"><span class="chip {{ $uiChipClass }}">{{ $uiChipLabel }}</span><span>{{ $documentTopCategoryLabels[$ui['top_category_code'] ?? ''] ?? '' }}</span>@if($uiDoc)<span>{{ $uiDoc->updated_at?->format('d M Y') ?? $uiDoc->updated_at }}</span>@endif</div>
+                        </div>
+                        <div class="doc-actions">
+                            @if($uiDoc)
+                                <button class="doc-btn small" type="button" data-preview="{{ $uiDoc->id }}">👁 Önizle</button>
+                                @if($uiStatus !== 'approved')
+                                    <button class="doc-btn small" type="button" data-upload="{{ $uiFid }}">🔄 Güncelle</button>
+                                @else
+                                    <a class="doc-btn small" href="{{ route('student.registration.documents.download', $uiDoc->id) }}">⬇ İndir</a>
+                                @endif
+                            @endif
+                        </div>
+                        <div class="upload-zone" id="uz-{{ $uiFid }}">
+                            <form method="post" action="{{ route('student.registration.documents.upload') }}" enctype="multipart/form-data" style="margin:0;">@csrf<input type="hidden" name="category_code" value="{{ $uiCode }}">
+                                <div class="upload-zone-inner">
+                                    <span class="uz-icon">📎</span>
+                                    <div class="uz-text">Dosyanı sürükle veya <strong><label for="{{ $uiFid }}" style="cursor:pointer;">seç</label></strong></div>
+                                    <input type="file" name="file" id="{{ $uiFid }}" required style="display:none;" data-fname-target="sf-{{ $uiFid }}">
+                                    <div class="selected-file" id="sf-{{ $uiFid }}">📄 <span class="sf-name"></span> <button class="doc-btn small primary" type="submit">Gönder</button></div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                @endforeach
+                @endif
+
+                {{-- 📝 DİĞER BELGELER --}}
+                @if($otherItems->count() > 0)
+                @php $showInitial = 2; @endphp
+                <div class="doc-group-title" data-grp="other" style="margin-top:8px;"><span>📝 Diğer Belgeler ({{ $otherItems->count() }})</span><span class="grp-stats">İsteğe bağlı</span></div>
+                @foreach($otherItems as $idx => $oi)
+                    @php $oiFid = 'oi-' . preg_replace('/[^a-z0-9]/', '-', strtolower((string)($oi['category_code'] ?? 'x'))); @endphp
+                    <div class="doc-card {{ $idx >= $showInitial ? 'extra-doc sdoc-collapsed' : '' }}" data-cat="{{ $oi['top_category_code'] ?? '' }}" data-req="0" data-up="0">
+                        <div class="doc-icon-wrap waiting">📄</div>
+                        <div class="doc-info">
+                            <div class="doc-name">{{ $oi['name'] ?: '-' }}</div>
+                            <div class="doc-meta"><span>{{ $documentTopCategoryLabels[$oi['top_category_code'] ?? ''] ?? '' }}</span><span>{{ $oi['accepted'] ?? 'pdf,jpg,png' }} — max {{ (int)($oi['max_mb'] ?? 10) }}MB</span></div>
+                        </div>
+                        <div class="doc-actions"><button class="doc-btn" type="button" data-upload="{{ $oiFid }}">📤 Yükle</button></div>
+                        <div class="upload-zone" id="uz-{{ $oiFid }}">
+                            <form method="post" action="{{ route('student.registration.documents.upload') }}" enctype="multipart/form-data" style="margin:0;">@csrf<input type="hidden" name="category_code" value="{{ $oi['category_code'] }}">
+                                <div class="upload-zone-inner">
+                                    <span class="uz-icon">📎</span>
+                                    <div class="uz-text">Dosyanı sürükle veya <strong><label for="{{ $oiFid }}" style="cursor:pointer;">seç</label></strong></div>
+                                    <input type="file" name="file" id="{{ $oiFid }}" required style="display:none;" data-fname-target="sf-{{ $oiFid }}">
+                                    <div class="selected-file" id="sf-{{ $oiFid }}">📄 <span class="sf-name"></span> <button class="doc-btn small primary" type="submit">Gönder</button></div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                @endforeach
+                @if($otherItems->count() > $showInitial)
+                    <div style="text-align:center;padding:12px;" id="showMoreWrap"><button class="doc-btn" style="color:var(--muted);" type="button" id="showMoreBtn">+ {{ $otherItems->count() - $showInitial }} belge daha göster</button></div>
+                @endif
+                @endif
+
+                {{-- Empty --}}
+                @if($allCount === 0)
+                <div style="text-align:center;padding:40px 20px;">
+                    <div style="font-size:48px;margin-bottom:12px;opacity:0.3;">📂</div>
+                    <h3 style="font-size:16px;font-weight:700;margin-bottom:4px;">Henüz belge alanı yok</h3>
+                    <p style="font-size:13px;color:var(--muted);">Başvuru tipine uygun belge listesi oluşturulduğunda burada görünecek.</p>
+                </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Approved docs collapsed (progress) --}}
+        @if($scenario === 'progress')
+            @php $approvedItems = $uploadedItems->filter(fn($x) => ($docByCode[$x['category_code'] ?? '']?->status ?? '') === 'approved'); @endphp
+            @if($approvedItems->count() > 0)
+            <div class="section-card">
+                <div class="section-header"><h4>✅ Onaylı Belgeler ({{ $approvedItems->count() }})</h4><button class="section-link" type="button" id="toggle-approved">Göster</button></div>
+                <div class="doc-list" id="approved-list" style="display:none;">
+                    @foreach($approvedItems->take(6) as $ai)
+                        @php $aiDoc = $docByCode[$ai['category_code'] ?? ''] ?? null; @endphp
+                        <div class="doc-card"><div class="doc-icon-wrap approved">✅</div><div class="doc-info"><div class="doc-name">{{ $ai['name'] ?: '-' }}</div><div class="doc-meta"><span class="chip approved">Onaylandı</span><span>{{ $documentTopCategoryLabels[$ai['top_category_code'] ?? ''] ?? '' }}</span></div></div><div class="doc-actions">@if($aiDoc)<button class="doc-btn small" type="button" data-preview="{{ $aiDoc->id }}">👁</button>@endif</div></div>
+                    @endforeach
+                    @if($approvedItems->count() > 6)
+                        <div style="text-align:center;padding:8px;"><span style="font-size:11px;color:var(--light);">+ {{ $approvedItems->count() - 6 }} belge daha</span></div>
+                    @endif
+                </div>
+            </div>
+            @endif
+        @endif
+
+        {{-- Quick links --}}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+            <a class="doc-btn small" href="/student/registration" style="text-decoration:none;">📋 Forma Dön</a>
+            <a class="doc-btn small" href="/student/registration/documents?builder_only=1" style="text-decoration:none;">📄 Builder Çıktıları</a>
+        </div>
+    @endif
+
+</div>{{-- /sdoc --}}
+
+{{-- ═══ PREVIEW MODAL ═══ --}}
+<div id="preview-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:var(--surface,#fff);border-radius:16px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.15);">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #f1f5f9;">
+            <strong id="preview-filename" style="font-size:15px;font-weight:700;"></strong>
+            <button id="preview-close-btn" type="button" style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;padding:4px 8px;border-radius:6px;">✕</button>
         </div>
         <div id="preview-container" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;background:#f9fafb;padding:12px;min-height:300px;"></div>
-        <div id="preview-review-note" style="display:none;padding:10px 16px;background:#fef3c7;border-top:1px solid #fde68a;font-size:var(--tx-xs);color:#92400e;"></div>
-        <div style="padding:10px 16px;border-top:1px solid #e5e7eb;">
-            <span id="preview-status" class="badge" style="font-size:var(--tx-xs);"></span>
-        </div>
+        <div id="preview-review-note" style="display:none;padding:10px 16px;background:#fef3c7;border-top:1px solid #fde68a;font-size:12px;color:#92400e;"></div>
+        <div style="padding:10px 16px;border-top:1px solid #f1f5f9;"><span id="preview-status" style="font-size:11px;font-weight:600;padding:2px 10px;border-radius:999px;"></span></div>
     </div>
 </div>
 
-<script>
-function openPreviewModal() {
-    const m = document.getElementById('preview-modal');
-    m.style.display = 'flex';
-}
-function closePreview() {
-    document.getElementById('preview-modal').style.display = 'none';
-    document.getElementById('preview-container').innerHTML = '';
-    document.getElementById('preview-review-note').style.display = 'none';
-}
-async function previewDoc(docId) {
-    document.getElementById('preview-container').innerHTML = '<div style="color:#9ca3af;font-size:var(--tx-sm);">Yükleniyor...</div>';
-    document.getElementById('preview-filename').textContent = '';
-    document.getElementById('preview-review-note').style.display = 'none';
-    openPreviewModal();
-
-    try {
-        const res = await fetch('/student/documents/' + docId + '/preview', {
-            headers: { 'Accept': 'application/json' }
-        });
-        if (!res.ok) { document.getElementById('preview-container').innerHTML = '<div style="color:#dc2626;font-size:var(--tx-sm);">Önizleme yüklenemedi.</div>'; return; }
-        const data = await res.json();
-        document.getElementById('preview-filename').textContent = data.filename || 'Belge';
-
-        const badgeMap = { approved: 'ok', rejected: 'danger', uploaded: 'info', pending: 'pending' };
-        const statusEl = document.getElementById('preview-status');
-        statusEl.textContent = data.status || '';
-        statusEl.className = 'badge ' + (badgeMap[data.status] || '');
-
-        const container = document.getElementById('preview-container');
-        if (data.mime === 'application/pdf') {
-            container.innerHTML = '<iframe src="' + data.url + '" style="width:100%;height:600px;border:none;border-radius:8px;"></iframe>';
-        } else {
-            container.innerHTML = '<img src="' + data.url + '" alt="' + (data.filename || '') + '" style="max-width:100%;max-height:70vh;border-radius:8px;object-fit:contain;">';
-        }
-
-        if (data.review_note) {
-            const note = document.getElementById('preview-review-note');
-            note.textContent = 'İnceleme notu: ' + data.review_note;
-            note.style.display = 'block';
-        }
-    } catch (e) {
-        document.getElementById('preview-container').innerHTML = '<div style="color:#dc2626;font-size:var(--tx-sm);">Bir hata oluştu.</div>';
-    }
-}
-document.getElementById('preview-modal').addEventListener('click', function(e) {
-    if (e.target === this) closePreview();
-});
-</script>
-
+{{-- ═══ CELEBRATION MODAL ═══ --}}
 @if(session('docs_complete'))
 <div id="docsCompleteModal" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;">
-    <div style="background:var(--u-card,#fff);border-radius:20px;max-width:420px;width:100%;padding:32px 28px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:dcPop .4s cubic-bezier(.34,1.56,.64,1);">
+    <div style="background:#fff;border-radius:20px;max-width:420px;width:100%;padding:32px 28px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:dcPop .4s cubic-bezier(.34,1.56,.64,1);">
         <div style="font-size:56px;margin-bottom:12px;">🎉</div>
-        <div style="font-size:22px;font-weight:800;color:var(--u-text);margin-bottom:8px;">Tebrikler!</div>
-        <div style="font-size:14px;color:var(--u-muted);line-height:1.6;margin-bottom:24px;">
-            Tum belgeler basariyla yuklendi.<br>
-            Simdi hizmet paketini secebilirsin.
-        </div>
-        <a href="{{ route('student.services') }}"
-           style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:12px;background:linear-gradient(135deg,#0d9488,#14b8a6);color:#fff;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(13,148,136,.3);">
-            Hizmetlere Git →
-        </a>
-        <div style="margin-top:14px;">
-            <button type="button" onclick="document.getElementById('docsCompleteModal').style.display='none'"
-                    style="background:none;border:none;font-size:13px;color:var(--u-muted);cursor:pointer;padding:4px 8px;">
-                Sonra bakarim
-            </button>
-        </div>
+        <div style="font-size:22px;font-weight:800;margin-bottom:8px;">Tebrikler!</div>
+        <div style="font-size:14px;color:#64748b;line-height:1.6;margin-bottom:24px;">Tüm belgeler başarıyla yüklendi.<br>Şimdi hizmet paketini seçebilirsin.</div>
+        <a href="{{ route('student.services') }}" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:12px;background:linear-gradient(135deg,#0d9488,#14b8a6);color:#fff;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(13,148,136,.3);">Hizmetlere Git →</a>
+        <div style="margin-top:14px;"><button type="button" id="docsCompleteClose" style="background:none;border:none;font-size:13px;color:#64748b;cursor:pointer;padding:4px 8px;">Sonra bakarım</button></div>
     </div>
 </div>
 <style>@keyframes dcPop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}</style>
 @endif
 
+{{-- ═══ JAVASCRIPT ═══ --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    // File inputs → show filename
+    document.querySelectorAll('input[type="file"][data-fname-target]').forEach(function(inp){
+        inp.addEventListener('change', function(){
+            var tgt = document.getElementById(this.dataset.fnameTarget);
+            if(tgt){ tgt.classList.add('show'); var n=tgt.querySelector('.sf-name'); if(n) n.textContent=this.files[0]?this.files[0].name:''; }
+        });
+    });
+
+    // Upload zone toggle
+    document.querySelectorAll('[data-upload]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var zone = document.getElementById('uz-'+this.dataset.upload);
+            if(zone) zone.classList.toggle('open');
+        });
+    });
+
+    // Show more — sadece collapse'ı kaldır, filtre ayrı
+    var smBtn = document.getElementById('showMoreBtn');
+    if(smBtn) smBtn.addEventListener('click', function(){
+        document.querySelectorAll('.extra-doc').forEach(function(el){ el.classList.remove('sdoc-collapsed'); });
+        var w=document.getElementById('showMoreWrap'); if(w) w.style.display='none';
+    });
+
+    // Toggle lists
+    ['toggle-approved','toggle-done-list','toggle-optional'].forEach(function(id){
+        var btn=document.getElementById(id); if(!btn) return;
+        var listId = id==='toggle-approved'?'approved-list': id==='toggle-done-list'?'done-list':'optional-list';
+        btn.addEventListener('click', function(){
+            var list=document.getElementById(listId); if(!list) return;
+            var h=list.style.display==='none'; list.style.display=h?'block':'none'; this.textContent=h?'Gizle':'Göster';
+        });
+    });
+
+    // Filter pills — zorunlu belge yoksa varsayılan "all"
+    var hasUrgent = document.querySelectorAll('#docList .doc-card[data-req="1"][data-up="0"]').length > 0;
+    var curFilter = hasUrgent ? 'urgent' : 'all';
+    if(!hasUrgent){
+        document.querySelectorAll('.sdoc .filter-pill').forEach(function(p){p.classList.remove('active')});
+        var allPill = document.querySelector('.sdoc .filter-pill[data-filter="all"]');
+        if(allPill) allPill.classList.add('active');
+    }
+    document.querySelectorAll('.sdoc .filter-pill').forEach(function(pill){
+        pill.addEventListener('click', function(){
+            document.querySelectorAll('.sdoc .filter-pill').forEach(function(p){p.classList.remove('active')});
+            this.classList.add('active'); curFilter=this.dataset.filter; applyFilters();
+        });
+    });
+
+    // Category tabs — kategori seçildiğinde filtre "all"e geçer (urgent boşsa)
+    var curCat='all';
+    document.querySelectorAll('.sdoc .cat-tab').forEach(function(tab){
+        tab.addEventListener('click', function(){
+            document.querySelectorAll('.sdoc .cat-tab').forEach(function(t){t.classList.remove('active')});
+            this.classList.add('active');
+            curCat=this.dataset.cattab;
+            // Kategori seçildiğinde "urgent" filtre sonuç vermiyorsa "all"e geç
+            if(curFilter==='urgent'){
+                var wouldShow=false;
+                document.querySelectorAll('#docList .doc-card').forEach(function(c){
+                    if(c.dataset.req==='1'&&c.dataset.up==='0'&&(curCat==='all'||(c.dataset.cat||'')===curCat)) wouldShow=true;
+                });
+                if(!wouldShow){
+                    curFilter='all';
+                    document.querySelectorAll('.sdoc .filter-pill').forEach(function(p){p.classList.remove('active')});
+                    var ap=document.querySelector('.sdoc .filter-pill[data-filter="all"]'); if(ap) ap.classList.add('active');
+                }
+            }
+            applyFilters();
+        });
+    });
+
+    function applyFilters(){
+        var cards=document.querySelectorAll('#docList .doc-card');
+        var grp={'missing-required':0,'uploaded':0,'other':0};
+        cards.forEach(function(c){
+            var req=c.dataset.req==='1', up=c.dataset.up==='1', cat=c.dataset.cat||'', show=true;
+            if(curFilter==='urgent') show=req&&!up;
+            else if(curFilter==='uploaded') show=up;
+            else if(curFilter==='missing') show=!up;
+            // Kategori filtresi
+            if(show&&curCat!=='all') show=cat===curCat;
+            c.classList.toggle('sdoc-hidden',!show);
+            if(show){ if(req&&!up) grp['missing-required']++; else if(up) grp['uploaded']++; else grp['other']++; }
+        });
+        document.querySelectorAll('#docList .doc-group-title').forEach(function(t){
+            var g=t.dataset.grp; if(g) t.classList.toggle('sdoc-hidden',(grp[g]||0)===0);
+        });
+        // Filtre/kategori değiştiğinde collapsed belgeleri aç
+        if(curFilter!=='all'||curCat!=='all'){
+            document.querySelectorAll('.extra-doc').forEach(function(el){ el.classList.remove('sdoc-collapsed'); });
+            var w=document.getElementById('showMoreWrap'); if(w) w.style.display='none';
+        }
+    }
+
+    // Sayfa yüklendiğinde filtreleri uygula
+    applyFilters();
+
+    // Preview
+    var modal=document.getElementById('preview-modal'), container=document.getElementById('preview-container'),
+        fname=document.getElementById('preview-filename'), rnote=document.getElementById('preview-review-note'),
+        pstatus=document.getElementById('preview-status');
+    function openPreview(id){
+        if(!modal) return;
+        container.innerHTML='<div style="color:#94a3b8;font-size:13px;">Yükleniyor...</div>';
+        fname.textContent=''; rnote.style.display='none'; pstatus.textContent=''; modal.style.display='flex';
+        fetch('/student/documents/'+id+'/preview',{headers:{'Accept':'application/json'}})
+            .then(function(r){if(!r.ok) throw 0; return r.json()})
+            .then(function(d){
+                fname.textContent=d.filename||'Belge';
+                var sm={approved:'Onaylandı',rejected:'Reddedildi',uploaded:'Yüklendi',pending:'Bekliyor'};
+                pstatus.textContent=sm[d.status]||d.status||'';
+                pstatus.style.background=d.status==='approved'?'#dcfce7':d.status==='rejected'?'#fee2e2':'#fef3c7';
+                pstatus.style.color=d.status==='approved'?'#16a34a':d.status==='rejected'?'#dc2626':'#d97706';
+                if(d.mime==='application/pdf') container.innerHTML='<iframe src="'+d.url+'" style="width:100%;height:600px;border:none;border-radius:8px;"></iframe>';
+                else container.innerHTML='<img src="'+d.url+'" alt="'+(d.filename||'')+'" style="max-width:100%;max-height:70vh;border-radius:8px;object-fit:contain;">';
+                if(d.review_note){rnote.textContent='İnceleme notu: '+d.review_note;rnote.style.display='block';}
+            }).catch(function(){container.innerHTML='<div style="color:#dc2626;font-size:13px;">Önizleme yüklenemedi.</div>';});
+    }
+    function closePreview(){if(modal) modal.style.display='none'; container.innerHTML=''; rnote.style.display='none';}
+    document.querySelectorAll('[data-preview]').forEach(function(b){b.addEventListener('click',function(){openPreview(this.dataset.preview)})});
+    var cb=document.getElementById('preview-close-btn'); if(cb) cb.addEventListener('click',closePreview);
+    if(modal) modal.addEventListener('click',function(e){if(e.target===this) closePreview()});
+
+    // Celebration close
+    var dc=document.getElementById('docsCompleteClose');
+    if(dc) dc.addEventListener('click',function(){var m=document.getElementById('docsCompleteModal');if(m)m.style.display='none'});
+})();
+</script>
 @endsection

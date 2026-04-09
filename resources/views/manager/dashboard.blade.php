@@ -594,7 +594,7 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
     <div class="panel">
         <div class="muted" style="font-size:var(--tx-xs);margin-bottom:4px;">ADVISORY ÖNIZLEME</div>
         <div style="display:flex;gap:6px;">
-            <input id="pvSeniorEmail" list="pvSeniorEmailSuggestions" placeholder="senior@mentorde.com…" style="flex:1;min-width:0;border:1.5px solid #cbd5e1;border-radius:7px;padding:6px 10px;font-size:var(--tx-sm);outline:none;">
+            <input id="pvSeniorEmail" list="pvSeniorEmailSuggestions" placeholder="senior@example.com…" style="flex:1;min-width:0;border:1.5px solid #cbd5e1;border-radius:7px;padding:6px 10px;font-size:var(--tx-sm);outline:none;">
             <button class="btn" type="button" onclick="openSeniorPreview()" style="white-space:nowrap;background:#1e40af;color:#fff;border-color:#1e40af;">Aç →</button>
         </div>
         <div class="muted" style="font-size:var(--tx-xs);margin-top:4px;">Senior / mentor e-postası ile</div>

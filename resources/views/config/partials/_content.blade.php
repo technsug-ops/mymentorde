@@ -172,10 +172,10 @@
             </div>
             <div class="row">
                 <input id="mtChannel" placeholder="channel (email/whatsapp/inApp)" value="email">
-                <input id="mtSubject" placeholder="subject_tr" value="MentorDE'ye hos geldiniz">
+                <input id="mtSubject" placeholder="subject_tr" value="{{ config('brand.name', 'MentorDE') }}'ye hos geldiniz">
             </div>
             <div class="row">
-                <input id="mtBody" placeholder="body_tr" value="Merhaba @{{student_name}}, MentorDE ailesine hos geldiniz.">
+                <input id="mtBody" placeholder="body_tr" value="Merhaba @{{student_name}}, {{ config('brand.name', 'MentorDE') }} ailesine hos geldiniz.">
             </div>
             <div class="row">
                 <input id="mtVars" placeholder="variables (virgulle)" value="student_name,senior_name,package_name">
@@ -327,7 +327,7 @@
                 <input id="boCategory" placeholder="category" value="batch_broadcast">
             </div>
             <div class="row">
-                <input id="boSubject" placeholder="subject" value="MentorDE Toplu Bilgilendirme">
+                <input id="boSubject" placeholder="subject" value="{{ config('brand.name', 'MentorDE') }} Toplu Bilgilendirme">
             </div>
             <div class="row">
                 <input id="boBody" placeholder="body" value="Merhaba, bu toplu bilgilendirme mesajidir.">

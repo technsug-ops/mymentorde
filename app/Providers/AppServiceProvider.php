@@ -57,23 +57,26 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // ── Global brand ayarları — tüm portallarda firma adı + logo ────────
+        // White-label: önce DB'den (manager panelden) oku, yoksa config('brand.*')'a düş
         View::composer('*', function ($view): void {
             $cid = (int) (auth()->user()?->company_id ?? 0);
             $brand = Cache::remember("brand_settings_{$cid}", 300, function () use ($cid): array {
+                $fallbackName = (string) config('brand.name', 'MentorDE');
+                $fallbackLogo = (string) (config('brand.logo_url') ?: config('brand.logo_path') ?: '');
                 try {
                     $name    = MarketingAdminSetting::where('company_id', $cid)
                                    ->where('setting_key', 'brand_name')
-                                   ->value('setting_value') ?? 'MentorDE';
+                                   ->value('setting_value') ?: $fallbackName;
                     $logoUrl = MarketingAdminSetting::where('company_id', $cid)
                                    ->where('setting_key', 'brand_logo_url')
-                                   ->value('setting_value') ?? '';
+                                   ->value('setting_value') ?: $fallbackLogo;
                     return ['name' => $name, 'logo_url' => $logoUrl];
                 } catch (\Throwable) {
-                    return ['name' => 'MentorDE', 'logo_url' => ''];
+                    return ['name' => $fallbackName, 'logo_url' => $fallbackLogo];
                 }
             });
             $view->with('brandName',    $brand['name']);
-            $view->with('brandInitial', strtoupper(substr($brand['name'], 0, 1)));
+            $view->with('brandInitial', strtoupper(mb_substr($brand['name'], 0, 1)));
             $view->with('brandLogoUrl', $brand['logo_url']);
         });
 

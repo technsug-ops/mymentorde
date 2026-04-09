@@ -434,7 +434,7 @@
     // Advisor
     $guestContractStatusForDecision = $selStatus;
     $signedFileExists = trim((string) ($selectedGuest->contract_signed_file_path ?? '')) !== '';
-    $canDecide        = $guestContractStatusForDecision === 'signed_uploaded' && $signedFileExists;
+    $canDecide        = in_array($guestContractStatusForDecision, ['signed_uploaded', 'requested'], true);
     $refreshAllowed   = in_array($selStatus, ['not_requested','pending_manager','requested','rejected'], true);
     $allowContractUpdate = in_array($selStatus, ['requested','signed_uploaded','rejected'], true);
     $guestContractStatus = $selStatus;
@@ -455,7 +455,7 @@
         </div>
         <span class="badge {{ $selBc['cls'] }}" style="margin-left:auto;">{{ $selBc['label'] }}</span>
         @if($signedFileExists)
-            <a class="ct-btn slim success" href="{{ asset('storage/'.ltrim((string)$selectedGuest->contract_signed_file_path, '/')) }}" target="_blank">📎 İmzalı Dosya</a>
+            <a class="ct-btn slim success" href="{{ route('manager.contract-template.signed-file', $selectedGuest->id) }}" target="_blank">📎 İmzalı Dosya</a>
         @endif
         <a class="ct-btn slim primary" href="{{ route('manager.contract-template.print', $selectedGuest->id) }}" target="_blank">🖨 Yazdır / PDF</a>
     </div>
@@ -495,6 +495,58 @@
             <div style="margin-left:12px;"><span class="badge danger">İptal Edildi</span></div>
         @endif
     </div>
+
+    {{-- Hizli Onay/Red (timeline altinda, her zaman gorunur) --}}
+    @if($canDecide)
+    <div style="background:var(--u-card);border:2px solid {{ $guestContractStatusForDecision === 'signed_uploaded' ? '#22c55e' : '#3b82f6' }};border-radius:12px;padding:16px 18px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <span style="font-size:var(--tx-lg);">{{ $guestContractStatusForDecision === 'signed_uploaded' ? '✅' : '📋' }}</span>
+            <div>
+                <div style="font-size:var(--tx-sm);font-weight:700;color:var(--u-text);">
+                    {{ $guestContractStatusForDecision === 'signed_uploaded' ? 'Imzali sozlesme yuklendi' : 'Sozlesme gonderildi' }}
+                    @if($guestContractStatusForDecision === 'rejected') <span class="badge danger" style="font-size:10px;">Daha once reddedildi</span> @endif
+                </div>
+                <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-top:1px;">Onay veya red karari verebilirsiniz. Not/sebep zorunludur.</div>
+            </div>
+        </div>
+        <form method="post" action="{{ route('manager.contract-template.decision') }}" id="quickDecisionForm">
+            @csrf
+            <input type="hidden" name="guest_id" value="{{ $selectedGuest->id }}">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                <div>
+                    <label style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);display:block;margin-bottom:3px;">Red Sebebi (reddetme icin)</label>
+                    <select id="qd_reason" style="width:100%;padding:7px 10px;border:1px solid var(--u-line);border-radius:8px;font-size:var(--tx-xs);font-family:inherit;">
+                        <option value="">-- Sebep secin --</option>
+                        <option value="Imza eksik veya okunamiyor">Imza eksik veya okunamiyor</option>
+                        <option value="Yanlis dosya yuklendi">Yanlis dosya yuklendi</option>
+                        <option value="Belge kalitesi yetersiz">Belge kalitesi yetersiz</option>
+                        <option value="Paket/fiyat uyusmazligi">Paket/fiyat uyusmazligi</option>
+                        <option value="Ogrenci bilgileri hatali">Ogrenci bilgileri hatali</option>
+                        <option value="Sozlesme sartlari degisti">Sozlesme sartlari degisti</option>
+                        <option value="Diger">Diger</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);display:block;margin-bottom:3px;">Not / Aciklama <span style="color:#dc2626;">*</span></label>
+                    <input name="note" id="qd_note" placeholder="Karar sebebini yazin..." required
+                           style="width:100%;padding:7px 10px;border:1px solid var(--u-line);border-radius:8px;font-size:var(--tx-xs);font-family:inherit;box-sizing:border-box;">
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button type="submit" name="decision" value="approve"
+                        onclick="if(!document.getElementById('qd_note').value.trim()){alert('Onay sebebi/notu zorunludur.');return false;}return confirm('Sozlesme onaylanacak. Devam?')"
+                        style="padding:9px 22px;border-radius:8px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;font-size:var(--tx-xs);font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;">
+                    ✓ Onayla
+                </button>
+                <button type="submit" name="decision" value="reject"
+                        onclick="var r=document.getElementById('qd_reason').value;var n=document.getElementById('qd_note');if(!r&&!n.value.trim()){alert('Red sebebi veya not zorunludur.');return false;}if(r&&!n.value.trim()){n.value=r;}return confirm('Sozlesme reddedilecek. Devam?')"
+                        style="padding:9px 22px;border-radius:8px;background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff;border:none;font-size:var(--tx-xs);font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;">
+                    ✕ Reddet
+                </button>
+            </div>
+        </form>
+    </div>
+    @endif
 
     {{-- Inner Tabs --}}
     <div class="ct-inner-tabs">
@@ -588,9 +640,9 @@
                     </div>
                     <div class="sca-card-body">
                         @if($canDecide)
-                        <div class="sca-status ok" style="margin-bottom:12px;">
-                            <span class="sca-status-icon">✅</span>
-                            <span>İmzalı sözleşme yüklendi — onay kararı verebilirsiniz.</span>
+                        <div class="sca-status {{ $guestContractStatusForDecision === 'signed_uploaded' ? 'ok' : 'info' }}" style="margin-bottom:12px;">
+                            <span class="sca-status-icon">{{ $guestContractStatusForDecision === 'signed_uploaded' ? '✅' : '📋' }}</span>
+                            <span>{{ $guestContractStatusForDecision === 'signed_uploaded' ? 'İmzalı sözleşme yüklendi — onay kararı verebilirsiniz.' : 'Sözleşme gönderildi — imza beklenmeden de onay/red kararı verebilirsiniz.' }}</span>
                         </div>
                         <form method="post" action="{{ route('manager.contract-template.decision') }}">
                             @csrf

@@ -191,9 +191,9 @@ function printContract() {
         '@media print { @page { margin:1.5cm 2cm; } body { padding:0; } }' +
         '</style>' +
         '</head><body>' +
-        '<div class="ph"><h1>' + title + '</h1><p>Sözleşme No: <strong>' + no + '</strong> &nbsp;&middot;&nbsp; MentorDE</p></div>' +
+        '<div class="ph"><h1>' + title + '</h1><p>Sözleşme No: <strong>' + no + '</strong> &nbsp;&middot;&nbsp; {{ config('brand.name', 'MentorDE') }}</p></div>' +
         '<pre>' + text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>' +
-        '<div class="pf"><span>MentorDE &mdash; Gizli &amp; Resmi Belge</span><span>' + no + '</span></div>' +
+        '<div class="pf"><span>{{ config('brand.name', 'MentorDE') }} &mdash; Gizli &amp; Resmi Belge</span><span>' + no + '</span></div>' +
         '</body></html>'
     );
     win.document.close();

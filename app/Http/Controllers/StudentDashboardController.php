@@ -149,14 +149,37 @@ class StudentDashboardController extends Controller
             'failed' => (int) $notifications->where('status', 'failed')->count(),
         ];
 
-        $hasFirstProcess = $outcomes->isNotEmpty() || $documents->isNotEmpty();
-        $hasSentNotification = $notifications->contains(fn ($n) => $n->status === 'sent' || !empty($n->sent_at));
-        $progressSteps = [
-            ['label' => 'Başvuru Alındı', 'done' => (bool) $guestApplication],
-            ['label' => 'Dönüştürüldü', 'done' => !empty($studentId)],
-            ['label' => 'İlk Süreç', 'done' => $hasFirstProcess],
-            ['label' => 'Bildirim Gönderildi', 'done' => $hasSentNotification],
+        // ── 6-Step Funnel Progress ────────────────────────────────────────
+        $contractStatus = (string) ($guestApplication?->contract_status ?? 'not_requested');
+        $contractDone   = $contractStatus === 'approved';
+        $docsDone       = (bool) ($guestApplication?->docs_ready ?? false);
+        $uniOutcomes    = $outcomes->whereIn('process_step', ['application_prep', 'uni_assist']);
+        $uniDone        = $uniOutcomes->where('outcome_type', 'acceptance')->isNotEmpty()
+                       || $uniOutcomes->where('outcome_type', 'conditional_acceptance')->isNotEmpty();
+        $visaOutcomes   = $outcomes->where('process_step', 'visa_application');
+        $visaDone       = $visaOutcomes->where('outcome_type', 'acceptance')->isNotEmpty();
+        $abroadOutcomes = $outcomes->whereIn('process_step', ['residence', 'official_services']);
+        $abroadDone     = $abroadOutcomes->isNotEmpty() && $visaDone;
+
+        $funnelSteps = [
+            ['key' => 'application', 'label' => 'Basvuru',    'done' => true],
+            ['key' => 'contract',    'label' => 'Sozlesme',   'done' => $contractDone],
+            ['key' => 'documents',   'label' => 'Belgeler',   'done' => $docsDone],
+            ['key' => 'uni_assist',  'label' => 'Uni-Assist', 'done' => $uniDone],
+            ['key' => 'visa',        'label' => 'Vize',       'done' => $visaDone],
+            ['key' => 'abroad',      'label' => 'Almanya',    'done' => $abroadDone],
         ];
+
+        // Aktif adimi bul (ilk tamamlanmamis adim)
+        $currentStageIdx = collect($funnelSteps)->search(fn ($s) => !$s['done']);
+        if ($currentStageIdx === false) {
+            $currentStageIdx = count($funnelSteps) - 1;
+        }
+        $currentStage = $funnelSteps[$currentStageIdx]['key'] ?? 'application';
+        $funnelPct = (int) round(collect($funnelSteps)->where('done', true)->count() / max(1, count($funnelSteps)) * 100);
+
+        // Eski progressSteps uyumu
+        $progressSteps = $funnelSteps;
 
         $outcomeByStep = $outcomes
             ->groupBy(fn ($o) => (string) ($o->process_step ?? 'unknown'))
@@ -350,6 +373,9 @@ class StudentDashboardController extends Controller
             'outcomes' => $outcomes,
             'documents' => $documents,
             'progressSteps' => $progressSteps,
+            'funnelSteps'  => $funnelSteps,
+            'funnelPct'    => $funnelPct,
+            'currentStage' => $currentStage,
             'docSummary' => $docSummary,
             'requiredChecklist' => $requiredChecklist,
             'notifications' => $notifications,

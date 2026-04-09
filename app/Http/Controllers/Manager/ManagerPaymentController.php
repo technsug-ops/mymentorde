@@ -21,7 +21,7 @@ class ManagerPaymentController extends Controller
         $cid = $this->companyId();
         return (string) MarketingAdminSetting::where('company_id', $cid)
             ->where('setting_key', 'brand_name')
-            ->value('setting_value') ?: 'MentorDE';
+            ->value('setting_value') ?: config('brand.name', 'MentorDE');
     }
 
     // ── Liste ──────────────────────────────────────────────────────────────

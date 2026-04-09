@@ -42,7 +42,7 @@
     @endforeach
 
     <div class="footer">
-        MentorDE &middot; Bu belge {{ now()->format('d.m.Y H:i') }} tarihinde olusturulmustur.
+        {{ config('brand.name', 'MentorDE') }} &middot; Bu belge {{ now()->format('d.m.Y H:i') }} tarihinde olusturulmustur.
     </div>
 </body>
 </html>

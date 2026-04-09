@@ -247,6 +247,9 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
     Route::post('/manager/contract-template/reset', [ContractWorkflowController::class, 'resetContract'])->name('manager.contract-template.reset');
     Route::post('/manager/contract-template/batch-decision', [ContractWorkflowController::class, 'batchDecision'])->name('manager.contract-template.batch-decision');
 
+    // ── Contract Signed File Serve ──────────────────────────────────────────
+    Route::get('/manager/contract-template/signed-file/{guest}', [ContractWorkflowController::class, 'serveSignedFile'])->name('manager.contract-template.signed-file');
+
     // ── Contract Print & Utilities (ContractPrintController) ──────────────────
     Route::post('/manager/contract-template/student-services', [ContractPrintController::class, 'saveStudentServices'])->name('manager.contract-template.student-services');
     Route::post('/manager/contract-template/refresh-snapshot', [ContractPrintController::class, 'refreshSnapshot'])->name('manager.contract-template.refresh-snapshot');

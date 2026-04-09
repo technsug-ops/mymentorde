@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MentorDE - Almanya Başvuru Süreci</title>
+    <title>{{ config('brand.name', 'MentorDE') }} - Almanya Başvuru Süreci</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
@@ -125,7 +125,7 @@
         <span class="badge">%95+ universite kabul orani</span>
         <h1>Almanya sürecini <em>adım adım</em> takip edin</h1>
         <p class="sub">
-            MentorDE ile başvuru, belge, outcome ve bildirim süreçleri tek yerde toplanir.
+            {{ config('brand.name', 'MentorDE') }} ile başvuru, belge, outcome ve bildirim süreçleri tek yerde toplanir.
             Reklam kaynak veriniz UTM ile otomatik takip edilir, başvuruya manuel kampanya secimi gerekmez.
         </p>
         <div class="actions">

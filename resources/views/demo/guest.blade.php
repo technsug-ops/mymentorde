@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MentorDE Demo - Guest Kayit</title>
+    <title>{{ config('brand.name', 'MentorDE') }} Demo - Guest Kayit</title>
     <style>
         :root {
             --bg: #eef3f9;

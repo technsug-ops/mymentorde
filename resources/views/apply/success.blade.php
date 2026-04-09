@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Başvuru Alındı — MentorDE</title>
+    <title>Başvuru Alındı — {{ config('brand.name', 'MentorDE') }}</title>
     <style>
         :root {
             --bg:      #eef3fb;

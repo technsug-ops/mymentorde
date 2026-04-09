@@ -6,7 +6,7 @@
 @section('content')
 <div class="page-header" style="margin-bottom:20px;">
     <h1 style="margin:0;font-size:var(--tx-xl);font-weight:700;">Sözleşmelerim</h1>
-    <p style="margin:4px 0 0;color:var(--u-muted);font-size:var(--tx-sm);">MentorDE ile imzaladığınız ortaklık ve operasyon sözleşmeleri</p>
+    <p style="margin:4px 0 0;color:var(--u-muted);font-size:var(--tx-sm);">{{ config('brand.name', 'MentorDE') }} ile imzaladığınız ortaklık ve operasyon sözleşmeleri</p>
 </div>
 
 @if(session('success'))
@@ -47,7 +47,7 @@
 
     @if($c->status === 'signed_uploaded')
     <div style="margin-top:10px;padding:10px;background:var(--badge-warn-bg,#fef9c3);border-radius:6px;font-size:var(--tx-xs);color:var(--badge-warn-fg,#92400e);">
-        ⏳ İmzalı sözleşmeniz MentorDE tarafından inceleniyor.
+        ⏳ İmzalı sözleşmeniz {{ config('brand.name', 'MentorDE') }} tarafından inceleniyor.
     </div>
     @endif
 
@@ -61,7 +61,7 @@
 <div class="card" style="padding:40px;text-align:center;color:var(--u-muted);">
     <div style="font-size:32px;margin-bottom:12px;">📋</div>
     <div style="font-size:var(--tx-base);font-weight:600;margin-bottom:6px;">Henüz sözleşme yok</div>
-    <div style="font-size:var(--tx-sm);">MentorDE tarafından sözleşme gönderildiğinde burada görünecek.</div>
+    <div style="font-size:var(--tx-sm);">{{ config('brand.name', 'MentorDE') }} tarafından sözleşme gönderildiğinde burada görünecek.</div>
 </div>
 @endforelse
 @endsection

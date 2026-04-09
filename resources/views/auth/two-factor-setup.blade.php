@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>2FA Kurulumu — MentorDE</title>
+    <title>2FA Kurulumu — {{ config('brand.name', 'MentorDE') }}</title>
     <style>
         :root{--bg:#eef3fb;--panel:#ffffff;--line:#d8e2f0;--ink:#11243d;--muted:#5f7392;--primary:#1f66d1;--ok:#16a34a;}
         *{box-sizing:border-box;margin:0;padding:0;}

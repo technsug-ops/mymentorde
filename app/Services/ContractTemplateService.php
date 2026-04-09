@@ -132,10 +132,11 @@ class ContractTemplateService
         $guardianRelation   = trim((string) ($draft['guardian_relation'] ?? '-'));
 
         // --- Sözleşme numarası ---
-        $contractNumber = 'MDE-' . now()->format('Y') . '-' . str_pad((string) $guest->id, 6, '0', STR_PAD_LEFT);
+        $contractPrefix = strtoupper(substr(preg_replace('/[^A-Z0-9]/i', '', config('brand.short_name', config('brand.name', 'MDE'))), 0, 3)) ?: 'MDE';
+        $contractNumber = $contractPrefix . '-' . now()->format('Y') . '-' . str_pad((string) $guest->id, 6, '0', STR_PAD_LEFT);
 
         // --- Firma ayarları ---
-        $advisorCompanyName      = (string) ($company?->name ?: 'MentorDE');
+        $advisorCompanyName      = (string) ($company?->name ?: config('brand.legal_name', config('brand.name', 'MentorDE')));
         $advisorCompanyAddress   = $settings['advisor_company_address'] ?? '';
         $advisorTaxInfo          = $settings['advisor_tax_info'] ?? '';
         $advisorAuthorizedPerson = $settings['advisor_authorized_person'] ?? '';
