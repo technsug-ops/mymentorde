@@ -1,4 +1,4 @@
-﻿@extends('guest.layouts.app')
+@extends('guest.layouts.app')
 
 @section('title', 'Ön Kayıt Formu')
 @section('page_title', 'Kayıt Süreci - Ön Kayıt Formu')
@@ -6,171 +6,220 @@
 @push('head')
 <script>if(localStorage.getItem('mentorde_design')==='minimalist'){document.documentElement.classList.add('jm-minimalist');}</script>
 <style>
-/* ── grf-* Guest Registration Form scoped ── */
+/* ── grf-* Guest Registration Form — Step Pills Redesign ── */
 
-/* Metrics strip */
-.grf-metrics {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 16px;
+/* ── Form Topbar with Step Pills ── */
+.grf-topbar {
+    background: var(--u-card); border-bottom: 1px solid var(--u-line);
+    padding: 0 24px; display: flex; align-items: stretch;
+    position: sticky; top: 0; z-index: 10; margin: -24px -24px 24px;
 }
-@media(max-width:1024px){ .grf-metrics { grid-template-columns: 1fr 1fr; } }
-@media(max-width:600px){ .grf-metrics { grid-template-columns: 1fr; } }
-.grf-metric {
-    background: var(--u-card);
-    border: 1px solid var(--u-line);
-    border-radius: 14px;
-    padding: 14px 18px;
+.grf-topbar-left {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 0; flex: 1; min-width: 0;
 }
-.grf-metric-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--u-muted); margin-bottom: 6px; }
-.grf-metric-val   { font-size: 28px; font-weight: 800; color: var(--u-text); line-height: 1; }
+.grf-topbar-title { font-size: 15px; font-weight: 700; color: var(--u-text); white-space: nowrap; }
+.grf-topbar-div { width: 1px; height: 20px; background: var(--u-line); }
 
-/* Progress */
-.grf-progress-card {
-    background: var(--u-card);
-    border: 1px solid var(--u-line);
-    border-radius: 14px;
-    padding: 16px 20px;
-    margin-bottom: 16px;
+/* Step pills */
+.grf-pills {
+    display: flex; gap: 4px; overflow-x: auto;
+    scrollbar-width: none; -ms-overflow-style: none;
 }
-.grf-progress-label { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; color: var(--u-muted); margin-bottom: 6px; }
-.grf-progress-bar { height: 8px; border-radius: 999px; background: var(--u-line); overflow: hidden; }
-.grf-progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #1d66d6, #3b82f6); transition: width .4s ease; }
+.grf-pills::-webkit-scrollbar { display: none; }
+.grf-pill {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 12px 4px; border-radius: 12px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+    cursor: pointer; transition: all .2s;
+    border: 1.5px solid transparent;
+    background: var(--u-bg); color: var(--u-muted);
+    text-decoration: none; min-width: 70px;
+}
+.grf-pill.done { background: rgba(22,163,74,.08); color: var(--u-ok); }
+.grf-pill.active {
+    background: rgba(37,99,235,.06); color: var(--u-brand);
+    border-color: var(--u-brand); box-shadow: 0 0 0 3px rgba(37,99,235,.06);
+}
+.grf-pill-num {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+}
+.grf-pill.done .grf-pill-num { background: var(--u-ok); color: #fff; }
+.grf-pill.active .grf-pill-num { background: var(--u-brand); color: #fff; }
+.grf-pill:not(.done):not(.active) .grf-pill-num { background: var(--u-line); color: var(--u-muted); }
+.grf-pill-bar { width: 100%; height: 3px; background: var(--u-line); border-radius: 2px; margin-top: 3px; overflow: hidden; }
+.grf-pill-bar-fill { height: 100%; border-radius: 2px; background: var(--u-brand); transition: width .3s ease; }
+.grf-pill.done .grf-pill-bar-fill { background: var(--u-ok); width: 100% !important; }
 
-/* Section nav */
-.grf-nav {
-    position: sticky;
-    top: 8px;
-    z-index: 30;
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    padding: 8px 10px;
-    border: 1px solid var(--u-line);
-    border-radius: 12px;
-    background: var(--u-card);
-    box-shadow: var(--u-shadow);
-    margin-bottom: 14px;
-    scrollbar-width: thin;
+.grf-topbar-right {
+    display: flex; align-items: center; gap: 8px; padding: 12px 0;
 }
-.grf-nav a {
-    white-space: nowrap;
-    border: 1px solid var(--u-line);
-    border-radius: 999px;
-    padding: 5px 14px;
-    color: var(--u-text);
-    font-size: 14px; font-weight: 600;
-    background: var(--u-card);
-    text-decoration: none;
-    display: inline-flex; align-items: center;
-    transition: background .15s, border-color .15s, color .15s;
-    flex-shrink: 0;
+.grf-topbar-btn {
+    padding: 7px 14px; border-radius: 8px; border: 1px solid var(--u-line);
+    background: var(--u-card); font-size: 12px; font-weight: 600;
+    color: var(--u-muted); text-decoration: none; transition: all .15s;
+    display: inline-flex; align-items: center; gap: 5px;
 }
-.grf-nav a:hover { background: #f0f6ff; border-color: #93c5fd; color: var(--u-brand); text-decoration: none; }
-.grf-nav a.active {
-    background: var(--u-brand); border-color: var(--u-brand);
-    color: #fff; font-weight: 700;
+.grf-topbar-btn:hover { background: var(--u-bg); color: var(--u-text); text-decoration: none; }
+
+/* ── Form body ── */
+.grf-body { display: flex; justify-content: center; }
+.grf-center { width: 100%; max-width: 720px; margin: 0 auto; }
+
+/* ── Step Context — full width above card ── */
+.grf-step-ctx { margin-bottom: 20px; }
+.grf-step-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .8px; color: var(--u-brand);
+    background: rgba(37,99,235,.06); padding: 4px 12px; border-radius: 99px;
+    margin-bottom: 10px;
 }
-.grf-nav a.done {
-    background: rgba(22,163,74,.1); border-color: rgba(22,163,74,.4);
-    color: var(--u-ok, #16a34a);
+.grf-step-title {
+    font-size: 20px; font-weight: 800; letter-spacing: -.3px;
+    margin-bottom: 8px; line-height: 1.3; color: var(--u-text);
 }
-.grf-nav-meta {
-    display: flex; justify-content: space-between; align-items: center;
-    gap: 10px; margin-bottom: 14px;
-}
-.grf-nav-counter {
-    font-weight: 700; color: var(--u-brand);
-    background: #eff6ff; border: 1px solid #bfdbfe;
-    border-radius: 999px; padding: 5px 14px; font-size: 15px;
+.grf-step-why {
+    font-size: 12px; color: var(--u-muted); line-height: 1.6;
+    padding: 10px 14px; background: var(--u-bg);
+    border-left: 3px solid var(--u-brand); border-radius: 0 8px 8px 0;
 }
 
-/* Step panels */
-.grf-step-panels { position: relative; }
-.grf-panel {
+/* ── Form Card — full width ── */
+.grf-card {
+    background: var(--u-card); border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06);
+    padding: 28px 32px; margin-bottom: 20px;
     border: 1px solid var(--u-line);
-    border-radius: 14px;
-    margin-bottom: 14px;
-    background: var(--u-card);
-    overflow: hidden;
-    display: none;
 }
-.grf-panel.active { display: block; }
-.grf-panel-head {
-    padding: 14px 18px;
-    background: linear-gradient(180deg, #f7fbff, #eef5ff);
-    border-bottom: 1px solid var(--u-line);
-    font-size: 16px; font-weight: 700; color: #143762;
-}
-.grf-panel-body { padding: 16px 18px; }
 
-/* Form grid */
+/* ── Fields — 2-col grid ── */
 .grf-form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
 }
-@media(max-width:740px){ .grf-form-grid { grid-template-columns: 1fr; } }
-.form-group { display: grid; gap: 6px; }
-.label-row { display: flex; align-items: center; gap: 6px; }
-.label-row label { font-weight: 700; color: var(--u-text); font-size: 15px; }
+.grf-form-grid .form-group.grf-full { grid-column: 1 / -1; }
+@media(max-width:640px){ .grf-form-grid { grid-template-columns: 1fr; } }
+
+.form-group { display: grid; gap: 5px; }
+.label-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.label-row label { font-weight: 700; color: var(--u-text); font-size: 13px; }
 .required-star { color: var(--u-danger); font-weight: 700; }
+
+/* Prefilled badge */
+.grf-prefilled {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10px; font-weight: 600; color: var(--u-ok);
+    background: rgba(22,163,74,.08); padding: 1px 8px; border-radius: 4px;
+}
+
+/* Filled state — green border */
+.form-group.is-filled input,
+.form-group.is-filled select {
+    border-color: var(--u-ok);
+    background: rgba(22,163,74,.02);
+}
 
 /* Help toggle */
 .help-toggle-btn {
     display: inline-flex; align-items: center; gap: 4px;
-    background: #eef4fb; border: 1px solid #c5d8f2; border-radius: 6px;
-    color: #2e5fa3; font-size: 13px; font-weight: 600;
-    padding: 3px 9px; cursor: pointer;
-    transition: background .15s;
+    background: rgba(37,99,235,.06); border: 1px solid rgba(37,99,235,.15); border-radius: 6px;
+    color: var(--u-brand); font-size: 11px; font-weight: 600;
+    padding: 2px 8px; cursor: pointer;
 }
-.help-toggle-btn:hover { background: #ddeaf9; }
 .help-panel {
-    display: none; font-size: 14px; color: #34597f; line-height: 1.65;
-    background: #f4f9ff; border: 1px solid #cfe0f7; border-radius: 8px;
+    display: none; font-size: 12px; color: var(--u-muted); line-height: 1.6;
+    background: var(--u-bg); border: 1px solid var(--u-line); border-radius: 8px;
     padding: 8px 12px;
 }
 .help-panel.open { display: block; }
-.field-error { color: var(--u-danger); font-size: 14px; }
+.field-error { color: var(--u-danger); font-size: 13px; }
+.field-hint { font-size: 11px; color: var(--u-muted); margin-bottom: 4px; }
 
-/* Form inputs */
-.grf-panel-body .form-group input,
-.grf-panel-body .form-group select,
-.grf-panel-body .form-group textarea {
-    width: 100%; padding: 9px 12px;
-    border: 1.5px solid var(--u-line); border-radius: 8px;
+/* Inputs */
+.grf-panel .form-group input,
+.grf-panel .form-group select,
+.grf-panel .form-group textarea {
+    width: 100%; padding: 11px 16px;
+    border: 2px solid var(--u-line); border-radius: 8px;
     font-size: 16px; color: var(--u-text); background: var(--u-card);
     font-family: inherit; box-sizing: border-box;
-    transition: border-color .15s, box-shadow .15s;
+    transition: border-color .2s, box-shadow .2s;
 }
-.grf-panel-body .form-group input:focus,
-.grf-panel-body .form-group select:focus,
-.grf-panel-body .form-group textarea:focus {
+.grf-panel .form-group input:focus,
+.grf-panel .form-group select:focus,
+.grf-panel .form-group textarea:focus {
     outline: none; border-color: var(--u-brand);
-    box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    box-shadow: 0 0 0 4px rgba(37,99,235,.06);
 }
 
-/* Sticky footer */
-.grf-sticky {
-    position: sticky; bottom: 8px; z-index: 20;
-    display: flex; justify-content: space-between; gap: 8px; align-items: center;
-    flex-wrap: wrap;
-    border: 1px solid #bfd2ef; background: rgba(241,247,255,.97);
-    border-radius: 12px; padding: 10px 14px;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 16px rgba(37,99,235,.1);
+/* ── Navigation ── */
+.grf-nav-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 4px; gap: 12px;
 }
-.grf-sticky-note { color: var(--u-muted); font-size: 12px; }
+.grf-nav-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 24px; border-radius: 8px;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    border: none; transition: all .2s; font-family: inherit;
+}
+.grf-nav-btn.back { background: transparent; color: var(--u-muted); border: 1.5px solid var(--u-line); }
+.grf-nav-btn.back:hover { background: var(--u-bg); color: var(--u-text); }
+.grf-nav-btn.next { background: var(--u-brand); color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,.2); }
+.grf-nav-btn.next:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,.25); }
+.grf-nav-btn.finish { background: var(--u-ok); color: #fff; box-shadow: 0 4px 12px rgba(22,163,74,.2); }
+.grf-nav-mid { font-size: 11px; color: var(--u-muted); display: flex; align-items: center; gap: 6px; }
+.grf-nav-mid kbd {
+    background: var(--u-bg); border: 1px solid var(--u-line);
+    border-radius: 4px; padding: 2px 6px; font-size: 10px; font-family: inherit;
+}
+
+/* Panels (JS compat) */
+.grf-panel { display: none; }
+.grf-panel.active { display: block; animation: grfFadeUp .4s ease; }
+@keyframes grfFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hidden nav for JS compat */
+.grf-hidden { display: none; }
+
+/* Autosave toast */
+.grf-toast {
+    position: fixed; bottom: 20px; right: 20px;
+    background: var(--u-text); color: #fff;
+    padding: 10px 18px; border-radius: 10px;
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+    opacity: 0; transform: translateY(8px);
+    transition: all .3s; z-index: 100; pointer-events: none;
+}
+.grf-toast.show { opacity: 1; transform: translateY(0); }
+
+/* ── Responsive ── */
+@media(max-width:900px){
+    .grf-topbar { margin: -16px -16px 16px; padding: 0 16px; }
+    .grf-pills { display: none; }
+    .grf-topbar-div { display: none; }
+    .grf-card { padding: 20px; }
+}
+@media(max-width:600px){
+    .grf-topbar { margin: -12px -12px 12px; padding: 0 12px; flex-wrap: wrap; }
+    .grf-step-title { font-size: 20px; }
+    .grf-card { padding: 16px; border-radius: 12px; }
+    .grf-nav-bar { flex-direction: column; }
+    .grf-nav-btn { width: 100%; justify-content: center; }
+    .grf-nav-mid { display: none; }
+    .grf-topbar-right { width: 100%; padding: 0 0 10px; }
+    .grf-topbar-btn { flex: 1; justify-content: center; font-size: 11px; padding: 6px 10px; }
+}
 
 /* ── Minimalist overrides ── */
-.jm-minimalist .grf-panel-head {
-    background: #e2e5ec !important;
-    color: var(--u-text, #1a1a1a) !important;
-    border-bottom: 1px solid rgba(0,0,0,.10) !important;
-}
-.jm-minimalist .grf-progress-fill { background: var(--u-brand, #111) !important; }
-.jm-minimalist .grf-nav a:hover { background: var(--u-bg) !important; }
+.jm-minimalist .grf-card { box-shadow: none; border: 1px solid var(--u-line); }
+.jm-minimalist .grf-step-why { border-left-color: var(--u-text); }
 </style>
 @endpush
 
@@ -187,80 +236,66 @@
     })->count();
     $completionPct = $requiredTotal > 0 ? (int)round(($requiredFilled / $requiredTotal) * 100) : 0;
     $groupCount = count($registrationFieldGroups ?? []);
+
+    $stepIcons = ['👤', '📍', '🎓', '🗣️', '💰', '👨‍👩‍👧', '📂'];
+    $stepShortNames = ['Kişisel', 'Adres', 'Eğitim', 'Dil', 'Finans', 'Aile', 'Ek Bilgi'];
+    $stepWhys = [
+        'Üniversite başvurularında kimlik bilgilerin gerekli. Bu bilgiler sadece senin dosyanda kalır ve üçüncü kişilerle paylaşılmaz.',
+        'Adres bilgilerin üniversite kabul mektuplarının gönderimi ve vize başvurun için kullanılacak.',
+        'Sana en uygun üniversite ve programı bulmamız için eğitim bilgilerin çok önemli.',
+        'Dil seviyen, hazırlık programı ihtiyacını ve başvurabileceğin üniversiteleri belirler.',
+        'Almanya vizesi için bloke hesap ve finansal yeterlilik gerekiyor. Bu bilgiler sana uygun burs ve finansman seçeneklerini bulmamızı sağlar.',
+        'Bazı üniversiteler ve burs programları veli bilgisi istiyor. Ayrıca acil durumda ulaşabileceğimiz bir kişi olması önemli.',
+        'Bu alan tamamen opsiyonel. Eklemek istediğin bilgi varsa buraya yazabilirsin.',
+    ];
 @endphp
 
-{{-- ── Top Bar ── --}}
-<div class="card" style="margin-bottom:14px;">
-    <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-        <div class="muted" style="font-size:var(--tx-sm);">Adım adım ilerle. Her adımda kaydet, sonunda tek tıkla gönder.</div>
-        <div style="display:flex;gap:8px;">
-            <a class="btn alt" href="{{ route('guest.registration.documents') }}" style="font-size:var(--tx-xs);">Belgelere Geç</a>
-            <a class="btn alt" href="{{ route('guest.dashboard') }}" style="font-size:var(--tx-xs);">Dashboard</a>
-        </div>
-    </div>
-</div>
-
-{{-- ── Metrics Strip ── --}}
-<div class="grf-metrics">
-    <div class="grf-metric">
-        <div class="grf-metric-label">Zorunlu Alan</div>
-        <div class="grf-metric-val">{{ $requiredTotal }}</div>
-    </div>
-    <div class="grf-metric">
-        <div class="grf-metric-label">Dolu Zorunlu</div>
-        <div class="grf-metric-val">{{ $requiredFilled }}</div>
-    </div>
-    <div class="grf-metric">
-        <div class="grf-metric-label">Tamamlama</div>
-        <div class="grf-metric-val">%{{ $completionPct }}</div>
-    </div>
-    <div class="grf-metric">
-        <div class="grf-metric-label">Son Kayıt</div>
-        <div class="grf-metric-val" style="font-size:var(--tx-sm);line-height:1.3;">{{ $guest?->registration_form_draft_saved_at ?: '-' }}</div>
-    </div>
-</div>
-
-{{-- ── Progress ── --}}
-<div class="grf-progress-card">
-    <div class="grf-progress-label">
-        <span>Form İlerlemesi (Zorunlu Alan Bazlı)</span>
-        <span style="color:var(--u-brand);font-size:var(--tx-sm);font-weight:800;">%{{ $completionPct }}</span>
-    </div>
-    <div class="grf-progress-bar">
-        <div class="grf-progress-fill" style="width:{{ $completionPct }}%;"></div>
-    </div>
-</div>
-
-{{-- ── Form Card ── --}}
-<div class="card">
-    <div class="card-body">
-        {{-- Section nav --}}
-        <div class="grf-nav" id="sectionNav">
+{{-- ── Topbar with Step Pills ── --}}
+<div class="grf-topbar">
+    <div class="grf-topbar-left">
+        <div class="grf-topbar-title">Başvuru Formu</div>
+        <div class="grf-topbar-div"></div>
+        <div class="grf-pills" id="grfPillNav">
             @foreach(($registrationFieldGroups ?? []) as $group)
-                <a href="#rg-{{ $loop->index }}" data-step-link="{{ $loop->index }}" data-step-pill="{{ $loop->index }}">
-                    {{ $group['title'] ?? 'Bölüm' }}
-                    <span data-step-missing="{{ $loop->index }}" style="font-size:var(--tx-xs);margin-left:4px;font-weight:700;"></span>
+                <a class="grf-pill {{ $loop->first ? 'active' : '' }}" data-step-link="{{ $loop->index }}" data-step-pill="{{ $loop->index }}" href="#rg-{{ $loop->index }}" style="flex-direction:column;align-items:stretch;">
+                    <span style="display:flex;align-items:center;gap:5px;">
+                        <span class="grf-pill-num">{{ $loop->iteration }}</span>
+                        {{ $stepShortNames[$loop->index] ?? $group['title'] ?? 'Bölüm' }}
+                    </span>
+                    <span data-step-missing="{{ $loop->index }}" style="display:none;"></span>
+                    <div class="grf-pill-bar"><div class="grf-pill-bar-fill" data-step-bar="{{ $loop->index }}" style="width:0%"></div></div>
                 </a>
             @endforeach
         </div>
-        <div class="grf-nav-meta">
-            <div class="grf-nav-counter" id="sectionNavMeta">Adım 1 / {{ $groupCount }}</div>
-            <div class="muted" style="font-size:var(--tx-xs);">Sekme geçişinde ekran sabit kalır; sadece ilgili bölüm görünür.</div>
-        </div>
+    </div>
+    <div class="grf-topbar-right">
+        <a class="grf-topbar-btn" href="{{ route('guest.registration.documents') }}">📄 Belgeler</a>
+        <a class="grf-topbar-btn" href="{{ route('guest.dashboard') }}">🏠 Dashboard</a>
+    </div>
+</div>
 
+{{-- ── Form Body ── --}}
+<div class="grf-body">
+    <div class="grf-center">
         <form id="guestRegistrationForm" method="POST"
               action="{{ route('guest.registration.autosave') }}"
               data-ajax-save-url="{{ route('guest.registration.ajax-save') }}">
             @csrf
             <input type="hidden" name="draft_saved_at" value="{{ optional($guest?->registration_form_draft_saved_at)->toIso8601String() }}">
 
-            <div id="stepPanelsStage" class="grf-step-panels">
+            <div id="stepPanelsStage">
                 @foreach(($registrationFieldGroups ?? []) as $group)
                     <section id="rg-{{ $loop->index }}" class="grf-panel" data-step="{{ $loop->index }}">
-                        <div class="grf-panel-head">
-                            Adım {{ $loop->iteration }} / {{ $groupCount }} — {{ $group['title'] ?? 'Alanlar' }}
+                        <div class="grf-step-ctx">
+                            <div class="grf-step-tag">{{ $stepIcons[$loop->index] ?? '📋' }} Adım {{ $loop->iteration }} / {{ $groupCount }}</div>
+                            <h1 class="grf-step-title">{{ $group['title'] ?? 'Alanlar' }}</h1>
+                            @if(!empty($stepWhys[$loop->index]))
+                                <div class="grf-step-why">{{ $stepWhys[$loop->index] }}</div>
+                            @endif
                         </div>
-                        <div class="grf-panel-body">
+
+                        {{-- Form Card: full width --}}
+                        <div class="grf-card">
                             <div class="grf-form-grid">
                                 @foreach(($group['fields'] ?? []) as $field)
                                     @php
@@ -271,11 +306,18 @@
                                         $placeholder = (string)($field['placeholder'] ?? '');
                                         $max         = (int)($field['max'] ?? 255);
                                         $value       = old($key, $draft[$key] ?? ($guest?->{$key} ?? ''));
+                                        $isFilled    = trim((string)$value) !== '';
+                                        $isWide      = $type === 'textarea' || $type === 'email'
+                                            || !empty($field['help_text']) || !empty($field['full_width'])
+                                            || str_contains($key, 'address') || str_contains($key, 'motivation');
                                     @endphp
                                     @if($key === '') @continue @endif
-                                    <div class="form-group" data-field-key="{{ $key }}">
+                                    <div class="form-group{{ $isFilled ? ' is-filled' : '' }}{{ $isWide ? ' grf-full' : '' }}" data-field-key="{{ $key }}">
                                         <div class="label-row">
                                             <label>{{ $label }} @if($required)<span class="required-star">*</span>@endif</label>
+                                            @if($isFilled && in_array($key, ['first_name','last_name','email','phone']))
+                                                <span class="grf-prefilled">✓ Kayıttan</span>
+                                            @endif
                                         </div>
                                         @if(!empty($field['help_text']))
                                             <button type="button" class="help-toggle-btn"
@@ -296,30 +338,23 @@
                                         @else
                                             @php
                                                 $inputmode = match(true) {
-                                                    $type === 'email'                              => 'email',
-                                                    $type === 'phone'                              => 'tel',
+                                                    $type === 'email' => 'email',
+                                                    $type === 'phone' => 'tel',
                                                     $type === 'money' || str_contains($key, '_gpa') || $key === 'financial_budget_eur' => 'decimal',
-                                                    $key === 'postal_code'                         => 'numeric',
-                                                    default                                        => '',
+                                                    $key === 'postal_code' => 'numeric',
+                                                    default => '',
                                                 };
                                                 $autocomplete = match($key) {
-                                                    'email'        => 'email',
-                                                    'phone'        => 'tel',
-                                                    'first_name'   => 'given-name',
-                                                    'last_name'    => 'family-name',
-                                                    'address_full' => 'street-address',
-                                                    'postal_code'  => 'postal-code',
-                                                    'city'         => 'address-level2',
-                                                    default        => '',
+                                                    'email' => 'email', 'phone' => 'tel',
+                                                    'first_name' => 'given-name', 'last_name' => 'family-name',
+                                                    'address_full' => 'street-address', 'postal_code' => 'postal-code',
+                                                    'city' => 'address-level2', default => '',
                                                 };
                                             @endphp
                                             <input class="{{ $required ? 'final-required' : '' }}"
                                                    type="{{ $type === 'email' ? 'email' : ($type === 'phone' ? 'tel' : 'text') }}"
-                                                   name="{{ $key }}"
-                                                   value="{{ $value }}"
-                                                   maxlength="{{ $max }}"
-                                                   placeholder="{{ $placeholder }}"
-                                                   data-required="{{ $required ? '1' : '0' }}"
+                                                   name="{{ $key }}" value="{{ $value }}" maxlength="{{ $max }}"
+                                                   placeholder="{{ $placeholder }}" data-required="{{ $required ? '1' : '0' }}"
                                                    @if($inputmode) inputmode="{{ $inputmode }}" @endif
                                                    @if($autocomplete) autocomplete="{{ $autocomplete }}" @endif>
                                         @endif
@@ -330,42 +365,120 @@
                                 @endforeach
                             </div>
                         </div>
+
+                        {{-- Step Nav --}}
+                        <div class="grf-nav-bar">
+                            @if(!$loop->first)
+                                <button type="button" class="grf-nav-btn back" data-grf-prev>← Geri</button>
+                            @else
+                                <div></div>
+                            @endif
+                            <div class="grf-nav-mid"><kbd>Enter</kbd> devam · <kbd>Shift+Enter</kbd> geri</div>
+                            @if($loop->last)
+                                <a href="{{ route('guest.registration.form.pdf') }}" target="_blank"
+                                   class="grf-nav-btn back" style="text-decoration:none;">
+                                    📄 Ön İzleme
+                                </a>
+                                <button type="submit" class="grf-nav-btn finish" id="btnFinalSubmit"
+                                        formaction="{{ route('guest.registration.submit') }}">✅ Formu Tamamla</button>
+                            @else
+                                <button type="button" class="grf-nav-btn next" data-grf-next>Devam Et →</button>
+                            @endif
+                        </div>
                     </section>
                 @endforeach
             </div>
 
-            <div style="margin:0 0 12px;padding:12px 14px;border:1px dashed var(--u-line);border-radius:10px;background:var(--u-bg);">
-                <p class="muted" style="margin:0;font-size:var(--tx-sm);">
-                    Belge/sertifika yüklemeleri için <a href="{{ route('guest.registration.documents') }}" style="color:var(--u-brand);font-weight:600;">Ön Kayıt Belgeleri</a> ekranına geçebilirsin.
-                </p>
-            </div>
-
-            {{-- Sticky action bar --}}
-            <div class="grf-sticky">
-                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                    <button id="btnPrevStep" class="btn" type="button">← Geri</button>
-                    <button id="btnNextStep" class="btn ok" type="button">İleri →</button>
-                    <button id="btnFirstMissing" class="btn alt" type="button">İlk Eksik Zorunlu</button>
-                    <span id="stepMeta" class="grf-sticky-note"></span>
-                </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <button id="btnDraftSave" class="btn" type="submit">Taslak Kaydet</button>
-                    <button id="btnFinalSubmit" class="btn ok" type="submit"
-                            formaction="{{ route('guest.registration.submit') }}">Formu Gönder ✓</button>
-                </div>
+            {{-- Hidden elements for JS compat --}}
+            <div class="grf-hidden">
+                <button id="btnPrevStep" type="button"></button>
+                <button id="btnNextStep" type="button"></button>
+                <button id="btnFirstMissing" type="button"></button>
+                <button id="btnDraftSave" type="submit"></button>
+                <span id="stepMeta"></span>
+                <span id="sectionNavMeta"></span>
             </div>
         </form>
     </div>
 </div>
 
+{{-- Autosave toast --}}
+<div class="grf-toast" id="grfToast"><span style="width:8px;height:8px;border-radius:50%;background:var(--u-ok);"></span> Otomatik kaydedildi</div>
+
 <script defer src="{{ Vite::asset('resources/js/guest-registration-form.js') }}"></script>
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 (function(){
+    // Pill sync — observe panel active changes
+    var panels = document.querySelectorAll('.grf-panel[data-step]');
+    var pills = document.querySelectorAll('.grf-pill[data-step-pill]');
+    var observer = new MutationObserver(function(){
+        var activeIdx = -1;
+        panels.forEach(function(p, i){ if(p.classList.contains('active')) activeIdx = i; });
+        if(activeIdx < 0) return;
+        pills.forEach(function(pill, i){
+            pill.classList.remove('active','done');
+            if(i < activeIdx) pill.classList.add('done');
+            else if(i === activeIdx) pill.classList.add('active');
+        });
+        // Scroll active pill into view
+        var ap = document.querySelector('.grf-pill.active');
+        if(ap) ap.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+    });
+    panels.forEach(function(p){ observer.observe(p, {attributes: true, attributeFilter: ['class']}); });
+
+    // In-card nav → trigger existing hidden buttons
+    document.addEventListener('click', function(e){
+        if(e.target.closest('[data-grf-next]')) document.getElementById('btnNextStep')?.click();
+        if(e.target.closest('[data-grf-prev]')) document.getElementById('btnPrevStep')?.click();
+    });
+
+    // Keyboard nav
+    document.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' && !e.shiftKey && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault(); document.getElementById('btnNextStep')?.click();
+        }
+        if(e.key === 'Enter' && e.shiftKey) {
+            e.preventDefault(); document.getElementById('btnPrevStep')?.click();
+        }
+    });
+
+    // Autosave toast + filled state
+    var toast = document.getElementById('grfToast'), tt;
+    document.addEventListener('input', function(e){
+        if(!e.target.closest('#guestRegistrationForm')) return;
+        // Toggle is-filled class
+        var fg = e.target.closest('.form-group');
+        if(fg) fg.classList.toggle('is-filled', e.target.value.trim() !== '');
+        // Toast
+        if(toast){ toast.classList.add('show'); clearTimeout(tt); tt = setTimeout(function(){ toast.classList.remove('show'); }, 1500); }
+    });
+    document.addEventListener('change', function(e){
+        var fg = e.target.closest('.form-group');
+        if(fg) fg.classList.toggle('is-filled', e.target.value.trim() !== '');
+    });
+
+    // Step bar doluluk güncelle
+    function updateStepBars(){
+        document.querySelectorAll('.grf-panel[data-step]').forEach(function(panel, idx){
+            var all = panel.querySelectorAll('.form-group[data-field-key]');
+            var visible = Array.from(all).filter(function(fg){ return fg.style.display !== 'none'; });
+            var total = visible.length;
+            var filled = visible.filter(function(fg){
+                var inp = fg.querySelector('input, select, textarea');
+                return inp && (inp.value || '').toString().trim() !== '';
+            }).length;
+            var pct = total > 0 ? Math.round(filled / total * 100) : 0;
+            var bar = document.querySelector('[data-step-bar="' + idx + '"]');
+            if(bar) bar.style.width = pct + '%';
+        });
+    }
+    updateStepBars();
+    document.addEventListener('input', function(e){ if(e.target.closest('#guestRegistrationForm')) updateStepBars(); });
+    document.addEventListener('change', function(e){ if(e.target.closest('#guestRegistrationForm')) updateStepBars(); });
+
+    // Design toggle compat
     var _orig = window.__designToggle;
-    window.__designToggle = function(d){
-        if(_orig) _orig(d);
-        setTimeout(function(){ document.documentElement.classList.toggle('jm-minimalist', d==='minimalist'); }, 50);
-    };
+    window.__designToggle = function(d){ if(_orig) _orig(d); setTimeout(function(){ document.documentElement.classList.toggle('jm-minimalist', d==='minimalist'); }, 50); };
 })();
 </script>
 @endsection

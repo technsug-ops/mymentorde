@@ -60,6 +60,9 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/guests',                           [ManagerPortalController::class, 'guests'])->name('manager.guests');
     Route::get('/manager/guests/export-csv',                [ManagerPortalController::class, 'guestsExportCsv'])->name('manager.guests.export-csv');
     Route::get('/manager/guests/{guest}',                   [ManagerPortalController::class, 'guestShow'])->name('manager.guests.show');
+    Route::get('/manager/guests/{guest}/documents/{document}/serve', [ManagerPortalController::class, 'guestDocumentServe'])->name('manager.guest.document.serve');
+    Route::get('/manager/guests/{guest}/documents/{document}/download', [ManagerPortalController::class, 'guestDocumentDownload'])->name('manager.guest.document.download');
+    Route::get('/manager/guests/{guest}/documents/zip', [ManagerPortalController::class, 'guestDocumentsZip'])->name('manager.guest.documents.zip');
     Route::patch('/manager/guests/{guest}/status',          [ManagerPortalController::class, 'guestUpdateStatus'])->name('manager.guests.status');
     Route::patch('/manager/guests/{guest}/assign',          [ManagerPortalController::class, 'guestAssignSenior'])->name('manager.guests.assign');
     Route::get('/manager/students',                         [ManagerPortalController::class, 'students'])->name('manager.students');

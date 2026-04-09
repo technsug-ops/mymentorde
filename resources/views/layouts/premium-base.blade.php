@@ -81,8 +81,7 @@
         <header class="topbar">
             <div class="topbar-left">
                 {{-- Mobile hamburger --}}
-                <button class="icon-btn" style="display:none;" id="premium-menu-btn"
-                        onclick="document.getElementById('premium-sidebar').classList.toggle('mobile-open');document.getElementById('premium-overlay').classList.toggle('active');">
+                <button class="icon-btn" style="display:none;" id="premium-menu-btn">
                     ☰
                 </button>
                 <div>
@@ -129,7 +128,7 @@
 </div>
 
 {{-- Mobile overlay --}}
-<div id="premium-overlay" onclick="document.getElementById('premium-sidebar').classList.remove('mobile-open');this.classList.remove('active');"
+<div id="premium-overlay"
      style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;"></div>
 <style>
     #premium-overlay.active { display: block; }
@@ -137,12 +136,12 @@
 </style>
 
 {{-- Dark mode toggle --}}
-<div class="dark-toggle" onclick="toggleTheme()" title="Tema Değiştir" id="theme-toggle">
+<div class="dark-toggle" title="Tema Değiştir" id="theme-toggle">
     <span id="theme-icon">🌙</span>
 </div>
 
 {{-- Toast Container --}}
-<div id="toast-container" style="position:fixed;bottom:20px;right:80px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:360px;"></div>
+<div id="toast-container" style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:min(360px, calc(100vw - 40px));"></div>
 
 {{-- Alpine.js (manifest okuma) --}}
 @php
@@ -154,7 +153,7 @@
 @endif
 
 {{-- Theme + Toast + Sidebar scripts --}}
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 // Dark mode
 function toggleTheme() {
     const html = document.documentElement;
@@ -175,6 +174,17 @@ function toggleTheme() {
             if (icon) icon.textContent = saved === 'dark' ? '☀️' : '🌙';
         });
     }
+})();
+
+// ── Mobile hamburger + overlay (CSP-safe addEventListener) ──
+(function(){
+    var _mb=document.getElementById('premium-menu-btn');
+    var _ov=document.getElementById('premium-overlay');
+    var _sb=document.getElementById('premium-sidebar');
+    if(_mb){_mb.addEventListener('click',function(){_sb.classList.toggle('mobile-open');if(_ov)_ov.classList.toggle('active');});}
+    if(_ov){_ov.addEventListener('click',function(){_sb.classList.remove('mobile-open');_ov.classList.remove('active');});}
+    var _tt=document.getElementById('theme-toggle');
+    if(_tt){_tt.addEventListener('click',toggleTheme);}
 })();
 
 // Toast (Alpine effect)

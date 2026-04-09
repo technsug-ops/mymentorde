@@ -349,23 +349,35 @@
             <div class="gs-acc-body" id="{{ $catId }}" style="display:none;">
                 <div class="gs-svc-list" style="padding:10px 14px;">
                     @foreach($cat['services'] as $svc)
-                        @php $added = in_array($svc['code'], $selectedExtraCodes); @endphp
-                        <div class="gs-svc-row {{ $added ? 'gs-svc-row--added' : '' }}">
+                        @php
+                            $added    = in_array($svc['code'], $selectedExtraCodes);
+                            $included = in_array($svc['code'], $includedExtras ?? []);
+                        @endphp
+                        <div class="gs-svc-row {{ $added ? 'gs-svc-row--added' : '' }}{{ $included ? ' gs-svc-row--included' : '' }}" @if($included) style="opacity:.7;" @endif>
                             <div class="gs-svc-info">
-                                <div class="gs-svc-title">{{ $svc['title'] }}</div>
+                                <div class="gs-svc-title">
+                                    {{ $svc['title'] }}
+                                    @if($included)
+                                        <span class="badge ok" style="font-size:9px;padding:1px 6px;margin-left:4px;">Paketinize Dahil</span>
+                                    @endif
+                                </div>
                                 @if(!empty($svc['description']))
                                     <div class="gs-svc-desc">{{ $svc['description'] }}</div>
                                 @endif
                             </div>
                             <div class="gs-svc-right">
-                                <span class="gs-svc-price">{{ $svc['price'] }}</span>
-                                @if($added)
+                                @if($included)
+                                    <span class="gs-svc-price" style="text-decoration:line-through;color:var(--u-muted);">{{ $svc['price'] }}</span>
+                                    <span style="font-size:11px;font-weight:700;color:var(--u-ok);">Dahil</span>
+                                @elseif($added)
+                                    <span class="gs-svc-price">{{ $svc['price'] }}</span>
                                     <form method="POST" action="{{ route('guest.services.remove-extra', ['extraCode' => $svc['code']]) }}" style="margin:0;">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn warn" style="font-size:11px;padding:4px 10px;white-space:nowrap;">Kaldır</button>
+                                        <button class="btn warn" style="font-size:11px;padding:4px 10px;white-space:nowrap;">Kaldir</button>
                                     </form>
                                 @else
+                                    <span class="gs-svc-price">{{ $svc['price'] }}</span>
                                     <form method="POST" action="{{ route('guest.services.add-extra') }}" style="margin:0;">
                                         @csrf
                                         <input type="hidden" name="extra_code"  value="{{ $svc['code'] }}">
@@ -407,6 +419,43 @@
                     </form>
                 </div>
                 @endforeach
+            </div>
+        </div>
+        @endif
+
+        {{-- Genel Toplam --}}
+        @if(!empty($selectedPackageCode))
+        @php
+            $pkgAmount = (int) (collect(config('service_packages.packages', []))->firstWhere('code', $selectedPackageCode)['price_amount'] ?? 0);
+            $extrasAmount = collect($selectedExtras ?? [])->sum(function($x) {
+                $found = collect(config('service_packages.extra_services', []))->firstWhere('code', $x['code'] ?? '');
+                return (int) ($found['price_amount'] ?? 0);
+            });
+            $grandTotal = $pkgAmount + $extrasAmount;
+        @endphp
+        <div style="background:linear-gradient(135deg,#134e4a,#0d9488);border-radius:12px;padding:18px 22px;margin-top:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                <div>
+                    <div style="font-size:var(--tx-xs);color:rgba(255,255,255,.6);font-weight:600;">GENEL TOPLAM</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;">
+                        {{ $selectedPackageTitle ?? '-' }}
+                        ({{ number_format($pkgAmount, 0, ',', '.') }} EUR)
+                        @if($extrasAmount > 0)
+                            + Ek Hizmetler ({{ number_format($extrasAmount, 0, ',', '.') }} EUR)
+                        @endif
+                    </div>
+                </div>
+                <div style="font-size:26px;font-weight:800;color:#fff;letter-spacing:-0.5px;">
+                    {{ number_format($grandTotal, 0, ',', '.') }} EUR
+                </div>
+            </div>
+            <div style="margin-top:14px;text-align:right;">
+                <form method="POST" action="{{ route('guest.services.confirm') }}" style="display:inline;">
+                    @csrf
+                    <button type="submit" style="padding:12px 32px;border-radius:10px;background:#fff;color:#134e4a;font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:all .15s;">
+                        ✅ Paket Secimini Kesinlestir
+                    </button>
+                </form>
             </div>
         </div>
         @endif
@@ -610,4 +659,29 @@
     };
 })();
 </script>
+
+@if(session('package_confirmed'))
+<div id="pkgConfirmModal" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:var(--u-card,#fff);border-radius:20px;max-width:420px;width:100%;padding:32px 28px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:pkgPop .4s cubic-bezier(.34,1.56,.64,1);">
+        <div style="font-size:56px;margin-bottom:12px;">🎉</div>
+        <div style="font-size:22px;font-weight:800;color:var(--u-text);margin-bottom:8px;">Tebrikler!</div>
+        <div style="font-size:14px;color:var(--u-muted);line-height:1.6;margin-bottom:24px;">
+            Paket seciminiz kesinlesti.<br>
+            Simdi sozlesme surecine gecebilirsin.
+        </div>
+        <a href="{{ route('guest.contract') }}"
+           style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:12px;background:linear-gradient(135deg,#0d9488,#14b8a6);color:#fff;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(13,148,136,.3);">
+            Sozlesmeme Git →
+        </a>
+        <div style="margin-top:14px;">
+            <button type="button" onclick="document.getElementById('pkgConfirmModal').style.display='none'"
+                    style="background:none;border:none;font-size:13px;color:var(--u-muted);cursor:pointer;padding:4px 8px;">
+                Burada kalayim
+            </button>
+        </div>
+    </div>
+</div>
+<style>@keyframes pkgPop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}</style>
+@endif
+
 @endsection

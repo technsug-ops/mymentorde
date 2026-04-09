@@ -20,6 +20,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['company.context', 'auth', 'senior.role'])->group(function (): void {
     Route::get('/senior/dashboard', [SeniorDashboardController::class, 'index'])->name('senior.dashboard');
     Route::get('/senior/guests/{guest}', [SeniorPortalController::class, 'guestDetail'])->name('senior.guest.detail');
+    Route::get('/senior/guests/{guest}/documents/{document}/serve', [SeniorPortalController::class, 'guestDocumentServe'])->name('senior.guest.document.serve');
+    Route::get('/senior/guests/{guest}/documents/{document}/download', [SeniorPortalController::class, 'guestDocumentDownload'])->name('senior.guest.document.download');
+    Route::get('/senior/guests/{guest}/documents/zip', [SeniorPortalController::class, 'guestDocumentsZip'])->name('senior.guest.documents.zip');
     Route::get('/senior/students', [SeniorStudentController::class, 'students'])->name('senior.students');
     Route::get('/senior/students/export-csv', [SeniorStudentController::class, 'studentsExportCsv'])->name('senior.students.export-csv');
     Route::get('/senior/registration-documents', [SeniorPortalController::class, 'registrationDocuments'])->name('senior.registration-documents');

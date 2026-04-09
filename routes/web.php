@@ -19,6 +19,11 @@ Route::middleware(['auth', 'manager.role'])->group(function (): void {
     Route::get('/demo', fn() => view('demo.index'));
     Route::get('/demo/checklist', fn() => view('demo.checklist'));
     Route::get('/demo/guest', fn() => view('demo.guest'));
+
+    Route::post('/system/cache-clear', function () {
+        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+        return back()->with('status', 'Cache temizlendi.');
+    })->middleware('throttle:5,1')->name('system.cache-clear');
 });
 Route::get('/go/{code}', TrackedLinkRedirectController::class)->name('tracked-link.redirect');
 
@@ -70,7 +75,7 @@ Route::post('/language', function(\Illuminate\Http\Request $r) {
         $pref->save();
     }
     return back();
-})->middleware('throttle:20,1')->name('language.switch');
+})->middleware('throttle:60,1')->name('language.switch');
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function (): void {

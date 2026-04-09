@@ -35,6 +35,9 @@ Thumbs.db
 # Debug screenshots
 *.png
 
+# Build artifacts
+/public/build.zip
+
 # Exports
 /exports/
 

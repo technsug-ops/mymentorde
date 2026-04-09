@@ -104,12 +104,21 @@ class SeniorInstitutionController extends Controller
         unset($data['document_file']);
 
         if ($request->hasFile('document_file')) {
-            $file   = $request->file('document_file');
-            $stored = $file->store('institution-docs/' . date('Y-m'), 'public');
+            $file      = $request->file('document_file');
+            $ext       = strtolower((string) ($file->getClientOriginalExtension() ?: 'bin'));
+            $assign    = \App\Models\StudentAssignment::where('student_id', $data['student_id'])->first();
+            $stdName   = app(\App\Services\DocumentNamingService::class)->buildStandardFileName(
+                $data['student_id'],
+                $data['document_type_code'],
+                (string) ($assign->first_name ?? ''),
+                (string) ($assign->last_name ?? ''),
+                $ext,
+            );
+            $stored = $file->storeAs('institution-docs/' . date('Y-m'), $stdName, 'public');
             $doc    = Document::create([
                 'student_id'         => $data['student_id'],
                 'original_file_name' => $file->getClientOriginalName(),
-                'standard_file_name' => $file->getClientOriginalName(),
+                'standard_file_name' => $stdName,
                 'storage_path'       => $stored,
                 'mime_type'          => $file->getMimeType(),
                 'status'             => 'approved',

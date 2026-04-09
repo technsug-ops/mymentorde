@@ -172,8 +172,7 @@
     <div class="main">
         <header class="topbar">
             <div class="topbar-left">
-                <button class="icon-btn" id="premium-menu-btn" style="display:none;"
-                        onclick="document.getElementById('premium-sidebar').classList.toggle('mobile-open');document.getElementById('premium-overlay').classList.toggle('active');">☰</button>
+                <button class="icon-btn" id="premium-menu-btn" style="display:none;">☰</button>
                 <div>
                     <div class="topbar-title">@yield('page_title', 'Staff Panel')</div>
                     @hasSection('page_subtitle')
@@ -183,8 +182,8 @@
             </div>
             <div class="topbar-right">
                 @yield('topbar-actions')
-                <button class="icon-btn" onclick="__dmToggle()" id="dm-btn" title="Tema">🌙</button>
-                <button class="icon-btn" onclick="__designToggle()" id="design-btn" title="Tasarım Teması">🎨</button>
+                <button class="icon-btn" id="dm-btn" title="Tema">🌙</button>
+                <button class="icon-btn" id="design-btn" title="Tasarım Teması">🎨</button>
                 <div class="avatar" style="width:36px;height:36px;font-size:13px;">{{ $staffInitials }}</div>
             </div>
         </header>
@@ -215,15 +214,14 @@
 </div>
 
 <div id="premium-overlay"
-     onclick="document.getElementById('premium-sidebar').classList.remove('mobile-open');this.classList.remove('active');"
      style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;"></div>
 <style>
     #premium-overlay.active{display:block;}
     @media(max-width:900px){#premium-menu-btn{display:flex!important;}}
 </style>
 
-<div class="dark-toggle" onclick="__dmToggle()" title="Tema Değiştir"><span id="theme-icon">🌙</span></div>
-<div id="toast-container" style="position:fixed;bottom:20px;right:80px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:360px;"></div>
+<div class="dark-toggle" title="Tema Değiştir" id="theme-toggle"><span id="theme-icon">🌙</span></div>
+<div id="toast-container" style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:min(360px, calc(100vw - 40px));"></div>
 
 
 <script nonce="{{ $cspNonce ?? '' }}">
@@ -268,6 +266,17 @@ function __dmToggle(){
             ['dm-btn','theme-icon'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent='☀️';});
         });
     }
+})();
+// ── Mobile hamburger + overlay + theme buttons (CSP-safe addEventListener) ──
+(function(){
+    var _mb=document.getElementById('premium-menu-btn');
+    var _ov=document.getElementById('premium-overlay');
+    var _sb=document.getElementById('premium-sidebar');
+    if(_mb){_mb.addEventListener('click',function(){_sb.classList.toggle('mobile-open');if(_ov)_ov.classList.toggle('active');});}
+    if(_ov){_ov.addEventListener('click',function(){_sb.classList.remove('mobile-open');_ov.classList.remove('active');});}
+    document.getElementById('dm-btn')?.addEventListener('click', __dmToggle);
+    document.getElementById('theme-toggle')?.addEventListener('click', __dmToggle);
+    document.getElementById('design-btn')?.addEventListener('click', __designToggle);
 })();
 document.addEventListener('alpine:init',function(){
     Alpine.effect(function(){

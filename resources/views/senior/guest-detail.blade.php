@@ -122,4 +122,130 @@
 
 </div>
 
+{{-- ── Belgeler ── --}}
+@php
+    $docOwnerId = trim((string) ($guest->converted_student_id ?? ''));
+    if ($docOwnerId === '') {
+        $docOwnerId = 'GST-' . str_pad((string) $guest->id, 8, '0', STR_PAD_LEFT);
+    }
+    $documents = \App\Models\Document::where('student_id', $docOwnerId)->with('category')->latest()->limit(50)->get();
+@endphp
+<div style="margin-top:16px;">
+    <div style="background:var(--u-card);border:1px solid var(--u-line);border-radius:10px;overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--u-line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <div style="font-weight:700;font-size:var(--tx-base);">Yüklenen Belgeler</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:var(--tx-xs);color:var(--u-muted);">{{ $documents->count() }} belge</span>
+                @if($documents->isNotEmpty())
+                    <a href="{{ route('senior.guest.documents.zip', $guest->id) }}"
+                       style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;font-size:var(--tx-xs);font-weight:600;color:#fff;background:#7c3aed;border-radius:6px;text-decoration:none;">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        ZIP
+                    </a>
+                @endif
+            </div>
+        </div>
+        @forelse($documents as $doc)
+            @php
+                $mime = strtolower((string) ($doc->mime_type ?? ''));
+                $canPreview = str_starts_with($mime, 'image/') || $mime === 'application/pdf';
+            @endphp
+            <div style="padding:10px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--u-line);font-size:var(--tx-sm);">
+                <span style="font-size:16px;">
+                    @if($doc->status === 'approved') ✅
+                    @elseif(in_array($doc->status, ['review','uploaded'])) ⏳
+                    @else ❌
+                    @endif
+                </span>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $doc->title ?? $doc->original_file_name ?? $doc->document_code ?? 'Belge' }}</div>
+                    <div style="font-size:var(--tx-xs);color:var(--u-muted);">{{ $doc->category->name ?? $doc->category->code ?? '' }} · {{ $doc->updated_at?->format('d.m.Y H:i') }}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                    <span class="badge {{ match($doc->status) { 'approved' => 'ok', 'review', 'uploaded' => 'warn', default => 'danger' } }}">
+                        {{ match($doc->status) { 'approved' => 'Onaylandı', 'review' => 'İncelemede', 'uploaded' => 'Yüklendi', default => 'Bekliyor' } }}
+                    </span>
+                    @if($canPreview)
+                        <button type="button" class="doc-preview-btn"
+                                data-url="{{ route('senior.guest.document.serve', [$guest->id, $doc->id]) }}"
+                                data-mime="{{ $mime }}"
+                                data-name="{{ $doc->title ?? $doc->original_file_name ?? 'Belge' }}"
+                                style="padding:3px 8px;font-size:var(--tx-xs);background:var(--u-bg);border:1px solid var(--u-line);border-radius:5px;cursor:pointer;color:var(--u-text);"
+                                title="Önizle">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    @endif
+                    <a href="{{ route('senior.guest.document.download', [$guest->id, $doc->id]) }}"
+                       style="padding:3px 8px;font-size:var(--tx-xs);background:var(--u-bg);border:1px solid var(--u-line);border-radius:5px;text-decoration:none;color:var(--u-text);"
+                       title="İndir">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    </a>
+                </div>
+            </div>
+        @empty
+            <div style="padding:20px 18px;text-align:center;color:var(--u-muted);font-size:var(--tx-sm);">
+                Henüz belge yüklenmemiş.
+            </div>
+        @endforelse
+    </div>
+</div>
+
+{{-- ── Belge Önizleme Modal ── --}}
+<div id="doc-preview-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);align-items:center;justify-content:center;">
+    <div style="position:relative;background:var(--u-card,#fff);border-radius:12px;width:90vw;max-width:900px;height:85vh;display:flex;flex-direction:column;overflow:hidden;">
+        <div style="padding:12px 18px;border-bottom:1px solid var(--u-line,#e5e7eb);display:flex;justify-content:space-between;align-items:center;">
+            <span id="doc-preview-title" style="font-weight:700;font-size:var(--tx-sm);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+            <button id="doc-preview-close" type="button" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--u-text,#333);line-height:1;padding:0 4px;">✕</button>
+        </div>
+        <div id="doc-preview-body" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:12px;background:var(--u-bg,#f9fafb);"></div>
+    </div>
+</div>
+
 @endsection
+
+@push('scripts')
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    var modal = document.getElementById('doc-preview-modal');
+    var body  = document.getElementById('doc-preview-body');
+    var title = document.getElementById('doc-preview-title');
+
+    document.querySelectorAll('.doc-preview-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var url  = this.getAttribute('data-url');
+            var mime = this.getAttribute('data-mime');
+            var name = this.getAttribute('data-name');
+            title.textContent = name;
+            body.innerHTML = '';
+
+            if (mime === 'application/pdf') {
+                body.innerHTML = '<iframe src="' + url + '" style="width:100%;height:100%;border:none;"></iframe>';
+            } else {
+                body.innerHTML = '<img src="' + url + '" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:6px;" alt="' + name + '">';
+            }
+
+            modal.style.display = 'flex';
+        });
+    });
+
+    document.getElementById('doc-preview-close').addEventListener('click', function(){
+        modal.style.display = 'none';
+        body.innerHTML = '';
+    });
+
+    modal.addEventListener('click', function(e){
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            body.innerHTML = '';
+        }
+    });
+
+    document.addEventListener('keydown', function(e){
+        if (e.key === 'Escape' && modal.style.display === 'flex') {
+            modal.style.display = 'none';
+            body.innerHTML = '';
+        }
+    });
+})();
+</script>
+@endpush

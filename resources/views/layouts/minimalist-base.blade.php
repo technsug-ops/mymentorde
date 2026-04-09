@@ -57,8 +57,7 @@
     <div class="main">
         <header class="topbar">
             <div class="topbar-left">
-                <button class="icon-btn" id="min-menu-btn" style="display:none;"
-                        onclick="document.getElementById('min-sidebar').classList.toggle('mobile-open');document.getElementById('min-overlay').classList.toggle('active');">
+                <button class="icon-btn" id="min-menu-btn" style="display:none;">
                     ☰
                 </button>
                 <div>
@@ -98,7 +97,7 @@
 </div>
 
 {{-- Mobile overlay --}}
-<div id="min-overlay" onclick="document.getElementById('min-sidebar').classList.remove('mobile-open');this.classList.remove('active');"
+<div id="min-overlay"
      style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:99;"></div>
 <style>
     #min-overlay.active { display: block; }
@@ -106,7 +105,7 @@
 </style>
 
 {{-- Dark mode toggle --}}
-<div class="dark-toggle" onclick="toggleMinTheme()" id="min-theme-toggle">🌙</div>
+<div class="dark-toggle" id="min-theme-toggle">🌙</div>
 
 {{-- Toast Container --}}
 <div id="toast-container" style="position:fixed;bottom:16px;right:56px;z-index:9999;display:flex;flex-direction:column;gap:6px;max-width:320px;"></div>
@@ -120,7 +119,7 @@
     <script type="module" src="/build/{{ $__appJs }}"></script>
 @endif
 
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 // Dark mode
 function toggleMinTheme() {
     const html = document.documentElement;
@@ -138,6 +137,17 @@ function toggleMinTheme() {
             if (el) el.textContent = saved === 'dark' ? '☀️' : '🌙';
         });
     }
+})();
+
+// ── Mobile hamburger + overlay + theme toggle (CSP-safe addEventListener) ──
+(function(){
+    var _mb=document.getElementById('min-menu-btn');
+    var _ov=document.getElementById('min-overlay');
+    var _sb=document.getElementById('min-sidebar');
+    if(_mb){_mb.addEventListener('click',function(){_sb.classList.toggle('mobile-open');if(_ov)_ov.classList.toggle('active');});}
+    if(_ov){_ov.addEventListener('click',function(){_sb.classList.remove('mobile-open');_ov.classList.remove('active');});}
+    var _tt=document.getElementById('min-theme-toggle');
+    if(_tt){_tt.addEventListener('click',toggleMinTheme);}
 })();
 
 // Sidebar toggle

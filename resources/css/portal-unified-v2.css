@@ -855,7 +855,7 @@ a.btn-secondary {
 .gchat-input{flex:1;border:1px solid var(--border,#e5e7eb);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;resize:none;background:var(--surface,#fff);color:var(--text,#111);}
 .gchat-send{background:var(--c-accent,#2563eb);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;}
 .gchat-empty{font-size:12px;color:var(--muted);text-align:center;padding:16px 0;}
-@media(max-width:480px){.gchat-panel{width:calc(100vw - 48px);right:24px;}}
+@media(max-width:640px){.gchat-fab{bottom:24px;right:16px;width:48px;height:48px;font-size:20px;}.gchat-panel{width:calc(100vw - 32px);right:16px;bottom:80px;max-height:60vh;}}
 
 /* Small */
 .btn-sm,

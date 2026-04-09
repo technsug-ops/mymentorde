@@ -574,17 +574,118 @@ Yeni hesap açıldığında sistem otomatik doğrulama yapır (tüm hesaplar adm
 
 #### Belge Kategorileri
 
-Manager tarafından oluşturulur. Her kategori:
+Manager tarafından `/config#belgeler` sayfasından oluşturulur. Her kategori:
 - Ad ve açıklama
 - Zorunlu / isteğe bağlı işareti
 - Hedef kitle (guest / student)
 
+##### Sistem Belge Kategorileri
+
+| Kod | Grup | Belge Adı |
+|-----|------|-----------|
+| `DOC-PASS` | Kişisel | Pasaport İlk 2 Sayfa |
+| `DOC-IDCR` | Kişisel | Kimlik Ön-Arka |
+| `DOC-DIPL` | Uni Assist | Diploma + Tercüme |
+| `DOC-TRNS` | Uni Assist | Transkript + Tercüme |
+| `DOC-UNWN` | Uni Assist | Üniversite Kazandı Belgesi |
+| `DOC-YKSP` | Uni Assist | YKS Yerleştirme Belgesi |
+| `DOC-APOS` | Uni Assist | Apostilli Belge (Apostille) |
+| `DOC-BGLT` | Uni Assist | Yeminli Tercüme |
+| `DOC-VPRF` | Uni Assist | Ön İnceleme Belgesi (VPD) |
+| `DOC-CV__` | Diğer | CV |
+| `DOC-MOTV` | Diğer | Motivasyon Mektubu |
+| `DOC-MAPP` | Diğer | Portfolyo (Mappe) |
+| `DOC-TSAS` | Diğer | TestAS / GMAT / GRE Sonuçları |
+| `DOC-ARBZ` | Diğer | İş Deneyimi Belgesi |
+| `DOC-HEIR` | Diğer | Evlenme Cüzdanı |
+| `DOC-EXMA` | Diğer | Üniversite Kayıt Silme Belgesi |
+| `DOC-AT11` | Almanya Bürokrasi | AT/11 Sağlık Sigortası Belgesi |
+| `DOC-SEMB` | Almanya Bürokrasi | Dönem Harcı Dekontu |
+| `DOC-IMMA` | Almanya Bürokrasi | Öğrenci Belgesi (Immatrikulation) |
+| `DOC-SPRK` | Dil Okulu | Dil Kursu Kayıt Belgesi |
+| `DOC-WGBE` | İkamet Kaydı | Ev Sahibi Onay Belgesi |
+| `DOC-NFUS` | Vize | Tam Tekmil Nüfus Kayıt Örneği |
+| `DOC-VERP` | Vize | Garantör Belgesi |
+| `DOC-RKRV` | Vize | Seyahat Sağlık Sigortası |
+| `DOC-FLUG` | Vize | Uçuş Rezervasyonu |
+| `passport` | Diğer (eski) | Pasaport |
+| `diploma` | Diğer (eski) | Diploma |
+| `transcript` | Diğer (eski) | Transkript |
+| `cv` | Diğer (eski) | Özgeçmiş |
+| `motivation_letter` | Diğer (eski) | Motivasyon Mektubu |
+| `language_certificate` | Dil Okulu (eski) | Dil Sertifikası |
+
+#### Dosya İsimlendirme Standardı
+
+Sisteme yüklenen **her belge, her portalda** otomatik olarak aynı standart formatta isimlendirilir. Orijinal dosya adı veritabanında saklanır ancak dosya adında görünmez.
+
+**Format:** `{KATEGORİ}_{SAHİP_ID}_{TARİH}_{AD_İLK_HARF}_{SOYAD}.{uzantı}`
+
+**Örnek:** `DOC-PASS_GST-00000051_20260406_M_Yilmaz.png`
+
+| Sıra | Parça | Örnek | Açıklama |
+|------|-------|-------|----------|
+| 1 | Kategori Kodu | `DOC-PASS` | `document_categories.code` tablosundan |
+| 2 | Sahip ID | `GST-00000051` | Guest ID. Öğrenciye dönüşmüşse gerçek Student ID (örn. `STD-2026-0001`) |
+| 3 | Tarih | `20260406` | Yükleme tarihi (YYYYMMDD). Saat:dakika:saniye veritabanında tutulur |
+| 4 | Ad İlk Harf | `M` | Kişinin sistemdeki adının ilk harfi (büyük) |
+| 5 | Soyad | `Yilmaz` | Kişinin sistemdeki soyadı (TR/DE karakterler ASCII'ye dönüştürülür: ç→c, ö→o, ü→u, ş→s, ğ→g, ı→i, ä→a, ß→ss) |
+| 6 | Uzantı | `.png` | Dosyanın gerçek formatı |
+
+##### Bu Kural Geçerli Olan Yükleme Noktaları
+
+| Yükleme Noktası | Portal | Açıklama | Örnek Dosya Adı |
+|-----------------|--------|----------|-----------------|
+| Guest belge yükleme | Guest | Başvuru sırasında pasaport, diploma vb. | `DOC-PASS_GST-00000051_20260406_M_Yilmaz.png` |
+| Student belge yükleme | Student | Kayıt sonrası ek belge yükleme | `DOC-TRNS_STD-2026-0001_20260407_A_Demir.pdf` |
+| Kurum belgesi yükleme | Senior | VPD, üniversite kabul, vize belgesi vb. | `VIS-ERTEIL_STD-2026-0001_20260408_A_Demir.pdf` |
+| Document Builder | Senior | CV, motivasyon mektubu, referans mektubu oluşturma | `DOC-CV___STD-2026-0001_20260408_A_Demir.docx` |
+| API belge yükleme | Sistem | Harici entegrasyonlar ile belge oluşturma | `DOC-DIPL_STD-2026-0001_20260408_A_Demir.pdf` |
+
+##### Önemli Kurallar
+
+- **Orijinal dosya adı:** Veritabanında `original_file_name` alanında saklanır, istendiğinde görüntülenebilir
+- **Saat bilgisi:** Veritabanında `created_at` alanında saat:dakika:saniye tutulur, dosya adında gösterilmez
+- **Sahip ID dönüşümü:** Guest öğrenciye dönüştüğünde `GST-00000051` yerine gerçek `STD-2026-0001` kullanılır
+- **Karakter dönüşümü:** Türkçe ve Almanca özel karakterler ASCII'ye çevrilir (ç→c, ö→o, ü→u, ş→s, ğ→g, ı→i, ä→a, ß→ss)
+- **Tekil isim garantisi:** Aynı anda aynı belge yüklenirse tarih+saat farkı ile çakışma önlenir
+
+**Toplu İndirme (ZIP):** Senior ve Manager portallarında guest detay sayfasından tüm belgeler tek ZIP olarak indirilebilir. ZIP dosya adı: `{SAHİP_ID}_belgeler_{TARİH_SAAT}.zip`
+
 #### Belge Yükleme (Guest/Student)
 
-- Desteklenen formatlar: PDF, JPG, JPEG, PNG
+- Desteklenen formatlar: PDF, JPG, JPEG, PNG, DOCX, WEBP
 - Maksimum dosya boyutu: 10 MB
 - Her belge kategori bazında yüklenir
 - Aynı kategoriye yeni dosya yükleme eskisinin üzerine yazar
+- Orijinal dosya adı veritabanında saklanır
+
+#### Kurum Belgesi Yükleme (Senior)
+
+Senior danışmanlar, atanmış öğrencileri için kurum belgelerini `/senior/process-tracking` sayfasından yükleyebilir:
+- Üniversite kabul belgeleri
+- VPD (Ön İnceleme Belgesi)
+- Vize onay belgesi (`VIS-ERTEIL`)
+- Yurt kabul belgesi
+- Her belge standart isimlendirme formatında kaydedilir
+- `VIS-ERTEIL` kodu yüklendiğinde otomatik otomasyon tetiklenir
+
+#### Document Builder (Senior)
+
+Senior danışmanlar, öğrencileri için otomatik belge oluşturabilir (`/senior/document-builder`):
+- **CV (Lebenslauf):** `DOC-CV__` kategorisi ile kaydedilir
+- **Motivasyon Mektubu:** `DOC-MOTV` kategorisi ile kaydedilir
+- **Referans Mektubu:** `DOC-REF` kategorisi ile kaydedilir
+- Çıktı formatları: DOCX (Word) veya Markdown
+- Dil seçenekleri: Türkçe, Almanca, İngilizce
+- AI destekli içerik iyileştirme modu mevcuttur
+
+#### Belge Önizleme ve İndirme (Senior/Manager)
+
+Guest detay sayfasında (`/senior/guests/{id}`, `/manager/guests/{id}`):
+- **Önizleme:** PDF dosyalar iframe içinde, resimler lightbox ile görüntülenir
+- **Tekli İndirme:** Her belge standart dosya adı formatında indirilir
+- **Toplu ZIP:** Tüm belgeler tek tıkla ZIP olarak indirilir
 
 #### Belge İnceleme (Senior/Manager)
 
@@ -592,16 +693,17 @@ Manager tarafından oluşturulur. Her kategori:
 |-------|----------|
 | Bekleniyor | Henüz yüklenmedi |
 | İncelemede | Yüklendi, onay bekleniyor |
-| Onaylandı | ✅ Belge kabul edildi |
-| Reddedildi | ❌ Gerekçe ile birlikte iade edildi |
+| Onaylandı | Belge kabul edildi |
+| Reddedildi | Gerekçe ile birlikte iade edildi |
 
 Red edilince otomatik bildirim gider, gerekçe öğrenciye görünür.
 
 #### Güvenlik
 
 - Dosya tipi sunucu tarafında magic byte kontrolü ile doğrulanır
-- Dosya adı hash'lenerek depolanır (orijinal ad görünmez)
-- Sadece yetkili kullanıcılar belgeye erişebilir
+- Dosya standart formatta yeniden isimlendirilir (orijinal ad gizli kalır)
+- Sadece yetkili kullanıcılar belgeye erişebilir (company_id + sahiplik kontrolü)
+- Belge erişimi rate-limited ve CSP uyumludur
 
 ---
 

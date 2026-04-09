@@ -9,7 +9,6 @@ use App\Models\DocumentCategory;
 use App\Rules\ValidFileMagicBytes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class StudentDocumentController extends Controller
 {
@@ -29,8 +28,13 @@ class StudentDocumentController extends Controller
         $file     = $request->file('file');
         $ownerId  = $this->resolveDocumentOwnerId($guest);
         $ext      = strtolower((string) ($file->getClientOriginalExtension() ?: 'bin'));
-        $safeBase = Str::slug(pathinfo((string) $file->getClientOriginalName(), PATHINFO_FILENAME));
-        $stdName  = $ownerId . '_' . $category->code . '_' . now()->format('Ymd_His') . '_' . ($safeBase ?: 'doc') . '.' . $ext;
+        $stdName  = app(\App\Services\DocumentNamingService::class)->buildStandardFileName(
+            $ownerId,
+            $category->code,
+            (string) ($guest->first_name ?? ''),
+            (string) ($guest->last_name ?? ''),
+            $ext,
+        );
         $stored   = $file->storeAs("student-documents/{$guest->id}", $stdName, 'local');
 
         $row = Document::query()->create([
@@ -51,6 +55,10 @@ class StudentDocumentController extends Controller
             'docs_ready'     => $docsReady,
             'status_message' => $docsReady ? 'Belgeler tamamlandi.' : 'Belge yuklendi. Eksikler var.',
         ])->save();
+
+        if ($docsReady) {
+            return redirect()->route('student.registration.documents')->with('docs_complete', true);
+        }
 
         return redirect()->route('student.registration.documents')->with('status', 'Belge yuklendi.');
     }

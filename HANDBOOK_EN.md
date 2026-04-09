@@ -574,17 +574,118 @@ When new accounts are created, the system auto-verifies (all accounts are create
 
 #### Document Categories
 
-Created by manager. Each category has:
+Created by manager at `/config#belgeler`. Each category has:
 - Name and description
 - Required / optional flag
 - Target audience (guest / student)
 
+##### System Document Categories
+
+| Code | Group | Document Name |
+|------|-------|---------------|
+| `DOC-PASS` | Personal | Passport First 2 Pages |
+| `DOC-IDCR` | Personal | ID Card Front-Back |
+| `DOC-DIPL` | Uni Assist | Diploma + Translation |
+| `DOC-TRNS` | Uni Assist | Transcript + Translation |
+| `DOC-UNWN` | Uni Assist | University Acceptance Letter |
+| `DOC-YKSP` | Uni Assist | YKS Placement Document |
+| `DOC-APOS` | Uni Assist | Apostilled Document |
+| `DOC-BGLT` | Uni Assist | Sworn Translation |
+| `DOC-VPRF` | Uni Assist | Preliminary Review Document (VPD) |
+| `DOC-CV__` | Other | CV |
+| `DOC-MOTV` | Other | Motivation Letter |
+| `DOC-MAPP` | Other | Portfolio (Mappe) |
+| `DOC-TSAS` | Other | TestAS / GMAT / GRE Results |
+| `DOC-ARBZ` | Other | Work Experience Certificate |
+| `DOC-HEIR` | Other | Marriage Certificate |
+| `DOC-EXMA` | Other | University Deregistration |
+| `DOC-AT11` | German Bureaucracy | AT/11 Health Insurance |
+| `DOC-SEMB` | German Bureaucracy | Semester Fee Receipt |
+| `DOC-IMMA` | German Bureaucracy | Student Certificate (Immatrikulation) |
+| `DOC-SPRK` | Language School | Language Course Registration |
+| `DOC-WGBE` | Residence | Landlord Confirmation |
+| `DOC-NFUS` | Visa | Full Family Register |
+| `DOC-VERP` | Visa | Guarantor Document |
+| `DOC-RKRV` | Visa | Travel Health Insurance |
+| `DOC-FLUG` | Visa | Flight Reservation |
+| `passport` | Other (legacy) | Passport |
+| `diploma` | Other (legacy) | Diploma |
+| `transcript` | Other (legacy) | Transcript |
+| `cv` | Other (legacy) | CV |
+| `motivation_letter` | Other (legacy) | Motivation Letter |
+| `language_certificate` | Language (legacy) | Language Certificate |
+
+#### File Naming Standard
+
+**Every document uploaded across all portals** is automatically renamed to the same standard format. The original file name is stored in the database but not shown in the file name.
+
+**Format:** `{CATEGORY}_{OWNER_ID}_{DATE}_{FIRST_INITIAL}_{LASTNAME}.{ext}`
+
+**Example:** `DOC-PASS_GST-00000051_20260406_M_Yilmaz.png`
+
+| # | Part | Example | Description |
+|---|------|---------|-------------|
+| 1 | Category Code | `DOC-PASS` | From `document_categories.code` table |
+| 2 | Owner ID | `GST-00000051` | Guest ID. If converted to student, real Student ID is used (e.g. `STD-2026-0001`) |
+| 3 | Date | `20260406` | Upload date (YYYYMMDD). Hour:minute:second stored in database only |
+| 4 | First Initial | `M` | First letter of person's first name (uppercase) |
+| 5 | Last Name | `Yilmaz` | Person's last name (TR/DE chars converted to ASCII: c→c, o→o, u→u, s→s, g→g, i→i, a→a, ss→ss) |
+| 6 | Extension | `.png` | Actual file format |
+
+##### Upload Points Where This Standard Applies
+
+| Upload Point | Portal | Description | Example File Name |
+|-------------|--------|-------------|-------------------|
+| Guest document upload | Guest | Passport, diploma etc. during application | `DOC-PASS_GST-00000051_20260406_M_Yilmaz.png` |
+| Student document upload | Student | Additional documents after enrollment | `DOC-TRNS_STD-2026-0001_20260407_A_Demir.pdf` |
+| Institution document upload | Senior | VPD, university acceptance, visa docs etc. | `VIS-ERTEIL_STD-2026-0001_20260408_A_Demir.pdf` |
+| Document Builder | Senior | CV, motivation letter, reference letter generation | `DOC-CV___STD-2026-0001_20260408_A_Demir.docx` |
+| API document upload | System | External integrations | `DOC-DIPL_STD-2026-0001_20260408_A_Demir.pdf` |
+
+##### Important Rules
+
+- **Original file name:** Stored in `original_file_name` database field, viewable on demand
+- **Time info:** Hour:minute:second stored in `created_at` database field, not shown in file name
+- **Owner ID conversion:** When a guest converts to student, `GST-00000051` is replaced by the real `STD-2026-0001`
+- **Character conversion:** Turkish and German special characters converted to ASCII (ç→c, ö→o, ü→u, ş→s, ğ→g, ı→i, ä→a, ß→ss)
+- **Uniqueness guarantee:** If the same document is uploaded simultaneously, date+time difference prevents collision
+
+**Bulk Download (ZIP):** All documents can be downloaded as a single ZIP from guest detail pages in Senior and Manager portals. ZIP file name: `{OWNER_ID}_belgeler_{DATE_TIME}.zip`
+
 #### Document Upload (Guest/Student)
 
-- Supported formats: PDF, JPG, JPEG, PNG
+- Supported formats: PDF, JPG, JPEG, PNG, DOCX, WEBP
 - Maximum file size: 10 MB
 - Uploaded per document category
 - New file uploaded to same category overwrites the previous one
+- Original file name is stored in the database
+
+#### Institution Document Upload (Senior)
+
+Senior advisors can upload institution documents for their assigned students from `/senior/process-tracking`:
+- University acceptance letters
+- VPD (Preliminary Review Document)
+- Visa approval document (`VIS-ERTEIL`)
+- Dormitory acceptance document
+- All documents saved in standard naming format
+- Uploading `VIS-ERTEIL` code triggers automatic automation
+
+#### Document Builder (Senior)
+
+Senior advisors can generate documents for their students (`/senior/document-builder`):
+- **CV (Lebenslauf):** Saved under `DOC-CV__` category
+- **Motivation Letter:** Saved under `DOC-MOTV` category
+- **Reference Letter:** Saved under `DOC-REF` category
+- Output formats: DOCX (Word) or Markdown
+- Language options: Turkish, German, English
+- AI-assisted content improvement mode available
+
+#### Document Preview & Download (Senior/Manager)
+
+On guest detail pages (`/senior/guests/{id}`, `/manager/guests/{id}`):
+- **Preview:** PDF files shown in iframe, images shown in lightbox
+- **Single Download:** Each document downloaded with standard file name format
+- **Bulk ZIP:** All documents downloadable as ZIP with one click
 
 #### Document Review (Senior/Manager)
 
@@ -592,16 +693,17 @@ Created by manager. Each category has:
 |--------|-------------|
 | Pending | Not yet uploaded |
 | Under Review | Uploaded, awaiting approval |
-| Approved | ✅ Document accepted |
-| Rejected | ❌ Returned with reason |
+| Approved | Document accepted |
+| Rejected | Returned with reason |
 
 Automatic notification sent when rejected; reason visible to student.
 
 #### Security
 
 - File type verified server-side with magic byte check
-- File name hashed for storage (original name not visible)
-- Only authorized users can access documents
+- File renamed to standard format (original name kept hidden)
+- Only authorized users can access documents (company_id + ownership check)
+- Document access is rate-limited and CSP-compliant
 
 ---
 

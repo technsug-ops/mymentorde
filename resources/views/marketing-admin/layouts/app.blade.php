@@ -469,9 +469,8 @@
         <header class="topbar">
             <div class="topbar-left">
                 <button class="icon-btn" id="premium-menu-btn"
-                        onclick="document.getElementById('premium-sidebar').classList.toggle('mobile-open');document.getElementById('premium-overlay').classList.toggle('active');"
                         style="display:none;">☰</button>
-                <button class="icon-btn" onclick="history.back()" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
+                <button class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
                 <div>
                     <div class="topbar-title">{{ $pageTitle ?? ($topMode === 'sales' ? 'Sales Panel' : 'Marketing Admin') }}</div>
                     @hasSection('page_subtitle')
@@ -525,7 +524,6 @@
 
 {{-- Mobile overlay --}}
 <div id="premium-overlay"
-     onclick="document.getElementById('premium-sidebar').classList.remove('mobile-open');this.classList.remove('active');"
      style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;"></div>
 <style>
     #premium-overlay.active { display:block; }
@@ -540,7 +538,7 @@
 </div>
 
 {{-- Toast container --}}
-<div id="toast-container" style="position:fixed;bottom:20px;right:80px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:360px;"></div>
+<div id="toast-container" style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:min(360px, calc(100vw - 40px));"></div>
 
 {{-- Alpine.js --}}
 @php
@@ -598,6 +596,16 @@ function __dmToggle(){
     }
 })();
 
+// ── Mobile hamburger + back btn (CSP-safe) ──
+(function(){
+    var _bb=document.getElementById('premium-back-btn');
+    if(_bb){_bb.addEventListener('click',function(){history.back();});}
+    var _mb=document.getElementById('premium-menu-btn');
+    var _ov=document.getElementById('premium-overlay');
+    var _sb=document.getElementById('premium-sidebar');
+    if(_mb)_mb.addEventListener('click',function(){_sb.classList.toggle('mobile-open');if(_ov)_ov.classList.toggle('active');});
+    if(_ov)_ov.addEventListener('click',function(){_sb.classList.remove('mobile-open');_ov.classList.remove('active');});
+})();
 // ── Sidebar accordion ──────────────────────────────────────────────────────
 (function(){
     function initSidebarAccordion(){

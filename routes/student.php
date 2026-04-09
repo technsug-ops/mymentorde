@@ -26,13 +26,14 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['company.context', 'auth'])->get('/guest/promoted-to-student', [GuestPortalController::class, 'promotedToStudent'])->name('guest.promoted-to-student');
 
 // Student Portal — grup throttle: 180 istek/dk (authenticated user başına)
-Route::middleware(['company.context', 'auth', 'verified', 'student.role', 'throttle:180,1'])->group(function (): void {
+Route::middleware(['company.context', 'auth', 'verified', 'student.role', 'throttle:600,1'])->group(function (): void {
     Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
 
     // ── Kayıt Akışı ──────────────────────────────────────────────────────────
     Route::get('/student/registration', [StudentPortalController::class, 'registration'])->name('student.registration');
     Route::post('/student/registration/form/auto-save', [StudentWorkflowController::class, 'autoSaveRegistration'])->middleware('throttle:60,1')->name('student.registration.autosave');
     Route::post('/student/registration/form/submit',    [StudentWorkflowController::class, 'submitRegistration'])->middleware('throttle:5,1')->name('student.registration.submit');
+    Route::get('/student/registration/form/pdf',       [StudentWorkflowController::class, 'registrationFormPdf'])->middleware('throttle:20,1')->name('student.registration.form.pdf');
 
     // ── Belgeler ─────────────────────────────────────────────────────────────
     Route::get('/student/registration/documents',                          [StudentPortalController::class,  'registrationDocuments'])->name('student.registration.documents');

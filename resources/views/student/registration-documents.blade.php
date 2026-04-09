@@ -410,4 +410,29 @@ document.getElementById('preview-modal').addEventListener('click', function(e) {
     if (e.target === this) closePreview();
 });
 </script>
+
+@if(session('docs_complete'))
+<div id="docsCompleteModal" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:var(--u-card,#fff);border-radius:20px;max-width:420px;width:100%;padding:32px 28px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:dcPop .4s cubic-bezier(.34,1.56,.64,1);">
+        <div style="font-size:56px;margin-bottom:12px;">🎉</div>
+        <div style="font-size:22px;font-weight:800;color:var(--u-text);margin-bottom:8px;">Tebrikler!</div>
+        <div style="font-size:14px;color:var(--u-muted);line-height:1.6;margin-bottom:24px;">
+            Tum belgeler basariyla yuklendi.<br>
+            Simdi hizmet paketini secebilirsin.
+        </div>
+        <a href="{{ route('student.services') }}"
+           style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:12px;background:linear-gradient(135deg,#0d9488,#14b8a6);color:#fff;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(13,148,136,.3);">
+            Hizmetlere Git →
+        </a>
+        <div style="margin-top:14px;">
+            <button type="button" onclick="document.getElementById('docsCompleteModal').style.display='none'"
+                    style="background:none;border:none;font-size:13px;color:var(--u-muted);cursor:pointer;padding:4px 8px;">
+                Sonra bakarim
+            </button>
+        </div>
+    </div>
+</div>
+<style>@keyframes dcPop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}</style>
+@endif
+
 @endsection

@@ -202,7 +202,26 @@ class WorkflowController extends Controller
         $status = $warnings->isNotEmpty()
             ? 'Form gonderildi. Kural uyari sayisi: '.$warnings->count()
             : 'Form gonderildi.';
-        return redirect()->route('guest.registration.form')->with('status', $status);
+        return redirect()->route('guest.registration.documents')->with('status', $status);
+    }
+
+    public function registrationFormPdf(Request $request)
+    {
+        $guest = $this->resolveGuest($request);
+        abort_if(!$guest, 404, 'Guest kaydi bulunamadi.');
+
+        $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
+        $groups = $this->registrationFieldSchemaService->groups($companyId);
+        $draft = is_array($guest->registration_form_draft) ? $guest->registration_form_draft : [];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('guest.registration-form-pdf', compact('guest', 'groups', 'draft'));
+        $fileName = 'Kayit_Formu_' . ($guest->first_name ?? '') . '_' . ($guest->last_name ?? '') . '_' . now()->format('Ymd') . '.pdf';
+
+        if ($request->query('download')) {
+            return $pdf->download($fileName);
+        }
+
+        return $pdf->stream($fileName);
     }
 
     public function selectPackage(Request $request)
@@ -217,16 +236,41 @@ class WorkflowController extends Controller
         $packages = collect($this->servicePackages())->keyBy('code');
         $pkg = (array) $packages->get(trim((string) $data['package_code']));
 
+        // Yeni pakette dahil olan ek hizmetleri, seçili ekstralardan kaldır
+        $includedExtras = is_array($pkg['included_extras'] ?? null) ? $pkg['included_extras'] : [];
+        $currentExtras = is_array($guest->selected_extra_services) ? $guest->selected_extra_services : [];
+        if (!empty($includedExtras) && !empty($currentExtras)) {
+            $currentExtras = collect($currentExtras)
+                ->reject(fn ($x) => in_array((string) ($x['code'] ?? ''), $includedExtras, true))
+                ->values()
+                ->all();
+        }
+
         $guest->fill([
-            'selected_package_code'  => (string) ($pkg['code'] ?? ''),
-            'selected_package_title' => (string) ($pkg['title'] ?? ''),
-            'selected_package_price' => (string) ($pkg['price'] ?? ''),
-            'package_selected_at'    => now(),
+            'selected_package_code'   => (string) ($pkg['code'] ?? ''),
+            'selected_package_title'  => (string) ($pkg['title'] ?? ''),
+            'selected_package_price'  => (string) ($pkg['price'] ?? ''),
+            'selected_extra_services' => $currentExtras,
+            'package_selected_at'     => now(),
         ]);
         $guest->status_message = 'Hizmet paketi seçildi. Sözleşme aşaması bekleniyor.'; // @internal
         $guest->save();
 
         return redirect()->route('guest.services')->with('status', 'Paket secimi kaydedildi.');
+    }
+
+    public function confirmPackage(Request $request)
+    {
+        $guest = $this->resolveGuest($request);
+        abort_if(!$guest, 404, 'Guest kaydi bulunamadi.');
+        abort_if(trim((string) ($guest->selected_package_code ?? '')) === '', 422, 'Oncelikle bir paket secmelisiniz.');
+
+        $guest->forceFill([
+            'package_selected_at' => now(),
+            'status_message'      => 'Paket secimi kesinlestirildi. Sozlesme asamasi bekleniyor.',
+        ])->save();
+
+        return redirect()->route('guest.services')->with('package_confirmed', true);
     }
 
     public function addExtraService(Request $request)
@@ -241,6 +285,14 @@ class WorkflowController extends Controller
         $extraOptions = collect($this->extraServiceOptions())->keyBy('code');
         $extras = is_array($guest->selected_extra_services) ? $guest->selected_extra_services : [];
         $code = trim((string) $data['extra_code']);
+
+        // Seçili pakette dahil olan hizmeti tekrar eklemeyi engelle
+        $selectedPkg = collect(config('service_packages.packages', []))->firstWhere('code', $guest->selected_package_code);
+        $includedExtras = is_array($selectedPkg['included_extras'] ?? null) ? $selectedPkg['included_extras'] : [];
+        if (in_array($code, $includedExtras, true)) {
+            return redirect()->route('guest.services')->with('status', 'Bu hizmet sectiginiz pakete zaten dahil.');
+        }
+
         $meta = (array) $extraOptions->get($code);
         $exists = collect($extras)->contains(fn ($x) => (string) ($x['code'] ?? '') === $code);
         if (!$exists) {

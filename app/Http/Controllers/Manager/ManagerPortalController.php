@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Manager;
 
+use App\Http\Controllers\Concerns\GuestDocumentAccessTrait;
 use App\Http\Controllers\Controller;
 use App\Models\Dealer;
 use App\Models\DealerPayoutRequest;
@@ -34,6 +35,14 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ManagerPortalController extends Controller
 {
+    use GuestDocumentAccessTrait;
+
+    protected function authorizeGuestAccess(\App\Models\GuestApplication $guest): void
+    {
+        $cid = $this->companyId();
+        abort_if($cid > 0 && (int) $guest->company_id !== $cid, 403);
+    }
+
     public function __construct(
         private readonly GuestListService   $guestList,
         private readonly StudentListService $studentList,

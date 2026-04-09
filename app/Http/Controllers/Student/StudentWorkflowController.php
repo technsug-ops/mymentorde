@@ -182,4 +182,24 @@ class StudentWorkflowController extends Controller
 
         return redirect('/student/registration')->with('status', 'Form gonderildi.');
     }
+
+    public function registrationFormPdf(Request $request)
+    {
+        $guest = $this->resolveStudentGuest($request);
+        abort_if(!$guest, 404, 'Student icin bagli basvuru kaydi bulunamadi.');
+
+        $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
+        $schema = app(GuestRegistrationFieldSchemaService::class);
+        $groups = $schema->groups($companyId);
+        $draft = is_array($guest->registration_form_draft) ? $guest->registration_form_draft : [];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('guest.registration-form-pdf', compact('guest', 'groups', 'draft'));
+        $fileName = 'Kayit_Formu_' . ($guest->first_name ?? '') . '_' . ($guest->last_name ?? '') . '_' . now()->format('Ymd') . '.pdf';
+
+        if ($request->query('download')) {
+            return $pdf->download($fileName);
+        }
+
+        return $pdf->stream($fileName);
+    }
 }

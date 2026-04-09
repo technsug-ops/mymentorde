@@ -29,8 +29,13 @@ trait GuestDocumentTrait
         $allowedDocExts = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'webp'];
         $rawExt = strtolower((string) $file->getClientOriginalExtension());
         $ext = in_array($rawExt, $allowedDocExts, true) ? $rawExt : 'bin';
-        $safeBase = Str::slug(pathinfo((string) $file->getClientOriginalName(), PATHINFO_FILENAME));
-        $stdName = $ownerId . '_' . $category->code . '_' . now()->format('Ymd_His') . '_' . ($safeBase ?: 'doc') . '.' . $ext;
+        $stdName = app(\App\Services\DocumentNamingService::class)->buildStandardFileName(
+            $ownerId,
+            $category->code,
+            (string) ($guest->first_name ?? ''),
+            (string) ($guest->last_name ?? ''),
+            $ext,
+        );
         $stored = $file->storeAs("guest-documents/{$guest->id}", $stdName, 'local');
 
         $row = Document::query()->create([
@@ -74,6 +79,10 @@ trait GuestDocumentTrait
                 'document_code' => (string) $category->code,
             ]
         );
+
+        if ($docsReady) {
+            return redirect()->route('guest.registration.documents')->with('docs_complete', true);
+        }
 
         return redirect()->route('guest.registration.documents')->with('status', 'Belge yuklendi.');
     }

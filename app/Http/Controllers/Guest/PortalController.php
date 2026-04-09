@@ -394,11 +394,7 @@ class PortalController extends Controller
         $guest = $this->resolveGuest($request);
         $data  = $this->viewData->build($request, $guest);
 
-        $rawPackages = collect([
-            ['code' => 'pkg_basic',   'title' => 'Basic Paket',   'price' => '1.490 EUR', 'price_amount' => 1490,  'includes' => 'Başvuru + evrak kontrol + onboarding',              'validity_months' => 6,  'max_universities' => 3,  'includes_visa' => false, 'includes_housing' => false, 'support_level' => 'standart',   'features' => ['Online başvuru desteği', 'Belge kontrolü', 'Danışman erişimi'],                                                              'is_active' => true],
-            ['code' => 'pkg_plus',    'title' => 'Plus Paket',    'price' => '2.490 EUR', 'price_amount' => 2490,  'includes' => 'Basic + süreç takibi + üniversite danışmanlığı',    'validity_months' => 12, 'max_universities' => 6,  'includes_visa' => true,  'includes_housing' => false, 'support_level' => 'öncelikli',  'features' => ['Basic özelliklerin tümü', 'Vize danışmanlığı', 'Süreç takibi', 'Üniversite seçimi rehberliği'],           'is_active' => true],
-            ['code' => 'pkg_premium', 'title' => 'Premium Paket', 'price' => '3.990 EUR', 'price_amount' => 3990,  'includes' => 'Plus + VIP danışman + bire bir mentorluk',          'validity_months' => 18, 'max_universities' => 10, 'includes_visa' => true,  'includes_housing' => true,  'support_level' => 'VIP',        'features' => ['Plus özelliklerin tümü', 'Konaklama desteği', 'VIP danışman', 'Bire bir mentorluk'],                    'is_active' => true],
-        ]);
+        $rawPackages = collect(config('service_packages.packages', []))->where('is_active', true)->values();
 
         $data['packages']            = $rawPackages;
         $data['eurTryRate']          = app(CurrencyRateService::class)->getRate('EUR', 'TRY');
@@ -416,6 +412,11 @@ class PortalController extends Controller
             ]))
             ->filter(fn ($cat) => count($cat['services']) > 0)
             ->values()->all();
+
+        // Seçili pakette dahil olan ek hizmetler
+        $selectedCode = (string) ($guest?->selected_package_code ?? '');
+        $selectedPkg = collect(config('service_packages.packages', []))->firstWhere('code', $selectedCode);
+        $data['includedExtras'] = is_array($selectedPkg['included_extras'] ?? null) ? $selectedPkg['included_extras'] : [];
 
         return view('guest.services', $data);
     }

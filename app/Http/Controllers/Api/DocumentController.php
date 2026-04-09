@@ -28,12 +28,14 @@ class DocumentController extends Controller
         ]);
 
         $tags = $tagService->normalize($data['process_tags'] ?? []);
+        [$firstName, $lastName] = $this->resolvePersonName($data['student_id']);
 
         return response()->json([
             'standard_file_name' => $naming->buildStandardFileName(
                 $data['student_id'],
                 $data['category_code'],
-                $tags,
+                $firstName,
+                $lastName,
                 $data['extension'] ?? 'pdf'
             ),
             'process_tags' => $tags,
@@ -56,12 +58,13 @@ class DocumentController extends Controller
         $tags = $tagService->normalize($data['process_tags'] ?? []);
 
         $ext = pathinfo($data['original_file_name'], PATHINFO_EXTENSION) ?: 'pdf';
+        [$firstName, $lastName] = $this->resolvePersonName($data['student_id']);
         $row = Document::create([
             'student_id' => $data['student_id'],
             'category_id' => $category->id,
             'process_tags' => $tags,
             'original_file_name' => $data['original_file_name'],
-            'standard_file_name' => $naming->buildStandardFileName($data['student_id'], $data['category_code'], $tags, $ext),
+            'standard_file_name' => $naming->buildStandardFileName($data['student_id'], $data['category_code'], $firstName, $lastName, $ext),
             'storage_path' => $data['storage_path'] ?? null,
             'mime_type' => $data['mime_type'] ?? null,
             'status' => $data['status'] ?? 'uploaded',
@@ -119,6 +122,22 @@ class DocumentController extends Controller
         );
 
         return response()->json($document->fresh()->load('category'));
+    }
+
+    /**
+     * student_id'den kişi adını çöz (Guest veya StudentAssignment).
+     * @return array{0: string, 1: string} [firstName, lastName]
+     */
+    private function resolvePersonName(string $studentId): array
+    {
+        if (str_starts_with($studentId, 'GST-')) {
+            $numericId = (int) ltrim(substr($studentId, 4), '0');
+            $guest = \App\Models\GuestApplication::find($numericId);
+            return [(string) ($guest->first_name ?? ''), (string) ($guest->last_name ?? '')];
+        }
+
+        $assignment = \App\Models\StudentAssignment::where('student_id', $studentId)->first();
+        return [(string) ($assignment->first_name ?? ''), (string) ($assignment->last_name ?? '')];
     }
 
     /**

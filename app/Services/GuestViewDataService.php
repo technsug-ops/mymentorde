@@ -44,7 +44,7 @@ class GuestViewDataService
                 ->limit(10)
                 ->get(['process_step', 'outcome_type', 'details_tr', 'created_at']);
 
-        $formCompleted    = (bool) ($guest?->registration_form_submitted_at ?? false);
+        $formSubmitted    = (bool) ($guest?->registration_form_submitted_at ?? false);
         $formDraftComplete = false;
         $formRequiredTotal = 0;
         $formRequiredFilled = 0;
@@ -55,16 +55,25 @@ class GuestViewDataService
             $allFields = collect($groups)->flatMap(fn ($g) => $g['fields'] ?? []);
             $required  = $allFields->filter(fn ($f) => !empty($f['required']));
             $formRequiredTotal  = (int) $required->count();
-            $formRequiredFilled = (int) $required->filter(function ($f) use ($draft, $guest) {
+            $fieldChecker = function ($f) use ($draft, $guest) {
                 $k = (string) ($f['key'] ?? '');
                 if ($k === '') {
                     return false;
                 }
                 $v = $draft[$k] ?? ($guest?->{$k} ?? null);
                 return trim((string) $v) !== '';
-            })->count();
+            };
+            $formRequiredFilled = (int) $required->filter($fieldChecker)->count();
             $formDraftComplete = $formRequiredTotal > 0 && $formRequiredFilled >= $formRequiredTotal;
+
+            // Tüm alanların (zorunlu + isteğe bağlı) doluluk oranı
+            $formAllTotal  = (int) $allFields->count();
+            $formAllFilled = (int) $allFields->filter($fieldChecker)->count();
         }
+
+        // Form tamamlandı sayılması için: gönderilmiş + zorunlu alanlar dolu + genel doluluk >= %80
+        $formAllPct    = ($formAllTotal ?? 0) > 0 ? (int) round(($formAllFilled ?? 0) / $formAllTotal * 100) : 0;
+        $formCompleted = $formSubmitted && $formDraftComplete && $formAllPct >= 80;
 
         $docsCompleted   = (bool) ($guest?->docs_ready ?? false);
         $packageSelected = trim((string) ($guest?->selected_package_code ?? '')) !== '';
@@ -159,6 +168,7 @@ class GuestViewDataService
             'formDraftComplete'        => $formDraftComplete,
             'formRequiredTotal'        => $formRequiredTotal,
             'formRequiredFilled'       => $formRequiredFilled,
+            'formAllPct'               => $formAllPct,
             'docsChecklistStats'       => $docsChecklistStats,
             'registrationSnapshots'    => $registrationSnapshots,
             'contractStatus'           => $contractStatus,
@@ -261,7 +271,7 @@ class GuestViewDataService
                 ->distinct('university_code')
                 ->count('university_code');
             return [
-                'total_students'   => $totalStudents,
+                'total_students'   => max(106, $totalStudents),
                 'total_unis'       => max(50, $totalUnis),
                 'satisfaction_pct' => 95,
             ];

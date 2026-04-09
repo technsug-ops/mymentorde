@@ -91,6 +91,11 @@
     html:not(.jm-minimalist) .sidebar {
         background: linear-gradient(180deg, var(--theme-sidebar-from-guest, #162C4A), var(--theme-sidebar-to-guest, #1E3D6B));
     }
+    @media(max-width:600px){
+        .sp-bar { padding: 8px 12px !important; gap: 6px 12px !important; }
+        .sp-bar span { font-size: 11px !important; }
+        .sp-sep { display: none !important; }
+    }
     </style>
 
     @stack('head')
@@ -151,9 +156,20 @@
                    class="nav-link {{ request()->routeIs('guest.registration.form') ? 'active' : '' }}">
                     <span class="nav-icon">📋</span> Başvuru Formu
                 </a>
+                <a href="{{ route('guest.registration.documents') }}"
+                   class="nav-link {{ request()->routeIs('guest.registration.documents') ? 'active' : '' }}">
+                    <span class="nav-icon">📂</span> Belgelerim
+                    @if((int)($guestDocsUnread ?? 0) > 0)
+                        <span class="nav-badge">{{ (int)$guestDocsUnread }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('guest.services') }}"
                    class="nav-link {{ request()->routeIs('guest.services') ? 'active' : '' }}">
                     <span class="nav-icon">🎓</span> Hizmetler
+                </a>
+                <a href="{{ route('guest.contract') }}"
+                   class="nav-link {{ request()->routeIs('guest.contract') ? 'active' : '' }}">
+                    <span class="nav-icon">📜</span> Sözleşmem
                 </a>
                 <a href="{{ route('guest.timeline') }}"
                    class="nav-link {{ request()->routeIs('guest.timeline') ? 'active' : '' }}">
@@ -167,21 +183,6 @@
                    class="nav-link {{ request()->routeIs('guest.ai-assistant*') ? 'active' : '' }}">
                     <span class="nav-icon">🤖</span> AI Asistan
                     <span style="margin-left:auto;font-size:9px;font-weight:600;background:var(--accent-soft,rgba(0,0,0,.05));color:var(--text,#1a1a1a);padding:1px 6px;border-radius:4px;">Yeni</span>
-                </a>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-label">Belgeler</div>
-                <a href="{{ route('guest.registration.documents') }}"
-                   class="nav-link {{ request()->routeIs('guest.registration.documents') ? 'active' : '' }}">
-                    <span class="nav-icon">📂</span> Belgelerim
-                    @if((int)($guestDocsUnread ?? 0) > 0)
-                        <span class="nav-badge">{{ (int)$guestDocsUnread }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('guest.contract') }}"
-                   class="nav-link {{ request()->routeIs('guest.contract') ? 'active' : '' }}">
-                    <span class="nav-icon">📜</span> Sözleşmem
                 </a>
             </div>
 
@@ -250,9 +251,8 @@
         <header class="topbar">
             <div class="topbar-left">
                 <button class="icon-btn" id="premium-menu-btn"
-                        onclick="document.getElementById('premium-sidebar').classList.toggle('mobile-open');document.getElementById('premium-overlay').classList.toggle('active');"
                         style="display:none;">☰</button>
-                <button class="icon-btn" onclick="history.back()" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
+                <button class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
                 <div>
                     <div class="topbar-title">@yield('page_title', 'MentorDE')</div>
                     @hasSection('page_subtitle')
@@ -293,12 +293,12 @@
         <div class="content">
             {{-- Social proof bar --}}
             @if(!empty($socialProof))
-            <div style="background:var(--hero-gradient);border-radius:10px;padding:12px 20px;display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
-                <span style="font-size:14px;font-weight:700;color:#fff;letter-spacing:.01em;">🎓 {{ number_format((int)($socialProof['total_students'] ?? 0)) }}+ öğrenci Almanya'da</span>
-                <span style="font-size:14px;color:rgba(255,255,255,.4);font-weight:300;">|</span>
-                <span style="font-size:14px;font-weight:700;color:#fff;letter-spacing:.01em;">🏛️ {{ (int)($socialProof['total_unis'] ?? 50) }}+ üniversite kabulü</span>
-                <span style="font-size:14px;color:rgba(255,255,255,.4);font-weight:300;">|</span>
-                <span style="font-size:14px;font-weight:700;color:#fff;letter-spacing:.01em;">⭐ %{{ (int)($socialProof['satisfaction_pct'] ?? 95) }} memnuniyet</span>
+            <div class="sp-bar" style="background:var(--hero-gradient);border-radius:10px;padding:10px 16px;display:flex;gap:12px 20px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+                <span style="font-size:13px;font-weight:700;color:#fff;letter-spacing:.01em;">🎓 {{ number_format((int)($socialProof['total_students'] ?? 0)) }}+ öğrenci Almanya'da</span>
+                <span class="sp-sep" style="font-size:14px;color:rgba(255,255,255,.4);font-weight:300;">|</span>
+                <span style="font-size:13px;font-weight:700;color:#fff;letter-spacing:.01em;">🏛️ {{ (int)($socialProof['total_unis'] ?? 50) }}+ üniversite kabulü</span>
+                <span class="sp-sep" style="font-size:14px;color:rgba(255,255,255,.4);font-weight:300;">|</span>
+                <span style="font-size:13px;font-weight:700;color:#fff;letter-spacing:.01em;">⭐ %{{ (int)($socialProof['satisfaction_pct'] ?? 95) }} memnuniyet</span>
             </div>
             @endif
 
@@ -338,7 +338,6 @@
 
 {{-- Mobile overlay --}}
 <div id="premium-overlay"
-     onclick="document.getElementById('premium-sidebar').classList.remove('mobile-open');this.classList.remove('active');"
      style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;"></div>
 <style>
     #premium-overlay.active { display:block; }
@@ -353,11 +352,11 @@
 </div>
 
 {{-- Toast container --}}
-<div id="toast-container" style="position:fixed;bottom:20px;right:80px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:360px;"></div>
+<div id="toast-container" style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:min(360px, calc(100vw - 40px));"></div>
 
 {{-- Floating Chat Widget --}}
 @php $scn = $seniorCard ?? null; @endphp
-<div style="position:relative;">
+<div>
     <button class="gchat-fab" id="gchatFab" title="Danışmana Mesaj">
         💬
         <span class="gchat-badge" id="gchatBadge" style="display:none;">0</span>
@@ -472,6 +471,8 @@ document.addEventListener('alpine:init',function(){
     var _sb=document.getElementById('premium-sidebar');
     if(_mb){_mb.addEventListener('click',function(){_sb.classList.toggle('mobile-open');if(_ov)_ov.classList.toggle('active');});}
     if(_ov){_ov.addEventListener('click',function(){_sb.classList.remove('mobile-open');_ov.classList.remove('active');});}
+    var _bb=document.getElementById('premium-back-btn');
+    if(_bb){_bb.addEventListener('click',function(){history.back();});}
     // ── Sidebar nav collapse ──
     var labels=document.querySelectorAll('.nav-section-label');
     var collapsed=getCollapsed();

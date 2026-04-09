@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\GuestDocumentAccessTrait;
 use App\Http\Controllers\Senior\Concerns\SeniorPortalTrait;
 use App\Models\BusinessContract;
 use App\Models\Document;
@@ -44,6 +45,13 @@ use Illuminate\Validation\Rule;
 class SeniorPortalController extends Controller
 {
     use SeniorPortalTrait;
+    use GuestDocumentAccessTrait;
+
+    protected function authorizeGuestAccess(\App\Models\GuestApplication $guest): void
+    {
+        $cid = auth()->user()->company_id ?? 0;
+        abort_if($cid > 0 && (int) $guest->company_id !== $cid, 403);
+    }
 
     public function __construct(
         private readonly NotificationService $notificationService,

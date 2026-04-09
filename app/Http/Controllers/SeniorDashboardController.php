@@ -328,7 +328,14 @@ class SeniorDashboardController extends Controller
         $ownerId      = trim((string) ($guest->converted_student_id ?: ('GST-'.$guest->id)));
         $outputFormat = (string) ($data['output_format'] ?? 'docx');
         $extension    = $outputFormat === 'docx' ? 'docx' : 'md';
-        $fileName     = "{$ownerId}_{$docType}_{$language}_" . now()->format('Ymd_His') . '.' . $extension;
+        $categoryCode = strtoupper($docType === 'cv' ? 'DOC-CV__' : ($docType === 'motivation' ? 'DOC-MOTV' : 'DOC-REF'));
+        $fileName     = app(\App\Services\DocumentNamingService::class)->buildStandardFileName(
+            $ownerId,
+            $categoryCode,
+            (string) ($guest->first_name ?? ''),
+            (string) ($guest->last_name ?? ''),
+            $extension,
+        );
         $path         = "student-builder/{$guest->id}/{$fileName}";
         if ($outputFormat === 'docx') {
             Storage::disk('public')->put($path, $this->cvTemplateService->buildDocxFromText((string) $built['content']));
