@@ -15,7 +15,35 @@ class HandbookController extends Controller
             ? base_path('HANDBOOK_EN.md')
             : base_path('HANDBOOK_TR.md');
 
-        return file_exists($file) ? file_get_contents($file) : '';
+        if (!file_exists($file)) {
+            return '';
+        }
+
+        $raw = file_get_contents($file);
+
+        // White-label: marka adını config'ten okuyup tüm "MentorDE" referanslarını
+        // dinamik hale getir. Yeni handbook'larda {brand} placeholder kullanılabilir.
+        $brand     = (string) config('brand.name', 'MentorDE');
+        $brandLow  = strtolower($brand);
+        $brandSlug = preg_replace('/[^a-z0-9]/', '', $brandLow) ?: 'app';
+
+        // 1. Önce placeholder'ları replace et (yeni handbook'lar için)
+        $out = strtr($raw, [
+            '{brand}'      => $brand,
+            '{{brand}}'    => $brand,
+            '{brand_low}'  => $brandLow,
+            '{brand_slug}' => $brandSlug,
+        ]);
+
+        // 2. Hardcoded eski referansları case-sensitive olarak değiştir
+        //    Sıralama önemli: önce uzun olanlar, sonra kısa olanlar
+        $out = strtr($out, [
+            'MentorDE' => $brand,    // büyük marka
+            'MENTORDE' => strtoupper($brand),
+            'mentorde' => $brandSlug, // küçük (slug, klasör adı, env değeri)
+        ]);
+
+        return $out;
     }
 
     /**
@@ -194,12 +222,14 @@ class HandbookController extends Controller
         $content = $this->extractForRole($raw, $filteredRole);
         $html    = Str::markdown($content, ['html_input' => 'allow', 'allow_unsafe_links' => false]);
 
-        $title   = $lang === 'en' ? 'MentorDE Handbook' : 'MentorDE Kullanıcı Kılavuzu';
+        $brand   = (string) config('brand.name', 'MentorDE');
+        $title   = $lang === 'en' ? "{$brand} Handbook" : "{$brand} Kullanıcı Kılavuzu";
         $fullHtml = view('handbook.export', compact('html', 'lang', 'role', 'title'))->render();
 
+        $fileSlug = Str::slug($brand) ?: 'handbook';
         return response($fullHtml, 200, [
             'Content-Type'        => 'text/html; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="mentorde-handbook-' . $lang . '.html"',
+            'Content-Disposition' => 'attachment; filename="' . $fileSlug . '-handbook-' . $lang . '.html"',
         ]);
     }
 }

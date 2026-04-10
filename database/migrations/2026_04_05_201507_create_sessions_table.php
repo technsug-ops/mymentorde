@@ -8,6 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Sessions tablosu Laravel default migration'ında (0001_01_01_000000_create_users_table.php)
+        // zaten oluşturuluyor — idempotent ol.
+        if (Schema::hasTable('sessions')) {
+            return;
+        }
+
         Schema::create('sessions', function (Blueprint $table): void {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
@@ -20,6 +26,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('sessions');
+        // Default migration de bu tabloyu siliyor — burada dokunma.
     }
 };

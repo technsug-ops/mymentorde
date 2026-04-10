@@ -43,14 +43,29 @@ class SecurityHeaders
         // Nonce şimdilik sadece script-src için, style-src'ye EKLENMEZ.
         // V6 sprint: tüm Blade template <style> taglerine nonce="{{ $cspNonce }}" eklendikten sonra
         //            'unsafe-inline' style-src'den kaldırılır, nonce eklenir.
+
+        // ── Dev ortamında Vite origin'leri CSP whitelist'ine ekle ──────────
+        // Vite dev server localhost/127.0.0.1/[::1] üzerinde random bir port'ta
+        // çalışır. Production'da bu satırlar devre dışıdır.
+        $viteScript = '';
+        $viteStyle  = '';
+        $viteConnect = '';
+        if (app()->environment('local')) {
+            $viteHosts = 'http://localhost:* http://127.0.0.1:* http://[::1]:*';
+            $wsHosts   = 'ws://localhost:* ws://127.0.0.1:* ws://[::1]:*';
+            $viteScript  = ' ' . $viteHosts;
+            $viteStyle   = ' ' . $viteHosts;
+            $viteConnect = ' ' . $viteHosts . ' ' . $wsHosts;
+        }
+
         $csp = implode('; ', [
             "default-src 'self'",
             // Production: nonce kaldırıldı — unsafe-inline aktif. Tüm view'lar nonce'a geçirildiğinde geri eklenecek.
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.qrserver.com",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.qrserver.com" . $viteScript,
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net" . $viteStyle,
             "font-src 'self' https://fonts.gstatic.com data:",
             "img-src 'self' data: https: blob:",
-            "connect-src 'self' https:",
+            "connect-src 'self' https:" . $viteConnect,
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://docs.google.com https://www.canva.com",
             "object-src 'none'",
             "base-uri 'self'",
