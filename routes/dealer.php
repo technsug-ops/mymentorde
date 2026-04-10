@@ -72,4 +72,9 @@ Route::middleware(['company.context', 'auth', 'dealer.role'])->group(function ()
     // ── Kılavuz ──────────────────────────────────────────────────────────────
     Route::get('/dealer/help', [HandbookController::class, 'dealer'])->name('dealer.handbook');
     Route::get('/dealer/help/download', [HandbookController::class, 'download'])->defaults('role', 'dealer')->name('dealer.handbook.download');
+
+    // ── Digital Asset Management (DAM) — macro tanımı AppServiceProvider'da ──
+    // Dealer'da dam.upload/update/delete/folder.manage izinleri olmadığı için
+    // o endpoint'ler permission middleware tarafından 403 döner.
+    Route::dam('dealer/digital-assets', 'dealer.dam.');
 });

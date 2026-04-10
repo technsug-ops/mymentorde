@@ -134,4 +134,8 @@ Route::middleware(['company.context', 'auth', 'senior.role'])->group(function ()
     // ── Kılavuz ──────────────────────────────────────────────────────────────
     Route::get('/senior/help', [HandbookController::class, 'senior'])->name('senior.handbook');
     Route::get('/senior/help/download', [HandbookController::class, 'download'])->defaults('role', 'senior')->name('senior.handbook.download');
+
+    // ── Digital Asset Management (DAM) — macro tanımı AppServiceProvider'da ──
+    // İzni olmayan senior permission middleware ile engellenir.
+    Route::dam('senior/digital-assets', 'senior.dam.');
 });

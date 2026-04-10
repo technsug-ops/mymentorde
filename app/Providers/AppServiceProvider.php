@@ -12,6 +12,8 @@ use App\Services\TaskFeedbackService;
 use App\Support\PortalTheme;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -31,6 +33,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Services\StudentListService::class);
         $this->app->singleton(\App\Services\CurrencyRateService::class);
         $this->app->singleton(\App\Services\NotificationService::class);
+
+        // DAM services — mevcut service pattern'ı ile tutarlı
+        $this->app->singleton(\App\Services\DigitalAsset\DigitalAssetThumbnailService::class);
+        $this->app->singleton(\App\Services\DigitalAsset\DigitalAssetFolderService::class);
+        $this->app->singleton(\App\Services\DigitalAsset\DigitalAssetService::class);
     }
 
     /**
@@ -44,6 +51,85 @@ class AppServiceProvider extends ServiceProvider
                 'PHP fileinfo extension is required for file upload validation. Enable it in php.ini.'
             );
         }
+
+        // ── Permission-bazlı Gate fallback ─────────────────────────────────
+        // Blade @can('dam.view') vb. çağrıları User::hasPermissionCode'a delege et.
+        // Mevcut izinler "kategori.isim" formatında (nokta içerir) — bu da onu
+        // klasik model-Gate ile karıştırmayı imkansız kılar.
+        Gate::before(function ($user, string $ability) {
+            if (!str_contains($ability, '.')) {
+                return null; // standart Gate'lere dokunma
+            }
+            return method_exists($user, 'hasPermissionCode') && $user->hasPermissionCode($ability) ? true : null;
+        });
+
+        // ── DAM modelleri için audit observer ─────────────────────────────
+        // Her update/delete olayını audit_trails tablosuna yazar.
+        \App\Models\DigitalAsset::observe(\App\Observers\AuditObserver::class);
+        \App\Models\DigitalAssetFolder::observe(\App\Observers\AuditObserver::class);
+
+        // ── DAM route macro ────────────────────────────────────────────────
+        // Tek yerden tanımlı, tüm portallar tek satırla çağırır:
+        //   Route::dam('manager/digital-assets', 'manager.dam.');
+        // Permission middleware'leri yazılı olduğu için dealer gibi read-only
+        // roller yazma endpoint'lerini 403 ile reddeder — ayrı tanımlamaya gerek yok.
+        Route::macro('dam', function (string $prefix, string $nameAs): void {
+            $ctrl = \App\Http\Controllers\Shared\DigitalAssetController::class;
+
+            \Illuminate\Support\Facades\Route::middleware('permission:dam.view')
+                ->prefix($prefix)
+                ->name($nameAs)
+                ->group(function () use ($ctrl): void {
+                    // Okuma endpoint'leri
+                    \Illuminate\Support\Facades\Route::get('/',                  [$ctrl, 'index'])->name('index');
+                    \Illuminate\Support\Facades\Route::get('/favorites',         [$ctrl, 'favorites'])->name('favorites');
+                    \Illuminate\Support\Facades\Route::get('/folder/{folder}',   [$ctrl, 'folderShow'])->name('folder.show');
+
+                    // Preview — grid'de çok çağrılır, yüksek limit
+                    \Illuminate\Support\Facades\Route::get('/{asset}/preview',   [$ctrl, 'preview'])
+                        ->middleware('throttle:240,1')
+                        ->name('preview');
+
+                    // Download — orta limit (toplu indirme akışlarına izin)
+                    \Illuminate\Support\Facades\Route::get('/{asset}/download',  [$ctrl, 'download'])
+                        ->middleware(['permission:dam.download', 'throttle:120,1'])
+                        ->name('download');
+
+                    // Favori toggle — düşük overhead, makul limit
+                    \Illuminate\Support\Facades\Route::post('/{asset}/favorite', [$ctrl, 'toggleFavorite'])
+                        ->middleware('throttle:120,1')
+                        ->name('favorite.toggle');
+
+                    // Yazma endpoint'leri — rol yoksa 403
+                    \Illuminate\Support\Facades\Route::post('/', [$ctrl, 'store'])
+                        ->middleware(['permission:dam.upload', 'throttle:15,1'])
+                        ->name('store');
+
+                    \Illuminate\Support\Facades\Route::post('/links', [$ctrl, 'storeLink'])
+                        ->middleware(['permission:dam.upload', 'throttle:30,1'])
+                        ->name('links.store');
+
+                    \Illuminate\Support\Facades\Route::put('/{asset}', [$ctrl, 'update'])
+                        ->middleware('permission:dam.update')
+                        ->name('update');
+
+                    \Illuminate\Support\Facades\Route::delete('/{asset}', [$ctrl, 'destroy'])
+                        ->middleware('permission:dam.delete')
+                        ->name('destroy');
+
+                    \Illuminate\Support\Facades\Route::post('/folders', [$ctrl, 'folderStore'])
+                        ->middleware('permission:dam.folder.manage')
+                        ->name('folder.store');
+
+                    \Illuminate\Support\Facades\Route::put('/folders/{folder}', [$ctrl, 'folderUpdate'])
+                        ->middleware('permission:dam.folder.manage')
+                        ->name('folder.update');
+
+                    \Illuminate\Support\Facades\Route::delete('/folders/{folder}', [$ctrl, 'folderDestroy'])
+                        ->middleware('permission:dam.folder.manage')
+                        ->name('folder.destroy');
+                });
+        });
 
         // CSP nonce direktifi — Blade şablonlarında @cspNonce ile kullanılır.
         // SecurityHeaders middleware'i her request'te nonce üretip csp-nonce ve $cspNonce olarak paylaşır.

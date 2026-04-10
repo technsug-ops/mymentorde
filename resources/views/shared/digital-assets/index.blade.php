@@ -1,0 +1,750 @@
+@extends($layout)
+
+@section('title', 'Dijital Varlıklar — ' . config('brand.name', 'MentorDE'))
+
+@section('content')
+<div class="dam-page" style="padding:24px;">
+    <div class="dam-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+            <h1 style="margin:0;font-size:24px;font-weight:700;color:var(--text,#0f172a);">
+                @if($onlyFavorites ?? false)
+                    <span style="margin-right:8px;">⭐</span>Yıldızlılarım
+                @else
+                    <span style="margin-right:8px;">📁</span>Dijital Varlıklar
+                @endif
+            </h1>
+            <div style="font-size:13px;color:var(--text-muted,#64748b);margin-top:4px;">
+                @if($onlyFavorites ?? false)
+                    Yıldızladığınız dosyalar — sadece size özel
+                @elseif(empty($breadcrumb))
+                    Tüm klasörler
+                @else
+                    @foreach($breadcrumb as $i => $crumb)
+                        @if($i > 0) <span style="margin:0 6px;">›</span> @endif
+                        <span>{{ $crumb['name'] }}</span>
+                    @endforeach
+                @endif
+            </div>
+        </div>
+        @unless($readOnly)
+            @if(auth()->user()?->hasPermissionCode('dam.upload') || auth()->user()?->hasPermissionCode('dam.folder.manage'))
+            <div style="position:relative;" id="dam-add-wrapper">
+                <button type="button" id="dam-add-btn"
+                        style="padding:10px 20px;border-radius:8px;border:none;background:var(--c-accent,#0f172a);color:#fff;cursor:pointer;font-weight:600;font-size:14px;display:flex;align-items:center;gap:6px;">
+                    <span style="font-size:18px;line-height:1;">+</span> Ekle
+                </button>
+                <div id="dam-add-menu"
+                     style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.12);min-width:220px;z-index:100;overflow:hidden;">
+                    @can('dam.upload')
+                    <button type="button" data-dam-action="upload"
+                            style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:none;background:#fff;cursor:pointer;font-size:14px;color:#0f172a;text-align:left;">
+                        <span style="font-size:18px;">↑</span>
+                        <span>
+                            <div style="font-weight:600;">Dosya Yükle</div>
+                            <div style="font-size:11px;color:#64748b;">Bir veya birden fazla dosya</div>
+                        </span>
+                    </button>
+                    <button type="button" data-dam-action="link"
+                            style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:none;background:#fff;cursor:pointer;font-size:14px;color:#0f172a;text-align:left;border-top:1px solid #f1f5f9;">
+                        <span style="font-size:18px;">🔗</span>
+                        <span>
+                            <div style="font-weight:600;">Link Ekle</div>
+                            <div style="font-size:11px;color:#64748b;">Drive, YouTube, Notion vb.</div>
+                        </span>
+                    </button>
+                    @endcan
+                    @can('dam.folder.manage')
+                    <button type="button" data-dam-action="folder"
+                            style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:none;background:#fff;cursor:pointer;font-size:14px;color:#0f172a;text-align:left;border-top:1px solid #f1f5f9;">
+                        <span style="font-size:18px;">📁</span>
+                        <span>
+                            <div style="font-weight:600;">Yeni Klasör</div>
+                            <div style="font-size:11px;color:#64748b;">Dosyaları gruplamak için</div>
+                        </span>
+                    </button>
+                    @endcan
+                </div>
+            </div>
+            @endif
+        @endunless
+    </div>
+
+    @if(session('status'))
+        <div style="padding:12px 16px;background:#dcfce7;color:#166534;border-radius:8px;margin-bottom:16px;">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    {{-- Arama + hızlı filtreler --}}
+    <form method="GET" action="{{ route($routePrefix . '.index') }}" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:16px;">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div style="flex:1;min-width:220px;position:relative;">
+                <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:#94a3b8;">🔍</span>
+                <input type="search" name="q" value="{{ $filters['q'] ?? '' }}"
+                       placeholder="İsim, açıklama, DOC kodu..."
+                       style="width:100%;padding:10px 12px 10px 36px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;background:#f8fafc;">
+            </div>
+            <select name="category" style="padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;background:#fff;">
+                <option value="">Tüm türler</option>
+                <option value="image"    @selected(($filters['category'] ?? '') === 'image')>🖼️ Görsel</option>
+                <option value="video"    @selected(($filters['category'] ?? '') === 'video')>🎬 Video</option>
+                <option value="audio"    @selected(($filters['category'] ?? '') === 'audio')>🎵 Ses</option>
+                <option value="document" @selected(($filters['category'] ?? '') === 'document')>📄 Doküman</option>
+                <option value="archive"  @selected(($filters['category'] ?? '') === 'archive')>🗜️ Arşiv</option>
+                <option value="other"    @selected(($filters['category'] ?? '') === 'other')>📎 Diğer</option>
+            </select>
+            <button type="submit"
+                    style="padding:10px 20px;border-radius:8px;border:none;background:var(--c-accent,#0f172a);color:#fff;cursor:pointer;font-weight:600;font-size:13px;">
+                Ara
+            </button>
+            @if($hasFilters)
+                <a href="{{ route($routePrefix . '.index') }}{{ $currentFolder ? '' : '' }}"
+                   style="padding:10px 14px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;text-decoration:none;font-size:13px;font-weight:600;">
+                    ✕ Temizle
+                </a>
+            @endif
+        </div>
+        {{-- Gelişmiş filtreler (collapse) --}}
+        <details style="margin-top:10px;">
+            <summary style="cursor:pointer;font-size:12px;color:#64748b;user-select:none;">Gelişmiş filtreler</summary>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;">
+                <label style="font-size:12px;color:#64748b;">Başlangıç:</label>
+                <input type="date" name="from" value="{{ $filters['from'] ?? '' }}"
+                       style="padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;">
+                <label style="font-size:12px;color:#64748b;">Bitiş:</label>
+                <input type="date" name="to" value="{{ $filters['to'] ?? '' }}"
+                       style="padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;">
+                @if(!empty($filters['tag']))
+                    <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#e0e7ff;color:#3730a3;border-radius:99px;font-size:11px;font-weight:600;">
+                        Etiket: {{ $filters['tag'] }}
+                        <input type="hidden" name="tag" value="{{ $filters['tag'] }}">
+                    </span>
+                @endif
+            </div>
+        </details>
+        @if($hasFilters)
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;font-size:12px;color:#64748b;">
+                <strong style="color:#0f172a;">{{ $assets->total() }}</strong> sonuç bulundu · Filtre aktif, tüm klasörlerde aranıyor
+            </div>
+        @endif
+    </form>
+
+    {{-- Popüler etiketler şeridi — sadece tag varsa görünür --}}
+    @if(!empty($popularTags))
+    <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:16px;padding:10px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;">
+        <span style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-right:4px;">🏷️ Popüler</span>
+        @foreach($popularTags as $tagName => $tagCount)
+            @php $isActive = (($filters['tag'] ?? '') === $tagName); @endphp
+            <a href="{{ route($routePrefix . '.index') }}?tag={{ urlencode($tagName) }}"
+               style="font-size:11px;padding:4px 10px;text-decoration:none;border-radius:99px;font-weight:600;white-space:nowrap;
+                      {{ $isActive ? 'background:var(--c-accent,#0f172a);color:#fff;' : 'background:#fff;color:#475569;border:1px solid #e2e8f0;' }}">
+                {{ $tagName }} <span style="opacity:.55;font-weight:500;">{{ $tagCount }}</span>
+            </a>
+        @endforeach
+    </div>
+    @endif
+
+    <div class="dam-layout" style="display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start;">
+        {{-- Sol panel: klasör ağacı --}}
+        <aside class="dam-sidebar" style="background:#fff;border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:16px;position:sticky;top:20px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted,#64748b);margin-bottom:10px;">
+                Klasörler
+            </div>
+            <a href="{{ route($routePrefix . '.index') }}"
+               style="display:block;padding:8px 10px;border-radius:6px;text-decoration:none;color:var(--text,#0f172a);font-size:14px;{{ empty($currentFolder) && !($onlyFavorites ?? false) ? 'background:var(--accent-soft,#f1f5f9);font-weight:600;' : '' }}">
+                🏠 Tüm Varlıklar
+            </a>
+            <a href="{{ route($routePrefix . '.favorites') }}"
+               style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:6px;text-decoration:none;color:var(--text,#0f172a);font-size:14px;margin-top:2px;{{ ($onlyFavorites ?? false) ? 'background:var(--accent-soft,#f1f5f9);font-weight:600;' : '' }}">
+                <span>⭐ Yıldızlılarım</span>
+                @if(($favoriteCount ?? 0) > 0)
+                    <span style="background:#fbbf24;color:#78350f;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;">{{ $favoriteCount }}</span>
+                @endif
+            </a>
+            <div style="height:1px;background:#f1f5f9;margin:8px 0;"></div>
+            @include('shared.digital-assets._folder_tree', ['nodes' => $tree, 'level' => 0, 'currentId' => $currentFolder?->id])
+        </aside>
+
+        {{-- Sağ panel: dosya grid/list --}}
+        <main class="dam-main" style="min-width:0;">
+            {{-- Görünüm toggle + (liste modunda) kolon seçici --}}
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px;align-items:center;position:relative;">
+                @if($viewMode === 'list')
+                <div style="position:relative;" id="dam-cols-wrapper">
+                    <button type="button" id="dam-cols-btn"
+                            style="padding:8px 14px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#64748b;display:flex;align-items:center;gap:6px;">
+                        ⚙ Kolonlar
+                    </button>
+                    <div id="dam-cols-menu"
+                         style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.12);min-width:220px;z-index:100;padding:10px 14px;">
+                        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;letter-spacing:.5px;margin-bottom:8px;">Gösterilecek Kolonlar</div>
+                        @php
+                            $colOptions = [
+                                'type'     => 'Tür',
+                                'category' => 'Kategori',
+                                'tags'     => 'Etiketler',
+                                'doc'      => 'DOC Kodu',
+                                'size'     => 'Boyut',
+                                'uploader' => 'Yükleyen',
+                                'date'     => 'Tarih',
+                            ];
+                        @endphp
+                        @foreach($colOptions as $key => $label)
+                            <label style="display:flex;align-items:center;gap:8px;padding:5px 2px;cursor:pointer;font-size:13px;color:#334155;">
+                                <input type="checkbox" class="dam-col-toggle" data-col-key="{{ $key }}" checked>
+                                <span>{{ $label }}</span>
+                            </label>
+                        @endforeach
+                        <div style="font-size:10px;color:#94a3b8;margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9;">
+                            Ad ve İşlem kolonları her zaman açık. Tercihiniz kaydedilir.
+                        </div>
+                    </div>
+                </div>
+                @endif
+                <div style="display:inline-flex;background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
+                    @php
+                        $qs = request()->except('view');
+                        $gridUrl = request()->url() . '?' . http_build_query(array_merge($qs, ['view' => 'grid']));
+                        $listUrl = request()->url() . '?' . http_build_query(array_merge($qs, ['view' => 'list']));
+                    @endphp
+                    <a href="{{ $gridUrl }}"
+                       style="padding:8px 14px;text-decoration:none;font-size:13px;font-weight:600;{{ $viewMode === 'grid' ? 'background:var(--c-accent,#0f172a);color:#fff;' : 'color:#64748b;' }}"
+                       title="Büyük görünüm">
+                        ⊞ Grid
+                    </a>
+                    <a href="{{ $listUrl }}"
+                       style="padding:8px 14px;text-decoration:none;font-size:13px;font-weight:600;border-left:1px solid #e2e8f0;{{ $viewMode === 'list' ? 'background:var(--c-accent,#0f172a);color:#fff;' : 'color:#64748b;' }}"
+                       title="Liste görünümü">
+                        ☰ Liste
+                    </a>
+                </div>
+            </div>
+
+            @if($viewMode === 'list')
+                @include('shared.digital-assets._asset_list', ['assets' => $assets, 'readOnly' => $readOnly, 'routePrefix' => $routePrefix, 'favoriteIds' => $favoriteIds, 'sortKey' => $sortKey, 'sortDir' => $sortDir])
+            @else
+                @include('shared.digital-assets._asset_grid', ['assets' => $assets, 'readOnly' => $readOnly, 'routePrefix' => $routePrefix, 'favoriteIds' => $favoriteIds])
+            @endif
+        </main>
+    </div>
+
+    @unless($readOnly)
+        @can('dam.upload')
+            @include('shared.digital-assets._upload_modal', ['currentFolder' => $currentFolder, 'routePrefix' => $routePrefix])
+            @include('shared.digital-assets._link_modal', ['currentFolder' => $currentFolder, 'routePrefix' => $routePrefix])
+        @endcan
+        @can('dam.folder.manage')
+            @include('shared.digital-assets._folder_modal', ['currentFolder' => $currentFolder, 'routePrefix' => $routePrefix])
+        @endcan
+        @can('dam.update')
+            @include('shared.digital-assets._edit_modal')
+        @endcan
+    @endunless
+
+    {{-- Lightbox (büyük önizleme) --}}
+    <dialog id="dam-lightbox" style="border:none;border-radius:14px;padding:0;max-width:1100px;width:92vw;max-height:92vh;box-shadow:0 30px 80px rgba(0,0,0,.4);background:#fff;">
+        <div style="display:grid;grid-template-columns:1fr 320px;min-height:500px;max-height:92vh;">
+            {{-- Sol: önizleme --}}
+            <div id="dam-lb-preview" style="background:#0f172a;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;min-height:400px;color:#fff;">
+                <div id="dam-lb-loading" style="text-align:center;color:#94a3b8;">Yükleniyor...</div>
+            </div>
+            {{-- Sağ: bilgi paneli --}}
+            <div style="padding:24px;display:flex;flex-direction:column;gap:14px;border-left:1px solid #e2e8f0;background:#fff;overflow:auto;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <h3 id="dam-lb-name" style="margin:0;font-size:16px;font-weight:700;color:#0f172a;line-height:1.4;word-break:break-word;"></h3>
+                    <button type="button" onclick="document.getElementById('dam-lightbox').close()"
+                            style="background:none;border:none;font-size:24px;cursor:pointer;color:#64748b;line-height:1;flex-shrink:0;">×</button>
+                </div>
+                <div id="dam-lb-meta" style="font-size:12px;color:#64748b;display:flex;flex-direction:column;gap:6px;"></div>
+                <div id="dam-lb-description" style="font-size:13px;color:#334155;line-height:1.5;display:none;"></div>
+                <div id="dam-lb-tags" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+                <div id="dam-lb-actions" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:14px;border-top:1px solid #f1f5f9;"></div>
+            </div>
+        </div>
+    </dialog>
+</div>
+
+{{-- DAM sayfası etkileşim script'i --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    // ── "+ Ekle" dropdown ──────────────────────────────────────
+    const btn   = document.getElementById('dam-add-btn');
+    const menu  = document.getElementById('dam-add-menu');
+    const wrap  = document.getElementById('dam-add-wrapper');
+    if (btn && menu) {
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', function(e){
+            if (wrap && !wrap.contains(e.target)) menu.style.display = 'none';
+        });
+
+        const actionDialogMap = {
+            upload: 'dam-upload-modal',
+            link:   'dam-link-modal',
+            folder: 'dam-folder-modal',
+        };
+        menu.querySelectorAll('[data-dam-action]').forEach(function(el){
+            el.addEventListener('mouseenter', function(){ el.style.background = '#f1f5f9'; });
+            el.addEventListener('mouseleave', function(){ el.style.background = '#fff'; });
+            el.addEventListener('click', function(){
+                menu.style.display = 'none';
+                const action = el.getAttribute('data-dam-action');
+                const dialogId = actionDialogMap[action];
+                if (!dialogId) return;
+                const dlg = document.getElementById(dialogId);
+                if (dlg && typeof dlg.showModal === 'function') dlg.showModal();
+            });
+        });
+    }
+
+    // ── Lightbox (kart tıklama → büyük önizleme) ───────────────
+    const lightbox    = document.getElementById('dam-lightbox');
+    const lbPreview   = document.getElementById('dam-lb-preview');
+    const lbName      = document.getElementById('dam-lb-name');
+    const lbMeta      = document.getElementById('dam-lb-meta');
+    const lbDesc      = document.getElementById('dam-lb-description');
+    const lbTags      = document.getElementById('dam-lb-tags');
+    const lbActions   = document.getElementById('dam-lb-actions');
+
+    function escapeHtml(str) {
+        return String(str || '').replace(/[&<>"']/g, function(c){
+            return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+        });
+    }
+
+    function openLightbox(card) {
+        if (!lightbox || !card) return;
+        const data = {
+            id:          card.getAttribute('data-asset-id'),
+            name:        card.getAttribute('data-asset-name'),
+            description: card.getAttribute('data-asset-description'),
+            tags:        JSON.parse(card.getAttribute('data-asset-tags') || '[]'),
+            category:    card.getAttribute('data-asset-category'),
+            mime:        card.getAttribute('data-asset-mime'),
+            extension:   card.getAttribute('data-asset-extension'),
+            size:        card.getAttribute('data-asset-size'),
+            doc:         card.getAttribute('data-asset-doc'),
+            creator:     card.getAttribute('data-asset-creator'),
+            date:        card.getAttribute('data-asset-date'),
+            source:      card.getAttribute('data-asset-source'),
+            url:         card.getAttribute('data-asset-url'),
+            preview:     card.getAttribute('data-asset-preview'),
+            download:    card.getAttribute('data-asset-download'),
+            emoji:       card.getAttribute('data-asset-emoji') || '📎',
+            youtubeId:   card.getAttribute('data-asset-youtube') || '',
+        };
+
+        lbName.textContent = data.name;
+
+        // Önizleme alanı
+        let previewHtml = '';
+        if (data.source === 'link' && data.youtubeId) {
+            // YouTube — nocookie embed
+            previewHtml =
+                '<iframe src="https://www.youtube-nocookie.com/embed/' + escapeHtml(data.youtubeId) + '" ' +
+                'style="width:100%;aspect-ratio:16/9;max-height:80vh;border:none;border-radius:6px;background:#000;" ' +
+                'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" ' +
+                'allowfullscreen></iframe>';
+        } else if (data.source === 'link') {
+            previewHtml =
+                '<div style="text-align:center;padding:40px 20px;">' +
+                '<div style="font-size:96px;margin-bottom:20px;">' + data.emoji + '</div>' +
+                '<div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px;">Harici Bağlantı</div>' +
+                '<div style="font-size:13px;color:#cbd5e1;margin-bottom:24px;word-break:break-all;max-width:500px;">' + escapeHtml(data.url) + '</div>' +
+                '<a href="' + escapeHtml(data.url) + '" target="_blank" rel="noopener" ' +
+                'style="display:inline-block;padding:12px 24px;background:#3730a3;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">' +
+                '🔗 Yeni Sekmede Aç' +
+                '</a>' +
+                '</div>';
+        } else if (data.category === 'image' && data.preview) {
+            previewHtml = '<img src="' + escapeHtml(data.preview) + '" alt="' + escapeHtml(data.name) + '" ' +
+                'style="max-width:100%;max-height:80vh;object-fit:contain;border-radius:6px;">';
+        } else if (data.mime === 'application/pdf' && data.preview) {
+            previewHtml = '<iframe src="' + escapeHtml(data.preview) + '" ' +
+                'style="width:100%;height:80vh;border:none;background:#fff;border-radius:6px;"></iframe>';
+        } else {
+            previewHtml =
+                '<div style="text-align:center;padding:40px 20px;">' +
+                '<div style="font-size:96px;margin-bottom:20px;">' + data.emoji + '</div>' +
+                '<div style="font-size:13px;color:#94a3b8;margin-bottom:24px;">Bu dosya türü için önizleme yok.</div>' +
+                '<a href="' + escapeHtml(data.download) + '" ' +
+                'style="display:inline-block;padding:12px 24px;background:#1d4ed8;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">' +
+                '↓ Dosyayı İndir' +
+                '</a>' +
+                '</div>';
+        }
+        lbPreview.innerHTML = previewHtml;
+
+        // Metadata
+        const metaRows = [];
+        if (data.doc)       metaRows.push('<div><strong style="color:#0f172a;">DOC:</strong> <span style="font-family:monospace;">' + escapeHtml(data.doc) + '</span></div>');
+        if (data.size && data.source !== 'link') metaRows.push('<div><strong style="color:#0f172a;">Boyut:</strong> ' + escapeHtml(data.size) + '</div>');
+        if (data.extension) metaRows.push('<div><strong style="color:#0f172a;">Tür:</strong> ' + escapeHtml(data.extension.toUpperCase()) + '</div>');
+        if (data.creator)   metaRows.push('<div><strong style="color:#0f172a;">Yükleyen:</strong> ' + escapeHtml(data.creator) + '</div>');
+        if (data.date)      metaRows.push('<div><strong style="color:#0f172a;">Tarih:</strong> ' + escapeHtml(data.date) + '</div>');
+        lbMeta.innerHTML = metaRows.join('');
+
+        // Açıklama
+        if (data.description) {
+            lbDesc.style.display = 'block';
+            lbDesc.textContent = data.description;
+        } else {
+            lbDesc.style.display = 'none';
+        }
+
+        // Etiketler
+        lbTags.innerHTML = '';
+        if (Array.isArray(data.tags) && data.tags.length > 0) {
+            data.tags.forEach(function(t){
+                const chip = document.createElement('span');
+                chip.style.cssText = 'font-size:10px;padding:3px 8px;background:#e0e7ff;color:#3730a3;border-radius:99px;font-weight:600;';
+                chip.textContent = t;
+                lbTags.appendChild(chip);
+            });
+        }
+
+        // Aksiyon butonları
+        const downloadLabel = data.source === 'link' ? '🔗 Linke Git' : '↓ İndir';
+        const downloadAttrs = data.source === 'link' ? ' target="_blank" rel="noopener"' : '';
+        lbActions.innerHTML =
+            '<a href="' + escapeHtml(data.download) + '"' + downloadAttrs + ' ' +
+            'style="flex:1;text-align:center;padding:8px 12px;background:var(--c-accent,#0f172a);color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:13px;">' +
+            downloadLabel +
+            '</a>';
+
+        if (typeof lightbox.showModal === 'function') {
+            lightbox.showModal();
+        }
+    }
+
+    // Kart click handler — sadece kart yüzeyine tıklayınca aç (butonlara değil)
+    document.querySelectorAll('.dam-card').forEach(function(card){
+        card.addEventListener('click', function(e){
+            // Buton/link/form içine tıklandıysa lightbox açma
+            if (e.target.closest('[data-stop-card-click="1"]')) return;
+            if (e.target.closest('.dam-fav-btn')) return;
+            if (e.target.closest('button')) return;
+            if (e.target.closest('a[href]') && !e.target.closest('.dam-card-preview')) return;
+            openLightbox(card);
+        });
+    });
+
+    // ESC kapatır (browser default'u olabilir ama emin olalım)
+    if (lightbox) {
+        lightbox.addEventListener('click', function(e){
+            // Backdrop'a tıklayınca kapat
+            if (e.target === lightbox) lightbox.close();
+        });
+    }
+
+    // ── Kolon seçici (localStorage) ─────────────────────────────
+    const COL_STORAGE_KEY = 'dam_hidden_columns_v1';
+    // Varsayılan olarak gizli: DOC Kodu (kullanıcı çok geniş buluyor)
+    const COL_DEFAULT_HIDDEN = ['doc'];
+
+    function loadHiddenCols() {
+        try {
+            const raw = localStorage.getItem(COL_STORAGE_KEY);
+            if (raw === null) return COL_DEFAULT_HIDDEN.slice();
+            const arr = JSON.parse(raw);
+            return Array.isArray(arr) ? arr : COL_DEFAULT_HIDDEN.slice();
+        } catch (e) {
+            return COL_DEFAULT_HIDDEN.slice();
+        }
+    }
+
+    function saveHiddenCols(list) {
+        try { localStorage.setItem(COL_STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
+    }
+
+    function applyColumnVisibility(hiddenList) {
+        const hidden = new Set(hiddenList);
+        document.querySelectorAll('#dam-list-table [data-col]').forEach(function(el){
+            const key = el.getAttribute('data-col');
+            if (key === 'name' || key === 'actions') return; // zorunlu
+            el.style.display = hidden.has(key) ? 'none' : '';
+        });
+    }
+
+    // Uygula (tablonun ilk renderında)
+    const initialHidden = loadHiddenCols();
+    applyColumnVisibility(initialHidden);
+
+    // Checkbox'ları uyumla (checked = kolon görünür)
+    document.querySelectorAll('.dam-col-toggle').forEach(function(cb){
+        const key = cb.getAttribute('data-col-key');
+        cb.checked = !initialHidden.includes(key);
+        cb.addEventListener('change', function(){
+            const current = loadHiddenCols();
+            const idx = current.indexOf(key);
+            if (cb.checked && idx > -1) current.splice(idx, 1);
+            else if (!cb.checked && idx === -1) current.push(key);
+            saveHiddenCols(current);
+            applyColumnVisibility(current);
+        });
+    });
+
+    // Kolonlar butonu dropdown toggle
+    const colsBtn   = document.getElementById('dam-cols-btn');
+    const colsMenu  = document.getElementById('dam-cols-menu');
+    const colsWrap  = document.getElementById('dam-cols-wrapper');
+    if (colsBtn && colsMenu) {
+        colsBtn.addEventListener('click', function(e){
+            e.stopPropagation();
+            colsMenu.style.display = (colsMenu.style.display === 'block') ? 'none' : 'block';
+        });
+        document.addEventListener('click', function(e){
+            if (colsWrap && !colsWrap.contains(e.target)) colsMenu.style.display = 'none';
+        });
+    }
+
+    // ── Düzenle modal (data-attr'lardan doldur + aç) ───────────
+    const editModal = document.getElementById('dam-edit-modal');
+    const editForm  = document.getElementById('dam-edit-form');
+    const editName  = document.getElementById('dam-edit-name');
+    const editDesc  = document.getElementById('dam-edit-description');
+    const editPin   = document.getElementById('dam-edit-pinned');
+    const editTagWrap = document.getElementById('dam-edit-tag-chips');
+    const editTagInput = document.getElementById('dam-edit-tag-input');
+
+    function renderEditChips(tagSet) {
+        if (!editTagWrap) return;
+        editTagWrap.querySelectorAll('.dam-chip, input[name="tags[]"]').forEach(n => n.remove());
+        tagSet.forEach(function(tag){
+            const chip = document.createElement('span');
+            chip.className = 'dam-chip';
+            chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#e0e7ff;color:#3730a3;border-radius:99px;font-size:11px;font-weight:600;';
+            chip.textContent = tag;
+            const x = document.createElement('button');
+            x.type = 'button';
+            x.textContent = '×';
+            x.style.cssText = 'background:none;border:none;cursor:pointer;color:#3730a3;font-size:14px;line-height:1;padding:0;margin-left:2px;';
+            x.addEventListener('click', function(){ tagSet.delete(tag); renderEditChips(tagSet); });
+            chip.appendChild(x);
+            editTagWrap.insertBefore(chip, editTagInput);
+
+            const hidden = document.createElement('input');
+            hidden.type  = 'hidden';
+            hidden.name  = 'tags[]';
+            hidden.value = tag;
+            editTagWrap.appendChild(hidden);
+        });
+    }
+
+    if (editModal && editForm) {
+        const editTagSet = new Set();
+
+        document.querySelectorAll('.dam-edit-btn').forEach(function(btn){
+            btn.addEventListener('click', function(){
+                const url = btn.getAttribute('data-update-url');
+                editForm.setAttribute('action', url);
+                editName.value = btn.getAttribute('data-asset-name') || '';
+                editDesc.value = btn.getAttribute('data-asset-description') || '';
+                editPin.checked = btn.getAttribute('data-asset-pinned') === '1';
+
+                editTagSet.clear();
+                try {
+                    const tagsRaw = btn.getAttribute('data-asset-tags') || '[]';
+                    const tagsArr = JSON.parse(tagsRaw);
+                    if (Array.isArray(tagsArr)) {
+                        tagsArr.forEach(t => editTagSet.add(String(t)));
+                    }
+                } catch (e) {}
+                renderEditChips(editTagSet);
+
+                if (typeof editModal.showModal === 'function') {
+                    editModal.showModal();
+                }
+            });
+        });
+
+        if (editTagInput) {
+            editTagInput.addEventListener('keydown', function(e){
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    const t = (editTagInput.value || '').trim().toLowerCase()
+                        .replace(/[^a-z0-9ğüşıöç\-_ ]/gi, '').substring(0, 60);
+                    if (t && !editTagSet.has(t)) {
+                        editTagSet.add(t);
+                        renderEditChips(editTagSet);
+                    }
+                    editTagInput.value = '';
+                } else if (e.key === 'Backspace' && editTagInput.value === '' && editTagSet.size > 0) {
+                    const last = Array.from(editTagSet).pop();
+                    editTagSet.delete(last);
+                    renderEditChips(editTagSet);
+                }
+            });
+        }
+    }
+
+    // ── Yıldız (favori) toggle — AJAX ──────────────────────────
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+    document.querySelectorAll('.dam-fav-btn').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            const url = btn.getAttribute('data-toggle-url');
+            if (!url || btn.dataset.loading === '1') return;
+            btn.dataset.loading = '1';
+            btn.style.opacity = '0.5';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin',
+            })
+            .then(function(r){ return r.ok ? r.json() : Promise.reject(r); })
+            .then(function(data){
+                const fav = !!data.favorited;
+                btn.textContent = fav ? '★' : '☆';
+                btn.style.color = fav ? '#f59e0b' : '#cbd5e1';
+                btn.setAttribute('aria-pressed', fav ? 'true' : 'false');
+                btn.setAttribute('title', fav ? 'Yıldızı kaldır' : 'Yıldızla');
+
+                // Sol paneldeki sayı badge'ini güncelle
+                const sidebarLink = document.querySelector('a[href*="/digital-assets/favorites"]');
+                if (sidebarLink && typeof data.count === 'number') {
+                    let badge = sidebarLink.querySelector('span:last-child');
+                    if (data.count > 0) {
+                        if (!badge || !badge.style.borderRadius) {
+                            badge = document.createElement('span');
+                            badge.style.cssText = 'background:#fbbf24;color:#78350f;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;';
+                            sidebarLink.appendChild(badge);
+                        }
+                        badge.textContent = data.count;
+                    } else if (badge && badge.style.borderRadius) {
+                        badge.remove();
+                    }
+                }
+            })
+            .catch(function(){
+                btn.style.color = '#dc2626';
+                setTimeout(function(){ btn.style.color = '#cbd5e1'; }, 1500);
+            })
+            .finally(function(){
+                btn.dataset.loading = '0';
+                btn.style.opacity = '1';
+            });
+        });
+    });
+
+    // ── Tag chip input (link modal — aynı mantık, farklı id'ler) ──
+    const linkTagContainer = document.getElementById('dam-link-tag-chips');
+    const linkTagInput     = document.getElementById('dam-link-tag-input');
+    if (linkTagContainer && linkTagInput) {
+        const linkTags = new Set();
+        function renderLinkChips() {
+            linkTagContainer.querySelectorAll('.dam-chip, input[name="tags[]"]').forEach(n => n.remove());
+            linkTags.forEach(function(tag){
+                const chip = document.createElement('span');
+                chip.className = 'dam-chip';
+                chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#e0e7ff;color:#3730a3;border-radius:99px;font-size:11px;font-weight:600;';
+                chip.textContent = tag;
+                const x = document.createElement('button');
+                x.type = 'button';
+                x.textContent = '×';
+                x.style.cssText = 'background:none;border:none;cursor:pointer;color:#3730a3;font-size:14px;line-height:1;padding:0;margin-left:2px;';
+                x.addEventListener('click', function(){ linkTags.delete(tag); renderLinkChips(); });
+                chip.appendChild(x);
+                linkTagContainer.insertBefore(chip, linkTagInput);
+
+                const hidden = document.createElement('input');
+                hidden.type  = 'hidden';
+                hidden.name  = 'tags[]';
+                hidden.value = tag;
+                linkTagContainer.appendChild(hidden);
+            });
+        }
+        linkTagInput.addEventListener('keydown', function(e){
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                const t = (linkTagInput.value || '').trim().toLowerCase()
+                    .replace(/[^a-z0-9ğüşıöç\-_ ]/gi, '').substring(0, 60);
+                if (t && !linkTags.has(t)) { linkTags.add(t); renderLinkChips(); }
+                linkTagInput.value = '';
+            } else if (e.key === 'Backspace' && linkTagInput.value === '' && linkTags.size > 0) {
+                const last = Array.from(linkTags).pop();
+                linkTags.delete(last);
+                renderLinkChips();
+            }
+        });
+        const linkModal = document.getElementById('dam-link-modal');
+        if (linkModal) {
+            linkModal.addEventListener('close', function(){
+                linkTags.clear();
+                renderLinkChips();
+                linkTagInput.value = '';
+            });
+        }
+    }
+
+    // ── Tag chip input (upload modal) ──────────────────────────
+    const tagContainer = document.getElementById('dam-tag-chips');
+    const tagInput     = document.getElementById('dam-tag-input');
+    if (tagContainer && tagInput) {
+        const tags = new Set();
+
+        function renderChips() {
+            // Tüm chip'leri ve hidden input'ları temizle
+            tagContainer.querySelectorAll('.dam-chip, input[name="tags[]"]').forEach(n => n.remove());
+            tags.forEach(function(tag){
+                const chip = document.createElement('span');
+                chip.className = 'dam-chip';
+                chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#e0e7ff;color:#3730a3;border-radius:99px;font-size:11px;font-weight:600;';
+                chip.textContent = tag;
+                const x = document.createElement('button');
+                x.type = 'button';
+                x.textContent = '×';
+                x.style.cssText = 'background:none;border:none;cursor:pointer;color:#3730a3;font-size:14px;line-height:1;padding:0;margin-left:2px;';
+                x.addEventListener('click', function(){ tags.delete(tag); renderChips(); });
+                chip.appendChild(x);
+                tagContainer.insertBefore(chip, tagInput);
+
+                const hidden = document.createElement('input');
+                hidden.type  = 'hidden';
+                hidden.name  = 'tags[]';
+                hidden.value = tag;
+                tagContainer.appendChild(hidden);
+            });
+        }
+
+        function addTag(raw) {
+            const t = (raw || '').trim().toLowerCase().replace(/[^a-z0-9ğüşıöç\-_ ]/gi, '').substring(0, 60);
+            if (t && !tags.has(t)) { tags.add(t); renderChips(); }
+        }
+
+        tagInput.addEventListener('keydown', function(e){
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                addTag(tagInput.value);
+                tagInput.value = '';
+            } else if (e.key === 'Backspace' && tagInput.value === '' && tags.size > 0) {
+                const last = Array.from(tags).pop();
+                tags.delete(last);
+                renderChips();
+            }
+        });
+
+        // Modal kapatıldığında input'u temizle (sonraki upload için)
+        const modal = document.getElementById('dam-upload-modal');
+        if (modal) {
+            modal.addEventListener('close', function(){
+                tags.clear();
+                renderChips();
+                tagInput.value = '';
+            });
+        }
+    }
+})();
+</script>
+@endsection

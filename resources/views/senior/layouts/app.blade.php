@@ -306,6 +306,11 @@
         </div>
 
         <div class="sidebar-footer">
+            @can('dam.view')
+            <a href="{{ route('senior.dam.index') }}" class="nav-link {{ request()->routeIs('senior.dam.*') ? 'active' : '' }}" style="margin-bottom:4px;">
+                <span class="nav-icon">📁</span> Dijital Varlıklar
+            </a>
+            @endcan
             <a href="{{ route('senior.handbook') }}" class="nav-link {{ request()->routeIs('senior.handbook') ? 'active' : '' }}" style="margin-bottom:4px;">
                 <span class="nav-icon">📖</span> Danışman Kılavuzu
             </a>

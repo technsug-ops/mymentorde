@@ -234,6 +234,11 @@
         </nav>
 
         <div class="sidebar-footer">
+            @can('dam.view')
+            <a href="{{ route('dealer.dam.index') }}" class="nav-link {{ request()->routeIs('dealer.dam.*') ? 'active' : '' }}" style="margin-bottom:6px;">
+                <span class="nav-icon">📁</span> Marka Kütüphanesi
+            </a>
+            @endcan
             <a href="{{ route('dealer.handbook') }}" class="nav-link {{ request()->routeIs('dealer.handbook') ? 'active' : '' }}" style="margin-bottom:6px;">
                 <span class="nav-icon">📖</span> Bayi Kılavuzu
             </a>

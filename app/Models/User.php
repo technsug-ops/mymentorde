@@ -101,6 +101,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
             'role.template.manage',
             'ticket.center.view',
             'ticket.center.route',
+            'dam.view', 'dam.download', 'dam.upload', 'dam.update', 'dam.delete', 'dam.folder.manage', 'dam.admin',
         ],
         self::ROLE_SYSTEM_ADMIN => [
             'config.view',
@@ -108,6 +109,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
             'notification.manage',
             'role.template.manage',
             'ticket.center.view',
+            'dam.view', 'dam.download',
         ],
         self::ROLE_OPERATIONS_ADMIN => [
             'config.view',
@@ -115,21 +117,37 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
             'approval.manage',
             'notification.manage',
             'ticket.center.view',
+            'dam.view', 'dam.download',
         ],
         self::ROLE_FINANCE_ADMIN => [
             'config.view',
             'revenue.manage',
             'notification.manage',
+            'dam.view', 'dam.download',
         ],
         self::ROLE_MARKETING_ADMIN => [
             'marketing.dashboard.view',
             'marketing.campaign.manage',
+            'dam.view', 'dam.download', 'dam.upload', 'dam.update', 'dam.delete', 'dam.folder.manage', 'dam.admin',
+        ],
+        self::ROLE_MARKETING_STAFF => [
+            'marketing.dashboard.view',
+            'dam.view', 'dam.download', 'dam.upload', 'dam.update', 'dam.folder.manage',
         ],
         self::ROLE_SALES_ADMIN => [
             'marketing.dashboard.view',
+            'dam.view', 'dam.download',
         ],
         self::ROLE_SALES_STAFF => [
             'marketing.dashboard.view',
+            'dam.view', 'dam.download',
+        ],
+        self::ROLE_SENIOR => [
+            'student.assignment.manage', 'student.card.view',
+            'dam.view', 'dam.download', 'dam.upload', 'dam.update',
+        ],
+        self::ROLE_DEALER => [
+            'dam.view', 'dam.download',
         ],
     ];
 
@@ -270,6 +288,16 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
     public function activeAwayPeriod(): ?\App\Models\UserAwayPeriod
     {
         return $this->awayPeriods()->active()->first();
+    }
+
+    public function favoriteAssets(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(
+            \App\Models\DigitalAsset::class,
+            'digital_asset_favorites',
+            'user_id',
+            'asset_id'
+        )->withTimestamps();
     }
 
     /** @var array<string>|null Request-scope memoization cache */

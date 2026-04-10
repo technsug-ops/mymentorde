@@ -228,6 +228,9 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::put('/manager/doc-templates/{tpl}',                  [\App\Http\Controllers\Manager\DocTemplateController::class, 'update'])->name('manager.doc-templates.update');
     Route::delete('/manager/doc-templates/{tpl}',               [\App\Http\Controllers\Manager\DocTemplateController::class, 'destroy'])->name('manager.doc-templates.destroy');
     Route::post('/manager/doc-templates/{tpl}/set-default',     [\App\Http\Controllers\Manager\DocTemplateController::class, 'setDefault'])->name('manager.doc-templates.set-default');
+
+    // ─── Digital Asset Management (DAM) — macro tanımı AppServiceProvider'da ──
+    Route::dam('manager/digital-assets', 'manager.dam.');
 });
 
 Route::middleware(['company.context', 'auth', 'manager.or.permission:student.assignment.manage'])->group(function (): void {

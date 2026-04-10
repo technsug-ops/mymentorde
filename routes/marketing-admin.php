@@ -326,4 +326,8 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->prefix('mktg-adm
 Route::middleware(['company.context', 'auth', 'marketing.access'])->prefix('mktg-admin')->group(function (): void {
     Route::get('/help', [HandbookController::class, 'marketing'])->name('marketing.handbook');
     Route::get('/help/download', [HandbookController::class, 'download'])->defaults('role', 'marketing')->name('marketing.handbook.download');
+
+    // ── Digital Asset Management (DAM) — macro tanımı AppServiceProvider'da ──
+    // Dış grup zaten prefix('mktg-admin') ekliyor, macro'ya sadece alt yol.
+    Route::dam('digital-assets', 'marketing-admin.dam.');
 });

@@ -83,6 +83,11 @@
         <a class="{{ request()->is('mktg-admin/dashboard') ? 'active' : '' }}" href="/mktg-admin/dashboard">
             {{ $panelMode === 'sales' ? 'Sales Dashboard' : 'Marketing Dashboard' }}
         </a>
+        @can('dam.view')
+        <a class="{{ request()->is('mktg-admin/digital-assets*') ? 'active' : '' }}" href="{{ route('marketing-admin.dam.index') }}">
+            📁 Dijital Varlıklar
+        </a>
+        @endcan
         @php $isComHub = request()->is('mktg-admin/tasks*') || request()->is('im*'); @endphp
         <div class="nav-group {{ $isComHub ? 'open has-active' : '' }}" id="ng-com-hub">
             <button class="nav-group-btn" type="button" data-toggle-group="ng-com-hub">
