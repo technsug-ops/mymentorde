@@ -1,0 +1,95 @@
+name: Deploy to KASSERVER (my.mentorde.com)
+
+# Her main branch push'unda otomatik tetiklenir
+# Manuel tetikleme için: GitHub > Actions > Deploy > "Run workflow"
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build and FTP Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── PHP + Composer ──────────────────────────────────────────
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, gd, fileinfo, zip, curl, openssl, bcmath
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies (production)
+        run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+      # ── Node + Vite build ───────────────────────────────────────
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build Vite assets
+        run: npm run build
+
+      # ── Deploy via FTP ──────────────────────────────────────────
+      # SamKirkland/FTP-Deploy-Action sadece değişen dosyaları yükler
+      # (ilk deploy uzun, sonrakiler hızlı)
+      - name: FTP Deploy to KASSERVER
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          protocol: ftps
+          port: 21
+          timeout: 120000
+          # Dahil edilmeyecek dosyalar (development + hassas):
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/node_modules/**
+            **/tests/**
+            **/.env
+            **/.env.*
+            **/storage/framework/cache/data/**
+            **/storage/framework/sessions/**
+            **/storage/framework/views/**
+            **/storage/logs/**
+            **/database/*.sqlite*
+            **/.vscode/**
+            **/.idea/**
+            **/phpunit.xml
+            **/package.json
+            **/package-lock.json
+            **/vite.config.js
+            **/postcss.config.js
+            **/tailwind.config.js
+            **/README.md
+            **/CLAUDE.md
+            **/_setup*.php
+            **/_kasserver_*.php
+            **/*.bak
+            **/memory/**
+            **/docs/**
+            **/playwright-report/**
+            **/test-results/**
