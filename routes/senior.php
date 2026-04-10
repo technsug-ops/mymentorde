@@ -55,7 +55,7 @@ Route::middleware(['company.context', 'auth', 'senior.role'])->group(function ()
     Route::post('/senior/profile', [SeniorProfileController::class, 'updateProfile'])->middleware('throttle:10,1')->name('senior.profile.update');
     Route::post('/senior/settings', [SeniorProfileController::class, 'updateSettings'])->middleware('throttle:10,1')->name('senior.settings.update');
     Route::post('/senior/settings/password', [SeniorProfileController::class, 'changePassword'])->middleware('throttle:5,1')->name('senior.settings.password');
-    Route::get('/senior/messages', fn() => redirect('/im'))->name('senior.messages');
+    Route::get('/senior/messages', [ConversationController::class, 'senior'])->name('senior.messages');
     Route::post('/senior/messages/{thread}/send', [ConversationController::class, 'seniorSend'])->name('senior.messages.send');
     Route::post('/senior/messages/{thread}/typing', [ConversationController::class, 'markAdvisorTyping'])->middleware('throttle:60,1')->name('senior.messages.typing');
     Route::get('/senior/document-builder', [SeniorDashboardController::class, 'documentBuilder'])->name('senior.document-builder');
