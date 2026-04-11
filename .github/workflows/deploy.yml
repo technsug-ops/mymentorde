@@ -57,70 +57,66 @@ jobs:
       - name: Install lftp
         run: sudo apt-get install -y lftp
 
-      - name: Deploy via lftp (FTPS)
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
-        shell: bash
+      - name: Write exclude file (Python)
+        shell: python
         run: |
-          set -e
-          echo "=== lftp version ==="
-          lftp --version | head -3
-
-          # ── Exclude listesi: regex, her satır bir pattern ─────────────
-          cat > /tmp/lftp-excludes.txt <<'EXCLUDES'
-          ^\.git/
-          ^\.github/
-          ^\.gitignore$
-          ^\.gitattributes$
-          /\.gitignore$
-          /\.gitattributes$
+          content = """^\\.git/
+          ^\\.github/
+          ^\\.gitignore$
+          ^\\.gitattributes$
+          /\\.gitignore$
+          /\\.gitattributes$
           ^node_modules/
           ^tests/
-          ^\.env$
-          ^\.env\.
+          ^\\.env$
+          ^\\.env\\.
           ^storage/framework/cache/data/
           ^storage/framework/sessions/
           ^storage/framework/views/
           ^storage/logs/
-          ^database/database\.sqlite$
-          ^database/.*\.sqlite$
-          ^database/.*\.sqlite-
-          ^\.vscode/
-          ^\.idea/
-          ^\.editorconfig$
-          ^\.phpactor\.json$
-          ^\.phpunit\.result\.cache$
-          ^phpunit\.xml$
-          ^package\.json$
-          ^package-lock\.json$
-          ^vite\.config\.js$
-          ^postcss\.config\.js$
-          ^tailwind\.config\.js$
-          ^playwright\.config\.js$
-          ^playwright\.dana\.config\.js$
-          ^README\.md$
-          ^CLAUDE\.md$
-          ^_setup.*\.php$
-          ^_kasserver_.*\.php$
-          \.bak$
+          ^database/database\\.sqlite$
+          ^database/.*\\.sqlite$
+          ^database/.*\\.sqlite-
+          ^\\.vscode/
+          ^\\.idea/
+          ^\\.editorconfig$
+          ^\\.phpactor\\.json$
+          ^\\.phpunit\\.result\\.cache$
+          ^phpunit\\.xml$
+          ^package\\.json$
+          ^package-lock\\.json$
+          ^vite\\.config\\.js$
+          ^postcss\\.config\\.js$
+          ^tailwind\\.config\\.js$
+          ^playwright\\.config\\.js$
+          ^playwright\\.dana\\.config\\.js$
+          ^README\\.md$
+          ^CLAUDE\\.md$
+          ^_setup.*\\.php$
+          ^_kasserver_.*\\.php$
+          \\.bak$
           ^memory/
           ^docs/
           ^playwright-report/
           ^test-results/
-          ^Homestead\.
-          ^Thumbs\.db$
-          ^\.DS_Store$
-          EXCLUDES
-          echo "=== Exclude file created ==="
-          wc -l /tmp/lftp-excludes.txt
+          ^Homestead\\.
+          ^Thumbs\\.db$
+          ^\\.DS_Store$
+          """
+          # Indent'i temizle
+          lines = [line.strip() for line in content.strip().split("\n")]
+          with open("/tmp/lftp-excludes.txt", "w") as f:
+              f.write("\n".join(lines) + "\n")
+          print(f"Wrote {len(lines)} exclude patterns")
 
-          # ── lftp deploy: -e flag ile tek satır komut string'i ─────────
-          # Her komut noktalı virgül ile ayrılır, lftp tek string olarak parse eder
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "ftp://$FTP_HOST" <<LFTPCMD || true
-          set ftp:ssl-force true
+      - name: Write lftp script (Python)
+        env:
+          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
+        shell: python
+        run: |
+          import os
+          server_dir = os.environ["FTP_SERVER_DIR"]
+          script = f"""set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ftp:ssl-allow true
           set ssl:verify-certificate no
@@ -130,10 +126,29 @@ jobs:
           set ftp:passive-mode true
           set mirror:parallel-transfer-count 3
           set cmd:fail-exit no
-          mirror -R --parallel=3 --only-newer --verbose --ignore-time --no-perms --exclude-rx-from=/tmp/lftp-excludes.txt ./ "$FTP_SERVER_DIR"
+          mirror -R --parallel=3 --only-newer --verbose --ignore-time --no-perms --exclude-rx-from=/tmp/lftp-excludes.txt ./ "{server_dir}"
           bye
-          LFTPCMD
-          echo "=== Deploy step complete ==="
+          """
+          lines = [line.strip() for line in script.strip().split("\n")]
+          with open("/tmp/deploy.lftp", "w") as f:
+              f.write("\n".join(lines) + "\n")
+          print(f"Wrote {len(lines)} lftp commands")
+
+      - name: Deploy via lftp (FTPS)
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        shell: bash
+        run: |
+          lftp --version | head -3
+          echo "--- deploy.lftp content ---"
+          cat /tmp/deploy.lftp
+          echo "--- excludes content ---"
+          head -20 /tmp/lftp-excludes.txt
+          echo "--- starting lftp ---"
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "ftp://$FTP_HOST" -f /tmp/deploy.lftp || true
+          echo "--- deploy complete ---"
           # Dahil edilmeyecek dosyalar (development + hassas):
           exclude: |
             **/.git*
