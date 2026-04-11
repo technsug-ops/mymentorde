@@ -57,9 +57,20 @@ jobs:
       - name: Install lftp
         run: sudo apt-get install -y lftp
 
-      - name: Build lftp exclude file
+      - name: Deploy via lftp (FTPS)
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
+        shell: bash
         run: |
-          cat > /tmp/lftp-excludes.txt <<'EOF'
+          set -e
+          echo "=== lftp version ==="
+          lftp --version | head -3
+
+          # ── Exclude listesi: regex, her satır bir pattern ─────────────
+          cat > /tmp/lftp-excludes.txt <<'EXCLUDES'
           ^\.git/
           ^\.github/
           ^\.gitignore$
@@ -102,18 +113,13 @@ jobs:
           ^Homestead\.
           ^Thumbs\.db$
           ^\.DS_Store$
-          EOF
-          echo "Exclude file:"
-          cat /tmp/lftp-excludes.txt
+          EXCLUDES
+          echo "=== Exclude file created ==="
+          wc -l /tmp/lftp-excludes.txt
 
-      - name: Build lftp script
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
-        run: |
-          cat > /tmp/deploy.lftp <<LFTP
+          # ── lftp deploy: -e flag ile tek satır komut string'i ─────────
+          # Her komut noktalı virgül ile ayrılır, lftp tek string olarak parse eder
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "ftp://$FTP_HOST" <<LFTPCMD || true
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ftp:ssl-allow true
@@ -124,15 +130,10 @@ jobs:
           set ftp:passive-mode true
           set mirror:parallel-transfer-count 3
           set cmd:fail-exit no
-          open -u "$FTP_USERNAME","$FTP_PASSWORD" "ftp://$FTP_HOST"
           mirror -R --parallel=3 --only-newer --verbose --ignore-time --no-perms --exclude-rx-from=/tmp/lftp-excludes.txt ./ "$FTP_SERVER_DIR"
           bye
-          LFTP
-
-      - name: Deploy via lftp (FTPS)
-        run: |
-          lftp -f /tmp/deploy.lftp || echo "[deploy] lftp finished with non-zero (may be acceptable for stray files)"
-          echo "Deploy step complete."
+          LFTPCMD
+          echo "=== Deploy step complete ==="
           # Dahil edilmeyecek dosyalar (development + hassas):
           exclude: |
             **/.git*
