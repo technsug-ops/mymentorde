@@ -11,14 +11,11 @@ use Symfony\Component\HttpFoundation\Response;
 class Require2FA
 {
     // Bu roller için 2FA zorunlu.
-    // GEÇİCİ: Production'da 2FA setup sayfası 500 hatası veriyor.
-    // 2FA bug'ı ayrı bir görevle düzeltilecek, şimdilik bypass edildi.
-    // TODO: 2FA setup controller'ı debug et, sonra ROL'leri geri ekle.
     private const ENFORCED_ROLES = [
-        // User::ROLE_MANAGER,
-        // User::ROLE_SYSTEM_ADMIN,
-        // User::ROLE_OPERATIONS_ADMIN,
-        // User::ROLE_FINANCE_ADMIN,
+        User::ROLE_MANAGER,
+        User::ROLE_SYSTEM_ADMIN,
+        User::ROLE_OPERATIONS_ADMIN,
+        User::ROLE_FINANCE_ADMIN,
     ];
 
     public function handle(Request $request, Closure $next): Response
