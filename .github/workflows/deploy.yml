@@ -13,11 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ── Checkout ────────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ── PHP + Composer ──────────────────────────────────────────
       - name: Setup PHP 8.4
         uses: shivammathur/setup-php@v2
         with:
@@ -36,7 +34,6 @@ jobs:
       - name: Install Composer dependencies (production)
         run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
 
-      # ── Node + Vite build ───────────────────────────────────────
       - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
@@ -49,153 +46,13 @@ jobs:
       - name: Build Vite assets
         run: npm run build
 
-      # ── Deploy via FTP ──────────────────────────────────────────
-      # SamKirkland/FTP-Deploy-Action sadece değişen dosyaları yükler
-      # (ilk deploy uzun, sonrakiler hızlı)
-      # LFTP: KASSERVER ile basic-ftp'den (SamKirkland action) çok daha uyumlu.
-      # Mirror (--delete-first, --only-newer) ile sadece değişen dosyaları gönderir.
       - name: Install lftp
         run: sudo apt-get install -y lftp
-
-      - name: Write exclude file (Python)
-        shell: python
-        run: |
-          content = """^\\.git/
-          ^\\.github/
-          ^\\.gitignore$
-          ^\\.gitattributes$
-          /\\.gitignore$
-          /\\.gitattributes$
-          ^node_modules/
-          ^tests/
-          ^\\.env$
-          ^\\.env\\.
-          ^storage/framework/cache/data/
-          ^storage/framework/sessions/
-          ^storage/framework/views/
-          ^storage/logs/
-          ^database/database\\.sqlite$
-          ^database/.*\\.sqlite$
-          ^database/.*\\.sqlite-
-          ^\\.vscode/
-          ^\\.idea/
-          ^\\.editorconfig$
-          ^\\.phpactor\\.json$
-          ^\\.phpunit\\.result\\.cache$
-          ^phpunit\\.xml$
-          ^package\\.json$
-          ^package-lock\\.json$
-          ^vite\\.config\\.js$
-          ^postcss\\.config\\.js$
-          ^tailwind\\.config\\.js$
-          ^playwright\\.config\\.js$
-          ^playwright\\.dana\\.config\\.js$
-          ^README\\.md$
-          ^CLAUDE\\.md$
-          ^_setup.*\\.php$
-          ^_kasserver_.*\\.php$
-          \\.bak$
-          ^memory/
-          ^docs/
-          ^playwright-report/
-          ^test-results/
-          ^Homestead\\.
-          ^Thumbs\\.db$
-          ^\\.DS_Store$
-          """
-          # Indent'i temizle
-          lines = [line.strip() for line in content.strip().split("\n")]
-          with open("/tmp/lftp-excludes.txt", "w") as f:
-              f.write("\n".join(lines) + "\n")
-          print(f"Wrote {len(lines)} exclude patterns")
-
-      - name: Write lftp script (Python)
-        env:
-          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
-        shell: python
-        run: |
-          import os
-          server_dir = os.environ["FTP_SERVER_DIR"]
-          script = f"""set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ftp:ssl-allow true
-          set ssl:verify-certificate no
-          set net:timeout 30
-          set net:max-retries 3
-          set net:reconnect-interval-base 5
-          set ftp:passive-mode true
-          set mirror:parallel-transfer-count 3
-          set cmd:fail-exit no
-          mirror -R --parallel=3 --only-newer --verbose --ignore-time --no-perms --exclude-rx-from=/tmp/lftp-excludes.txt ./ "{server_dir}"
-          bye
-          """
-          lines = [line.strip() for line in script.strip().split("\n")]
-          with open("/tmp/deploy.lftp", "w") as f:
-              f.write("\n".join(lines) + "\n")
-          print(f"Wrote {len(lines)} lftp commands")
 
       - name: Deploy via lftp (FTPS)
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-        shell: python
-        run: |
-          import os, subprocess, sys
-
-          host = os.environ["FTP_HOST"]
-          user = os.environ["FTP_USERNAME"]
-          password = os.environ["FTP_PASSWORD"]
-
-          print("=== lftp version ===")
-          subprocess.run(["lftp", "--version"], check=False)
-
-          print("=== Reading lftp script ===")
-          with open("/tmp/deploy.lftp") as f:
-              script_content = f.read()
-          print(script_content)
-
-          print("=== Starting lftp deploy ===")
-          # lftp'yi stdin üzerinden besle — -f flag'i bu lftp versiyonunda yok,
-          # -c flag multi-line script için güvenilmez, stdin piping en temiz yol
-          result = subprocess.run(
-              ["lftp", "-u", f"{user},{password}", f"ftp://{host}"],
-              input=script_content,
-              text=True,
-              capture_output=False,
-          )
-          print(f"=== lftp exit code: {result.returncode} ===")
-          # Exit code non-zero olsa bile workflow'u fail etme
-          # (stray file failures acceptable)
-          sys.exit(0)
-          # Dahil edilmeyecek dosyalar (development + hassas):
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/.github/**
-            **/node_modules/**
-            **/tests/**
-            **/.env
-            **/.env.*
-            **/storage/framework/cache/data/**
-            **/storage/framework/sessions/**
-            **/storage/framework/views/**
-            **/storage/logs/**
-            **/database/*.sqlite*
-            **/.vscode/**
-            **/.idea/**
-            **/phpunit.xml
-            **/package.json
-            **/package-lock.json
-            **/vite.config.js
-            **/postcss.config.js
-            **/tailwind.config.js
-            **/README.md
-            **/CLAUDE.md
-            **/_setup*.php
-            **/_kasserver_*.php
-            **/*.bak
-            **/memory/**
-            **/docs/**
-            **/playwright-report/**
-            **/test-results/**
+          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
+        run: python3 scripts/lftp-deploy.py
