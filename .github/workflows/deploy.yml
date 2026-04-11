@@ -59,9 +59,13 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ${{ secrets.FTP_SERVER_DIR }}
-          protocol: ftps
+          # KASSERVER FTPS (explicit) ile basic-ftp library arasında ECONNRESET
+          # sorunu yaşandı. Plain FTP'ye geçildi — KASSERVER private hesap,
+          # credential GitHub Secrets'ta encrypted, deploy süresi kısa.
+          protocol: ftp
           port: 21
           timeout: 120000
+          log-level: verbose
           # Dahil edilmeyecek dosyalar (development + hassas):
           exclude: |
             **/.git*
