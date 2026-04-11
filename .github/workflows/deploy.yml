@@ -139,16 +139,35 @@ jobs:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-        shell: bash
+        shell: python
         run: |
-          lftp --version | head -3
-          echo "--- deploy.lftp content ---"
-          cat /tmp/deploy.lftp
-          echo "--- excludes content ---"
-          head -20 /tmp/lftp-excludes.txt
-          echo "--- starting lftp ---"
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "ftp://$FTP_HOST" -f /tmp/deploy.lftp || true
-          echo "--- deploy complete ---"
+          import os, subprocess, sys
+
+          host = os.environ["FTP_HOST"]
+          user = os.environ["FTP_USERNAME"]
+          password = os.environ["FTP_PASSWORD"]
+
+          print("=== lftp version ===")
+          subprocess.run(["lftp", "--version"], check=False)
+
+          print("=== Reading lftp script ===")
+          with open("/tmp/deploy.lftp") as f:
+              script_content = f.read()
+          print(script_content)
+
+          print("=== Starting lftp deploy ===")
+          # lftp'yi stdin üzerinden besle — -f flag'i bu lftp versiyonunda yok,
+          # -c flag multi-line script için güvenilmez, stdin piping en temiz yol
+          result = subprocess.run(
+              ["lftp", "-u", f"{user},{password}", f"ftp://{host}"],
+              input=script_content,
+              text=True,
+              capture_output=False,
+          )
+          print(f"=== lftp exit code: {result.returncode} ===")
+          # Exit code non-zero olsa bile workflow'u fail etme
+          # (stray file failures acceptable)
+          sys.exit(0)
           # Dahil edilmeyecek dosyalar (development + hassas):
           exclude: |
             **/.git*
