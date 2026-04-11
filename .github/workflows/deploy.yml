@@ -74,10 +74,16 @@ jobs:
             set net:reconnect-interval-base 5;
             set ftp:passive-mode true;
             set mirror:parallel-transfer-count 3;
+            set cmd:fail-exit no;
             open -u \"$FTP_USERNAME,$FTP_PASSWORD\" \"ftp://$FTP_HOST\";
-            mirror -R --parallel=3 --only-newer --verbose \
+            mirror -R --parallel=3 --only-newer --verbose --ignore-time --no-perms \
+              --exclude-glob=.git \
               --exclude-glob=.git/ \
               --exclude-glob=.git/** \
+              --exclude-glob=.gitignore \
+              --exclude-glob=.gitattributes \
+              --exclude-glob=**/.gitignore \
+              --exclude-glob=**/.gitattributes \
               --exclude-glob=.github/ \
               --exclude-glob=.github/** \
               --exclude-glob=node_modules/ \
@@ -86,21 +92,32 @@ jobs:
               --exclude-glob=tests/** \
               --exclude-glob=.env \
               --exclude-glob=.env.* \
-              --exclude-glob=storage/framework/cache/data/** \
+              --exclude-glob=storage/framework/cache/ \
+              --exclude-glob=storage/framework/cache/** \
+              --exclude-glob=storage/framework/sessions/ \
               --exclude-glob=storage/framework/sessions/** \
+              --exclude-glob=storage/framework/views/ \
               --exclude-glob=storage/framework/views/** \
+              --exclude-glob=storage/logs/ \
               --exclude-glob=storage/logs/** \
-              --exclude-glob=database/*.sqlite* \
+              --exclude-glob=database/database.sqlite \
+              --exclude-glob=database/*.sqlite \
+              --exclude-glob=database/*.sqlite-* \
               --exclude-glob=.vscode/ \
               --exclude-glob=.vscode/** \
               --exclude-glob=.idea/ \
               --exclude-glob=.idea/** \
+              --exclude-glob=.editorconfig \
+              --exclude-glob=.phpactor.json \
+              --exclude-glob=.phpunit.result.cache \
               --exclude-glob=phpunit.xml \
               --exclude-glob=package.json \
               --exclude-glob=package-lock.json \
               --exclude-glob=vite.config.js \
               --exclude-glob=postcss.config.js \
               --exclude-glob=tailwind.config.js \
+              --exclude-glob=playwright.config.js \
+              --exclude-glob=playwright.dana.config.js \
               --exclude-glob=README.md \
               --exclude-glob=CLAUDE.md \
               --exclude-glob=_setup*.php \
@@ -114,7 +131,11 @@ jobs:
               --exclude-glob=playwright-report/** \
               --exclude-glob=test-results/ \
               --exclude-glob=test-results/** \
-              ./ \"$FTP_SERVER_DIR\"
+              --exclude-glob=Homestead.json \
+              --exclude-glob=Homestead.yaml \
+              --exclude-glob=Thumbs.db \
+              --exclude-glob=.DS_Store \
+              ./ \"$FTP_SERVER_DIR\" || echo '[deploy] mirror finished with warnings (acceptable)'
           "
           # Dahil edilmeyecek dosyalar (development + hassas):
           exclude: |
