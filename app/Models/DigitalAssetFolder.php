@@ -37,11 +37,17 @@ class DigitalAssetFolder extends Model
 
     /**
      * Bu klasör verilen role açık mı?
-     * null/boş = herkes (DAM izni olan tüm roller).
+     * null/boş allowed_roles = herkes (DAM izni olan tüm roller).
+     * Manager ve admin türü roller allowed_roles kısıtlamasını bypass eder.
      */
     public function isAccessibleByRole(?string $role): bool
     {
         if (empty($this->allowed_roles) || !is_array($this->allowed_roles)) {
+            return true;
+        }
+        // Admin-level roles her zaman tüm klasörleri görür — kısıtlamayı by-pass ederler
+        $adminRoles = ['manager', 'system_admin', 'operations_admin', 'marketing_admin', 'sales_admin', 'finance_admin'];
+        if (in_array((string) $role, $adminRoles, true)) {
             return true;
         }
         return in_array((string) $role, $this->allowed_roles, true);
