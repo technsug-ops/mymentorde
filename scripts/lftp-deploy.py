@@ -87,6 +87,9 @@ def main() -> int:
     print(f"=== Wrote {len(EXCLUDE_PATTERNS)} exclude patterns to {exclude_path} ===")
 
     # ── Build lftp commands ───────────────────────────────────────
+    # Normalize server_dir — avoid double slashes when concatenating build path
+    build_dir = server_dir.rstrip("/") + "/public/build/"
+
     lftp_commands = [
         "set ftp:ssl-force true",
         "set ftp:ssl-protect-data true",
@@ -98,11 +101,21 @@ def main() -> int:
         "set ftp:passive-mode true",
         "set mirror:parallel-transfer-count 3",
         "set cmd:fail-exit no",
+        # Main mirror — ana repo (vendor, app, routes, etc.).
+        # --only-newer kaldırıldı: bazı lftp sürümleri yeni hash'li asset
+        # dosyalarını algılayamıyordu (B2 JS bundle prod'a inmedi).
+        # Default davranış: size+time karşılaştır, farklı olanları upload et.
         (
-            "mirror -R --parallel=3 --only-newer --verbose "
-            "--ignore-time --no-perms "
+            "mirror -R --parallel=3 --verbose --no-perms "
             f"--exclude-rx-from={exclude_path} "
             f'./ "{server_dir}"'
+        ),
+        # Build assets için ayrıca explicit force mirror — cache/hash sorunlarını
+        # bypass eder, public/build her zaman source ile eşleşsin. --delete
+        # eski hash'li Vite chunk'ları temizler.
+        (
+            "mirror -R --parallel=3 --verbose --no-perms --delete "
+            f'./public/build/ "{build_dir}"'
         ),
         "bye",
     ]
