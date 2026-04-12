@@ -25,7 +25,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     Route::post('/services/select-package', [GuestWorkflowController::class, 'selectPackage'])->middleware('throttle:60,1')->name('guest.services.select-package');
     Route::post('/services/add-extra', [GuestWorkflowController::class, 'addExtraService'])->middleware('throttle:60,1')->name('guest.services.add-extra');
     Route::delete('/services/remove-extra/{extraCode}', [GuestWorkflowController::class, 'removeExtraService'])->middleware('throttle:60,1')->name('guest.services.remove-extra');
-    Route::post('/services/confirm', [GuestWorkflowController::class, 'confirmPackage'])->middleware('throttle:10,1')->name('guest.services.confirm');
+    Route::post('/services/confirm', [GuestWorkflowController::class, 'confirmPackage'])->middleware('throttle:60,1')->name('guest.services.confirm');
 
     // ── Sözleşme ─────────────────────────────────────────────────────────────
     Route::get('/contract', [GuestPortalController::class, 'contract'])->name('guest.contract');

@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             CmsContentSeeder::class,
             ContentHubSeeder::class,
             ContentHubExtraSeeder::class,
+            DocumentCategoryFromConfigSeeder::class,
         ]);
     }
 }
