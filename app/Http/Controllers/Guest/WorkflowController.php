@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Guest;
 
 use App\Http\Controllers\Controller;
+use App\Models\DmMessage;
 use App\Models\DmThread;
 use App\Models\GuestApplication;
 use App\Models\GuestFeedback;

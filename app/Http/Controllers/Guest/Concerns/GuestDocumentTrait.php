@@ -8,6 +8,7 @@ use App\Models\GuestApplication;
 use App\Models\GuestRequiredDocument;
 use App\Rules\ValidFileMagicBytes;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -16,14 +17,30 @@ trait GuestDocumentTrait
     public function uploadDocument(Request $request)
     {
         $guest = $this->resolveGuest($request);
-        abort_if(!$guest, 404, 'Guest kaydi bulunamadi.');
+        if (!$guest) {
+            Log::warning('guest.upload: resolveGuest returned null', [
+                'user_id'           => (int) ($request->user()?->id ?? 0),
+                'user_email'        => (string) ($request->user()?->email ?? ''),
+                'user_company_id'   => (int) ($request->user()?->company_id ?? 0),
+                'current_company_id'=> app()->bound('current_company_id') ? (int) app('current_company_id') : null,
+                'category_code'     => (string) $request->input('category_code', ''),
+            ]);
+            abort(404, 'Guest kaydi bulunamadi.');
+        }
 
         $data = $request->validate([
             'category_code' => ['required', 'string', 'max:64'],
             'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx,webp', 'max:10240', new ValidFileMagicBytes()],
         ]);
 
-        $category = DocumentCategory::query()->where('code', $data['category_code'])->firstOrFail();
+        $category = DocumentCategory::query()->where('code', $data['category_code'])->first();
+        if (!$category) {
+            Log::warning('guest.upload: DocumentCategory not found', [
+                'category_code' => (string) $data['category_code'],
+                'guest_id'      => (int) $guest->id,
+            ]);
+            abort(404, 'Belge kategorisi bulunamadi: ' . $data['category_code']);
+        }
         $file = $request->file('file');
         $ownerId = $this->resolveDocumentOwnerId($guest);
         $allowedDocExts = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'webp'];
