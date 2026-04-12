@@ -364,20 +364,43 @@ class MessageCenterController extends Controller
             ? Str::limit($messageText, 220, '...')
             : '📎 '.$attachmentName;
 
-        $thread->forceFill([
-            'last_message_preview' => $preview,
-            'last_message_at'      => now(),
-            'status'               => 'open',
-            'last_advisor_reply_at' => now(),
-            'next_response_due_at' => null,
-        ])->save();
+        try {
+            $thread->forceFill([
+                'last_message_preview' => $preview,
+                'last_message_at'      => now(),
+                'status'               => 'open',
+                'last_advisor_reply_at' => now(),
+                'next_response_due_at' => null,
+            ])->save();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('messages-center.send: thread update failed', [
+                'thread_id' => (int) $thread->id,
+                'error'     => $e->getMessage(),
+            ]);
+        }
 
-        $this->queueParticipantNotification($thread, $preview, (string) $user->email);
+        // Notifications + auto-reply are side-effects — a failure here must NOT
+        // break the send response. The message is already persisted.
+        try {
+            $this->queueParticipantNotification($thread, $preview, (string) $user->email);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('messages-center.send: notification failed', [
+                'thread_id' => (int) $thread->id,
+                'error'     => $e->getMessage(),
+            ]);
+        }
 
         // Participant (guest/student) mesaj gönderdi → advisor away ise auto-reply
         $isParticipantSender = in_array($user->role, ['guest', 'student'], true);
         if ($isParticipantSender) {
-            \App\Services\AutoReplyService::checkDmThread($thread, (int) $user->id);
+            try {
+                \App\Services\AutoReplyService::checkDmThread($thread, (int) $user->id);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('messages-center.send: auto-reply failed', [
+                    'thread_id' => (int) $thread->id,
+                    'error'     => $e->getMessage(),
+                ]);
+            }
         }
 
         if ($request->ajax() || $request->wantsJson()) {

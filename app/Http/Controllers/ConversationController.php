@@ -320,17 +320,34 @@ class ConversationController extends Controller
             $update['last_advisor_reply_at'] = now();
             $update['next_response_due_at'] = null;
         }
-        $thread->forceFill($update)->save();
-
-        if (!empty($data['quick_request'])) {
-            $this->taskAutomationService->ensureConversationQuickRequestTask($thread);
+        try {
+            $thread->forceFill($update)->save();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('conversation.storeMessage: thread update failed', [
+                'thread_id' => (int) $thread->id,
+                'error'     => $e->getMessage(),
+            ]);
         }
-        if ($isParticipant) {
-            $this->taskAutomationService->ensureConversationResponseTask($thread, $sla);
-            $this->queueAdvisorNotification($thread, $preview, (string) ($request->user()?->email ?? 'system'));
-        } else {
-            $this->taskAutomationService->markConversationResponseDone($thread);
-            $this->queueParticipantNotification($thread, $preview, (string) ($request->user()?->email ?? 'system'));
+
+        // Tasks + notifications are side-effects — a failure here must NOT
+        // break the send (message is already persisted).
+        try {
+            if (!empty($data['quick_request'])) {
+                $this->taskAutomationService->ensureConversationQuickRequestTask($thread);
+            }
+            if ($isParticipant) {
+                $this->taskAutomationService->ensureConversationResponseTask($thread, $sla);
+                $this->queueAdvisorNotification($thread, $preview, (string) ($request->user()?->email ?? 'system'));
+            } else {
+                $this->taskAutomationService->markConversationResponseDone($thread);
+                $this->queueParticipantNotification($thread, $preview, (string) ($request->user()?->email ?? 'system'));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('conversation.storeMessage: side-effects failed', [
+                'thread_id' => (int) $thread->id,
+                'is_participant' => $isParticipant,
+                'error'     => $e->getMessage(),
+            ]);
         }
     }
 
