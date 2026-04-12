@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -50,6 +51,13 @@ class AppServiceProvider extends ServiceProvider
             throw new \RuntimeException(
                 'PHP fileinfo extension is required for file upload validation. Enable it in php.ini.'
             );
+        }
+
+        // KASSERVER reverse proxy X-Forwarded-Proto göndermiyor → Laravel request'i
+        // HTTP sanıyor → route() http:// URL üretiyor → form POST .htaccess 301'inde
+        // GET'e düşüyor → 405. Non-local'de şema'yı https'e sabitle.
+        if (!app()->environment('local')) {
+            URL::forceScheme('https');
         }
 
         // ── Permission-bazlı Gate fallback ─────────────────────────────────
