@@ -337,10 +337,26 @@
                                             <input class="{{ $required ? 'final-required' : '' }}" type="date" name="{{ $key }}" value="{{ $value }}" data-required="{{ $required ? '1' : '0' }}">
                                         @else
                                             @php
+                                                // B11: harf-only alanlar (şehir, ilçe, il, doğum yeri) — sayı/sembol kabul etmesin
+                                                $isTextOnly = in_array($key, [
+                                                    'application_city', 'district', 'province', 'birth_place',
+                                                    'father_birth_place', 'mother_birth_place',
+                                                ], true);
+
+                                                // B14: mezuniyet ortalaması — sadece sayı (0-100 veya 0-5, kullanıcı tercihine bağlı)
+                                                $isGrade = in_array($key, ['primary_grade', 'middle_grade', 'high_school_grade'], true);
+
+                                                $inputType = match(true) {
+                                                    $type === 'email' => 'email',
+                                                    $type === 'phone' => 'tel',
+                                                    $isGrade => 'number',
+                                                    default => 'text',
+                                                };
+
                                                 $inputmode = match(true) {
                                                     $type === 'email' => 'email',
                                                     $type === 'phone' => 'tel',
-                                                    $type === 'money' || str_contains($key, '_gpa') || $key === 'financial_budget_eur' => 'decimal',
+                                                    $isGrade || $type === 'money' || str_contains($key, '_gpa') || $key === 'financial_budget_eur' => 'decimal',
                                                     $key === 'postal_code' => 'numeric',
                                                     default => '',
                                                 };
@@ -350,13 +366,22 @@
                                                     'address_full' => 'street-address', 'postal_code' => 'postal-code',
                                                     'city' => 'address-level2', default => '',
                                                 };
+
+                                                $pattern = $isTextOnly
+                                                    ? "[A-Za-zçğıöşüÇĞİÖŞÜ\s\-.',]+"
+                                                    : '';
+                                                $patternTitle = $isTextOnly
+                                                    ? 'Sadece harf, boşluk ve tire kullanın (sayı içeremez)'
+                                                    : '';
                                             @endphp
                                             <input class="{{ $required ? 'final-required' : '' }}"
-                                                   type="{{ $type === 'email' ? 'email' : ($type === 'phone' ? 'tel' : 'text') }}"
+                                                   type="{{ $inputType }}"
                                                    name="{{ $key }}" value="{{ $value }}" maxlength="{{ $max }}"
                                                    placeholder="{{ $placeholder }}" data-required="{{ $required ? '1' : '0' }}"
                                                    @if($inputmode) inputmode="{{ $inputmode }}" @endif
-                                                   @if($autocomplete) autocomplete="{{ $autocomplete }}" @endif>
+                                                   @if($autocomplete) autocomplete="{{ $autocomplete }}" @endif
+                                                   @if($isGrade) step="0.01" min="0" max="100" @endif
+                                                   @if($pattern) pattern="{{ $pattern }}" title="{{ $patternTitle }}" @endif>
                                         @endif
                                         @error($key)
                                             <div class="field-error">{{ $message }}</div>
@@ -475,6 +500,44 @@
     updateStepBars();
     document.addEventListener('input', function(e){ if(e.target.closest('#guestRegistrationForm')) updateStepBars(); });
     document.addEventListener('change', function(e){ if(e.target.closest('#guestRegistrationForm')) updateStepBars(); });
+
+    // B15: Anne/baba doğum tarihi çocuğun doğum tarihinden önce olmalı (ve en az 12 yıl fark).
+    // Child dob değişince parent dob max'ını günceller; parent dob değişince çakışmayı native
+    // setCustomValidity ile gösterir. Submit sırasında browser engeller.
+    function _bdIso(v){ return (v || '').trim().slice(0, 10); }
+    function _syncParentDobConstraints(){
+        var f = document.getElementById('guestRegistrationForm');
+        if(!f) return;
+        var child = f.querySelector('[name="birth_date"]');
+        if(!child) return;
+        var childVal = _bdIso(child.value);
+        if(!childVal) return;
+        // Ebeveyn çocuğun doğumundan en az 12 yıl önce doğmuş olmalı.
+        var d = new Date(childVal);
+        if(isNaN(d)) return;
+        var maxDate = new Date(d.getFullYear() - 12, d.getMonth(), d.getDate());
+        var maxIso = maxDate.toISOString().slice(0, 10);
+        ['father_birth_date','mother_birth_date'].forEach(function(name){
+            var el = f.querySelector('[name="' + name + '"]');
+            if(!el) return;
+            el.max = maxIso;
+            // Value şu an kötüyse hata göster
+            var v = _bdIso(el.value);
+            if(v && v > maxIso) {
+                el.setCustomValidity('Doğum tarihi çocuğun doğum tarihinden önce ve en az 12 yıl büyük olmalı.');
+            } else {
+                el.setCustomValidity('');
+            }
+        });
+    }
+    document.addEventListener('change', function(e){
+        if(!e.target.closest('#guestRegistrationForm')) return;
+        var n = e.target.name || '';
+        if(n === 'birth_date' || n === 'father_birth_date' || n === 'mother_birth_date') {
+            _syncParentDobConstraints();
+        }
+    });
+    _syncParentDobConstraints();
 
     // Design toggle compat
     var _orig = window.__designToggle;
