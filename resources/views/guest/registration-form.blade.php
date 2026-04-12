@@ -539,6 +539,103 @@
     });
     _syncParentDobConstraints();
 
+    // B12: Eğitim seviyesi, tamamlanan son kademeyi belirler. Üst kademelerin
+    // alanları gizlenir + required kaldırılır ki submit'te zorunluluk tetiklenmesin.
+    //   middle_school → göster: primary, middle          | gizle: high, university
+    //   high_school   → göster: primary, middle, high    | gizle: university
+    //   bachelor/mas. → göster: hepsi
+    var _educationVisibility = {
+        middle_school: ['high_', 'university_'],
+        high_school:   ['university_'],
+        bachelor:      [],
+        master:        [],
+    };
+    function _isEducationField(key, prefixes){
+        for(var i=0;i<prefixes.length;i++){ if(key.indexOf(prefixes[i])===0) return true; }
+        return false;
+    }
+    function _applyEducationVisibility(){
+        var f = document.getElementById('guestRegistrationForm');
+        if(!f) return;
+        var sel = f.querySelector('[name="education_level"]');
+        if(!sel) return;
+        var level = String(sel.value || '');
+        var hidePrefixes = _educationVisibility[level] || [];
+        // Only apply to fields in the education_history section
+        f.querySelectorAll('[data-field-key]').forEach(function(fg){
+            var k = fg.dataset.fieldKey || '';
+            // Only manage the education kademe alanları (primary/middle/high/university)
+            if(!/^(primary_|middle_|high_|university_)/.test(k)) return;
+            // education_level select'i kendisini gizleme
+            if(k === 'education_level') return;
+            var shouldHide = _isEducationField(k, hidePrefixes);
+            fg.style.display = shouldHide ? 'none' : '';
+            // Required kaldır/geri al (server-side kontrol'ü ayrıca gereken alanları bypass eder)
+            var inp = fg.querySelector('input, select, textarea');
+            if(inp) {
+                if(shouldHide) {
+                    inp.dataset.origRequired = inp.dataset.required || '0';
+                    inp.dataset.required = '0';
+                    inp.classList.remove('final-required');
+                    inp.removeAttribute('required');
+                } else if(inp.dataset.origRequired === '1') {
+                    inp.dataset.required = '1';
+                    inp.classList.add('final-required');
+                }
+            }
+        });
+    }
+    document.addEventListener('change', function(e){
+        if(!e.target.closest('#guestRegistrationForm')) return;
+        if((e.target.name || '') === 'education_level') _applyEducationVisibility();
+    });
+    _applyEducationVisibility();
+
+    // B13: Eğitim tarihlerinin mantıklı sırada olmasını zorunlu kıl.
+    //   primary_end >= primary_start
+    //   middle_start >= primary_end
+    //   middle_end >= middle_start
+    //   high_start >= middle_end
+    //   high_end >= high_start
+    var _eduDateChain = [
+        ['primary_start_date', 'primary_end_date', 'İlkokul bitiş tarihi başlama tarihinden önce olamaz.'],
+        ['primary_end_date', 'middle_start_date', 'Ortaokul başlama tarihi ilkokul bitiş tarihinden önce olamaz.'],
+        ['middle_start_date', 'middle_end_date', 'Ortaokul bitiş tarihi başlama tarihinden önce olamaz.'],
+        ['middle_end_date', 'high_start_date', 'Lise başlama tarihi ortaokul bitiş tarihinden önce olamaz.'],
+        ['high_start_date', 'high_end_date', 'Lise bitiş tarihi başlama tarihinden önce olamaz.'],
+    ];
+    function _validateEduDates(){
+        var f = document.getElementById('guestRegistrationForm');
+        if(!f) return;
+        _eduDateChain.forEach(function(pair){
+            var aEl = f.querySelector('[name="' + pair[0] + '"]');
+            var bEl = f.querySelector('[name="' + pair[1] + '"]');
+            if(!aEl || !bEl) return;
+            // Hidden alanları kontrol etme
+            var aGroup = aEl.closest('.form-group');
+            var bGroup = bEl.closest('.form-group');
+            if((aGroup && aGroup.style.display === 'none') || (bGroup && bGroup.style.display === 'none')) {
+                bEl.setCustomValidity('');
+                return;
+            }
+            var a = (aEl.value || '').trim();
+            var b = (bEl.value || '').trim();
+            if(a && b && b < a) {
+                bEl.setCustomValidity(pair[2]);
+                bEl.min = a;
+            } else {
+                bEl.setCustomValidity('');
+                if(a) bEl.min = a;
+            }
+        });
+    }
+    document.addEventListener('change', function(e){
+        if(!e.target.closest('#guestRegistrationForm')) return;
+        var n = e.target.name || '';
+        if(/_(start|end)_date$/.test(n)) _validateEduDates();
+    });
+    _validateEduDates();
+
     // Design toggle compat
     var _orig = window.__designToggle;
     window.__designToggle = function(d){ if(_orig) _orig(d); setTimeout(function(){ document.documentElement.classList.toggle('jm-minimalist', d==='minimalist'); }, 50); };

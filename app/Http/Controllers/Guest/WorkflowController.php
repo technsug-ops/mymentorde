@@ -131,12 +131,20 @@ class WorkflowController extends Controller
         }
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
         $payload = $this->registrationFieldSchemaService->sanitizePayload($request->all(), $companyId);
+        $skipKeys = $this->educationSkippedKeys($payload);
         $missingErrors = [];
         foreach ($this->registrationFieldSchemaService->requiredKeys($companyId) as $key) {
+            if (in_array($key, $skipKeys, true)) {
+                continue;
+            }
             $val = $payload[$key] ?? null;
             if ($val === null || trim((string) $val) === '') {
                 $missingErrors[$key] = 'Bu alan zorunludur.';
             }
+        }
+        // B13: eğitim tarihleri mantıklı sırada mı
+        foreach ($this->educationDateOrderErrors($payload) as $f => $err) {
+            $missingErrors[$f] = $err;
         }
         if (!empty($missingErrors)) {
             return redirect()
@@ -554,6 +562,83 @@ class WorkflowController extends Controller
      * @param array<string,mixed> $payload
      * @return array<string,string>
      */
+    /**
+     * B12: Kullanıcının education_level seçimine göre üst kademe alanlarını
+     * required listesinden atla. "middle_school" seçildiyse lise ve üniversite
+     * alanları gereksizdir; "high_school" seçildiyse üniversite alanı gereksizdir.
+     *
+     * @param  array<string,mixed> $payload
+     * @return array<int,string>
+     */
+    private function educationSkippedKeys(array $payload): array
+    {
+        $level = strtolower(trim((string) ($payload['education_level'] ?? '')));
+
+        $highKeys = [
+            'high_start_date', 'high_end_date', 'high_school_name',
+            'high_school_type', 'high_school_grade',
+        ];
+        $universityKeys = [
+            'university_name', 'university_department',
+        ];
+
+        return match ($level) {
+            'middle_school' => array_merge($highKeys, $universityKeys),
+            'high_school'   => $universityKeys,
+            default         => [],
+        };
+    }
+
+    /**
+     * B13: Eğitim tarihlerinin mantıklı sırada olduğundan emin ol.
+     * Her tarih bir önceki kademenin bitişinden önce olamaz.
+     *
+     * @param  array<string,mixed> $payload
+     * @return array<string,string>
+     */
+    private function educationDateOrderErrors(array $payload): array
+    {
+        $chain = [
+            ['primary_start_date', 'primary_end_date', 'İlkokul bitiş tarihi başlama tarihinden önce olamaz.'],
+            ['primary_end_date', 'middle_start_date', 'Ortaokul başlama tarihi ilkokul bitiş tarihinden önce olamaz.'],
+            ['middle_start_date', 'middle_end_date', 'Ortaokul bitiş tarihi başlama tarihinden önce olamaz.'],
+            ['middle_end_date', 'high_start_date', 'Lise başlama tarihi ortaokul bitiş tarihinden önce olamaz.'],
+            ['high_start_date', 'high_end_date', 'Lise bitiş tarihi başlama tarihinden önce olamaz.'],
+        ];
+        $skipKeys = $this->educationSkippedKeys($payload);
+
+        $errors = [];
+        foreach ($chain as [$aKey, $bKey, $msg]) {
+            if (in_array($aKey, $skipKeys, true) || in_array($bKey, $skipKeys, true)) {
+                continue;
+            }
+            $a = trim((string) ($payload[$aKey] ?? ''));
+            $b = trim((string) ($payload[$bKey] ?? ''));
+            if ($a === '' || $b === '') {
+                continue;
+            }
+            if ($b < $a) {
+                $errors[$bKey] = $msg;
+            }
+        }
+
+        // B15: anne/baba doğum tarihi çocuğun doğum tarihinden en az 12 yıl önce olmalı
+        $childDob = trim((string) ($payload['birth_date'] ?? ''));
+        if ($childDob !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $childDob)) {
+            try {
+                $maxParentDob = (new \DateTimeImmutable($childDob))->modify('-12 years')->format('Y-m-d');
+                foreach (['father_birth_date', 'mother_birth_date'] as $pKey) {
+                    $pVal = trim((string) ($payload[$pKey] ?? ''));
+                    if ($pVal !== '' && $pVal > $maxParentDob) {
+                        $errors[$pKey] = 'Doğum tarihi çocuğun doğum tarihinden en az 12 yıl önce olmalı.';
+                    }
+                }
+            } catch (\Throwable) {}
+        }
+
+        return $errors;
+    }
+
     private function conditionalRequiredErrors(array $payload): array
     {
         $rules = [
