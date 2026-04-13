@@ -135,6 +135,37 @@ class GuestRegistrationFormCatalog
                 ],
             ],
             [
+                // Sadece marital_status=='married' seçildiğinde görünür
+                // (client-side JS + server-side conditionalRequired ile kontrol edilir)
+                'section_key' => 'spouse_info',
+                'section_order' => 65,
+                'title' => 'Eşinizle İlgili Bilgiler',
+                'fields' => [
+                    self::f('spouse_full_name', 'Eşinizin adı soyadı *', 'text', true, 180),
+                    self::f('spouse_birth_date', 'Eşinizin doğum tarihi *', 'date', true, 20),
+                    self::f('spouse_nationality', 'Eşinizin uyruğu *', 'text', true, 120),
+                    self::f('spouse_occupation', 'Eşinizin mesleği *', 'text', true, 120),
+                    self::f('marriage_date', 'Nikah tarihi *', 'date', true, 20),
+                    self::f('marriage_place', 'Nikah yeri (şehir/ülke) *', 'text', true, 180),
+                    self::f(
+                        'spouse_currently_in_germany',
+                        'Eşiniz şu an Almanya\'da mı? *',
+                        'select',
+                        true,
+                        10,
+                        options: self::yesNoOptions()
+                    ),
+                    self::f(
+                        'has_children',
+                        'Çocuğunuz var mı?',
+                        'select',
+                        false,
+                        10,
+                        options: self::yesNoOptions()
+                    ),
+                ],
+            ],
+            [
                 'section_key' => 'reference_extra',
                 'section_order' => 70,
                 'title' => 'Proje / Referans / Ek Bilgi',

@@ -591,6 +591,53 @@
     });
     _applyEducationVisibility();
 
+    // B20 (spouse): marital_status === 'married' ise "Eşinizle İlgili Bilgiler"
+    // section'ı ve alanları görünür, yoksa gizli + required kaldırılır.
+    var _spouseFieldKeys = [
+        'spouse_full_name','spouse_birth_date','spouse_nationality','spouse_occupation',
+        'marriage_date','marriage_place','spouse_currently_in_germany','has_children'
+    ];
+    function _applySpouseVisibility(){
+        var f = document.getElementById('guestRegistrationForm');
+        if(!f) return;
+        var sel = f.querySelector('[name="marital_status"]');
+        var show = sel && String(sel.value || '') === 'married';
+        // Section panel başlığı (spouse_info step) — data-field-key üzerinden değil,
+        // direkt kademe alanlarını tek tek yönet
+        _spouseFieldKeys.forEach(function(k){
+            var fg = f.querySelector('[data-field-key="' + k + '"]');
+            if(!fg) return;
+            fg.style.display = show ? '' : 'none';
+            var inp = fg.querySelector('input, select, textarea');
+            if(!inp) return;
+            if(show) {
+                // Geri aç — orij required'ı data-attr'dan geri yükle
+                if(inp.dataset.origSpouseRequired === '1') {
+                    inp.dataset.required = '1';
+                    inp.classList.add('final-required');
+                }
+            } else {
+                inp.dataset.origSpouseRequired = inp.dataset.required || '0';
+                inp.dataset.required = '0';
+                inp.classList.remove('final-required');
+                inp.removeAttribute('required');
+                inp.setCustomValidity('');
+            }
+        });
+        // Step panel'i (section) tamamen gizlemek için spouse_info panel'i bul
+        f.querySelectorAll('.grf-panel').forEach(function(panel){
+            var hasSpouseField = _spouseFieldKeys.some(function(k){
+                return !!panel.querySelector('[data-field-key="' + k + '"]');
+            });
+            if(hasSpouseField) panel.dataset.spouseSection = '1';
+        });
+    }
+    document.addEventListener('change', function(e){
+        if(!e.target.closest('#guestRegistrationForm')) return;
+        if((e.target.name || '') === 'marital_status') _applySpouseVisibility();
+    });
+    _applySpouseVisibility();
+
     // B13: Eğitim tarihleri — hem sıralama hem her kademenin minimum süresi.
     //   İlkokul: en az 4 yıl | Ortaokul: en az 3 yıl | Lise: en az 3 yıl
     //   Ayrıca kademeler arası sıralama: middle_start >= primary_end vb.

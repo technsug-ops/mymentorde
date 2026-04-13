@@ -454,6 +454,40 @@
         var fg = e.target.closest('.srf-form-group');
         if(fg) fg.classList.toggle('is-filled', e.target.value.trim() !== '');
     });
+
+    // Spouse fields conditional visibility (marital_status === 'married')
+    // Student registration form'da da aynı davranış — guest blade ile tutarlı.
+    var _spouseFieldKeys = [
+        'spouse_full_name','spouse_birth_date','spouse_nationality','spouse_occupation',
+        'marriage_date','marriage_place','spouse_currently_in_germany','has_children'
+    ];
+    function _applySpouseVisibilityStudent(){
+        var form = document.querySelector('form');
+        if(!form) return;
+        var sel = form.querySelector('[name="marital_status"]');
+        var show = sel && String(sel.value || '') === 'married';
+        _spouseFieldKeys.forEach(function(k){
+            var fg = form.querySelector('[data-field-key="' + k + '"]');
+            if(!fg) return;
+            fg.style.display = show ? '' : 'none';
+            var inp = fg.querySelector('input, select, textarea');
+            if(!inp) return;
+            if(show) {
+                if(inp.dataset.origSpouseRequired === '1') {
+                    inp.dataset.required = '1';
+                }
+            } else {
+                inp.dataset.origSpouseRequired = inp.dataset.required || '0';
+                inp.dataset.required = '0';
+                inp.removeAttribute('required');
+                inp.setCustomValidity('');
+            }
+        });
+    }
+    document.addEventListener('change', function(e){
+        if((e.target.name || '') === 'marital_status') _applySpouseVisibilityStudent();
+    });
+    _applySpouseVisibilityStudent();
 })();
 </script>
 @endsection

@@ -131,7 +131,10 @@ class WorkflowController extends Controller
         }
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
         $payload = $this->registrationFieldSchemaService->sanitizePayload($request->all(), $companyId);
-        $skipKeys = $this->educationSkippedKeys($payload);
+        $skipKeys = array_merge(
+            $this->registrationFieldSchemaService->educationSkippedKeys($payload),
+            $this->registrationFieldSchemaService->spouseSkippedKeys($payload),
+        );
         $missingErrors = [];
         foreach ($this->registrationFieldSchemaService->requiredKeys($companyId) as $key) {
             if (in_array($key, $skipKeys, true)) {
@@ -142,8 +145,8 @@ class WorkflowController extends Controller
                 $missingErrors[$key] = 'Bu alan zorunludur.';
             }
         }
-        // B13: eğitim tarihleri mantıklı sırada mı
-        foreach ($this->educationDateOrderErrors($payload) as $f => $err) {
+        // B13: eğitim tarihleri mantıklı sırada mı + B15 parent dob kontrolü
+        foreach ($this->registrationFieldSchemaService->educationDateOrderErrors($payload) as $f => $err) {
             $missingErrors[$f] = $err;
         }
         if (!empty($missingErrors)) {
@@ -562,115 +565,6 @@ class WorkflowController extends Controller
      * @param array<string,mixed> $payload
      * @return array<string,string>
      */
-    /**
-     * B12: Kullanıcının education_level seçimine göre üst kademe alanlarını
-     * required listesinden atla. "middle_school" seçildiyse lise ve üniversite
-     * alanları gereksizdir; "high_school" seçildiyse üniversite alanı gereksizdir.
-     *
-     * @param  array<string,mixed> $payload
-     * @return array<int,string>
-     */
-    private function educationSkippedKeys(array $payload): array
-    {
-        $level = strtolower(trim((string) ($payload['education_level'] ?? '')));
-
-        $highKeys = [
-            'high_start_date', 'high_end_date', 'high_school_name',
-            'high_school_type', 'high_school_grade',
-        ];
-        $universityKeys = [
-            'university_name', 'university_department',
-        ];
-
-        return match ($level) {
-            'middle_school' => array_merge($highKeys, $universityKeys),
-            'high_school'   => $universityKeys,
-            default         => [],
-        };
-    }
-
-    /**
-     * B13: Eğitim tarihlerinin mantıklı sırada olduğundan ve her kademenin
-     * minimum süresini doldurduğundan emin ol.
-     *   İlkokul: ≥ 4 yıl | Ortaokul: ≥ 3 yıl | Lise: ≥ 3 yıl
-     * Kademeler arası: bir sonraki kademe başlama tarihi >= öncekinin bitişi.
-     *
-     * @param  array<string,mixed> $payload
-     * @return array<string,string>
-     */
-    private function educationDateOrderErrors(array $payload): array
-    {
-        // [start_key, end_key, min_years, label]
-        $durationRules = [
-            ['primary_start_date', 'primary_end_date', 4, 'İlkokul'],
-            ['middle_start_date',  'middle_end_date',  3, 'Ortaokul'],
-            ['high_start_date',    'high_end_date',    3, 'Lise'],
-        ];
-        // Kademeler arası: next.start >= prev.end
-        $orderChain = [
-            ['primary_end_date', 'middle_start_date', 'Ortaokul başlama tarihi ilkokul bitiş tarihinden önce olamaz.'],
-            ['middle_end_date', 'high_start_date', 'Lise başlama tarihi ortaokul bitiş tarihinden önce olamaz.'],
-        ];
-        $skipKeys = $this->educationSkippedKeys($payload);
-        $errors = [];
-
-        // 1) Her kademe için duration + sıra kontrolü
-        foreach ($durationRules as [$sKey, $eKey, $minYears, $label]) {
-            if (in_array($sKey, $skipKeys, true) || in_array($eKey, $skipKeys, true)) {
-                continue;
-            }
-            $s = trim((string) ($payload[$sKey] ?? ''));
-            $e = trim((string) ($payload[$eKey] ?? ''));
-            if ($s === '' || $e === '') {
-                continue;
-            }
-            if ($e < $s) {
-                $errors[$eKey] = $label . ' bitiş tarihi başlama tarihinden önce olamaz.';
-                continue;
-            }
-            try {
-                $minEnd = (new \DateTimeImmutable($s))->modify('+' . $minYears . ' years')->format('Y-m-d');
-                if ($e < $minEnd) {
-                    $errors[$eKey] = $label . ' bitiş tarihi başlamadan en az ' . $minYears . ' yıl sonra olmalı.';
-                }
-            } catch (\Throwable) {}
-        }
-
-        // 2) Kademeler arası sıralama
-        foreach ($orderChain as [$aKey, $bKey, $msg]) {
-            if (in_array($aKey, $skipKeys, true) || in_array($bKey, $skipKeys, true)) {
-                continue;
-            }
-            if (isset($errors[$bKey])) {
-                continue; // zaten duration hatası var
-            }
-            $a = trim((string) ($payload[$aKey] ?? ''));
-            $b = trim((string) ($payload[$bKey] ?? ''));
-            if ($a === '' || $b === '') {
-                continue;
-            }
-            if ($b < $a) {
-                $errors[$bKey] = $msg;
-            }
-        }
-
-        // B15: anne/baba doğum tarihi çocuğun doğum tarihinden en az 12 yıl önce olmalı
-        $childDob = trim((string) ($payload['birth_date'] ?? ''));
-        if ($childDob !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $childDob)) {
-            try {
-                $maxParentDob = (new \DateTimeImmutable($childDob))->modify('-12 years')->format('Y-m-d');
-                foreach (['father_birth_date', 'mother_birth_date'] as $pKey) {
-                    $pVal = trim((string) ($payload[$pKey] ?? ''));
-                    if ($pVal !== '' && $pVal > $maxParentDob) {
-                        $errors[$pKey] = 'Doğum tarihi çocuğun doğum tarihinden en az 12 yıl önce olmalı.';
-                    }
-                }
-            } catch (\Throwable) {}
-        }
-
-        return $errors;
-    }
-
     private function conditionalRequiredErrors(array $payload): array
     {
         $rules = [

@@ -106,6 +106,135 @@ class GuestRegistrationFieldSchemaService
     }
 
     /**
+     * B12: Kullanıcının education_level seçimine göre üst kademe alanlarını
+     * required listesinden atla. "middle_school" seçildiyse lise ve üniversite
+     * alanları gereksizdir; "high_school" seçildiyse üniversite alanı gereksizdir.
+     *
+     * @param  array<string,mixed> $payload
+     * @return array<int,string>
+     */
+    public function educationSkippedKeys(array $payload): array
+    {
+        $level = strtolower(trim((string) ($payload['education_level'] ?? '')));
+
+        $highKeys = [
+            'high_start_date', 'high_end_date', 'high_school_name',
+            'high_school_type', 'high_school_grade',
+        ];
+        $universityKeys = [
+            'university_name', 'university_department',
+        ];
+
+        return match ($level) {
+            'middle_school' => array_merge($highKeys, $universityKeys),
+            'high_school'   => $universityKeys,
+            default         => [],
+        };
+    }
+
+    /**
+     * Spouse alanları yalnızca marital_status === 'married' ise required sayılır.
+     *
+     * @param  array<string,mixed> $payload
+     * @return array<int,string>
+     */
+    public function spouseSkippedKeys(array $payload): array
+    {
+        $maritalStatus = strtolower(trim((string) ($payload['marital_status'] ?? '')));
+        if ($maritalStatus === 'married') {
+            return [];
+        }
+        return [
+            'spouse_full_name',
+            'spouse_birth_date',
+            'spouse_nationality',
+            'spouse_occupation',
+            'marriage_date',
+            'marriage_place',
+            'spouse_currently_in_germany',
+            'has_children',
+        ];
+    }
+
+    /**
+     * B13: Eğitim tarihleri — her kademenin minimum süresini ve kademeler arası
+     * sıralamayı doğrular.
+     *   İlkokul ≥ 4 yıl | Ortaokul ≥ 3 yıl | Lise ≥ 3 yıl
+     *
+     * @param  array<string,mixed> $payload
+     * @return array<string,string>
+     */
+    public function educationDateOrderErrors(array $payload): array
+    {
+        // [start_key, end_key, min_years, label]
+        $durationRules = [
+            ['primary_start_date', 'primary_end_date', 4, 'İlkokul'],
+            ['middle_start_date',  'middle_end_date',  3, 'Ortaokul'],
+            ['high_start_date',    'high_end_date',    3, 'Lise'],
+        ];
+        $orderChain = [
+            ['primary_end_date', 'middle_start_date', 'Ortaokul başlama tarihi ilkokul bitiş tarihinden önce olamaz.'],
+            ['middle_end_date', 'high_start_date', 'Lise başlama tarihi ortaokul bitiş tarihinden önce olamaz.'],
+        ];
+        $skipKeys = $this->educationSkippedKeys($payload);
+        $errors = [];
+
+        foreach ($durationRules as [$sKey, $eKey, $minYears, $label]) {
+            if (in_array($sKey, $skipKeys, true) || in_array($eKey, $skipKeys, true)) {
+                continue;
+            }
+            $s = trim((string) ($payload[$sKey] ?? ''));
+            $e = trim((string) ($payload[$eKey] ?? ''));
+            if ($s === '' || $e === '') {
+                continue;
+            }
+            if ($e < $s) {
+                $errors[$eKey] = $label . ' bitiş tarihi başlama tarihinden önce olamaz.';
+                continue;
+            }
+            try {
+                $minEnd = (new \DateTimeImmutable($s))->modify('+' . $minYears . ' years')->format('Y-m-d');
+                if ($e < $minEnd) {
+                    $errors[$eKey] = $label . ' bitiş tarihi başlamadan en az ' . $minYears . ' yıl sonra olmalı.';
+                }
+            } catch (\Throwable) {}
+        }
+
+        foreach ($orderChain as [$aKey, $bKey, $msg]) {
+            if (in_array($aKey, $skipKeys, true) || in_array($bKey, $skipKeys, true)) {
+                continue;
+            }
+            if (isset($errors[$bKey])) {
+                continue;
+            }
+            $a = trim((string) ($payload[$aKey] ?? ''));
+            $b = trim((string) ($payload[$bKey] ?? ''));
+            if ($a === '' || $b === '') {
+                continue;
+            }
+            if ($b < $a) {
+                $errors[$bKey] = $msg;
+            }
+        }
+
+        // B15: parent dob vs child dob
+        $childDob = trim((string) ($payload['birth_date'] ?? ''));
+        if ($childDob !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $childDob)) {
+            try {
+                $maxParentDob = (new \DateTimeImmutable($childDob))->modify('-12 years')->format('Y-m-d');
+                foreach (['father_birth_date', 'mother_birth_date'] as $pKey) {
+                    $pVal = trim((string) ($payload[$pKey] ?? ''));
+                    if ($pVal !== '' && $pVal > $maxParentDob) {
+                        $errors[$pKey] = 'Doğum tarihi çocuğun doğum tarihinden en az 12 yıl önce olmalı.';
+                    }
+                }
+            } catch (\Throwable) {}
+        }
+
+        return $errors;
+    }
+
+    /**
      * DB kaydındaki type'ı döndür; application_country için 'select' olarak zorla.
      */
     private function resolveFieldType(GuestRegistrationField $row): string

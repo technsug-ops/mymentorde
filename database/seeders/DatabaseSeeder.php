@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             ContentHubSeeder::class,
             ContentHubExtraSeeder::class,
             DocumentCategoryFromConfigSeeder::class,
+            GuestRegistrationSpouseFieldsSeeder::class,
         ]);
     }
 }

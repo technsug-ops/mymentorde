@@ -127,12 +127,23 @@ class StudentWorkflowController extends Controller
         $companyId     = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
         $schemaService = app(GuestRegistrationFieldSchemaService::class);
         $payload       = $schemaService->sanitizePayload($request->all(), $companyId);
+        $skipKeys = array_merge(
+            $schemaService->educationSkippedKeys($payload),
+            $schemaService->spouseSkippedKeys($payload),
+        );
         $missingErrors = [];
         foreach ($schemaService->requiredKeys($companyId) as $key) {
+            if (in_array($key, $skipKeys, true)) {
+                continue;
+            }
             $val = $payload[$key] ?? null;
             if ($val === null || trim((string) $val) === '') {
                 $missingErrors[$key] = 'Bu alan zorunludur.';
             }
+        }
+        // B13/B15: eğitim tarih sırası + parent dob kontrolü
+        foreach ($schemaService->educationDateOrderErrors($payload) as $f => $err) {
+            $missingErrors[$f] = $err;
         }
         $existingDraft = is_array($guest->registration_form_draft) ? $guest->registration_form_draft : [];
         $mergedDraft   = array_merge($existingDraft, $payload);
