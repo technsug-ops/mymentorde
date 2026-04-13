@@ -109,6 +109,23 @@ class SeniorDashboardController extends Controller
         $todayStart = now()->startOfDay();
         $todayEnd   = now()->endOfDay();
 
+        // Bugün atanan guest'ler (assigned_at TODAY AND assigned_senior_email = me)
+        $todayAssignedGuests = GuestApplication::query()
+            ->whereRaw('lower(assigned_senior_email) = ?', [$seniorEmail])
+            ->whereBetween('assigned_at', [$todayStart, $todayEnd])
+            ->latest('assigned_at')
+            ->limit(10)
+            ->get(['id', 'first_name', 'last_name', 'email', 'application_type', 'converted_to_student', 'converted_student_id', 'assigned_at']);
+
+        // Bugün yüklenen & inceleme bekleyen belgeler (bu senior'ın öğrencilerine ait)
+        $todayDocsForReview = $studentIds->isEmpty() ? collect() : Document::query()
+            ->whereIn('student_id', $studentIds->all())
+            ->where('status', 'uploaded')
+            ->whereBetween('created_at', [$todayStart, $todayEnd])
+            ->latest('created_at')
+            ->limit(10)
+            ->get(['id', 'student_id', 'category_id', 'original_file_name', 'created_at', 'document_id']);
+
         $todayAppointments = $studentIds->isEmpty() ? collect() : StudentAppointment::query()
             ->whereIn('student_id', $studentIds->all())
             ->whereBetween('scheduled_at', [$todayStart, $todayEnd])
@@ -213,6 +230,8 @@ class SeniorDashboardController extends Controller
             'dmSummary'            => $dmSummary,
             'banners'              => $banners,
             // 1.1 Smart Command Center
+            'todayAssignedGuests'  => $todayAssignedGuests,
+            'todayDocsForReview'   => $todayDocsForReview,
             'todayAppointments'    => $todayAppointments,
             'todayTasks'           => $todayTasks,
             'pendingTickets'       => $pendingTickets,

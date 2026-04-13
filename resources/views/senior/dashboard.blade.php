@@ -84,6 +84,28 @@
     border: 1px solid var(--u-line, #e5e7eb);
     border-radius: 14px;
     padding: 16px 18px;
+    position: relative;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+/* E8: KPI'lar tıklanabilir link → hover affordance */
+a.srd-kpi-card { cursor: pointer; text-decoration: none; color: inherit; display: block; }
+a.srd-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+    border-color: var(--c-accent, #7c3aed);
+}
+a.srd-kpi-card::after {
+    content: '→';
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 14px;
+    color: #d1d5db;
+    transition: color .15s, transform .15s;
+}
+a.srd-kpi-card:hover::after {
+    color: var(--c-accent, #7c3aed);
+    transform: translateX(3px);
 }
 .srd-kpi-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6b7280; margin-bottom: 6px; }
 .srd-kpi-val { font-size: 28px; font-weight: 700; color: #111827; line-height: 1; margin-bottom: 4px; }
@@ -198,15 +220,7 @@
             </div>
         </div>
     </div>
-    <div class="srd-hero-actions">
-        <a class="srd-hero-btn primary" href="/senior/students">Öğrenciler</a>
-        <a class="srd-hero-btn ghost" href="/senior/process-tracking">Süreç Takibi</a>
-        <a class="srd-hero-btn ghost" href="/senior/inbox">Gelen Kutusu</a>
-        <a class="srd-hero-btn ghost" href="/senior/registration-documents">Belgeler</a>
-        <a class="srd-hero-btn ghost" href="/senior/contracts">Sözleşmeler</a>
-        <a class="srd-hero-btn ghost" href="/tasks">Task Board</a>
-        <a class="srd-hero-btn ghost" href="/senior/document-builder">CV Builder</a>
-    </div>
+    {{-- Hero action butonları kaldırıldı — bu linklerin hepsi sidebar'da zaten mevcut. --}}
 </div>
 
 {{-- ── Tab Bar ── --}}
@@ -260,61 +274,41 @@ function seniorBannerClick(id, slug) {
 </script>
 @endif
 
-{{-- ── KPI Cards ── --}}
+{{-- ── KPI Cards (E8: senior için anlamlı 4'lü) ──────────────────────────
+     Veri kaynağı: $sidebarKpi view composer
+     (AppServiceProvider::boot, senior.layouts.app) — sidebar'dan buraya
+     taşındı, sidebar artık sadece navigasyon. --}}
+@php $kpi = $sidebarKpi ?? ['activeStudents'=>0,'pendingGuests'=>0,'todayTasks'=>0,'todayAppointments'=>0]; @endphp
 <div class="srd-kpis">
-    <div class="srd-kpi-card">
-        <div class="srd-kpi-label">Bekleyen Onay</div>
-        <div class="srd-kpi-val">{{ $pendingApprovalCount }}</div>
-        <div class="srd-kpi-sub"><a href="/senior/process-tracking">Süreçe git →</a></div>
-    </div>
-    <div class="srd-kpi-card">
-        <div class="srd-kpi-label">Okunmamış DM</div>
-        <div class="srd-kpi-val">{{ $unread }}</div>
-        <div class="srd-kpi-sub"><a href="/im">Danışan İletişim →</a></div>
-    </div>
-    <div class="srd-kpi-card">
-        <div class="srd-kpi-label">Geciken Task</div>
-        <div class="srd-kpi-val" style="{{ $overdue > 0 ? 'color:#dc2626' : '' }}">{{ $overdue }}</div>
-        <div class="srd-kpi-sub"><a href="/tasks">Task Board →</a></div>
-    </div>
-    <div class="srd-kpi-card">
+    <a class="srd-kpi-card" href="/senior/students" style="text-decoration:none;color:inherit;display:block;">
         <div class="srd-kpi-label">Aktif Öğrenci</div>
-        <div class="srd-kpi-val">{{ $activeStudentCount }}</div>
+        <div class="srd-kpi-val">{{ $kpi['activeStudents'] ?? 0 }}</div>
         <div class="srd-kpi-sub">arşiv: {{ $archivedStudentCount }}</div>
-    </div>
-</div>
-
-{{-- ── Hızlı Erişim ── --}}
-<div class="srd-quick-grid">
-    <a class="srd-quick-link" href="/senior/students">
-        <span class="srd-quick-icon" style="background:#7c3aed;">🎓</span>
-        Öğrenciler
     </a>
-    <a class="srd-quick-link" href="/senior/registration-documents">
-        <span class="srd-quick-icon" style="background:#6d28d9;">📂</span>
-        Belgeler
+    <a class="srd-kpi-card" href="/senior/students?pool=guest" style="text-decoration:none;color:inherit;display:block;">
+        <div class="srd-kpi-label">Bekleyen Guest</div>
+        <div class="srd-kpi-val" style="{{ ($kpi['pendingGuests'] ?? 0) > 0 ? 'color:#dc2626' : '' }}">{{ $kpi['pendingGuests'] ?? 0 }}</div>
+        <div class="srd-kpi-sub">başvuru incelemede</div>
     </a>
-    <a class="srd-quick-link" href="/senior/contracts">
-        <span class="srd-quick-icon" style="background:#7c3aed;">📜</span>
-        Sözleşmeler
+    <a class="srd-kpi-card" href="/tasks" style="text-decoration:none;color:inherit;display:block;">
+        <div class="srd-kpi-label">Bugün Görev</div>
+        <div class="srd-kpi-val" style="{{ ($kpi['todayTasks'] ?? 0) > 0 ? 'color:#d97706' : '' }}">{{ $kpi['todayTasks'] ?? 0 }}</div>
+        <div class="srd-kpi-sub">bugün bitmesi gereken</div>
     </a>
-    <a class="srd-quick-link" href="/senior/inbox">
-        <span class="srd-quick-icon" style="background:#059669;">📬</span>
-        Gelen Kutusu
-    </a>
-    <a class="srd-quick-link" href="/senior/appointments">
-        <span class="srd-quick-icon" style="background:#d97706;">📅</span>
-        Randevular
-    </a>
-    <a class="srd-quick-link" href="/senior/performance">
-        <span class="srd-quick-icon" style="background:#dc2626;">📊</span>
-        Performans
+    <a class="srd-kpi-card" href="/senior/appointments" style="text-decoration:none;color:inherit;display:block;">
+        <div class="srd-kpi-label">Bugün Randevu</div>
+        <div class="srd-kpi-val">{{ $kpi['todayAppointments'] ?? 0 }}</div>
+        <div class="srd-kpi-sub">planlanmış görüşme</div>
     </a>
 </div>
 
-{{-- ── Öncelikli Aksiyon Banner ── --}}
+{{-- Hızlı Erişim icon grid kaldırıldı — sidebar + KPI tıklanabilir tile'ları yeterli.
+     Hepsi sidebar'da zaten var, dashboard'da çift bilgi oluşturuyordu. --}}
+
+{{-- ── Öncelikli Aksiyon Banner (full-width) ── --}}
 @php
-    $hasUrgency = $pendingApprovalCount > 0 || $unread > 0 || $overdue > 0 || $dmOverdue > 0;
+    $hasUrgency    = $pendingApprovalCount > 0 || $unread > 0 || $overdue > 0 || $dmOverdue > 0;
+    $hasTodayInbox = $todayAssignedGuests->isNotEmpty() || $todayDocsForReview->isNotEmpty();
 @endphp
 @if($hasUrgency)
 <div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
@@ -328,7 +322,7 @@ function seniorBannerClick(id, slug) {
             <a class="btn" href="/im">Okunmamış ({{ $unread }})</a>
         @endif
         @if($overdue > 0)
-            <a class="btn" href="/tasks">Geciken Task ({{ $overdue }})</a>
+            <a class="btn" href="/tasks">Geciken Görev ({{ $overdue }})</a>
         @endif
         @if($dmOverdue > 0)
             <a class="btn" href="/im">Geciken SLA ({{ $dmOverdue }})</a>
@@ -340,15 +334,85 @@ function seniorBannerClick(id, slug) {
     <span class="badge ok" style="font-size:var(--tx-sm);">✓</span>
     <span style="font-size:var(--tx-sm);font-weight:600;color:#166534;">Acil bekleyen iş yok — harika!</span>
     <div class="muted" style="font-size:var(--tx-xs);margin-left:8px;">
-        Task todo: {{ (int)($taskSummary['todo']??0) }} | in_progress: {{ (int)($taskSummary['in_progress']??0) }} | DM açık: {{ (int)($dmSummary['open']??0) }}
+        Yapılacak: {{ (int)($taskSummary['todo']??0) }} · Devam eden: {{ (int)($taskSummary['in_progress']??0) }} · DM açık: {{ (int)($dmSummary['open']??0) }}
     </div>
 </div>
 @endif
 
+{{-- ── 📥 Bugün Sana Gelenler (full-width) ──────────────────────────────── --}}
+<article class="panel" style="margin-bottom:14px;border-left:4px solid #7c3aed;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;">
+        <h3 style="margin:0;">📥 Bugün Sana Gelenler</h3>
+        <span class="muted" style="font-size:var(--tx-xs);">{{ now()->format('d.m.Y') }}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        {{-- Yeni atanan guest/student --}}
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px;">
+            <div style="font-size:var(--tx-xs);font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                <span>👤 Yeni Atanan</span>
+                <span style="background:{{ $todayAssignedGuests->count() > 0 ? '#7c3aed' : '#d1d5db' }};color:#fff;border-radius:999px;padding:1px 8px;font-size:10px;font-weight:700;">{{ $todayAssignedGuests->count() }}</span>
+            </div>
+            @forelse($todayAssignedGuests as $g)
+                @php
+                    $name = trim(($g->first_name ?? '') . ' ' . ($g->last_name ?? '')) ?: $g->email;
+                    $isStudent = (bool) ($g->converted_to_student ?? false);
+                    $targetUrl = $isStudent && $g->converted_student_id
+                        ? '/senior/students?q=' . urlencode($g->converted_student_id)
+                        : '/senior/guest-pipeline?q=' . urlencode($g->email ?? '');
+                @endphp
+                <a href="{{ $targetUrl }}" class="srd-list-item" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:6px;text-decoration:none;color:inherit;transition:background .12s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+                    <div>
+                        <strong style="font-size:var(--tx-sm);">{{ $name }}</strong>
+                        <div class="muted" style="font-size:var(--tx-xs);margin-top:2px;">
+                            <span class="badge {{ $isStudent ? 'info' : 'warn' }}">{{ $isStudent ? '🎓 Öğrenci' : '👋 Misafir' }}</span>
+                            @php
+                                $appTypeLabels = [
+                                    'yurtdisi'   => 'Yurtdışı',
+                                    'bachelor'   => 'Lisans',
+                                    'master'     => 'Y. Lisans',
+                                    'ausbildung' => 'Ausbildung',
+                                    'sprachkurs' => 'Dil Kursu',
+                                    'ikamet'     => 'İkamet',
+                                ];
+                                $appTypeLabel = $appTypeLabels[(string) $g->application_type] ?? $g->application_type;
+                            @endphp
+                            @if($g->application_type)<span class="muted" style="margin-left:4px;">{{ $appTypeLabel }}</span>@endif
+                        </div>
+                    </div>
+                    <span class="muted" style="font-size:var(--tx-xs);">{{ \Carbon\Carbon::parse($g->assigned_at)->format('H:i') }}</span>
+                </a>
+            @empty
+                <div class="muted" style="font-size:var(--tx-xs);padding:6px 10px;">Bugün yeni atama yok.</div>
+            @endforelse
+        </div>
+
+        {{-- Onay bekleyen belgeler --}}
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px;">
+            <div style="font-size:var(--tx-xs);font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                <span>📋 Onay Bekleyen Belge</span>
+                <span style="background:{{ $todayDocsForReview->count() > 0 ? '#7c3aed' : '#d1d5db' }};color:#fff;border-radius:999px;padding:1px 8px;font-size:10px;font-weight:700;">{{ $todayDocsForReview->count() }}</span>
+            </div>
+            @forelse($todayDocsForReview as $doc)
+                <a href="/senior/batch-review" class="srd-list-item" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:6px;text-decoration:none;color:inherit;transition:background .12s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+                    <div>
+                        <strong style="font-size:var(--tx-sm);">{{ \Illuminate\Support\Str::limit($doc->original_file_name ?? ($doc->document_id ?? 'Belge'), 38) }}</strong>
+                        <div class="muted" style="font-size:var(--tx-xs);margin-top:2px;">
+                            {{ $guestMap[$doc->student_id] ?? $doc->student_id }}
+                        </div>
+                    </div>
+                    <span class="muted" style="font-size:var(--tx-xs);">{{ \Carbon\Carbon::parse($doc->created_at)->format('H:i') }}</span>
+                </a>
+            @empty
+                <div class="muted" style="font-size:var(--tx-xs);padding:6px 10px;">Bugün inceleme bekleyen belge yok.</div>
+            @endforelse
+        </div>
+    </div>
+</article>
+
 {{-- ── Smart Command Center ── --}}
 <div class="grid3" style="margin-bottom:14px;">
 
-    {{-- Today's Agenda --}}
+    {{-- Today's Agenda (info panel — KPI'daki sayıları detaylandırır) --}}
     <article class="panel">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;">
             <h3 style="margin:0;">📅 Bugünün Ajandası</h3>
@@ -469,7 +533,7 @@ function seniorBannerClick(id, slug) {
 
     <article class="panel">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;">
-            <h3 style="margin:0;">Son Process Outcomes</h3>
+            <h3 style="margin:0;">Son Süreç Çıktıları</h3>
             <a class="btn" href="/senior/process-tracking">Süreçe Git</a>
         </div>
         <div class="srd-list srd-acc-list" id="acc-outcomes">
@@ -557,8 +621,8 @@ function seniorBannerClick(id, slug) {
 
     <article class="panel">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;">
-            <h3 style="margin:0;">Son Tasklar</h3>
-            <a class="btn" href="/tasks">Task Board</a>
+            <h3 style="margin:0;">Son Görevler</h3>
+            <a class="btn" href="/tasks">Görev Tablosu</a>
         </div>
         <div class="srd-list srd-acc-list" id="acc-tasks">
             @forelse($recentTasks as $t)
@@ -578,7 +642,7 @@ function seniorBannerClick(id, slug) {
                     <div class="muted" style="font-size:var(--tx-xs);flex-shrink:0;">{{ $t->due_date ? \Carbon\Carbon::parse($t->due_date)->format('d.m.Y') : '-' }}</div>
                 </div>
             @empty
-                <div class="srd-list-item muted">Task kaydı yok.</div>
+                <div class="srd-list-item muted">Görev kaydı yok.</div>
             @endforelse
         </div>
         @if($recentTasks->count() > 2)

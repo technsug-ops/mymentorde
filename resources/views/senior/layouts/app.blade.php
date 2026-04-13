@@ -264,6 +264,9 @@
                     <a href="/senior/ai-assistant"     class="nav-link {{ request()->is('senior/ai-assistant*') ? 'active' : '' }}"><span class="nav-icon">🤖</span> AI Asistan</a>
                     <a href="/senior/knowledge-base"   class="nav-link {{ request()->is('senior/knowledge-base*','senior/materials*') ? 'active' : '' }}"><span class="nav-icon">📚</span> Materyaller & KB</a>
                     <a href="/senior/services"         class="nav-link {{ request()->is('senior/services*') ? 'active' : '' }}"><span class="nav-icon">🔧</span> Servisler</a>
+                    @can('dam.view')
+                    <a href="{{ route('senior.dam.index') }}" class="nav-link {{ request()->routeIs('senior.dam.*') ? 'active' : '' }}"><span class="nav-icon">📁</span> Dijital Varlıklar</a>
+                    @endcan
                 </div>
             </div>
 
@@ -279,43 +282,22 @@
                     <a href="/senior/profile"     class="nav-link {{ request()->is('senior/profile*','my-contracts*') ? 'active' : '' }}"><span class="nav-icon">👤</span> Profil & Sözleşmeler</a>
                     <a href="/senior/settings"    class="nav-link {{ request()->is('senior/settings*') ? 'active' : '' }}"><span class="nav-icon">⚙️</span> Ayarlar</a>
                     <a href="/availability"       class="nav-link {{ request()->is('availability*') ? 'active' : '' }}"><span class="nav-icon">📡</span> Müsaitlik Ayarları</a>
+                    <a href="/hr/my/leaves"       class="nav-link {{ request()->is('hr/my/leaves*') ? 'active' : '' }}"><span class="nav-icon">🏖️</span> İzin Taleplerim</a>
                 </div>
             </div>
 
         </nav>
 
-        {{-- KPI Chips --}}
-        @php $kpi = $sidebarKpi ?? []; @endphp
-        <div style="display:flex;flex-direction:column;gap:5px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.12);margin-top:4px;">
-            <a href="/senior/students" style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;text-decoration:none;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);transition:background .12s;" onmouseover="this.style.background='rgba(255,255,255,.14)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
-                <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.65);">Aktif Öğrenci</span>
-                <span style="font-size:13px;font-weight:800;color:#fff;min-width:20px;text-align:right;">{{ $kpi['activeStudents'] ?? 0 }}</span>
-            </a>
-            <a href="/senior/students?pool=guest" style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;text-decoration:none;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);transition:background .12s;" onmouseover="this.style.background='rgba(255,255,255,.14)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
-                <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.65);">Bekleyen Guest</span>
-                <span style="font-size:13px;font-weight:800;{{ ($kpi['pendingGuests'] ?? 0) > 0 ? 'color:#fca5a5' : 'color:#fff' }};min-width:20px;text-align:right;">{{ $kpi['pendingGuests'] ?? 0 }}</span>
-            </a>
-            <a href="/tasks" style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;text-decoration:none;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);transition:background .12s;" onmouseover="this.style.background='rgba(255,255,255,.14)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
-                <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.65);">Bugün Görev</span>
-                <span style="font-size:13px;font-weight:800;{{ ($kpi['todayTasks'] ?? 0) > 0 ? 'color:#fca5a5' : 'color:#fff' }};min-width:20px;text-align:right;">{{ $kpi['todayTasks'] ?? 0 }}</span>
-            </a>
-            <a href="/senior/appointments" style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;text-decoration:none;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);transition:background .12s;" onmouseover="this.style.background='rgba(255,255,255,.14)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
-                <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.65);">Bugün Randevu</span>
-                <span style="font-size:13px;font-weight:800;color:#fff;min-width:20px;text-align:right;">{{ $kpi['todayAppointments'] ?? 0 }}</span>
-            </a>
-        </div>
+        {{-- KPI Chips kaldırıldı (E8) — sidebar sadece navigasyon, bu metrikler artık
+             senior/dashboard.blade.php üst KPI tile'larında gösterilir. Veri kaynağı:
+             $sidebarKpi view composer (AppServiceProvider::boot, senior.layouts.app). --}}
 
         <div class="sidebar-footer">
-            @can('dam.view')
-            <a href="{{ route('senior.dam.index') }}" class="nav-link {{ request()->routeIs('senior.dam.*') ? 'active' : '' }}" style="margin-bottom:4px;">
-                <span class="nav-icon">📁</span> Dijital Varlıklar
-            </a>
-            @endcan
+            {{-- Dijital Varlıklar → İçerik & Araçlar altına taşındı.
+                 İzin Taleplerim → Kişisel altına taşındı.
+                 Footer'da sadece Danışman Kılavuzu ve Çıkış Yap kalıyor. --}}
             <a href="{{ route('senior.handbook') }}" class="nav-link {{ request()->routeIs('senior.handbook') ? 'active' : '' }}" style="margin-bottom:4px;">
                 <span class="nav-icon">📖</span> Danışman Kılavuzu
-            </a>
-            <a href="/hr/my/leaves" class="nav-link {{ request()->is('hr/my/leaves*') ? 'active' : '' }}" style="margin-bottom:4px;">
-                <span class="nav-icon">🏖️</span> İzin Taleplerim
             </a>
             <a href="/logout" class="nav-link logout">
                 <span class="nav-icon">🚪</span> Çıkış Yap
