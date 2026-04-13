@@ -590,27 +590,59 @@ class WorkflowController extends Controller
     }
 
     /**
-     * B13: Eğitim tarihlerinin mantıklı sırada olduğundan emin ol.
-     * Her tarih bir önceki kademenin bitişinden önce olamaz.
+     * B13: Eğitim tarihlerinin mantıklı sırada olduğundan ve her kademenin
+     * minimum süresini doldurduğundan emin ol.
+     *   İlkokul: ≥ 4 yıl | Ortaokul: ≥ 3 yıl | Lise: ≥ 3 yıl
+     * Kademeler arası: bir sonraki kademe başlama tarihi >= öncekinin bitişi.
      *
      * @param  array<string,mixed> $payload
      * @return array<string,string>
      */
     private function educationDateOrderErrors(array $payload): array
     {
-        $chain = [
-            ['primary_start_date', 'primary_end_date', 'İlkokul bitiş tarihi başlama tarihinden önce olamaz.'],
+        // [start_key, end_key, min_years, label]
+        $durationRules = [
+            ['primary_start_date', 'primary_end_date', 4, 'İlkokul'],
+            ['middle_start_date',  'middle_end_date',  3, 'Ortaokul'],
+            ['high_start_date',    'high_end_date',    3, 'Lise'],
+        ];
+        // Kademeler arası: next.start >= prev.end
+        $orderChain = [
             ['primary_end_date', 'middle_start_date', 'Ortaokul başlama tarihi ilkokul bitiş tarihinden önce olamaz.'],
-            ['middle_start_date', 'middle_end_date', 'Ortaokul bitiş tarihi başlama tarihinden önce olamaz.'],
             ['middle_end_date', 'high_start_date', 'Lise başlama tarihi ortaokul bitiş tarihinden önce olamaz.'],
-            ['high_start_date', 'high_end_date', 'Lise bitiş tarihi başlama tarihinden önce olamaz.'],
         ];
         $skipKeys = $this->educationSkippedKeys($payload);
-
         $errors = [];
-        foreach ($chain as [$aKey, $bKey, $msg]) {
+
+        // 1) Her kademe için duration + sıra kontrolü
+        foreach ($durationRules as [$sKey, $eKey, $minYears, $label]) {
+            if (in_array($sKey, $skipKeys, true) || in_array($eKey, $skipKeys, true)) {
+                continue;
+            }
+            $s = trim((string) ($payload[$sKey] ?? ''));
+            $e = trim((string) ($payload[$eKey] ?? ''));
+            if ($s === '' || $e === '') {
+                continue;
+            }
+            if ($e < $s) {
+                $errors[$eKey] = $label . ' bitiş tarihi başlama tarihinden önce olamaz.';
+                continue;
+            }
+            try {
+                $minEnd = (new \DateTimeImmutable($s))->modify('+' . $minYears . ' years')->format('Y-m-d');
+                if ($e < $minEnd) {
+                    $errors[$eKey] = $label . ' bitiş tarihi başlamadan en az ' . $minYears . ' yıl sonra olmalı.';
+                }
+            } catch (\Throwable) {}
+        }
+
+        // 2) Kademeler arası sıralama
+        foreach ($orderChain as [$aKey, $bKey, $msg]) {
             if (in_array($aKey, $skipKeys, true) || in_array($bKey, $skipKeys, true)) {
                 continue;
+            }
+            if (isset($errors[$bKey])) {
+                continue; // zaten duration hatası var
             }
             $a = trim((string) ($payload[$aKey] ?? ''));
             $b = trim((string) ($payload[$bKey] ?? ''));

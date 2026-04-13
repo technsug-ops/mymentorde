@@ -591,41 +591,65 @@
     });
     _applyEducationVisibility();
 
-    // B13: Eğitim tarihlerinin mantıklı sırada olmasını zorunlu kıl.
-    //   primary_end >= primary_start
-    //   middle_start >= primary_end
-    //   middle_end >= middle_start
-    //   high_start >= middle_end
-    //   high_end >= high_start
-    var _eduDateChain = [
-        ['primary_start_date', 'primary_end_date', 'İlkokul bitiş tarihi başlama tarihinden önce olamaz.'],
+    // B13: Eğitim tarihleri — hem sıralama hem her kademenin minimum süresi.
+    //   İlkokul: en az 4 yıl | Ortaokul: en az 3 yıl | Lise: en az 3 yıl
+    //   Ayrıca kademeler arası sıralama: middle_start >= primary_end vb.
+    var _eduOrderChain = [
         ['primary_end_date', 'middle_start_date', 'Ortaokul başlama tarihi ilkokul bitiş tarihinden önce olamaz.'],
-        ['middle_start_date', 'middle_end_date', 'Ortaokul bitiş tarihi başlama tarihinden önce olamaz.'],
         ['middle_end_date', 'high_start_date', 'Lise başlama tarihi ortaokul bitiş tarihinden önce olamaz.'],
-        ['high_start_date', 'high_end_date', 'Lise bitiş tarihi başlama tarihinden önce olamaz.'],
     ];
+    // [start_key, end_key, minYears, label]
+    var _eduDurationRules = [
+        ['primary_start_date', 'primary_end_date', 4, 'İlkokul'],
+        ['middle_start_date',  'middle_end_date',  3, 'Ortaokul'],
+        ['high_start_date',    'high_end_date',    3, 'Lise'],
+    ];
+    function _isHidden(el){
+        var g = el && el.closest('.form-group');
+        return !!(g && g.style.display === 'none');
+    }
+    function _addYears(iso, years){
+        if(!iso) return '';
+        var d = new Date(iso);
+        if(isNaN(d)) return '';
+        return new Date(d.getFullYear() + years, d.getMonth(), d.getDate()).toISOString().slice(0,10);
+    }
     function _validateEduDates(){
         var f = document.getElementById('guestRegistrationForm');
         if(!f) return;
-        _eduDateChain.forEach(function(pair){
+        // 1) Her kademe için min duration
+        _eduDurationRules.forEach(function(r){
+            var sEl = f.querySelector('[name="' + r[0] + '"]');
+            var eEl = f.querySelector('[name="' + r[1] + '"]');
+            if(!sEl || !eEl) return;
+            if(_isHidden(sEl) || _isHidden(eEl)) { eEl.setCustomValidity(''); return; }
+            var s = (sEl.value || '').trim();
+            var e = (eEl.value || '').trim();
+            if(!s || !e) { eEl.setCustomValidity(''); return; }
+            var minEnd = _addYears(s, r[2]);
+            if(e < s) {
+                eEl.setCustomValidity(r[3] + ' bitiş tarihi başlama tarihinden önce olamaz.');
+            } else if(minEnd && e < minEnd) {
+                eEl.setCustomValidity(r[3] + ' bitiş tarihi başlamadan en az ' + r[2] + ' yıl sonra olmalı.');
+                eEl.min = minEnd;
+            } else {
+                eEl.setCustomValidity('');
+                if(minEnd) eEl.min = minEnd;
+            }
+        });
+        // 2) Kademeler arası sıralama (next kademe start >= prev kademe end)
+        _eduOrderChain.forEach(function(pair){
             var aEl = f.querySelector('[name="' + pair[0] + '"]');
             var bEl = f.querySelector('[name="' + pair[1] + '"]');
             if(!aEl || !bEl) return;
-            // Hidden alanları kontrol etme
-            var aGroup = aEl.closest('.form-group');
-            var bGroup = bEl.closest('.form-group');
-            if((aGroup && aGroup.style.display === 'none') || (bGroup && bGroup.style.display === 'none')) {
-                bEl.setCustomValidity('');
-                return;
-            }
+            if(_isHidden(aEl) || _isHidden(bEl)) { bEl.setCustomValidity(''); return; }
             var a = (aEl.value || '').trim();
             var b = (bEl.value || '').trim();
             if(a && b && b < a) {
                 bEl.setCustomValidity(pair[2]);
                 bEl.min = a;
-            } else {
+            } else if(bEl.validity.customError && bEl.validationMessage === pair[2]) {
                 bEl.setCustomValidity('');
-                if(a) bEl.min = a;
             }
         });
     }
