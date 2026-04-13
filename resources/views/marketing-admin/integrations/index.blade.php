@@ -54,17 +54,79 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
 
 <div style="display:grid;gap:12px;">
 
-    {{-- AI Writer --}}
+    {{-- AI Writer — multi-provider --}}
     <div class="card">
-        <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:6px;">AI Writer <span style="font-size:var(--tx-xs);font-weight:400;color:var(--u-muted,#64748b);">— Doküman Almanca Destek</span></div>
+        <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:6px;">AI Writer <span style="font-size:var(--tx-xs);font-weight:400;color:var(--u-muted,#64748b);">— Doküman Almanca Destek (multi-provider)</span></div>
         <div style="font-size:var(--tx-xs);color:var(--u-muted,#64748b);margin-bottom:10px;">
-            Student doküman oluşturma (motivasyon / referans mektubu) için OpenAI-compatible API bağlantısı.
-            Ayarlar <code>.env</code> içinden yönetilir: <code>AI_WRITER_*</code>
+            4 provider desteklenir: <strong>OpenAI</strong>, <strong>Anthropic Claude</strong>, <strong>Google Gemini</strong>, <strong>OpenRouter</strong>.
+            Her provider için ayrı key saklanır; aktif olanı dropdown'dan seç.<br>
+            @if($aiWriter['has_active_key'])
+                <span style="color:#1f6d35;font-weight:600;">• Aktif: {{ $aiWriter['provider_labels'][$aiWriter['provider']] ?? $aiWriter['provider'] }} — key: {{ $aiWriter['active_masked'] }} — model: {{ $aiWriter['model'] }}</span>
+            @else
+                <span style="color:#b12525;font-weight:600;">• Aktif provider'da key yok — istek başarısız olur</span>
+            @endif
         </div>
-        <div style="display:flex;align-items:center;gap:10px;">
-            <button class="btn alt" type="button" style="font-size:var(--tx-xs);padding:5px 14px;" onclick="testProvider('ai_writer')">AI Writer Test</button>
-            <span id="ai_writerTestStatus" class="test-line">test bekliyor</span>
-        </div>
+
+        <form method="POST" action="/mktg-admin/integrations/ai-writer" style="display:grid;gap:12px;max-width:680px;">
+            @csrf
+
+            <label style="display:flex;align-items:center;gap:8px;font-size:var(--tx-xs);">
+                <input type="checkbox" name="ai_writer_enabled" value="1" {{ $aiWriter['enabled'] ? 'checked' : '' }}>
+                <span>AI Writer aktif</span>
+            </label>
+
+            <label style="display:grid;gap:4px;font-size:var(--tx-xs);">
+                <span><strong>Aktif Provider</strong></span>
+                <select name="ai_writer_provider" style="padding:7px 10px;border:1px solid var(--u-line);border-radius:6px;font-size:var(--tx-xs);">
+                    @foreach($aiWriter['provider_labels'] as $p => $label)
+                        <option value="{{ $p }}" {{ $aiWriter['provider'] === $p ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
+
+            <label style="display:grid;gap:4px;font-size:var(--tx-xs);">
+                <span>Model <span style="color:var(--u-muted,#64748b);">— boş = provider default'u</span></span>
+                <input type="text" name="ai_writer_model" value="{{ $aiWriter['model'] }}"
+                       placeholder="{{ $aiWriter['provider_defaults'][$aiWriter['provider']] ?? 'gpt-4o-mini' }}"
+                       style="padding:7px 10px;border:1px solid var(--u-line);border-radius:6px;font-size:var(--tx-xs);font-family:monospace;">
+                <span style="color:var(--u-muted,#64748b);font-size:10px;">
+                    Default'lar — OpenAI: <code>gpt-4o-mini</code> · Claude: <code>claude-haiku-4-5-20251001</code> · Gemini: <code>gemini-2.5-flash</code> · OpenRouter: <code>openai/gpt-4o-mini</code>
+                </span>
+            </label>
+
+            <div style="border-top:1px dashed var(--u-line);padding-top:10px;display:grid;gap:10px;">
+                <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted,#64748b);">API Keys (boş bırakırsan mevcut korunur)</div>
+
+                @foreach($aiWriter['provider_labels'] as $p => $label)
+                    @php $pk = $aiWriter['provider_keys'][$p]; @endphp
+                    <label style="display:grid;gap:3px;font-size:var(--tx-xs);">
+                        <span>
+                            {{ $label }}
+                            @if($pk['has_key'])
+                                <span style="color:#1f6d35;">✓ {{ $pk['masked_key'] }}</span>
+                            @else
+                                <span style="color:#b12525;">— key yok</span>
+                            @endif
+                        </span>
+                        <input type="password" name="ai_writer_{{ $p }}_key" autocomplete="new-password"
+                               placeholder="{{ $aiWriter['provider_key_hints'][$p] ?? '' }}"
+                               style="padding:6px 10px;border:1px solid var(--u-line);border-radius:6px;font-size:var(--tx-xs);font-family:monospace;">
+                    </label>
+                @endforeach
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:4px;">
+                <button class="btn ok" type="submit" style="font-size:var(--tx-xs);padding:6px 18px;">Kaydet</button>
+                <button class="btn alt" type="button" style="font-size:var(--tx-xs);padding:5px 14px;" onclick="testProvider('ai_writer')">Aktif Provider'ı Test Et</button>
+                <span id="ai_writerTestStatus" class="test-line">test bekliyor</span>
+            </div>
+        </form>
+
+        @if(session('status'))
+            <div style="margin-top:10px;padding:8px 12px;background:#e6f4ea;color:#1f6d35;border-radius:6px;font-size:var(--tx-xs);">
+                ✓ {{ session('status') }}
+            </div>
+        @endif
     </div>
 
     {{-- Connection Health Matrix --}}

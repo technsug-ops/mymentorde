@@ -52,7 +52,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     Route::post('/profile', [GuestWorkflowController::class, 'updateProfile'])->middleware('throttle:60,1')->name('guest.profile.update');
     Route::get('/settings', [GuestPortalController::class, 'settings'])->name('guest.settings');
     Route::post('/settings', [GuestWorkflowController::class, 'updateSettings'])->middleware('throttle:60,1')->name('guest.settings.update');
-    Route::post('/settings/password', [GuestWorkflowController::class, 'changePassword'])->middleware('throttle:6,1')->name('guest.settings.password');
+    Route::post('/settings/password', [GuestWorkflowController::class, 'changePassword'])->middleware('throttle:15,1')->name('guest.settings.password');
     Route::post('/settings/logout-all', [GuestWorkflowController::class, 'logoutAllDevices'])->middleware('throttle:5,1')->name('guest.settings.logout-all');
 
     // ── Mesajlaşma ───────────────────────────────────────────────────────────

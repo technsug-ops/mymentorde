@@ -117,7 +117,7 @@ html,body{height:100%;overflow:hidden}
 .hub-picker-wrap{position:relative;display:flex;gap:2px;align-items:center;flex-shrink:0}
 .hub-picker-btn{background:none !important;border:none !important;cursor:pointer;font-size:17px !important;padding:4px 6px !important;border-radius:6px !important;line-height:1 !important;color:#888;transition:background .12s;min-height:0 !important;height:32px !important;width:32px !important;display:inline-flex !important;align-items:center !important;justify-content:center !important}
 .hub-picker-btn:hover{background:#f0f4ff !important;color:#4577c4}
-.hub-emoji-picker,.hub-gif-picker{position:absolute;bottom:calc(100% + 8px);right:0;z-index:9000;background:#fff;border:1px solid var(--u-line);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.18);display:none}
+.hub-emoji-picker,.hub-gif-picker{position:absolute;bottom:calc(100% + 8px);left:0;z-index:9000;background:#fff;border:1px solid var(--u-line);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.18);display:none;max-width:calc(100vw - 32px)}
 .hub-emoji-picker.open,.hub-gif-picker.open{display:block}
 .hub-emoji-picker{width:310px;padding:8px}
 .hub-emoji-cats{display:flex;gap:3px;margin-bottom:6px;flex-wrap:wrap}

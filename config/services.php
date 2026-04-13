@@ -44,8 +44,8 @@ return [
         'timeout' => (int) env('AI_WRITER_TIMEOUT', 30),
     ],
 
-    'tenor' => [
-        'key' => env('TENOR_API_KEY'),
+    'giphy' => [
+        'key' => env('GIPHY_API_KEY'),
     ],
 
     'whatsapp' => [

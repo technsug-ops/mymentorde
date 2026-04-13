@@ -72,13 +72,60 @@ class IntegrationController extends Controller
             ];
         }
 
+        $aiSvc = app(AiWritingService::class);
+        $activeProvider = $aiSvc->currentProvider();
+        $providerKeys = [];
+        foreach (AiWritingService::PROVIDERS as $p) {
+            $k = $aiSvc->apiKeyFor($p);
+            $providerKeys[$p] = [
+                'has_key'    => $k !== '',
+                'masked_key' => $this->maskKey($k),
+            ];
+        }
+        $aiWriter = [
+            'enabled'         => $aiSvc->isEnabled(),
+            'provider'        => $activeProvider,
+            'model'           => $aiSvc->effectiveModel(),
+            'has_active_key'  => $aiSvc->isConfigured(),
+            'active_masked'   => $this->maskKey($aiSvc->effectiveApiKey()),
+            'provider_keys'   => $providerKeys,
+            'provider_labels' => [
+                'openai'     => 'OpenAI (ChatGPT)',
+                'anthropic'  => 'Anthropic (Claude)',
+                'gemini'     => 'Google (Gemini)',
+                'openrouter' => 'OpenRouter (hepsi tek API)',
+            ],
+            'provider_defaults' => [
+                'openai'     => 'gpt-4o-mini',
+                'anthropic'  => 'claude-haiku-4-5-20251001',
+                'gemini'     => 'gemini-2.5-flash',
+                'openrouter' => 'openai/gpt-4o-mini',
+            ],
+            'provider_key_hints' => [
+                'openai'     => 'sk-proj-... veya sk-...',
+                'anthropic'  => 'sk-ant-...',
+                'gemini'     => 'AIzaSy...',
+                'openrouter' => 'sk-or-...',
+            ],
+        ];
+
         return view('marketing-admin.integrations.index', [
             'pageTitle' => 'Integrations',
             'settings' => $settings,
             'healthRows' => $healthRows,
             'tableReady' => SchemaCache::hasTable('marketing_admin_settings'),
             'connectionTableReady' => SchemaCache::hasTable('marketing_integration_connections'),
+            'aiWriter' => $aiWriter,
         ]);
+    }
+
+    private function maskKey(string $key): string
+    {
+        $k = trim($key);
+        if ($k === '') return '';
+        $len = strlen($k);
+        if ($len <= 12) return str_repeat('•', max(0, $len - 2)) . substr($k, -2);
+        return substr($k, 0, 6) . str_repeat('•', 8) . substr($k, -4);
     }
 
     public function update(Request $request): RedirectResponse
@@ -817,6 +864,50 @@ class IntegrationController extends Controller
             ->where('setting_key', $key)
             ->first(['setting_value']);
         return trim((string) data_get($row, 'setting_value.value', ''));
+    }
+
+    /**
+     * AI Writer çoklu provider ayarlarını kaydeder.
+     * Her provider'ın kendi key'i vardır; aktif olan `ai_writer_provider` ile seçilir.
+     * Boş gelen key input'u mevcut değeri korur (UI'den silmek için ayrı bir yol yok — şimdilik yeterli).
+     */
+    public function updateAiWriter(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ai_writer_enabled'         => ['nullable', 'boolean'],
+            'ai_writer_provider'        => ['nullable', 'string', 'in:openai,anthropic,gemini,openrouter'],
+            'ai_writer_model'           => ['nullable', 'string', 'max:120'],
+            'ai_writer_openai_key'      => ['nullable', 'string', 'max:500'],
+            'ai_writer_anthropic_key'   => ['nullable', 'string', 'max:500'],
+            'ai_writer_gemini_key'      => ['nullable', 'string', 'max:500'],
+            'ai_writer_openrouter_key'  => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $userId = $request->user()?->id;
+
+        MarketingAdminSetting::setValue(
+            'ai_writer_enabled',
+            $request->boolean('ai_writer_enabled') ? '1' : '0',
+            $userId
+        );
+
+        $provider = (string) ($validated['ai_writer_provider'] ?? 'openai');
+        MarketingAdminSetting::setValue('ai_writer_provider', $provider, $userId);
+
+        $newModel = trim((string) ($validated['ai_writer_model'] ?? ''));
+        if ($newModel !== '') {
+            MarketingAdminSetting::setValue('ai_writer_model', $newModel, $userId);
+        }
+
+        foreach (['openai', 'anthropic', 'gemini', 'openrouter'] as $p) {
+            $field = "ai_writer_{$p}_key";
+            $val = trim((string) ($validated[$field] ?? ''));
+            if ($val !== '') {
+                MarketingAdminSetting::setValue($field, $val, $userId);
+            }
+        }
+
+        return redirect('/mktg-admin/integrations')->with('status', 'AI Writer ayarları kaydedildi.');
     }
 
     /**

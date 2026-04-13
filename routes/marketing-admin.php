@@ -274,6 +274,7 @@ Route::middleware(['company.context', 'auth', 'marketing.access'])
             Route::put('/settings', [SettingsController::class, 'update']);
 
             Route::put('/integrations', [IntegrationController::class, 'update']);
+            Route::post('/integrations/ai-writer', [IntegrationController::class, 'updateAiWriter'])->name('mktg-admin.integrations.ai-writer.update');
             Route::post('/integrations/test/{provider}', [IntegrationController::class, 'test']);
             Route::post('/integrations/refresh/{provider}', [IntegrationController::class, 'refreshToken']);
             Route::get('/integrations/oauth/{provider}/start', [IntegrationController::class, 'oauthStart']);

@@ -493,7 +493,7 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('/sw-student.js',{scope:'/student/'}).catch(function(){});
 }
 </script>
-<script nonce="{{ $cspNonce ?? '' }}">window.__tenorKey={{ Js::from(config('services.tenor.key','')) }};</script>
+<script nonce="{{ $cspNonce ?? '' }}">window.__giphyKey={{ Js::from(config('services.giphy.key','')) }};</script>
 @stack('scripts')
 
 @include('partials.welcome-video-modal', ['wvPortal' => 'student'])

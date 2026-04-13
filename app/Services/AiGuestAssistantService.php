@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\GuestAiConversation;
 use App\Models\GuestApplication;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -51,49 +50,38 @@ class AiGuestAssistantService
 
         $systemPrompt = $this->buildSystemPrompt($guest, $context);
 
-        try {
-            $apiKey = config('services.anthropic.api_key', env('ANTHROPIC_API_KEY'));
-            if (!$apiKey) {
-                return $this->fallbackAnswer($question);
-            }
+        // Delegate to AiWritingService → Marketing Admin'de seçilen aktif provider kullanılır
+        // (OpenAI / Anthropic / Gemini / OpenRouter). Key yönetimi tek yerden.
+        $result = app(AiWritingService::class)->chat($systemPrompt, $question, 512);
 
-            $response = Http::withHeaders([
-                'x-api-key'         => $apiKey,
-                'anthropic-version' => '2023-06-01',
-                'content-type'      => 'application/json',
-            ])->post('https://api.anthropic.com/v1/messages', [
-                'model'      => 'claude-haiku-4-5-20251001',
-                'max_tokens' => 512,
-                'system'     => $systemPrompt,
-                'messages'   => [
-                    ['role' => 'user', 'content' => $question],
-                ],
+        if (!$result['ok']) {
+            Log::warning('AI Guest Assistant provider error', [
+                'provider' => $result['provider'] ?? '-',
+                'error'    => $result['error'] ?? 'unknown',
             ]);
+            return $this->fallbackAnswer($question);
+        }
 
-            if (!$response->successful()) {
-                Log::warning('AI Guest Assistant API error', ['status' => $response->status()]);
-                return $this->fallbackAnswer($question);
-            }
+        $answer = (string) ($result['content'] ?? '');
+        if ($answer === '') {
+            return $this->fallbackAnswer($question);
+        }
 
-            $json        = $response->json();
-            $answer      = $json['content'][0]['text'] ?? '';
-            $tokensUsed  = $json['usage']['input_tokens'] + $json['usage']['output_tokens'] ?? 0;
-
+        try {
             GuestAiConversation::create([
                 'guest_application_id' => $guest->id,
                 'question'             => $question,
                 'answer'               => $answer,
                 'context'              => $context ?: null,
-                'tokens_used'          => $tokensUsed,
+                'tokens_used'          => (int) ($result['tokens_used'] ?? 0),
                 'created_at'           => now(),
             ]);
-
-            return ['ok' => true, 'answer' => $answer, 'remaining' => $remaining - 1];
-
         } catch (\Throwable $e) {
-            Log::error('AI Guest Assistant exception', ['error' => $e->getMessage()]);
-            return $this->fallbackAnswer($question);
+            Log::warning('AI Guest Assistant conversation log failed', ['error' => $e->getMessage()]);
+            // logging failure shouldn't break the response — devam
         }
+
+        return ['ok' => true, 'answer' => $answer, 'remaining' => $remaining - 1];
     }
 
     private function buildSystemPrompt(GuestApplication $guest, array $context): string
@@ -106,18 +94,27 @@ class AiGuestAssistantService
 
         $progressPct = (int) ($context['progress_percent'] ?? 0);
 
+        // NOT: HEREDOC içinde ternary operatörü ({$a ?: $b}) çalışmaz — PHP parse error verir.
+        // Bu yüzden boş olabilecek alanları önce değişkene çıkarıp default'u burada uyguluyoruz.
+        $applicationType  = $guest->application_type    ?: '-';
+        $applicationCtry  = $guest->application_country ?: '-';
+        $targetCity       = $guest->target_city         ?: '-';
+        $languageLevel    = $guest->language_level      ?: '-';
+        $packageTitle     = $guest->selected_package_title ?: 'seçilmedi';
+        $contractStatus   = $guest->contract_status     ?: '-';
+
         return <<<PROMPT
 Sen MentorDE eğitim danışmanlığı platformunun AI asistanısın.
 Bu bir potansiyel müşteri (Guest) — henüz sözleşme imzalamamış.
 
 Aday bilgileri:
-- Başvuru tipi: {$guest->application_type}
-- Hedef ülke: {$guest->application_country}
-- Hedef şehir: {$guest->target_city}
-- Dil seviyesi: {$guest->language_level}
-- Paket: {$guest->selected_package_title ?: 'seçilmedi'}
+- Başvuru tipi: {$applicationType}
+- Hedef ülke: {$applicationCtry}
+- Hedef şehir: {$targetCity}
+- Dil seviyesi: {$languageLevel}
+- Paket: {$packageTitle}
 - Belge durumu: {$docsStatus}
-- Sözleşme: {$guest->contract_status}
+- Sözleşme: {$contractStatus}
 - İlerleme: %{$progressPct}
 
 Kurallar:

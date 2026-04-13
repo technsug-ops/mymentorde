@@ -89,7 +89,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'student.role', 'throt
     Route::post('/student/profile/photo',                    [StudentProfileController::class, 'uploadPhoto'])->middleware('throttle:5,1')->name('student.profile.photo');
     Route::post('/student/profile',                          [StudentProfileController::class, 'update'])->middleware('throttle:20,1')->name('student.profile.update');
     Route::post('/student/settings',                         [StudentProfileController::class, 'updateSettings'])->middleware('throttle:20,1')->name('student.settings.update');
-    Route::post('/student/settings/password',                [StudentProfileController::class, 'changePassword'])->middleware('throttle:5,1')->name('student.settings.password');
+    Route::post('/student/settings/password',                [StudentProfileController::class, 'changePassword'])->middleware('throttle:15,1')->name('student.settings.password');
 
     // ── Mesajlaşma ───────────────────────────────────────────────────────────
     Route::get('/student/messages',                          [ConversationController::class, 'student'])->name('student.messages');
