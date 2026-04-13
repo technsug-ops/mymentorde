@@ -459,7 +459,7 @@
     // Student registration form'da da aynı davranış — guest blade ile tutarlı.
     var _spouseFieldKeys = [
         'spouse_full_name','spouse_birth_date','spouse_nationality','spouse_occupation',
-        'marriage_date','marriage_place','spouse_currently_in_germany','has_children'
+        'marriage_date','marriage_place','spouse_currently_in_germany','has_children','children_count'
     ];
     function _applySpouseVisibilityStudent(){
         var form = document.querySelector('form');
@@ -484,10 +484,42 @@
             }
         });
     }
+    // children_count: has_children === 'yes' ise görünür + number pattern
+    function _applyChildrenCountVisibilityStudent(){
+        var form = document.querySelector('form');
+        if(!form) return;
+        var maritalSel = form.querySelector('[name="marital_status"]');
+        var hcSel = form.querySelector('[name="has_children"]');
+        var ccFg  = form.querySelector('[data-field-key="children_count"]');
+        if(!ccFg) return;
+        var spouseVisible = maritalSel && String(maritalSel.value || '') === 'married';
+        var show = spouseVisible && hcSel && String(hcSel.value || '') === 'yes';
+        ccFg.style.display = show ? '' : 'none';
+        var inp = ccFg.querySelector('input, select, textarea');
+        if(inp) {
+            if(show) {
+                inp.dataset.required = '1';
+                inp.setAttribute('inputmode', 'numeric');
+                inp.setAttribute('pattern', '[0-9]+');
+                inp.setAttribute('maxlength', '2');
+                inp.setCustomValidity('');
+            } else {
+                inp.dataset.required = '0';
+                inp.removeAttribute('required');
+                inp.setCustomValidity('');
+            }
+        }
+    }
     document.addEventListener('change', function(e){
-        if((e.target.name || '') === 'marital_status') _applySpouseVisibilityStudent();
+        var n = e.target.name || '';
+        if(n === 'marital_status') {
+            _applySpouseVisibilityStudent();
+            _applyChildrenCountVisibilityStudent();
+        }
+        if(n === 'has_children') _applyChildrenCountVisibilityStudent();
     });
     _applySpouseVisibilityStudent();
+    _applyChildrenCountVisibilityStudent();
 })();
 </script>
 @endsection

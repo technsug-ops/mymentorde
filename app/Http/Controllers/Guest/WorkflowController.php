@@ -593,10 +593,21 @@ class WorkflowController extends Controller
                 'when_values' => ['yes'],
                 'message' => 'Almanya gecmisi secildi ise son ikamet bilgileri zorunludur.',
             ],
+            'children_count' => [
+                'when_key' => 'has_children',
+                'when_values' => ['yes'],
+                'message' => 'Çocuğunuz varsa kaç çocuğunuz olduğunu belirtin.',
+            ],
         ];
 
         $errors = [];
+        // children_count yalnızca evli + çocuk var ise zorunlu — marital_status kontrolü
+        $isMarried = strtolower(trim((string) ($payload['marital_status'] ?? ''))) === 'married';
         foreach ($rules as $field => $cfg) {
+            // children_count için marital_status !== married ise atla
+            if ($field === 'children_count' && !$isMarried) {
+                continue;
+            }
             $when = strtolower(trim((string) ($payload[$cfg['when_key']] ?? '')));
             $expects = array_map(static fn ($v) => strtolower(trim((string) $v)), (array) ($cfg['when_values'] ?? []));
             if (!in_array($when, $expects, true)) {

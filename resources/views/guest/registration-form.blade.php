@@ -593,9 +593,10 @@
 
     // B20 (spouse): marital_status === 'married' ise "Eşinizle İlgili Bilgiler"
     // section'ı ve alanları görünür, yoksa gizli + required kaldırılır.
+    // children_count ayrıca has_children === 'yes' ise görünür + zorunlu.
     var _spouseFieldKeys = [
         'spouse_full_name','spouse_birth_date','spouse_nationality','spouse_occupation',
-        'marriage_date','marriage_place','spouse_currently_in_germany','has_children'
+        'marriage_date','marriage_place','spouse_currently_in_germany','has_children','children_count'
     ];
     function _applySpouseVisibility(){
         var f = document.getElementById('guestRegistrationForm');
@@ -632,11 +633,48 @@
             if(hasSpouseField) panel.dataset.spouseSection = '1';
         });
     }
+    // children_count: has_children === 'yes' ise görünür + number-only + required
+    function _applyChildrenCountVisibility(){
+        var f = document.getElementById('guestRegistrationForm');
+        if(!f) return;
+        var hcSel = f.querySelector('[name="has_children"]');
+        var ccFg  = f.querySelector('[data-field-key="children_count"]');
+        if(!ccFg) return;
+        // spouse parent: marital_status != married ise children_count hâlâ gizli olmalı
+        var maritalSel = f.querySelector('[name="marital_status"]');
+        var spouseVisible = maritalSel && String(maritalSel.value || '') === 'married';
+        var show = spouseVisible && hcSel && String(hcSel.value || '') === 'yes';
+        ccFg.style.display = show ? '' : 'none';
+        var inp = ccFg.querySelector('input, select, textarea');
+        if(inp) {
+            if(show) {
+                inp.dataset.required = '1';
+                inp.classList.add('final-required');
+                // number-only pattern
+                inp.setAttribute('inputmode', 'numeric');
+                inp.setAttribute('pattern', '[0-9]+');
+                inp.setAttribute('maxlength', '2');
+                inp.setCustomValidity('');
+            } else {
+                inp.dataset.required = '0';
+                inp.classList.remove('final-required');
+                inp.removeAttribute('required');
+                inp.setCustomValidity('');
+            }
+        }
+    }
+
     document.addEventListener('change', function(e){
         if(!e.target.closest('#guestRegistrationForm')) return;
-        if((e.target.name || '') === 'marital_status') _applySpouseVisibility();
+        var n = e.target.name || '';
+        if(n === 'marital_status') {
+            _applySpouseVisibility();
+            _applyChildrenCountVisibility();
+        }
+        if(n === 'has_children') _applyChildrenCountVisibility();
     });
     _applySpouseVisibility();
+    _applyChildrenCountVisibility();
 
     // B13: Eğitim tarihleri — hem sıralama hem her kademenin minimum süresi.
     //   İlkokul: en az 4 yıl | Ortaokul: en az 3 yıl | Lise: en az 3 yıl

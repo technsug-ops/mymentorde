@@ -163,6 +163,8 @@ class GuestRegistrationFormCatalog
                         10,
                         options: self::yesNoOptions()
                     ),
+                    // has_children === 'yes' seçildiğinde görünür (client-side JS).
+                    self::f('children_count', 'Kaç çocuğunuz var?', 'text', false, 2, placeholder: 'Örn: 2'),
                 ],
             ],
             [

@@ -134,6 +134,9 @@ class GuestRegistrationFieldSchemaService
 
     /**
      * Spouse alanları yalnızca marital_status === 'married' ise required sayılır.
+     * children_count ayrıca has_children === 'yes' olduğunda zorunlu
+     * (conditionalRequiredErrors içinde handle edilir — buradaki skipKeys sadece
+     * "required değil" demek; conditional rule ayrı bir kontrol).
      *
      * @param  array<string,mixed> $payload
      * @return array<int,string>
@@ -141,19 +144,23 @@ class GuestRegistrationFieldSchemaService
     public function spouseSkippedKeys(array $payload): array
     {
         $maritalStatus = strtolower(trim((string) ($payload['marital_status'] ?? '')));
-        if ($maritalStatus === 'married') {
-            return [];
+        if ($maritalStatus !== 'married') {
+            // Evli değil → tüm spouse + children_count alanları atlanır
+            return [
+                'spouse_full_name',
+                'spouse_birth_date',
+                'spouse_nationality',
+                'spouse_occupation',
+                'marriage_date',
+                'marriage_place',
+                'spouse_currently_in_germany',
+                'has_children',
+                'children_count',
+            ];
         }
-        return [
-            'spouse_full_name',
-            'spouse_birth_date',
-            'spouse_nationality',
-            'spouse_occupation',
-            'marriage_date',
-            'marriage_place',
-            'spouse_currently_in_germany',
-            'has_children',
-        ];
+        // Evli → children_count'u default skip (zorunlu değil),
+        // sadece has_children === 'yes' ise required sayılacak (conditional rule).
+        return ['children_count'];
     }
 
     /**
