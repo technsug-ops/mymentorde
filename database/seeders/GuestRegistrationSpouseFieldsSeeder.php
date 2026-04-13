@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\GuestRegistrationField;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * "Eşinizle İlgili Bilgiler" section — marital_status=='married' seçilince
@@ -69,42 +70,45 @@ class GuestRegistrationSpouseFieldsSeeder extends Seeder
             ],
         ];
 
-        // Aktif company_id'leri bul. BelongsToCompany trait yeni kayıtlarda
-        // company_id'yi otomatik set ediyor (creating event), bu yüzden firstOrCreate
-        // direkt company_id=0 ile çalışmıyor. Her aktif company için ayrı iterate.
-        $companyIds = \App\Models\Company::query()
-            ->where('is_active', true)
-            ->orderBy('id')
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
-        // Fallback: hiç company yoksa default 0 tablosuna yaz
-        if (empty($companyIds)) {
-            $companyIds = [0];
-        }
-
-        foreach ($companyIds as $companyId) {
-            foreach ($fields as $f) {
-                // withoutGlobalScopes trait scope'undan kaçar, raw existence kontrolü
-                $exists = GuestRegistrationField::withoutGlobalScopes()
-                    ->where('company_id', $companyId)
-                    ->where('field_key', $f['field_key'])
-                    ->exists();
-                if ($exists) {
-                    continue;
-                }
-                $row = new GuestRegistrationField();
-                $row->company_id    = $companyId;
-                $row->section_key   = $section['section_key'];
-                $row->section_title = $section['section_title'];
-                $row->section_order = $section['section_order'];
-                $row->is_active     = true;
-                $row->is_system     = true;
-                foreach ($f as $k => $v) {
-                    $row->{$k} = $v;
-                }
-                $row->save();
+        // Spouse alanlarını company_id=0 (defaults) olarak ekle. Bu pattern'de:
+        //   - company_id=0 → "tüm şirketler için varsayılan alanlar"
+        //   - company_id=X → sadece X şirketine özel override
+        // Service read sırasında company_id=X boşsa company_id=0'a fallback yapar.
+        // (Eskiden company_id=1'e ekliyorduk, bu diğer section'ların company_id=0'dan
+        //  gelmesini engelliyordu — new_guest form'unda sadece spouse gözüküyordu.)
+        //
+        // BelongsToCompany trait "creating" event'i company_id=0'ı boş sayıp otomatik
+        // override ediyor. Bunu önlemek için doğrudan DB::table insert kullanıyoruz.
+        $inserted = 0;
+        foreach ($fields as $f) {
+            $exists = DB::table('guest_registration_fields')
+                ->where('company_id', 0)
+                ->where('field_key', $f['field_key'])
+                ->exists();
+            if ($exists) {
+                continue;
             }
+            $insertData = [
+                'company_id'    => 0,
+                'section_key'   => $section['section_key'],
+                'section_title' => $section['section_title'],
+                'section_order' => $section['section_order'],
+                'is_active'     => true,
+                'is_system'     => true,
+                'created_at'    => now(),
+                'updated_at'    => now(),
+            ];
+            foreach ($f as $k => $v) {
+                // options_json array ise JSON'a çevir (DB::table Eloquent cast yapmaz)
+                if ($k === 'options_json' && is_array($v)) {
+                    $insertData[$k] = json_encode($v, JSON_UNESCAPED_UNICODE);
+                } else {
+                    $insertData[$k] = $v;
+                }
+            }
+            DB::table('guest_registration_fields')->insert($insertData);
+            $inserted++;
         }
+        echo 'GuestRegistrationSpouseFieldsSeeder: inserted ' . $inserted . ' rows at company_id=0' . PHP_EOL;
     }
 }

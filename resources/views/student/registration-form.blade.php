@@ -102,11 +102,12 @@
 .required-star { color: var(--u-danger); font-weight: 700; }
 .srf-field-error { color: var(--u-danger); font-size: 13px; }
 
-/* Prefilled + filled state */
+/* Prefilled + filled state — B9: minimal ✓ sembolü */
 .srf-prefilled {
-    display: inline-flex; align-items: center; gap: 3px;
-    font-size: 10px; font-weight: 600; color: var(--u-ok);
-    background: rgba(22,163,74,.08); padding: 1px 8px; border-radius: 4px;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px;
+    font-size: 11px; line-height: 1;
+    color: var(--u-ok); font-weight: 700;
 }
 .srf-form-group.is-filled input,
 .srf-form-group.is-filled select {
@@ -297,6 +298,10 @@
                                 $placeholder = (string) ($field['placeholder'] ?? '');
                                 $options     = is_array($field['options'] ?? null) ? $field['options'] : [];
                                 $value       = old($key, $draft[$key] ?? ($guestApplication?->{$key} ?? ''));
+                                // B10: application_country DB'de 'de' (code) — eski label kayıtları normalize et
+                                if ($key === 'application_country') {
+                                    $value = \App\Support\GuestRegistrationFormCatalog::normalizeCountryValue($value);
+                                }
                                 $isFilled    = trim((string)$value) !== '';
                                 $isWide      = $type === 'textarea' || $type === 'email'
                                     || !empty($field['full_width']) || !empty($field['help_text'])
@@ -307,7 +312,7 @@
                                 <div class="srf-label-row">
                                     <label>{{ $label }} @if($required)<span class="required-star">*</span>@endif</label>
                                     @if($isFilled && in_array($key, ['first_name','last_name','email','phone']))
-                                        <span class="srf-prefilled">✓ Kayıttan</span>
+                                        <span class="srf-prefilled" title="Kayıttan otomatik dolduruldu">✓</span>
                                     @endif
                                 </div>
                                 @if($type === 'select')
@@ -328,10 +333,35 @@
                                     <input type="date" name="{{ $key }}" value="{{ $value }}"
                                            data-required="{{ $required ? '1' : '0' }}" {{ $formLocked ? 'disabled' : '' }}>
                                 @else
-                                    <input type="{{ $type === 'email' ? 'email' : 'text' }}"
+                                    @php
+                                        // B11: harf-only alanlar (şehir, ilçe, il, doğum yeri)
+                                        $isTextOnly = in_array($key, [
+                                            'application_city', 'district', 'province', 'birth_place',
+                                            'father_birth_place', 'mother_birth_place',
+                                        ], true);
+                                        // B14: mezuniyet ortalaması — sadece sayı
+                                        $isGrade = in_array($key, ['primary_grade', 'middle_grade', 'high_school_grade'], true);
+                                        $inputType = match(true) {
+                                            $type === 'email' => 'email',
+                                            $type === 'phone' => 'tel',
+                                            $isGrade           => 'number',
+                                            default            => 'text',
+                                        };
+                                        $inputmode = $isGrade ? 'decimal' : '';
+                                        $pattern = $isTextOnly
+                                            ? "[A-Za-zçğıöşüÇĞİÖŞÜ\s\-.',]+"
+                                            : '';
+                                        $patternTitle = $isTextOnly
+                                            ? 'Sadece harf, boşluk ve tire kullanın (sayı içeremez)'
+                                            : '';
+                                    @endphp
+                                    <input type="{{ $inputType }}"
                                            name="{{ $key }}" value="{{ (string)$value }}"
                                            placeholder="{{ $placeholder }}"
-                                           data-required="{{ $required ? '1' : '0' }}" {{ $formLocked ? 'disabled' : '' }}>
+                                           data-required="{{ $required ? '1' : '0' }}" {{ $formLocked ? 'disabled' : '' }}
+                                           @if($inputmode) inputmode="{{ $inputmode }}" @endif
+                                           @if($isGrade) step="0.01" min="0" max="100" @endif
+                                           @if($pattern) pattern="{{ $pattern }}" title="{{ $patternTitle }}" @endif>
                                 @endif
                                 @error($key)
                                     <div class="srf-field-error">{{ $message }}</div>
@@ -442,18 +472,158 @@
         });
     }
 
-    // Autosave toast + filled state
+    // B8: filled state toggle her input'ta, ama "kaydedildi" toast'u sadece
+    // sonraki adıma geçişte (Devam Et).
     var toast = document.getElementById('srfToast'), tt;
     document.addEventListener('input', function(e){
         if(!e.target.closest('form')) return;
         var fg = e.target.closest('.srf-form-group');
         if(fg) fg.classList.toggle('is-filled', e.target.value.trim() !== '');
-        if(toast){ toast.classList.add('show'); clearTimeout(tt); tt = setTimeout(function(){ toast.classList.remove('show'); }, 1500); }
     });
     document.addEventListener('change', function(e){
         var fg = e.target.closest('.srf-form-group');
         if(fg) fg.classList.toggle('is-filled', e.target.value.trim() !== '');
     });
+    // Devam Et tıklanınca toast göster
+    var nextStudentBtn = document.querySelector('[data-srf-next]') || document.getElementById('nextSectionBtn');
+    if (nextStudentBtn && toast) {
+        nextStudentBtn.addEventListener('click', function () {
+            toast.classList.add('show');
+            clearTimeout(tt);
+            tt = setTimeout(function () { toast.classList.remove('show'); }, 1500);
+        });
+    }
+
+    // ─── B12: Eğitim seviyesi conditional visibility (Student parity) ────────
+    // middle_school → hide high_+university_, high_school → hide university_
+    var _educationVisibility = {
+        middle_school: ['high_', 'university_'],
+        high_school:   ['university_'],
+        bachelor:      [],
+        master:        [],
+    };
+    function _isEduFieldStudent(key, prefixes){
+        for(var i=0;i<prefixes.length;i++){ if(key.indexOf(prefixes[i])===0) return true; }
+        return false;
+    }
+    function _applyEducationVisibilityStudent(){
+        var form = document.querySelector('form');
+        if(!form) return;
+        var sel = form.querySelector('[name="education_level"]');
+        if(!sel) return;
+        var hidePrefixes = _educationVisibility[String(sel.value || '')] || [];
+        form.querySelectorAll('[data-field-key]').forEach(function(fg){
+            var k = fg.dataset.fieldKey || '';
+            if(!/^(primary_|middle_|high_|university_)/.test(k)) return;
+            if(k === 'education_level') return;
+            var shouldHide = _isEduFieldStudent(k, hidePrefixes);
+            fg.style.display = shouldHide ? 'none' : '';
+            var inp = fg.querySelector('input, select, textarea');
+            if(inp) {
+                if(shouldHide) {
+                    inp.dataset.origRequired = inp.dataset.required || '0';
+                    inp.dataset.required = '0';
+                    inp.removeAttribute('required');
+                } else if(inp.dataset.origRequired === '1') {
+                    inp.dataset.required = '1';
+                }
+            }
+        });
+    }
+
+    // ─── B13: Eğitim tarih validation (sıralama + min duration) ─────────────
+    // İlkokul ≥ 4 yıl, Ortaokul ≥ 3 yıl, Lise ≥ 3 yıl
+    var _eduOrderChainStudent = [
+        ['primary_end_date', 'middle_start_date', 'Ortaokul başlama tarihi ilkokul bitiş tarihinden önce olamaz.'],
+        ['middle_end_date', 'high_start_date', 'Lise başlama tarihi ortaokul bitiş tarihinden önce olamaz.'],
+    ];
+    var _eduDurationRulesStudent = [
+        ['primary_start_date', 'primary_end_date', 4, 'İlkokul'],
+        ['middle_start_date',  'middle_end_date',  3, 'Ortaokul'],
+        ['high_start_date',    'high_end_date',    3, 'Lise'],
+    ];
+    function _isHiddenStudent(el){
+        var g = el && el.closest('.srf-form-group');
+        return !!(g && g.style.display === 'none');
+    }
+    function _addYearsStudent(iso, years){
+        if(!iso) return '';
+        var d = new Date(iso);
+        if(isNaN(d)) return '';
+        return new Date(d.getFullYear() + years, d.getMonth(), d.getDate()).toISOString().slice(0,10);
+    }
+    function _validateEduDatesStudent(){
+        var form = document.querySelector('form');
+        if(!form) return;
+        _eduDurationRulesStudent.forEach(function(r){
+            var sEl = form.querySelector('[name="' + r[0] + '"]');
+            var eEl = form.querySelector('[name="' + r[1] + '"]');
+            if(!sEl || !eEl) return;
+            if(_isHiddenStudent(sEl) || _isHiddenStudent(eEl)) { eEl.setCustomValidity(''); return; }
+            var s = (sEl.value || '').trim();
+            var e = (eEl.value || '').trim();
+            if(!s || !e) { eEl.setCustomValidity(''); return; }
+            var minEnd = _addYearsStudent(s, r[2]);
+            if(e < s) {
+                eEl.setCustomValidity(r[3] + ' bitiş tarihi başlama tarihinden önce olamaz.');
+            } else if(minEnd && e < minEnd) {
+                eEl.setCustomValidity(r[3] + ' bitiş tarihi başlamadan en az ' + r[2] + ' yıl sonra olmalı.');
+                eEl.min = minEnd;
+            } else {
+                eEl.setCustomValidity('');
+                if(minEnd) eEl.min = minEnd;
+            }
+        });
+        _eduOrderChainStudent.forEach(function(pair){
+            var aEl = form.querySelector('[name="' + pair[0] + '"]');
+            var bEl = form.querySelector('[name="' + pair[1] + '"]');
+            if(!aEl || !bEl) return;
+            if(_isHiddenStudent(aEl) || _isHiddenStudent(bEl)) { bEl.setCustomValidity(''); return; }
+            var a = (aEl.value || '').trim();
+            var b = (bEl.value || '').trim();
+            if(a && b && b < a) {
+                bEl.setCustomValidity(pair[2]);
+                bEl.min = a;
+            }
+        });
+    }
+
+    // ─── B15: Parent dob >= child dob + 12 yıl (Student parity) ─────────────
+    function _bdIsoStudent(v){ return (v || '').trim().slice(0, 10); }
+    function _syncParentDobConstraintsStudent(){
+        var form = document.querySelector('form');
+        if(!form) return;
+        var child = form.querySelector('[name="birth_date"]');
+        if(!child) return;
+        var childVal = _bdIsoStudent(child.value);
+        if(!childVal) return;
+        var d = new Date(childVal);
+        if(isNaN(d)) return;
+        var maxDate = new Date(d.getFullYear() - 12, d.getMonth(), d.getDate());
+        var maxIso = maxDate.toISOString().slice(0, 10);
+        ['father_birth_date','mother_birth_date'].forEach(function(name){
+            var el = form.querySelector('[name="' + name + '"]');
+            if(!el) return;
+            el.max = maxIso;
+            var v = _bdIsoStudent(el.value);
+            if(v && v > maxIso) {
+                el.setCustomValidity('Doğum tarihi çocuğun doğum tarihinden önce ve en az 12 yıl büyük olmalı.');
+            } else {
+                el.setCustomValidity('');
+            }
+        });
+    }
+
+    // ─── Listener'lar ───────────────────────────────────────────────────────
+    document.addEventListener('change', function(e){
+        var n = e.target.name || '';
+        if(n === 'education_level') _applyEducationVisibilityStudent();
+        if(/_(start|end)_date$/.test(n)) _validateEduDatesStudent();
+        if(n === 'birth_date' || n === 'father_birth_date' || n === 'mother_birth_date') _syncParentDobConstraintsStudent();
+    });
+    _applyEducationVisibilityStudent();
+    _validateEduDatesStudent();
+    _syncParentDobConstraintsStudent();
 
     // Spouse fields conditional visibility (marital_status === 'married')
     // Student registration form'da da aynı davranış — guest blade ile tutarlı.

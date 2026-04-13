@@ -110,7 +110,9 @@ class InternalMessagingController extends Controller
 
         $conv = $this->service->findOrCreateDm((int) $user->id, $targetUserId, $this->companyId());
 
-        return redirect()->route('im.index', ['conv' => $conv->id]);
+        // tab=internal ekle: aksi halde hub.index default olarak customer tab'ını açıyor
+        // ve kullanıcı "boş ekran" görüp tekrar Ekip sekmesine tıklamak zorunda kalıyor (B20).
+        return redirect()->route('im.index', ['tab' => 'internal', 'conv' => $conv->id]);
     }
 
     /** Grup konuşması oluştur */
@@ -153,7 +155,9 @@ class InternalMessagingController extends Controller
             default        => 'Grup konuşması oluşturuldu.',
         };
 
-        return redirect()->route('im.index', ['conv' => $conv->id])
+        // tab=internal eklendi: B20 ile aynı sebep — aksi halde manager için
+        // default tab=customer açılır ve oluşturulan grup/oda görünmez.
+        return redirect()->route('im.index', ['tab' => 'internal', 'conv' => $conv->id])
             ->with('status', $label);
     }
 
@@ -223,7 +227,7 @@ class InternalMessagingController extends Controller
             ]);
         }
 
-        return redirect()->route('im.index', ['conv' => $convId]);
+        return redirect()->route('im.index', ['tab' => 'internal', 'conv' => $convId]);
     }
 
     /** Konuşmayı okundu işaretle */
@@ -274,7 +278,7 @@ class InternalMessagingController extends Controller
             return response()->json(['ok' => true]);
         }
 
-        return redirect()->route('im.index', ['conv' => $conv->id]);
+        return redirect()->route('im.index', ['tab' => 'internal', 'conv' => $conv->id]);
     }
 
     /** Gruba üye ekle */
@@ -305,7 +309,7 @@ class InternalMessagingController extends Controller
         $added = User::query()->find($targetId);
         $this->service->sendMessage($conv, (int) $user->id, "📥 {$added?->name} gruba eklendi.");
 
-        return redirect()->route('im.index', ['conv' => $conv->id])
+        return redirect()->route('im.index', ['tab' => 'internal', 'conv' => $conv->id])
             ->with('status', 'Üye eklendi.');
     }
 
@@ -344,7 +348,7 @@ class InternalMessagingController extends Controller
             return redirect()->route('im.index')->with('status', 'Gruptan ayrıldınız.');
         }
 
-        return redirect()->route('im.index', ['conv' => $conv->id])
+        return redirect()->route('im.index', ['tab' => 'internal', 'conv' => $conv->id])
             ->with('status', 'Üye çıkarıldı.');
     }
 
@@ -526,7 +530,7 @@ class InternalMessagingController extends Controller
             return response()->json(['ok' => true, 'body' => $msg->body, 'edited_at' => $msg->edited_at]);
         }
 
-        return redirect()->route('im.index', ['conv' => $msg->conversation_id]);
+        return redirect()->route('im.index', ['tab' => 'internal', 'conv' => $msg->conversation_id]);
     }
 
     /** Konuşma arşivle / arşivden çıkar (toggle) */

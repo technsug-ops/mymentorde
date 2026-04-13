@@ -107,11 +107,12 @@
 .label-row label { font-weight: 700; color: var(--u-text); font-size: 13px; }
 .required-star { color: var(--u-danger); font-weight: 700; }
 
-/* Prefilled badge */
+/* Prefilled badge — B9: minimal ✓ sembolü, text yok */
 .grf-prefilled {
-    display: inline-flex; align-items: center; gap: 3px;
-    font-size: 10px; font-weight: 600; color: var(--u-ok);
-    background: rgba(22,163,74,.08); padding: 1px 8px; border-radius: 4px;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px;
+    font-size: 11px; line-height: 1;
+    color: var(--u-ok); font-weight: 700;
 }
 
 /* Filled state — green border */
@@ -306,6 +307,11 @@
                                         $placeholder = (string)($field['placeholder'] ?? '');
                                         $max         = (int)($field['max'] ?? 255);
                                         $value       = old($key, $draft[$key] ?? ($guest?->{$key} ?? ''));
+                                        // B10: application_country DB'de 'de' (code) saklanıyor ama eski kayıtlar
+                                        // 'Almanya' (label) olabilir. Render öncesi code'a normalize et.
+                                        if ($key === 'application_country') {
+                                            $value = \App\Support\GuestRegistrationFormCatalog::normalizeCountryValue($value);
+                                        }
                                         $isFilled    = trim((string)$value) !== '';
                                         $isWide      = $type === 'textarea' || $type === 'email'
                                             || !empty($field['help_text']) || !empty($field['full_width'])
@@ -316,7 +322,7 @@
                                         <div class="label-row">
                                             <label>{{ $label }} @if($required)<span class="required-star">*</span>@endif</label>
                                             @if($isFilled && in_array($key, ['first_name','last_name','email','phone']))
-                                                <span class="grf-prefilled">✓ Kayıttan</span>
+                                                <span class="grf-prefilled" title="Kayıttan otomatik dolduruldu">✓</span>
                                             @endif
                                         </div>
                                         @if(!empty($field['help_text']))
@@ -467,20 +473,32 @@
         }
     });
 
-    // Autosave toast + filled state
+    // B8: filled state'i her input'ta toggle et (görsel filled class) ama
+    // "kaydedildi" toast'unu HER KEYSTROKE'da gösterme — sadece "Devam Et"
+    // basınca server save yapılınca göster (aşağıdaki click handler'da).
     var toast = document.getElementById('grfToast'), tt;
     document.addEventListener('input', function(e){
         if(!e.target.closest('#guestRegistrationForm')) return;
-        // Toggle is-filled class
         var fg = e.target.closest('.form-group');
         if(fg) fg.classList.toggle('is-filled', e.target.value.trim() !== '');
-        // Toast
-        if(toast){ toast.classList.add('show'); clearTimeout(tt); tt = setTimeout(function(){ toast.classList.remove('show'); }, 1500); }
     });
     document.addEventListener('change', function(e){
         var fg = e.target.closest('.form-group');
         if(fg) fg.classList.toggle('is-filled', e.target.value.trim() !== '');
     });
+
+    // Toast'u yalnızca "Devam Et" butonuna basıldığında göster (server save'i tetikleyen).
+    // guest-registration-form.js içinde bu buton click'i ajax-save fetch yapıyor; biz
+    // burada paralel bir click handler ile toast'ı yönetiyoruz.
+    var nextBtn = document.getElementById('btnNextStep');
+    if (nextBtn && toast) {
+        nextBtn.addEventListener('click', function () {
+            // Saved state'i göster, 1.5sn sonra gizle
+            toast.classList.add('show');
+            clearTimeout(tt);
+            tt = setTimeout(function () { toast.classList.remove('show'); }, 1500);
+        });
+    }
 
     // Step bar doluluk güncelle
     function updateStepBars(){

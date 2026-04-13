@@ -76,8 +76,9 @@ html,body{height:100%;overflow:hidden}
 .hub-reply-preview{background:#f0f4ff;border-left:3px solid var(--u-brand,#4577c4);padding:3px 7px;border-radius:4px;font-size:10px;color:#555;margin-bottom:3px}
 .hub-attach{display:flex;align-items:center;gap:5px;background:#f5f5f5;border-radius:5px;padding:4px 7px;font-size:11px;margin-top:3px}
 .hub-attach a{color:var(--u-brand,#4577c4)}
-.hub-input-bar{border-top:1px solid var(--u-line);padding:9px 11px;display:flex;gap:6px;align-items:flex-end;background:var(--u-card,#fff);flex-shrink:0}
-.hub-input-bar textarea{flex:1;resize:none;border:1px solid var(--u-line);border-radius:7px;padding:7px 9px;font-size:13px;max-height:110px;font-family:inherit;line-height:1.4}
+.hub-input-bar{border-top:1px solid var(--u-line);padding:9px 11px;display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;background:var(--u-card,#fff);flex-shrink:0}
+.hub-input-bar textarea{flex:1 1 100%;resize:none;border:1px solid var(--u-line);border-radius:7px;padding:8px 12px;font-size:14px;min-height:42px;max-height:160px;font-family:inherit;line-height:1.45;order:-1}
+.hub-input-bar .hub-picker-wrap{margin-right:auto}
 .hub-input-bar textarea:focus{outline:none;border-color:var(--u-brand,#4577c4)}
 .hub-input-bar .btn{align-self:flex-end;padding:7px 14px}
 .hub-reply-bar{padding:5px 11px;background:#f0f4ff;border-top:1px solid #d0dcf5;font-size:11px;color:#444;display:flex;align-items:center;gap:7px;flex-shrink:0}
@@ -229,11 +230,24 @@ window.__hub = {
         <div class="hub-section {{ $tab !== 'internal' ? 'hidden' : '' }}" id="hubSectionInternal">
             <div class="hub-list-head">
                 <input type="text" placeholder="Konuşma ara..." id="hubIntSearchInput">
-                <div class="hub-list-btns">
-                    <a href="#hubModalDm" class="btn" style="text-decoration:none">+ DM</a>
-                    <a href="#hubModalGroup" class="btn alt" style="text-decoration:none">+ Grup</a>
-                    <a href="#hubModalRoom" class="btn" style="background:#fdecea;color:#c0392b;border-color:#f5c6c6;text-decoration:none">+ Oda</a>
+                <div class="hub-list-btns" style="position:relative">
+                    <button type="button" id="hubNewConvBtn"
+                            class="btn ok"
+                            style="padding:5px 11px;font-weight:600;cursor:pointer"
+                            title="Yeni konuşma başlat">+ Yeni</button>
+                    <div id="hubNewConvMenu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:1px solid var(--u-line);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.12);min-width:160px;z-index:50;padding:4px;">
+                        <a href="#hubModalDm"    style="display:block;padding:8px 11px;text-decoration:none;color:var(--u-text);font-size:13px;border-radius:6px" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">💬 Direkt Mesaj</a>
+                        <a href="#hubModalGroup" style="display:block;padding:8px 11px;text-decoration:none;color:var(--u-text);font-size:13px;border-radius:6px" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">👥 Grup Konuşması</a>
+                        <a href="#hubModalRoom"  style="display:block;padding:8px 11px;text-decoration:none;color:var(--u-text);font-size:13px;border-radius:6px" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">🏠 Konu Odası</a>
+                    </div>
                 </div>
+            </div>
+            {{-- Filter pills (Slack-style) — tek listede tip filtresi --}}
+            <div class="hub-conv-filters" style="display:flex;gap:5px;padding:4px 11px 8px;flex-wrap:wrap">
+                <button type="button" class="hub-filter-pill active" data-conv-filter="all"    style="padding:4px 11px;font-size:11px;border-radius:999px;border:1px solid var(--u-line);background:var(--u-brand,#4577c4);color:#fff;cursor:pointer;font-weight:600">Tümü</button>
+                <button type="button" class="hub-filter-pill"        data-conv-filter="direct" style="padding:4px 11px;font-size:11px;border-radius:999px;border:1px solid var(--u-line);background:#fff;color:var(--u-text);cursor:pointer">💬 DM</button>
+                <button type="button" class="hub-filter-pill"        data-conv-filter="group"  style="padding:4px 11px;font-size:11px;border-radius:999px;border:1px solid var(--u-line);background:#fff;color:var(--u-text);cursor:pointer">👥 Grup</button>
+                <button type="button" class="hub-filter-pill"        data-conv-filter="room"   style="padding:4px 11px;font-size:11px;border-radius:999px;border:1px solid var(--u-line);background:#fff;color:var(--u-text);cursor:pointer">🏠 Oda</button>
             </div>
             <div class="hub-item-list" id="hubInternalList">
                 @if($internalData && $internalData['conversations']->count())
@@ -251,6 +265,7 @@ window.__hub = {
                 <div class="hub-item {{ $isActive ? 'active' : '' }} {{ $isPinned ? 'pinned' : '' }}"
                      style="{{ $isMuted ? 'opacity:.55;' : '' }}cursor:pointer"
                      data-search="{{ strtolower($display) }}"
+                     data-conv-type="{{ $conv->type === 'announcement' ? 'group' : $conv->type }}"
                      data-hub-conv="{{ $conv->id }}">
                     <div class="hub-avatar type-{{ $typeIcon }}">{{ strtoupper(substr($display,0,1)) }}</div>
                     <div class="hub-item-meta">
@@ -395,6 +410,50 @@ document.addEventListener('DOMContentLoaded', function () {
     if (el) el.addEventListener('change', function () { hubImFileChosen(this); });
     el = document.getElementById('hubCFileInput');
     if (el) el.addEventListener('change', function () { hubCFileChosen(this); });
+
+    // ── + Yeni dropdown menu (DM/Grup/Oda) ──
+    var hubNewBtn  = document.getElementById('hubNewConvBtn');
+    var hubNewMenu = document.getElementById('hubNewConvMenu');
+    if (hubNewBtn && hubNewMenu) {
+        hubNewBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            hubNewMenu.style.display = (hubNewMenu.style.display === 'block') ? 'none' : 'block';
+        });
+        document.addEventListener('click', function (e) {
+            if (!hubNewMenu.contains(e.target) && e.target !== hubNewBtn) {
+                hubNewMenu.style.display = 'none';
+            }
+        });
+        // Menü içinde modal link'ine tıklanırsa menüyü kapat (modal browser hash navigation ile açılır)
+        hubNewMenu.querySelectorAll('a').forEach(function (a) {
+            a.addEventListener('click', function () { hubNewMenu.style.display = 'none'; });
+        });
+    }
+
+    // ── Conversation type filter pills (Tümü / DM / Grup / Oda) ──
+    var hubFilterPills = document.querySelectorAll('.hub-filter-pill');
+    var hubCurFilter = 'all';
+    function _hubApplyConvFilter() {
+        var items = document.querySelectorAll('#hubInternalList .hub-item');
+        items.forEach(function (it) {
+            var t = it.dataset.convType || '';
+            var match = (hubCurFilter === 'all') || (t === hubCurFilter);
+            it.style.display = match ? '' : 'none';
+        });
+    }
+    hubFilterPills.forEach(function (pill) {
+        pill.addEventListener('click', function () {
+            hubCurFilter = this.dataset.convFilter || 'all';
+            hubFilterPills.forEach(function (p) {
+                var active = (p.dataset.convFilter === hubCurFilter);
+                p.classList.toggle('active', active);
+                p.style.background = active ? 'var(--u-brand,#4577c4)' : '#fff';
+                p.style.color      = active ? '#fff' : 'var(--u-text)';
+                p.style.fontWeight = active ? '600' : '400';
+            });
+            _hubApplyConvFilter();
+        });
+    });
 
     // ── Global delegated click handler ──
     document.addEventListener('click', function (e) {

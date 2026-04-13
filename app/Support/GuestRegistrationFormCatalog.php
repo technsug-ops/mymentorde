@@ -9,10 +9,39 @@ class GuestRegistrationFormCatalog
      */
     public static function applicationCountryOptions(): array
     {
+        // value = lowercase ISO code (DB ile uyumlu — guest_applications.application_country
+        // 'de' gibi kod saklıyor). Label = "Almanya (DE)" gösterim.
         return array_map(
-            static fn (array $c) => ['value' => $c['label'], 'label' => $c['label'] . ' (' . $c['code'] . ')'],
+            static fn (array $c) => [
+                'value' => strtolower($c['code']),
+                'label' => $c['label'] . ' (' . $c['code'] . ')',
+            ],
             ApplicationCountryCatalog::options()
         );
+    }
+
+    /**
+     * Eski label-tabanlı kayıtları (örn. 'Almanya') yeni code formatına ('de') çevir.
+     * Form rendering sırasında $value'yu normalize etmek için.
+     */
+    public static function normalizeCountryValue(?string $value): string
+    {
+        $v = trim((string) $value);
+        if ($v === '') {
+            return '';
+        }
+        $vLower = strtolower($v);
+        // Zaten code ise (2 harf, ASCII)
+        if (preg_match('/^[a-z]{2}$/', $vLower)) {
+            return $vLower;
+        }
+        // Label ise (Almanya, Avusturya, ...) → code'a çevir
+        foreach (ApplicationCountryCatalog::options() as $c) {
+            if (mb_strtolower((string) $c['label']) === mb_strtolower($v)) {
+                return strtolower((string) $c['code']);
+            }
+        }
+        return $v;
     }
 
     /**
