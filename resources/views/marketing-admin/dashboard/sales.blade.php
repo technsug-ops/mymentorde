@@ -420,7 +420,7 @@
         <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
             <li><strong>Aylık Gelir Grafiği:</strong> Son 12 ayın ödeme tahsilat trendi</li>
             <li><strong>Dealer Sıralaması:</strong> En çok lead getiren bayi listesi — alt sıradakilerle iletişime geç</li>
-            <li><strong>Dönüşüm Hunisi:</strong> Lead → Guest → Öğrenci geçiş oranları</li>
+            <li><strong>Dönüşüm Hunisi:</strong> Lead → Aday Öğrenci → Öğrenci geçiş oranları</li>
             <li><strong>Hedef vs Gerçek:</strong> Aylık gelir hedefine ne kadar yakınsın?</li>
             <li><strong>Bekleyen Komisyonlar:</strong> Ödenmemiş dealer komisyonları</li>
         </ul>

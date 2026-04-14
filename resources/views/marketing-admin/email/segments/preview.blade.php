@@ -43,7 +43,7 @@
                         <th>Email</th>
                         <th>Role</th>
                         <th>Status</th>
-                        <th>Student/Dealer/Senior Codes</th>
+                        <th>Öğrenci/Dealer/Eğitim Danışmanı Kodları</th>
                     </tr>
                 </thead>
                 <tbody>

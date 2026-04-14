@@ -107,7 +107,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
         <div class="sm-stat"><div class="sm-val">{{ number_format((int) ($summary['total_posts'] ?? 0), 0, ',', '.') }}</div><div class="sm-lbl">Posts</div></div>
         <div class="sm-stat"><div class="sm-val">{{ number_format((int) ($summary['total_views'] ?? 0), 0, ',', '.') }}</div><div class="sm-lbl">Views</div></div>
         <div class="sm-stat"><div class="sm-val">{{ number_format((int) ($summary['total_engagement'] ?? 0), 0, ',', '.') }}</div><div class="sm-lbl">Engagement</div></div>
-        <div class="sm-stat"><div class="sm-val">{{ number_format((int) ($summary['total_guest_registrations'] ?? 0), 0, ',', '.') }}</div><div class="sm-lbl">Guest Reg</div></div>
+        <div class="sm-stat"><div class="sm-val">{{ number_format((int) ($summary['total_guest_registrations'] ?? 0), 0, ',', '.') }}</div><div class="sm-lbl">Aday Öğrenci Kayıt</div></div>
     </div>
 
     {{-- Tablo --}}
@@ -126,7 +126,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
                     <th>Shares</th>
                     <th>Avg Eng %</th>
                     <th>Clicks</th>
-                    <th>Guest Reg</th>
+                    <th>Aday Öğrenci Kayıt</th>
                 </tr></thead>
                 <tbody>
                 @forelse(($rows ?? []) as $row)

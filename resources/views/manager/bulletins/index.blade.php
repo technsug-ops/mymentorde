@@ -66,7 +66,7 @@
                     @else
                         @if(!empty($b->target_roles))
                         <div>🎭 {{ implode(', ', array_map(fn($r) => match($r){
-                            'manager'=>'Manager','senior'=>'Senior','marketing_admin'=>'Mkt.Admin',
+                            'manager'=>'Manager','senior'=>'Eğitim Danışmanı','marketing_admin'=>'Mkt.Admin',
                             'marketing_staff'=>'Mkt.Staff','sales_admin'=>'Sales Admin',
                             'sales_staff'=>'Sales Staff','finance_admin'=>'Fin.Admin',
                             'finance_staff'=>'Fin.Staff',default=>$r}, $b->target_roles)) }}</div>

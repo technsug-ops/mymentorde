@@ -93,7 +93,7 @@
         <div class="perf-kpi-sub">tüm zamanlar</div>
     </div>
     <div class="perf-kpi conv">
-        <div class="perf-kpi-label">Student'e Dönüşen</div>
+        <div class="perf-kpi-label">Öğrenciye Dönüşen</div>
         <div class="perf-kpi-val">{{ $ds['converted_total'] ?? 0 }}</div>
     </div>
     <div class="perf-kpi rate">

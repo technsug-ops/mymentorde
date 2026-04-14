@@ -69,7 +69,7 @@
         </div>
 
         <section class="grid">
-            <div class="card"><h3>Guest Kayıt</h3><div id="kpiGuests" class="big">-</div></div>
+            <div class="card"><h3>Aday Öğrenci Kayıt</h3><div id="kpiGuests" class="big">-</div></div>
             <div class="card"><h3>Doğrulanmış Kaynak</h3><div id="kpiVerified" class="big">-</div></div>
             <div class="card"><h3>Kampanya Sayısı</h3><div id="kpiCampaigns" class="big">-</div></div>
             <div class="card"><h3>CPA</h3><div id="kpiCpa" class="big">-</div></div>
@@ -107,7 +107,7 @@
             <div class="card">
                 <h3>Lead Kaynağı Analizi</h3>
                 <table>
-                    <thead><tr><th>Kaynak</th><th>Guest</th><th>Student</th><th>Dönüşüm</th></tr></thead>
+                    <thead><tr><th>Kaynak</th><th>Aday Öğrenci</th><th>Öğrenci</th><th>Dönüşüm</th></tr></thead>
                     <tbody id="sourceTable"></tbody>
                 </table>
             </div>

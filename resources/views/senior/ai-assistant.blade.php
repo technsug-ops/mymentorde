@@ -136,7 +136,7 @@
         <div class="sai-card-body">
             <div style="font-size:var(--tx-sm);color:var(--u-muted);line-height:1.7;">
                 <strong style="color:var(--u-text);">Günlük Soru Hakkı</strong><br>
-                Senior danışmanlar: <strong>{{ $limit }} soru/gün</strong>
+                Eğitim Danışmanları: <strong>{{ $limit }} soru/gün</strong>
             </div>
             <div style="margin-top:8px;font-size:var(--tx-xs);color:var(--u-muted);">
                 💡 Belirli bir öğrenci için analiz yapmak isterseniz sol alttaki "Öğrenci ID" alanını doldurun. AI o öğrencinin belgelerini, risk seviyesini ve süreç aşamasını bilerek yanıt verir.

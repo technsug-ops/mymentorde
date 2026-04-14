@@ -6,7 +6,7 @@
 @push('head')
 <script>if(localStorage.getItem('mentorde_design')==='minimalist'){document.documentElement.classList.add('jm-minimalist');}</script>
 <style>
-/* ── gp-* Guest Profile scoped ── */
+/* ── gp-* Aday Öğrenci Profile scoped ── */
 .gp-hero {
     background: linear-gradient(to right, var(--theme-hero-from-guest) 0%, var(--theme-hero-to-guest) 100%);
     border-radius: 16px;

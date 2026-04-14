@@ -113,7 +113,7 @@
 $statusLabels = ['todo'=>'Yapılacak','in_progress'=>'Devam Ediyor','in_review'=>'İncelemede','on_hold'=>'Beklemede','blocked'=>'Bloke','done'=>'Tamamlandı','cancelled'=>'İptal'];
 $prioLabels   = ['low'=>'Düşük','normal'=>'Normal','high'=>'Yüksek','urgent'=>'Acil'];
 $prioCls      = ['low'=>'p-low','normal'=>'p-normal','high'=>'p-high','urgent'=>'p-urgent'];
-$roleLabels   = ['manager'=>'Manager','system_admin'=>'Sistem Admin','marketing_admin'=>'Mktg Admin','sales_admin'=>'Satış Admin','marketing_staff'=>'Mktg Staff','sales_staff'=>'Satış Staff','senior'=>'Senior','mentor'=>'Mentor','operations_admin'=>'Ops Admin','finance_admin'=>'Fin Admin'];
+$roleLabels   = ['manager'=>'Manager','system_admin'=>'Sistem Admin','marketing_admin'=>'Mktg Admin','sales_admin'=>'Satış Admin','marketing_staff'=>'Mktg Staff','sales_staff'=>'Satış Staff','senior'=>'Eğitim Danışmanı','mentor'=>'Mentor','operations_admin'=>'Ops Admin','finance_admin'=>'Fin Admin'];
 $dueDate    = $task->due_date ? $task->due_date->format('d.m.Y') : null;
 $isOverdue  = $dueDate && !in_array($task->status, ['done','cancelled']) && $task->due_date->isPast();
 $isDueToday = $dueDate && !in_array($task->status, ['done','cancelled']) && $task->due_date->isToday();
@@ -133,7 +133,7 @@ $srcLink = null; $srcLabel = null;
 $st = (string)($task->source_type ?? '');
 if (in_array($st, ['guest_ticket_opened','guest_ticket_replied'], true)) { $srcLink = '/tickets-center/'.($task->department ?: 'operations'); $srcLabel = 'Ticket Merkezi'; }
 elseif ($st === 'guest_document_uploaded') { $srcLink = '/config#guest-ops'; $srcLabel = 'Belge Onay'; }
-elseif (in_array($st, ['guest_contract_requested','guest_contract_signed_uploaded'], true)) { $srcLink = '/config#guest-applications'; $srcLabel = 'Guest Dönüşüm'; }
+elseif (in_array($st, ['guest_contract_requested','guest_contract_signed_uploaded'], true)) { $srcLink = '/config#guest-applications'; $srcLabel = 'Aday Öğrenci Dönüşüm'; }
 elseif ($st === 'student_onboarding_auto') { $srcLink = '/tasks/advisory'; $srcLabel = 'Advisory'; }
 elseif ($st === 'manager_request_created') { $srcLink = '/manager/requests'; $srcLabel = 'Manager Request'; }
 elseif (in_array($st, ['conversation_quick_request','conversation_response_due','conversation_message'], true)) { $srcLink = '/messages-center/advisory'; $srcLabel = 'Mesaj Merkezi'; }

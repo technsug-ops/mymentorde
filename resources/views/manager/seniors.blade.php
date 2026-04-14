@@ -1,7 +1,7 @@
 @extends('manager.layouts.app')
 
-@section('title', 'Manager – Senior Yönetimi')
-@section('page_title', 'Senior Yönetimi')
+@section('title', 'Manager – Eğitim Danışmanı Yönetimi')
+@section('page_title', 'Eğitim Danışmanı Yönetimi')
 
 @push('head')
 <style>
@@ -27,7 +27,7 @@
 {{-- KPI Strip --}}
 <div class="mgr-kpi-strip">
     <div class="mgr-kpi">
-        <div class="mgr-kpi-label">Toplam Senior</div>
+        <div class="mgr-kpi-label">Toplam Eğitim Danışmanı</div>
         <div class="mgr-kpi-val">{{ $kpis['total'] }}</div>
     </div>
     <div class="mgr-kpi">
@@ -40,11 +40,11 @@
     </div>
 </div>
 
-{{-- Senior Tablosu --}}
+{{-- Eğitim Danışmanı Tablosu --}}
 <section class="panel" style="padding:0;overflow:hidden;">
     <div style="padding:14px 16px;border-bottom:1px solid var(--border,#e2e8f0);">
         <span style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;">
-            {{ count($seniors) }} Senior
+            {{ count($seniors) }} Eğitim Danışmanı
         </span>
     </div>
     <div style="overflow-x:auto;">
@@ -55,7 +55,7 @@
                     <th>E-posta</th>
                     <th class="center">Aktif Öğrenci</th>
                     <th class="center">Arşiv</th>
-                    <th class="center">Bekleyen Guest</th>
+                    <th class="center">Bekleyen Aday Öğrenci</th>
                     <th class="center">Kapasite</th>
                     <th></th>
                 </tr>
@@ -88,7 +88,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" style="padding:28px;text-align:center;color:var(--muted,#64748b);">Senior kaydı bulunamadı.</td></tr>
+                    <tr><td colspan="7" style="padding:28px;text-align:center;color:var(--muted,#64748b);">Eğitim Danışmanı kaydı bulunamadı.</td></tr>
                 @endforelse
             </tbody>
         </table>

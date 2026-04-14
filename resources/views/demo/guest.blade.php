@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('brand.name', 'MentorDE') }} Demo - Guest Kayit</title>
+    <title>{{ config('brand.name', 'MentorDE') }} Demo - Aday Öğrenci Kayıt</title>
     <style>
         :root {
             --bg: #eef3f9;
@@ -87,11 +87,11 @@
         <a href="/demo">Demo Akisi</a>
         <a href="/apply">Public Basvuru</a>
         <a href="/config">Config</a>
-        <a href="/student-card">Student Card</a>
+        <a href="/student-card">Öğrenci Kartı</a>
         <a href="/manager/dashboard">Manager Dashboard</a>
     </div>
 
-    <h1>Guest Kayit (Demo)</h1>
+    <h1>Aday Öğrenci Kayıt (Demo)</h1>
     <div class="meta">Master v5.0 icindeki "8 bolum guest formu"nun demo sunum versiyonu.</div>
 
     <div class="grid">
@@ -143,8 +143,8 @@
             <h2>4) Atama</h2>
             <div class="row">
                 <select id="gSeniorType">
-                    <option value="lisans">Senior tipi: lisans</option>
-                    <option value="master" selected>Senior tipi: master</option>
+                    <option value="lisans">Eğitim Danışmanı tipi: lisans</option>
+                    <option value="master" selected>Eğitim Danışmanı tipi: master</option>
                 </select>
                 <input id="gBranch" list="demoBranchSuggestions" placeholder="Sube" value="istanbul">
             </div>
@@ -190,8 +190,8 @@
             </select>
         </div>
         <div class="actions">
-            <button onclick="simulateGuestSave()">Guest Kaydet (Demo)</button>
-            <button onclick="simulateConvert()">Student'a Donustur (Demo)</button>
+            <button onclick="simulateGuestSave()">Aday Öğrenci Kaydet (Demo)</button>
+            <button onclick="simulateConvert()">Öğrenciye Dönüştür (Demo)</button>
         </div>
         <div id="guestDemoStatus" class="status">Hazir.</div>
     </section>

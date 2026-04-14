@@ -13,9 +13,9 @@
             $g = $guestMap[$thread->guest_application_id] ?? null;
             if ($g) {
                 $name = trim(($g->first_name ?? '') . ' ' . ($g->last_name ?? ''));
-                return $name !== '' ? $name : ($g->email ?? 'Guest #' . $thread->guest_application_id);
+                return $name !== '' ? $name : ($g->email ?? 'Aday Öğrenci #' . $thread->guest_application_id);
             }
-            return 'Guest #' . $thread->guest_application_id;
+            return 'Aday Öğrenci #' . $thread->guest_application_id;
         }
         if ($thread->thread_type === 'student' && $thread->student_id) {
             return 'Öğrenci ' . $thread->student_id;
@@ -25,7 +25,7 @@
 
     $threadBadge = function ($thread) {
         return match ($thread->thread_type) {
-            'guest'   => ['👤', 'Guest',   '#dbeafe', '#1e40af'],
+            'guest'   => ['👤', 'Aday Öğrenci',   '#dbeafe', '#1e40af'],
             'student' => ['🎓', 'Öğrenci', '#dcfce7', '#166534'],
             default   => ['💬', 'Mesaj',   '#f1f5f9', '#475569'],
         };
@@ -39,7 +39,7 @@
             <span style="margin-right:8px;">💬</span>Mesaj Merkezi
         </h1>
         <div style="font-size:13px;color:var(--u-muted,#64748b);margin-top:4px;">
-            Guest ve öğrencilerden gelen mesajları yanıtlayın. Toplam {{ count($threads) }} konuşma.
+            Aday Öğrenci ve öğrencilerden gelen mesajları yanıtlayın. Toplam {{ count($threads) }} konuşma.
         </div>
     </div>
 
@@ -72,7 +72,7 @@
         <div style="background:#fff;border:1px dashed #cbd5e1;border-radius:12px;padding:60px 20px;text-align:center;color:#64748b;">
             <div style="font-size:48px;margin-bottom:12px;">📭</div>
             <div style="font-weight:600;color:#0f172a;">Henüz mesaj yok</div>
-            <div style="font-size:13px;margin-top:4px;">Guest veya öğrenciler size yazdığında burada görünecek.</div>
+            <div style="font-size:13px;margin-top:4px;">Aday Öğrenci veya öğrenciler size yazdığında burada görünecek.</div>
         </div>
     @else
     <div style="display:grid;grid-template-columns:320px 1fr;gap:16px;align-items:start;">

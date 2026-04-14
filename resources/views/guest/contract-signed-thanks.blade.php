@@ -204,7 +204,7 @@
 
         {{-- Notice --}}
         <div class="cst-notice">
-            <strong>Misafir portali aktif kalmaya devam eder.</strong><br>
+            <strong>Aday Öğrenci Paneli aktif kalmaya devam eder.</strong><br>
             Onay sürecinde mesaj gönderebilir, belgelerinizi takip edebilir ve danışmanınızla iletişim kurabilirsiniz. Sorunuz için destek talebi oluşturabilirsiniz.
         </div>
 

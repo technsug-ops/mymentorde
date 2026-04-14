@@ -52,7 +52,7 @@
     </div>
 </div>
 
-{{-- Özet bar: Guest bilgisi + Öğrenci kısayolları --}}
+{{-- Özet bar: Aday Öğrenci bilgisi + Öğrenci kısayolları --}}
 <div class="hub-summary">
     @if($guest)
     <span class="kv"><strong>E-posta:</strong> {{ $guest->email }}</span>

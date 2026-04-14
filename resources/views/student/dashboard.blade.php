@@ -1,12 +1,12 @@
 @extends('student.layouts.app')
 
-@section('title', 'Student Dashboard')
-@section('page_title', 'Student Dashboard')
+@section('title', 'Öğrenci Paneli')
+@section('page_title', 'Öğrenci Paneli')
 
 @push('head')
 <script>if(localStorage.getItem('mentorde_design')==='minimalist'){document.documentElement.classList.add('jm-minimalist');}</script>
 <style>
-/* -- sd-* Student Dashboard v2 -- Funnel based -- */
+/* -- sd-* Öğrenci Paneli v2 -- Funnel based -- */
 
 /* Journey */
 .sd-journey { background:var(--u-card); border-radius:14px; box-shadow:var(--u-shadow); border:1px solid var(--u-line); overflow:hidden; margin-bottom:20px; }

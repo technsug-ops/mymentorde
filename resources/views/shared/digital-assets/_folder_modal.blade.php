@@ -35,7 +35,7 @@
                         'manager'         => 'Manager',
                         'marketing_admin' => 'Marketing Admin',
                         'marketing_staff' => 'Marketing Staff',
-                        'senior'          => 'Senior',
+                        'senior'          => 'Eğitim Danışmanı',
                         'mentor'          => 'Mentor',
                         'dealer'          => 'Bayi',
                     ];

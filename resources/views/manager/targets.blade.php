@@ -44,15 +44,15 @@
         </form>
     </div>
 
-    {{-- Senior Hedefleri --}}
+    {{-- Eğitim Danışmanı Hedefleri --}}
     <div class="card">
-        <div class="card-title">Senior Hedefi Ekle</div>
+        <div class="card-title">Eğitim Danışmanı Hedefi Ekle</div>
         <form method="POST" action="/manager/targets">
             @csrf
             <input type="hidden" name="period" value="{{ $period }}">
             <input type="hidden" name="target_type" value="senior_specific">
             <div class="field">
-                <label>Senior *</label>
+                <label>Eğitim Danışmanı *</label>
                 <select name="senior_email" required>
                     <option value="">-- Seç --</option>
                     @foreach($seniors as $sr)

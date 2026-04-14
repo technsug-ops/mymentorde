@@ -5,7 +5,7 @@
 
 @push('head')
 <style>
-/* ═══ Guest Portal Yeşil Tema (sabit, override-immune) ═══ */
+/* ═══ Aday Öğrenci Paneli Yeşil Tema (sabit, override-immune) ═══ */
 .sdoc {
     --bg: #f0f2f5;
     --card: #ffffff;

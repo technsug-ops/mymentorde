@@ -95,33 +95,33 @@
     <div class="top">
         <a href="/manager/dashboard">Manager Dashboard</a>
         <a href="/config">Config Panel</a>
-        <a href="/student-card">Student Card</a>
+        <a href="/student-card">Öğrenci Kartı</a>
         <a href="/demo/checklist">MVP Checklist</a>
     </div>
 
     <div class="grid">
         <section class="card">
-            <h2>1. Guest Kayit</h2>
+            <h2>1. Aday Öğrenci Kayıt</h2>
             <p>Aday ogrencinin sisteme ilk girisi ve temel bilgiler.</p>
             <div class="actions">
-                <a class="btn primary" href="/apply">Guest Kayit Formu (Public)</a>
+                <a class="btn primary" href="/apply">Aday Öğrenci Kayıt Formu (Public)</a>
                 <a class="btn" href="/demo/guest">Demo Simulasyon</a>
             </div>
         </section>
 
         <section class="card">
-            <h2>2. Student Dashboard</h2>
+            <h2>2. Öğrenci Paneli</h2>
             <p>Ogrenci karti, surec arama ve durum gorunumu.</p>
             <div class="actions">
-                <a class="btn primary" href="/student-card">Student Card</a>
+                <a class="btn primary" href="/student-card">Öğrenci Kartı</a>
             </div>
         </section>
 
         <section class="card">
-            <h2>3. Senior Paneli</h2>
-            <p>Senior atama, kapasite, devretme ve sahiplik yonetimi.</p>
+            <h2>3. Eğitim Danışmanı Paneli</h2>
+            <p>Eğitim Danışmanı atama, kapasite, devretme ve sahiplik yonetimi.</p>
             <div class="actions">
-                <a class="btn primary" href="/config">Config > Senior + Student Ownership</a>
+                <a class="btn primary" href="/config">Config > Eğitim Danışmanı + Öğrenci Sahipliği</a>
             </div>
         </section>
 

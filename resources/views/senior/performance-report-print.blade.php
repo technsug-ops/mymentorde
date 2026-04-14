@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Senior Performans Raporu</title>
+    <title>Eğitim Danışmanı Performans Raporu</title>
     <style>
         body { font-family: Arial, sans-serif; color:#1d2a3a; margin:24px; }
         .top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:16px; }
@@ -30,8 +30,8 @@
 <body>
     <div class="top">
         <div>
-            <h1>Senior Performans Raporu</h1>
-            <div class="muted">Senior: {{ $reportSeniorEmail ?? '-' }}</div>
+            <h1>Eğitim Danışmanı Performans Raporu</h1>
+            <div class="muted">Eğitim Danışmanı: {{ $reportSeniorEmail ?? '-' }}</div>
             <div class="muted">Uretim zamani: {{ $reportGeneratedAt ?? '-' }}</div>
         </div>
         <div class="noprint">
@@ -59,11 +59,11 @@
             <div class="value">{{ $pendingAppointments ?? 0 }}</div>
         </div>
         <div class="card">
-            <div class="label">Atanan Guest</div>
+            <div class="label">Atanan Aday Öğrenci</div>
             <div class="value">{{ $guestCount ?? 0 }}</div>
         </div>
         <div class="card">
-            <div class="label">Guest Dönüşüm</div>
+            <div class="label">Aday Öğrenci Dönüşüm</div>
             <div class="value">{{ $guestConverted ?? 0 }}</div>
             <div class="muted">Oran: %{{ $conversionRate ?? 0 }}</div>
             <div class="bar" style="margin-top:6px;"><span style="width:{{ min(100, max(0, (int) ($conversionRate ?? 0))) }}%"></span></div>

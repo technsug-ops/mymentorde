@@ -1,12 +1,12 @@
 @extends('manager.layouts.app')
 
-@section('title', 'Manager – Guest Detay #' . $guest->id)
-@section('page_title', 'Guest Detay')
+@section('title', 'Manager – Aday Öğrenci Detay #' . $guest->id)
+@section('page_title', 'Aday Öğrenci Detay')
 
 @section('content')
 
 <div style="margin-bottom:10px;">
-    <a class="btn" href="/manager/guests">← Guest Listesi</a>
+    <a class="btn" href="/manager/guests">← Aday Öğrenci Listesi</a>
 </div>
 
 {{-- Dönüşüm Bandı --}}
@@ -14,7 +14,7 @@
     <div class="panel" style="background:#f0faf4;border-color:var(--u-ok,#21a861);margin-bottom:12px;">
         <strong style="color:var(--u-ok,#21a861);">✓ Öğrenciye Dönüştü</strong>
         @if($guest->converted_student_id)
-            — Student ID:
+            — Öğrenci ID:
             <a href="/manager/students/{{ urlencode($guest->converted_student_id) }}" style="font-weight:600;">
                 {{ $guest->converted_student_id }}
             </a>
@@ -179,12 +179,12 @@
             </form>
         </section>
 
-        {{-- Senior Atama --}}
+        {{-- Eğitim Danışmanı Atama --}}
         <section class="panel" style="margin-bottom:12px;">
-            <h2>Senior Ataması</h2>
+            <h2>Eğitim Danışmanı Ataması</h2>
             @if($guest->assigned_senior_email)
                 <div style="margin-bottom:8px;">
-                    <span class="muted">Mevcut Senior:</span>
+                    <span class="muted">Mevcut Eğitim Danışmanı:</span>
                     <strong>{{ $guest->assigned_senior_email }}</strong>
                     @if($guest->assigned_at)
                         <span class="muted" style="font-size:var(--tx-xs);">({{ optional($guest->assigned_at)->format('d.m.Y H:i') }})</span>
@@ -200,7 +200,7 @@
             <form method="POST" action="/manager/guests/{{ $guest->id }}/assign">
                 @csrf @method('PATCH')
                 <div style="margin-bottom:8px;">
-                    <label class="muted">Senior Seç</label>
+                    <label class="muted">Eğitim Danışmanı Seç</label>
                     <select name="assigned_senior_email" style="width:100%;">
                         <option value="">– Atamayı Kaldır –</option>
                         @foreach($seniorOptions as $e)
@@ -217,9 +217,9 @@
             <section class="panel" style="margin-bottom:12px;">
                 <h2>Dönüşen Öğrenci</h2>
                 <table style="width:100%;border-collapse:collapse;font-size:var(--tx-sm);">
-                    <tr><td class="muted" style="padding:5px 0;width:120px;">Student ID</td>
+                    <tr><td class="muted" style="padding:5px 0;width:120px;">Öğrenci ID</td>
                         <td><a href="/manager/students/{{ urlencode($student->student_id) }}"><strong>{{ $student->student_id }}</strong></a></td></tr>
-                    <tr><td class="muted" style="padding:5px 0;">Senior</td>
+                    <tr><td class="muted" style="padding:5px 0;">Eğitim Danışmanı</td>
                         <td>{{ $student->senior_email ?: '–' }}</td></tr>
                     <tr><td class="muted" style="padding:5px 0;">Şube</td>
                         <td>{{ $student->branch ?: '–' }}</td></tr>

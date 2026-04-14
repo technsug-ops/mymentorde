@@ -1,6 +1,6 @@
 @extends('student.layouts.app')
 
-@section('title', 'Student - Profil')
+@section('title', 'Öğrenci - Profil')
 @section('page_title', 'Profil')
 
 @push('head')

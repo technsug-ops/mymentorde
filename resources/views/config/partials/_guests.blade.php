@@ -1,5 +1,5 @@
 ﻿        <section class="card" id="guest-applications">
-            <h2>Guest Applications</h2>
+            <h2>Aday Öğrenci Başvuruları</h2>
             <div class="meta">API: /api/v1/config/guest-applications</div>
             <div class="row">
                 <select id="gaFilterConverted">
@@ -20,14 +20,14 @@
             <div class="row">
                 <button onclick="loadGuestApplications()">Filtrele</button>
                 <button onclick="clearGuestApplicationFilters()">Temizle</button>
-                <button onclick="archiveStaleGuestApplications()">Eski Guest Arsivle</button>
+                <button onclick="archiveStaleGuestApplications()">Eski Aday Öğrenci Arşivle</button>
             </div>
             <div id="guestApplicationList" class="list"></div>
             <div class="meta">Secilen aday için dönüşüm ayari (opsiyonel)</div>
             <div class="row">
-                <input id="gaSelectedId" placeholder="Guest ID" readonly>
+                <input id="gaSelectedId" placeholder="Aday Öğrenci ID" readonly>
                 <select id="gaSeniorEmail">
-                    <option value="">Senior (oto secim)</option>
+                    <option value="">Eğitim Danışmanı (oto secim)</option>
                 </select>
             </div>
             <div class="row">
@@ -44,10 +44,10 @@
         </section>
 
         <section class="card" id="guest-ops">
-            <h2>Guest Ops</h2>
+            <h2>Aday Öğrenci İşlemleri</h2>
             <div class="meta">API: /api/v1/config/guest-ops/*</div>
             <div class="row">
-                <input id="goGuestId" placeholder="Guest ID (opsiyonel)">
+                <input id="goGuestId" placeholder="Aday Öğrenci ID (opsiyonel)">
                 <select id="goTicketStatus">
                     <option value="">Tum ticket durumlari</option>
                     <option value="open">open</option>
@@ -66,7 +66,7 @@
                 <input id="goDocCategoryCode" placeholder="Belge category code (opsiyonel)">
             </div>
             <div class="row row-wrap">
-                <button onclick="loadGuestOps()">Guest Ops Yükle</button>
+                <button onclick="loadGuestOps()">Aday Öğrenci İşlemleri Yükle</button>
                 <button onclick="clearGuestOpsFilters()">Filtre Temizle</button>
             </div>
             <div class="meta">Ticketlar</div>
@@ -77,7 +77,7 @@
             <div class="guide" style="margin-top:8px;">
                 <h4>Kullanim Kilavuzu</h4>
                 <ol class="list">
-                    <li>Guest ID ile tek aday ticket/belge kayitlarini filtreleyin.</li>
+                    <li>Aday Öğrenci ID ile tek aday ticket/belge kayitlarini filtreleyin.</li>
                     <li>Ticket status'u buradan güncelleyip manager yaniti gönderebilirsiniz.</li>
                     <li>Belge reddinde not zorunludur; onay/reddet karari task akisini etkiler.</li>
                 </ol>

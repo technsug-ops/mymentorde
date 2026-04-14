@@ -131,7 +131,7 @@
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
             <a href="/manager/theme" class="btn">Tema</a>
-            <a href="/student-card" class="btn">Student Card</a>
+            <a href="/student-card" class="btn">Öğrenci Kartı</a>
             <a href="/config/export-code/safe" class="btn">Kodu İndir</a>
             <a href="/demo" class="btn">Demo</a>
         </div>

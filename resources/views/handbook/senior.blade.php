@@ -9,7 +9,7 @@
 <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div>
         <h1 class="page-title">📖 {{ $lang === 'en' ? 'Advisor Guide' : 'Danışman Kılavuzu' }}</h1>
-        <p class="page-subtitle" style="margin:0;">{{ $lang === 'en' ? 'Portal guide and module reference for advisors.' : 'Senior/Mentor portal rehberi ve modül referansı.' }}</p>
+        <p class="page-subtitle" style="margin:0;">{{ $lang === 'en' ? 'Portal guide and module reference for advisors.' : 'Eğitim Danışmanı/Mentor portal rehberi ve modül referansı.' }}</p>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
         <div class="handbook-lang">

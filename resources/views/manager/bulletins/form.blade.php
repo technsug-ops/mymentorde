@@ -78,7 +78,7 @@
                     @php
                         $allRoles = [
                             'manager'          => 'Manager',
-                            'senior'           => 'Senior / Danışman',
+                            'senior'           => 'Eğitim Danışmanı',
                             'marketing_admin'  => 'Marketing Admin',
                             'marketing_staff'  => 'Marketing Staff',
                             'sales_admin'      => 'Sales Admin',

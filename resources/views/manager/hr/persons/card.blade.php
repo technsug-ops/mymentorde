@@ -460,7 +460,7 @@
             @if(in_array($user->role, ['system_admin','system_staff','operations_admin','operations_staff','finance_admin','finance_staff','marketing_admin','marketing_staff','sales_admin','sales_staff']))
             <a href="/manager/staff/{{ $user->id }}/edit" class="btn alt" style="font-size:11px;padding:5px 14px;">Düzenle</a>
             @elseif($user->role === 'senior')
-            <a href="/manager/seniors/{{ $user->id }}" class="btn alt" style="font-size:11px;padding:5px 14px;">Senior Detayı</a>
+            <a href="/manager/seniors/{{ $user->id }}" class="btn alt" style="font-size:11px;padding:5px 14px;">Eğitim Danışmanı Detayı</a>
             @endif
             <form method="POST" action="/manager/hr/persons/{{ $user->id }}/toggle" style="display:inline;">
                 @csrf

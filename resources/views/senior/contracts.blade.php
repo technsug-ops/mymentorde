@@ -30,7 +30,7 @@ $counts    = $counts ?? [];
 {{-- Gradient Header + Status Chips --}}
 <div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:20px 24px;margin-bottom:16px;color:#fff;">
     <div style="font-size:var(--tx-xl);font-weight:800;letter-spacing:-.3px;margin-bottom:4px;">📋 Sözleşme Yönetimi</div>
-    <div style="font-size:var(--tx-sm);opacity:.8;margin-bottom:16px;">Guest ve öğrenci sözleşmeleri</div>
+    <div style="font-size:var(--tx-sm);opacity:.8;margin-bottom:16px;">Aday Öğrenci ve öğrenci sözleşmeleri</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
         @foreach($statusLabels as $val => $label)
         @php
@@ -64,7 +64,7 @@ $counts    = $counts ?? [];
             <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);margin-bottom:4px;">Kayıt Tipi</div>
             <select name="type" style="width:100%;border:1px solid var(--u-line);border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);background:var(--u-bg);color:var(--u-text);">
                 <option value="all"     @selected($curType === 'all')>Tümü</option>
-                <option value="guest"   @selected($curType === 'guest')>Yalnızca Guest</option>
+                <option value="guest"   @selected($curType === 'guest')>Yalnızca Aday Öğrenci</option>
                 <option value="student" @selected($curType === 'student')>Yalnızca Öğrenci</option>
             </select>
         </div>
@@ -112,7 +112,7 @@ $counts    = $counts ?? [];
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
                     <span style="font-weight:800;font-size:var(--tx-base);color:var(--u-text);">{{ $fullName ?: ($row->email ?? '—') }}</span>
                     @if($isGuest)
-                        <span class="badge info" style="font-size:var(--tx-xs);">Guest</span>
+                        <span class="badge info" style="font-size:var(--tx-xs);">Aday Öğrenci</span>
                     @else
                         <span style="font-size:var(--tx-xs);background:#eef4fb;color:#2a567a;border:1px solid #c0d5ee;border-radius:999px;padding:1px 8px;font-weight:700;">Öğrenci</span>
                     @endif

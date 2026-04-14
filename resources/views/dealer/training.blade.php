@@ -226,7 +226,7 @@
     <div class="tr-skel-card">
         <div class="tr-skel-icon">📋</div>
         <div class="tr-skel-title">Süreç Rehberi</div>
-        <div class="tr-skel-desc">Guest → Student dönüşüm adımları ve komisyon milestone mantığı.</div>
+        <div class="tr-skel-desc">Aday Öğrenci → Öğrenci dönüşüm adımları ve komisyon milestone mantığı.</div>
     </div>
 </div>
 
@@ -235,7 +235,7 @@
     @foreach([
         ['Lead Kalitesi', 'Hangi profillerde dönüşüm daha yüksek, minimum bilgi standardı.'],
         ['Referans Link Kullanımı', 'UTM/ref kodlu paylaşım, kanal ayrımı ve takip mantığı.'],
-        ['Paket ve Sözleşme Aşaması', 'Guest tarafında servis seçimi, sözleşme talebi ve onay akışları.'],
+        ['Paket ve Sözleşme Aşaması', 'Aday Öğrenci tarafında servis seçimi, sözleşme talebi ve onay akışları.'],
         ['Komisyon Mantığı', 'Milestone bazlı kazanç ve bekleyen ödeme yorumlama.'],
     ] as $i => $topic)
     <div class="tr-topic-item">

@@ -89,7 +89,7 @@
         @endphp
         <span class="badge {{ $badgeClass }}">{{ $leadLabel }}</span>
         @if($guest->assigned_senior_email)
-        <div style="margin-top:10px;font-size:var(--tx-sm);color:var(--u-muted);">Senior: <strong style="color:var(--u-text);">{{ $guest->assigned_senior_email }}</strong></div>
+        <div style="margin-top:10px;font-size:var(--tx-sm);color:var(--u-muted);">Eğitim Danışmanı: <strong style="color:var(--u-text);">{{ $guest->assigned_senior_email }}</strong></div>
         @endif
         @if($guest->notes)
         <div style="margin-top:10px;padding:10px 12px;background:var(--u-bg);border-radius:8px;font-size:var(--tx-sm);color:var(--u-text);">{{ $guest->notes }}</div>
@@ -100,7 +100,7 @@
     <div style="background:var(--u-card);border:1px solid var(--u-line);border-radius:10px;padding:16px 18px;margin-bottom:12px;">
         <div style="font-weight:700;font-size:var(--tx-base);margin-bottom:12px;">Dönüşen Öğrenci</div>
         <table style="width:100%;border-collapse:collapse;font-size:var(--tx-sm);">
-            <tr><td style="padding:5px 0;color:var(--u-muted);width:120px;">Student ID</td>
+            <tr><td style="padding:5px 0;color:var(--u-muted);width:120px;">Öğrenci ID</td>
                 <td><a href="/senior/process-tracking?student_id={{ urlencode($student->student_id) }}" style="color:#7c3aed;font-weight:700;">{{ $student->student_id }}</a></td></tr>
             <tr><td style="padding:5px 0;color:var(--u-muted);">Ödeme</td><td>{{ $student->payment_status ?: '–' }}</td></tr>
         </table>

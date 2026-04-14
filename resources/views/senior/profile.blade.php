@@ -4,7 +4,7 @@
 
 @push('head')
 <style>
-/* ── Senior Profile Hero ── */
+/* ── Eğitim Danışmanı Profile Hero ── */
 .sprf-hero {
     background: linear-gradient(to right, #3b1a6e 0%, #6d28d9 60%, #7c3aed 100%);
     border-radius: 16px;

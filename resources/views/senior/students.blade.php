@@ -38,7 +38,7 @@
         <div style="width:1px;background:rgba(255,255,255,.2);"></div>
         <div>
             <div style="font-size:var(--tx-2xl);font-weight:800;line-height:1;">{{ $guestPool->count() }}</div>
-            <div style="font-size:var(--tx-xs);opacity:.7;text-transform:uppercase;letter-spacing:.05em;">Guest</div>
+            <div style="font-size:var(--tx-xs);opacity:.7;text-transform:uppercase;letter-spacing:.05em;">Aday Öğrenci</div>
         </div>
     </div>
 </div>
@@ -47,7 +47,7 @@
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
     @foreach([
         ['label'=>'Aktif Öğrenci', 'val'=>$active->count(),    'color'=>'#7c3aed','icon'=>'🎓','sub'=>'toplam atanmış'],
-        ['label'=>'Guest Havuzu',  'val'=>$guestPool->count(),  'color'=>'#7c3aed','icon'=>'👤','sub'=>'dönüşüm bekleniyor'],
+        ['label'=>'Aday Öğrenci Havuzu',  'val'=>$guestPool->count(),  'color'=>'#7c3aed','icon'=>'👤','sub'=>'dönüşüm bekleniyor'],
         ['label'=>'Kritik / Yüksek','val'=>$critHigh,          'color'=>$critHigh > 0 ? '#dc2626' : '#16a34a','icon'=>$critHigh > 0 ? '🚨' : '✅','sub'=>$critHigh > 0 ? 'aksiyon gerekli' : 'her şey yolunda'],
         ['label'=>'Arşiv',         'val'=>$archived->count(),  'color'=>'#6b7280','icon'=>'📦','sub'=>'tamamlananlar'],
     ] as $k)
@@ -62,7 +62,7 @@
 
 {{-- Filter bar --}}
 <form method="GET" style="background:var(--u-card);border:1px solid var(--u-line);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-    <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="🔍  Student ID / branch / dealer / guest"
+    <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="🔍  Öğrenci ID / branch / dealer / guest"
         style="flex:1;min-width:200px;border:1px solid var(--u-line);border-radius:7px;padding:8px 12px;font-size:var(--tx-sm);color:var(--u-text);background:var(--u-bg);">
     <select name="archived" style="border:1px solid var(--u-line);border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);color:var(--u-text);background:var(--u-bg);">
         <option value="all" @selected(($filters['archived']??'all')==='all')>Tüm Durumlar</option>
@@ -104,7 +104,7 @@
     </div>
 </div>
 
-{{-- Lists: Active + Guest --}}
+{{-- Lists: Aktif + Aday Öğrenci --}}
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
 
     {{-- Aktif Öğrenciler --}}
@@ -185,10 +185,10 @@
         @endif
     </div>
 
-    {{-- Guest Havuzu --}}
+    {{-- Aday Öğrenci Havuzu --}}
     <div style="background:var(--u-card);border:1px solid var(--u-line);border-radius:10px;overflow:hidden;">
         <div style="padding:14px 16px;border-bottom:1px solid var(--u-line);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;" onclick="toggleAcc('acc-guest',this)">
-            <div style="font-weight:700;font-size:var(--tx-base);">Guest Havuzu</div>
+            <div style="font-weight:700;font-size:var(--tx-base);">Aday Öğrenci Havuzu</div>
             <div style="display:flex;align-items:center;gap:8px;">
                 <span class="badge info">{{ $guestPool->count() }}</span>
                 <span id="acc-guest-caret" style="font-size:var(--tx-xs);color:var(--u-muted);transition:transform .2s;">▼</span>
@@ -225,7 +225,7 @@
             @empty
             <div style="padding:32px 16px;text-align:center;color:var(--u-muted);">
                 <div style="font-size:30px;margin-bottom:6px;">👤</div>
-                <div style="font-size:var(--tx-sm);">Guest havuzu boş.</div>
+                <div style="font-size:var(--tx-sm);">Aday Öğrenci havuzu boş.</div>
             </div>
             @endforelse
             @if($guestPool->count() > 2)

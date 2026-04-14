@@ -64,7 +64,7 @@
     <a href="/manager/staff/performance?layer=admin&period={{ $period }}&tab={{ $activeTab }}"
        class="layer-tab {{ $layerFilter === 'admin' ? 'active' : '' }}">🔑 Admin</a>
     <a href="/manager/staff/performance?layer=senior&period={{ $period }}&tab={{ $activeTab }}"
-       class="layer-tab {{ $layerFilter === 'senior' ? 'active' : '' }}">👨‍💼 Senior</a>
+       class="layer-tab {{ $layerFilter === 'senior' ? 'active' : '' }}">👨‍💼 Eğitim Danışmanı</a>
     <a href="/manager/staff/performance?layer=personel&period={{ $period }}&tab={{ $activeTab }}"
        class="layer-tab {{ $layerFilter === 'personel' ? 'active' : '' }}">👥 Personel</a>
 </div>

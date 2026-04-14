@@ -141,7 +141,7 @@
 <div class="adv-kpi-strip">
     @if(!isset($tierPerms) || $tierPerms->isStandard())
     <div class="adv-kpi seniors">
-        <div class="adv-kpi-label">Bağlı Senior</div>
+        <div class="adv-kpi-label">Bağlı Eğitim Danışmanı</div>
         <div class="adv-kpi-val">{{ $seniors->count() }}</div>
     </div>
     <div class="adv-kpi students">
@@ -157,11 +157,11 @@
 
 <div class="{{ isset($tierPerms) && $tierPerms->isBasic() ? '' : 'grid2' }}" style="align-items:start;">
 
-{{-- Bağlı Seniorlar — sadece T2+ --}}
+{{-- Bağlı Eğitim Danışmanları — sadece T2+ --}}
 @if(!isset($tierPerms) || $tierPerms->isStandard())
 <div class="adv-card">
     <div class="adv-card-head">
-        <h3>👨‍🏫 Bağlı Seniorlar</h3>
+        <h3>👨‍🏫 Bağlı Eğitim Danışmanları</h3>
         @if($seniors->isNotEmpty())
             <span class="adv-badge neutral">{{ $seniors->count() }} senior</span>
         @endif

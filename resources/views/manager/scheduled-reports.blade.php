@@ -46,7 +46,7 @@
                 <input type="text" name="send_to" placeholder="manager@firma.com, ceo@firma.com" required>
             </div>
             <div class="field">
-                <label>Senior Filtresi (opsiyonel)</label>
+                <label>Eğitim Danışmanı Filtresi (opsiyonel)</label>
                 <input type="email" name="senior_filter" placeholder="senior@firma.com">
             </div>
         </div>
@@ -62,7 +62,7 @@
             <div class="u-muted" style="font-size:var(--tx-xs);">
                 {{ \App\Models\ManagerScheduledReport::FREQUENCY_LABELS[$report->frequency] ?? $report->frequency }}
                 · Gönderilecek: {{ implode(', ', (array)$report->send_to) }}
-                @if($report->senior_filter) · Senior: {{ $report->senior_filter }} @endif
+                @if($report->senior_filter) · Eğitim Danışmanı: {{ $report->senior_filter }} @endif
                 @if($report->last_sent_at) · Son gönderim: {{ $report->last_sent_at->diffForHumans() }} @else · Hiç gönderilmedi @endif
             </div>
         </div>

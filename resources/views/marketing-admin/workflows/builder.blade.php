@@ -293,7 +293,7 @@ function buildConfigFields(type, cfg) {
         case 'create_task':
             return [
                 fi('title', 'Task Başlığı', 'text', cfg.title),
-                sel('assigned_to', 'Atanacak Kişi', [['senior','Senior Danışman'],['manager','Manager'],['marketing','Marketing']], cfg.assigned_to || 'senior'),
+                sel('assigned_to', 'Atanacak Kişi', [['senior','Eğitim Danışmanı'],['manager','Manager'],['marketing','Marketing']], cfg.assigned_to || 'senior'),
                 sel('priority', 'Öncelik', [['low','Düşük'],['medium','Orta'],['high','Yüksek'],['urgent','Acil']], cfg.priority || 'medium'),
                 fi('label', 'Etiket', 'text', cfg.label),
             ].join('');
@@ -435,7 +435,7 @@ function updateAddConfig(type) {
                 <div style="font-size:var(--tx-xs);font-weight:700;margin-bottom:5px;">📋 Task Oluştur</div>
                 <ul style="margin:0;padding-left:14px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.7;">
                     <li><strong>Başlık:</strong> @{{name}} değişkeni kullanılabilir</li>
-                    <li><strong>Atanacak:</strong> Senior, Manager, Marketing</li>
+                    <li><strong>Atanacak:</strong> Eğitim Danışmanı, Manager, Marketing</li>
                 </ul>
             </div>
         </div>

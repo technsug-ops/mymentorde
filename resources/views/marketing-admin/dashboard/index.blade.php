@@ -137,7 +137,7 @@
         <div class="mkd-hero-stats">
             <div class="mkd-hstat">
                 <div class="mkd-hstat-val">{{ number_format((float)($kpis['guest_count'] ?? 0)) }}</div>
-                <div class="mkd-hstat-label">Yeni Guest</div>
+                <div class="mkd-hstat-label">Yeni Aday Öğrenci</div>
             </div>
             <div class="mkd-hstat-sep"></div>
             <div class="mkd-hstat">
@@ -180,7 +180,7 @@
 {{-- KPI --}}
 <div class="mkd-kpis">
     <div class="mkd-kpi c1">
-        <div class="mkd-kpi-label">Son 30g Guest</div>
+        <div class="mkd-kpi-label">Son 30g Aday Öğrenci</div>
         <div class="mkd-kpi-val">{{ number_format((float)($kpis['guest_count'] ?? 0)) }}</div>
         @if($bmGuests)
         <div class="mkd-kpi-delta">
@@ -349,7 +349,7 @@
                     <li><strong>Toplam Lead:</strong> Bugüne kadar sisteme giren tüm adaylar</li>
                     <li><strong>Bu Ay Lead:</strong> Cari aydaki yeni kayıtlar</li>
                     <li><strong>Aktif Kampanya:</strong> Şu an çalışan kampanya sayısı</li>
-                    <li><strong>Dönüşüm Oranı:</strong> Guest → Student oranı (hedef: %15+)</li>
+                    <li><strong>Dönüşüm Oranı:</strong> Aday Öğrenci → Öğrenci oranı (hedef: %15+)</li>
                     <li><strong>Toplam Harcama:</strong> Onaylı bütçe harcaması</li>
                     <li><strong>ROI:</strong> (Gelir - Harcama) / Harcama × 100</li>
                 </ul>

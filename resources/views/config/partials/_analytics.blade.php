@@ -22,7 +22,7 @@
         </section>
 
         <section class="card">
-            <h2>Student Risk Scores</h2>
+            <h2>Öğrenci Risk Skorları</h2>
             <div class="meta">API: /api/v1/config/student-risk-scores</div>
             <div id="studentRiskList" class="list"></div>
             <div class="row">
@@ -48,7 +48,7 @@
         </section>
 
         <section class="card">
-            <h2>Student Ownership</h2>
+            <h2>Öğrenci Sahipliği</h2>
             <div class="meta">API: /api/v1/config/student-assignments</div>
             <div class="row">
                 <input id="saFilterStudentId" list="studentIdSuggestions" placeholder="Filtre: Öğrenci ID">
@@ -140,12 +140,12 @@
         </section>
 
         <section class="card">
-            <h2>Senior Management</h2>
+            <h2>Eğitim Danışmanı Yönetimi</h2>
             <div class="meta">API: /api/v1/config/seniors</div>
             <div id="seniorList" class="list"></div>
             <div class="row">
                 <input id="seniorId" list="seniorIdSuggestions" placeholder="Danışman ID (düzenleme için)" value="">
-                <input id="seniorName" placeholder="Ad Soyad" value="Senior Demo">
+                <input id="seniorName" placeholder="Ad Soyad" value="Eğitim Danışmanı Demo">
                 <input id="seniorEmail" placeholder="Email" value="">
             </div>
             <div class="row">
@@ -158,7 +158,7 @@
                 </select>
             </div>
             <div class="row">
-                <input id="seniorType" placeholder="Senior tipi (lisans/master)" value="lisans">
+                <input id="seniorType" placeholder="Eğitim Danışmanı tipi (lisans/master)" value="lisans">
                 <input id="seniorMaxCapacity" placeholder="Max kapasite" value="20">
             </div>
             <div class="row row-wrap">
@@ -167,8 +167,8 @@
                     <option value="0">Oto atama: kapali</option>
                 </select>
                 <select id="seniorGuestPool">
-                    <option value="0" selected>Guest havuzu: kapali</option>
-                    <option value="1">Guest havuzu: acik</option>
+                    <option value="0" selected>Aday Öğrenci havuzu: kapali</option>
+                    <option value="1">Aday Öğrenci havuzu: acik</option>
                 </select>
                 <select id="seniorActive">
                     <option value="1" selected>Durum: aktif</option>
@@ -176,8 +176,8 @@
                 </select>
             </div>
             <div class="row row-wrap">
-                <button onclick="createSenior()">Senior Ekle</button>
-                <button onclick="updateSenior()">Senior Güncelle</button>
+                <button onclick="createSenior()">Eğitim Danışmanı Ekle</button>
+                <button onclick="updateSenior()">Eğitim Danışmanı Güncelle</button>
                 <button onclick="saveSeniorSettings()">Ayarlari Kaydet</button>
                 <button onclick="loadSeniors()">Yenile</button>
             </div>

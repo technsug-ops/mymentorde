@@ -120,7 +120,7 @@
     <h2>Onay Bekleyenler</h2>
     <table>
         <thead>
-            <tr><th>ID</th><th>Rule</th><th>Student</th><th>Field</th><th>Olusma</th></tr>
+            <tr><th>ID</th><th>Rule</th><th>Öğrenci</th><th>Field</th><th>Olusma</th></tr>
         </thead>
         <tbody>
             @forelse ($pendingApprovals as $row)
@@ -140,7 +140,7 @@
     <h2>Geciken Outcome Kayıtlari</h2>
     <table>
         <thead>
-            <tr><th>ID</th><th>Student</th><th>Step</th><th>Outcome</th><th>Deadline</th><th>Added By</th></tr>
+            <tr><th>ID</th><th>Öğrenci</th><th>Step</th><th>Outcome</th><th>Deadline</th><th>Added By</th></tr>
         </thead>
         <tbody>
             @forelse ($overdueOutcomes as $row)

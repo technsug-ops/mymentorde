@@ -242,7 +242,7 @@ a.tb-stat:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); background:#f0f6ff; }
                     <a class="pill-link" href="/manager/requests">Request Center</a>
                 @endif
                 @if($canSeeSenior)
-                    <a class="pill-link" href="/senior/dashboard">Senior</a>
+                    <a class="pill-link" href="/senior/dashboard">Eğitim Danışmanı</a>
                 @endif
                 @if($userRole !== \App\Models\User::ROLE_SALES_STAFF)
                 <a class="pill-link" href="/tickets-center">Ticket Center</a>
@@ -463,7 +463,7 @@ a.tb-stat:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); background:#f0f6ff; }
                     <input id="tpl-student" type="text" placeholder="ör. STU-001" style="width:100%;">
                 </div>
                 <div>
-                    <label style="font-size:12px;color:var(--u-muted);display:block;margin-bottom:4px;">Senior E-posta (opsiyonel)</label>
+                    <label style="font-size:12px;color:var(--u-muted);display:block;margin-bottom:4px;">Eğitim Danışmanı E-posta (opsiyonel)</label>
                     <input id="tpl-senior" type="email" placeholder="senior@example.com" style="width:100%;">
                 </div>
             </div>
@@ -567,7 +567,7 @@ a.tb-stat:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); background:#f0f6ff; }
                     $sourceLinkLabel = 'Belge Onay';
                 } elseif (in_array((string)$row->source_type, ['guest_contract_requested','guest_contract_signed_uploaded'], true)) {
                     $sourceLink = '/config#guest-applications';
-                    $sourceLinkLabel = 'Guest Dönüşüm';
+                    $sourceLinkLabel = 'Aday Öğrenci Dönüşüm';
                 } elseif ((string)$row->source_type === 'student_assignment_upsert') {
                     $sourceLink = '/config';
                     $sourceLinkLabel = 'Config';

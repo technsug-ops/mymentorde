@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Student Card</title>
+    <title>Öğrenci Kartı</title>
     <style>
         :root { --bg:#f4f7fb; --card:#fff; --line:#d8e0ea; --text:#132238; --muted:#52657d; --accent:#0f6bdc; }
         * { box-sizing:border-box; }
@@ -31,7 +31,7 @@
 <body>
 <div class="wrap">
     <div class="head">
-        <h1 style="margin:0;">Student Card Arama</h1>
+        <h1 style="margin:0;">Öğrenci Kartı Arama</h1>
         <a href="/config">/config'a don</a>
     </div>
 

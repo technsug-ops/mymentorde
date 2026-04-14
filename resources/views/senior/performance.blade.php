@@ -19,7 +19,7 @@
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
         <div>
             <div style="font-size:var(--tx-xl);font-weight:800;letter-spacing:-.3px;margin-bottom:4px;">📊 Performans Metrikleri</div>
-            <div style="font-size:var(--tx-sm);opacity:.8;">Senior raporu · dönüşüm, risk, süreç hızı</div>
+            <div style="font-size:var(--tx-sm);opacity:.8;">Eğitim Danışmanı raporu · dönüşüm, risk, süreç hızı</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <a href="/senior/performance/report-print" target="_blank"
@@ -50,14 +50,14 @@
     </div>
 </div>
 
-{{-- Guest Dönüşüm + Risk Dağılımı --}}
+{{-- Aday Öğrenci Dönüşüm + Risk Dağılımı --}}
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
     {{-- Dönüşüm --}}
     <div style="background:var(--u-card);border:1px solid var(--u-line);border-radius:12px;padding:18px 20px;">
-        <div style="font-size:var(--tx-sm);font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">🔄 Guest Dönüşüm</div>
+        <div style="font-size:var(--tx-sm);font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">🔄 Aday Öğrenci Dönüşüm</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
             <div>
-                <div style="font-size:var(--tx-xs);color:var(--u-muted);font-weight:600;">Toplam Guest</div>
+                <div style="font-size:var(--tx-xs);color:var(--u-muted);font-weight:600;">Toplam Aday Öğrenci</div>
                 <div style="font-size:var(--tx-2xl);font-weight:800;color:var(--u-text);line-height:1.1;">{{ $guestCount ?? 0 }}</div>
             </div>
             <div>

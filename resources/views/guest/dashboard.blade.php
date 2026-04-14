@@ -6,7 +6,7 @@
 @push('head')
 <script>if(localStorage.getItem('mentorde_design')==='minimalist'){document.documentElement.classList.add('jm-minimalist');}</script>
 <style>
-/* ── Guest Dashboard v3 — gdb-* scoped ── */
+/* ── Aday Öğrenci Paneli v3 — gdb-* scoped ── */
 
 /* ── Topbar greeting ── */
 .gdb-greet { margin-bottom: 24px; }

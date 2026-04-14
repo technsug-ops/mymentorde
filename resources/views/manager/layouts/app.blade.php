@@ -179,7 +179,7 @@
                 <div class="nav-section-label">Kullanıcı Yönetimi</div>
                 <a href="/manager/guests"
                    class="nav-link {{ request()->is('manager/guests*') ? 'active' : '' }}">
-                    <span class="nav-icon">👤</span> Guest Yönetimi
+                    <span class="nav-icon">👤</span> Aday Öğrenci Yönetimi
                 </a>
                 <a href="/manager/students"
                    class="nav-link {{ request()->is('manager/students*') ? 'active' : '' }}">
@@ -187,7 +187,7 @@
                 </a>
                 <a href="/manager/seniors"
                    class="nav-link {{ request()->is('manager/seniors*') ? 'active' : '' }}">
-                    <span class="nav-icon">👨‍💼</span> Senior Yönetimi
+                    <span class="nav-icon">👨‍💼</span> Eğitim Danışmanı Yönetimi
                 </a>
                 <a href="/manager/dealers"
                    class="nav-link {{ request()->is('manager/dealers*') ? 'active' : '' }}">

@@ -49,7 +49,7 @@
 $layerMeta = [
     'manager' => ['icon'=>'👑','label'=>'Manager','color'=>'#7c3aed'],
     'admin'   => ['icon'=>'🔑','label'=>'Admin',  'color'=>'#1e40af'],
-    'senior'  => ['icon'=>'👨‍💼','label'=>'Senior', 'color'=>'#0891b2'],
+    'senior'  => ['icon'=>'👨‍💼','label'=>'Eğitim Danışmanı', 'color'=>'#0891b2'],
     'personel'=> ['icon'=>'👥','label'=>'Personel','color'=>'#16a34a'],
 ];
 @endphp
@@ -68,7 +68,7 @@ $layerMeta = [
         <a href="/manager/staff?layer=hepsi"   class="layer-btn {{ $layerFilter === 'hepsi'   ? 'active' : '' }}">Hepsi</a>
         <a href="/manager/staff?layer=manager" class="layer-btn {{ $layerFilter === 'manager' ? 'active' : '' }}">👑 Manager</a>
         <a href="/manager/staff?layer=admin"   class="layer-btn {{ $layerFilter === 'admin'   ? 'active' : '' }}">🔑 Admin</a>
-        <a href="/manager/staff?layer=senior"  class="layer-btn {{ $layerFilter === 'senior'  ? 'active' : '' }}">👨‍💼 Senior</a>
+        <a href="/manager/staff?layer=senior"  class="layer-btn {{ $layerFilter === 'senior'  ? 'active' : '' }}">👨‍💼 Eğitim Danışmanı</a>
         <a href="/manager/staff?layer=personel"class="layer-btn {{ $layerFilter === 'personel'? 'active' : '' }}">👥 Personel</a>
         <form method="GET" action="/manager/staff" style="display:flex;gap:4px;margin-left:8px;">
             <input type="hidden" name="layer" value="{{ $layerFilter }}">
@@ -95,7 +95,7 @@ $layerMeta = [
         </div>
         @else
         @php
-        $layerOrder  = [1=>'👑 Manager',2=>'🔑 Admin',3=>'👨‍💼 Senior',4=>'👥 Personel'];
+        $layerOrder  = [1=>'👑 Manager',2=>'🔑 Admin',3=>'👨‍💼 Eğitim Danışmanı',4=>'👥 Personel'];
         $layerColors = [1=>'#7c3aed',2=>'#1e40af',3=>'#0891b2',4=>'#16a34a'];
         $roleLayerMap = [
             'manager'=>1,'system_admin'=>2,'operations_admin'=>2,'finance_admin'=>2,
@@ -170,7 +170,7 @@ $layerMeta = [
                         $lBadge = match($layer) {
                             1 => ['warn',   'Manager'],
                             2 => ['info',   'Admin'],
-                            3 => ['',       'Senior'],
+                            3 => ['',       'Eğitim Danışmanı'],
                             4 => ['',       'Personel'],
                             default => ['', '—'],
                         };

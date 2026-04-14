@@ -40,7 +40,7 @@
         <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;">Rol Dağılımı</div>
         <div style="font-size:12px;font-weight:700;color:var(--u-text);line-height:2;">
             <span style="color:#1e40af;">{{ $counts['staff'] }}</span> Staff &nbsp;·&nbsp;
-            <span style="color:#7c3aed;">{{ $counts['senior'] }}</span> Senior &nbsp;·&nbsp;
+            <span style="color:#7c3aed;">{{ $counts['senior'] }}</span> Eğitim Danışmanı &nbsp;·&nbsp;
             <span style="color:#0891b2;">{{ $counts['manager'] }}</span> Manager
         </div>
     </div>
@@ -102,7 +102,7 @@
         <div style="padding:14px 16px;">
         @foreach($deptDist as $dept => $cnt)
         @php
-            $colors = ['Sistem'=>'#1e40af','Operasyon'=>'#0891b2','Finans'=>'#16a34a','Pazarlama'=>'#7c3aed','Satış'=>'#d97706','Senior'=>'#6366f1','Manager'=>'#0891b2','Diğer'=>'#94a3b8'];
+            $colors = ['Sistem'=>'#1e40af','Operasyon'=>'#0891b2','Finans'=>'#16a34a','Pazarlama'=>'#7c3aed','Satış'=>'#d97706','Eğitim Danışmanı'=>'#6366f1','Manager'=>'#0891b2','Diğer'=>'#94a3b8'];
             $color  = $colors[$dept] ?? '#94a3b8';
             $pct    = round($cnt / $maxDept * 100);
         @endphp
@@ -238,7 +238,7 @@
                 str_contains($hire->user?->role ?? '', 'finance')    => 'Finans',
                 str_contains($hire->user?->role ?? '', 'marketing')  => 'Pazarlama',
                 str_contains($hire->user?->role ?? '', 'sales')      => 'Satış',
-                ($hire->user?->role ?? '') === 'senior'              => 'Senior',
+                ($hire->user?->role ?? '') === 'senior'              => 'Eğitim Danışmanı',
                 default                                              => $hire->user?->role ?? '—',
             };
             $daysAgo = \Carbon\Carbon::parse($hire->hire_date)->diffInDays(now());

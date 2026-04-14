@@ -6,7 +6,7 @@
 @push('head')
 <script>if(localStorage.getItem('mentorde_design')==='minimalist'){document.documentElement.classList.add('jm-minimalist');}</script>
 <style>
-/* ── grf-* Guest Registration Form — Step Pills Redesign ── */
+/* ── grf-* Aday Öğrenci Kayıtistration Form — Step Pills Redesign ── */
 
 /* ── Form Topbar with Step Pills ── */
 .grf-topbar {

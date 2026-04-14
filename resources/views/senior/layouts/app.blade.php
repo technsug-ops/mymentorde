@@ -13,7 +13,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('brand.name', 'MentorDE') . ' — Senior Portalı')</title>
+    <title>@yield('title', config('brand.name', 'MentorDE') . ' — Eğitim Danışmanı Paneliı')</title>
 
     {{-- Premium Design System --}}
     <link id="mentorde-theme-css" rel="stylesheet" href="{{ Vite::asset('resources/css/premium.css') }}">
@@ -155,7 +155,7 @@
         {{-- Sidebar Header (merged brand + user) --}}
         @php
             $user      = auth()->user();
-            $name      = (string) ($user?->name ?? 'Senior');
+            $name      = (string) ($user?->name ?? 'Eğitim Danışmanı');
             $initials  = strtoupper(substr(preg_replace('/\s+/', '', $name), 0, 2));
             $sidebarStats      = $sidebarStats ?? [];
             $activeStudents    = (int) ($sidebarStats['active_students'] ?? 0);
@@ -174,14 +174,14 @@
                 <div class="avatar" style="width:46px;height:46px;font-size:17px;flex-shrink:0;">{{ $initials }}</div>
                 <div style="flex:1;min-width:0;">
                     <div class="user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $name }}</div>
-                    <div class="user-role">Senior Danışman</div>
+                    <div class="user-role">Eğitim Danışmanı</div>
                 </div>
                 <div class="brand-logo" style="width:28px;height:28px;font-size:11px;flex-shrink:0;overflow:hidden;" title="{{ $brandName }}">
                     @if(!empty($brandLogoUrl))<img src="{{ $brandLogoUrl }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">@endif
                     <span style="{{ !empty($brandLogoUrl)?'display:none;':'display:flex;' }}align-items:center;justify-content:center;width:100%;height:100%;">{{ $brandInitial }}</span>
                 </div>
             </div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">{{ $brandName }} · Senior Portalı</div>
+            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">{{ $brandName }} · Eğitim Danışmanı Paneliı</div>
             <div style="height:1px;background:rgba(255,255,255,.12);margin-top:12px;"></div>
         </div>
 
@@ -231,7 +231,7 @@
                     <a href="/senior/students"               class="nav-link {{ request()->is('senior/students*') ? 'active' : '' }}"><span class="nav-icon">🎓</span> Öğrencilerim</a>
                     <a href="/senior/registration-documents" class="nav-link {{ request()->is('senior/registration-documents*') ? 'active' : '' }}"><span class="nav-icon">📂</span> Belge Onayları</a>
                     <a href="/senior/process-tracking"       class="nav-link {{ request()->is('senior/process-tracking*','senior/university-applications*','senior/visa*','senior/housing*') ? 'active' : '' }}"><span class="nav-icon">🔄</span> Başvuru & Süreç @if(($deadlineIn7 ?? 0) > 0)<span style="background:#dc2626;color:#fff;border-radius:999px;font-size:10px;font-weight:700;padding:1px 6px;margin-left:4px;">{{ $deadlineIn7 }}</span>@endif</a>
-                    <a href="/senior/guest-pipeline"         class="nav-link {{ request()->is('senior/guest-pipeline*') ? 'active' : '' }}" style="padding-left:32px;font-size:var(--tx-xs);"><span class="nav-icon" style="font-size:11px;">🌀</span> Guest Pipeline</a>
+                    <a href="/senior/guest-pipeline"         class="nav-link {{ request()->is('senior/guest-pipeline*') ? 'active' : '' }}" style="padding-left:32px;font-size:var(--tx-xs);"><span class="nav-icon" style="font-size:11px;">🌀</span> Aday Öğrenci Pipeline</a>
                     <a href="/senior/student-pipeline"       class="nav-link {{ request()->is('senior/student-pipeline*') ? 'active' : '' }}" style="padding-left:32px;font-size:var(--tx-xs);"><span class="nav-icon" style="font-size:11px;">🗂</span> Pipeline Kanban</a>
                     <a href="/senior/appointments"           class="nav-link {{ request()->is('senior/appointments*') ? 'active' : '' }}"><span class="nav-icon">📅</span> Randevularım</a>
                     <a href="/senior/contracts"              class="nav-link {{ request()->is('senior/contracts*') ? 'active' : '' }}"><span class="nav-icon">📜</span> Sözleşmeler</a>
@@ -315,7 +315,7 @@
                         style="display:none;">☰</button>
                 <button class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
                 <div>
-                    <div class="topbar-title">@yield('page_title', 'Senior Portalı')</div>
+                    <div class="topbar-title">@yield('page_title', 'Eğitim Danışmanı Paneliı')</div>
                     @hasSection('page_subtitle')
                         <div class="topbar-sub">@yield('page_subtitle')</div>
                     @endif

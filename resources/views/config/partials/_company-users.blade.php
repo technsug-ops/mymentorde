@@ -22,7 +22,7 @@
         </section>
 
         <section class="card">
-            <h2>Student Types</h2>
+            <h2>Öğrenci Tipleri</h2>
             <div class="meta">API: /api/v1/config/student-types</div>
             <div id="studentList" class="list"></div>
             <div class="row">

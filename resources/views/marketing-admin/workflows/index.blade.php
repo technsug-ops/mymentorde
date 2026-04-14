@@ -55,7 +55,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
                     <label>Tetikleyici *</label>
                     <select name="trigger_type" required>
                         <option value="">Seçin…</option>
-                        <option value="guest_created">Yeni Guest Kaydı</option>
+                        <option value="guest_created">Yeni Aday Öğrenci Kaydı</option>
                         <option value="score_tier_changed">Score Tier Değişimi</option>
                         <option value="score_reached">Belirli Puana Ulaşma</option>
                         <option value="status_changed">Durum Değişimi</option>

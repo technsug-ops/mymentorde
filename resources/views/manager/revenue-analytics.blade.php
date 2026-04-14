@@ -41,9 +41,9 @@
         </div>
     </div>
 
-    {{-- Senior Bazlı --}}
+    {{-- Eğitim Danışmanı Bazlı --}}
     <div class="card">
-        <div class="card-title">Senior Bazlı Gelir</div>
+        <div class="card-title">Eğitim Danışmanı Bazlı Gelir</div>
         <div class="list">
             @forelse($bySenior->sortByDesc('earned') as $row)
             <div class="item">

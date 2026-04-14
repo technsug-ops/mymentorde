@@ -160,7 +160,7 @@
         <div class="dl-kpi-val">{{ $stats['guest_total'] ?? 0 }}</div>
     </div>
     <div class="dl-kpi c-conv">
-        <div class="dl-kpi-label">Student'e Dönüşen</div>
+        <div class="dl-kpi-label">Öğrenciye Dönüşen</div>
         <div class="dl-kpi-val">{{ $stats['converted_total'] ?? 0 }}</div>
         @if(($stats['conversion_rate'] ?? 0) > 0)
             <div class="dl-kpi-sub">%{{ $stats['conversion_rate'] }} dönüşüm oranı</div>

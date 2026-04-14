@@ -56,7 +56,7 @@
     <a href="/manager/staff/leaderboard?layer=admin&period={{ $period }}"
        class="layer-tab {{ $layerFilter === 'admin' ? 'active' : '' }}">🔑 Admin</a>
     <a href="/manager/staff/leaderboard?layer=senior&period={{ $period }}"
-       class="layer-tab {{ $layerFilter === 'senior' ? 'active' : '' }}">👨‍💼 Senior</a>
+       class="layer-tab {{ $layerFilter === 'senior' ? 'active' : '' }}">👨‍💼 Eğitim Danışmanı</a>
     <a href="/manager/staff/leaderboard?layer=personel&period={{ $period }}"
        class="layer-tab {{ $layerFilter === 'personel' ? 'active' : '' }}">👥 Personel</a>
 </div>

@@ -270,7 +270,7 @@
                 <span>Durum</span>
                 <span>Öncelik</span>
                 <span>Departman</span>
-                <span>Guest</span>
+                <span>Aday Öğrenci</span>
                 <span>Son Yanıt</span>
             </div>
 
@@ -322,7 +322,7 @@
                     $slaUrgent   = $slaDue && !$slaDue->isPast() && $slaDue->diffInHours(now()) <= 2 && $row->status !== 'closed';
                 @endphp
                 <div class="t-meta" style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                    <span>Guest: <strong>{{ $row->guestApplication?->email ?? '-' }}</strong></span>
+                    <span>Aday Öğrenci: <strong>{{ $row->guestApplication?->email ?? '-' }}</strong></span>
                     <span>SLA İlk Yanıt: {{ $row->sla_first_response_hours !== null ? $row->sla_first_response_hours.'s' : '-' }}</span>
                     <span>SLA Çözüm: {{ $row->sla_resolution_hours !== null ? $row->sla_resolution_hours.'s' : '-' }}</span>
                     @if($slaDue)

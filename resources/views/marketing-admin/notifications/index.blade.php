@@ -108,7 +108,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
                 <thead><tr>
                     <th style="width:60px;">ID</th>
                     <th>Channel / Category</th>
-                    <th>Student</th>
+                    <th>Öğrenci</th>
                     <th>Recipient</th>
                     <th style="width:90px;">Durum</th>
                     <th>Queue Time</th>

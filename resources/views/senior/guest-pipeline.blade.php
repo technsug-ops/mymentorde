@@ -1,6 +1,6 @@
 @extends('senior.layouts.app')
-@section('title', 'Guest Pipeline')
-@section('page_title', 'Guest Pipeline')
+@section('title', 'Aday Öğrenci Pipeline')
+@section('page_title', 'Aday Öğrenci Pipeline')
 
 @push('head')
 <style>
@@ -97,7 +97,7 @@ $langLabels = ['tr'=>'TR','en'=>'EN','de'=>'DE','ar'=>'AR','fr'=>'FR','ru'=>'RU'
 <div style="background:linear-gradient(to right,#4f46e5,#7c3aed);border-radius:14px;padding:18px 22px;margin-bottom:16px;color:#fff;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
         <div>
-            <div style="font-size:20px;font-weight:800;margin-bottom:4px;">🌀 Guest Pipeline</div>
+            <div style="font-size:20px;font-weight:800;margin-bottom:4px;">🌀 Aday Öğrenci Pipeline</div>
             <div style="font-size:12px;opacity:.8;">Adaylarınızı aşamalar arasında sürükleyip bırakarak yönetin</div>
         </div>
     </div>

@@ -21,9 +21,9 @@
                 <span class="nav-caret">▾</span>
             </button>
             <div class="nav-sub">
-                <a class="{{ request()->is('manager/guests*') ? 'active' : '' }}" href="/manager/guests">Guest</a>
+                <a class="{{ request()->is('manager/guests*') ? 'active' : '' }}" href="/manager/guests">Aday Öğrenci</a>
                 <a class="{{ request()->is('manager/students*') ? 'active' : '' }}" href="/manager/students">Öğrenciler</a>
-                <a class="{{ request()->is('manager/seniors*') ? 'active' : '' }}" href="/manager/seniors">Seniorlar</a>
+                <a class="{{ request()->is('manager/seniors*') ? 'active' : '' }}" href="/manager/seniors">Eğitim Danışmanları</a>
                 <a class="{{ request()->is('manager/staff*') ? 'active' : '' }}" href="/manager/staff">👥 Personel</a>
                 <a class="{{ request()->is('manager/dealers*') ? 'active' : '' }}" href="/manager/dealers">Bayiler</a>
                 <a class="{{ request()->is('manager/commissions*') ? 'active' : '' }}" href="/manager/commissions">Komisyonlar</a>

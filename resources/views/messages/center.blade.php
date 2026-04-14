@@ -55,7 +55,7 @@
 @endpush
 
 @section('content')
-    <p class="muted" style="margin:0 0 12px;">Guest + Student direkt mesaj takip ve yonetim</p>
+    <p class="muted" style="margin:0 0 12px;">Aday Öğrenci + Öğrenci direkt mesaj takip ve yonetim</p>
 
     <div class="summary7">
         <div class="panel"><div class="muted">Toplam Thread</div><div style="font-size:var(--tx-2xl);font-weight:700;">{{ (int) ($summary['total'] ?? 0) }}</div></div>
@@ -76,8 +76,8 @@
         <form method="get" action="{{ route('messages.center') }}" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;">
             <select name="type" class="btn" style="text-align:left;">
                 <option value="" @selected(($filters['type'] ?? '') === '')>Tum tipler</option>
-                <option value="guest" @selected(($filters['type'] ?? '') === 'guest')>Guest</option>
-                <option value="student" @selected(($filters['type'] ?? '') === 'student')>Student</option>
+                <option value="guest" @selected(($filters['type'] ?? '') === 'guest')>Aday Öğrenci</option>
+                <option value="student" @selected(($filters['type'] ?? '') === 'student')>Öğrenci</option>
             </select>
             <select name="status" class="btn" style="text-align:left;">
                 <option value="" @selected(($filters['status'] ?? '') === '')>Tum durumlar</option>

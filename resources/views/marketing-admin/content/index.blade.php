@@ -197,8 +197,8 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
                             <input id="cms-slug-input" name="slug" placeholder="slug (otomatik üretilir)" value="{{ old('slug', $editing->slug ?? '') }}" style="font-family:ui-monospace,monospace;font-size:12px;">
                             <select name="target_audience">
                                 <option value="all" @selected(old('target_audience', $editing->target_audience ?? 'all') === 'all')>🌐 Tüm Kullanıcılar</option>
-                                <option value="guests" @selected(old('target_audience', $editing->target_audience ?? '') === 'guests')>👤 Sadece Guest</option>
-                                <option value="students" @selected(old('target_audience', $editing->target_audience ?? '') === 'students')>🎓 Sadece Student</option>
+                                <option value="guests" @selected(old('target_audience', $editing->target_audience ?? '') === 'guests')>👤 Sadece Aday Öğrenci</option>
+                                <option value="students" @selected(old('target_audience', $editing->target_audience ?? '') === 'students')>🎓 Sadece Öğrenci</option>
                             </select>
                         </div>
                         <div class="fm-row">

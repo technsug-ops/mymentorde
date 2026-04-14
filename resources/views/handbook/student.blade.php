@@ -1,5 +1,5 @@
 @extends('student.layouts.app')
-@section('title', $lang === 'en' ? 'Student Guide' : 'Öğrenci Kılavuzu')
+@section('title', $lang === 'en' ? 'Öğrenci Kılavuzu' : 'Öğrenci Kılavuzu')
 
 @push('styles')
     @include('handbook._style')
@@ -8,7 +8,7 @@
 @section('content')
 <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div>
-        <h1 class="page-title">📖 {{ $lang === 'en' ? 'Student Guide' : 'Öğrenci Kılavuzu' }}</h1>
+        <h1 class="page-title">📖 {{ $lang === 'en' ? 'Öğrenci Kılavuzu' : 'Öğrenci Kılavuzu' }}</h1>
         @php $hbBrand = config('brand.name', 'MentorDE'); @endphp
         <p class="page-subtitle" style="margin:0;">{{ $lang === 'en' ? 'Everything about your student journey on ' . $hbBrand . '.' : $hbBrand . ' öğrenci deneyiminiz hakkında her şey.' }}</p>
     </div>

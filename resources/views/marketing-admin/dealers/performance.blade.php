@@ -192,8 +192,8 @@
                 <table class="tbl">
                     <thead>
                     <tr>
-                        <th>Student</th>
-                        <th>Senior</th>
+                        <th>Öğrenci</th>
+                        <th>Eğitim Danışmanı</th>
                         <th>Branch</th>
                         <th>Risk</th>
                         <th>Payment</th>
@@ -223,7 +223,7 @@
                 <table class="tbl">
                     <thead>
                     <tr>
-                        <th>Student</th>
+                        <th>Öğrenci</th>
                         <th>Tip</th>
                         <th>Earned</th>
                         <th>Pending</th>
@@ -274,7 +274,7 @@
             <h4 style="margin:0 0 8px;">Lead Kaynaklari</h4>
             <div class="table-wrap">
                 <table class="tbl">
-                    <thead><tr><th>Guest</th><th>UTM</th><th>Campaign</th><th>Converted</th><th>Tarih</th></tr></thead>
+                    <thead><tr><th>Aday Öğrenci</th><th>UTM</th><th>Campaign</th><th>Converted</th><th>Tarih</th></tr></thead>
                     <tbody>
                     @forelse(($leads ?? []) as $row)
                         <tr>

@@ -14,7 +14,7 @@
     <div class="card" style="padding:28px;">
         <h2 style="font-size:18px;font-weight:700;margin-bottom:6px;">Firma Marka Ayarları</h2>
         <p style="color:var(--muted);font-size:13px;margin-bottom:24px;">
-            Burada girilen firma adı ve logo tüm portallarda (Manager, Senior, Marketing, Staff) anlık olarak güncellenir.
+            Burada girilen firma adı ve logo tüm portallarda (Manager, Eğitim Danışmanı, Marketing, Staff) anlık olarak güncellenir.
         </p>
 
         <form method="POST" action="/manager/brand">
@@ -81,7 +81,7 @@
         <div style="font-size:13px;font-weight:700;margin-bottom:10px;">ℹ️ Bu ayar neyi etkiler?</div>
         <ul style="font-size:13px;color:var(--muted);line-height:2;margin:0;padding-left:18px;">
             <li>Tüm portal sidebar'larındaki firma adı ve logo</li>
-            <li>Manager, Senior, Marketing Admin, Staff Panel</li>
+            <li>Manager, Eğitim Danışmanı, Marketing Admin, Staff Panel</li>
             <li>Tarayıcı sekme başlıkları (kısmen)</li>
             <li>Değişiklik anlık olarak tüm kullanıcılara yansır</li>
         </ul>

@@ -8,7 +8,7 @@
 {{-- Filtreler --}}
 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
     <div style="display:flex;gap:4px;">
-        @foreach([['all','Hepsi',$total['all']],['staff','Staff',$total['staff']],['senior','Senior',$total['senior']],['manager','Manager',$total['manager']]] as [$key,$label,$cnt])
+        @foreach([['all','Hepsi',$total['all']],['staff','Staff',$total['staff']],['senior','Eğitim Danışmanı',$total['senior']],['manager','Manager',$total['manager']]] as [$key,$label,$cnt])
         <a href="/manager/hr/persons?type={{ $key }}{{ $search ? '&q='.urlencode($search) : '' }}"
            style="padding:5px 12px;font-size:11px;font-weight:700;border-radius:7px;text-decoration:none;border:1.5px solid {{ $typeFilter===$key ? '#1e40af' : 'var(--u-line)' }};background:{{ $typeFilter===$key ? '#1e40af' : 'var(--u-card)' }};color:{{ $typeFilter===$key ? '#fff' : 'var(--u-muted)' }};">
             {{ $label }} <span style="opacity:.75;">({{ $cnt }})</span>
@@ -42,7 +42,7 @@
             @foreach($employees as $emp)
             @php
                 $roleLabels = [
-                    'manager'=>'Manager','senior'=>'Senior',
+                    'manager'=>'Manager','senior'=>'Eğitim Danışmanı',
                     'system_admin'=>'Sistem — Yönetici','system_staff'=>'Sistem — Personel',
                     'operations_admin'=>'Operasyon — Yönetici','operations_staff'=>'Operasyon — Personel',
                     'finance_admin'=>'Finans — Yönetici','finance_staff'=>'Finans — Personel',

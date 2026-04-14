@@ -222,9 +222,9 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
         </div>
     </div>
     <div class="mgd-hero-actions">
-        <a class="mgd-hero-btn primary" href="/manager/guests">Guest Yönetimi</a>
+        <a class="mgd-hero-btn primary" href="/manager/guests">Aday Öğrenci Yönetimi</a>
         <a class="mgd-hero-btn ghost" href="/manager/students">Öğrenciler</a>
-        <a class="mgd-hero-btn ghost" href="/manager/seniors">Seniorlar</a>
+        <a class="mgd-hero-btn ghost" href="/manager/seniors">Eğitim Danışmanları</a>
         <a class="mgd-hero-btn ghost" href="/manager/dealers">Bayiler</a>
         <a class="mgd-hero-btn ghost" href="/manager/commissions">Komisyonlar</a>
         <a class="mgd-hero-btn ghost" href="/tasks">Görevler</a>
@@ -443,7 +443,7 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
     </a>
     <a class="mgd-quick-link" href="/manager/guests">
         <span class="mgd-quick-icon" style="background:#1e40af;">G</span>
-        Guest'ler
+        Aday Öğrenciler
     </a>
     <a class="mgd-quick-link" href="/manager/dealers">
         <span class="mgd-quick-icon" style="background:#1e40af;">D</span>
@@ -451,7 +451,7 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
     </a>
     <a class="mgd-quick-link" href="/manager/seniors">
         <span class="mgd-quick-icon" style="background:#1e40af;">S</span>
-        Senior'lar
+        Eğitim Danışmanları
     </a>
     <a class="mgd-quick-link" href="/manager/contract-template">
         <span class="mgd-quick-icon" style="background:#1e40af;">Z</span>
@@ -589,7 +589,7 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
             <input id="pvStudentId" list="pvStudentIdSuggestions" placeholder="BCS100001…" style="flex:1;min-width:0;border:1.5px solid #cbd5e1;border-radius:7px;padding:6px 10px;font-size:var(--tx-sm);outline:none;">
             <button class="btn" type="button" onclick="openStudentPreview()" style="white-space:nowrap;background:#1e40af;color:#fff;border-color:#1e40af;">Aç →</button>
         </div>
-        <div class="muted" style="font-size:var(--tx-xs);margin-top:4px;">Student ID ile portal önizleme</div>
+        <div class="muted" style="font-size:var(--tx-xs);margin-top:4px;">Öğrenci ID ile portal önizleme</div>
     </div>
     <div class="panel">
         <div class="muted" style="font-size:var(--tx-xs);margin-bottom:4px;">ADVISORY ÖNIZLEME</div>
@@ -597,7 +597,7 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
             <input id="pvSeniorEmail" list="pvSeniorEmailSuggestions" placeholder="senior@example.com…" style="flex:1;min-width:0;border:1.5px solid #cbd5e1;border-radius:7px;padding:6px 10px;font-size:var(--tx-sm);outline:none;">
             <button class="btn" type="button" onclick="openSeniorPreview()" style="white-space:nowrap;background:#1e40af;color:#fff;border-color:#1e40af;">Aç →</button>
         </div>
-        <div class="muted" style="font-size:var(--tx-xs);margin-top:4px;">Senior / mentor e-postası ile</div>
+        <div class="muted" style="font-size:var(--tx-xs);margin-top:4px;">Eğitim Danışmanı / mentor e-postası ile</div>
     </div>
     <div class="panel">
         <div class="muted" style="font-size:var(--tx-xs);margin-bottom:4px;">DEALER ÖNIZLEME</div>
@@ -805,7 +805,7 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
     <section class="card" style="padding:14px 16px;">
         <div style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">👥 Advisory Performans</div>
         @if ($seniorPerformance->isEmpty())
-            <div style="font-size:var(--tx-xs);color:var(--muted,#64748b);">Senior/mentor rolünde kullanıcı bulunamadı.</div>
+            <div style="font-size:var(--tx-xs);color:var(--muted,#64748b);">Eğitim Danışmanı/mentor rolünde kullanıcı bulunamadı.</div>
         @else
             {{-- Bar chart --}}
             <div style="position:relative;height:110px;margin-bottom:12px;">
@@ -1252,12 +1252,12 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
 <script>
 function openStudentPreview() {
     var val = document.getElementById('pvStudentId').value.trim();
-    if (!val) { alert('Lütfen bir Student ID girin.'); return; }
+    if (!val) { alert('Lütfen bir Öğrenci ID girin.'); return; }
     window.open('/manager/preview/student/' + encodeURIComponent(val), '_blank');
 }
 function openSeniorPreview() {
     var val = document.getElementById('pvSeniorEmail').value.trim();
-    if (!val) { alert('Lütfen bir Senior e-postası girin.'); return; }
+    if (!val) { alert('Lütfen bir Eğitim Danışmanı e-postası girin.'); return; }
     window.open('/manager/preview/senior/' + encodeURIComponent(val), '_blank');
 }
 function openDealerPreview() {

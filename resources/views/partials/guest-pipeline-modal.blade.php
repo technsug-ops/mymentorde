@@ -1,5 +1,5 @@
 {{-- ═══════════════════════════════════════════════════════════════
-     Guest Pipeline Stage Modal — Aşama Değişiklik Formu
+     Aday Öğrenci Pipeline Aşama Modal — Aşama Değişiklik Formu
      Her iki pipeline view'ında @include ile kullanılır.
      JS: window.showPipelineModal() / window.hidePipelineModal()
 ════════════════════════════════════════════════════════════════ --}}

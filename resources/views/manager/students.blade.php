@@ -44,10 +44,10 @@
     <form method="GET" action="/manager/students" style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;">
         <div style="display:flex;flex-direction:column;gap:3px;">
             <label class="mgr-filter-label">Ara</label>
-            <input name="q" value="{{ $q }}" placeholder="Student ID veya senior e-posta…" style="width:230px;">
+            <input name="q" value="{{ $q }}" placeholder="Öğrenci ID veya eğitim danışmanı e-posta…" style="width:230px;">
         </div>
         <div style="display:flex;flex-direction:column;gap:3px;">
-            <label class="mgr-filter-label">Senior</label>
+            <label class="mgr-filter-label">Eğitim Danışmanı</label>
             <select name="senior">
                 <option value="">– Tümü –</option>
                 @foreach($seniorOptions as $e)
@@ -105,8 +105,8 @@
         <table class="mgr-table">
             <thead>
                 <tr>
-                    <th>Student ID</th>
-                    <th>Senior</th>
+                    <th>Öğrenci ID</th>
+                    <th>Eğitim Danışmanı</th>
                     <th>Şube</th>
                     <th>Risk</th>
                     <th>Ödeme</th>

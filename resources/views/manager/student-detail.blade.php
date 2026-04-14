@@ -43,9 +43,9 @@
                 };
             @endphp
             <table style="width:100%;border-collapse:collapse;font-size:var(--tx-sm);">
-                <tr><td class="muted" style="padding:5px 0;width:140px;">Student ID</td>
+                <tr><td class="muted" style="padding:5px 0;width:140px;">Öğrenci ID</td>
                     <td><strong style="font-size:var(--tx-base);">{{ $studentId }}</strong></td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Senior</td>
+                <tr><td class="muted" style="padding:5px 0;">Eğitim Danışmanı</td>
                     <td>
                         @if($assignment->senior_email)
                             <a href="/manager/seniors/{{ urlencode($assignment->senior_email) }}">{{ $assignment->senior_email }}</a>
@@ -104,12 +104,12 @@
             </section>
         @endif
 
-        {{-- Orijinal Guest --}}
+        {{-- Orijinal Aday Öğrenci --}}
         @if($guest)
             <section class="panel">
-                <h2>Orijinal Başvuru (Guest)</h2>
+                <h2>Orijinal Başvuru (Aday Öğrenci)</h2>
                 <table style="width:100%;border-collapse:collapse;font-size:var(--tx-sm);">
-                    <tr><td class="muted" style="padding:5px 0;width:140px;">Guest ID</td>
+                    <tr><td class="muted" style="padding:5px 0;width:140px;">Aday Öğrenci ID</td>
                         <td><a href="/manager/guests/{{ $guest->id }}">#{{ $guest->id }}</a></td></tr>
                     <tr><td class="muted" style="padding:5px 0;">Ad Soyad</td>
                         <td>{{ $guest->first_name }} {{ $guest->last_name }}</td></tr>
@@ -135,7 +135,7 @@
             <form method="POST" action="/manager/students/{{ urlencode($studentId) }}/update">
                 @csrf @method('PATCH')
                 <div style="margin-bottom:8px;">
-                    <label class="muted">Senior E-posta</label>
+                    <label class="muted">Eğitim Danışmanı E-posta</label>
                     <select name="senior_email" style="width:100%;">
                         <option value="">– Seç –</option>
                         @foreach($seniorOptions as $e)
@@ -270,7 +270,7 @@
             <h2>Hızlı Linkler</h2>
             <div style="display:flex;flex-direction:column;gap:8px;">
                 @if($assignment->senior_email)
-                    <a class="btn" href="/manager/seniors/{{ urlencode($assignment->senior_email) }}">Senior Profili →</a>
+                    <a class="btn" href="/manager/seniors/{{ urlencode($assignment->senior_email) }}">Eğitim Danışmanı Profili →</a>
                 @endif
                 @if($assignment->dealer_id)
                     <a class="btn" href="/manager/dealers/{{ $assignment->dealer_id }}">Bayi Detay →</a>
@@ -278,7 +278,7 @@
                 @if($guest)
                     <a class="btn" href="/manager/guests/{{ $guest->id }}">Orijinal Başvuru →</a>
                 @endif
-                <a class="btn" href="/manager/preview/student/{{ urlencode($studentId) }}" target="_blank">Student Önizleme</a>
+                <a class="btn" href="/manager/preview/student/{{ urlencode($studentId) }}" target="_blank">Öğrenci Önizleme</a>
             </div>
         </section>
     </div>

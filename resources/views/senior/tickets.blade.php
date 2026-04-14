@@ -110,7 +110,7 @@
                         <span>🎓 {{ $studentId }}</span>
                     @elseif($row->guest_application_id)
                         <span>·</span>
-                        <span>Guest #{{ $row->guest_application_id }}</span>
+                        <span>Aday Öğrenci #{{ $row->guest_application_id }}</span>
                     @endif
                     @if($guest?->email)
                         <span>·</span>
@@ -143,7 +143,7 @@
                 <a href="/senior/notes?q={{ urlencode($studentId) }}" style="font-size:var(--tx-xs);padding:5px 11px;border:1px solid var(--u-line);border-radius:6px;background:var(--u-bg);color:var(--u-text);text-decoration:none;font-weight:600;">📝 Notlar</a>
                 <a href="/im" style="font-size:var(--tx-xs);padding:5px 11px;border:1px solid var(--u-line);border-radius:6px;background:var(--u-bg);color:var(--u-text);text-decoration:none;font-weight:600;">🔍 Mesajlarda Ara</a>
             @elseif($row->guest_application_id)
-                <a href="/im" style="font-size:var(--tx-xs);padding:5px 11px;border:1px solid var(--u-line);border-radius:6px;background:var(--u-bg);color:var(--u-text);text-decoration:none;font-weight:600;">🔍 Guest Mesajları</a>
+                <a href="/im" style="font-size:var(--tx-xs);padding:5px 11px;border:1px solid var(--u-line);border-radius:6px;background:var(--u-bg);color:var(--u-text);text-decoration:none;font-weight:600;">🔍 Aday Öğrenci Mesajları</a>
             @endif
         </div>
     </div>

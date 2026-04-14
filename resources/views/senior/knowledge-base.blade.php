@@ -77,7 +77,7 @@
             ['Toplam',  $kTotal ?? 0,     '📦', url('/senior/knowledge-base'),                    $activePublished==='all' && $activeRole==='all' && $activeQ===''],
             ['Yayında', $kPublished ?? 0, '✅', url('/senior/knowledge-base').'?published=yes',   $activePublished==='yes'],
             ['Öğrenci', $kStudent ?? 0,   '🎓', url('/senior/knowledge-base').'?role=student',    $activeRole==='student'],
-            ['Guest',   $kGuest ?? 0,     '👤', url('/senior/knowledge-base').'?role=guest',      $activeRole==='guest'],
+            ['Aday Öğrenci',   $kGuest ?? 0,     '👤', url('/senior/knowledge-base').'?role=guest',      $activeRole==='guest'],
         ];
     @endphp
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -126,7 +126,7 @@
     <select name="role" style="border:1px solid var(--u-line);border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);color:var(--u-text);background:var(--u-bg);">
         <option value="all"     @selected(($filters['role']??'all')==='all')>Tüm Roller</option>
         <option value="student" @selected(($filters['role']??'')==='student')>🎓 Öğrenci</option>
-        <option value="guest"   @selected(($filters['role']??'')==='guest')>👤 Guest</option>
+        <option value="guest"   @selected(($filters['role']??'')==='guest')>👤 Aday Öğrenci</option>
     </select>
     <select name="sort" style="border:1px solid var(--u-line);border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);color:var(--u-text);background:var(--u-bg);">
         <option value="latest"  @selected(($filters['sort']??'latest')==='latest')>📅 En Yeni</option>
@@ -197,7 +197,7 @@
                 <div class="kb-form-group" style="justify-content:flex-end;">
                     <label style="margin-bottom:8px;">Görünür Roller</label>
                     <div style="display:flex;gap:14px;flex-wrap:wrap;">
-                        @foreach(['student'=>'🎓 Öğrenci','guest'=>'👤 Guest','senior'=>'🧑‍💼 Senior'] as $r=>$rl)
+                        @foreach(['student'=>'🎓 Öğrenci','guest'=>'👤 Aday Öğrenci','senior'=>'🧑‍💼 Eğitim Danışmanı'] as $r=>$rl)
                         <label style="display:flex;align-items:center;gap:6px;font-size:var(--tx-sm);cursor:pointer;text-transform:none;letter-spacing:0;">
                             <input type="checkbox" name="target_roles[]" value="{{ $r }}"> {{ $rl }}
                         </label>
@@ -292,7 +292,7 @@
                         </form>
                         <form method="POST" action="{{ route('senior.kb.toggle-role', $row->id) }}" style="display:inline;">
                             @csrf <input type="hidden" name="role" value="guest">
-                            <button type="submit" title="{{ $hasGuest ? 'Guest kapalı yap' : 'Guest aç' }}"
+                            <button type="submit" title="{{ $hasGuest ? 'Aday Öğrenci kapalı yap' : 'Aday Öğrenci aç' }}"
                                 style="font-size:var(--tx-xs);padding:3px 9px;border-radius:5px;cursor:pointer;font-weight:700;border:1px solid {{ $hasGuest ? '#fde68a' : 'var(--u-line)' }};background:{{ $hasGuest ? '#fef3c7' : 'var(--u-bg)' }};color:{{ $hasGuest ? '#92400e' : 'var(--u-muted)' }};">
                                 👤{{ $hasGuest ? ' ✓' : '' }}
                             </button>
@@ -359,7 +359,7 @@
                                 <div class="kb-form-group">
                                     <label>Görünür Roller</label>
                                     <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:4px;">
-                                        @foreach(['student'=>'🎓 Öğrenci','guest'=>'👤 Guest','senior'=>'🧑‍💼 Senior'] as $r=>$rl)
+                                        @foreach(['student'=>'🎓 Öğrenci','guest'=>'👤 Aday Öğrenci','senior'=>'🧑‍💼 Eğitim Danışmanı'] as $r=>$rl)
                                         <label style="display:flex;align-items:center;gap:5px;font-size:var(--tx-sm);cursor:pointer;text-transform:none;letter-spacing:0;">
                                             <input type="checkbox" name="target_roles[]" value="{{ $r }}" @checked(in_array($r,(array)($row->target_roles??[])))> {{ $rl }}
                                         </label>
@@ -447,7 +447,7 @@
                         </form>
                         <form method="POST" action="{{ route('senior.kb.toggle-role', $row->id) }}" style="display:inline;">
                             @csrf <input type="hidden" name="role" value="guest">
-                            <button type="submit" title="{{ $hasGuest ? 'Guest kapalı yap' : 'Guest aç' }}"
+                            <button type="submit" title="{{ $hasGuest ? 'Aday Öğrenci kapalı yap' : 'Aday Öğrenci aç' }}"
                                 style="font-size:var(--tx-xs);padding:3px 9px;border-radius:5px;cursor:pointer;font-weight:700;border:1px solid {{ $hasGuest ? '#fde68a' : 'var(--u-line)' }};background:{{ $hasGuest ? '#fef3c7' : 'var(--u-bg)' }};color:{{ $hasGuest ? '#92400e' : 'var(--u-muted)' }};">
                                 👤{{ $hasGuest ? ' ✓' : '' }}
                             </button>
@@ -514,7 +514,7 @@
                                 <div class="kb-form-group">
                                     <label>Görünür Roller</label>
                                     <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:4px;">
-                                        @foreach(['student'=>'🎓 Öğrenci','guest'=>'👤 Guest','senior'=>'🧑‍💼 Senior'] as $r=>$rl)
+                                        @foreach(['student'=>'🎓 Öğrenci','guest'=>'👤 Aday Öğrenci','senior'=>'🧑‍💼 Eğitim Danışmanı'] as $r=>$rl)
                                         <label style="display:flex;align-items:center;gap:5px;font-size:var(--tx-sm);cursor:pointer;text-transform:none;letter-spacing:0;">
                                             <input type="checkbox" name="target_roles[]" value="{{ $r }}" @checked(in_array($r,(array)($row->target_roles??[])))> {{ $rl }}
                                         </label>

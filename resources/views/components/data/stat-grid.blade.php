@@ -5,7 +5,7 @@
 ])
 {{-- stats array ile kullanım:
 <x-data.stat-grid :stats="[
-    ['icon'=>'👥','value'=>'142','label'=>'Toplam Guest'],
+    ['icon'=>'👥','value'=>'142','label'=>'Toplam Aday Öğrenci'],
     ['icon'=>'✅','value'=>'38','label'=>'Dönüşüm','trend'=>'+12%','trendUp'=>true],
 ]" />
 

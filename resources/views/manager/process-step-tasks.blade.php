@@ -10,7 +10,7 @@
 @endif
 
 <div style="margin-bottom:16px;color:#64748b;font-size:13px;">
-    Her süreç adımı için senior'ların öğrenci takibinde göreceği sub-task (görev) şablonlarını yönetin. Senior bu görevleri her öğrenci için ayrı ayrı tamamlandı olarak işaretleyebilir.
+    Her süreç adımı için eğitim danışmanlarının öğrenci takibinde göreceği sub-task (görev) şablonlarını yönetin. Eğitim Danışmanı bu görevleri her öğrenci için ayrı ayrı tamamlandı olarak işaretleyebilir.
 </div>
 
 @foreach($definitions as $def)

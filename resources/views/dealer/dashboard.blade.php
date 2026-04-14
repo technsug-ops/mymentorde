@@ -210,7 +210,7 @@
     <div class="drd-kpi-card">
         <div class="drd-kpi-label">Dönüşüm Oranı</div>
         <div class="drd-kpi-val">%{{ $kpis['conversion_rate'] ?? 0 }}</div>
-        <div class="drd-kpi-sub">Lead → Student</div>
+        <div class="drd-kpi-sub">Lead → Öğrenci</div>
     </div>
     <div class="drd-kpi-card">
         <div class="drd-kpi-label">Bağlı Öğrenci</div>

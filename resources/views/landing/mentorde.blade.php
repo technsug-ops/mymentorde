@@ -141,7 +141,7 @@
         </article>
         <article class="card">
             <h3>2. Dönüşüm Takibi</h3>
-            <p class="muted">Guest -> Student dönüşümunde funnel adımlari otomatik güncellenir.</p>
+            <p class="muted">Aday Öğrenci -> Öğrenci dönüşümunde funnel adımlari otomatik güncellenir.</p>
         </article>
         <article class="card">
             <h3>3. KPI ve Rapor</h3>

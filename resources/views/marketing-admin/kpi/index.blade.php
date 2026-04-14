@@ -136,7 +136,7 @@ var _kpiExtProv  = {!! json_encode($_jsExtProv) !!};
             <div class="ks-item"><div class="ks-val ok">{{ $kpis['converted_count'] ?? 0 }}</div><div class="ks-lbl">Dönüştürülen</div></div>
             <div class="ks-item"><div class="ks-val {{ $convClass }}">{{ number_format($convRate,1,'.',',' ) }}%</div><div class="ks-lbl">Dönüşüm Oranı</div></div>
             <div class="ks-item"><div class="ks-val">{{ $kpis['active_campaign_count'] ?? 0 }}</div><div class="ks-lbl">Aktif Kampanya</div></div>
-            <div class="ks-item"><div class="ks-val warn">{{ $kpis['open_guest_count'] ?? 0 }}</div><div class="ks-lbl">Açık Guest</div></div>
+            <div class="ks-item"><div class="ks-val warn">{{ $kpis['open_guest_count'] ?? 0 }}</div><div class="ks-lbl">Açık Aday Öğrenci</div></div>
             <div class="ks-item"><div class="ks-val">{{ $kpis['archived_guest_count'] ?? 0 }}</div><div class="ks-lbl">Arşivlenen</div></div>
         </div>
     </div>

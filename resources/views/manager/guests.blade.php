@@ -1,7 +1,7 @@
 @extends('manager.layouts.app')
 
-@section('title', 'Manager – Guest Yönetimi')
-@section('page_title', 'Guest Yönetimi')
+@section('title', 'Manager – Aday Öğrenci Yönetimi')
+@section('page_title', 'Aday Öğrenci Yönetimi')
 
 @push('head')
 <style>
@@ -32,7 +32,7 @@
 {{-- KPI Strip --}}
 <div class="mgr-kpi-strip">
     <div class="mgr-kpi">
-        <div class="mgr-kpi-label">Toplam Guest</div>
+        <div class="mgr-kpi-label">Toplam Aday Öğrenci</div>
         <div class="mgr-kpi-val">{{ $kpis['total'] }}</div>
     </div>
     <div class="mgr-kpi">
@@ -66,7 +66,7 @@
             </select>
         </div>
         <div style="display:flex;flex-direction:column;gap:3px;">
-            <label style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;">Senior</label>
+            <label style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;">Eğitim Danışmanı</label>
             <select name="senior">
                 <option value="">– Tümü –</option>
                 @foreach($seniorOptions as $e)
@@ -106,7 +106,7 @@
                     <th>E-posta / Telefon</th>
                     <th>Tür</th>
                     <th>Durum</th>
-                    <th>Senior</th>
+                    <th>Eğitim Danışmanı</th>
                     <th>Dealer</th>
                     <th>Tarih</th>
                     <th></th>

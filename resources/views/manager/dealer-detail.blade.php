@@ -54,7 +54,7 @@
                 <table style="width:100%;border-collapse:collapse;font-size:var(--tx-xs);">
                     <thead>
                         <tr style="background:var(--u-bg,#f5f7fa);">
-                            <th style="padding:6px 8px;text-align:left;">Student ID</th>
+                            <th style="padding:6px 8px;text-align:left;">Öğrenci ID</th>
                             <th style="padding:6px 8px;text-align:right;">Kazanılan</th>
                             <th style="padding:6px 8px;text-align:right;">Bekleyen</th>
                             <th style="padding:6px 8px;"></th>
@@ -144,7 +144,7 @@
                         <th style="padding:6px 8px;text-align:left;">ID</th>
                         <th style="padding:6px 8px;text-align:left;">Ad Soyad</th>
                         <th style="padding:6px 8px;text-align:left;">E-posta</th>
-                        <th style="padding:6px 8px;text-align:left;">Senior</th>
+                        <th style="padding:6px 8px;text-align:left;">Eğitim Danışmanı</th>
                         <th style="padding:6px 8px;text-align:left;">Durum</th>
                         <th style="padding:6px 8px;text-align:left;">Dönüşüm</th>
                         <th style="padding:6px 8px;text-align:left;">Tarih</th>

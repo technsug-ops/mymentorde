@@ -1,6 +1,6 @@
 @extends('student.layouts.app')
 
-@section('title', 'Student - Belgeler')
+@section('title', 'Öğrenci - Belgeler')
 @section('page_title', 'Kayıt Belgeleri')
 
 @push('head')

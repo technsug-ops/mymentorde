@@ -47,7 +47,7 @@
     <div class="card">
         <h2>2. Admin Donusum</h2>
         <ol class="list">
-            <li><code>/config</code> -> <strong>Guest Applications</strong> kartinda kaydi bul.</li>
+            <li><code>/config</code> -> <strong>Aday Öğrenci Başvuruları</strong> kartinda kaydi bul.</li>
             <li>Sec ve <strong>Studenta Donustur</strong> yap.</li>
             <li>Durum mesajinda yeni <code>student_id</code> gorundugunu kontrol et.</li>
         </ol>
@@ -56,7 +56,7 @@
     <div class="card">
         <h2>3. Otomatik Tetikler</h2>
         <ol class="list">
-            <li>Config'te <strong>Student Ownership</strong> listesinde yeni ogrenciyi gor.</li>
+            <li>Config'te <strong>Öğrenci Sahipliği</strong> listesinde yeni ogrenciyi gor.</li>
             <li><strong>Internal Notes</strong> ve <strong>Process Outcomes</strong kayitlari olusmus olmali.</li>
             <li><strong>Notification Queue</strong kartinda <code>queued/sent/failed</code> kayitlari gor.</li>
         </ol>

@@ -192,7 +192,7 @@
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
     <div>
         <div style="font-size:var(--tx-sm);font-weight:700;color:#0f172a;">Sözleşme Template Yönetimi</div>
-        <div style="font-size:var(--tx-xs);color:#64748b;">Guest talebinden otomatik ya da manuel sözleşme başlatma</div>
+        <div style="font-size:var(--tx-xs);color:#64748b;">Aday Öğrenci talebinden otomatik ya da manuel sözleşme başlatma</div>
     </div>
     <a href="/config" class="ct-btn">← Config'a Dön</a>
 </div>
@@ -652,7 +652,7 @@
                             </div>
                             <div class="sca-decision-grid">
                                 <button type="submit" name="decision" value="approve" class="sca-btn-approve"
-                                        onclick="return confirm('Onay verilirse öğrenci Student portala geçer. Devam?')">
+                                        onclick="return confirm('Onay verilirse öğrenci Öğrenci paneline geçer. Devam?')">
                                     ✓ Onayla
                                 </button>
                                 <button type="submit" name="decision" value="reject" class="sca-btn-reject"
@@ -664,7 +664,7 @@
                         @elseif($guestContractStatusForDecision === 'approved')
                         <div class="sca-status ok">
                             <span class="sca-status-icon">🎓</span>
-                            <span>Sözleşme onaylandı — öğrenci Student portala geçirildi.</span>
+                            <span>Sözleşme onaylandı — öğrenci Öğrenci paneline geçirildi.</span>
                         </div>
                         @elseif(in_array($guestContractStatusForDecision, ['requested','pending_manager'], true))
                         <div class="sca-status warn">

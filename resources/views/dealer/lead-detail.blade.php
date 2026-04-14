@@ -14,7 +14,7 @@
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <a class="btn" href="/dealer/leads">Listeye Dön</a>
                 @if($lead->converted_student_id)
-                    <a class="btn" target="_blank" href="/manager/preview/student/{{ urlencode($lead->converted_student_id) }}">Student Preview</a>
+                    <a class="btn" target="_blank" href="/manager/preview/student/{{ urlencode($lead->converted_student_id) }}">Öğrenci Önizleme</a>
                 @endif
             </div>
         </div>
@@ -30,7 +30,7 @@
         <div class="panel"><div class="muted">Lead Durumu</div><div style="margin-top:6px;"><span class="badge {{ $ldBadge }}">{{ $ldLabel }}</span></div></div>
         <div class="panel"><div class="muted">Paket</div><div class="kpi" style="font-size:var(--tx-xl);">{{ $lead->selected_package_code ?: '–' }}</div></div>
         <div class="panel"><div class="muted">Sözleşme</div><div style="margin-top:6px;"><span class="badge {{ $csBadge }}">{{ $csLabel }}</span></div></div>
-        <div class="panel"><div class="muted">Dönüşen Student</div><div class="kpi" style="font-size:var(--tx-xl);">{{ $lead->converted_student_id ?: '–' }}</div></div>
+        <div class="panel"><div class="muted">Dönüşen Öğrenci</div><div class="kpi" style="font-size:var(--tx-xl);">{{ $lead->converted_student_id ?: '–' }}</div></div>
     </div>
 
     {{-- 4 Aşama Milestone --}}
@@ -200,7 +200,7 @@
                 <div class="item"><strong>Kanal:</strong> {{ $lead->lead_source ?: '-' }}</div>
                 <div class="item"><strong>Branch:</strong> {{ $lead->branch ?: '-' }}</div>
                 <div class="item"><strong>Risk:</strong> {{ $lead->risk_level ?: '-' }} | <strong>Öncelik:</strong> {{ $lead->priority ?: '-' }}</div>
-                <div class="item"><strong>Senior:</strong> {{ $lead->assigned_senior_email ?: '-' }}</div>
+                <div class="item"><strong>Eğitim Danışmanı:</strong> {{ $lead->assigned_senior_email ?: '-' }}</div>
                 <div class="item"><strong>UTM:</strong> {{ $lead->utm_source ?: '-' }} / {{ $lead->utm_medium ?: '-' }} / {{ $lead->utm_campaign ?: '-' }}</div>
                 <div class="item"><strong>Not:</strong><br><span class="muted">{{ $lead->notes ?: '-' }}</span></div>
             </div>
@@ -366,7 +366,7 @@
             '4 aşama görseli lead\'in komisyon mihenk taşlarını (Kayıt, Üniversite Kabulü, Vize, Tamamlandı) gösterir.',
             'Komisyon tutarları milestone_progress verisi varsa aşama bazlı görünür.',
             'Timeline alanından otomasyonların hangi sırayla tetiklendiğini izleyebilirsin.',
-            'Dönüşen student varsa Student Preview butonundan manager önizleme ekranına geçilebilir.',
+            'Dönüşen öğrenci varsa Öğrenci Önizleme butonundan manager önizleme ekranına geçilebilir.',
             '"Gelen Belgeler" bölümü, danışman tarafından sizinle paylaşılan kurumsal belgeleri gösterir.',
         ]
     ])

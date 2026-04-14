@@ -323,7 +323,7 @@ document.addEventListener('dragend', function() {
 
 {{-- Header --}}
 <div style="background:linear-gradient(to right,#4f46e5,#7c3aed);border-radius:14px;padding:16px 20px;margin-bottom:16px;color:#fff;">
-    <div style="font-size:18px;font-weight:800;margin-bottom:4px;">🌀 Guest Pipeline Kanban</div>
+    <div style="font-size:18px;font-weight:800;margin-bottom:4px;">🌀 Aday Öğrenci Pipeline Kanban</div>
     <div style="font-size:11px;opacity:.8;margin-bottom:12px;">Sürükle &amp; bırak ile aşamaları güncelleyin</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
         @foreach([['Toplam',$stats['total'],'rgba(255,255,255,.15)'],['Aktif',$stats['open'],'rgba(255,255,255,.1)'],['HOT',$stats['hot'],'rgba(220,38,38,.25)'],['Dönüştürülen',$stats['converted'],'rgba(5,150,105,.25)'],['Kaybedilen',$stats['lost'],'rgba(107,114,128,.25)']] as [$lbl,$val,$bg])

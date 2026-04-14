@@ -70,7 +70,7 @@
     </div>
     <div class="cal-legend-item">
         <span class="cal-legend-dot" style="background:#22c55e;"></span>
-        Student Dönüşümü
+        Öğrenci Dönüşümü
     </div>
     <div class="cal-legend-item">
         <span class="cal-legend-dot" style="background:#f97316;"></span>

@@ -405,7 +405,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
             <div class="card" style="grid-column:1 / -1;">
                 <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:6px;">AI Prompt Template Yönetimi <span style="font-size:var(--tx-xs);font-weight:400;color:var(--u-muted,#64748b);">— Doküman Yazımı</span></div>
                 <div style="font-size:var(--tx-xs);color:var(--u-muted,#64748b);margin-bottom:12px;">
-                    Student document-builder içinde <code>AI Destek Modu</code> seçildiğinde kullanılan system prompt override alanları. Boş bırakılırsa uygulama default prompt kullanır.
+                    Öğrenci doküman-builder içinde <code>AI Destek Modu</code> seçildiğinde kullanılan system prompt override alanları. Boş bırakılırsa uygulama default prompt kullanır.
                 </div>
                 <div style="display:flex;flex-direction:column;gap:8px;">
                     <div class="wf-field">

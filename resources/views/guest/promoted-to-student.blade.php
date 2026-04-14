@@ -120,7 +120,7 @@ body{
 }
 .hero-sub strong{color:rgba(255,255,255,.9);font-weight:700;}
 
-/* ── Student ID Band ── */
+/* ── Öğrenci ID Band ── */
 .id-band{
     background:rgba(0,0,0,.2);
     border-top:1px solid rgba(255,255,255,.05);
@@ -310,7 +310,7 @@ body{
         </div>
     </div>
 
-    {{-- Student ID --}}
+    {{-- Öğrenci ID --}}
     @if($studentId)
     <div class="id-band">
         <div class="id-icon">🪪</div>

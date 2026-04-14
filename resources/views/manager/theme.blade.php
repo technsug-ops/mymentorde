@@ -279,8 +279,8 @@ input[type="range"] { width:100%; accent-color:#1e40af; }
                 @php
                 $portalDefs = [
                     'student'   => ['🎓', 'Öğrenci'],
-                    'guest'     => ['👤', 'Guest (Aday)'],
-                    'senior'    => ['🧑‍🏫', 'Senior / Danışman'],
+                    'guest'     => ['👤', 'Aday Öğrenci'],
+                    'senior'    => ['🧑‍🏫', 'Eğitim Danışmanı'],
                     'dealer'    => ['🤝', 'Bayi'],
                     'manager'   => ['🏢', 'Manager'],
                     'marketing' => ['📣', 'Marketing Admin'],
@@ -316,8 +316,8 @@ input[type="range"] { width:100%; accent-color:#1e40af; }
                 @php
                 $portalColorDefs = [
                     'student'   => ['🎓','Öğrenci',  'accent_student'],
-                    'guest'     => ['👤','Guest',    'accent_guest'],
-                    'senior'    => ['🧑‍🏫','Senior',  'accent_senior'],
+                    'guest'     => ['👤','Aday Öğrenci',    'accent_guest'],
+                    'senior'    => ['🧑‍🏫','Eğitim Danışmanı',  'accent_senior'],
                     'dealer'    => ['🤝','Bayi',     'accent_dealer'],
                     'manager'   => ['🏢','Manager',  'accent_manager'],
                     'marketing' => ['📣','Marketing','accent_marketing'],
@@ -444,7 +444,7 @@ input[type="range"] { width:100%; accent-color:#1e40af; }
                 </div>
             </div>
             <div style="padding:8px 14px;border-top:1px solid var(--border,#e2e8f0);background:var(--subtle,#f8fafc);font-size:var(--tx-xs);color:var(--muted,#64748b);">
-                🌐 <strong>Student · Guest · Senior · Dealer · Manager · Marketing</strong>
+                🌐 <strong>Öğrenci · Aday Öğrenci · Eğitim Danışmanı · Dealer · Manager · Marketing</strong>
             </div>
         </div>
 
@@ -561,7 +561,7 @@ input[type="range"] { width:100%; accent-color:#1e40af; }
             </div>
 
             <div style="padding:8px 14px;border-top:1px solid var(--border,#e2e8f0);background:var(--subtle,#f8fafc);font-size:var(--tx-xs);color:var(--muted,#64748b);">
-                🌐 <strong>Student · Guest · Senior · Dealer · Manager · Marketing</strong>
+                🌐 <strong>Öğrenci · Aday Öğrenci · Eğitim Danışmanı · Dealer · Manager · Marketing</strong>
             </div>
     </div>
 

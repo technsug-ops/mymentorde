@@ -45,7 +45,7 @@
         </section>
 
         <section class="card">
-            <h2>Guest Required Documents</h2>
+            <h2>Aday Öğrenci Gerekli Belgeleri</h2>
             <div class="meta">API: /api/v1/config/guest-required-documents</div>
             <div class="row">
                 <select id="grdFilterApplicationType" onchange="loadGuestRequiredDocuments()">
@@ -117,7 +117,7 @@
         </section>
 
         <section class="card">
-            <h2>Guest Registration Fields <span style="font-size:var(--tx-xs);color:#0f6bdc;border:1px solid #b9d3f6;border-radius:999px;padding:2px 6px;">accordion v3</span></h2>
+            <h2>Aday Öğrenci Kayıt Alanları <span style="font-size:var(--tx-xs);color:#0f6bdc;border:1px solid #b9d3f6;border-radius:999px;padding:2px 6px;">accordion v3</span></h2>
             <div class="meta">API: /api/v1/config/guest-registration-fields</div>
             <div class="row">
                 <input id="grfFilterSection" placeholder="section_key filtre (opsiyonel)">

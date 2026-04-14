@@ -48,7 +48,7 @@
 
 {{-- Filter bar --}}
 <form method="GET" style="background:var(--u-card);border:1px solid var(--u-line);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-    <input type="text" name="q" value="{{ $activeQ }}" placeholder="🔍  Student ID / doküman / dosya adı"
+    <input type="text" name="q" value="{{ $activeQ }}" placeholder="🔍  Öğrenci ID / doküman / dosya adı"
         style="flex:1;min-width:200px;border:1px solid var(--u-line);border-radius:7px;padding:8px 12px;font-size:var(--tx-sm);color:var(--u-text);background:var(--u-bg);">
     <select name="status" style="border:1px solid var(--u-line);border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);color:var(--u-text);background:var(--u-bg);">
         <option value="all"      @selected($activeSt==='all')>Tüm Durumlar</option>

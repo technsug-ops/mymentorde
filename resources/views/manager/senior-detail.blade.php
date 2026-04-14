@@ -1,15 +1,15 @@
 @extends('manager.layouts.app')
 
-@section('title', 'Manager – Senior Detay')
-@section('page_title', 'Senior Detay')
+@section('title', 'Manager – Eğitim Danışmanı Detay')
+@section('page_title', 'Eğitim Danışmanı Detay')
 
 @section('content')
 
 <div style="margin-bottom:10px;">
-    <a class="btn" href="/manager/seniors">← Senior Listesi</a>
+    <a class="btn" href="/manager/seniors">← Eğitim Danışmanı Listesi</a>
 </div>
 
-{{-- Senior Başlık --}}
+{{-- Eğitim Danışmanı Başlık --}}
 <section class="panel" style="margin-bottom:12px;">
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
         <div class="avatar" style="width:52px;height:52px;font-size:var(--tx-xl);flex-shrink:0;">
@@ -26,7 +26,7 @@
 <div class="grid4" style="margin-bottom:12px;">
     <div class="panel"><div class="muted">Aktif Öğrenci</div><div class="kpi">{{ $stats['active'] }}</div></div>
     <div class="panel"><div class="muted">Arşiv</div><div class="kpi">{{ $stats['archived'] }}</div></div>
-    <div class="panel"><div class="muted">Bekleyen Guest</div><div class="kpi">{{ $stats['pending'] }}</div></div>
+    <div class="panel"><div class="muted">Bekleyen Aday Öğrenci</div><div class="kpi">{{ $stats['pending'] }}</div></div>
     <div class="panel">
         <div class="muted">Yüksek Risk</div>
         <div class="kpi" style="{{ $stats['high_risk'] > 0 ? 'color:var(--u-danger,#d33c3c);' : '' }}">{{ $stats['high_risk'] }}</div>
@@ -61,7 +61,7 @@
                 <table style="width:100%;border-collapse:collapse;font-size:var(--tx-xs);">
                     <thead>
                         <tr style="background:var(--u-bg,#f5f7fa);">
-                            <th style="padding:6px 8px;text-align:left;">Student ID</th>
+                            <th style="padding:6px 8px;text-align:left;">Öğrenci ID</th>
                             <th style="padding:6px 8px;text-align:left;">Şube</th>
                             <th style="padding:6px 8px;text-align:left;">Risk</th>
                             <th style="padding:6px 8px;text-align:left;">Ödeme</th>
@@ -98,9 +98,9 @@
         @endif
     </section>
 
-    {{-- Bekleyen Guest'ler --}}
+    {{-- Bekleyen Aday Öğrenci'ler --}}
     <section class="card">
-        <h2>Bekleyen Guest'ler ({{ $stats['pending'] }})</h2>
+        <h2>Bekleyen Aday Öğrenci'ler ({{ $stats['pending'] }})</h2>
         @if($pendingGuests->isEmpty())
             <div class="muted" style="padding:12px 0;">Bekleyen başvuru yok.</div>
         @else
@@ -138,7 +138,7 @@
                 <table style="width:100%;border-collapse:collapse;font-size:var(--tx-xs);">
                     <thead>
                         <tr style="background:var(--u-bg,#f5f7fa);">
-                            <th style="padding:6px 8px;text-align:left;">Student ID</th>
+                            <th style="padding:6px 8px;text-align:left;">Öğrenci ID</th>
                             <th style="padding:6px 8px;text-align:left;">Şube</th>
                             <th style="padding:6px 8px;text-align:left;">Arşiv Tarihi</th>
                             <th style="padding:6px 8px;"></th>

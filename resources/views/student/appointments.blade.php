@@ -161,7 +161,7 @@
     <div class="apt-form-card">
         <div class="apt-form-head">
             <div class="apt-form-head-title">📅 Yeni Randevu Talebi</div>
-            <div class="apt-form-head-sub">Senior onayladıktan sonra toplantı linki eklenir.</div>
+            <div class="apt-form-head-sub">Eğitim Danışmanı onayladıktan sonra toplantı linki eklenir.</div>
         </div>
         <div class="apt-form-body">
             <form method="post" action="{{ route('student.appointments.store') }}">

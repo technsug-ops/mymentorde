@@ -1,12 +1,12 @@
 @extends('manager.layouts.app')
-@section('title', 'Senior Devir')
-@section('page_title', 'Senior Devir')
+@section('title', 'Eğitim Danışmanı Devir')
+@section('page_title', 'Eğitim Danışmanı Devir')
 
 @section('content')
 
 <div style="display:flex;gap:6px;align-items:center;margin-bottom:14px;font-size:11px;color:var(--u-muted);">
     <a href="/manager/hr" style="color:#1e40af;text-decoration:none;font-weight:700;">İnsan Kaynakları</a>
-    <span>›</span><span>Senior Devir</span>
+    <span>›</span><span>Eğitim Danışmanı Devir</span>
 </div>
 
 @if(session('status'))
@@ -24,7 +24,7 @@
             @csrf
 
             <div style="margin-bottom:14px;">
-                <label style="font-size:11px;font-weight:700;color:var(--u-muted);display:block;margin-bottom:5px;">Devirden — Kaynak Senior</label>
+                <label style="font-size:11px;font-weight:700;color:var(--u-muted);display:block;margin-bottom:5px;">Devirden — Kaynak Eğitim Danışmanı</label>
                 <select name="from_senior_id" id="fromSelect" required
                     style="width:100%;padding:8px 12px;border:1.5px solid var(--u-line);border-radius:8px;font-size:13px;background:var(--u-bg);color:var(--u-text);">
                     <option value="">— Seçin —</option>
@@ -38,7 +38,7 @@
             </div>
 
             <div style="margin-bottom:14px;">
-                <label style="font-size:11px;font-weight:700;color:var(--u-muted);display:block;margin-bottom:5px;">Devire — Hedef Senior</label>
+                <label style="font-size:11px;font-weight:700;color:var(--u-muted);display:block;margin-bottom:5px;">Devire — Hedef Eğitim Danışmanı</label>
                 <select name="to_senior_id" required
                     style="width:100%;padding:8px 12px;border:1.5px solid var(--u-line);border-radius:8px;font-size:13px;background:var(--u-bg);color:var(--u-text);">
                     <option value="">— Seçin —</option>
@@ -56,9 +56,9 @@
         </form>
     </section>
 
-    {{-- Senior Listesi --}}
+    {{-- Eğitim Danışmanı Listesi --}}
     <section class="panel" style="padding:0;overflow:hidden;">
-        <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);">👥 Senior Yükü</div>
+        <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);">👥 Eğitim Danışmanı Yükü</div>
         @foreach($seniors as $s)
         @php $cnt = $assignedCounts[$s->email] ?? 0; @endphp
         <div style="padding:10px 16px;border-bottom:1px solid var(--u-line);display:flex;align-items:center;gap:12px;">

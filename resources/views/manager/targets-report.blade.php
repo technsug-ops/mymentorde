@@ -53,15 +53,15 @@
 
 @endif
 
-{{-- Senior Hedefleri --}}
+{{-- Eğitim Danışmanı Hedefleri --}}
 @if($seniorTargets->isNotEmpty())
 <div class="card">
-    <div class="card-title">Senior Hedefleri — {{ $period }}</div>
+    <div class="card-title">Eğitim Danışmanı Hedefleri — {{ $period }}</div>
     <div style="overflow-x:auto;">
         <table style="width:100%;border-collapse:collapse;font-size:var(--tx-sm);">
             <thead>
                 <tr style="border-bottom:2px solid var(--u-line);">
-                    <th style="padding:8px 10px;text-align:left;">Senior</th>
+                    <th style="padding:8px 10px;text-align:left;">Eğitim Danışmanı</th>
                     <th style="padding:8px 10px;text-align:center;">Dönüşüm H.</th>
                     <th style="padding:8px 10px;text-align:center;">Başvuru H.</th>
                     <th style="padding:8px 10px;text-align:center;">Belge H.</th>

@@ -1,11 +1,11 @@
 @extends('senior.layouts.app')
 
-@section('title', 'Senior Dashboard')
-@section('page_title', 'Senior Dashboard')
+@section('title', 'Eğitim Danışmanı Paneli')
+@section('page_title', 'Eğitim Danışmanı Paneli')
 
 @push('head')
 <style>
-/* ── Senior Dashboard Hero ── */
+/* ── Eğitim Danışmanı Paneli Hero ── */
 .srd-hero {
     background: linear-gradient(to right, #3b1a6e 0%, #6d28d9 60%, #7c3aed 100%);
     border-radius: 0 0 16px 16px;
@@ -175,7 +175,7 @@ a.srd-kpi-card:hover::after {
 
 @section('content')
 @php
-    $seniorName = auth()->user()?->name ?? 'Senior';
+    $seniorName = auth()->user()?->name ?? 'Eğitim Danışmanı';
     $initials   = strtoupper(substr($seniorName, 0, 2));
     $unread     = (int) ($dmSummary['unread'] ?? 0);
     $overdue    = (int) ($taskSummary['overdue'] ?? 0);
@@ -197,7 +197,7 @@ a.srd-kpi-card:hover::after {
         <div class="srd-hero-info">
             <div class="srd-hero-name">{{ $seniorName }}</div>
             <div class="srd-hero-badges">
-                <span class="srd-hero-badge">Senior / Advisor</span>
+                <span class="srd-hero-badge">Eğitim Danışmanı</span>
                 <span class="srd-hero-badge">{{ $activeStudentCount }} aktif öğrenci</span>
                 @if($unread > 0)<span class="srd-hero-badge alert">{{ $unread }} okunmamış</span>@endif
                 @if($overdue > 0)<span class="srd-hero-badge alert">{{ $overdue }} geciken task</span>@endif
@@ -286,7 +286,7 @@ function seniorBannerClick(id, slug) {
         <div class="srd-kpi-sub">arşiv: {{ $archivedStudentCount }}</div>
     </a>
     <a class="srd-kpi-card" href="/senior/students?pool=guest" style="text-decoration:none;color:inherit;display:block;">
-        <div class="srd-kpi-label">Bekleyen Guest</div>
+        <div class="srd-kpi-label">Bekleyen Aday Öğrenci</div>
         <div class="srd-kpi-val" style="{{ ($kpi['pendingGuests'] ?? 0) > 0 ? 'color:#dc2626' : '' }}">{{ $kpi['pendingGuests'] ?? 0 }}</div>
         <div class="srd-kpi-sub">başvuru incelemede</div>
     </a>
