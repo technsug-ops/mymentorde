@@ -120,6 +120,15 @@
                             style="padding:4px 8px;background:#eff6ff;color:#1d4ed8;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;">
                         ✎
                     </button>
+                    {{-- E3 — Dosya taşıma --}}
+                    <button type="button" class="dam-move-btn"
+                            data-asset-id="{{ $asset->id }}"
+                            data-asset-name="{{ $asset->name }}"
+                            data-move-url="{{ route($routePrefix . '.move', $asset->id) }}"
+                            title="Başka klasöre taşı"
+                            style="padding:4px 8px;background:#fef3c7;color:#92400e;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;">
+                        ➜
+                    </button>
                     @endcan
                     @can('dam.delete')
                     <form method="POST" action="{{ route($routePrefix . '.destroy', $asset->id) }}" style="display:inline;"

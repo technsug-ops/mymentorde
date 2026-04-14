@@ -13,16 +13,46 @@
                     <span style="margin-right:8px;">📁</span>Dijital Varlıklar
                 @endif
             </h1>
-            <div style="font-size:13px;color:var(--text-muted,#64748b);margin-top:4px;">
+            <div style="font-size:13px;color:var(--text-muted,#64748b);margin-top:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                 @if($onlyFavorites ?? false)
                     Yıldızladığınız dosyalar — sadece size özel
                 @elseif(empty($breadcrumb))
                     Tüm klasörler
                 @else
+                    <div>
                     @foreach($breadcrumb as $i => $crumb)
                         @if($i > 0) <span style="margin:0 6px;">›</span> @endif
                         <span>{{ $crumb['name'] }}</span>
                     @endforeach
+                    </div>
+
+                    {{-- E1/E2 — Klasör yönetim butonları (rename/move/delete) — sadece admin ve non-system --}}
+                    @can('dam.folder.manage')
+                        @if($currentFolder && !$currentFolder->is_system)
+                        <div style="display:flex;gap:5px;">
+                            <button type="button" id="damFolderRenameBtn"
+                                    data-folder-id="{{ $currentFolder->id }}"
+                                    data-folder-name="{{ $currentFolder->name }}"
+                                    data-update-url="{{ route($routePrefix . '.folder.update', $currentFolder->id) }}"
+                                    title="Klasörü yeniden adlandır"
+                                    style="padding:3px 8px;font-size:11px;border:1px solid #e2e8f0;background:#fff;border-radius:5px;cursor:pointer">✎ Yeniden Adlandır</button>
+
+                            <button type="button" id="damFolderMoveBtn"
+                                    data-folder-id="{{ $currentFolder->id }}"
+                                    data-move-url="{{ route($routePrefix . '.folder.move', $currentFolder->id) }}"
+                                    title="Klasörü başka yere taşı"
+                                    style="padding:3px 8px;font-size:11px;border:1px solid #e2e8f0;background:#fff;border-radius:5px;cursor:pointer">➜ Taşı</button>
+
+                            <form method="POST" action="{{ route($routePrefix . '.folder.destroy', $currentFolder->id) }}" style="display:inline"
+                                  onsubmit="return confirm('{{ $currentFolder->name }} klasörünü silmek istediğinize emin misiniz? Klasör boş olmalı.')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        style="padding:3px 8px;font-size:11px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;border-radius:5px;cursor:pointer">✕ Sil</button>
+                            </form>
+                        </div>
+                        @endif
+                    @endcan
                 @endif
             </div>
         </div>
@@ -104,18 +134,49 @@
                 </a>
             @endif
         </div>
-        {{-- Gelişmiş filtreler (collapse) --}}
-        <details style="margin-top:10px;">
+        {{-- Gelişmiş filtreler (collapse) — E6 --}}
+        <details style="margin-top:10px;" @if(!empty($filters['uploader']) || !empty($filters['size_min']) || !empty($filters['size_max']) || !empty($filters['from']) || !empty($filters['to'])) open @endif>
             <summary style="cursor:pointer;font-size:12px;color:#64748b;user-select:none;">Gelişmiş filtreler</summary>
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;">
-                <label style="font-size:12px;color:#64748b;">Başlangıç:</label>
-                <input type="date" name="from" value="{{ $filters['from'] ?? '' }}"
-                       style="padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;">
-                <label style="font-size:12px;color:#64748b;">Bitiş:</label>
-                <input type="date" name="to" value="{{ $filters['to'] ?? '' }}"
-                       style="padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;">
+                {{-- Tarih aralığı --}}
+                <label style="font-size:12px;color:#64748b;display:flex;flex-direction:column;gap:3px;">
+                    <span>Başlangıç tarihi</span>
+                    <input type="date" name="from" value="{{ $filters['from'] ?? '' }}"
+                           style="padding:7px 9px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;">
+                </label>
+                <label style="font-size:12px;color:#64748b;display:flex;flex-direction:column;gap:3px;">
+                    <span>Bitiş tarihi</span>
+                    <input type="date" name="to" value="{{ $filters['to'] ?? '' }}"
+                           style="padding:7px 9px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;">
+                </label>
+
+                {{-- E6: Uploader filter --}}
+                <label style="font-size:12px;color:#64748b;display:flex;flex-direction:column;gap:3px;">
+                    <span>Yükleyen kişi</span>
+                    <select name="uploader" style="padding:7px 9px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;background:#fff;">
+                        <option value="">Herkes</option>
+                        @foreach(($uploaderList ?? collect()) as $uu)
+                            <option value="{{ $uu->id }}" @selected((int)($filters['uploader'] ?? 0) === (int)$uu->id)>{{ $uu->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+
+                {{-- E6: Size range --}}
+                <label style="font-size:12px;color:#64748b;display:flex;flex-direction:column;gap:3px;">
+                    <span>Min boyut (MB)</span>
+                    <input type="number" name="size_min_mb" min="0" step="0.1"
+                           value="{{ !empty($filters['size_min']) ? round($filters['size_min']/1024/1024, 2) : '' }}"
+                           style="padding:7px 9px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;">
+                </label>
+                <label style="font-size:12px;color:#64748b;display:flex;flex-direction:column;gap:3px;">
+                    <span>Max boyut (MB)</span>
+                    <input type="number" name="size_max_mb" min="0" step="0.1"
+                           value="{{ !empty($filters['size_max']) ? round($filters['size_max']/1024/1024, 2) : '' }}"
+                           style="padding:7px 9px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;">
+                </label>
+
                 @if(!empty($filters['tag']))
-                    <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#e0e7ff;color:#3730a3;border-radius:99px;font-size:11px;font-weight:600;">
+                    <span style="grid-column:span 2;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#e0e7ff;color:#3730a3;border-radius:99px;font-size:11px;font-weight:600;align-self:end">
                         Etiket: {{ $filters['tag'] }}
                         <input type="hidden" name="tag" value="{{ $filters['tag'] }}">
                     </span>
@@ -162,7 +223,13 @@
                 @endif
             </a>
             <div style="height:1px;background:#f1f5f9;margin:8px 0;"></div>
-            @include('shared.digital-assets._folder_tree', ['nodes' => $tree, 'level' => 0, 'currentId' => $currentFolder?->id])
+            @include('shared.digital-assets._folder_tree', [
+                'nodes'             => $tree,
+                'level'             => 0,
+                'currentId'         => $currentFolder?->id,
+                'routePrefix'       => $routePrefix,
+                'favoriteFolderIds' => $favoriteFolderIds ?? [],
+            ])
         </aside>
 
         {{-- Sağ panel: dosya grid/list --}}
@@ -585,6 +652,116 @@
     const csrfMeta = document.querySelector('meta[name="csrf-token"]');
     const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
 
+    // ── E4 — Folder star toggle (aynı pattern) ─────────────────
+    document.querySelectorAll('.dam-folder-star').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            const url = btn.getAttribute('data-toggle-url');
+            if (!url || btn.dataset.loading === '1') return;
+            btn.dataset.loading = '1';
+            btn.style.opacity = '0.5';
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin',
+            })
+            .then(function(r){ return r.ok ? r.json() : Promise.reject(r); })
+            .then(function(data){
+                const fav = !!data.favorited;
+                btn.textContent = fav ? '⭐' : '☆';
+                btn.style.color = fav ? '#f59e0b' : 'var(--text-muted, #94a3b8)';
+                btn.setAttribute('title', fav ? 'Yıldızı kaldır' : 'Yıldızla');
+            })
+            .catch(function(){ btn.style.color = '#dc2626'; setTimeout(() => { btn.style.color = 'var(--text-muted, #94a3b8)'; }, 1500); })
+            .finally(function(){ btn.dataset.loading = '0'; btn.style.opacity = '1'; });
+        });
+    });
+
+    // ── E1 — Klasör rename (prompt, submit via hidden form) ────
+    const folderRenameBtn = document.getElementById('damFolderRenameBtn');
+    if (folderRenameBtn) {
+        folderRenameBtn.addEventListener('click', function(){
+            const oldName = folderRenameBtn.getAttribute('data-folder-name') || '';
+            const newName = window.prompt('Yeni klasör adı:', oldName);
+            if (newName === null || newName.trim() === '' || newName.trim() === oldName) return;
+            const url = folderRenameBtn.getAttribute('data-update-url');
+            const f = document.createElement('form');
+            f.method = 'POST';
+            f.action = url;
+            f.innerHTML = '<input type="hidden" name="_token" value="' + csrfToken + '">' +
+                          '<input type="hidden" name="_method" value="PUT">' +
+                          '<input type="hidden" name="name" value="' + newName.trim().replace(/"/g, '&quot;') + '">';
+            document.body.appendChild(f);
+            f.submit();
+        });
+    }
+
+    // ── E2 — Klasör taşıma (select ile parent seç) ──────────────
+    const folderMoveBtn = document.getElementById('damFolderMoveBtn');
+    if (folderMoveBtn) {
+        folderMoveBtn.addEventListener('click', function(){
+            const url = folderMoveBtn.getAttribute('data-move-url');
+            const selfId = parseInt(folderMoveBtn.getAttribute('data-folder-id'), 10);
+            openFolderPicker('Klasörü taşımak istediğiniz hedef klasörü seçin', selfId, function(targetId){
+                const f = document.createElement('form');
+                f.method = 'POST';
+                f.action = url;
+                f.innerHTML = '<input type="hidden" name="_token" value="' + csrfToken + '">' +
+                              '<input type="hidden" name="parent_id" value="' + (targetId || '') + '">';
+                document.body.appendChild(f);
+                f.submit();
+            });
+        });
+    }
+
+    // ── E3 — Dosya taşıma (select ile folder seç) ──────────────
+    document.querySelectorAll('.dam-move-btn').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            const url = btn.getAttribute('data-move-url');
+            const name = btn.getAttribute('data-asset-name') || 'dosya';
+            openFolderPicker('"' + name + '" dosyasını hangi klasöre taşıyalım?', null, function(targetId){
+                const f = document.createElement('form');
+                f.method = 'POST';
+                f.action = url;
+                f.innerHTML = '<input type="hidden" name="_token" value="' + csrfToken + '">' +
+                              '<input type="hidden" name="folder_id" value="' + (targetId || '') + '">';
+                document.body.appendChild(f);
+                f.submit();
+            });
+        });
+    });
+
+    // ── Folder picker (basit prompt; gelişmiş modal yerine flat listing) ──
+    // Klasörleri sidebar'dan dinamik çekip basit bir seçim alert'i gösterir
+    function openFolderPicker(title, excludeFolderId, cb) {
+        const folders = [];
+        document.querySelectorAll('.dam-folder-star').forEach(function(fb){
+            const fid = parseInt(fb.getAttribute('data-folder-id'), 10);
+            if (fid === excludeFolderId) return;
+            const link = fb.previousElementSibling;
+            const fname = link ? link.textContent.trim().replace(/[★🔒]/g, '').trim() : '#' + fid;
+            folders.push({ id: fid, name: fname });
+        });
+        if (folders.length === 0) {
+            if (confirm(title + '\n\nKlasör yok — kök dizine taşımak ister misiniz?')) {
+                cb(null);
+            }
+            return;
+        }
+        let msg = title + '\n\n';
+        msg += '0 — 📂 Kök dizin (hiçbiri)\n';
+        folders.forEach(function(f, i){ msg += (i + 1) + ' — ' + f.name + '\n'; });
+        const pick = window.prompt(msg + '\nNumara girin:');
+        if (pick === null) return;
+        const n = parseInt(pick, 10);
+        if (isNaN(n) || n < 0 || n > folders.length) { alert('Geçersiz seçim.'); return; }
+        cb(n === 0 ? null : folders[n - 1].id);
+    }
+
+    // ── Asset fav toggle (mevcut, değişmedi) ─────────────────────
     document.querySelectorAll('.dam-fav-btn').forEach(function(btn){
         btn.addEventListener('click', function(e){
             e.preventDefault();

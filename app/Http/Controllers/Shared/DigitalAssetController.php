@@ -92,7 +92,13 @@ class DigitalAssetController extends Controller
             ? $request->query('view')
             : 'grid';
 
-        // Filtreler (tag, search q, category, date range)
+        // Filtreler (tag, search q, category, date range, uploader, size range) — E6 gelişmiş arama
+        // size_min_mb/size_max_mb UI'dan MB olarak gelir, bytes'a çevrilir
+        $sizeMinMb = (float) $request->query('size_min_mb', 0);
+        $sizeMaxMb = (float) $request->query('size_max_mb', 0);
+        $sizeMinBytes = $sizeMinMb > 0 ? (int) ($sizeMinMb * 1024 * 1024) : 0;
+        $sizeMaxBytes = $sizeMaxMb > 0 ? (int) ($sizeMaxMb * 1024 * 1024) : 0;
+
         $filters = [
             'q'        => trim((string) $request->query('q', '')),
             'tag'      => trim((string) $request->query('tag', '')),
@@ -100,6 +106,9 @@ class DigitalAssetController extends Controller
                             ? $request->query('category') : '',
             'from'     => $request->query('from', ''),
             'to'       => $request->query('to', ''),
+            'uploader' => (int) $request->query('uploader', 0) ?: '',
+            'size_min' => $sizeMinBytes ?: '',
+            'size_max' => $sizeMaxBytes ?: '',
         ];
         $hasFilters = array_filter($filters) !== [];
 
@@ -153,6 +162,19 @@ class DigitalAssetController extends Controller
             $query->whereDate('created_at', '<=', $filters['to']);
         }
 
+        // E6 — Uploader filtresi (yükleyen user id)
+        if (!empty($filters['uploader'])) {
+            $query->where('created_by', (int) $filters['uploader']);
+        }
+
+        // E6 — Boyut filtresi (bytes)
+        if (!empty($filters['size_min'])) {
+            $query->where('size_bytes', '>=', (int) $filters['size_min']);
+        }
+        if (!empty($filters['size_max'])) {
+            $query->where('size_bytes', '<=', (int) $filters['size_max']);
+        }
+
         // ── Sıralama ───────────────────────────────────────────────────────
         // Desteklenen kolonlar; bilinmeyen değer gelirse created_at'a düşer.
         $allowedSorts = [
@@ -184,27 +206,39 @@ class DigitalAssetController extends Controller
         );
 
         // ── Kullanıcının yıldızlı varlıkları + sayı ────────────────────────
-        $favoriteIds   = $user->favoriteAssets()->pluck('digital_assets.id')->all();
-        $favoriteCount = count($favoriteIds);
+        $favoriteIds         = $user->favoriteAssets()->pluck('digital_assets.id')->all();
+        $favoriteCount       = count($favoriteIds);
+
+        // E4 — Yıldızlı klasör ID'leri
+        $favoriteFolderIds   = $user->favoriteFolders()->pluck('digital_asset_folders.id')->all();
+
+        // E6 — Advanced search için uploader listesi (aynı company'deki dosya yükleyenler)
+        $uploaderList = User::query()
+            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->whereIn('id', DigitalAsset::query()->distinct()->pluck('created_by')->filter())
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
         return view('shared.digital-assets.index', [
-            'layout'        => $layout,
-            'portal'        => $portal,
-            'readOnly'      => $readOnly,
-            'tree'          => $tree,
-            'currentFolder' => $current,
-            'breadcrumb'    => $breadcrumb,
-            'assets'        => $assets,
-            'viewMode'      => $viewMode,
-            'filters'       => $filters,
-            'hasFilters'    => $hasFilters,
-            'popularTags'   => $popularTags,
-            'favoriteIds'   => $favoriteIds,
-            'favoriteCount' => $favoriteCount,
-            'onlyFavorites' => $onlyFavorites,
-            'sortKey'       => $sortKey,
-            'sortDir'       => $sortDir,
-            'routePrefix'   => $this->routePrefix($portal),
+            'layout'            => $layout,
+            'portal'            => $portal,
+            'readOnly'          => $readOnly,
+            'tree'              => $tree,
+            'currentFolder'     => $current,
+            'breadcrumb'        => $breadcrumb,
+            'assets'            => $assets,
+            'viewMode'          => $viewMode,
+            'filters'           => $filters,
+            'hasFilters'        => $hasFilters,
+            'popularTags'       => $popularTags,
+            'favoriteIds'       => $favoriteIds,
+            'favoriteCount'     => $favoriteCount,
+            'favoriteFolderIds' => $favoriteFolderIds,
+            'uploaderList'      => $uploaderList,
+            'onlyFavorites'     => $onlyFavorites,
+            'sortKey'           => $sortKey,
+            'sortDir'           => $sortDir,
+            'routePrefix'       => $this->routePrefix($portal),
         ]);
     }
 
@@ -410,6 +444,76 @@ class DigitalAssetController extends Controller
         $model = DigitalAssetFolder::query()->findOrFail($folder);
         $this->folders->delete($model);
         return back()->with('status', 'Klasör silindi.');
+    }
+
+    /**
+     * E2 — Klasörü başka parent'a taşı. null = root'a.
+     */
+    public function folderMove(Request $request, int $folder): RedirectResponse
+    {
+        $request->validate([
+            'parent_id' => ['nullable', 'integer', 'exists:digital_asset_folders,id'],
+        ]);
+
+        $model = DigitalAssetFolder::query()->findOrFail($folder);
+
+        try {
+            $this->folders->move($model, $request->integer('parent_id') ?: null);
+            return back()->with('status', 'Klasör taşındı.');
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['folder' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * E3 — Dosyayı başka klasöre taşı. null folder_id = root.
+     */
+    public function assetMove(Request $request, int $asset): RedirectResponse
+    {
+        $request->validate([
+            'folder_id' => ['nullable', 'integer', 'exists:digital_asset_folders,id'],
+        ]);
+
+        $model  = DigitalAsset::query()->findOrFail($asset);
+        $target = $request->integer('folder_id') ?: null;
+
+        // Hedef klasör rol erişim kontrolü
+        if ($target) {
+            $targetFolder = DigitalAssetFolder::query()->findOrFail($target);
+            if (!$targetFolder->isAccessibleByRole((string) $this->user()->role)) {
+                abort(403, 'Hedef klasöre erişiminiz yok.');
+            }
+        }
+
+        $this->assets->move($model, $target);
+        return back()->with('status', 'Dosya taşındı.');
+    }
+
+    /**
+     * E4 — Klasör yıldızla / yıldızı kaldır (toggle).
+     */
+    public function folderToggleFavorite(int $folder): \Illuminate\Http\JsonResponse
+    {
+        $user  = $this->user();
+        $model = DigitalAssetFolder::query()->findOrFail($folder);
+
+        if (!$model->isAccessibleByRole((string) $user->role)) {
+            abort(403, 'Bu klasöre erişiminiz yok.');
+        }
+
+        $exists = $user->favoriteFolders()->where('folder_id', $model->id)->exists();
+        if ($exists) {
+            $user->favoriteFolders()->detach($model->id);
+            $favorited = false;
+        } else {
+            $user->favoriteFolders()->attach($model->id);
+            $favorited = true;
+        }
+
+        return response()->json([
+            'favorited' => $favorited,
+            'count'     => $user->favoriteFolders()->count(),
+        ]);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────

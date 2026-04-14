@@ -136,6 +136,21 @@ class AppServiceProvider extends ServiceProvider
                     \Illuminate\Support\Facades\Route::delete('/folders/{folder}', [$ctrl, 'folderDestroy'])
                         ->middleware('permission:dam.folder.manage')
                         ->name('folder.destroy');
+
+                    // E2 — Klasör taşıma
+                    \Illuminate\Support\Facades\Route::post('/folders/{folder}/move', [$ctrl, 'folderMove'])
+                        ->middleware('permission:dam.folder.manage')
+                        ->name('folder.move');
+
+                    // E3 — Dosya taşıma
+                    \Illuminate\Support\Facades\Route::post('/{asset}/move', [$ctrl, 'assetMove'])
+                        ->middleware('permission:dam.update')
+                        ->name('move');
+
+                    // E4 — Klasör yıldızlama toggle
+                    \Illuminate\Support\Facades\Route::post('/folders/{folder}/favorite', [$ctrl, 'folderToggleFavorite'])
+                        ->middleware('throttle:120,1')
+                        ->name('folder.favorite.toggle');
                 });
         });
 

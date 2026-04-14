@@ -98,6 +98,71 @@ class DigitalAssetFolderService
         $folder->delete();
     }
 
+    /**
+     * Klasörü başka bir parent'a taşı. path/depth yeniden hesaplanır ve descendants cascade güncellenir.
+     * null newParentId → root'a taşı.
+     */
+    public function move(DigitalAssetFolder $folder, ?int $newParentId): DigitalAssetFolder
+    {
+        if ($folder->is_system) {
+            throw new RuntimeException('Sistem klasörü taşınamaz.');
+        }
+
+        // Aynı yere taşıma no-op
+        if ((int) ($folder->parent_id ?? 0) === (int) ($newParentId ?? 0)) {
+            return $folder;
+        }
+
+        $newParent = null;
+        if ($newParentId) {
+            $newParent = DigitalAssetFolder::query()->findOrFail($newParentId);
+
+            // Kendi kendini veya descendant'ına taşıma yasak — cycle engellenir
+            if ($newParent->id === $folder->id) {
+                throw new RuntimeException('Klasör kendi içine taşınamaz.');
+            }
+            if (str_starts_with((string) $newParent->path, $folder->path . '/')) {
+                throw new RuntimeException('Klasör alt klasörüne taşınamaz.');
+            }
+        }
+
+        $newDepth = $newParent ? ((int) $newParent->depth + 1) : 0;
+
+        // Descendants derinliğini hesaba kat — en derin child + move = max_depth'i aşmasın
+        $maxDescendantDepth = (int) DigitalAssetFolder::query()
+            ->where('path', 'like', $folder->path . '/%')
+            ->max('depth');
+        $currentMaxRelative = $maxDescendantDepth > 0 ? ($maxDescendantDepth - (int) $folder->depth) : 0;
+        if (($newDepth + $currentMaxRelative) >= self::MAX_DEPTH) {
+            throw new RuntimeException('Hedef konum çok derin, maksimum seviye aşılır (' . self::MAX_DEPTH . ').');
+        }
+
+        // Yeni slug'ı parent bağlamında unique yap (aynı isim olabilir başka yerde)
+        $newSlug = $this->uniqueSlug($folder->name, $newParentId, $folder->id);
+        $oldPath = $folder->path;
+        $newPath = $newParent ? rtrim($newParent->path, '/') . '/' . $newSlug : '/' . $newSlug;
+        $depthDiff = $newDepth - (int) $folder->depth;
+
+        $folder->update([
+            'parent_id' => $newParentId,
+            'slug'      => $newSlug,
+            'path'      => $newPath,
+            'depth'     => $newDepth,
+        ]);
+
+        // Descendant path ve depth güncelleme
+        DigitalAssetFolder::query()
+            ->where('path', 'like', $oldPath . '/%')
+            ->get()
+            ->each(function (DigitalAssetFolder $child) use ($oldPath, $newPath, $depthDiff) {
+                $child->path  = $newPath . substr($child->path, strlen($oldPath));
+                $child->depth = (int) $child->depth + $depthDiff;
+                $child->save();
+            });
+
+        return $folder->refresh();
+    }
+
     public function tree(): Collection
     {
         return $this->treeForRole(null);

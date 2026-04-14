@@ -300,6 +300,16 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         )->withTimestamps();
     }
 
+    public function favoriteFolders(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(
+            \App\Models\DigitalAssetFolder::class,
+            'digital_asset_folder_favorites',
+            'user_id',
+            'folder_id'
+        )->withTimestamps();
+    }
+
     /** @var array<string>|null Request-scope memoization cache */
     private ?array $_permissionCodesCache = null;
 
