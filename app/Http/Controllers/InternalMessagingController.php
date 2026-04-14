@@ -167,6 +167,9 @@ class InternalMessagingController extends Controller
         $user    = $request->user();
         $conv    = $this->resolveConversation($convId, (int) $user->id);
 
+        // Arşivlenmiş konuşmada mesaj gönderilemez
+        abort_if($conv->isArchived(), 403, 'Bu konuşma arşivlenmiş. Yeni mesaj gönderilemez.');
+
         // Duyurularda yalnızca admin mesaj gönderebilir
         if ($conv->type === 'announcement') {
             $part = $conv->participants()->where('user_id', $user->id)->first();
@@ -265,13 +268,13 @@ class InternalMessagingController extends Controller
     {
         $user = $request->user();
         $msg  = Message::query()->findOrFail($msgId);
-
-        // Kendi mesajı veya manager/system_admin
-        $canDelete = (int) $msg->sender_id === (int) $user->id
-            || in_array((string) $user->role, [User::ROLE_MANAGER, User::ROLE_SYSTEM_ADMIN], true);
-        abort_if(!$canDelete, 403);
-
         $conv = $this->resolveConversation((int) $msg->conversation_id, (int) $user->id);
+
+        // Kendi mesajı herkes silebilir; başkasının mesajını sadece grup admin + manager
+        $isOwn = (int) $msg->sender_id === (int) $user->id;
+        $canDeleteAny = $this->service->canPerform($conv, $user, 'delete_any_message');
+        abort_if(!$isOwn && !$canDeleteAny, 403, 'Başkasının mesajını silme yetkiniz yok.');
+
         $msg->delete();
 
         if ($request->expectsJson()) {
@@ -281,12 +284,13 @@ class InternalMessagingController extends Controller
         return redirect()->route('im.index', ['tab' => 'internal', 'conv' => $conv->id]);
     }
 
-    /** Gruba üye ekle */
+    /** Gruba üye ekle — sadece grup admin + manager */
     public function groupAddMember(Request $request, int $convId)
     {
         $user = $request->user();
         $conv = $this->resolveConversation($convId, (int) $user->id);
         abort_if(!in_array($conv->type, ['group','room'], true), 403, 'Yalnızca grup veya odalara üye eklenebilir.');
+        abort_if(!$this->service->canPerform($conv, $user, 'add_member'), 403, 'Üye ekleme yetkiniz yok.');
 
         $data = $request->validate([
             'user_id' => ['required', 'integer', 'exists:users,id'],
@@ -533,21 +537,81 @@ class InternalMessagingController extends Controller
         return redirect()->route('im.index', ['tab' => 'internal', 'conv' => $msg->conversation_id]);
     }
 
-    /** Konuşma arşivle / arşivden çıkar (toggle) */
+    /** Konuşma arşivle — sadece grup admin + manager */
     public function archive(Request $request, int $convId)
     {
         $user = $request->user();
         $conv = $this->resolveConversation($convId, (int) $user->id);
 
-        $conv->forceFill(['is_archived' => !$conv->is_archived])->save();
+        abort_if(!$this->service->canPerform($conv, $user, 'archive'), 403, 'Arşivleme yetkiniz yok.');
 
-        $label = $conv->is_archived ? 'Konuşma arşivlendi.' : 'Konuşma arşivden çıkarıldı.';
+        $this->service->archiveConversation($conv, (int) $user->id);
 
         if ($request->expectsJson()) {
-            return response()->json(['ok' => true, 'is_archived' => $conv->is_archived]);
+            return response()->json(['ok' => true, 'is_archived' => true]);
         }
 
-        return redirect()->route('im.index')->with('status', $label);
+        return redirect()->route('im.index')->with('status', 'Konuşma arşivlendi.');
+    }
+
+    /** Arşivden çıkar — sadece grup admin + manager */
+    public function unarchive(Request $request, int $convId)
+    {
+        $user = $request->user();
+        $conv = $this->resolveConversation($convId, (int) $user->id);
+
+        abort_if(!$this->service->canPerform($conv, $user, 'unarchive'), 403, 'Arşivden çıkarma yetkiniz yok.');
+
+        $this->service->unarchiveConversation($conv, (int) $user->id);
+
+        return redirect()->route('im.index', ['tab' => 'internal', 'conv' => $conv->id])
+            ->with('status', 'Konuşma arşivden çıkarıldı.');
+    }
+
+    /** Konuşmayı kalıcı sil — sadece manager/system_admin */
+    public function destroy(Request $request, int $convId)
+    {
+        $user = $request->user();
+        $conv = $this->resolveConversation($convId, (int) $user->id);
+
+        abort_if(!$this->service->canPerform($conv, $user, 'destroy'), 403, 'Sadece yöneticiler konuşma silebilir.');
+
+        $this->service->destroyConversation($conv);
+
+        return redirect()->route('im.index')->with('status', 'Konuşma kalıcı olarak silindi.');
+    }
+
+    /** Member'ı admin'e yükselt — mevcut grup admin + manager */
+    public function promoteMember(Request $request, int $convId, int $targetUserId)
+    {
+        $user = $request->user();
+        $conv = $this->resolveConversation($convId, (int) $user->id);
+
+        abort_if(!$this->service->canPerform($conv, $user, 'promote_member'), 403, 'Yetki ataması yapamazsınız.');
+        abort_if(!in_array($conv->type, ['group','room'], true), 403, 'Yalnızca grup/odada admin atanabilir.');
+        abort_if(!$conv->isParticipant($targetUserId), 404, 'Kullanıcı bu grupta değil.');
+
+        $this->service->promoteToAdmin($conv, $targetUserId, (int) $user->id);
+
+        return redirect()->route('im.index', ['tab' => 'internal', 'conv' => $conv->id])
+            ->with('status', 'Admin yetkisi verildi.');
+    }
+
+    /** Admin yetkisini kaldır — mevcut grup admin + manager */
+    public function demoteMember(Request $request, int $convId, int $targetUserId)
+    {
+        $user = $request->user();
+        $conv = $this->resolveConversation($convId, (int) $user->id);
+
+        abort_if(!$this->service->canPerform($conv, $user, 'promote_member'), 403, 'Yetki değişikliği yapamazsınız.');
+
+        $ok = $this->service->demoteFromAdmin($conv, $targetUserId, (int) $user->id);
+        if (!$ok) {
+            return back()->withErrors(['member' => 'Son admin demote edilemez veya kullanıcı admin değil.']);
+        }
+
+        return redirect()->route('im.index', ['tab' => 'internal', 'conv' => $conv->id])
+            ->with('status', 'Admin yetkisi kaldırıldı.');
     }
 
     // ── Katman 2: Mesaj Tepkileri ──────────────────────────────────────────────

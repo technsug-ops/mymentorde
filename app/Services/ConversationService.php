@@ -236,4 +236,157 @@ class ConversationService
             'created_at'      => now(),
         ]);
     }
+
+    // ─── Slack-style management methods ──────────────────────────────────────
+
+    /**
+     * Kullanıcının conversation üzerindeki yetki seviyesini döner.
+     * none: üye değil | member: normal üye | admin: grup admin | manager: workspace admin
+     */
+    public function permissionLevel(Conversation $conv, User $user): string
+    {
+        if (in_array((string) $user->role, [User::ROLE_MANAGER, User::ROLE_SYSTEM_ADMIN], true)) {
+            return 'manager';
+        }
+
+        $part = $conv->participants()->where('user_id', $user->id)->first();
+        if (!$part) {
+            return 'none';
+        }
+
+        return $part->role === 'admin' ? 'admin' : 'member';
+    }
+
+    /**
+     * Kullanıcı bu conversation'da belirli bir aksiyona yetkili mi?
+     * Actions: send, delete_any_message, add_member, remove_member, promote, archive, destroy, rename
+     */
+    public function canPerform(Conversation $conv, User $user, string $action): bool
+    {
+        $level = $this->permissionLevel($conv, $user);
+
+        if ($level === 'none') {
+            return false;
+        }
+
+        // Manager tüm aksiyonlara yetkili
+        if ($level === 'manager') {
+            return true;
+        }
+
+        return match ($action) {
+            // Herkesin yapabildiği (member + admin)
+            'send', 'leave'             => !$conv->isArchived(),
+
+            // Sadece grup admin + manager
+            'delete_any_message',
+            'add_member',
+            'remove_member',
+            'promote_member',
+            'archive',
+            'unarchive',
+            'rename'                    => $level === 'admin',
+
+            // Sadece manager (yukarıdaki return true ile gelen)
+            'destroy'                   => false,
+
+            default                     => false,
+        };
+    }
+
+    /**
+     * Conversation'ı arşivle (read-only + hidden).
+     * Archive sonrası yeni mesaj gönderilemez, listeden gizlenir.
+     */
+    public function archiveConversation(Conversation $conv, int $actorId): void
+    {
+        if ($conv->isArchived()) {
+            return; // zaten arşivli
+        }
+
+        $conv->forceFill([
+            'is_archived'         => true,
+            'archived_at'         => now(),
+            'archived_by_user_id' => $actorId,
+        ])->save();
+
+        $actor = User::query()->find($actorId, ['name']);
+        $this->addSystemMessage($conv, "📦 {$actor?->name} bu konuşmayı arşivledi. Yeni mesaj gönderilemez.");
+    }
+
+    /**
+     * Arşivden çıkar — tekrar aktif hale getir.
+     */
+    public function unarchiveConversation(Conversation $conv, int $actorId): void
+    {
+        if (!$conv->isArchived()) {
+            return;
+        }
+
+        $conv->forceFill([
+            'is_archived'         => false,
+            'archived_at'         => null,
+            'archived_by_user_id' => null,
+        ])->save();
+
+        $actor = User::query()->find($actorId, ['name']);
+        $this->addSystemMessage($conv, "📤 {$actor?->name} konuşmayı arşivden çıkardı.");
+    }
+
+    /**
+     * Conversation'ı kalıcı sil (soft delete). Mesajlar cascade korunur (conversation_id ON DELETE CASCADE
+     * aktiftir ama soft delete mesajları etkilemez). Sadece manager çağırmalı.
+     */
+    public function destroyConversation(Conversation $conv): void
+    {
+        // SoftDeletes — sadece deleted_at = now() set eder, geri alınabilir (trashed() ile)
+        $conv->delete();
+    }
+
+    /**
+     * Bir member'ı admin'e yükselt. Mevcut admin çağırır.
+     */
+    public function promoteToAdmin(Conversation $conv, int $targetUserId, int $actorId): bool
+    {
+        $targetPart = $conv->participants()->where('user_id', $targetUserId)->first();
+        if (!$targetPart) {
+            return false;
+        }
+        if ($targetPart->role === 'admin') {
+            return true; // zaten admin
+        }
+
+        $targetPart->forceFill(['role' => 'admin'])->save();
+
+        $actor  = User::query()->find($actorId, ['name']);
+        $target = User::query()->find($targetUserId, ['name']);
+        $this->addSystemMessage($conv, "⭐ {$target?->name} admin olarak yetkilendirildi ({$actor?->name}).");
+
+        return true;
+    }
+
+    /**
+     * Admin'i member'a demote et — son admin kontrolü.
+     */
+    public function demoteFromAdmin(Conversation $conv, int $targetUserId, int $actorId): bool
+    {
+        $targetPart = $conv->participants()->where('user_id', $targetUserId)->first();
+        if (!$targetPart || $targetPart->role !== 'admin') {
+            return false;
+        }
+
+        // Son admin demote edilemez
+        $adminCount = $conv->participants()->where('role', 'admin')->count();
+        if ($adminCount <= 1) {
+            return false;
+        }
+
+        $targetPart->forceFill(['role' => 'member'])->save();
+
+        $actor  = User::query()->find($actorId, ['name']);
+        $target = User::query()->find($targetUserId, ['name']);
+        $this->addSystemMessage($conv, "👤 {$target?->name} artık normal üye ({$actor?->name}).");
+
+        return true;
+    }
 }

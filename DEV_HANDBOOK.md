@@ -407,6 +407,60 @@ Her portal layout'u şunu içerir:
 
 Non-blocking yükleme + FOUC yok. Tüm 5 portal layout'unda uygulandı.
 
+### IM (Internal Messaging) — Slack-tarzı Yönetim Modeli
+
+Conversation'lar için 3 seviyeli permission hiyerarşisi:
+
+```
+Manager (workspace admin)
+  └── Channel Admin (creator + promoted members)
+        └── Member
+```
+
+**Permission matrisi:**
+
+| Aksiyon | Member | Channel Admin | Manager |
+|---------|:------:|:-------------:|:-------:|
+| Mesaj gönder (non-archived) | ✓ | ✓ | ✓ |
+| Kendi mesajını sil | ✓ | ✓ | ✓ |
+| Başkasının mesajını sil | ✗ | ✓ | ✓ |
+| Üye ekle | ✗ | ✓ | ✓ |
+| Üye çıkar (kick) | ✗ | ✓ | ✓ |
+| Kendisi ayrıl (leave) | ✓ | ✓ | ✓ |
+| Member → Admin promote | ✗ | ✓ | ✓ |
+| Admin → Member demote | ✗ | ✓ | ✓ |
+| Archive (read-only + hidden) | ✗ | ✓ | ✓ |
+| Unarchive | ✗ | ✓ | ✓ |
+| **Destroy** (permanent delete) | ✗ | ✗ | **✓** |
+
+**Kod yerleri:**
+- Service: `ConversationService::permissionLevel()`, `canPerform()`, `archiveConversation()`, `destroyConversation()`, `promoteToAdmin()`, `demoteFromAdmin()`
+- Controller: `InternalMessagingController` — `archive`, `unarchive`, `destroy`, `promoteMember`, `demoteMember`
+- Routes: `POST /im/conversations/{id}/archive|unarchive|destroy`, `/members/{uid}/promote|demote`
+- UI: `resources/views/hub/_partials/internal-conv-panel.blade.php` — collapsible settings panel (⚙️ button header'da, sadece group/room için)
+
+**Archive davranışı:**
+- `is_archived=true` + `archived_at=now()` + `archived_by_user_id=userId`
+- `send` controller'ı `abort(403)` eder (yeni mesaj engellenir)
+- `UnifiedMessagingHubController::loadInternalData` → `Conversation::notArchived()` scope → liste gizler
+- Unarchive geri aktif hale getirir, notArchived scope yeniden dahil eder
+
+**Destroy (permanent delete):**
+- `Conversation` modeline `SoftDeletes` trait eklendi — `deleted_at` kolonu
+- `destroyConversation()` sadece soft delete yapar (trashed() ile geri alınabilir)
+- Manager/system_admin override ile çağrılır
+- Messages tablosu `ON DELETE CASCADE` FK var, ama soft delete cascade etmez → mesajlar korunur
+- UI'de sadece manager'a "Kalıcı Sil" butonu görünür
+
+**Son admin koruması:**
+- `demoteFromAdmin()` admin sayısı 1 iken false döner
+- `groupRemoveMember` içinde aynı kontrol (zaten vardı)
+- Kendi kendini çıkarma senaryosunda bu kural `isSelf` flag ile bypass oluyor — TODO: self-leave da son admin'se engelle
+
+**HTML5 validation:**
+- `hubGroupTitle` ve `hubRoomTitle` input'larında `required` + `minlength="2"` var
+- Boş submit browser tarafında engellenir, server'a geçersiz istek gitmez
+
 ---
 
 ## 6. Temel Servisler

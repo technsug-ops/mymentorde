@@ -6,9 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Conversation extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'conversations';
 
     protected $fillable = [
@@ -19,6 +22,8 @@ class Conversation extends Model
         'context_type',
         'context_id',
         'is_archived',
+        'archived_at',
+        'archived_by_user_id',
         'last_message_at',
         'last_message_preview',
     ];
@@ -27,8 +32,15 @@ class Conversation extends Model
     {
         return [
             'is_archived'     => 'boolean',
+            'archived_at'     => 'datetime',
             'last_message_at' => 'datetime',
         ];
+    }
+
+    /** Archive kontrolü: archived_at NULL değilse archived */
+    public function isArchived(): bool
+    {
+        return $this->archived_at !== null || (bool) $this->is_archived;
     }
 
     public function creator(): BelongsTo

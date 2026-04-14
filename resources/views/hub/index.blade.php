@@ -243,11 +243,20 @@ window.__hub = {
                 </div>
             </div>
             {{-- Filter pills (Slack-style) — tek listede tip filtresi --}}
-            <div class="hub-conv-filters" style="display:flex;gap:5px;padding:4px 11px 8px;flex-wrap:wrap">
-                <button type="button" class="hub-filter-pill active" data-conv-filter="all"    style="padding:4px 11px;font-size:11px;border-radius:999px;border:1px solid var(--u-line);background:var(--u-brand,#4577c4);color:#fff;cursor:pointer;font-weight:600">Tümü</button>
-                <button type="button" class="hub-filter-pill"        data-conv-filter="direct" style="padding:4px 11px;font-size:11px;border-radius:999px;border:1px solid var(--u-line);background:#fff;color:var(--u-text);cursor:pointer">💬 DM</button>
-                <button type="button" class="hub-filter-pill"        data-conv-filter="group"  style="padding:4px 11px;font-size:11px;border-radius:999px;border:1px solid var(--u-line);background:#fff;color:var(--u-text);cursor:pointer">👥 Grup</button>
-                <button type="button" class="hub-filter-pill"        data-conv-filter="room"   style="padding:4px 11px;font-size:11px;border-radius:999px;border:1px solid var(--u-line);background:#fff;color:var(--u-text);cursor:pointer">🏠 Oda</button>
+            @php
+                $showArchived = $internalData['showArchived'] ?? false;
+                $archivedCount = $internalData['archivedCount'] ?? 0;
+            @endphp
+            <div class="hub-conv-filters" style="display:flex;gap:5px;padding:4px 11px 8px;flex-wrap:wrap;align-items:center">
+                @if($showArchived)
+                    <a href="/im?tab=internal" class="hub-filter-pill" style="padding:4px 11px;font-size:11px;border-radius:999px;border:1px solid var(--u-line);background:#fff;color:var(--u-text);cursor:pointer;text-decoration:none">← Aktiflere Dön</a>
+                    <span style="font-size:10px;color:var(--u-muted);margin-left:4px">📦 {{ $internalData['conversations']->count() }} arşivli konuşma</span>
+                @else
+                    <button type="button" class="hub-filter-pill active" data-conv-filter="all"    style="padding:4px 11px;font-size:11px;border-radius:999px;border:1px solid var(--u-line);background:var(--u-brand,#4577c4);color:#fff;cursor:pointer;font-weight:600">Tümü</button>
+                    <button type="button" class="hub-filter-pill"        data-conv-filter="direct" style="padding:4px 11px;font-size:11px;border-radius:999px;border:1px solid var(--u-line);background:#fff;color:var(--u-text);cursor:pointer">💬 DM</button>
+                    <button type="button" class="hub-filter-pill"        data-conv-filter="group"  style="padding:4px 11px;font-size:11px;border-radius:999px;border:1px solid var(--u-line);background:#fff;color:var(--u-text);cursor:pointer">👥 Grup</button>
+                    <button type="button" class="hub-filter-pill"        data-conv-filter="room"   style="padding:4px 11px;font-size:11px;border-radius:999px;border:1px solid var(--u-line);background:#fff;color:var(--u-text);cursor:pointer">🏠 Oda</button>
+                @endif
             </div>
             <div class="hub-item-list" id="hubInternalList">
                 @if($internalData && $internalData['conversations']->count())
@@ -287,6 +296,18 @@ window.__hub = {
                         <a href="#hubModalGroup" class="btn alt" style="font-size:11px;padding:5px 8px;text-decoration:none">👥 Grup Kur</a>
                         <a href="#hubModalRoom" class="btn" style="font-size:11px;padding:5px 8px;background:#e74c3c;color:#fff;border-color:#e74c3c;text-decoration:none">🏠 Oda Aç</a>
                     </div>
+                </div>
+                @endif
+
+                {{-- Arşivli konuşmalara erişim — sade, alt tarafta, dikkat çekmeyen link --}}
+                @if(!$showArchived && $archivedCount > 0)
+                <div style="padding:8px 12px 12px;border-top:1px solid var(--u-line);margin-top:4px">
+                    <a href="/im?tab=internal&archived=1"
+                       style="display:block;text-align:center;font-size:11px;color:var(--u-muted);text-decoration:none;padding:6px;border-radius:6px;transition:background .12s"
+                       onmouseover="this.style.background='#f1f5f9';this.style.color='var(--u-text)'"
+                       onmouseout="this.style.background='transparent';this.style.color='var(--u-muted)'">
+                        📦 {{ $archivedCount }} arşivli konuşma
+                    </a>
                 </div>
                 @endif
             </div>

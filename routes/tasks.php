@@ -111,6 +111,11 @@ Route::middleware(['company.context', 'auth', 'task.access'])->group(function ()
     Route::post('/im/conversations/{convId}/members/{targetUserId}/remove', [InternalMessagingController::class, 'groupRemoveMember'])->name('im.group.member.remove');
     Route::get('/im/conversations/{convId}/poll', [InternalMessagingController::class, 'poll'])->name('im.poll');
     Route::post('/im/conversations/{convId}/archive', [InternalMessagingController::class, 'archive'])->name('im.archive');
+    Route::post('/im/conversations/{convId}/unarchive', [InternalMessagingController::class, 'unarchive'])->name('im.unarchive');
+    Route::delete('/im/conversations/{convId}', [InternalMessagingController::class, 'destroy'])->name('im.destroy');
+    Route::post('/im/conversations/{convId}/destroy', [InternalMessagingController::class, 'destroy'])->name('im.destroy.post');
+    Route::post('/im/conversations/{convId}/members/{targetUserId}/promote', [InternalMessagingController::class, 'promoteMember'])->name('im.member.promote');
+    Route::post('/im/conversations/{convId}/members/{targetUserId}/demote', [InternalMessagingController::class, 'demoteMember'])->name('im.member.demote');
     Route::get('/im/unread-count', [InternalMessagingController::class, 'unreadCount'])->name('im.unread.count');
     Route::get('/im/search', [InternalMessagingController::class, 'search'])->name('im.search');
     Route::put('/im/messages/{msgId}', [InternalMessagingController::class, 'editMessage'])->name('im.message.edit');

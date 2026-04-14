@@ -175,15 +175,23 @@ class UnifiedMessagingHubController extends Controller
     private function loadInternalData(Request $request, User $user, int $companyId, bool $full): array
     {
         $selectedId = (int) ($request->query('conv') ?: 0);
+        $showArchived = (bool) $request->query('archived');
 
         if (!$full) {
-            return ['conversations' => collect(), 'selected' => null, 'messages' => collect(), 'dmableUsers' => collect(), 'unreadMap' => []];
+            return ['conversations' => collect(), 'selected' => null, 'messages' => collect(), 'dmableUsers' => collect(), 'unreadMap' => [], 'archivedCount' => 0, 'showArchived' => false];
         }
 
-        $conversations = Conversation::query()
+        $baseQuery = Conversation::query()
             ->forUser((int) $user->id)
-            ->notArchived()
-            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId));
+
+        // Archived count — UI'de "Arşivli Göster (N)" linki için
+        $archivedCount = (clone $baseQuery)->where('is_archived', true)->count();
+
+        // Ana liste: archived flag'e göre filtrele
+        $conversations = $baseQuery
+            ->when($showArchived, fn ($q) => $q->where('is_archived', true))
+            ->when(!$showArchived, fn ($q) => $q->where('is_archived', false))
             ->with(['participantUsers:id,name,role', 'participants' => fn ($q) => $q->where('user_id', $user->id)])
             ->orderByRaw('(SELECT is_pinned FROM conversation_participants WHERE conversation_id = conversations.id AND user_id = ? LIMIT 1) DESC', [(int) $user->id])
             ->orderByDesc('last_message_at')
@@ -221,6 +229,8 @@ class UnifiedMessagingHubController extends Controller
             'messages'      => $messages,
             'dmableUsers'   => $dmableUsers,
             'unreadMap'     => $this->buildUnreadMap($conversations, (int) $user->id),
+            'archivedCount' => $archivedCount,
+            'showArchived'  => $showArchived,
         ];
     }
 
