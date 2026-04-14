@@ -1,4 +1,10 @@
-@extends('layouts.staff')
+@php
+    $role = auth()->user()?->role;
+    $hrLayout = in_array($role, ['senior','mentor'])
+        ? 'senior.layouts.app'
+        : ($role === 'manager' ? 'manager.layouts.app' : 'layouts.staff');
+@endphp
+@extends($hrLayout)
 
 @section('title', 'Onboarding')
 @section('page_title', 'Onboarding Süreci')

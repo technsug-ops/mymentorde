@@ -13,6 +13,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    {{-- Chrome View Transitions API: sayfa geçişlerinde cross-fade, beyaz flash'ı engeller --}}
+    <meta name="view-transition" content="same-origin">
+    <style>
+        @view-transition { navigation: auto; }
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+            animation-duration: 180ms;
+            animation-timing-function: ease-out;
+        }
+        html, body, .app, .main, .content { background: var(--bg, #f1f5f9) !important; }
+    </style>
     <title>@yield('title', config('brand.name', 'MentorDE') . ' — Öğrenci Portalı')</title>
 
     {{-- Preconnect: CDN (twemoji, chart.js) + Tenor GIF --}}
@@ -21,6 +32,15 @@
 
     {{-- Premium Design System --}}
     <link id="mentorde-theme-css" rel="stylesheet" href="{{ Vite::asset('resources/css/premium.css') }}">
+    {{-- Vite app.css — preload + onload swap: FOUC olmadan non-blocking yükleme --}}
+    @php
+        $__headManifest = json_decode(@file_get_contents(public_path('build/manifest.json')) ?: '{}', true);
+        $__headAppCss = $__headManifest['resources/css/app.css']['file'] ?? null;
+    @endphp
+    @if($__headAppCss)
+    <link rel="preload" href="/build/{{ $__headAppCss }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/build/{{ $__headAppCss }}"></noscript>
+    @endif
 
     {{-- Guest portal accent (mavi) + backwards-compat bridge --}}
     <style>
@@ -409,13 +429,11 @@
     </div>
 </div>
 
-{{-- Alpine.js --}}
+{{-- Alpine.js — app.css zaten head'de yüklendi --}}
 @php
     $__manifest = json_decode(@file_get_contents(public_path('build/manifest.json')) ?: '{}', true);
     $__appJs  = $__manifest['resources/js/app.js']['file'] ?? null;
-    $__appCss = $__manifest['resources/css/app.css']['file'] ?? null;
 @endphp
-@if($__appCss)<link rel="stylesheet" href="/build/{{ $__appCss }}">@endif
 @if($__appJs)<script type="module" src="/build/{{ $__appJs }}"></script>@endif
 
 {{-- Theme + Toast + Dark Mode --}}

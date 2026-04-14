@@ -1,7 +1,8 @@
 @php
-    $taskLayout = in_array(auth()->user()?->role, ['senior','mentor'])
+    $role = auth()->user()?->role;
+    $taskLayout = in_array($role, ['senior','mentor'])
         ? 'senior.layouts.app'
-        : 'layouts.staff';
+        : ($role === 'manager' ? 'manager.layouts.app' : 'layouts.staff');
 @endphp
 @extends($taskLayout)
 

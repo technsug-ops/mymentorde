@@ -333,6 +333,80 @@ public function build(Request $request, GuestApplication $guest): array
 `GuestResolverService` — auth kullanıcısından `GuestApplication` modeline ulaşır.
 Senior portal'da: senior'ın atanmış guest'lerini filtreler.
 
+### Shared Layout Pattern (Role-Aware Dynamic Layouts)
+
+Bazı sayfalar (Görev Panosu, Ticket Merkezi, Mesaj Merkezi, HR özlük sayfaları) **birden fazla rol** tarafından kullanılır — manager, senior, staff hepsi aynı URL'yi kullanır.
+
+**Problem:** Hardcoded `@extends('layouts.staff')` yapılırsa, manager/senior da staff layout görür → "yama" izlenimi, tutarsız UX.
+
+**Çözüm:** Her böyle blade dosyasının başında role'e göre dinamik layout seç:
+
+```blade
+@php
+    $role = auth()->user()?->role;
+    $layout = in_array($role, ['senior','mentor'])
+        ? 'senior.layouts.app'
+        : ($role === 'manager' ? 'manager.layouts.app' : 'layouts.staff');
+@endphp
+@extends($layout)
+```
+
+**Uygulandığı dosyalar:**
+- `resources/views/tasks/index.blade.php`
+- `resources/views/tasks/show.blade.php`
+- `resources/views/tickets/center.blade.php`
+- `resources/views/messages/center.blade.php`
+- `resources/views/hr/my/onboarding.blade.php`
+- `resources/views/hr/my/leaves.blade.php`
+- `resources/views/hr/my/certifications.blade.php`
+- `resources/views/hr/my/attendance.blade.php`
+- `resources/views/manager/requests/index.blade.php` (match() pattern)
+
+**Layout section compatibility:**
+
+Tüm 3 layout (manager, senior, staff) aynı section isimlerini yield eder:
+- `@yield('title')`
+- `@yield('page_title')`
+- `@yield('page_subtitle')`
+- `@yield('topbar-actions')`
+- `@yield('content')`
+
+Bu sayede drop-in replacement olarak çalışır, blade içeriği değişmez.
+
+### View Transitions API (sayfa geçiş smooth'laması)
+
+Her portal layout'u şunu içerir:
+
+```html
+<meta name="view-transition" content="same-origin">
+<style>
+    @view-transition { navigation: auto; }
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation-duration: 180ms;
+        animation-timing-function: ease-out;
+    }
+    html, body, .app, .main, .content { background: var(--bg, #f1f5f9) !important; }
+</style>
+```
+
+- **Chrome 126+** → MPA cross-fade otomatik, beyaz flash azalır (tamamen yok etmez)
+- **Diğer browserlar** → progressive enhancement, etkilenmez
+- **bg fallback** → transition sırasında beyaz yerine slate görünür
+
+> Not: `php artisan serve` tek-thread olduğu için local'de TTFB yavaş (1-1.2s), View Transitions flash'ı tamamen gidermez. Prod Apache'de sorun yok. Future work: Laravel Herd / Turbo / SPA wrapper.
+
+### FOUC Preload Trick (CSS async yükleme)
+
+`app.css` body sonunda yüklenirse FOUC (flash of unstyled content) olur. Preload + onload swap pattern:
+
+```html
+<link rel="preload" href="/build/{$__headAppCss}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/build/{$__headAppCss}"></noscript>
+```
+
+Non-blocking yükleme + FOUC yok. Tüm 5 portal layout'unda uygulandı.
+
 ---
 
 ## 6. Temel Servisler
