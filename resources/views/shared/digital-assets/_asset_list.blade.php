@@ -30,9 +30,25 @@
         <div style="font-weight:600;color:#0f172a;margin-bottom:6px;">Bu klasörde henüz dosya yok</div>
     </div>
 @else
+{{-- DAM3 — Bulk action bar (sticky üstte, seçim olunca görünür) --}}
+<div id="dam-bulk-bar" style="display:none;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 14px;margin-bottom:10px;align-items:center;gap:12px;">
+    <span id="dam-bulk-count" style="font-size:13px;font-weight:700;color:#1e40af">0 dosya seçili</span>
+    <div style="flex:1"></div>
+    <form method="POST" action="{{ route($routePrefix . '.bulk.download') }}" id="dam-bulk-form" style="display:inline">
+        @csrf
+        <button type="submit" class="btn ok" style="padding:7px 14px;font-size:12px;font-weight:600;background:#16a34a;color:#fff;border:none;border-radius:6px;cursor:pointer">
+            📦 Seçilenleri ZIP İndir
+        </button>
+    </form>
+    <button type="button" id="dam-bulk-clear" style="padding:7px 12px;font-size:12px;font-weight:600;background:#fff;color:#64748b;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer">
+        Temizle
+    </button>
+</div>
+
 <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
     <table id="dam-list-table" style="width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;">
         <colgroup>
+            <col data-col="select"   style="width:34px;">
             <col data-col="type"     style="width:44px;">
             <col data-col="name"     style="width:auto;">
             <col data-col="category" style="width:90px;">
@@ -41,10 +57,13 @@
             <col data-col="size"     style="width:80px;">
             <col data-col="uploader" style="width:120px;">
             <col data-col="date"     style="width:100px;">
-            <col data-col="actions"  style="width:160px;">
+            <col data-col="actions"  style="width:180px;">
         </colgroup>
         <thead>
             <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+                <th data-col="select" style="{{ $thStyle }}text-align:center;">
+                    <input type="checkbox" id="dam-bulk-select-all" title="Tümünü seç" style="cursor:pointer">
+                </th>
                 <th data-col="type"     style="{{ $thStyle }}text-align:center;">Tür</th>
                 <th data-col="name"     style="{{ $thStyle }}"><a href="{{ $makeSortUrl('name') }}" style="color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">Ad {!! $sortIndicator('name') !!}</a></th>
                 <th data-col="category" style="{{ $thStyle }}"><a href="{{ $makeSortUrl('category') }}" style="color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">Kategori {!! $sortIndicator('category') !!}</a></th>
@@ -63,6 +82,9 @@
                 $isFav = in_array($asset->id, $favoriteIds ?? [], true);
             @endphp
             <tr style="border-bottom:1px solid #f1f5f9;">
+                <td data-col="select" style="{{ $tdBase }}text-align:center;">
+                    <input type="checkbox" class="dam-row-check" value="{{ $asset->id }}" style="cursor:pointer">
+                </td>
                 <td data-col="type" style="{{ $tdBase }}text-align:center;font-size:22px;">{!! $cat[0] !!}</td>
                 <td data-col="name" style="padding:10px 10px;overflow:hidden;">
                     <div style="font-weight:600;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $asset->name }}">{{ $asset->name }}</div>
@@ -128,6 +150,15 @@
                             title="Başka klasöre taşı"
                             style="padding:4px 8px;background:#fef3c7;color:#92400e;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;">
                         ➜
+                    </button>
+                    {{-- DAM4 — Paylaşım linki --}}
+                    <button type="button" class="dam-share-btn"
+                            data-asset-id="{{ $asset->id }}"
+                            data-asset-name="{{ $asset->name }}"
+                            data-share-url="{{ route($routePrefix . '.share.create', $asset->id) }}"
+                            title="Paylaşım linki oluştur"
+                            style="padding:4px 8px;background:#dcfce7;color:#15803d;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;">
+                        🔗
                     </button>
                     @endcan
                     @can('dam.delete')

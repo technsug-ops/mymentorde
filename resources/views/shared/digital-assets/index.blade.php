@@ -56,6 +56,14 @@
                 @endif
             </div>
         </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+            @can('dam.folder.manage')
+                <a href="{{ route($routePrefix . '.reports') }}"
+                   style="padding:10px 16px;border-radius:8px;border:1px solid var(--u-line,#e2e8f0);background:#fff;color:var(--u-text,#0f172a);text-decoration:none;font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px;"
+                   title="DAM Raporları">
+                    📊 Raporlar
+                </a>
+            @endcan
         @unless($readOnly)
             @if(auth()->user()?->hasPermissionCode('dam.upload') || auth()->user()?->hasPermissionCode('dam.folder.manage'))
             <div style="position:relative;" id="dam-add-wrapper">
@@ -97,6 +105,7 @@
             </div>
             @endif
         @endunless
+        </div>
     </div>
 
     @if(session('status'))
@@ -132,6 +141,43 @@
                    style="padding:10px 14px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;text-decoration:none;font-size:13px;font-weight:600;">
                     ✕ Temizle
                 </a>
+                {{-- DAM5 — Mevcut aramayı kaydet --}}
+                <button type="button" id="dam-save-search-btn"
+                        style="padding:10px 14px;border-radius:8px;border:1px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;cursor:pointer;font-size:13px;font-weight:600;"
+                        title="Bu filtre kombinasyonunu kaydet">
+                    💾 Kaydet
+                </button>
+            @endif
+            {{-- DAM5 — Kayıtlı aramalar dropdown --}}
+            @if(!empty($savedSearches) && $savedSearches->count() > 0)
+                <div style="position:relative;" id="dam-saved-wrapper">
+                    <button type="button" id="dam-saved-btn"
+                            style="padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#475569;cursor:pointer;font-size:13px;font-weight:600;">
+                        📂 Kayıtlılar ({{ $savedSearches->count() }})
+                    </button>
+                    <div id="dam-saved-menu"
+                         style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.12);min-width:260px;max-height:320px;overflow-y:auto;z-index:100;">
+                        @foreach($savedSearches as $ss)
+                            @php
+                                $params = is_array($ss->query_params) ? $ss->query_params : [];
+                                $qs     = http_build_query($params);
+                                $ssUrl  = route($routePrefix . '.index') . ($qs ? '?' . $qs : '');
+                            @endphp
+                            <div style="display:flex;align-items:center;gap:4px;border-bottom:1px solid #f1f5f9;">
+                                <a href="{{ $ssUrl }}"
+                                   style="flex:1;padding:10px 12px;color:var(--u-text);text-decoration:none;font-size:13px;">
+                                    {{ $ss->name }}
+                                </a>
+                                <form method="POST" action="{{ route($routePrefix . '.saved-search.destroy', $ss->id) }}" style="display:inline"
+                                      onsubmit="return confirm('{{ $ss->name }} aramasını silmek istediğinize emin misiniz?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" style="background:none;border:none;color:#dc2626;cursor:pointer;padding:8px 10px;font-size:13px;" title="Sil">✕</button>
+                                </form>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             @endif
         </div>
         {{-- Gelişmiş filtreler (collapse) — E6 --}}
@@ -305,6 +351,7 @@
         @endcan
         @can('dam.update')
             @include('shared.digital-assets._edit_modal')
+            @include('shared.digital-assets._share_modal')
         @endcan
     @endunless
 
@@ -531,7 +578,7 @@
         const hidden = new Set(hiddenList);
         document.querySelectorAll('#dam-list-table [data-col]').forEach(function(el){
             const key = el.getAttribute('data-col');
-            if (key === 'name' || key === 'actions') return; // zorunlu
+            if (key === 'name' || key === 'actions' || key === 'select') return; // zorunlu
             el.style.display = hidden.has(key) ? 'none' : '';
         });
     }
@@ -567,6 +614,128 @@
             if (colsWrap && !colsWrap.contains(e.target)) colsMenu.style.display = 'none';
         });
     }
+
+    // ── DAM5 — Saved searches dropdown toggle ──────────────────
+    const savedBtn   = document.getElementById('dam-saved-btn');
+    const savedMenu  = document.getElementById('dam-saved-menu');
+    const savedWrap  = document.getElementById('dam-saved-wrapper');
+    if (savedBtn && savedMenu) {
+        savedBtn.addEventListener('click', function(e){
+            e.stopPropagation();
+            savedMenu.style.display = (savedMenu.style.display === 'block') ? 'none' : 'block';
+        });
+        document.addEventListener('click', function(e){
+            if (savedWrap && !savedWrap.contains(e.target)) savedMenu.style.display = 'none';
+        });
+    }
+
+    // ── DAM5 — "Aramayı Kaydet" butonu: mevcut query + name ile POST ──
+    const saveSearchBtn = document.getElementById('dam-save-search-btn');
+    if (saveSearchBtn) {
+        saveSearchBtn.addEventListener('click', function(){
+            const name = window.prompt('Bu arama için bir isim girin:');
+            if (!name || name.trim() === '') return;
+
+            const f = document.createElement('form');
+            f.method = 'POST';
+            f.action = '{{ route($routePrefix . ".saved-search.store") }}';
+
+            // CSRF
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden'; csrf.name = '_token'; csrf.value = '{{ csrf_token() }}';
+            f.appendChild(csrf);
+
+            // Name + mevcut query params
+            const nameInput = document.createElement('input');
+            nameInput.type = 'hidden'; nameInput.name = 'name'; nameInput.value = name.trim();
+            f.appendChild(nameInput);
+
+            // Mevcut URL'deki query params'ı kopyala
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.forEach(function(v, k){
+                if (k === '_token' || k === 'name') return;
+                const inp = document.createElement('input');
+                inp.type = 'hidden'; inp.name = k; inp.value = v;
+                f.appendChild(inp);
+            });
+
+            document.body.appendChild(f);
+            f.submit();
+        });
+    }
+
+    // ── DAM3 — Bulk selection + download ───────────────────────
+    const bulkBar       = document.getElementById('dam-bulk-bar');
+    const bulkCount     = document.getElementById('dam-bulk-count');
+    const bulkForm      = document.getElementById('dam-bulk-form');
+    const bulkClearBtn  = document.getElementById('dam-bulk-clear');
+    const bulkSelectAll = document.getElementById('dam-bulk-select-all');
+
+    function updateBulkBar() {
+        const checked = document.querySelectorAll('.dam-row-check:checked');
+        const n = checked.length;
+        if (bulkBar) bulkBar.style.display = n > 0 ? 'flex' : 'none';
+        if (bulkCount) bulkCount.textContent = n + ' dosya seçili';
+
+        // Bulk form'u güncelle — eski hidden input'ları sil, yenilerini ekle
+        if (bulkForm) {
+            bulkForm.querySelectorAll('input[name="asset_ids[]"]').forEach(i => i.remove());
+            checked.forEach(function(cb){
+                const hid = document.createElement('input');
+                hid.type = 'hidden'; hid.name = 'asset_ids[]'; hid.value = cb.value;
+                bulkForm.appendChild(hid);
+            });
+        }
+    }
+
+    document.querySelectorAll('.dam-row-check').forEach(function(cb){
+        cb.addEventListener('change', updateBulkBar);
+    });
+
+    if (bulkSelectAll) {
+        bulkSelectAll.addEventListener('change', function(){
+            document.querySelectorAll('.dam-row-check').forEach(function(cb){
+                cb.checked = bulkSelectAll.checked;
+            });
+            updateBulkBar();
+        });
+    }
+
+    if (bulkClearBtn) {
+        bulkClearBtn.addEventListener('click', function(){
+            document.querySelectorAll('.dam-row-check').forEach(cb => cb.checked = false);
+            if (bulkSelectAll) bulkSelectAll.checked = false;
+            updateBulkBar();
+        });
+    }
+
+    // ── DAM4 — Share link modal ─────────────────────────────────
+    const shareModal = document.getElementById('dam-share-modal');
+    const shareForm  = document.getElementById('dam-share-form');
+    const shareName  = document.getElementById('dam-share-asset-name');
+
+    document.querySelectorAll('.dam-share-btn').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            if (!shareModal || !shareForm) return;
+
+            shareForm.setAttribute('action', btn.getAttribute('data-share-url'));
+            shareName.textContent = btn.getAttribute('data-asset-name') || '—';
+            if (typeof shareModal.showModal === 'function') {
+                shareModal.showModal();
+            }
+        });
+    });
+
+    const shareCloseBtn  = document.getElementById('dam-share-close');
+    const shareCancelBtn = document.getElementById('dam-share-cancel');
+    [shareCloseBtn, shareCancelBtn].forEach(function(btn){
+        if (btn && shareModal) {
+            btn.addEventListener('click', function(){
+                if (typeof shareModal.close === 'function') shareModal.close();
+            });
+        }
+    });
 
     // ── Düzenle modal (data-attr'lardan doldur + aç) ───────────
     const editModal = document.getElementById('dam-edit-modal');

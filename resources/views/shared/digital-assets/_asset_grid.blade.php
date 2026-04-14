@@ -165,6 +165,16 @@
                         title="Başka klasöre taşı">
                     ➜
                 </button>
+                {{-- DAM4 — Paylaşım linki --}}
+                <button type="button" class="dam-share-btn"
+                        data-stop-card-click="1"
+                        data-asset-id="{{ $asset->id }}"
+                        data-asset-name="{{ $asset->name }}"
+                        data-share-url="{{ route($routePrefix . '.share.create', $asset->id) }}"
+                        style="padding:6px 10px;background:#dcfce7;color:#15803d;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;"
+                        title="Paylaşım linki oluştur">
+                    🔗
+                </button>
                 @endcan
                 @can('dam.delete')
                 <form method="POST" action="{{ route($routePrefix . '.destroy', $asset->id) }}" style="flex:0 0 auto;" data-stop-card-click="1"
