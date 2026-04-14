@@ -103,6 +103,31 @@ class AppServiceProvider extends ServiceProvider
                         ->middleware(['permission:dam.download', 'throttle:120,1'])
                         ->name('download');
 
+                    // DAM3 — Bulk ZIP download
+                    \Illuminate\Support\Facades\Route::post('/bulk-download', [$ctrl, 'bulkDownload'])
+                        ->middleware(['permission:dam.download', 'throttle:10,1'])
+                        ->name('bulk.download');
+
+                    // DAM4 — Share link management (auth required — harici access ayrı)
+                    \Illuminate\Support\Facades\Route::post('/{asset}/share', [$ctrl, 'shareLinkCreate'])
+                        ->middleware(['permission:dam.update', 'throttle:30,1'])
+                        ->name('share.create');
+                    \Illuminate\Support\Facades\Route::delete('/share-links/{linkId}', [$ctrl, 'shareLinkRevoke'])
+                        ->middleware('permission:dam.update')
+                        ->name('share.revoke');
+
+                    // DAM5 — Saved searches
+                    \Illuminate\Support\Facades\Route::post('/saved-searches', [$ctrl, 'savedSearchStore'])
+                        ->middleware('throttle:30,1')
+                        ->name('saved-search.store');
+                    \Illuminate\Support\Facades\Route::delete('/saved-searches/{searchId}', [$ctrl, 'savedSearchDestroy'])
+                        ->name('saved-search.destroy');
+
+                    // DAM8 — Reports (yalnızca manage rolü)
+                    \Illuminate\Support\Facades\Route::get('/reports', [$ctrl, 'reports'])
+                        ->middleware('permission:dam.folder.manage')
+                        ->name('reports');
+
                     // Favori toggle — düşük overhead, makul limit
                     \Illuminate\Support\Facades\Route::post('/{asset}/favorite', [$ctrl, 'toggleFavorite'])
                         ->middleware('throttle:120,1')

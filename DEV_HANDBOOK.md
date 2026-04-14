@@ -407,6 +407,69 @@ Her portal layout'u şunu içerir:
 
 Non-blocking yükleme + FOUC yok. Tüm 5 portal layout'unda uygulandı.
 
+### DAM (Digital Asset Manager) — Orta Seviye Enterprise Özellikleri
+
+MentorDE'nin DAM modülü klasör/dosya organizasyonunun ötesinde enterprise-grade özellikler sunar:
+
+**Organizasyon:**
+- Klasör ağacı (max depth 10, cycle detection, role-scoped)
+- Klasör CRUD + move + yıldızlama (kişisel favoriler)
+- Dosya CRUD + move + yıldızlama + pin
+- Tag sistemi (JSON kolonu, popüler tag'ler cache'li)
+
+**Versiyon kontrolü** (DAM6):
+- `version_group_id`: aynı dosyanın versiyonlarını gruplar
+- `version_number`: 1, 2, 3, ...
+- `is_current_version`: default list sadece bunu gösterir
+- `version_note`: upload sırasında açıklama
+- Geçmiş versiyonlar detay panelinden erişilebilir, restore/swap mümkün
+
+**Arama (DAM5, DAM6, DAM7):**
+- **E5 tag search** — `?tag=xxx` JSON-LIKE arama
+- **E6 gelişmiş filtreler** — category, date range, **uploader**, **size range** (MB)
+- **DAM5 saved searches** — kullanıcı query'i isimle kaydeder (`digital_asset_saved_searches` tablosu)
+- **DAM7 full-text search** — MySQL FULLTEXT index `ft_dam_search (name, original_filename, description, doc_code)`, boolean mode prefix match (`+term*`), SQLite'ta LIKE fallback
+
+**Paylaşım ve İndirme (DAM3, DAM4):**
+- **DAM3 bulk download** — `POST /bulk-download` — seçili asset'leri ZIP olarak indirir, max 200 dosya/istek
+- **DAM4 share links** — `digital_asset_share_links` tablosu:
+  - Token-based access (`GET /share/{token}` — auth gerekmez)
+  - Expiring (`expires_at`)
+  - Opsiyonel password (bcrypt hash)
+  - Max download limit
+  - Revoke flag
+  - Download counter + last accessed IP
+  - Password protected link için ayrı blade (`share-password.blade.php`)
+
+**Raporlar (DAM8):**
+- `/digital-assets/reports` — sadece `dam.folder.manage` yetkili
+- KPI: toplam varlık, toplam boyut, kategori dağılımı
+- En çok indirilen 10 asset
+- 30 gün aktivite özeti (aksiyona göre count)
+- En aktif 10 kullanıcı
+- Son 20 aktivite feed
+
+**Aktivite logu (DAM2):**
+- `digital_asset_activity_log` tablosu
+- Her CRUD + move + share + download otomatik kayıt
+- `DigitalAssetActivityLog::record($action, $targetType, $targetId, $targetName, $user, $meta, $ip)` helper
+- Action types: upload, download, update, delete, move, share, folder_create, folder_rename, folder_move, folder_delete
+- Kullanıcı silinse bile `user_name` snapshot korunur
+
+**Kolon seçici (E7):**
+- Liste view'da kullanıcı hangi kolonları görmek istediğini seçer
+- localStorage-based persistence (`dam_hidden_cols`)
+- Ad ve İşlem kolonları zorunlu (kapatılamaz)
+
+**S3 storage desteği (DAM9):**
+- `config/filesystems.php` → `s3` disk zaten tanımlı
+- Geçiş için:
+  1. `composer require league/flysystem-aws-s3-v3`
+  2. `.env` → `FILESYSTEM_DISK=s3`
+  3. `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_BUCKET`, `AWS_DEFAULT_REGION` doldur
+- Kod değişikliği gerektirmez — `DigitalAssetService::store()` Laravel disk abstraction kullanır
+- Mevcut dosyalar otomatik taşınmaz — migration script gerekir (opsiyonel, rsync/aws-cli)
+
 ### IM (Internal Messaging) — Slack-tarzı Yönetim Modeli
 
 Conversation'lar için 3 seviyeli permission hiyerarşisi:

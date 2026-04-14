@@ -27,6 +27,11 @@ Route::middleware(['auth', 'manager.role'])->group(function (): void {
 });
 Route::get('/go/{code}', TrackedLinkRedirectController::class)->name('tracked-link.redirect');
 
+// DAM4 — Public share link access (auth gerekmez, expires + password protected)
+Route::get('/share/{token}', [\App\Http\Controllers\Shared\DigitalAssetController::class, 'sharePublic'])
+    ->middleware('throttle:60,1')
+    ->name('dam.share.public');
+
 Route::middleware(['company.context'])->group(function () {
     Route::get('/apply', [GuestApplicationController::class, 'create'])->name('apply.create');
     Route::post('/apply', [GuestApplicationController::class, 'store'])

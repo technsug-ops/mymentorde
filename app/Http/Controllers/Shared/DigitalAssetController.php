@@ -138,12 +138,22 @@ class DigitalAssetController extends Controller
 
         if ($filters['q'] !== '') {
             $q = $filters['q'];
-            $query->where(function ($w) use ($q) {
-                $w->where('name', 'like', "%{$q}%")
-                  ->orWhere('original_filename', 'like', "%{$q}%")
-                  ->orWhere('description', 'like', "%{$q}%")
-                  ->orWhere('doc_code', 'like', "%{$q}%");
-            });
+            // DAM7 — MySQL'de FULLTEXT MATCH AGAINST kullan (10-100x hızlı), diğerlerinde LIKE
+            if (\Illuminate\Support\Facades\DB::getDriverName() === 'mysql' && mb_strlen($q) >= 3) {
+                // Boolean mode — her kelime prefix match ile (+term*)
+                $booleanQ = '+' . implode('* +', preg_split('/\s+/', $q)) . '*';
+                $query->whereRaw(
+                    'MATCH(name, original_filename, description, doc_code) AGAINST(? IN BOOLEAN MODE)',
+                    [$booleanQ]
+                );
+            } else {
+                $query->where(function ($w) use ($q) {
+                    $w->where('name', 'like', "%{$q}%")
+                      ->orWhere('original_filename', 'like', "%{$q}%")
+                      ->orWhere('description', 'like', "%{$q}%")
+                      ->orWhere('doc_code', 'like', "%{$q}%");
+                });
+            }
         }
 
         if ($filters['tag'] !== '') {
@@ -219,6 +229,11 @@ class DigitalAssetController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
+        // DAM5 — Kullanıcının kayıtlı aramaları
+        $savedSearches = \App\Models\DigitalAssetSavedSearch::where('user_id', $user->id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'query_params']);
+
         return view('shared.digital-assets.index', [
             'layout'            => $layout,
             'portal'            => $portal,
@@ -235,6 +250,7 @@ class DigitalAssetController extends Controller
             'favoriteCount'     => $favoriteCount,
             'favoriteFolderIds' => $favoriteFolderIds,
             'uploaderList'      => $uploaderList,
+            'savedSearches'     => $savedSearches,
             'onlyFavorites'     => $onlyFavorites,
             'sortKey'           => $sortKey,
             'sortDir'           => $sortDir,
@@ -318,7 +334,8 @@ class DigitalAssetController extends Controller
         $failed  = [];
         foreach ($incoming as $file) {
             try {
-                $this->assets->store($file, $folderId, $this->user(), $meta);
+                $created = $this->assets->store($file, $folderId, $this->user(), $meta);
+                \App\Models\DigitalAssetActivityLog::record('upload', 'asset', $created->id, $created->name, $this->user(), ['size' => $created->size_bytes, 'folder_id' => $folderId], $request->ip());
                 $success++;
             } catch (\Throwable $e) {
                 $failed[] = $file->getClientOriginalName() . ' (' . $e->getMessage() . ')';
@@ -342,8 +359,11 @@ class DigitalAssetController extends Controller
             'is_pinned'   => ['nullable', 'boolean'],
         ]);
 
-        $model = DigitalAsset::query()->findOrFail($asset);
+        $model   = DigitalAsset::query()->findOrFail($asset);
+        $oldName = $model->name;
         $this->assets->update($model, $request->only(['name', 'description', 'tags', 'is_pinned']));
+
+        \App\Models\DigitalAssetActivityLog::record('update', 'asset', $model->id, $model->name, $this->user(), ['old_name' => $oldName], $request->ip());
 
         return back()->with('status', 'Varlık güncellendi.');
     }
@@ -351,14 +371,303 @@ class DigitalAssetController extends Controller
     public function destroy(int $asset): RedirectResponse
     {
         $model = DigitalAsset::query()->findOrFail($asset);
+        $name  = $model->name;
         $this->assets->delete($model);
+        \App\Models\DigitalAssetActivityLog::record('delete', 'asset', $asset, $name, $this->user(), [], request()->ip());
         return back()->with('status', 'Varlık silindi.');
     }
 
     public function download(int $asset)
     {
         $model = DigitalAsset::query()->findOrFail($asset);
+        \App\Models\DigitalAssetActivityLog::record('download', 'asset', $model->id, $model->name, $this->user(), ['size' => $model->size_bytes], request()->ip());
         return $this->assets->download($model, $this->user());
+    }
+
+    /**
+     * DAM3 — Bulk ZIP download: birden fazla asset'i tek ZIP olarak indir.
+     * POST ile asset_ids[] gönderilir. Permission: dam.download.
+     */
+    public function bulkDownload(Request $request)
+    {
+        $data = $request->validate([
+            'asset_ids'   => ['required', 'array', 'min:1', 'max:200'],
+            'asset_ids.*' => ['integer', 'exists:digital_assets,id'],
+        ]);
+
+        $user  = $this->user();
+        $assets = DigitalAsset::query()->whereIn('id', $data['asset_ids'])->get();
+
+        if ($assets->isEmpty()) {
+            return back()->withErrors(['bulk' => 'Hiç varlık bulunamadı.']);
+        }
+
+        // Rol filtresi — erişemeyeceği klasörlerdekileri at
+        $userRole = (string) $user->role;
+        $accessibleFolderIds = DigitalAssetFolder::query()
+            ->get()
+            ->filter(fn ($f) => $f->isAccessibleByRole($userRole))
+            ->pluck('id')
+            ->all();
+
+        $assets = $assets->filter(function (DigitalAsset $a) use ($accessibleFolderIds) {
+            if ($a->folder_id === null) return true; // root her zaman erişilebilir
+            return in_array($a->folder_id, $accessibleFolderIds, true);
+        });
+
+        if ($assets->isEmpty()) {
+            return back()->withErrors(['bulk' => 'Yetkili olduğunuz varlık yok.']);
+        }
+
+        $tempDir  = sys_get_temp_dir();
+        $zipName  = 'mentorde-assets-' . now()->format('YmdHis') . '.zip';
+        $zipPath  = $tempDir . DIRECTORY_SEPARATOR . $zipName;
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            abort(500, 'ZIP dosyası oluşturulamadı.');
+        }
+
+        $skipped = 0;
+        foreach ($assets as $asset) {
+            if ($asset->source_type === 'link') {
+                $skipped++;
+                continue; // harici link'ler indirilemez
+            }
+            try {
+                $disk = \Illuminate\Support\Facades\Storage::disk($asset->disk ?: 'local');
+                if (!$disk->exists($asset->path)) {
+                    $skipped++;
+                    continue;
+                }
+                $fileContent = $disk->get($asset->path);
+                $entryName   = $this->sanitizeZipName($asset->original_filename ?: $asset->name . '.' . ($asset->extension ?: 'bin'));
+                // Çakışma önleme
+                $base = $entryName;
+                $i = 1;
+                while ($zip->locateName($entryName) !== false) {
+                    $pathInfo = pathinfo($base);
+                    $entryName = ($pathInfo['filename'] ?? 'file') . '-' . $i . (isset($pathInfo['extension']) ? '.' . $pathInfo['extension'] : '');
+                    $i++;
+                }
+                $zip->addFromString($entryName, $fileContent);
+
+                \App\Models\DigitalAssetActivityLog::record('download', 'asset', $asset->id, $asset->name, $user, ['bulk' => true], $request->ip());
+            } catch (\Throwable $e) {
+                $skipped++;
+            }
+        }
+
+        $zip->close();
+
+        if (filesize($zipPath) <= 22) { // boş zip ~22 bytes
+            @unlink($zipPath);
+            return back()->withErrors(['bulk' => 'ZIP oluşturulamadı (tüm dosyalar hatalı).']);
+        }
+
+        return response()->download($zipPath, $zipName)->deleteFileAfterSend(true);
+    }
+
+    private function sanitizeZipName(string $name): string
+    {
+        // Güvenli dosya adı: path traversal önle, ASCII-safe
+        $name = str_replace(['..', '/', '\\', "\0"], '_', $name);
+        return substr(trim($name), 0, 240) ?: 'file';
+    }
+
+    /**
+     * DAM4 — Share link oluştur. Manager + asset editor kullanır.
+     */
+    public function shareLinkCreate(Request $request, int $asset): RedirectResponse
+    {
+        $data = $request->validate([
+            'expires_hours'  => ['nullable', 'integer', 'min:1', 'max:8760'], // 1 saat - 1 yıl
+            'password'       => ['nullable', 'string', 'min:4', 'max:100'],
+            'max_downloads'  => ['nullable', 'integer', 'min:1', 'max:1000'],
+        ]);
+
+        $model = DigitalAsset::query()->findOrFail($asset);
+
+        $link = \App\Models\DigitalAssetShareLink::create([
+            'asset_id'           => $model->id,
+            'token'              => \App\Models\DigitalAssetShareLink::generateToken(),
+            'password_hash'      => !empty($data['password']) ? \Illuminate\Support\Facades\Hash::make($data['password']) : null,
+            'created_by_user_id' => $this->user()->id,
+            'expires_at'         => !empty($data['expires_hours']) ? now()->addHours((int) $data['expires_hours']) : null,
+            'max_downloads'      => $data['max_downloads'] ?? null,
+        ]);
+
+        \App\Models\DigitalAssetActivityLog::record('share', 'asset', $model->id, $model->name, $this->user(), ['link_id' => $link->id, 'expires_at' => (string) $link->expires_at], $request->ip());
+
+        $shareUrl = url('/share/' . $link->token);
+        return back()->with('status', 'Paylaşım linki oluşturuldu: ' . $shareUrl)->with('share_url', $shareUrl);
+    }
+
+    /**
+     * DAM4 — Share link iptal et.
+     */
+    public function shareLinkRevoke(int $linkId): RedirectResponse
+    {
+        $link = \App\Models\DigitalAssetShareLink::findOrFail($linkId);
+        $link->update(['is_revoked' => true]);
+        return back()->with('status', 'Paylaşım linki iptal edildi.');
+    }
+
+    /**
+     * DAM8 — Raporlar sayfası: en çok indirilen, storage kullanımı, aktivite özeti.
+     */
+    public function reports(): View
+    {
+        $user      = $this->user();
+        $portal    = $this->portalKey($user);
+        $layout    = $this->layoutFor($portal);
+        $companyId = (int) ($user->company_id ?? 0);
+
+        // En çok indirilen 10 asset
+        $topDownloaded = DigitalAsset::query()
+            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->orderByDesc('download_count')
+            ->limit(10)
+            ->get(['id', 'name', 'download_count', 'category', 'size_bytes', 'folder_id']);
+
+        // Kategori bazlı dağılım
+        $byCategory = DigitalAsset::query()
+            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->selectRaw('category, COUNT(*) as count, SUM(size_bytes) as total_size')
+            ->groupBy('category')
+            ->get();
+
+        // Toplam storage
+        $totalSize = DigitalAsset::query()
+            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->sum('size_bytes');
+
+        $totalCount = DigitalAsset::query()
+            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->count();
+
+        // Son 30 gün aktivite özeti
+        $activitySummary = \App\Models\DigitalAssetActivityLog::query()
+            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->where('created_at', '>=', now()->subDays(30))
+            ->selectRaw('action, COUNT(*) as count')
+            ->groupBy('action')
+            ->orderByDesc('count')
+            ->get();
+
+        // En aktif 10 kullanıcı (son 30 gün)
+        $topUsers = \App\Models\DigitalAssetActivityLog::query()
+            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->where('created_at', '>=', now()->subDays(30))
+            ->whereNotNull('user_id')
+            ->selectRaw('user_id, user_name, COUNT(*) as count')
+            ->groupBy('user_id', 'user_name')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get();
+
+        // Son 20 aktivite
+        $recentActivity = \App\Models\DigitalAssetActivityLog::query()
+            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
+
+        return view('shared.digital-assets.reports', [
+            'layout'          => $layout,
+            'portal'          => $portal,
+            'routePrefix'     => $this->routePrefix($portal),
+            'topDownloaded'   => $topDownloaded,
+            'byCategory'      => $byCategory,
+            'totalSize'       => (int) $totalSize,
+            'totalCount'      => $totalCount,
+            'activitySummary' => $activitySummary,
+            'topUsers'        => $topUsers,
+            'recentActivity'  => $recentActivity,
+        ]);
+    }
+
+    /**
+     * DAM5 — Saved search kaydet.
+     */
+    public function savedSearchStore(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:150'],
+        ]);
+
+        $queryParams = $request->only(['q', 'tag', 'category', 'uploader', 'size_min_mb', 'size_max_mb', 'from', 'to']);
+        $queryParams = array_filter($queryParams, fn ($v) => $v !== null && $v !== '' && $v !== '0');
+
+        \App\Models\DigitalAssetSavedSearch::create([
+            'user_id'      => $this->user()->id,
+            'name'         => $data['name'],
+            'query_params' => $queryParams,
+        ]);
+
+        return back()->with('status', 'Arama kaydedildi: ' . $data['name']);
+    }
+
+    /**
+     * DAM5 — Saved search sil.
+     */
+    public function savedSearchDestroy(int $searchId): RedirectResponse
+    {
+        $search = \App\Models\DigitalAssetSavedSearch::where('user_id', $this->user()->id)->findOrFail($searchId);
+        $search->delete();
+        return back()->with('status', 'Kayıtlı arama silindi.');
+    }
+
+    /**
+     * DAM4 — PUBLIC: share link ile asset erişimi (auth gerekmez).
+     * GET /share/{token}
+     */
+    public function sharePublic(Request $request, string $token)
+    {
+        $link = \App\Models\DigitalAssetShareLink::where('token', $token)->first();
+        if (!$link) {
+            abort(404, 'Paylaşım linki bulunamadı.');
+        }
+
+        if ($link->isExpired()) {
+            abort(410, 'Paylaşım linkinin süresi dolmuş veya iptal edilmiş.');
+        }
+
+        // Password varsa ve henüz girilmemişse formu göster
+        if ($link->requiresPassword()) {
+            $providedPassword = (string) $request->query('pw', '');
+            if ($providedPassword === '' || !$link->checkPassword($providedPassword)) {
+                return response()->view('shared.digital-assets.share-password', [
+                    'token' => $token,
+                    'error' => $providedPassword !== '' ? 'Şifre yanlış.' : null,
+                ]);
+            }
+        }
+
+        $asset = $link->asset;
+        if (!$asset) {
+            abort(404, 'Varlık bulunamadı.');
+        }
+
+        // İndirme sayacı
+        $link->increment('download_count');
+        $link->forceFill(['last_accessed_at' => now(), 'last_accessed_ip' => $request->ip()])->save();
+
+        // Direkt dosya response (auth gerekmez)
+        if ($asset->source_type === 'link' && $asset->external_url) {
+            return redirect()->away($asset->external_url);
+        }
+
+        $disk = \Illuminate\Support\Facades\Storage::disk($asset->disk ?: 'local');
+        if (!$disk->exists($asset->path)) {
+            abort(404, 'Dosya bulunamadı.');
+        }
+
+        return $disk->download(
+            $asset->path,
+            $asset->original_filename ?: $asset->name,
+            ['Content-Type' => $asset->mime_type ?: 'application/octet-stream']
+        );
     }
 
     /**
@@ -421,12 +730,14 @@ class DigitalAssetController extends Controller
             'allowed_roles.*' => ['string', 'max:40'],
         ]);
 
-        $this->folders->createFolder(
+        $created = $this->folders->createFolder(
             $request->string('name'),
             $request->integer('parent_id') ?: null,
             $this->user(),
             $request->only(['description', 'color', 'icon', 'allowed_roles'])
         );
+
+        \App\Models\DigitalAssetActivityLog::record('folder_create', 'folder', $created->id, $created->name, $this->user(), ['parent_id' => $request->integer('parent_id') ?: null], $request->ip());
 
         return back()->with('status', 'Klasör oluşturuldu.');
     }
@@ -434,15 +745,19 @@ class DigitalAssetController extends Controller
     public function folderUpdate(Request $request, int $folder): RedirectResponse
     {
         $request->validate(['name' => ['required', 'string', 'max:150']]);
-        $model = DigitalAssetFolder::query()->findOrFail($folder);
+        $model   = DigitalAssetFolder::query()->findOrFail($folder);
+        $oldName = $model->name;
         $this->folders->rename($model, (string) $request->input('name'));
+        \App\Models\DigitalAssetActivityLog::record('folder_rename', 'folder', $model->id, $model->name, $this->user(), ['old_name' => $oldName], $request->ip());
         return back()->with('status', 'Klasör güncellendi.');
     }
 
     public function folderDestroy(int $folder): RedirectResponse
     {
         $model = DigitalAssetFolder::query()->findOrFail($folder);
+        $name  = $model->name;
         $this->folders->delete($model);
+        \App\Models\DigitalAssetActivityLog::record('folder_delete', 'folder', $folder, $name, $this->user(), [], request()->ip());
         return back()->with('status', 'Klasör silindi.');
     }
 
@@ -455,10 +770,13 @@ class DigitalAssetController extends Controller
             'parent_id' => ['nullable', 'integer', 'exists:digital_asset_folders,id'],
         ]);
 
-        $model = DigitalAssetFolder::query()->findOrFail($folder);
+        $model  = DigitalAssetFolder::query()->findOrFail($folder);
+        $oldParent = $model->parent_id;
+        $newParent = $request->integer('parent_id') ?: null;
 
         try {
-            $this->folders->move($model, $request->integer('parent_id') ?: null);
+            $this->folders->move($model, $newParent);
+            \App\Models\DigitalAssetActivityLog::record('folder_move', 'folder', $model->id, $model->name, $this->user(), ['old_parent_id' => $oldParent, 'new_parent_id' => $newParent], $request->ip());
             return back()->with('status', 'Klasör taşındı.');
         } catch (\RuntimeException $e) {
             return back()->withErrors(['folder' => $e->getMessage()]);
@@ -474,8 +792,9 @@ class DigitalAssetController extends Controller
             'folder_id' => ['nullable', 'integer', 'exists:digital_asset_folders,id'],
         ]);
 
-        $model  = DigitalAsset::query()->findOrFail($asset);
-        $target = $request->integer('folder_id') ?: null;
+        $model     = DigitalAsset::query()->findOrFail($asset);
+        $target    = $request->integer('folder_id') ?: null;
+        $oldFolder = $model->folder_id;
 
         // Hedef klasör rol erişim kontrolü
         if ($target) {
@@ -486,6 +805,7 @@ class DigitalAssetController extends Controller
         }
 
         $this->assets->move($model, $target);
+        \App\Models\DigitalAssetActivityLog::record('move', 'asset', $model->id, $model->name, $this->user(), ['old_folder_id' => $oldFolder, 'new_folder_id' => $target], $request->ip());
         return back()->with('status', 'Dosya taşındı.');
     }
 
