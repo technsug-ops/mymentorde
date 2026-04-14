@@ -65,7 +65,9 @@
             <input type="hidden" name="type" value="group">
             <div style="margin-bottom:12px">
                 <label style="display:block;font-size:11px;font-weight:600;color:var(--u-muted);margin-bottom:5px">Grup Adı *</label>
-                <input type="text" name="title" id="hubGroupTitle" placeholder="örn: Pazarlama Ekibi, Q2 Projesi…" maxlength="80"
+                <input type="text" name="title" id="hubGroupTitle" required minlength="2" maxlength="80"
+                       placeholder="örn: Pazarlama Ekibi, Q2 Projesi…"
+                       title="Grup adı en az 2 karakter olmalıdır"
                        style="width:100%;padding:8px 11px;border:1px solid var(--u-line);border-radius:7px;font-size:13px;box-sizing:border-box;background:#fafafa">
             </div>
             <div>
@@ -113,7 +115,9 @@
             <input type="hidden" name="type" value="room">
             <div style="margin-bottom:12px">
                 <label style="display:block;font-size:11px;font-weight:600;color:var(--u-muted);margin-bottom:5px">Oda Adı / Konu *</label>
-                <input type="text" name="title" id="hubRoomTitle" placeholder="örn: Vize Süreç Toplantısı, Q2 Kampanya…" maxlength="80"
+                <input type="text" name="title" id="hubRoomTitle" required minlength="2" maxlength="80"
+                       placeholder="örn: Vize Süreç Toplantısı, Q2 Kampanya…"
+                       title="Oda adı en az 2 karakter olmalıdır"
                        style="width:100%;padding:8px 11px;border:1px solid var(--u-line);border-radius:7px;font-size:13px;box-sizing:border-box;background:#fafafa">
             </div>
             <div>
