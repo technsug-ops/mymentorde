@@ -53,7 +53,9 @@ return new class extends Migration
             $table->string('condition_type', 50);        // risk_score_above, revenue_below, inactive_students, pending_docs_above, overdue_outcomes
             $table->decimal('threshold_value', 12, 2);
             $table->string('check_frequency', 15)->default('daily'); // hourly, daily, weekly
-            $table->json('notify_channels')->default('["in_app"]');
+            // MySQL 8.x JSON kolona default için expression syntax gerekir; nullable yapıp
+            // model tarafında default'u set etmek cross-version (MySQL 8 / MariaDB / SQLite) en güvenlisi.
+            $table->json('notify_channels')->nullable();
             $table->json('notify_emails')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamp('last_triggered_at')->nullable();

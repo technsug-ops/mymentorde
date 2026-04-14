@@ -27,6 +27,10 @@ class ManagerAlertRule extends Model
         'last_triggered_at' => 'datetime',
     ];
 
+    protected $attributes = [
+        'notify_channels' => '["in_app"]',
+    ];
+
     public const CONDITION_LABELS = [
         'risk_score_above'   => 'Risk skoru üstünde',
         'revenue_below'      => 'Gelir altında',

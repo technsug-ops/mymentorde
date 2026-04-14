@@ -485,18 +485,13 @@ class GuestApplicationController extends Controller
             return [null, null];
         }
 
+        // SECURITY: Mevcut kullanıcıya dokunma — re-apply'da şifre sıfırlanmamalı.
+        // (Eski kod guest role için şifreyi random yeniliyordu; saldırgan duplicate
+        //  başvuruyu arşivlenmiş hale getirip email'le yeni /apply açarak kurbanın
+        //  şifresini çalabiliyordu. Şifremi unuttum flow'u /password/reset'te mevcut.)
         $existing = User::query()->where('email', $email)->first();
         if ($existing) {
-            if ((string) $existing->role !== User::ROLE_GUEST) {
-                return [null, null];
-            }
-            // Her yeni başvuruda şifreyi sıfırla — hem fix hem iyi UX
-            $plainPassword = Str::random(12);
-            $existing->forceFill([
-                'is_active' => true,
-                'password'  => $plainPassword, // 'hashed' cast otomatik hash'ler
-            ])->save();
-            return [$existing, $plainPassword];
+            return [$existing, null];
         }
 
         $plainPassword = Str::random(12);

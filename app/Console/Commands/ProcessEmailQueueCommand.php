@@ -20,9 +20,9 @@ class ProcessEmailQueueCommand extends Command
         // Bekleyen email'leri al (send_at <= now, status=pending)
         $pending = EmailSendLog::query()
             ->where('status', 'pending')
-            ->whereHas('emailCampaign', fn ($q) => $q->where('status', 'sending')
-                ->where('send_at', '<=', now()))
-            ->with(['emailCampaign.emailTemplate', 'recipient'])
+            ->whereHas('campaign', fn ($q) => $q->where('status', 'sending')
+                ->where('scheduled_at', '<=', now()))
+            ->with(['campaign.emailTemplate', 'recipient'])
             ->orderBy('id')
             ->limit($limit)
             ->get();
@@ -36,11 +36,11 @@ class ProcessEmailQueueCommand extends Command
                 $dispatch = NotificationDispatch::create([
                     'user_id'          => $log->recipient_user_id ?? null,
                     'channel'          => 'email',
-                    'subject'          => (string) ($log->emailCampaign?->subject ?? $log->emailCampaign?->emailTemplate?->subject ?? ''),
-                    'body'             => (string) ($log->emailCampaign?->emailTemplate?->body_html ?? ''),
+                    'subject'          => (string) ($log->campaign?->subject ?? $log->campaign?->emailTemplate?->subject ?? ''),
+                    'body'             => (string) ($log->campaign?->emailTemplate?->body_html ?? ''),
                     'recipient_email'  => (string) ($log->recipient_email ?? ''),
                     'status'           => 'pending',
-                    'company_id'       => $log->emailCampaign?->company_id,
+                    'company_id'       => $log->campaign?->company_id,
                 ]);
 
                 $log->update([
