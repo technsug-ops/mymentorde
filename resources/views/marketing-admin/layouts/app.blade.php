@@ -674,6 +674,8 @@ document.addEventListener('alpine:init',function(){
 <style>@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}</style>
 
 <script defer src="{{ Vite::asset('resources/js/icon-switcher.js') }}"></script>
+{{-- Giphy API key — GIF picker tarafından okunur (messaging-hub.js + emoji-gif-picker.js) --}}
+<script nonce="{{ $cspNonce ?? '' }}">window.__giphyKey={{ Js::from(config('services.giphy.key','')) }};</script>
 @stack('scripts')
 </body>
 </html>

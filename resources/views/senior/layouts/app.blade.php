@@ -226,7 +226,7 @@
             {{-- İletişim --}}
             <div class="nav-section" data-acc-key="iletisim">
                 <div class="nav-section-label" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:7px 14px 7px 16px;margin:0 6px;border-radius:8px;user-select:none;"
-                     onclick="(function(lbl){var b=lbl.nextElementSibling;var open=b.style.display==='none'||b.style.display==='';b.style.display=open?'block':'none';var arr=lbl.querySelector('.acc-arrow');if(arr)arr.style.transform=open?'':'rotate(-90deg)';})(this)">
+                    >
                     <span>İletişim</span>
                     <span class="acc-arrow" style="font-size:12px;opacity:.7;display:inline-block;transition:transform .2s;{{ $isComm ? '' : 'transform:rotate(-90deg);' }}">▾</span>
                 </div>
@@ -243,7 +243,7 @@
             {{-- Öğrenci Takibi --}}
             <div class="nav-section" data-acc-key="ogrenci">
                 <div class="nav-section-label" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:7px 14px 7px 16px;margin:0 6px;border-radius:8px;user-select:none;"
-                     onclick="(function(lbl){var b=lbl.nextElementSibling;var open=b.style.display==='none'||b.style.display==='';b.style.display=open?'block':'none';var arr=lbl.querySelector('.acc-arrow');if(arr)arr.style.transform=open?'':'rotate(-90deg)';})(this)">
+                    >
                     <span>Öğrenci Takibi</span>
                     <span class="acc-arrow" style="font-size:12px;opacity:.7;display:inline-block;transition:transform .2s;{{ $isOgrenci ? '' : 'transform:rotate(-90deg);' }}">▾</span>
                 </div>
@@ -262,7 +262,7 @@
             {{-- Lojistik & Destek --}}
             <div class="nav-section" data-acc-key="lojistik">
                 <div class="nav-section-label" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:7px 14px 7px 16px;margin:0 6px;border-radius:8px;user-select:none;"
-                     onclick="(function(lbl){var b=lbl.nextElementSibling;var open=b.style.display==='none'||b.style.display==='';b.style.display=open?'block':'none';var arr=lbl.querySelector('.acc-arrow');if(arr)arr.style.transform=open?'':'rotate(-90deg)';})(this)">
+                    >
                     <span>Lojistik & Destek</span>
                     <span class="acc-arrow" style="font-size:12px;opacity:.7;display:inline-block;transition:transform .2s;{{ $isLojistik ? '' : 'transform:rotate(-90deg);' }}">▾</span>
                 </div>
@@ -275,7 +275,7 @@
             {{-- İçerik & Araçlar --}}
             <div class="nav-section" data-acc-key="icerik">
                 <div class="nav-section-label" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:7px 14px 7px 16px;margin:0 6px;border-radius:8px;user-select:none;"
-                     onclick="(function(lbl){var b=lbl.nextElementSibling;var open=b.style.display==='none'||b.style.display==='';b.style.display=open?'block':'none';var arr=lbl.querySelector('.acc-arrow');if(arr)arr.style.transform=open?'':'rotate(-90deg)';})(this)">
+                    >
                     <span>İçerik & Araçlar</span>
                     <span class="acc-arrow" style="font-size:12px;opacity:.7;display:inline-block;transition:transform .2s;{{ $isIcerik ? '' : 'transform:rotate(-90deg);' }}">▾</span>
                 </div>
@@ -293,7 +293,7 @@
             {{-- Kişisel --}}
             <div class="nav-section" data-acc-key="kisisel">
                 <div class="nav-section-label" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:7px 14px 7px 16px;margin:0 6px;border-radius:8px;user-select:none;"
-                     onclick="(function(lbl){var b=lbl.nextElementSibling;var open=b.style.display==='none'||b.style.display==='';b.style.display=open?'block':'none';var arr=lbl.querySelector('.acc-arrow');if(arr)arr.style.transform=open?'':'rotate(-90deg)';})(this)">
+                    >
                     <span>Kişisel</span>
                     <span class="acc-arrow" style="font-size:12px;opacity:.7;display:inline-block;transition:transform .2s;{{ $isKisisel ? '' : 'transform:rotate(-90deg);' }}">▾</span>
                 </div>
@@ -552,6 +552,18 @@ document.addEventListener('alpine:init',function(){
     var _sb=document.getElementById('premium-sidebar');
     if(_mb)_mb.addEventListener('click',function(){_sb.classList.toggle('mobile-open');if(_ov)_ov.classList.toggle('active');});
     if(_ov)_ov.addEventListener('click',function(){_sb.classList.remove('mobile-open');_ov.classList.remove('active');});
+
+    // ── Sidebar accordion (CSP-safe — eski inline onclick CSP nonce yüzünden blokluydu, B5) ──
+    document.querySelectorAll('.sidebar-nav .nav-section-label').forEach(function(lbl){
+        lbl.addEventListener('click', function(){
+            var body = lbl.nextElementSibling;
+            if(!body) return;
+            var isHidden = (body.style.display === 'none' || body.style.display === '');
+            body.style.display = isHidden ? 'block' : 'none';
+            var arr = lbl.querySelector('.acc-arrow');
+            if(arr) arr.style.transform = isHidden ? '' : 'rotate(-90deg)';
+        });
+    });
 }());
 </script>
 

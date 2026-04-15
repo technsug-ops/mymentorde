@@ -925,6 +925,15 @@ Auto-suggest: dropdown'da bayi seçilince `data-suggest-template` attribute'u `o
 
 PDF üretimi için `_tmp_md2pdf.php` şablonu: `league/commonmark` + `barryvdh/laravel-dompdf`. Tek seferlik script, commit'e dahil değil.
 
+### B5 — Senior sidebar inline onclick CSP bloklaması (fix)
+`resources/views/senior/layouts/app.blade.php` içindeki 6 `nav-section-label` accordion başlığında inline `onclick="(function(lbl){...})(this)"` kullanılıyordu. SecurityHeaders middleware CSP nonce üretir → Chrome/Firefox CSP Level 3 kuralıyla inline handler'ları reddeder. Accordion çalışmıyordu. Tüm inline handler'lar kaldırıldı, tek `addEventListener` ile nonce'lu script bloğunda bağlandı.
+
+### GIF picker boş (fix)
+`manager.layouts.app` ve `marketing-admin.layouts.app` layout'larında `window.__giphyKey` inline set'i eksikti. Diğer 5 layout'ta vardı. `messaging-hub.js` top-level'da `_GIPHY_KEY=window.__giphyKey||""` okuduğu için manager/marketing user'larda key boş kalıyordu → Giphy 401 → picker "Yüklenemedi". Her iki layout'a da `@stack('scripts')` öncesi nonce'lu `window.__giphyKey` satırı eklendi.
+
+### Bulletins — B3 layout swap
+`resources/views/bulletins/index.blade.php` statik olarak `layouts.staff`'ı extend ediyordu → senior/manager panelinden Duyurular'a girince sidebar staff'a düşüyor, "portaldan çıkmış" hissi oluşturuyordu. B3 pattern uygulandı: `$layout` değişkeni auth role'e göre `senior.layouts.app | manager.layouts.app | marketing-admin.layouts.app | layouts.staff` seçer.
+
 ---
 
 *MentorDE Developer Handbook — Güncelleme: 15 Nisan 2026*

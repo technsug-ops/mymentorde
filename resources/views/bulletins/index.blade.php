@@ -1,4 +1,15 @@
-@extends('layouts.staff')
+@php
+    // B3 pattern — kullanıcının rolüne göre doğru layout seç,
+    // staff layout yüzünden senior/manager modülünden "çıkmış" hissi olmasın.
+    $role   = (string) (auth()->user()?->role ?? '');
+    $layout = match(true) {
+        in_array($role, ['senior','mentor'], true) => 'senior.layouts.app',
+        $role === 'manager'                        => 'manager.layouts.app',
+        in_array($role, ['marketing_admin','marketing_staff','sales_admin','sales_staff'], true) => 'marketing-admin.layouts.app',
+        default                                    => 'layouts.staff',
+    };
+@endphp
+@extends($layout)
 @section('title', 'Duyurular')
 @section('page_title', 'Duyuru Panosu')
 

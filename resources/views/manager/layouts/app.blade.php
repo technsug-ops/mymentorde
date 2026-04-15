@@ -585,6 +585,8 @@ document.getElementById('sozlesme-btn')?.addEventListener('click', function() {
     caret.style.transform  = open ? '' : 'rotate(180deg)';
 });
 </script>
+{{-- Giphy API key — GIF picker tarafından okunur (messaging-hub.js + emoji-gif-picker.js) --}}
+<script nonce="{{ $cspNonce ?? '' }}">window.__giphyKey={{ Js::from(config('services.giphy.key','')) }};</script>
 @stack('scripts')
 @include('partials.push-init')
 </body>
