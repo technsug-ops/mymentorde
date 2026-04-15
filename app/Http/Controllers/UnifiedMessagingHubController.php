@@ -215,11 +215,40 @@ class UnifiedMessagingHubController extends Controller
             $this->convService->markRead($selected, (int) $user->id);
         }
 
-        $dmableUsers = User::query()
+        // Rehber: aynı company'deki tüm IM-access'li ekip
+        $dmableQuery = User::query()
             ->where('id', '!=', $user->id)
             ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
-            ->whereIn('role', InternalMessagingController::ALLOWED_ROLES)
-            ->where('is_active', true)
+            ->where('is_active', true);
+
+        // Senior istisnası: kendi aday/öğrencilerini de (guest rolü) rehbere dahil et.
+        // guest_applications.assigned_senior_email senior email'ine eşit olan guest_user_id'ler
+        if ($user->role === User::ROLE_SENIOR) {
+            $ownGuestIds = \App\Models\GuestApplication::query()
+                ->where('assigned_senior_email', $user->email)
+                ->whereNotNull('guest_user_id')
+                ->pluck('guest_user_id')
+                ->filter()
+                ->map(fn ($v) => (int) $v)
+                ->unique()
+                ->values()
+                ->all();
+
+            $dmableQuery->where(function ($q) use ($ownGuestIds) {
+                $q->whereIn('role', InternalMessagingController::ALLOWED_ROLES)
+                  ->orWhere(function ($qq) use ($ownGuestIds) {
+                      if (!empty($ownGuestIds)) {
+                          $qq->whereIn('id', $ownGuestIds);
+                      } else {
+                          $qq->whereRaw('1 = 0');
+                      }
+                  });
+            });
+        } else {
+            $dmableQuery->whereIn('role', InternalMessagingController::ALLOWED_ROLES);
+        }
+
+        $dmableUsers = $dmableQuery
             ->orderBy('name')
             ->get(['id', 'name', 'role']);
 
@@ -249,7 +278,11 @@ class UnifiedMessagingHubController extends Controller
         $counts = [];
         foreach ($ids as $cid) {
             $lastRead = $parts->get($cid)?->last_read_at;
-            $q = Message::query()->where('conversation_id', $cid)->whereNull('deleted_at');
+            $q = Message::query()
+                ->where('conversation_id', $cid)
+                ->whereNull('deleted_at')
+                ->where('is_system', false)
+                ->where('sender_id', '!=', $userId); // kendi mesajın unread sayılmaz
             if ($lastRead) $q->where('created_at', '>', $lastRead);
             $counts[(int) $cid] = (int) $q->count();
         }

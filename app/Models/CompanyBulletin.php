@@ -67,22 +67,33 @@ class CompanyBulletin extends Model
     }
 
     /**
-     * Belirli bir kullanıcının rolü/departmanı için görülebilir bültenler.
-     * target_roles / target_departments NULL ise herkese gösterilir.
+     * Duyuruyu kullanıcıya gösterir mi?
+     *
+     * Kural (OR mantığı):
+     *  (a) target_roles ve target_departments ikisi de null → herkese açık
+     *  (b) kullanıcının rolü target_roles içinde
+     *  (c) kullanıcının departmanı target_departments içinde (varsa)
+     *
+     * Not: MentorDE'de `users.department` kolonu yok — birincil eşleşme rol
+     * üzerinden yapılır. Department filtresi ileride kolon eklenirse aktif olur.
      */
     public function scopeVisibleToUser($query, string $role, ?string $department = null)
     {
-        $query->where(fn($q) => $q->whereNull('target_roles')
-            ->orWhereJsonContains('target_roles', $role));
+        return $query->where(function ($outer) use ($role, $department): void {
+            // (a) Hiç hedef belirtilmemiş → herkese gösterilir
+            $outer->where(function ($q): void {
+                $q->whereNull('target_roles')
+                  ->whereNull('target_departments');
+            });
 
-        $query->where(function ($q) use ($department): void {
-            $q->whereNull('target_departments');
+            // (b) Rol eşleşmesi
+            $outer->orWhereJsonContains('target_roles', $role);
+
+            // (c) Departman eşleşmesi (varsa)
             if ($department) {
-                $q->orWhereJsonContains('target_departments', $department);
+                $outer->orWhereJsonContains('target_departments', $department);
             }
         });
-
-        return $query;
     }
 
     public function isExpired(): bool

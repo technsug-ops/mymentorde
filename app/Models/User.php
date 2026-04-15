@@ -144,7 +144,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         ],
         self::ROLE_SENIOR => [
             'student.assignment.manage', 'student.card.view',
-            'dam.view', 'dam.download', 'dam.upload', 'dam.update',
+            'dam.view', 'dam.download', 'dam.upload', 'dam.update', 'dam.folder.manage',
         ],
         self::ROLE_DEALER => [
             'dam.view', 'dam.download',

@@ -152,3 +152,55 @@
         </form>
     </div>
 </div>
+
+{{-- HTML5 validation mesajları Türkçeleştir + çift submit engelle --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    // Form ilk submit'te butonları disable et — double-click ile çoklu grup oluşmasın
+    document.querySelectorAll('.hub-modal form').forEach(function(form){
+        form.addEventListener('submit', function(){
+            // Valid değilse JS engellemesin (tarayıcı validasyonu zaten submit'i durdurur)
+            if (!form.checkValidity || !form.checkValidity()) return;
+            form.querySelectorAll('button[type="submit"]').forEach(function(btn){
+                btn.disabled = true;
+                btn.style.opacity = '0.65';
+                btn.style.cursor = 'not-allowed';
+                var original = btn.innerHTML;
+                btn.setAttribute('data-orig', original);
+                btn.innerHTML = '⏳ Oluşturuluyor...';
+            });
+            // Sayfa yenilenmezse (ör. hata) 8 saniye sonra geri al
+            setTimeout(function(){
+                form.querySelectorAll('button[type="submit"][disabled]').forEach(function(btn){
+                    btn.disabled = false;
+                    btn.style.opacity = '';
+                    btn.style.cursor = '';
+                    if (btn.getAttribute('data-orig')) {
+                        btn.innerHTML = btn.getAttribute('data-orig');
+                    }
+                });
+            }, 8000);
+        });
+    });
+
+    document.querySelectorAll('.hub-modal input[required], .hub-modal textarea[required]').forEach(function(el){
+        function setMsg() {
+            if (el.validity.valueMissing) {
+                el.setCustomValidity('Lütfen bu alanı doldurun.');
+            } else if (el.validity.tooShort) {
+                var min = el.getAttribute('minlength') || '2';
+                el.setCustomValidity('En az ' + min + ' karakter girin.');
+            } else if (el.validity.tooLong) {
+                var max = el.getAttribute('maxlength') || '';
+                el.setCustomValidity('En fazla ' + max + ' karakter girebilirsiniz.');
+            } else if (el.validity.typeMismatch) {
+                el.setCustomValidity('Geçerli bir değer girin.');
+            } else {
+                el.setCustomValidity('');
+            }
+        }
+        el.addEventListener('invalid', setMsg);
+        el.addEventListener('input', function(){ el.setCustomValidity(''); });
+    });
+})();
+</script>

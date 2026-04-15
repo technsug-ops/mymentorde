@@ -278,25 +278,37 @@ select.f-input   { cursor:pointer; }
             </label>
         </div>
 
-        {{-- Dealer Seçici --}}
+        {{-- Dealer Seçici — 3 kategori (Link Dağıtan / Freelance / Operasyon) + Diğer --}}
         <div id="dealerSelectorBlock" style="display:{{ $initType==='dealer' ? 'block' : 'none' }};margin-top:16px;">
-            <div class="f-label">Dealer Seç</div>
+            <div class="f-label">Dealer Seç <span style="font-weight:400;color:#94a3b8;font-size:11px;">(kategorilere göre gruplanmış)</span></div>
             <div class="party-select-wrap">
                 <span class="party-select-icon">🏢</span>
                 <select name="dealer_id" id="dealerSelect" onchange="prefillDealer(this)">
                     <option value="">Dealer seçin...</option>
-                    @foreach($dealers as $d)
-                        <option value="{{ $d->id }}"
-                            data-firma="{{ $d->name }}"
-                            data-yetkili="{{ $d->contact_name ?? '' }}"
-                            data-adres="{{ $d->address ?? '' }}"
-                            data-vergi="{{ $d->tax_no ?? '' }}"
-                            data-tel="{{ $d->phone ?? '' }}"
-                            data-eposta="{{ $d->email ?? '' }}"
-                            @selected(old('dealer_id')==$d->id || (isset($selectedDealer) && $selectedDealer->id==$d->id))
-                        >{{ $d->name }}</option>
+                    @foreach(($dealersByCategory ?? []) as $catKey => $cat)
+                        @if($cat['dealers']->isNotEmpty())
+                        <optgroup label="{{ $cat['label'] }}">
+                            @foreach($cat['dealers'] as $d)
+                                <option value="{{ $d->id }}"
+                                    data-firma="{{ $d->name }}"
+                                    data-yetkili="{{ $d->contact_name ?? '' }}"
+                                    data-adres="{{ $d->address ?? '' }}"
+                                    data-vergi="{{ $d->tax_no ?? '' }}"
+                                    data-tel="{{ $d->phone ?? '' }}"
+                                    data-eposta="{{ $d->email ?? '' }}"
+                                    data-kategori="{{ $catKey }}"
+                                    data-tip-kodu="{{ $d->dealer_type_code ?? '' }}"
+                                    data-suggest-template="{{ $cat['template'] ?? '' }}"
+                                    @selected(old('dealer_id')==$d->id || (isset($selectedDealer) && $selectedDealer->id==$d->id))
+                                >{{ $d->name }}@if($d->code) · {{ $d->code }}@endif</option>
+                            @endforeach
+                        </optgroup>
+                        @endif
                     @endforeach
                 </select>
+            </div>
+            <div id="dealerCategoryHint" style="margin-top:6px;font-size:11px;color:#64748b;display:none;">
+                Seçilen bayi kategorisi: <strong id="dealerCategoryLabel" style="color:#0f172a;">—</strong>
             </div>
         </div>
 
@@ -786,6 +798,33 @@ function prefillDealer(sel) {
     document.getElementById('f_dealer_vergi').value   = opt.dataset.vergi   || '';
     document.getElementById('f_dealer_tel').value     = opt.dataset.tel     || '';
     document.getElementById('f_dealer_eposta').value  = opt.dataset.eposta  || '';
+
+    // Kategori hint'i göster — parent optgroup label'ından al
+    var hintEl  = document.getElementById('dealerCategoryHint');
+    var labelEl = document.getElementById('dealerCategoryLabel');
+    if (hintEl && labelEl) {
+        if (opt.value && opt.parentElement && opt.parentElement.label) {
+            labelEl.textContent = opt.parentElement.label;
+            hintEl.style.display = 'block';
+        } else {
+            hintEl.style.display = 'none';
+        }
+    }
+
+    // Önerilen template'i otomatik seç ve işaretle
+    var suggestCode = opt.dataset.suggestTemplate || '';
+    if (suggestCode) {
+        var radio = document.querySelector('input[name="template_id"][data-code="' + suggestCode + '"]');
+        if (radio && !radio.checked) {
+            radio.checked = true;
+            // onchange handler'ı tetikle
+            if (typeof onTemplateChange === 'function') {
+                onTemplateChange(parseInt(radio.value), radio.dataset.type, radio.dataset.code);
+            } else {
+                radio.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+    }
     updateSummary();
 }
 

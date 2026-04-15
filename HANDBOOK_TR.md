@@ -1213,5 +1213,48 @@ C: Evet, MentorDE tamamen responsive tasarıma sahiptir. Tüm sayfalar mobil, ta
 
 ---
 
+## 9. Son Değişiklikler (15 Nisan 2026)
+
+### DAM (Dijital Varlıklar)
+- Kart aksiyon butonları unified "ghost icon" stilinde yeniden düzenlendi (hover'da renklendirme)
+- Upload modaline **mention** özelliği eklendi: dosya yüklenirken belirli kişilere veya rol gruplarına bildirim gönderilir
+- Rol grupları: 🎓 Öğrenciler, 👤 Guest'ler, 🏪 Bayiler (3 alt tip), 👨‍🏫 Senior, 🧭 Mentor, 📣 Marketing
+- Grid kartlarda **bulk select** (checkbox overlay + selection mode)
+- Post-upload 📢 **Bildir** butonu — mevcut dosyayı sonradan duyurmak için
+- Klasör ayarları **her yerden düzenlenebilir** (sidebar ⚙) — ad, açıklama, erişim izinleri
+- **Senior** rolüne `dam.folder.manage` izni eklendi
+- Klasör silme sonrası parent'a/root'a otomatik redirect (404 fix)
+- Upload hata mesajları Türkçeleştirildi
+
+### İletişim Merkezi (IM)
+- **Senior DM rehberi**: tüm iç ekip + kendi aday öğrencileri (telefon rehberi mantığı)
+- **Toplu grup silme**: "Seç" moduyla çoklu seçim
+- Grup silme yetkisi **grup oluşturanı (admin)** da kapsıyor
+- Arşivleme / silme / toplu silme sonrası **Ekip sekmesinde kalma** düzeltildi
+- Çift tıklama ile çoklu grup oluşma bug'ı düzeltildi
+- HTML5 validation mesajları **Türkçeleştirildi**
+- Kendi yazdığın mesaj unread sayılmıyor
+- Silinen / arşivli konuşmalar toplam unread'e dahil değil
+- Mesaj baloncuğu 9 karakter wrap bug'ı düzeltildi
+- **Pin max 4** kuralı
+- Grup adı HTML5 `minlength="2"` validation
+
+### İş Sözleşmeleri
+- Eksik kolon SQL crash fix (`contact_name / tax_no / address`)
+- Bayi dropdown **3 kategoriye optgroup** ile gruplandı: 📣 Lead Generation, 🎯 Freelance Danışmanlık, 🏢 Operasyon
+- Bayi seçilince ilgili template otomatik işaretlenir
+- Detay sayfasında bayi kategorisi gösteriliyor
+
+### Duyurular
+- Kritik bug fix: `target_departments` dolu olan duyurular herkesten gizleniyordu → OR mantığıyla düzeltildi
+- Form'da **checkbox grid + "Tümünü Seç"** master checkbox
+- Mentor ve System Staff listeye eklendi
+
+### Dokümantasyon
+- `docs/DEALER_ONBOARDING_PROCESS.md` + PDF — 3 senaryolu bayi süreç dokümanı
+- `docs/USER_CREATION_PROCESS.md` + PDF — 5 kullanıcı tipi oluşturma akışı
+
+---
+
 *MentorDE System Handbook — Türkçe Versiyon 1.0*
-*Son güncelleme: 2026*
+*Son güncelleme: 15 Nisan 2026*

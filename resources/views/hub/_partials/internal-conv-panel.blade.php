@@ -128,8 +128,8 @@
             @endif
         @endif
 
-        {{-- Destroy — sadece manager --}}
-        @if($isManager)
+        {{-- Destroy — grup admin (oluşturan) + manager --}}
+        @if($canManage)
             <form method="POST" action="/im/conversations/{{ $conv->id }}/destroy" style="display:inline"
                   onsubmit="return confirm('DİKKAT: Bu {{ $conv->type === 'room' ? 'oda' : 'grup' }} KALICI olarak silinecek. Geri alınamaz. Devam edilsin mi?')">
                 @csrf
@@ -167,7 +167,7 @@
         @if(!$isMine && !$isSystem)
         <div class="hub-msg-avatar" style="background:#4577c4">{{ $letter }}</div>
         @endif
-        <div style="max-width:95%">
+        <div style="max-width:78%;min-width:0">
             @if(!$isMine && !$isSystem)
             <div class="hub-msg-sender">{{ $senderName }}</div>
             @endif

@@ -53,8 +53,55 @@ class BusinessContractController extends Controller
 
         $dealers = Dealer::query()
             ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->where('is_active', true)
             ->orderBy('name')
-            ->get(['id', 'name', 'code', 'contact_name', 'address', 'tax_no', 'phone', 'email']);
+            ->get(['id', 'name', 'code', 'phone', 'email', 'dealer_type_code']);
+
+        // İş sözleşmeleri için 3 bayi kategorisi:
+        //  • 📣 Lead Generation      → dealer_referral_v1 template
+        //  • 🎯 Freelance Danışmanlık → dealer_referral_v1 template
+        //  • 🏢 Operasyon            → dealer_operations_v1 template
+        // Lead Generation + Freelance Danışmanlık aynı "referans ortaklığı"
+        // hukuki şablonunu kullanır; kategori adları sistemde ayrık durur.
+        $dealerCategoryLabels = [
+            'lead_generation' => [
+                'label'    => '📣 Lead Generation',
+                'codes'    => ['lead_generation', 'referrer'],
+                'template' => 'dealer_referral_v1',
+            ],
+            'freelance'       => [
+                'label'    => '🎯 Freelance Danışmanlık',
+                'codes'    => ['freelance_danisman'],
+                'template' => 'dealer_referral_v1',
+            ],
+            'operational'     => [
+                'label'    => '🏢 Operasyon',
+                'codes'    => ['operational', 'b2b_partner'],
+                'template' => 'dealer_operations_v1',
+            ],
+        ];
+
+        // Kategoriye göre grupla — UI `<optgroup>` için
+        $dealersByCategory = [];
+        foreach ($dealerCategoryLabels as $key => $cat) {
+            $dealersByCategory[$key] = [
+                'label'   => $cat['label'],
+                'dealers' => $dealers->filter(fn ($d) => in_array($d->dealer_type_code, $cat['codes'], true))->values(),
+            ];
+        }
+        // Kategorisiz bayiler (eski kayıtlar) — "Diğer" altında göster
+        $uncategorized = $dealers->filter(function ($d) use ($dealerCategoryLabels) {
+            foreach ($dealerCategoryLabels as $cat) {
+                if (in_array($d->dealer_type_code, $cat['codes'], true)) return false;
+            }
+            return true;
+        })->values();
+        if ($uncategorized->isNotEmpty()) {
+            $dealersByCategory['other'] = [
+                'label'   => '📦 Diğer / Kategorisiz',
+                'dealers' => $uncategorized,
+            ];
+        }
 
         $templates = BusinessContractTemplate::query()
             ->where('is_active', true)
@@ -78,7 +125,7 @@ class BusinessContractController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'email', 'role']);
 
-        return view('manager.business-contracts.create', compact('dealers', 'templates', 'selectedDealer', 'users'));
+        return view('manager.business-contracts.create', compact('dealers', 'dealersByCategory', 'templates', 'selectedDealer', 'users'));
     }
 
     public function store(Request $r): RedirectResponse
@@ -122,9 +169,42 @@ class BusinessContractController extends Controller
     public function show(BusinessContract $businessContract): View
     {
         $this->authorizeContract($businessContract);
-        $businessContract->load(['dealer:id,name,code,contact_name', 'staffUser:id,name,email', 'issuedByUser:id,name', 'approvedByUser:id,name']);
+        $businessContract->load(['dealer:id,name,code,dealer_type_code', 'staffUser:id,name,email', 'issuedByUser:id,name', 'approvedByUser:id,name']);
 
-        return view('manager.business-contracts.show', ['contract' => $businessContract]);
+        return view('manager.business-contracts.show', [
+            'contract'             => $businessContract,
+            'dealerCategoryLabel'  => $businessContract->dealer
+                ? self::dealerCategoryLabel((string) $businessContract->dealer->dealer_type_code)
+                : null,
+        ]);
+    }
+
+    /**
+     * Sözleşme sistemindeki 3 bayi kategorisinden birine map'ler.
+     * Lead Generation + Freelance aynı hukuki şablonu kullansa da
+     * kategori etiketleri ayrıdır (iş modeli farkı için).
+     */
+    public static function dealerCategoryLabel(?string $typeCode): ?string
+    {
+        return match ($typeCode) {
+            'lead_generation', 'referrer' => '📣 Lead Generation Bayi',
+            'freelance_danisman'          => '🎯 Freelance Danışmanlık Bayi',
+            'operational', 'b2b_partner'  => '🏢 Operasyon Bayi',
+            default                       => null,
+        };
+    }
+
+    /**
+     * Bayi tipine göre önerilen sözleşme template_code'u.
+     * Seçilen bayiden template otomatik önerilir.
+     */
+    public static function suggestedTemplateCode(?string $typeCode): ?string
+    {
+        return match ($typeCode) {
+            'lead_generation', 'referrer', 'freelance_danisman' => 'dealer_referral_v1',
+            'operational', 'b2b_partner'                        => 'dealer_operations_v1',
+            default                                             => null,
+        };
     }
 
     public function updateBody(Request $r, BusinessContract $businessContract): RedirectResponse

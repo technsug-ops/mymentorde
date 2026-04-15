@@ -3,6 +3,68 @@
 @section('title', 'Dijital Varlıklar — ' . config('brand.name', 'MentorDE'))
 
 @section('content')
+<style>
+/* ── DAM unified action buttons (ghost style, color on hover) ───────────── */
+.dam-action-row { display:inline-flex; align-items:center; gap:2px; flex-wrap:nowrap; }
+.dam-iconbtn {
+    width:30px; height:30px;
+    display:inline-flex; align-items:center; justify-content:center;
+    border:1px solid transparent; background:transparent; color:#64748b;
+    border-radius:7px; font-size:14px; line-height:1;
+    cursor:pointer; text-decoration:none; padding:0;
+    transition:background .12s ease, color .12s ease, border-color .12s ease;
+}
+.dam-iconbtn:hover { background:#f1f5f9; color:#0f172a; border-color:#e2e8f0; }
+.dam-iconbtn:focus-visible { outline:2px solid #6366f1; outline-offset:1px; }
+.dam-iconbtn.is-fav-on { color:#f59e0b; }
+.dam-iconbtn.is-fav-on:hover { background:#fef3c7; color:#d97706; border-color:#fde68a; }
+.dam-iconbtn.v-download:hover { background:#eef2ff; color:#4338ca; border-color:#e0e7ff; }
+.dam-iconbtn.v-edit:hover     { background:#eff6ff; color:#1d4ed8; border-color:#dbeafe; }
+.dam-iconbtn.v-move:hover     { background:#fef3c7; color:#92400e; border-color:#fde68a; }
+.dam-iconbtn.v-share:hover    { background:#dcfce7; color:#15803d; border-color:#bbf7d0; }
+.dam-iconbtn.v-delete:hover   { background:#fef2f2; color:#dc2626; border-color:#fecaca; }
+.dam-iconbtn.v-notify:hover   { background:#eef2ff; color:#3730a3; border-color:#c7d2fe; }
+.dam-iconbtn-form { display:inline-flex; margin:0; padding:0; }
+
+/* Grid kart: primary "İndir" butonu ve secondary icon row */
+.dam-card-primary {
+    display:flex; align-items:center; justify-content:center; gap:5px;
+    width:100%; padding:8px 10px;
+    background:#0f172a; color:#fff; text-decoration:none;
+    border:none; border-radius:7px;
+    font-size:12px; font-weight:600;
+    cursor:pointer; transition:background .12s;
+}
+.dam-card-primary:hover { background:#1e293b; }
+.dam-card-actions-sec {
+    display:flex; justify-content:center; align-items:center; gap:2px;
+    margin-top:6px;
+}
+
+/* Grid bulk select — checkbox her zaman görünür (subtle), seçili kart mavi çerçeveli */
+.dam-grid-check {
+    position:absolute; top:6px; left:6px; z-index:3;
+    width:26px; height:26px; border-radius:6px;
+    background:rgba(255,255,255,.92);
+    border:1px solid rgba(148,163,184,.5);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,.12);
+    transition:background .12s, border-color .12s, transform .12s;
+}
+.dam-grid-check:hover { background:#fff; border-color:#6366f1; }
+.dam-grid-check input {
+    width:16px; height:16px; margin:0; cursor:pointer;
+}
+.dam-card.is-selected {
+    box-shadow:0 0 0 2px #6366f1, 0 6px 16px rgba(99,102,241,.18) !important;
+    border-color:#6366f1 !important;
+}
+.dam-card.is-selected .dam-grid-check {
+    background:#6366f1; border-color:#4338ca;
+}
+.dam-card.is-selected .dam-grid-check input { accent-color:#fff; }
+</style>
 <div class="dam-page" style="padding:24px;">
     <div class="dam-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
         <div>
@@ -30,12 +92,14 @@
                     @can('dam.folder.manage')
                         @if($currentFolder && !$currentFolder->is_system)
                         <div style="display:flex;gap:5px;">
-                            <button type="button" id="damFolderRenameBtn"
+                            <button type="button" id="damFolderSettingsBtn"
                                     data-folder-id="{{ $currentFolder->id }}"
                                     data-folder-name="{{ $currentFolder->name }}"
+                                    data-folder-description="{{ $currentFolder->description ?? '' }}"
+                                    data-folder-roles='@json($currentFolder->allowed_roles ?? [])'
                                     data-update-url="{{ route($routePrefix . '.folder.update', $currentFolder->id) }}"
-                                    title="Klasörü yeniden adlandır"
-                                    style="padding:3px 8px;font-size:11px;border:1px solid #e2e8f0;background:#fff;border-radius:5px;cursor:pointer">✎ Yeniden Adlandır</button>
+                                    title="Klasör ayarları (ad, açıklama, yetkiler)"
+                                    style="padding:3px 8px;font-size:11px;border:1px solid #e2e8f0;background:#fff;border-radius:5px;cursor:pointer">⚙ Ayarlar</button>
 
                             <button type="button" id="damFolderMoveBtn"
                                     data-folder-id="{{ $currentFolder->id }}"
@@ -333,6 +397,21 @@
                 </div>
             </div>
 
+            {{-- DAM3 — Bulk action bar (liste + grid ortak). Seçim >0 olunca görünür. --}}
+            <div id="dam-bulk-bar" style="display:none;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 14px;margin-bottom:10px;align-items:center;gap:12px;">
+                <span id="dam-bulk-count" style="font-size:13px;font-weight:700;color:#1e40af">0 dosya seçili</span>
+                <div style="flex:1"></div>
+                <form method="POST" action="{{ route($routePrefix . '.bulk.download') }}" id="dam-bulk-form" style="display:inline">
+                    @csrf
+                    <button type="submit" class="btn ok" style="padding:7px 14px;font-size:12px;font-weight:600;background:#16a34a;color:#fff;border:none;border-radius:6px;cursor:pointer">
+                        📦 Seçilenleri ZIP İndir
+                    </button>
+                </form>
+                <button type="button" id="dam-bulk-clear" style="padding:7px 12px;font-size:12px;font-weight:600;background:#fff;color:#64748b;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer">
+                    Temizle
+                </button>
+            </div>
+
             @if($viewMode === 'list')
                 @include('shared.digital-assets._asset_list', ['assets' => $assets, 'readOnly' => $readOnly, 'routePrefix' => $routePrefix, 'favoriteIds' => $favoriteIds, 'sortKey' => $sortKey, 'sortDir' => $sortDir])
             @else
@@ -343,15 +422,19 @@
 
     @unless($readOnly)
         @can('dam.upload')
-            @include('shared.digital-assets._upload_modal', ['currentFolder' => $currentFolder, 'routePrefix' => $routePrefix])
+            @include('shared.digital-assets._upload_modal', ['currentFolder' => $currentFolder, 'routePrefix' => $routePrefix, 'mentionableUsers' => $mentionableUsers ?? collect(), 'mentionRoleGroups' => $mentionRoleGroups ?? []])
             @include('shared.digital-assets._link_modal', ['currentFolder' => $currentFolder, 'routePrefix' => $routePrefix])
         @endcan
         @can('dam.folder.manage')
             @include('shared.digital-assets._folder_modal', ['currentFolder' => $currentFolder, 'routePrefix' => $routePrefix])
+            @include('shared.digital-assets._folder_edit_modal')
         @endcan
         @can('dam.update')
             @include('shared.digital-assets._edit_modal')
             @include('shared.digital-assets._share_modal')
+        @endcan
+        @can('dam.upload')
+            @include('shared.digital-assets._notify_modal', ['mentionableUsers' => $mentionableUsers ?? collect(), 'mentionRoleGroups' => $mentionRoleGroups ?? []])
         @endcan
     @endunless
 
@@ -534,14 +617,31 @@
         }
     }
 
-    // Kart click handler — sadece kart yüzeyine tıklayınca aç (butonlara değil)
+    // Kart click handler:
+    //   - Buton/link/form → lightbox açma (data-stop-card-click ile korunuyor)
+    //   - Herhangi bir kart seçiliyse (selection mode) → tıklama seçim toggle eder
+    //   - Hiçbir şey seçili değilse → tıklama lightbox açar
+    function anySelected() {
+        return document.querySelector('.dam-row-check:checked') !== null;
+    }
     document.querySelectorAll('.dam-card').forEach(function(card){
         card.addEventListener('click', function(e){
-            // Buton/link/form içine tıklandıysa lightbox açma
+            // Buton/link/form içine tıklandıysa özel handler çalışacak → bize gerek yok
             if (e.target.closest('[data-stop-card-click="1"]')) return;
             if (e.target.closest('.dam-fav-btn')) return;
             if (e.target.closest('button')) return;
             if (e.target.closest('a[href]') && !e.target.closest('.dam-card-preview')) return;
+
+            // Selection mode aktifse → seçim toggle
+            if (anySelected()) {
+                const cb = card.querySelector('.dam-row-check');
+                if (cb) {
+                    cb.checked = !cb.checked;
+                    updateBulkBar();
+                }
+                return;
+            }
+
             openLightbox(card);
         });
     });
@@ -686,10 +786,24 @@
                 bulkForm.appendChild(hid);
             });
         }
+
+        // Grid kartlarında seçili state'i senkronize et
+        document.querySelectorAll('.dam-card').forEach(function(card){
+            const cb = card.querySelector('.dam-row-check');
+            if (cb) card.classList.toggle('is-selected', cb.checked);
+        });
     }
 
     document.querySelectorAll('.dam-row-check').forEach(function(cb){
         cb.addEventListener('change', updateBulkBar);
+    });
+
+    // Grid kartlarında: kart gövdesine tıklama → seçim VARSA seçim toggle, YOKSA lightbox.
+    // Checkbox'a tıklama → sadece seçim (lightbox açılmaz, stop-card-click ile).
+    document.querySelectorAll('.dam-card').forEach(function(card){
+        const cb = card.querySelector('.dam-row-check');
+        if (!cb) return;
+        // Checkbox kendi change'iyle updateBulkBar'ı tetikler; ek bir şey gerekmez.
     });
 
     if (bulkSelectAll) {
@@ -708,6 +822,76 @@
             updateBulkBar();
         });
     }
+
+    // ── Post-upload mention modal (📢 Bildir) ──────────────────
+    const notifyModal = document.getElementById('dam-notify-modal');
+    const notifyForm  = document.getElementById('dam-notify-form');
+    const notifyName  = document.getElementById('dam-notify-asset-name');
+    const notifyCount = document.getElementById('dam-nm-count');
+    const notifyWarn  = document.getElementById('dam-nm-warn');
+    const notifySearch= document.getElementById('dam-nm-search');
+
+    function resetNotifyModal() {
+        if (!notifyForm) return;
+        notifyForm.querySelectorAll('.dam-nm-cb, .dam-nm-group-cb').forEach(cb => cb.checked = false);
+        const noteInput = notifyForm.querySelector('input[name="notify_note"]');
+        if (noteInput) noteInput.value = '';
+        if (notifySearch) notifySearch.value = '';
+        notifyForm.querySelectorAll('.dam-nm-row').forEach(r => r.style.display = 'flex');
+        updateNotifyCount();
+    }
+
+    function updateNotifyCount() {
+        if (!notifyForm || !notifyCount) return;
+        let n = 0;
+        notifyForm.querySelectorAll('.dam-nm-cb:checked').forEach(() => n++);
+        let gtot = 0;
+        notifyForm.querySelectorAll('.dam-nm-group-cb:checked').forEach(function(cb){
+            gtot += parseInt(cb.getAttribute('data-count') || '0', 10);
+        });
+        const total = n + gtot;
+        notifyCount.textContent = total > 0 ? ('~' + total + ' kişi seçildi') : '0 kişi seçildi';
+        if (notifyWarn) notifyWarn.style.display = gtot >= 50 ? 'block' : 'none';
+    }
+
+    document.querySelectorAll('.dam-notify-btn').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            if (!notifyModal || !notifyForm) return;
+            notifyForm.setAttribute('action', btn.getAttribute('data-notify-url') || '');
+            if (notifyName) notifyName.textContent = btn.getAttribute('data-asset-name') || '—';
+            resetNotifyModal();
+            if (typeof notifyModal.showModal === 'function') {
+                notifyModal.showModal();
+            }
+        });
+    });
+
+    if (notifyForm) {
+        notifyForm.addEventListener('change', function(e){
+            if (!e.target || !e.target.classList) return;
+            if (e.target.classList.contains('dam-nm-cb') || e.target.classList.contains('dam-nm-group-cb')) {
+                updateNotifyCount();
+            }
+        });
+    }
+    if (notifySearch) {
+        notifySearch.addEventListener('input', function(){
+            const q = (this.value || '').toLowerCase().trim();
+            notifyForm.querySelectorAll('.dam-nm-row').forEach(function(r){
+                const name = r.getAttribute('data-name') || '';
+                r.style.display = (q === '' || name.indexOf(q) !== -1) ? 'flex' : 'none';
+            });
+        });
+    }
+    ['dam-notify-close', 'dam-notify-cancel'].forEach(function(id){
+        const b = document.getElementById(id);
+        if (b && notifyModal) {
+            b.addEventListener('click', function(){
+                if (typeof notifyModal.close === 'function') notifyModal.close();
+            });
+        }
+    });
 
     // ── DAM4 — Share link modal ─────────────────────────────────
     const shareModal = document.getElementById('dam-share-modal');
@@ -848,24 +1032,49 @@
         });
     });
 
-    // ── E1 — Klasör rename (prompt, submit via hidden form) ────
-    const folderRenameBtn = document.getElementById('damFolderRenameBtn');
-    if (folderRenameBtn) {
-        folderRenameBtn.addEventListener('click', function(){
-            const oldName = folderRenameBtn.getAttribute('data-folder-name') || '';
-            const newName = window.prompt('Yeni klasör adı:', oldName);
-            if (newName === null || newName.trim() === '' || newName.trim() === oldName) return;
-            const url = folderRenameBtn.getAttribute('data-update-url');
-            const f = document.createElement('form');
-            f.method = 'POST';
-            f.action = url;
-            f.innerHTML = '<input type="hidden" name="_token" value="' + csrfToken + '">' +
-                          '<input type="hidden" name="_method" value="PUT">' +
-                          '<input type="hidden" name="name" value="' + newName.trim().replace(/"/g, '&quot;') + '">';
-            document.body.appendChild(f);
-            f.submit();
+    // ── E1 — Klasör ayarları modalı (ad + açıklama + yetkiler) ────
+    // Hem breadcrumb'daki "⚙ Ayarlar" butonu hem sidebar tree'deki inline ⚙ butonu.
+    const folderEditModal = document.getElementById('dam-folder-edit-modal');
+    const folderEditForm  = document.getElementById('dam-folder-edit-form');
+
+    function openFolderSettingsModal(triggerEl) {
+        if (!folderEditModal || !folderEditForm || !triggerEl) return;
+        const name = triggerEl.getAttribute('data-folder-name') || '';
+        const desc = triggerEl.getAttribute('data-folder-description') || '';
+        const url  = triggerEl.getAttribute('data-update-url');
+        let roles = [];
+        try { roles = JSON.parse(triggerEl.getAttribute('data-folder-roles') || '[]') || []; }
+        catch(e) { roles = []; }
+
+        folderEditForm.setAttribute('action', url);
+        folderEditForm.querySelector('#dam-fedit-name').value = name;
+        folderEditForm.querySelector('#dam-fedit-description').value = desc;
+        folderEditForm.querySelectorAll('.dam-fedit-role').forEach(function(cb){
+            cb.checked = Array.isArray(roles) && roles.indexOf(cb.value) !== -1;
+        });
+
+        if (typeof folderEditModal.showModal === 'function') {
+            folderEditModal.showModal();
+        } else {
+            folderEditModal.setAttribute('open', '');
+        }
+    }
+
+    // Breadcrumb butonu (mevcut klasör)
+    const folderSettingsBtn = document.getElementById('damFolderSettingsBtn');
+    if (folderSettingsBtn) {
+        folderSettingsBtn.addEventListener('click', function(){
+            openFolderSettingsModal(folderSettingsBtn);
         });
     }
+    // Sidebar tree inline butonları (tüm klasörler)
+    document.querySelectorAll('.dam-folder-settings-btn').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            openFolderSettingsModal(btn);
+        });
+    });
 
     // ── E2 — Klasör taşıma (select ile parent seç) ──────────────
     const folderMoveBtn = document.getElementById('damFolderMoveBtn');

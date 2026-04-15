@@ -57,9 +57,13 @@
          data-asset-download="{{ route($routePrefix . '.download', $asset->id) }}"
          data-asset-emoji="{{ $emoji }}"
          data-asset-youtube="{{ $youtubeId ?? '' }}"
-         style="background:#fff;border:1px solid var(--border,#e2e8f0);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s;cursor:pointer;"
+         style="position:relative;background:#fff;border:1px solid var(--border,#e2e8f0);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s;cursor:pointer;"
          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,.08)'"
          onmouseout="this.style.transform='';this.style.boxShadow=''">
+        {{-- Bulk select checkbox (grid view) --}}
+        <label class="dam-grid-check" data-stop-card-click="1" title="Seç">
+            <input type="checkbox" class="dam-row-check" value="{{ $asset->id }}">
+        </label>
         {{-- Önizleme alanı --}}
         <div class="dam-card-preview" style="aspect-ratio:1.4;background:linear-gradient(135deg,#f1f5f9,#e2e8f0);display:flex;align-items:center;justify-content:center;font-size:42px;position:relative;overflow:hidden;">
             @if($isLink && $ytThumb)
@@ -134,60 +138,59 @@
                 <span>·</span>
                 <span>{{ $asset->created_at?->format('d.m.Y') }}</span>
             </div>
-            <div style="display:flex;gap:4px;margin-top:10px;">
+            <div style="margin-top:10px;">
                 <a href="{{ route($routePrefix . '.download', $asset->id) }}"
+                   class="dam-card-primary"
                    data-stop-card-click="1"
-                   {{ $isLink ? 'target=_blank' : '' }}
-                   style="flex:1;text-align:center;padding:6px 8px;font-size:12px;background:var(--accent-soft,#f1f5f9);color:var(--text,#0f172a);text-decoration:none;border-radius:6px;font-weight:600;">
-                    {{ $isLink ? 'Aç ↗' : '↓ İndir' }}
+                   {{ $isLink ? 'target=_blank' : '' }}>
+                    <span style="font-size:14px;line-height:1;">{{ $isLink ? '↗' : '↓' }}</span>
+                    <span>{{ $isLink ? 'Aç' : 'İndir' }}</span>
                 </a>
                 @unless($readOnly)
-                @can('dam.update')
-                <button type="button" class="dam-edit-btn"
-                        data-stop-card-click="1"
-                        data-asset-id="{{ $asset->id }}"
-                        data-asset-name="{{ $asset->name }}"
-                        data-asset-description="{{ $asset->description ?? '' }}"
-                        data-asset-tags='@json($asset->tags ?? [])'
-                        data-asset-pinned="{{ $asset->is_pinned ? '1' : '0' }}"
-                        data-update-url="{{ route($routePrefix . '.update', $asset->id) }}"
-                        style="padding:6px 10px;background:#eff6ff;color:#1d4ed8;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;"
-                        title="Düzenle">
-                    ✎
-                </button>
-                {{-- E3 — Dosya taşıma --}}
-                <button type="button" class="dam-move-btn"
-                        data-stop-card-click="1"
-                        data-asset-id="{{ $asset->id }}"
-                        data-asset-name="{{ $asset->name }}"
-                        data-move-url="{{ route($routePrefix . '.move', $asset->id) }}"
-                        style="padding:6px 10px;background:#fef3c7;color:#92400e;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;"
-                        title="Başka klasöre taşı">
-                    ➜
-                </button>
-                {{-- DAM4 — Paylaşım linki --}}
-                <button type="button" class="dam-share-btn"
-                        data-stop-card-click="1"
-                        data-asset-id="{{ $asset->id }}"
-                        data-asset-name="{{ $asset->name }}"
-                        data-share-url="{{ route($routePrefix . '.share.create', $asset->id) }}"
-                        style="padding:6px 10px;background:#dcfce7;color:#15803d;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;"
-                        title="Paylaşım linki oluştur">
-                    🔗
-                </button>
-                @endcan
-                @can('dam.delete')
-                <form method="POST" action="{{ route($routePrefix . '.destroy', $asset->id) }}" style="flex:0 0 auto;" data-stop-card-click="1"
-                      onsubmit="return confirm('Bu varlığı silmek istediğinize emin misiniz?')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            style="padding:6px 10px;background:#fef2f2;color:#dc2626;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;"
-                            title="Sil">
-                        ×
-                    </button>
-                </form>
-                @endcan
+                @if(auth()->user()?->hasPermissionCode('dam.update') || auth()->user()?->hasPermissionCode('dam.delete'))
+                <div class="dam-card-actions-sec">
+                    @can('dam.update')
+                    <button type="button" class="dam-iconbtn v-edit dam-edit-btn"
+                            data-stop-card-click="1"
+                            data-asset-id="{{ $asset->id }}"
+                            data-asset-name="{{ $asset->name }}"
+                            data-asset-description="{{ $asset->description ?? '' }}"
+                            data-asset-tags='@json($asset->tags ?? [])'
+                            data-asset-pinned="{{ $asset->is_pinned ? '1' : '0' }}"
+                            data-update-url="{{ route($routePrefix . '.update', $asset->id) }}"
+                            title="Düzenle">✎</button>
+                    <button type="button" class="dam-iconbtn v-move dam-move-btn"
+                            data-stop-card-click="1"
+                            data-asset-id="{{ $asset->id }}"
+                            data-asset-name="{{ $asset->name }}"
+                            data-move-url="{{ route($routePrefix . '.move', $asset->id) }}"
+                            title="Başka klasöre taşı">➜</button>
+                    <button type="button" class="dam-iconbtn v-share dam-share-btn"
+                            data-stop-card-click="1"
+                            data-asset-id="{{ $asset->id }}"
+                            data-asset-name="{{ $asset->name }}"
+                            data-share-url="{{ route($routePrefix . '.share.create', $asset->id) }}"
+                            title="Paylaşım linki oluştur">🔗</button>
+                    @endcan
+                    @can('dam.upload')
+                    <button type="button" class="dam-iconbtn v-notify dam-notify-btn"
+                            data-stop-card-click="1"
+                            data-asset-id="{{ $asset->id }}"
+                            data-asset-name="{{ $asset->name }}"
+                            data-notify-url="{{ route($routePrefix . '.notify', $asset->id) }}"
+                            title="Kişilere bildir">📢</button>
+                    @endcan
+                    @can('dam.delete')
+                    <form method="POST" action="{{ route($routePrefix . '.destroy', $asset->id) }}" class="dam-iconbtn-form"
+                          data-stop-card-click="1"
+                          onsubmit="return confirm('Bu varlığı silmek istediğinize emin misiniz?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="dam-iconbtn v-delete" title="Sil">×</button>
+                    </form>
+                    @endcan
+                </div>
+                @endif
                 @endunless
             </div>
         </div>

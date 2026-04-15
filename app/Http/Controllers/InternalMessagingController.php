@@ -70,12 +70,39 @@ class InternalMessagingController extends Controller
             $this->service->markRead($selected, (int) $user->id);
         }
 
-        // DM başlatılabilecek kullanıcı listesi
-        $dmableUsers = User::query()
+        // DM başlatılabilecek kullanıcı listesi — rehber (telefon rehberi mantığı)
+        $dmableQuery = User::query()
             ->where('id', '!=', $user->id)
             ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
-            ->whereIn('role', self::ALLOWED_ROLES)
-            ->where('is_active', true)
+            ->where('is_active', true);
+
+        // Senior istisnası: kendi aday/öğrencileri (guest rolü) de listede
+        if ($user->role === User::ROLE_SENIOR) {
+            $ownGuestIds = \App\Models\GuestApplication::query()
+                ->where('assigned_senior_email', $user->email)
+                ->whereNotNull('guest_user_id')
+                ->pluck('guest_user_id')
+                ->filter()
+                ->map(fn ($v) => (int) $v)
+                ->unique()
+                ->values()
+                ->all();
+
+            $dmableQuery->where(function ($q) use ($ownGuestIds) {
+                $q->whereIn('role', self::ALLOWED_ROLES)
+                  ->orWhere(function ($qq) use ($ownGuestIds) {
+                      if (!empty($ownGuestIds)) {
+                          $qq->whereIn('id', $ownGuestIds);
+                      } else {
+                          $qq->whereRaw('1 = 0');
+                      }
+                  });
+            });
+        } else {
+            $dmableQuery->whereIn('role', self::ALLOWED_ROLES);
+        }
+
+        $dmableUsers = $dmableQuery
             ->orderBy('name')
             ->get(['id', 'name', 'role']);
 
@@ -258,6 +285,20 @@ class InternalMessagingController extends Controller
     {
         $user = $request->user();
         $part = $this->resolveParticipant($convId, (int) $user->id);
+
+        // Pin ekleniyorsa 4 sabit kuralı — zaten 4 tanesi varsa engelle
+        if (!$part->is_pinned) {
+            $pinnedCount = ConversationParticipant::query()
+                ->where('user_id', $user->id)
+                ->where('is_pinned', true)
+                ->count();
+            if ($pinnedCount >= 4) {
+                return back()->withErrors([
+                    'pin' => 'En fazla 4 konuşma sabitleyebilirsiniz. Yeni bir sabitleme için önce birini kaldırın.',
+                ]);
+            }
+        }
+
         $part->forceFill(['is_pinned' => !$part->is_pinned])->save();
 
         return back()->with('status', $part->is_pinned ? 'Konuşma sabitlendi.' : 'Sabitleme kaldırıldı.');
@@ -551,7 +592,8 @@ class InternalMessagingController extends Controller
             return response()->json(['ok' => true, 'is_archived' => true]);
         }
 
-        return redirect()->route('im.index')->with('status', 'Konuşma arşivlendi.');
+        return redirect()->route('im.index', ['tab' => 'internal'])
+            ->with('status', 'Konuşma arşivlendi.');
     }
 
     /** Arşivden çıkar — sadece grup admin + manager */
@@ -578,7 +620,48 @@ class InternalMessagingController extends Controller
 
         $this->service->destroyConversation($conv);
 
-        return redirect()->route('im.index')->with('status', 'Konuşma kalıcı olarak silindi.');
+        return redirect()->route('im.index', ['tab' => 'internal'])
+            ->with('status', 'Konuşma kalıcı olarak silindi.');
+    }
+
+    /**
+     * Toplu konuşma silme — kullanıcı sadece yetkisi olan konuşmaları silebilir.
+     * Yetkili olmayan ID'ler sessizce atlanır, sonuç flash mesajında özetlenir.
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $user = $request->user();
+        abort_if(!in_array((string) $user->role, self::ALLOWED_ROLES, true), 403);
+
+        $data = $request->validate([
+            'conversation_ids'   => ['required', 'array', 'min:1', 'max:100'],
+            'conversation_ids.*' => ['integer'],
+        ]);
+
+        $ids = array_values(array_unique(array_map('intval', $data['conversation_ids'])));
+
+        $deleted = 0;
+        $skipped = 0;
+        foreach ($ids as $cid) {
+            try {
+                $conv = $this->resolveConversation($cid, (int) $user->id);
+                if (!$this->service->canPerform($conv, $user, 'destroy')) {
+                    $skipped++;
+                    continue;
+                }
+                $this->service->destroyConversation($conv);
+                $deleted++;
+            } catch (\Throwable $e) {
+                $skipped++;
+            }
+        }
+
+        $msg = "{$deleted} konuşma silindi.";
+        if ($skipped > 0) {
+            $msg .= " {$skipped} tanesi yetki/erişim sebebiyle atlandı.";
+        }
+
+        return redirect()->route('im.index', ['tab' => 'internal'])->with('status', $msg);
     }
 
     /** Member'ı admin'e yükselt — mevcut grup admin + manager */

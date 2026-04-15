@@ -177,6 +177,10 @@ class ConversationService
                       ->orWhereColumn('m.created_at', '>', 'cp.last_read_at');
                 })
                 ->whereNull('m.deleted_at')
+                ->whereNull('c.deleted_at')        // silinen konuşmaları sayma
+                ->where('c.is_archived', false)    // arşivli konuşmaları da sayma
+                ->where('m.is_system', false)      // sistem mesajları unread sayılmaz
+                ->where('m.sender_id', '!=', $userId) // kendi mesajın unread sayılmaz
                 ->count();
         });
     }
@@ -287,8 +291,8 @@ class ConversationService
             'unarchive',
             'rename'                    => $level === 'admin',
 
-            // Sadece manager (yukarıdaki return true ile gelen)
-            'destroy'                   => false,
+            // Destroy: manager (yukarıda return true) + grup admin'i (kendi oluşturduğu)
+            'destroy'                   => $level === 'admin',
 
             default                     => false,
         };
@@ -339,8 +343,15 @@ class ConversationService
      */
     public function destroyConversation(Conversation $conv): void
     {
+        // Tüm katılımcıların unread cache'ini invalidate et — aksi halde stale badge kalır
+        $participantIds = $conv->participants()->pluck('user_id')->all();
+
         // SoftDeletes — sadece deleted_at = now() set eder, geri alınabilir (trashed() ile)
         $conv->delete();
+
+        foreach ($participantIds as $uid) {
+            self::invalidateUnreadCache((int) $uid);
+        }
     }
 
     /**

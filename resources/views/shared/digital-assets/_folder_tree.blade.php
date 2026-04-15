@@ -19,9 +19,25 @@
                 data-folder-id="{{ $node['id'] }}"
                 data-toggle-url="{{ route($routePrefix . '.folder.favorite.toggle', $node['id']) }}"
                 title="{{ $isFav ? 'Yıldızı kaldır' : 'Yıldızla' }}"
-                style="background:none;border:none;cursor:pointer;font-size:13px;padding:2px 6px;color:{{ $isFav ? '#f59e0b' : 'var(--text-muted,#94a3b8)' }};margin-right:6px;">
+                style="background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px;color:{{ $isFav ? '#f59e0b' : 'var(--text-muted,#94a3b8)' }};">
             {{ $isFav ? '⭐' : '☆' }}
         </button>
+        {{-- Klasör ayar butonu (yeniden adlandır + yetki + açıklama) --}}
+        @can('dam.folder.manage')
+            @if(!$node['is_system'])
+            <button type="button"
+                    class="dam-folder-settings-btn"
+                    data-folder-id="{{ $node['id'] }}"
+                    data-folder-name="{{ $node['name'] }}"
+                    data-folder-description="{{ $node['description'] ?? '' }}"
+                    data-folder-roles='@json($node['allowed_roles'] ?? [])'
+                    data-update-url="{{ route($routePrefix . '.folder.update', $node['id']) }}"
+                    title="Klasör ayarları (ad, açıklama, yetkiler)"
+                    style="background:none;border:none;cursor:pointer;font-size:12px;padding:2px 4px;color:var(--text-muted,#94a3b8);margin-right:4px;">
+                ⚙
+            </button>
+            @endif
+        @endcan
     </div>
     @if(!empty($node['children']) && count($node['children']))
         @include('shared.digital-assets._folder_tree', [

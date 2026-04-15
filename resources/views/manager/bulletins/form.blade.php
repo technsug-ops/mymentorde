@@ -73,12 +73,20 @@
                 🎯 Hedef Kitle <span style="font-size:11px;font-weight:400;text-transform:none;">(Boş bırakılırsa tüm çalışanlara gösterilir)</span>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                {{-- Roller --}}
                 <div>
-                    <label style="display:block;font-size:12px;font-weight:600;color:var(--u-muted);margin-bottom:6px;">Roller</label>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                        <label style="font-size:12px;font-weight:600;color:var(--u-muted);">Roller</label>
+                        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:var(--u-brand,#4577c4);font-weight:700;">
+                            <input type="checkbox" class="bulletin-target-all" data-target="roles" style="width:14px;height:14px;margin:0;cursor:pointer;">
+                            <span>Tümünü Seç</span>
+                        </label>
+                    </div>
                     @php
                         $allRoles = [
                             'manager'          => 'Manager',
                             'senior'           => 'Eğitim Danışmanı',
+                            'mentor'           => 'Mentor',
                             'marketing_admin'  => 'Marketing Admin',
                             'marketing_staff'  => 'Marketing Staff',
                             'sales_admin'      => 'Sales Admin',
@@ -88,19 +96,33 @@
                             'operations_admin' => 'Operations Admin',
                             'operations_staff' => 'Operations Staff',
                             'system_admin'     => 'System Admin',
+                            'system_staff'     => 'System Staff',
                         ];
                         $selRoles = old('target_roles', $bulletin?->target_roles ?? []);
                     @endphp
-                    <select name="target_roles[]" multiple size="6"
-                            style="width:100%;border:1.5px solid var(--u-line);border-radius:8px;font-size:13px;background:var(--u-card);color:var(--u-text);padding:6px;">
+                    <div class="bulletin-target-grid" data-group="roles"
+                         style="display:grid;grid-template-columns:1fr 1fr;gap:4px;max-height:200px;overflow-y:auto;padding:8px;border:1.5px solid var(--u-line);border-radius:8px;background:var(--u-card);">
                         @foreach($allRoles as $val => $lbl)
-                        <option value="{{ $val }}" @selected(is_array($selRoles) && in_array($val, $selRoles, true))>{{ $lbl }}</option>
+                            <label style="display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:5px;cursor:pointer;font-size:12px;color:var(--u-text);">
+                                <input type="checkbox" name="target_roles[]" value="{{ $val }}" class="bulletin-target-cb"
+                                       @checked(is_array($selRoles) && in_array($val, $selRoles, true))
+                                       style="width:13px;height:13px;margin:0;cursor:pointer;">
+                                <span>{{ $lbl }}</span>
+                            </label>
                         @endforeach
-                    </select>
-                    <div style="font-size:11px;color:var(--u-muted);margin-top:4px;">Ctrl+tıkla ile çoklu seçim yapabilirsiniz.</div>
+                    </div>
+                    <div style="font-size:11px;color:var(--u-muted);margin-top:4px;">Boş bırakılırsa rol filtresi uygulanmaz.</div>
                 </div>
+
+                {{-- Departmanlar --}}
                 <div>
-                    <label style="display:block;font-size:12px;font-weight:600;color:var(--u-muted);margin-bottom:6px;">Departmanlar</label>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                        <label style="font-size:12px;font-weight:600;color:var(--u-muted);">Departmanlar</label>
+                        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:var(--u-brand,#4577c4);font-weight:700;">
+                            <input type="checkbox" class="bulletin-target-all" data-target="departments" style="width:14px;height:14px;margin:0;cursor:pointer;">
+                            <span>Tümünü Seç</span>
+                        </label>
+                    </div>
                     @php
                         $allDepts = [
                             'marketing'  => 'Pazarlama',
@@ -113,16 +135,57 @@
                         ];
                         $selDepts = old('target_departments', $bulletin?->target_departments ?? []);
                     @endphp
-                    <select name="target_departments[]" multiple size="6"
-                            style="width:100%;border:1.5px solid var(--u-line);border-radius:8px;font-size:13px;background:var(--u-card);color:var(--u-text);padding:6px;">
+                    <div class="bulletin-target-grid" data-group="departments"
+                         style="display:grid;grid-template-columns:1fr 1fr;gap:4px;max-height:200px;overflow-y:auto;padding:8px;border:1.5px solid var(--u-line);border-radius:8px;background:var(--u-card);">
                         @foreach($allDepts as $val => $lbl)
-                        <option value="{{ $val }}" @selected(is_array($selDepts) && in_array($val, $selDepts, true))>{{ $lbl }}</option>
+                            <label style="display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:5px;cursor:pointer;font-size:12px;color:var(--u-text);">
+                                <input type="checkbox" name="target_departments[]" value="{{ $val }}" class="bulletin-target-cb"
+                                       @checked(is_array($selDepts) && in_array($val, $selDepts, true))
+                                       style="width:13px;height:13px;margin:0;cursor:pointer;">
+                                <span>{{ $lbl }}</span>
+                            </label>
                         @endforeach
-                    </select>
-                    <div style="font-size:11px;color:var(--u-muted);margin-top:4px;">Ctrl+tıkla ile çoklu seçim yapabilirsiniz.</div>
+                    </div>
+                    <div style="font-size:11px;color:var(--u-muted);margin-top:4px;">Boş bırakılırsa departman filtresi uygulanmaz.</div>
                 </div>
             </div>
+            <div style="font-size:11px;color:var(--u-muted);margin-top:10px;padding:8px 10px;background:#f8fafc;border-radius:6px;">
+                💡 Roller ve departmanlar birleşim olarak çalışır: kullanıcı seçilen rollerden <strong>veya</strong> seçilen departmanlardan birine uyarsa duyuruyu görür.
+            </div>
         </div>
+
+        <script nonce="{{ $cspNonce ?? '' }}">
+        (function(){
+            function syncMasterState(masterCb, grid) {
+                var cbs = grid.querySelectorAll('.bulletin-target-cb');
+                var total = cbs.length;
+                var checked = grid.querySelectorAll('.bulletin-target-cb:checked').length;
+                masterCb.checked = (checked === total && total > 0);
+                masterCb.indeterminate = (checked > 0 && checked < total);
+            }
+
+            document.querySelectorAll('.bulletin-target-all').forEach(function(masterCb){
+                var grp  = masterCb.getAttribute('data-target');
+                var grid = document.querySelector('.bulletin-target-grid[data-group="' + grp + '"]');
+                if (!grid) return;
+
+                // İlk yükleme: mevcut durumu yansıt
+                syncMasterState(masterCb, grid);
+
+                masterCb.addEventListener('change', function(){
+                    grid.querySelectorAll('.bulletin-target-cb').forEach(function(cb){
+                        cb.checked = masterCb.checked;
+                    });
+                });
+
+                grid.addEventListener('change', function(e){
+                    if (e.target.classList && e.target.classList.contains('bulletin-target-cb')) {
+                        syncMasterState(masterCb, grid);
+                    }
+                });
+            });
+        })();
+        </script>
 
         <div style="display:flex;gap:8px;margin-top:22px;padding-top:16px;border-top:1px solid var(--u-line);">
             <button type="submit" class="btn ok">{{ $bulletin ? 'Güncelle' : 'Yayınla' }}</button>

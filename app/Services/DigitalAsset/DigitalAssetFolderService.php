@@ -197,6 +197,8 @@ class DigitalAssetFolderService
                     'color'         => $f->color,
                     'is_system'     => (bool) $f->is_system,
                     'is_restricted' => !empty($f->allowed_roles),
+                    'description'   => $f->description,
+                    'allowed_roles' => is_array($f->allowed_roles) ? $f->allowed_roles : [],
                     'children'      => $build((int) $f->id),
                 ];
             })->values();

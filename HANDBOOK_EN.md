@@ -1171,5 +1171,48 @@ A: Commission is calculated based on each student's payment. When a student make
 
 ---
 
+## 9. Recent Changes (April 15, 2026)
+
+### DAM (Digital Asset Management)
+- Card action buttons redesigned with unified "ghost icon" style (color on hover)
+- **Mention** feature added to upload modal: notify specific users or role groups when a file is uploaded
+- Role groups: 🎓 Students, 👤 Guests, 🏪 Dealers (3 sub-types), 👨‍🏫 Seniors, 🧭 Mentors, 📣 Marketing
+- Grid cards support **bulk select** (checkbox overlay + selection mode)
+- Post-upload 📢 **Notify** button — announce an existing file to users later
+- Folder settings **editable from anywhere** (sidebar ⚙) — name, description, access permissions
+- **Senior** role granted `dam.folder.manage` permission
+- Folder deletion redirects to parent/root (fixes 404)
+- Upload error messages translated to Turkish
+
+### Messaging Hub (IM)
+- **Senior DM directory**: full internal team + their assigned guests (phonebook pattern)
+- **Bulk group delete**: selection mode for multi-select
+- Group delete permission extended to **group creator (admin)**
+- Archive / delete / bulk-delete redirects **stay on Team tab**
+- Double-submit bug fixed (multiple groups being created on rapid clicks)
+- HTML5 validation messages **translated to Turkish**
+- Own messages no longer count as unread
+- Deleted / archived conversations excluded from total unread count
+- Message bubble 9-char wrap bug fixed
+- **Max 4 pinned conversations** rule
+- Group name HTML5 `minlength="2"` validation
+
+### Business Contracts
+- Missing column SQL crash fix (`contact_name / tax_no / address`)
+- Dealer dropdown grouped into **3 optgroups**: 📣 Lead Generation, 🎯 Freelance Consulting, 🏢 Operational
+- Selecting a dealer auto-suggests matching contract template
+- Contract detail page shows dealer category
+
+### Bulletins
+- Critical bug fix: bulletins with `target_departments` set were hidden from everyone → fixed with OR logic
+- Form redesigned with **checkbox grid + "Select All"** master checkbox
+- Mentor and System Staff added to role list
+
+### Documentation
+- `docs/DEALER_ONBOARDING_PROCESS.md` + PDF — 3-scenario dealer process documentation
+- `docs/USER_CREATION_PROCESS.md` + PDF — 5 user-type creation workflow
+
+---
+
 *MentorDE System Handbook — English Version 1.0*
-*Last updated: 2026*
+*Last updated: April 15, 2026*

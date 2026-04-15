@@ -229,6 +229,18 @@ class DigitalAssetController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
+        // DAM mention — upload modalında "kime bildirilsin" picker'ı için
+        $mentionableUsers = User::query()
+            ->where('id', '!=', $user->id)
+            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->whereIn('role', \App\Http\Controllers\InternalMessagingController::ALLOWED_ROLES)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'role']);
+
+        // DAM mention — rol bazlı toplu duyuru grupları (Tüm öğrenciler, Tüm bayiler, ...)
+        $mentionRoleGroups = $this->buildMentionRoleGroups((int) ($user->company_id ?? 0), (int) $user->id);
+
         // DAM5 — Kullanıcının kayıtlı aramaları
         $savedSearches = \App\Models\DigitalAssetSavedSearch::where('user_id', $user->id)
             ->orderBy('name')
@@ -250,6 +262,8 @@ class DigitalAssetController extends Controller
             'favoriteCount'     => $favoriteCount,
             'favoriteFolderIds' => $favoriteFolderIds,
             'uploaderList'      => $uploaderList,
+            'mentionableUsers'  => $mentionableUsers,
+            'mentionRoleGroups' => $mentionRoleGroups,
             'savedSearches'     => $savedSearches,
             'onlyFavorites'     => $onlyFavorites,
             'sortKey'           => $sortKey,
@@ -301,14 +315,26 @@ class DigitalAssetController extends Controller
             $fileRules[] = "mimetypes:{$allowedMimes}";
         }
 
+        $maxMb = (int) round($maxKb / 1024);
         $request->validate([
-            'file'        => array_merge(['nullable'], $fileRules),
-            'files'       => ['nullable', 'array', "max:{$maxFiles}"],
-            'files.*'     => $fileRules,
-            'folder_id'   => ['nullable', 'integer', 'exists:digital_asset_folders,id'],
-            'description' => ['nullable', 'string', 'max:2000'],
-            'tags'        => ['nullable', 'array'],
-            'tags.*'      => ['string', 'max:60'],
+            'file'              => array_merge(['nullable'], $fileRules),
+            'files'             => ['nullable', 'array', "max:{$maxFiles}"],
+            'files.*'           => $fileRules,
+            'folder_id'         => ['nullable', 'integer', 'exists:digital_asset_folders,id'],
+            'description'       => ['nullable', 'string', 'max:2000'],
+            'tags'              => ['nullable', 'array'],
+            'tags.*'            => ['string', 'max:60'],
+            'notify_user_ids'     => ['nullable', 'array', 'max:25'],
+            'notify_user_ids.*'   => ['integer', 'exists:users,id'],
+            'notify_role_groups'  => ['nullable', 'array', 'max:10'],
+            'notify_role_groups.*'=> ['string', 'max:40'],
+            'notify_note'         => ['nullable', 'string', 'max:280'],
+        ], [
+            'file.mimetypes'     => 'Kabul edilmeyen dosya türü. İzin verilenler: PDF, Word, Excel, PowerPoint, JPG, PNG, WEBP, GIF, MP4, MP3, ZIP, RAR.',
+            'files.*.mimetypes'  => 'Kabul edilmeyen dosya türü. İzin verilenler: PDF, Word, Excel, PowerPoint, JPG, PNG, WEBP, GIF, MP4, MP3, ZIP, RAR.',
+            'file.max'           => "Dosya boyutu {$maxMb} MB sınırını aşıyor.",
+            'files.*.max'        => "Dosya boyutu {$maxMb} MB sınırını aşıyor.",
+            'files.max'          => "Tek seferde en fazla {$maxFiles} dosya yüklenebilir.",
         ]);
 
         $folderId = $request->integer('folder_id') ?: null;
@@ -332,21 +358,160 @@ class DigitalAssetController extends Controller
 
         $success = 0;
         $failed  = [];
+        $createdAssets = [];
         foreach ($incoming as $file) {
             try {
                 $created = $this->assets->store($file, $folderId, $this->user(), $meta);
                 \App\Models\DigitalAssetActivityLog::record('upload', 'asset', $created->id, $created->name, $this->user(), ['size' => $created->size_bytes, 'folder_id' => $folderId], $request->ip());
+                $createdAssets[] = $created;
                 $success++;
             } catch (\Throwable $e) {
                 $failed[] = $file->getClientOriginalName() . ' (' . $e->getMessage() . ')';
             }
         }
 
+        // Mention — seçilen kullanıcılara + rol gruplarına in_app bildirim gönder
+        $notifyIds  = array_values(array_unique(array_map('intval', (array) $request->input('notify_user_ids', []))));
+        $roleGroups = array_values(array_filter(array_map('strval', (array) $request->input('notify_role_groups', []))));
+        $notifyNote = trim((string) $request->input('notify_note', ''));
+
+        if (!empty($roleGroups)) {
+            $uploaderUser = $this->user();
+            $groupIds = $this->resolveRoleGroupUserIds(
+                $roleGroups,
+                (int) ($uploaderUser->company_id ?? 0),
+                (int) $uploaderUser->id
+            );
+            $notifyIds = array_values(array_unique(array_merge($notifyIds, $groupIds)));
+        }
+
+        // Güvenlik kapak: tek upload'ta 500'den fazla alıcıya dağıtma
+        if (count($notifyIds) > 500) {
+            $notifyIds = array_slice($notifyIds, 0, 500);
+        }
+
+        if (!empty($notifyIds) && !empty($createdAssets)) {
+            $this->dispatchUploadMentions($createdAssets, $notifyIds, $notifyNote, $request->ip());
+        }
+
         $msg = "{$success} dosya yüklendi.";
         if (!empty($failed)) {
             $msg .= ' ' . count($failed) . ' başarısız: ' . implode('; ', $failed);
         }
+        if (!empty($notifyIds) && !empty($createdAssets)) {
+            $msg .= ' ' . count($notifyIds) . ' kişi bilgilendirildi.';
+        }
         return back()->with('status', $msg);
+    }
+
+    /**
+     * Mevcut bir dosyayı seçilen kişilere / rol gruplarına bildirir.
+     * Upload sırasında değil, sonradan manuel tetikleme. Aynı pipeline'ı kullanır.
+     */
+    public function notify(Request $request, int $asset): RedirectResponse
+    {
+        $request->validate([
+            'notify_user_ids'     => ['nullable', 'array', 'max:25'],
+            'notify_user_ids.*'   => ['integer', 'exists:users,id'],
+            'notify_role_groups'  => ['nullable', 'array', 'max:10'],
+            'notify_role_groups.*'=> ['string', 'max:40'],
+            'notify_note'         => ['nullable', 'string', 'max:280'],
+        ]);
+
+        $model = DigitalAsset::query()->findOrFail($asset);
+
+        // Rol bazlı klasör kısıtı — erişimi olmayan kullanıcı notify yapamaz
+        if ($model->folder_id) {
+            $folder = DigitalAssetFolder::query()->find($model->folder_id);
+            if ($folder && !$folder->isAccessibleByRole((string) $this->user()->role)) {
+                abort(403, 'Bu varlığa erişiminiz yok.');
+            }
+        }
+
+        $notifyIds  = array_values(array_unique(array_map('intval', (array) $request->input('notify_user_ids', []))));
+        $roleGroups = array_values(array_filter(array_map('strval', (array) $request->input('notify_role_groups', []))));
+        $notifyNote = trim((string) $request->input('notify_note', ''));
+
+        if (!empty($roleGroups)) {
+            $uploaderUser = $this->user();
+            $groupIds = $this->resolveRoleGroupUserIds(
+                $roleGroups,
+                (int) ($uploaderUser->company_id ?? 0),
+                (int) $uploaderUser->id
+            );
+            $notifyIds = array_values(array_unique(array_merge($notifyIds, $groupIds)));
+        }
+
+        if (empty($notifyIds)) {
+            return back()->withErrors(['notify' => 'En az 1 kişi veya grup seçmelisiniz.']);
+        }
+
+        if (count($notifyIds) > 500) {
+            $notifyIds = array_slice($notifyIds, 0, 500);
+        }
+
+        $this->dispatchUploadMentions([$model], $notifyIds, $notifyNote, $request->ip());
+
+        return back()->with('status', count($notifyIds) . ' kişi bilgilendirildi.');
+    }
+
+    /**
+     * Upload sonrası (veya manuel tetiklemeyle) seçilen kullanıcılara in_app bildirim gönderir.
+     * Aynı zamanda DigitalAssetActivityLog'a mention kaydı düşer (audit).
+     */
+    private function dispatchUploadMentions(array $assets, array $userIds, string $note, ?string $ip): void
+    {
+        try {
+            /** @var \App\Services\NotificationService $notifier */
+            $notifier = app(\App\Services\NotificationService::class);
+        } catch (\Throwable $e) {
+            return;
+        }
+
+        $uploader     = $this->user();
+        $uploaderName = $uploader?->name ?? 'Kullanıcı';
+        $routePrefix  = $this->routePrefix($this->portalKey($uploader));
+
+        foreach ($assets as $asset) {
+            try {
+                $previewUrl = route($routePrefix . '.preview', $asset->id);
+            } catch (\Throwable $e) {
+                $previewUrl = '';
+            }
+
+            $bodyLines = ["{$uploaderName} size bir dosya bildirdi: «{$asset->name}»"];
+            if ($note !== '') {
+                $bodyLines[] = "Not: {$note}";
+            }
+            $body = implode("\n", $bodyLines);
+
+            $notifier->sendToMany($userIds, [
+                'channel'      => 'in_app',
+                'category'     => 'dam_mention',
+                'subject'      => "Yeni dosya: {$asset->name}",
+                'body'         => $body,
+                'source_type'  => 'digital_asset',
+                'source_id'    => (string) $asset->id,
+                'triggered_by' => 'dam_upload_mention',
+                'variables'    => [
+                    'asset_id'     => $asset->id,
+                    'asset_name'   => $asset->name,
+                    'uploader'     => $uploaderName,
+                    'note'         => $note,
+                    'preview_url'  => $previewUrl,
+                ],
+            ]);
+
+            \App\Models\DigitalAssetActivityLog::record(
+                'mention',
+                'asset',
+                $asset->id,
+                $asset->name,
+                $uploader,
+                ['user_ids' => $userIds, 'note' => $note],
+                $ip
+            );
+        }
     }
 
     public function update(Request $request, int $asset): RedirectResponse
@@ -744,21 +909,80 @@ class DigitalAssetController extends Controller
 
     public function folderUpdate(Request $request, int $folder): RedirectResponse
     {
-        $request->validate(['name' => ['required', 'string', 'max:150']]);
+        $request->validate([
+            'name'            => ['required', 'string', 'max:150'],
+            'description'     => ['nullable', 'string', 'max:1000'],
+            'color'           => ['nullable', 'string', 'max:7'],
+            'icon'            => ['nullable', 'string', 'max:50'],
+            'allowed_roles'   => ['nullable', 'array'],
+            'allowed_roles.*' => ['string', 'max:40'],
+        ]);
+
         $model   = DigitalAssetFolder::query()->findOrFail($folder);
         $oldName = $model->name;
-        $this->folders->rename($model, (string) $request->input('name'));
-        \App\Models\DigitalAssetActivityLog::record('folder_rename', 'folder', $model->id, $model->name, $this->user(), ['old_name' => $oldName], $request->ip());
+
+        // Ad değiştiyse rename servisini kullan (path yeniden yazılır)
+        if ($oldName !== (string) $request->input('name')) {
+            $this->folders->rename($model, (string) $request->input('name'));
+            \App\Models\DigitalAssetActivityLog::record('folder_rename', 'folder', $model->id, $model->name, $this->user(), ['old_name' => $oldName], $request->ip());
+        }
+
+        // Diğer alanlar doğrudan güncellenir
+        $changes = [];
+        if ($request->has('description')) {
+            if ($model->description !== $request->input('description')) {
+                $changes['description'] = true;
+                $model->description = $request->input('description') ?: null;
+            }
+        }
+        if ($request->has('color')) {
+            if ($model->color !== $request->input('color')) {
+                $changes['color'] = true;
+                $model->color = $request->input('color') ?: null;
+            }
+        }
+        if ($request->has('icon')) {
+            if ($model->icon !== $request->input('icon')) {
+                $changes['icon'] = true;
+                $model->icon = $request->input('icon') ?: null;
+            }
+        }
+
+        // allowed_roles — checkbox, gelmezse null
+        if ($request->has('allowed_roles') || $request->input('_has_roles_form')) {
+            $roles = $request->input('allowed_roles', []);
+            $clean = array_values(array_filter(array_map('trim', (array) $roles)));
+            $newRoles = empty($clean) ? null : $clean;
+            if ($model->allowed_roles !== $newRoles) {
+                $changes['allowed_roles'] = true;
+                $model->allowed_roles = $newRoles;
+                \App\Models\DigitalAssetActivityLog::record('folder_permissions', 'folder', $model->id, $model->name, $this->user(), ['new_roles' => $newRoles], $request->ip());
+            }
+        }
+
+        if (!empty($changes)) {
+            $model->save();
+        }
+
         return back()->with('status', 'Klasör güncellendi.');
     }
 
     public function folderDestroy(int $folder): RedirectResponse
     {
-        $model = DigitalAssetFolder::query()->findOrFail($folder);
-        $name  = $model->name;
+        $model    = DigitalAssetFolder::query()->findOrFail($folder);
+        $name     = $model->name;
+        $parentId = $model->parent_id;
+
         $this->folders->delete($model);
         \App\Models\DigitalAssetActivityLog::record('folder_delete', 'folder', $folder, $name, $this->user(), [], request()->ip());
-        return back()->with('status', 'Klasör silindi.');
+
+        // Silinen klasörde kaldık, back() 404 verir. Parent'a veya kök'e yönlendir.
+        $routePrefix = $this->routePrefix($this->portalKey($this->user()));
+        $target = $parentId
+            ? route($routePrefix . '.folder.show', $parentId)
+            : route($routePrefix . '.index');
+
+        return redirect($target)->with('status', 'Klasör silindi.');
     }
 
     /**
@@ -867,6 +1091,143 @@ class DigitalAssetController extends Controller
             'dealer'          => 'dealer.layouts.app',
             default           => abort(403),
         };
+    }
+
+    /**
+     * Upload modalındaki rol bazlı mention grupları.
+     *
+     * Her grup definition şeması:
+     *   label          : string   — görünen ad
+     *   icon           : string   — emoji ikon
+     *   roles          : string[] — hedef User.role değerleri
+     *   dealer_types   : string[] — (opsiyonel) dealer_type_code filtresi
+     *                    (sadece role=dealer için kullanılır; boşsa tüm bayiler)
+     *   hidden         : bool     — true ise UI'da gösterilmez, yalnızca rezerve
+     *                    (ileri tarihli alt birimler buraya eklenebilir)
+     *
+     * Yeni alt birim eklemek için: bu diziye key'li bir giriş ekle, count > 0 ise
+     * otomatik UI'da görünür. Hidden=true ise sadece rezerve (örn. prod hazır değil).
+     */
+    private function mentionGroupDefinitions(): array
+    {
+        return [
+            // ── Öğrenci & aday ──────────────────────────────
+            'students' => ['label' => 'Tüm Öğrenciler',      'roles' => [User::ROLE_STUDENT], 'icon' => '🎓'],
+            'guests'   => ['label' => 'Tüm Adaylar (Guest)', 'roles' => [User::ROLE_GUEST],   'icon' => '👤'],
+
+            // ── Bayi alt tipleri ────────────────────────────
+            // 1) Link dağıtan bayiler — lead_generation + referrer
+            'dealers_link' => [
+                'label'        => 'Link Dağıtan Bayiler',
+                'roles'        => [User::ROLE_DEALER],
+                'dealer_types' => ['lead_generation', 'referrer'],
+                'icon'         => '🔗',
+            ],
+            // 2) Freelance / Danışman bayiler
+            'dealers_freelance' => [
+                'label'        => 'Freelance Bayiler',
+                'roles'        => [User::ROLE_DEALER],
+                'dealer_types' => ['freelance_danisman'],
+                'icon'         => '🎯',
+            ],
+            // 3) Operasyonel / B2B partner bayiler
+            'dealers_operational' => [
+                'label'        => 'Operasyon Bayiler',
+                'roles'        => [User::ROLE_DEALER],
+                'dealer_types' => ['operational', 'b2b_partner'],
+                'icon'         => '🏢',
+            ],
+
+            // ── Ekip ────────────────────────────────────────
+            'seniors'         => ['label' => 'Tüm Eğitim Danışmanları', 'roles' => [User::ROLE_SENIOR], 'icon' => '👨‍🏫'],
+            'mentors'         => ['label' => 'Tüm Mentorlar',           'roles' => [User::ROLE_MENTOR], 'icon' => '🧭'],
+            'marketing_staff' => [
+                'label' => 'Marketing Ekibi',
+                'roles' => [User::ROLE_MARKETING_ADMIN, User::ROLE_MARKETING_STAFF, User::ROLE_SALES_ADMIN, User::ROLE_SALES_STAFF],
+                'icon'  => '📣',
+            ],
+
+            // ── İleri tarihli alt birimler (rezerve) ───────
+            // Örn. kurulacak "İçerik Ekibi", "Halkla İlişkiler", "Satış Bölge Liderleri"...
+            // Şimdilik hidden:true → UI'da gözükmez ama infrastructure hazır.
+            // 'content_team' => ['label' => 'İçerik Ekibi', 'roles' => [User::ROLE_MARKETING_STAFF], 'icon' => '✍️', 'hidden' => true],
+        ];
+    }
+
+    /**
+     * Upload modalındaki rol bazlı mention grupları (gerçek sayılarla).
+     * Her grup: ['label', 'icon', 'count', 'roles', 'dealer_types?']
+     */
+    private function buildMentionRoleGroups(int $companyId, int $excludeUserId): array
+    {
+        $groups = [];
+        foreach ($this->mentionGroupDefinitions() as $key => $def) {
+            if (!empty($def['hidden'])) continue;
+
+            $count = $this->countMentionGroupMembers($def, $companyId, $excludeUserId);
+            if ($count > 0) {
+                $groups[$key] = [
+                    'label'        => $def['label'],
+                    'icon'         => $def['icon'],
+                    'count'        => $count,
+                    'roles'        => $def['roles'],
+                    'dealer_types' => $def['dealer_types'] ?? null,
+                ];
+            }
+        }
+        return $groups;
+    }
+
+    private function countMentionGroupMembers(array $def, int $companyId, int $excludeUserId): int
+    {
+        return $this->mentionGroupQuery($def, $companyId, $excludeUserId)->count();
+    }
+
+    /**
+     * Tek bir grup tanımından User eloquent query builder döndürür.
+     * dealer_types filtresi varsa users.dealer_code → dealers.code ile join'leyerek
+     * dealers.dealer_type_code üzerinden süzer.
+     */
+    private function mentionGroupQuery(array $def, int $companyId, int $excludeUserId)
+    {
+        $q = User::query()
+            ->where('users.id', '!=', $excludeUserId)
+            ->whereIn('users.role', $def['roles'])
+            ->where('users.is_active', true)
+            ->when($companyId > 0, fn ($qq) => $qq->where('users.company_id', $companyId));
+
+        if (!empty($def['dealer_types']) && in_array(User::ROLE_DEALER, $def['roles'], true)) {
+            $q->whereIn('users.dealer_code', function ($sub) use ($def) {
+                $sub->select('code')
+                    ->from('dealers')
+                    ->whereIn('dealer_type_code', $def['dealer_types'])
+                    ->where('is_active', true);
+            });
+        }
+
+        return $q;
+    }
+
+    /**
+     * Rol grup key'lerini gerçek user_id listesine çevirir.
+     */
+    private function resolveRoleGroupUserIds(array $groupKeys, int $companyId, int $excludeUserId): array
+    {
+        $definitions = $this->mentionGroupDefinitions();
+        $ids = [];
+        foreach ($groupKeys as $key) {
+            if (!isset($definitions[$key])) continue;
+            if (!empty($definitions[$key]['hidden'])) continue; // güvenlik: gizli grupları resolve etme
+
+            $ids = array_merge(
+                $ids,
+                $this->mentionGroupQuery($definitions[$key], $companyId, $excludeUserId)
+                    ->pluck('users.id')
+                    ->map(fn ($v) => (int) $v)
+                    ->all()
+            );
+        }
+        return array_values(array_unique($ids));
     }
 
     private function routePrefix(string $portal): string

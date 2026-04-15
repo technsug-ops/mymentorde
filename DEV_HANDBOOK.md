@@ -866,4 +866,65 @@ php artisan queue:retry all
 
 ---
 
-*MentorDE Developer Handbook — Güncelleme: Nisan 2026*
+## 13. Son Teknik Değişiklikler (15 Nisan 2026)
+
+### DAM — `dam.folder.manage` izni Senior'a eklendi
+`app/Models/User.php::PERMISSIONS` içindeki `ROLE_SENIOR` listesine `dam.folder.manage` eklendi. Senior artık klasör oluşturabilir/taşıyabilir/silebilir. `dam.delete` ve `dam.admin` hâlâ sadece manager'da.
+
+### DAM — `digital_asset_folders.allowed_roles` her klasörde düzenlenebilir
+`DigitalAssetFolderService::treeForRole()` artık tree node'larında `description` ve `allowed_roles` alanlarını da taşır. Sidebar tree partial (`_folder_tree.blade.php`) inline ⚙ butonuyla her klasör için `_folder_edit_modal` açabilir.
+
+### DAM — `notify()` endpoint post-upload mention için
+`POST {portal}/digital-assets/{asset}/notify` — mevcut asset'i belirli user_id'lere veya rol gruplarına duyurmak için. `NotificationService::sendToMany()` ile `in_app` kanal, dedup 24h TTL.
+
+### DAM — `dispatchUploadMentions()` + rol grup resolver
+`BusinessContractController::resolveRoleGroupUserIds()` benzeri pattern ile `mentionGroupDefinitions` tek merkezi definisyonu. Dealer alt tipleri `dealer_types` filtresiyle `users.dealer_code → dealers.code → dealers.dealer_type_code` üzerinden çözülüyor.
+
+### IM — `ConversationService::unreadCountForUser` raw query düzeltmeleri
+Raw `DB::table()` sorgularında Eloquent global scope çalışmaz. Manuel filtreler eklendi:
+- `whereNull('c.deleted_at')` — silinen konuşmaları sayma
+- `where('c.is_archived', false)` — arşivli konuşmaları sayma
+- `where('m.is_system', false)` — sistem mesajları sayma
+- `where('m.sender_id', '!=', $userId)` — kendi mesajını sayma
+
+### IM — `destroyConversation` cache invalidation
+`ConversationService::destroyConversation()` önce tüm participant ID'lerini toplar, soft delete sonrası her biri için `invalidateUnreadCache()` çağrır. Aksi halde stale 60sn cache yüzünden badge düşmüyordu.
+
+### IM — bulk destroy endpoint
+`POST /im/conversations/bulk-destroy` — max 100 ID, her biri için `canPerform('destroy')` kontrolü, yetkisizler sessizce atlanır.
+
+### IM — Archive/destroy/bulk redirect fix
+`redirect()->route('im.index', ['tab' => 'internal'])` — `tab=internal` query param olmadan hub default olarak customer tab'ı açar.
+
+### IM — Mesaj baloncuğu nested max-width bug'ı
+`.hub-bubble { max-width: 95% }` + inner wrapper `max-width: 95%` cascade halinde baloncuğu ~45px genişliğe indiriyordu. Outer wrapper `max-width: 78%; min-width: 0` + bubble `max-width: 100%; overflow-wrap: anywhere` ile çözüldü. `word-break: break-word` yerine modern `overflow-wrap` kullanılıyor.
+
+### Business Contracts — `dealer_categories` 3 kategoriye
+`BusinessContractController::mentionGroupDefinitions()` benzeri pattern `dealerCategoryLabels` — 3 kategori + `template` alanı:
+- `lead_generation` → `['lead_generation', 'referrer']` → `dealer_referral_v1`
+- `freelance`       → `['freelance_danisman']`          → `dealer_referral_v1`
+- `operational`     → `['operational', 'b2b_partner']`  → `dealer_operations_v1`
+
+Auto-suggest: dropdown'da bayi seçilince `data-suggest-template` attribute'u `onTemplateChange()` tetikler.
+
+### Bulletin — OR mantığı (kritik fix)
+`CompanyBulletin::scopeVisibleToUser` AND tabanlıydı: `target_departments` dolu olan bulletin'ler herkesten gizleniyordu çünkü `users.department` kolonu yok. OR mantığına çevrildi:
+- `target_roles=null AND target_departments=null` → herkese açık
+- `target_roles JSON_CONTAINS role` → görür
+- `target_departments JSON_CONTAINS department` (varsa) → görür
+
+### Genel — Türkçe HTML5 validation
+`.hub-modal form` elementleri üzerinde `setCustomValidity()` override'ı. `invalid` event'te Türkçe mesaj, `input` event'te temizleme.
+
+### Genel — Çift submit engelleme
+`hub-modal form` submit'te tüm `button[type="submit"]` disable edilir + "⏳ Oluşturuluyor..." yazısı, 8sn timeout ile revert (hata durumunda kilit kalmaz).
+
+### Yeni dokümanlar
+- `docs/DEALER_ONBOARDING_PROCESS.md` + PDF
+- `docs/USER_CREATION_PROCESS.md` + PDF
+
+PDF üretimi için `_tmp_md2pdf.php` şablonu: `league/commonmark` + `barryvdh/laravel-dompdf`. Tek seferlik script, commit'e dahil değil.
+
+---
+
+*MentorDE Developer Handbook — Güncelleme: 15 Nisan 2026*

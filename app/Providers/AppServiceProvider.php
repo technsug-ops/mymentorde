@@ -108,6 +108,11 @@ class AppServiceProvider extends ServiceProvider
                         ->middleware(['permission:dam.download', 'throttle:10,1'])
                         ->name('bulk.download');
 
+                    // Post-upload mention — mevcut dosyayı x kişiye bildir
+                    \Illuminate\Support\Facades\Route::post('/{asset}/notify', [$ctrl, 'notify'])
+                        ->middleware(['permission:dam.upload', 'throttle:15,1'])
+                        ->name('notify');
+
                     // DAM4 — Share link management (auth required — harici access ayrı)
                     \Illuminate\Support\Facades\Route::post('/{asset}/share', [$ctrl, 'shareLinkCreate'])
                         ->middleware(['permission:dam.update', 'throttle:30,1'])

@@ -114,6 +114,7 @@ Route::middleware(['company.context', 'auth', 'task.access'])->group(function ()
     Route::post('/im/conversations/{convId}/unarchive', [InternalMessagingController::class, 'unarchive'])->name('im.unarchive');
     Route::delete('/im/conversations/{convId}', [InternalMessagingController::class, 'destroy'])->name('im.destroy');
     Route::post('/im/conversations/{convId}/destroy', [InternalMessagingController::class, 'destroy'])->name('im.destroy.post');
+    Route::post('/im/conversations/bulk-destroy', [InternalMessagingController::class, 'bulkDestroy'])->name('im.bulk.destroy');
     Route::post('/im/conversations/{convId}/members/{targetUserId}/promote', [InternalMessagingController::class, 'promoteMember'])->name('im.member.promote');
     Route::post('/im/conversations/{convId}/members/{targetUserId}/demote', [InternalMessagingController::class, 'demoteMember'])->name('im.member.demote');
     Route::get('/im/unread-count', [InternalMessagingController::class, 'unreadCount'])->name('im.unread.count');

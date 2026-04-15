@@ -37,6 +37,12 @@
                 <span style="color:var(--u-muted);">Dealer:</span>
                 <strong>{{ $contract->dealer?->name ?? '—' }}</strong>
             </div>
+            @if(!empty($dealerCategoryLabel ?? null))
+            <div style="display:flex;justify-content:space-between;">
+                <span style="color:var(--u-muted);">Kategori:</span>
+                <strong>{{ $dealerCategoryLabel }}</strong>
+            </div>
+            @endif
             @else
             <div style="display:flex;justify-content:space-between;">
                 <span style="color:var(--u-muted);">Çalışan:</span>

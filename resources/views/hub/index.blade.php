@@ -36,6 +36,11 @@ html,body{height:100%;overflow:hidden}
 .hub-item.active{background:#eef4fb}
 .hub-item.pinned{border-left:3px solid var(--u-brand,#4577c4)}
 .hub-item.overdue{border-left:3px solid var(--u-danger,#c0392b)}
+.hub-item.bulk-mode{position:relative;padding-left:30px}
+.hub-item.bulk-mode::before{content:"";position:absolute;left:9px;top:50%;transform:translateY(-50%);width:15px;height:15px;border:1.5px solid #cbd5e1;border-radius:4px;background:#fff;transition:background .12s,border-color .12s}
+.hub-item.bulk-mode.bulk-selected::before{background:#dc2626;border-color:#dc2626}
+.hub-item.bulk-mode.bulk-selected::after{content:"✓";position:absolute;left:11px;top:50%;transform:translateY(-55%);color:#fff;font-size:10px;font-weight:700;line-height:1}
+.hub-item.bulk-mode.bulk-selected{background:#fef2f2 !important}
 .hub-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
 .hub-avatar.type-guest{background:#e67e22}
 .hub-avatar.type-student{background:#27ae60}
@@ -65,7 +70,7 @@ html,body{height:100%;overflow:hidden}
 .hub-msg-row.staff{justify-content:flex-end}
 .hub-msg-row.customer{justify-content:flex-start}
 .hub-msg-row.system-msg{justify-content:center}
-.hub-bubble{padding:7px 11px;border-radius:10px;font-size:13px;line-height:1.45;max-width:95%;word-break:break-word}
+.hub-bubble{padding:7px 11px;border-radius:10px;font-size:13px;line-height:1.45;max-width:100%;overflow-wrap:anywhere;word-break:normal;white-space:pre-wrap}
 .hub-msg-row.staff .hub-bubble{background:#dcf8c6;border-radius:10px 0 10px 10px}
 .hub-msg-row.customer .hub-bubble{background:var(--u-card,#fff);border:1px solid var(--u-line);border-radius:0 10px 10px 10px}
 .hub-msg-row.system-msg .hub-bubble{background:#f0f0f0;color:#888;font-size:11px;padding:3px 10px;border-radius:6px}
@@ -235,6 +240,10 @@ window.__hub = {
                             class="btn ok"
                             style="padding:5px 11px;font-weight:600;cursor:pointer"
                             title="Yeni konuşma başlat">+ Yeni</button>
+                    <button type="button" id="hubBulkToggleBtn"
+                            class="btn alt"
+                            style="padding:5px 9px;font-weight:600;cursor:pointer"
+                            title="Birden fazla konuşma seç ve sil">☑ Seç</button>
                     <div id="hubNewConvMenu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:1px solid var(--u-line);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.12);min-width:160px;z-index:50;padding:4px;">
                         <a href="#hubModalDm"    style="display:block;padding:8px 11px;text-decoration:none;color:var(--u-text);font-size:13px;border-radius:6px" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">💬 Direkt Mesaj</a>
                         <a href="#hubModalGroup" style="display:block;padding:8px 11px;text-decoration:none;color:var(--u-text);font-size:13px;border-radius:6px" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">👥 Grup Konuşması</a>
@@ -242,6 +251,14 @@ window.__hub = {
                     </div>
                 </div>
             </div>
+            {{-- Toplu silme action bar — selection mode aktifken ve ≥1 seçili olunca görünür --}}
+            <div id="hubBulkBar" style="display:none;padding:8px 11px;background:#fef2f2;border-bottom:1px solid #fecaca;align-items:center;gap:8px;">
+                <span id="hubBulkCount" style="font-size:12px;font-weight:700;color:#991b1b;">0 seçili</span>
+                <div style="flex:1"></div>
+                <button type="button" id="hubBulkDeleteBtn" class="btn" style="padding:5px 11px;font-size:11px;font-weight:600;background:#dc2626;color:#fff;border-color:#dc2626">🗑 Sil</button>
+                <button type="button" id="hubBulkCancelBtn" class="btn alt" style="padding:5px 11px;font-size:11px;font-weight:600">İptal</button>
+            </div>
+            <form id="hubBulkDestroyForm" method="POST" action="{{ route('im.bulk.destroy') }}" style="display:none">@csrf</form>
             {{-- Filter pills (Slack-style) — tek listede tip filtresi --}}
             @php
                 $showArchived = $internalData['showArchived'] ?? false;
@@ -476,9 +493,91 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // ── Toplu silme / seçim modu ──
+    var hubBulkMode = false;
+    var hubBulkToggleBtn = document.getElementById('hubBulkToggleBtn');
+    var hubBulkBar       = document.getElementById('hubBulkBar');
+    var hubBulkCount     = document.getElementById('hubBulkCount');
+    var hubBulkDeleteBtn = document.getElementById('hubBulkDeleteBtn');
+    var hubBulkCancelBtn = document.getElementById('hubBulkCancelBtn');
+    var hubBulkForm      = document.getElementById('hubBulkDestroyForm');
+
+    function _hubBulkSelected() {
+        return document.querySelectorAll('#hubInternalList .hub-item.bulk-selected');
+    }
+    function _hubBulkUpdate() {
+        var n = _hubBulkSelected().length;
+        if (hubBulkCount) hubBulkCount.textContent = n + ' seçili';
+        if (hubBulkBar)   hubBulkBar.style.display = (hubBulkMode && n > 0) ? 'flex' : 'none';
+    }
+    function _hubBulkExit() {
+        hubBulkMode = false;
+        document.querySelectorAll('#hubInternalList .hub-item').forEach(function(it){
+            it.classList.remove('bulk-selected');
+            it.classList.remove('bulk-mode');
+        });
+        if (hubBulkToggleBtn) {
+            hubBulkToggleBtn.textContent = '☑ Seç';
+            hubBulkToggleBtn.classList.remove('ok');
+            hubBulkToggleBtn.classList.add('alt');
+        }
+        _hubBulkUpdate();
+    }
+    if (hubBulkToggleBtn) {
+        hubBulkToggleBtn.addEventListener('click', function(){
+            hubBulkMode = !hubBulkMode;
+            if (hubBulkMode) {
+                document.querySelectorAll('#hubInternalList .hub-item').forEach(function(it){
+                    it.classList.add('bulk-mode');
+                });
+                hubBulkToggleBtn.textContent = '✕ Kapat';
+                hubBulkToggleBtn.classList.remove('alt');
+                hubBulkToggleBtn.classList.add('ok');
+            } else {
+                _hubBulkExit();
+            }
+            _hubBulkUpdate();
+        });
+    }
+    if (hubBulkCancelBtn) {
+        hubBulkCancelBtn.addEventListener('click', _hubBulkExit);
+    }
+    if (hubBulkDeleteBtn && hubBulkForm) {
+        hubBulkDeleteBtn.addEventListener('click', function(){
+            var selected = _hubBulkSelected();
+            if (selected.length === 0) return;
+            if (!confirm('DİKKAT: Seçilen ' + selected.length + ' konuşma KALICI olarak silinecek. Geri alınamaz. Devam?')) return;
+
+            // Eski hidden input'ları temizle, yenilerini ekle
+            hubBulkForm.querySelectorAll('input[name="conversation_ids[]"]').forEach(function(i){ i.remove(); });
+            selected.forEach(function(it){
+                var id = it.getAttribute('data-hub-conv');
+                if (!id) return;
+                var hid = document.createElement('input');
+                hid.type = 'hidden';
+                hid.name = 'conversation_ids[]';
+                hid.value = id;
+                hubBulkForm.appendChild(hid);
+            });
+            hubBulkForm.submit();
+        });
+    }
+
     // ── Global delegated click handler ──
     document.addEventListener('click', function (e) {
         var t;
+
+        // Selection mode aktifken hub-item'a tıklama → select toggle (aç değil)
+        if (hubBulkMode) {
+            t = e.target.closest('#hubInternalList .hub-item');
+            if (t) {
+                e.preventDefault();
+                e.stopPropagation();
+                t.classList.toggle('bulk-selected');
+                _hubBulkUpdate();
+                return;
+            }
+        }
 
         t = e.target.closest('[data-hub-tab]');
         if (t) { hubSwitchTab(t.dataset.hubTab); return; }
