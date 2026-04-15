@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             ContentHubExtraSeeder::class,
             DocumentCategoryFromConfigSeeder::class,
             GuestRegistrationSpouseFieldsSeeder::class,
+            GermanyCitySeeder::class,
         ]);
     }
 }
