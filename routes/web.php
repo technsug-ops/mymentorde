@@ -24,6 +24,48 @@ Route::middleware(['auth', 'manager.role'])->group(function (): void {
         \Illuminate\Support\Facades\Artisan::call('optimize:clear');
         return back()->with('status', 'Cache temizlendi.');
     })->middleware('throttle:5,1')->name('system.cache-clear');
+
+    // Post-deploy: migration + cache clear tek buton.
+    // KAS shared hosting'de SSH yok, artisan manuel çalıştırılamıyor.
+    // Deploy sonrası manager buradan migrate + cache clear tetikler.
+    Route::post('/system/post-deploy', function () {
+        $output = [];
+        try {
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            $output['migrate'] = trim(\Illuminate\Support\Facades\Artisan::output());
+        } catch (\Throwable $e) {
+            $output['migrate_error'] = $e->getMessage();
+        }
+        try {
+            \Illuminate\Support\Facades\Artisan::call('cache:clear');
+            $output['cache_clear'] = trim(\Illuminate\Support\Facades\Artisan::output());
+        } catch (\Throwable $e) {
+            $output['cache_clear_error'] = $e->getMessage();
+        }
+        try {
+            \Illuminate\Support\Facades\Artisan::call('view:clear');
+            $output['view_clear'] = trim(\Illuminate\Support\Facades\Artisan::output());
+        } catch (\Throwable $e) {
+            $output['view_clear_error'] = $e->getMessage();
+        }
+        try {
+            \Illuminate\Support\Facades\Artisan::call('config:clear');
+            $output['config_clear'] = trim(\Illuminate\Support\Facades\Artisan::output());
+        } catch (\Throwable $e) {
+            $output['config_clear_error'] = $e->getMessage();
+        }
+        try {
+            \Illuminate\Support\Facades\Artisan::call('route:clear');
+            $output['route_clear'] = trim(\Illuminate\Support\Facades\Artisan::output());
+        } catch (\Throwable $e) {
+            $output['route_clear_error'] = $e->getMessage();
+        }
+        return response()->json(['ok' => true, 'output' => $output]);
+    })->middleware('throttle:5,1')->name('system.post-deploy');
+
+    Route::get('/system/post-deploy', function () {
+        return view('system.post-deploy');
+    })->name('system.post-deploy.show');
 });
 Route::get('/go/{code}', TrackedLinkRedirectController::class)->name('tracked-link.redirect');
 
