@@ -133,6 +133,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/revenue-analytics', [ManagerAnalyticsController::class, 'revenueAnalytics'])->name('manager.revenue-analytics');
     Route::get('/manager/feedback-analytics',        [ManagerAnalyticsController::class, 'feedbackAnalytics'])->name('manager.feedback-analytics');
     Route::get('/manager/feedback-analytics/export', [ManagerAnalyticsController::class, 'feedbackExport'])->name('manager.feedback-analytics.export');
+    Route::get('/manager/conversion-funnel',         [ManagerAnalyticsController::class, 'conversionFunnel'])->name('manager.conversion-funnel');
     Route::get('/manager/scheduled-reports',                          [ManagerScheduledReportController::class, 'index'])->name('manager.scheduled-reports');
     Route::post('/manager/scheduled-reports',                         [ManagerScheduledReportController::class, 'store'])->name('manager.scheduled-reports.store');
     Route::put('/manager/scheduled-reports/{scheduledReport}',        [ManagerScheduledReportController::class, 'update'])->name('manager.scheduled-reports.update');

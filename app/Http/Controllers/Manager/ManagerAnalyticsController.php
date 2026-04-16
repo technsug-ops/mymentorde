@@ -104,6 +104,163 @@ class ManagerAnalyticsController extends Controller
         return view('manager.notification-stats', compact('stats'));
     }
 
+    public function conversionFunnel(Request $request)
+    {
+        [$start, $end] = $this->resolveFilters($request);
+        $sourceFilter = $request->query('source', 'all');
+
+        // Stage mapping: her lead_status kendi level'ine atanır.
+        // Daha ilerideki level kullanıcı, öncekileri de "geçmiştir" varsayımı (cumulative).
+        $statusToLevel = [
+            'new'               => 1,
+            'contacted'         => 1,
+            'evaluating'        => 2,
+            'meeting_scheduled' => 2,
+            'in_progress'       => 3,
+            'docs_pending'      => 3,
+            'contract_signed'   => 4,
+            'converted'         => 5,
+        ];
+        $stageDef = [
+            1 => ['key' => 'lead',      'label' => 'Yeni Lead',    'icon' => '👤', 'color' => '#3b82f6'],
+            2 => ['key' => 'qualified', 'label' => 'Nitelikli',    'icon' => '✅', 'color' => '#8b5cf6'],
+            3 => ['key' => 'inproc',    'label' => 'Süreç İçinde', 'icon' => '⚙️', 'color' => '#f59e0b'],
+            4 => ['key' => 'signed',    'label' => 'Sözleşme',     'icon' => '📝', 'color' => '#06b6d4'],
+            5 => ['key' => 'student',   'label' => 'Öğrenci',      'icon' => '🎓', 'color' => '#16a34a'],
+            6 => ['key' => 'paid',      'label' => 'Ödeme Aktif',  'icon' => '💶', 'color' => '#0891b2'],
+        ];
+
+        $query = GuestApplication::whereBetween('created_at', [$start, $end]);
+        if ($sourceFilter !== 'all') {
+            $query->where('lead_source', $sourceFilter);
+        }
+        $all = $query->get([
+            'id', 'lead_status', 'lead_source', 'lost_reason', 'lost_note',
+            'converted_student_id', 'created_at', 'converted_at', 'assigned_senior_email',
+        ]);
+
+        // ── Funnel stage counts (cumulative) ──────────────────────────────
+        $stageCounts = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0];
+        $studentIds = [];
+        foreach ($all as $g) {
+            $lvl = $statusToLevel[$g->lead_status] ?? 0;
+            if ($lvl === 0) {
+                continue;
+            }
+            for ($i = 1; $i <= $lvl; $i++) {
+                $stageCounts[$i]++;
+            }
+            if ($g->converted_student_id) {
+                $studentIds[] = $g->converted_student_id;
+            }
+        }
+        $stageCounts[6] = empty($studentIds) ? 0 : StudentRevenue::whereIn('student_id', $studentIds)
+            ->where('total_earned', '>', 0)
+            ->distinct('student_id')
+            ->count('student_id');
+
+        $topCount = $stageCounts[1] ?: 1;
+        $funnel = [];
+        foreach ($stageDef as $level => $def) {
+            $count = $stageCounts[$level] ?? 0;
+            $pctTotal = $topCount > 0 ? round($count / $topCount * 100, 1) : 0;
+            $prevCount = $level > 1 ? ($stageCounts[$level - 1] ?? 0) : $topCount;
+            $pctStep = $prevCount > 0 ? round($count / $prevCount * 100, 1) : 0;
+            $funnel[$level] = array_merge($def, [
+                'count'    => $count,
+                'pctTotal' => $pctTotal,
+                'pctStep'  => $pctStep,
+            ]);
+        }
+
+        $overallConv = $topCount > 0 ? round($stageCounts[5] / $topCount * 100, 1) : 0;
+
+        // ── Source breakdown ──────────────────────────────────────────────
+        $bySource = $all->groupBy(fn ($g) => $g->lead_source ?: 'unknown')
+            ->map(function ($grp) use ($statusToLevel, $studentIds) {
+                $sc = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
+                foreach ($grp as $g) {
+                    $lvl = $statusToLevel[$g->lead_status] ?? 0;
+                    if ($lvl === 0) {
+                        continue;
+                    }
+                    for ($i = 1; $i <= $lvl; $i++) {
+                        $sc[$i]++;
+                    }
+                }
+                $total = $grp->count();
+                return [
+                    'total'      => $total,
+                    'converted'  => $sc[5],
+                    'convPct'    => $total > 0 ? round($sc[5] / $total * 100, 1) : 0,
+                    'stages'     => $sc,
+                ];
+            })
+            ->sortByDesc('total');
+
+        // ── Senior breakdown ──────────────────────────────────────────────
+        $bySenior = $all->filter(fn ($g) => !empty($g->assigned_senior_email))
+            ->groupBy('assigned_senior_email')
+            ->map(function ($grp) use ($statusToLevel) {
+                $converted = $grp->where('lead_status', 'converted')->count();
+                $total = $grp->count();
+                return [
+                    'total'     => $total,
+                    'converted' => $converted,
+                    'convPct'   => $total > 0 ? round($converted / $total * 100, 1) : 0,
+                ];
+            })
+            ->sortByDesc('convPct');
+
+        // ── Lost reasons ──────────────────────────────────────────────────
+        $lostReasons = $all->filter(fn ($g) => !empty($g->lost_reason))
+            ->groupBy('lost_reason')
+            ->map(fn ($grp) => $grp->count())
+            ->sortDesc();
+
+        // ── Avg time from new → converted (days) ──────────────────────────
+        $convertedItems = $all->filter(fn ($g) => $g->converted_at && $g->created_at);
+        $avgDaysToConvert = $convertedItems->count() > 0
+            ? round($convertedItems->avg(fn ($g) => \Carbon\Carbon::parse($g->created_at)->diffInDays(\Carbon\Carbon::parse($g->converted_at))), 1)
+            : 0;
+
+        // ── Revenue from converted leads (period) ─────────────────────────
+        $totalRevenue = empty($studentIds) ? 0 : (float) StudentRevenue::whereIn('student_id', $studentIds)->sum('total_earned');
+
+        // ── Daily new lead trend (last 30d, regardless of filter) ─────────
+        $leadTrend = collect(range(29, 0))->map(function (int $ago) {
+            $d = now()->subDays($ago);
+            return [
+                'label' => $d->format('d.m'),
+                'count' => GuestApplication::whereDate('created_at', $d->toDateString())->count(),
+            ];
+        });
+
+        $sourceOptions = GuestApplication::selectRaw('DISTINCT lead_source')
+            ->whereNotNull('lead_source')
+            ->pluck('lead_source')
+            ->values();
+
+        return view('manager.conversion-funnel', [
+            'funnel'           => $funnel,
+            'stageDef'         => $stageDef,
+            'overallConv'      => $overallConv,
+            'totalLeads'       => $topCount,
+            'totalRevenue'     => $totalRevenue,
+            'avgDaysToConvert' => $avgDaysToConvert,
+            'bySource'         => $bySource,
+            'bySenior'         => $bySenior,
+            'lostReasons'      => $lostReasons,
+            'leadTrend'        => $leadTrend,
+            'sourceOptions'    => $sourceOptions,
+            'filters'          => [
+                'start_date' => $start->toDateString(),
+                'end_date'   => $end->toDateString(),
+                'source'     => $sourceFilter,
+            ],
+        ]);
+    }
+
     public function feedbackAnalytics(Request $request)
     {
         [$start, $end, $senior] = $this->resolveFilters($request);
