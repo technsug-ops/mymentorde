@@ -15,7 +15,7 @@
             <div class="field"><label>Seri Adı *</label><input name="name" type="text" required></div>
             <div class="field"><label>Tetikleyici *</label>
                 <select name="trigger_event" required>
-                    <option value="guest_registered">Misafir Kayıt</option>
+                    <option value="guest_registered">Aday Öğrenci Kayıt</option>
                     <option value="contract_signed">Sözleşme İmzalandı</option>
                     <option value="package_selected">Paket Seçildi</option>
                 </select>

@@ -364,7 +364,7 @@ function seniorBannerClick(id, slug) {
                     <div>
                         <strong style="font-size:var(--tx-sm);">{{ $name }}</strong>
                         <div class="muted" style="font-size:var(--tx-xs);margin-top:2px;">
-                            <span class="badge {{ $isStudent ? 'info' : 'warn' }}">{{ $isStudent ? '🎓 Öğrenci' : '👋 Misafir' }}</span>
+                            <span class="badge {{ $isStudent ? 'info' : 'warn' }}">{{ $isStudent ? '🎓 Öğrenci' : '👋 Aday Öğrenci' }}</span>
                             @php
                                 $appTypeLabels = [
                                     'yurtdisi'   => 'Yurtdışı',

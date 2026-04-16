@@ -183,7 +183,7 @@
                     </td>
                     <td>
                         <div style="font-weight:700;font-size:13px;">{{ $p->student_id }}</div>
-                        <div style="font-size:11px;color:var(--u-muted);">{{ $studentNames[$p->student_id] ?? (str_starts_with($p->student_id,'GUEST-') ? 'Misafir Başvuru' : '—') }}</div>
+                        <div style="font-size:11px;color:var(--u-muted);">{{ $studentNames[$p->student_id] ?? (str_starts_with($p->student_id,'GUEST-') ? 'Aday Öğrenci Başvuru' : '—') }}</div>
                     </td>
                     <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $p->description }}">
                         {{ $p->description }}

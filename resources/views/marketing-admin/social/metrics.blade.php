@@ -166,7 +166,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
                     <li><strong>Takipçi Büyümesi %:</strong> Ay içi net artış oranı — negatifse içerik stratejisini gözden geçir</li>
                     <li><strong>Engagement %:</strong> (Beğeni+Yorum+Paylaşım) / Gösterim × 100 — %2+ iyi, %5+ mükemmel</li>
                     <li><strong>Click-Through:</strong> Link tıklamaları — kampanya trafiğini ölçer</li>
-                    <li><strong>Misafir Kayıt:</strong> Sosyal medyadan dönüşen başvuru sayısı</li>
+                    <li><strong>Aday Öğrenci Kayıt:</strong> Sosyal medyadan dönüşen başvuru sayısı</li>
                 </ul>
             </div>
             <div>

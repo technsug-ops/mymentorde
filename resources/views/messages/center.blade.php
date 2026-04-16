@@ -149,7 +149,7 @@
                     <option value="{{ $a->id }}" @selected((int)($filters['advisor_id'] ?? 0) === (int)$a->id)>{{ $a->name }} ({{ $a->role }})</option>
                 @endforeach
             </select>
-            <input type="text" class="btn" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Ara (student/guest/mesaj)">
+            <input type="text" class="btn" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Ara (öğrenci / aday / mesaj)">
             <button class="btn btn-primary" type="submit">Filtrele</button>
         </form>
     </section>
@@ -217,7 +217,8 @@
                     @php $unreadForAdvisor = (int) ($unreadAdvisorMap[$t->id] ?? 0); @endphp
                     <a href="{{ route('messages.center', array_merge(request()->query(), ['thread_id' => $t->id])) }}" class="mc-thread-item {{ $isActive ? 'active' : '' }}">
                         <div class="mc-thread-head">
-                            <span class="mc-thread-id">#{{ $t->id }} {{ strtoupper($t->thread_type) }}</span>
+                            @php $threadTypeLabel = ['guest' => 'ADAY ÖĞRENCİ', 'student' => 'ÖĞRENCİ'][$t->thread_type] ?? strtoupper($t->thread_type); @endphp
+                            <span class="mc-thread-id">#{{ $t->id }} {{ $threadTypeLabel }}</span>
                             <span class="mc-thread-status">{{ $t->status }}</span>
                         </div>
                         <label class="mc-thread-select-row">
@@ -227,7 +228,7 @@
                                 <span style="margin-left:auto;display:inline-block;padding:2px 8px;border-radius:999px;background:#ffe9d2;border:1px solid #f6c48b;color:#7f4100;font-size:10px;font-weight:600;">{{ $unreadForAdvisor }} okunmamış</span>
                             @endif
                         </label>
-                        <div class="mc-thread-meta">guest: {{ $t->guest_application_id ?: '-' }} | student: {{ $t->student_id ?: '-' }}</div>
+                        <div class="mc-thread-meta">aday: {{ $t->guest_application_id ?: '-' }} | öğrenci: {{ $t->student_id ?: '-' }}</div>
                         <div class="mc-thread-meta">dept: {{ $t->department ?: '-' }} | sla: {{ (int)($t->sla_hours ?: 24) }}s | advisor: #{{ $t->advisor_user_id ?: '-' }}</div>
                         <div class="mc-thread-meta">son: {{ $t->last_message_at ?: '-' }} | due: {{ $t->next_response_due_at ?: '-' }}</div>
                         <div class="mc-thread-preview">{{ $t->last_message_preview ?: '-' }}</div>
