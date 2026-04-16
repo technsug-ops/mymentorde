@@ -265,7 +265,7 @@
 {{-- ── Form Body ── --}}
 <div class="srf-body">
     <div class="srf-center">
-        <form method="POST" action="{{ route('student.registration.submit') }}" id="studentRegForm">
+        <form method="POST" action="{{ route('student.registration.submit') }}" id="studentRegForm" novalidate>
             @csrf
 
             {{-- Hidden nav for JS compat --}}

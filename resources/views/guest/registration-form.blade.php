@@ -278,7 +278,7 @@
 {{-- ── Form Body ── --}}
 <div class="grf-body">
     <div class="grf-center">
-        <form id="guestRegistrationForm" method="POST"
+        <form id="guestRegistrationForm" method="POST" novalidate
               action="{{ route('guest.registration.autosave') }}"
               data-ajax-save-url="{{ route('guest.registration.ajax-save') }}">
             @csrf
