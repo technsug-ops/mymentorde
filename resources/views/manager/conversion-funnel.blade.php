@@ -157,7 +157,9 @@
 
     <div class="card" style="padding:16px;">
         <div class="card-title" style="font-weight:700;margin-bottom:12px;">📅 Yeni Lead Trendi (son 30 gün, filtreden bağımsız)</div>
-        <canvas id="leadTrendChart" height="100"></canvas>
+        <div style="position:relative;height:180px;width:100%;">
+            <canvas id="leadTrendChart"></canvas>
+        </div>
     </div>
 </div>
 

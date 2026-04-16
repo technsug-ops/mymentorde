@@ -104,7 +104,9 @@
 <div class="grid2" style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;">
     <div class="card" style="padding:16px;">
         <div class="card-title" style="font-weight:700;margin-bottom:12px;">📈 Günlük Trend (30 gün)</div>
-        <canvas id="trendChart" height="120"></canvas>
+        <div style="position:relative;height:220px;width:100%;">
+            <canvas id="trendChart"></canvas>
+        </div>
     </div>
     <div class="card" style="padding:16px;">
         <div class="card-title" style="font-weight:700;margin-bottom:12px;">⭐ Puan Dağılımı</div>
