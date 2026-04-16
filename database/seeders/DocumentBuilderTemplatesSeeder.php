@@ -31,7 +31,7 @@ class DocumentBuilderTemplatesSeeder extends Seeder
         $templates[] = [
             'doc_type' => 'cv',
             'language' => 'de',
-            'name'     => 'Lebenslauf — Klasik Tabellarisch',
+            'name'     => 'Klasik Tabellarisch',
             'is_default' => true,
             'body'     => <<<'TXT'
 LEBENSLAUF
@@ -79,7 +79,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'cv',
             'language' => 'de',
-            'name'     => 'Lebenslauf — Modern Kompakt',
+            'name'     => 'Modern Kompakt',
             'is_default' => false,
             'body'     => <<<'TXT'
 # LEBENSLAUF
@@ -135,7 +135,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'cv',
             'language' => 'de',
-            'name'     => 'Lebenslauf — Quereinstieg / Akademisch Detaylı',
+            'name'     => 'Quereinstieg / Akademisch Detaylı',
             'is_default' => false,
             'body'     => <<<'TXT'
 # LEBENSLAUF
@@ -206,7 +206,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'motivation',
             'language' => 'de',
-            'name'     => 'Motivationsschreiben — Teknik Bölüm (Mühendislik)',
+            'name'     => 'Teknik Bölüm (Mühendislik)',
             'is_default' => true,
             'body'     => <<<'TXT'
 {{first_name}} {{last_name}}
@@ -247,7 +247,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'motivation',
             'language' => 'de',
-            'name'     => 'Motivationsschreiben — Sozial/Wirtschaftswissenschaften',
+            'name'     => 'Sosyal/Wirtschaftswissenschaften',
             'is_default' => false,
             'body'     => <<<'TXT'
 {{first_name}} {{last_name}}
@@ -285,7 +285,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'motivation',
             'language' => 'de',
-            'name'     => 'Motivationsschreiben — Master / İleri Studium',
+            'name'     => 'Master / İleri Studium',
             'is_default' => false,
             'body'     => <<<'TXT'
 {{first_name}} {{last_name}}
@@ -329,7 +329,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'reference',
             'language' => 'de',
-            'name'     => 'Empfehlungsschreiben — Lise Öğretmeni',
+            'name'     => 'Lise Öğretmeni',
             'is_default' => true,
             'body'     => <<<'TXT'
 {{high_school_name}}
@@ -378,7 +378,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'reference',
             'language' => 'de',
-            'name'     => 'Empfehlungsschreiben — Üniversite Hocası',
+            'name'     => 'Üniversite Hocası',
             'is_default' => false,
             'body'     => <<<'TXT'
 {{previous_university}}
@@ -425,7 +425,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'reference',
             'language' => 'de',
-            'name'     => 'Empfehlungsschreiben — Staj/İşveren',
+            'name'     => 'Staj/İşveren',
             'is_default' => false,
             'body'     => <<<'TXT'
 {{company_name}}
@@ -475,7 +475,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'cover_letter',
             'language' => 'de',
-            'name'     => 'Anschreiben — Üniversite Başvurusu',
+            'name'     => 'Üniversite Başvurusu',
             'is_default' => true,
             'body'     => <<<'TXT'
 {{first_name}} {{last_name}}
@@ -515,7 +515,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'cover_letter',
             'language' => 'de',
-            'name'     => 'Anschreiben — Studienkolleg Başvurusu',
+            'name'     => 'Studienkolleg Başvurusu',
             'is_default' => false,
             'body'     => <<<'TXT'
 {{first_name}} {{last_name}}
@@ -555,7 +555,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'cover_letter',
             'language' => 'de',
-            'name'     => 'Anschreiben — Ausländerbehörde / Botschaft Vize',
+            'name'     => 'Vize Başvurusu (Botschaft)',
             'is_default' => false,
             'body'     => <<<'TXT'
 {{first_name}} {{last_name}}
@@ -604,7 +604,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'sperrkonto',
             'language' => 'de',
-            'name'     => 'Sperrkonto — Fintiba/Coracle E-posta Başvurusu',
+            'name'     => 'Fintiba/Coracle E-posta',
             'is_default' => true,
             'body'     => <<<'TXT'
 Von: {{email}}
@@ -644,7 +644,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'sperrkonto',
             'language' => 'de',
-            'name'     => 'Sperrkonto — Deutsche Bank Resmi Başvuru',
+            'name'     => 'Deutsche Bank Resmi',
             'is_default' => false,
             'body'     => <<<'TXT'
 {{first_name}} {{last_name}}
@@ -694,7 +694,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'sperrkonto',
             'language' => 'de',
-            'name'     => 'Sperrkonto — Coracle/Expatrio Begleitschreiben',
+            'name'     => 'Coracle/Expatrio Begleitschreiben',
             'is_default' => false,
             'body'     => <<<'TXT'
 {{first_name}} {{last_name}}
@@ -748,7 +748,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'housing',
             'language' => 'de',
-            'name'     => 'Wohnheim — Studentenwerk Standart Başvuru',
+            'name'     => 'Standart Başvuru',
             'is_default' => true,
             'body'     => <<<'TXT'
 {{first_name}} {{last_name}}
@@ -799,7 +799,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'housing',
             'language' => 'de',
-            'name'     => 'Wohnheim — Sosyal Gerekçeli Öncelik Talebi',
+            'name'     => 'Sosyal Öncelik Talebi',
             'is_default' => false,
             'body'     => <<<'TXT'
 {{first_name}} {{last_name}}
@@ -851,7 +851,7 @@ TXT,
         $templates[] = [
             'doc_type' => 'housing',
             'language' => 'de',
-            'name'     => 'Wohnheim — Warteliste / Alternatif Sorgusu',
+            'name'     => 'Warteliste / Alternatif Sorgusu',
             'is_default' => false,
             'body'     => <<<'TXT'
 {{first_name}} {{last_name}}
