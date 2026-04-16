@@ -282,31 +282,53 @@
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-label">📊 Analitik & Raporlar</div>
-                <a href="/manager/conversion-funnel"
-                   class="nav-link {{ request()->is('manager/conversion-funnel*') ? 'active' : '' }}">
-                    <span class="nav-icon">🎯</span> Dönüşüm Hunisi
-                </a>
-                <a href="/manager/senior-performance"
-                   class="nav-link {{ request()->is('manager/senior-performance*') ? 'active' : '' }}">
-                    <span class="nav-icon">👤</span> Danışman Performansı
-                </a>
-                <a href="/manager/ticket-analytics"
-                   class="nav-link {{ request()->is('manager/ticket-analytics*') ? 'active' : '' }}">
-                    <span class="nav-icon">🎫</span> Ticket Analitik
-                </a>
-                <a href="/manager/feedback-analytics"
-                   class="nav-link {{ request()->is('manager/feedback-analytics*') ? 'active' : '' }}">
-                    <span class="nav-icon">💬</span> Geri Bildirim Analitik
-                </a>
-                <a href="/manager/revenue-analytics"
-                   class="nav-link {{ request()->is('manager/revenue-analytics*') ? 'active' : '' }}">
-                    <span class="nav-icon">💰</span> Gelir Analitik
-                </a>
-                <a href="/manager/notification-stats"
-                   class="nav-link {{ request()->is('manager/notification-stats*') ? 'active' : '' }}">
-                    <span class="nav-icon">🔔</span> Bildirim İstatistik
-                </a>
+                @php
+                    $isAnalyticsOpen = request()->is('manager/conversion-funnel*')
+                        || request()->is('manager/senior-performance*')
+                        || request()->is('manager/ticket-analytics*')
+                        || request()->is('manager/feedback-analytics*')
+                        || request()->is('manager/revenue-analytics*')
+                        || request()->is('manager/notification-stats*');
+                @endphp
+                <button type="button"
+                        id="analytics-btn"
+                        class="nav-link {{ $isAnalyticsOpen ? 'active' : '' }}"
+                        style="display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;cursor:pointer;text-align:left;">
+                    <span><span class="nav-icon">📊</span> Analitik & Raporlar</span>
+                    <span id="analytics-caret" style="font-size:10px;transition:transform .2s;{{ $isAnalyticsOpen ? 'transform:rotate(180deg)' : '' }}">▾</span>
+                </button>
+                <div id="analytics-sub" style="{{ $isAnalyticsOpen ? '' : 'display:none;' }}padding-left:12px;">
+                    <a href="/manager/conversion-funnel"
+                       class="nav-link {{ request()->is('manager/conversion-funnel*') ? 'active' : '' }}"
+                       style="font-size:12px;padding:6px 12px;">
+                        <span class="nav-icon" style="font-size:14px;">🎯</span> Dönüşüm Hunisi
+                    </a>
+                    <a href="/manager/senior-performance"
+                       class="nav-link {{ request()->is('manager/senior-performance*') ? 'active' : '' }}"
+                       style="font-size:12px;padding:6px 12px;">
+                        <span class="nav-icon" style="font-size:14px;">👤</span> Danışman Performansı
+                    </a>
+                    <a href="/manager/ticket-analytics"
+                       class="nav-link {{ request()->is('manager/ticket-analytics*') ? 'active' : '' }}"
+                       style="font-size:12px;padding:6px 12px;">
+                        <span class="nav-icon" style="font-size:14px;">🎫</span> Ticket Analitik
+                    </a>
+                    <a href="/manager/feedback-analytics"
+                       class="nav-link {{ request()->is('manager/feedback-analytics*') ? 'active' : '' }}"
+                       style="font-size:12px;padding:6px 12px;">
+                        <span class="nav-icon" style="font-size:14px;">💬</span> Geri Bildirim
+                    </a>
+                    <a href="/manager/revenue-analytics"
+                       class="nav-link {{ request()->is('manager/revenue-analytics*') ? 'active' : '' }}"
+                       style="font-size:12px;padding:6px 12px;">
+                        <span class="nav-icon" style="font-size:14px;">💰</span> Gelir Analitik
+                    </a>
+                    <a href="/manager/notification-stats"
+                       class="nav-link {{ request()->is('manager/notification-stats*') ? 'active' : '' }}"
+                       style="font-size:12px;padding:6px 12px;">
+                        <span class="nav-icon" style="font-size:14px;">🔔</span> Bildirim İstatistik
+                    </a>
+                </div>
             </div>
 
             <div class="nav-section">
@@ -622,6 +644,13 @@ document.addEventListener('alpine:init',function(){
 document.getElementById('sozlesme-btn')?.addEventListener('click', function() {
     var sub   = document.getElementById('sozlesme-sub');
     var caret = document.getElementById('sozlesme-caret');
+    var open  = sub.style.display !== 'none';
+    sub.style.display      = open ? 'none' : 'block';
+    caret.style.transform  = open ? '' : 'rotate(180deg)';
+});
+document.getElementById('analytics-btn')?.addEventListener('click', function() {
+    var sub   = document.getElementById('analytics-sub');
+    var caret = document.getElementById('analytics-caret');
     var open  = sub.style.display !== 'none';
     sub.style.display      = open ? 'none' : 'block';
     caret.style.transform  = open ? '' : 'rotate(180deg)';
