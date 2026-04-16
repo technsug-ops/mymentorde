@@ -141,7 +141,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'student.role', 'throt
 
     // ── Geri Bildirim & NPS ──────────────────────────────────────────────────
     Route::get('/student/feedback',  [StudentProgressController::class,  'feedback'])->name('student.feedback');
-    Route::post('/student/feedback', [StudentInteractionController::class, 'storeFeedback'])->middleware('throttle:5,60')->name('student.feedback.store');
+    Route::post('/student/feedback', [StudentInteractionController::class, 'storeFeedback'])->middleware('throttle:30,60')->name('student.feedback.store');
     Route::post('/student/nps',      [StudentInteractionController::class, 'storeNps'])->middleware('throttle:3,1')->name('student.nps.store');
 
     // ── Bilgi Sayfaları ──────────────────────────────────────────────────────
