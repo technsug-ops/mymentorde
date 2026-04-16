@@ -252,8 +252,9 @@
 </div>
 @endif
 
-{{-- Okunmamış Duyurular --}}
+{{-- Okunmamış Duyurular + reactions --}}
 @if($unreadBulletins->isNotEmpty())
+@php $rxnAll = \App\Models\CompanyBulletin::REACTIONS; @endphp
 <div class="card" style="padding:16px 18px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
         <p class="sd-section-title" style="margin:0;">📢 Okunmamış Duyurular</p>
@@ -261,25 +262,55 @@
     </div>
     <div class="sd-list">
         @foreach($unreadBulletins as $bulletin)
-        <div class="sd-item">
-            @if($bulletin->is_pinned)
-                <span style="font-size:16px;">📌</span>
-            @else
-                <span style="font-size:16px;">📣</span>
-            @endif
-            <div class="sd-item-body">
-                <div class="sd-item-title">
-                    <a href="/bulletins/{{ $bulletin->id }}" style="color:inherit;text-decoration:none;">{{ $bulletin->title }}</a>
+        @php
+            $rxnCounts = $bulletin->reactions->groupBy('emoji')->map->count();
+            $myEmoji = $myReactions[$bulletin->id] ?? null;
+        @endphp
+        <div class="sd-item" style="flex-direction:column;align-items:stretch;gap:6px;">
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+                @if($bulletin->is_pinned)
+                    <span style="font-size:16px;">📌</span>
+                @else
+                    <span style="font-size:16px;">📣</span>
+                @endif
+                <div class="sd-item-body" style="flex:1;">
+                    <div class="sd-item-title">
+                        <a href="/bulletins/{{ $bulletin->id }}" style="color:inherit;text-decoration:none;">{{ $bulletin->title }}</a>
+                    </div>
+                    <div class="sd-item-meta">
+                        @if($bulletin->category) {{ ucfirst($bulletin->category) }} · @endif
+                        {{ optional($bulletin->published_at)->diffForHumans() ?? '-' }}
+                    </div>
                 </div>
-                <div class="sd-item-meta">
-                    @if($bulletin->category) {{ ucfirst($bulletin->category) }} · @endif
-                    {{ optional($bulletin->published_at)->diffForHumans() ?? '-' }}
-                </div>
+            </div>
+            <div id="staff-rxn-{{ $bulletin->id }}" style="display:grid;grid-template-columns:repeat(5, minmax(0, 1fr));gap:4px;margin-top:4px;">
+                @foreach($rxnAll as $rxnEmo)
+                @php $cnt = $rxnCounts[$rxnEmo] ?? 0; @endphp
+                <button type="button" data-emoji="{{ $rxnEmo }}" data-bid="{{ $bulletin->id }}"
+                        onclick="staffReact({{ $bulletin->id }},'{{ $rxnEmo }}',this)"
+                        style="display:flex;align-items:center;justify-content:center;gap:2px;padding:0;border-radius:6px;font-size:13px;border:1px solid {{ $myEmoji === $rxnEmo ? '#1e40af' : 'rgba(0,0,0,.15)' }};background:{{ $myEmoji === $rxnEmo ? 'rgba(30,64,175,.12)' : '#fff' }};cursor:pointer;height:22px;width:100%;min-width:0;box-sizing:border-box;overflow:hidden;font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif;">
+                    <span>{{ $rxnEmo }}</span>@if($cnt > 0)<span style="font-size:9px;color:rgba(0,0,0,.5);font-weight:700;">{{ $cnt }}</span>@endif
+                </button>
+                @endforeach
             </div>
         </div>
         @endforeach
     </div>
 </div>
+<script nonce="{{ $cspNonce ?? '' }}">
+window.staffReact = async function(bid, emoji, btn) {
+    try {
+        var csrf = document.querySelector('meta[name=csrf-token]')?.content || '';
+        var res = await fetch('/bulletins/' + bid + '/react', {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify({ emoji: emoji }),
+            credentials: 'same-origin'
+        });
+        if (res.ok) location.reload();
+    } catch (e) { console.error(e); }
+};
+</script>
 @endif
 
 @endsection

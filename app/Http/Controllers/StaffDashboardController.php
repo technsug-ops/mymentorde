@@ -46,17 +46,23 @@ class StaffDashboardController extends Controller
                 ->limit(5)
                 ->get(['id', 'subject', 'status', 'priority', 'created_at']);
 
-            // Okunmamış bültenler
+            // Okunmamış bültenler + reactions
             $readIds = BulletinRead::where('user_id', $uid)->pluck('bulletin_id');
-            $unreadBulletins = CompanyBulletin::where(fn($q) => $q->whereNull('company_id')->orWhere('company_id', $cid))
+            $unreadBulletins = CompanyBulletin::with('reactions')
+                ->where(fn($q) => $q->whereNull('company_id')->orWhere('company_id', $cid))
                 ->where('published_at', '<=', now())
                 ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
                 ->whereNotIn('id', $readIds)
                 ->orderByDesc('is_pinned')->orderByDesc('published_at')
                 ->limit(5)
-                ->get(['id', 'title', 'category', 'published_at', 'is_pinned']);
+                ->get();
+            // Kullanıcının mevcut reaksiyonları (bu kullanıcı hangi emoji'yi seçmiş)
+            $myReactions = \App\Models\BulletinReaction::where('user_id', $uid)
+                ->whereIn('bulletin_id', $unreadBulletins->pluck('id'))
+                ->pluck('emoji', 'bulletin_id')
+                ->toArray();
 
-            return compact('todayTasks', 'overdueTasks', 'openTickets', 'unreadBulletins');
+            return compact('todayTasks', 'overdueTasks', 'openTickets', 'unreadBulletins', 'myReactions');
         });
 
         // KPI sayıları

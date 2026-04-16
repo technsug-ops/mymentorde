@@ -330,8 +330,18 @@
                                     <textarea name="{{ $key }}" rows="4" placeholder="{{ $placeholder }}"
                                               data-required="{{ $required ? '1' : '0' }}" {{ $formLocked ? 'disabled' : '' }}>{{ (string)$value }}</textarea>
                                 @elseif($type === 'date')
+                                    @php
+                                        $futureOnly = in_array($key, [
+                                            'university_start_target_date',
+                                            'planned_start_date',
+                                            'target_start_date',
+                                        ], true);
+                                        $dateMin = $futureOnly ? now()->format('Y-m-d') : null;
+                                    @endphp
                                     <input type="date" name="{{ $key }}" value="{{ $value }}"
-                                           data-required="{{ $required ? '1' : '0' }}" {{ $formLocked ? 'disabled' : '' }}>
+                                           @if($dateMin) min="{{ $dateMin }}" @endif
+                                           data-required="{{ $required ? '1' : '0' }}" {{ $formLocked ? 'disabled' : '' }}
+                                           @if($futureOnly) oninvalid="this.setCustomValidity('Bu tarih bugünden eski olamaz.')" oninput="this.setCustomValidity('')" @endif>
                                 @else
                                     @php
                                         // B11: harf-only alanlar (şehir, ilçe, il, doğum yeri)
@@ -552,6 +562,24 @@
         if(isNaN(d)) return '';
         return new Date(d.getFullYear() + years, d.getMonth(), d.getDate()).toISOString().slice(0,10);
     }
+    function _setEduErrStudent(el, msg){
+        if(!el) return;
+        var fg = el.closest('.srf-form-group') || el.parentNode;
+        var holder = fg ? fg.querySelector('.edu-err') : null;
+        if(msg){
+            el.style.borderColor = '#dc2626';
+            if(!holder){
+                holder = document.createElement('div');
+                holder.className = 'edu-err';
+                holder.style.cssText = 'color:#dc2626;font-size:12px;margin-top:4px;font-weight:500;';
+                fg.appendChild(holder);
+            }
+            holder.textContent = msg;
+        } else {
+            el.style.borderColor = '';
+            if(holder) holder.remove();
+        }
+    }
     function _validateEduDatesStudent(){
         var form = document.querySelector('form');
         if(!form) return;
@@ -559,31 +587,41 @@
             var sEl = form.querySelector('[name="' + r[0] + '"]');
             var eEl = form.querySelector('[name="' + r[1] + '"]');
             if(!sEl || !eEl) return;
-            if(_isHiddenStudent(sEl) || _isHiddenStudent(eEl)) { eEl.setCustomValidity(''); return; }
+            if(_isHiddenStudent(sEl) || _isHiddenStudent(eEl)) { eEl.setCustomValidity(''); _setEduErrStudent(eEl,''); return; }
             var s = (sEl.value || '').trim();
             var e = (eEl.value || '').trim();
-            if(!s || !e) { eEl.setCustomValidity(''); return; }
-            var minEnd = _addYearsStudent(s, r[2]);
-            if(e < s) {
-                eEl.setCustomValidity(r[3] + ' bitiş tarihi başlama tarihinden önce olamaz.');
-            } else if(minEnd && e < minEnd) {
-                eEl.setCustomValidity(r[3] + ' bitiş tarihi başlamadan en az ' + r[2] + ' yıl sonra olmalı.');
-                eEl.min = minEnd;
-            } else {
-                eEl.setCustomValidity('');
+            if(s){
+                var minEnd = _addYearsStudent(s, r[2]);
                 if(minEnd) eEl.min = minEnd;
+            }
+            if(e){
+                var maxStart = _addYearsStudent(e, -r[2]);
+                if(maxStart) sEl.max = maxStart;
+            }
+            if(!s || !e) { eEl.setCustomValidity(''); _setEduErrStudent(eEl,''); return; }
+            var minEnd2 = _addYearsStudent(s, r[2]);
+            if(e < s) {
+                var msg = r[3] + ' bitiş tarihi başlama tarihinden önce olamaz.';
+                eEl.setCustomValidity(msg); _setEduErrStudent(eEl, msg);
+            } else if(minEnd2 && e < minEnd2) {
+                var msg2 = r[3] + ' bitiş tarihi başlamadan en az ' + r[2] + ' yıl sonra olmalı.';
+                eEl.setCustomValidity(msg2); _setEduErrStudent(eEl, msg2);
+            } else {
+                eEl.setCustomValidity(''); _setEduErrStudent(eEl,'');
             }
         });
         _eduOrderChainStudent.forEach(function(pair){
             var aEl = form.querySelector('[name="' + pair[0] + '"]');
             var bEl = form.querySelector('[name="' + pair[1] + '"]');
             if(!aEl || !bEl) return;
-            if(_isHiddenStudent(aEl) || _isHiddenStudent(bEl)) { bEl.setCustomValidity(''); return; }
+            if(_isHiddenStudent(aEl) || _isHiddenStudent(bEl)) return;
             var a = (aEl.value || '').trim();
             var b = (bEl.value || '').trim();
+            if(a) bEl.min = a;
             if(a && b && b < a) {
-                bEl.setCustomValidity(pair[2]);
-                bEl.min = a;
+                bEl.setCustomValidity(pair[2]); _setEduErrStudent(bEl, pair[2]);
+            } else if(bEl.validity.customError && bEl.validationMessage === pair[2]) {
+                bEl.setCustomValidity(''); _setEduErrStudent(bEl,'');
             }
         });
     }

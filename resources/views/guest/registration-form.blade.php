@@ -340,7 +340,17 @@
                                         @elseif($type === 'textarea')
                                             <textarea class="{{ $required ? 'final-required' : '' }}" name="{{ $key }}" rows="4" maxlength="{{ $max }}" placeholder="{{ $placeholder }}" data-required="{{ $required ? '1' : '0' }}">{{ $value }}</textarea>
                                         @elseif($type === 'date')
-                                            <input class="{{ $required ? 'final-required' : '' }}" type="date" name="{{ $key }}" value="{{ $value }}" data-required="{{ $required ? '1' : '0' }}">
+                                            @php
+                                                // Gelecek tarih zorunlu alanlar — hedef/planlanan tarihler geçmişte olamaz
+                                                $futureOnly = in_array($key, [
+                                                    'university_start_target_date',
+                                                    'planned_start_date',
+                                                    'target_start_date',
+                                                ], true);
+                                                $dateMin = $futureOnly ? now()->format('Y-m-d') : null;
+                                            @endphp
+                                            <input class="{{ $required ? 'final-required' : '' }}" type="date" name="{{ $key }}" value="{{ $value }}" @if($dateMin) min="{{ $dateMin }}" @endif data-required="{{ $required ? '1' : '0' }}"
+                                                @if($futureOnly) data-future-only="1" oninvalid="this.setCustomValidity('Bu tarih bugünden eski olamaz.')" oninput="this.setCustomValidity('')" @endif>
                                         @else
                                             @php
                                                 // B11: harf-only alanlar (şehir, ilçe, il, doğum yeri) — sayı/sembol kabul etmesin
@@ -717,27 +727,55 @@
         if(isNaN(d)) return '';
         return new Date(d.getFullYear() + years, d.getMonth(), d.getDate()).toISOString().slice(0,10);
     }
+    function _setEduErr(el, msg){
+        if(!el) return;
+        var fg = el.closest('.form-group');
+        var holder = fg ? fg.querySelector('.edu-err') : null;
+        if(msg){
+            el.style.borderColor = '#dc2626';
+            if(!holder){
+                holder = document.createElement('div');
+                holder.className = 'edu-err';
+                holder.style.cssText = 'color:#dc2626;font-size:12px;margin-top:4px;font-weight:500;';
+                (fg || el.parentNode).appendChild(holder);
+            }
+            holder.textContent = msg;
+        } else {
+            el.style.borderColor = '';
+            if(holder) holder.remove();
+        }
+    }
     function _validateEduDates(){
         var f = document.getElementById('guestRegistrationForm');
         if(!f) return;
-        // 1) Her kademe için min duration
+        // 1) Her kademe için min duration + dinamik start max (end - minYears)
         _eduDurationRules.forEach(function(r){
             var sEl = f.querySelector('[name="' + r[0] + '"]');
             var eEl = f.querySelector('[name="' + r[1] + '"]');
             if(!sEl || !eEl) return;
-            if(_isHidden(sEl) || _isHidden(eEl)) { eEl.setCustomValidity(''); return; }
+            if(_isHidden(sEl) || _isHidden(eEl)) { eEl.setCustomValidity(''); _setEduErr(eEl,''); return; }
             var s = (sEl.value || '').trim();
             var e = (eEl.value || '').trim();
-            if(!s || !e) { eEl.setCustomValidity(''); return; }
-            var minEnd = _addYears(s, r[2]);
-            if(e < s) {
-                eEl.setCustomValidity(r[3] + ' bitiş tarihi başlama tarihinden önce olamaz.');
-            } else if(minEnd && e < minEnd) {
-                eEl.setCustomValidity(r[3] + ' bitiş tarihi başlamadan en az ' + r[2] + ' yıl sonra olmalı.');
-                eEl.min = minEnd;
-            } else {
-                eEl.setCustomValidity('');
+            // Start seçildiyse end.min = start + minYears
+            if(s){
+                var minEnd = _addYears(s, r[2]);
                 if(minEnd) eEl.min = minEnd;
+            }
+            // End seçildiyse start.max = end - minYears
+            if(e){
+                var maxStart = _addYears(e, -r[2]);
+                if(maxStart) sEl.max = maxStart;
+            }
+            if(!s || !e) { eEl.setCustomValidity(''); _setEduErr(eEl,''); return; }
+            var minEnd2 = _addYears(s, r[2]);
+            if(e < s) {
+                var msg = r[3] + ' bitiş tarihi başlama tarihinden önce olamaz.';
+                eEl.setCustomValidity(msg); _setEduErr(eEl, msg);
+            } else if(minEnd2 && e < minEnd2) {
+                var msg2 = r[3] + ' bitiş tarihi başlamadan en az ' + r[2] + ' yıl sonra olmalı.';
+                eEl.setCustomValidity(msg2); _setEduErr(eEl, msg2);
+            } else {
+                eEl.setCustomValidity(''); _setEduErr(eEl,'');
             }
         });
         // 2) Kademeler arası sıralama (next kademe start >= prev kademe end)
@@ -745,14 +783,14 @@
             var aEl = f.querySelector('[name="' + pair[0] + '"]');
             var bEl = f.querySelector('[name="' + pair[1] + '"]');
             if(!aEl || !bEl) return;
-            if(_isHidden(aEl) || _isHidden(bEl)) { bEl.setCustomValidity(''); return; }
+            if(_isHidden(aEl) || _isHidden(bEl)) return;
             var a = (aEl.value || '').trim();
             var b = (bEl.value || '').trim();
+            if(a) bEl.min = a;
             if(a && b && b < a) {
-                bEl.setCustomValidity(pair[2]);
-                bEl.min = a;
+                bEl.setCustomValidity(pair[2]); _setEduErr(bEl, pair[2]);
             } else if(bEl.validity.customError && bEl.validationMessage === pair[2]) {
-                bEl.setCustomValidity('');
+                bEl.setCustomValidity(''); _setEduErr(bEl,'');
             }
         });
     }
