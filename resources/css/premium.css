@@ -337,13 +337,79 @@ body {
 .card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r); box-shadow: var(--shadow);
+  padding: 16px;
 }
 .card-head {
   padding: 16px 20px; border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
 }
-.card-title { font-size: var(--tx-base); font-weight: 700; color: var(--text); }
+.card-title { font-size: var(--tx-base); font-weight: 700; color: var(--text); margin-bottom: 10px; }
 .card-body  { padding: 20px; }
+
+/* ─── Page Header (analytics pages) ─── */
+.page-header {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--r, 12px);
+  box-shadow: var(--shadow);
+}
+.page-header h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text, #0f172a);
+  letter-spacing: -0.01em;
+}
+.page-header .muted,
+.page-header .u-muted {
+  color: var(--muted, #64748b);
+  font-size: 12px; margin-top: 2px;
+}
+@media (max-width: 640px) {
+  .page-header h1 { font-size: 17px; }
+}
+
+/* ─── Grid helpers (unified with v2) ─── */
+.grid2 {
+  display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 14px; margin-bottom: 14px;
+}
+.grid3 {
+  display: grid; grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 14px; margin-bottom: 14px;
+}
+.grid4 {
+  display: grid; grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 14px; margin-bottom: 14px;
+}
+.grid5 {
+  display: grid; grid-template-columns: repeat(5, minmax(0,1fr));
+  gap: 12px; margin-bottom: 14px;
+}
+@media (max-width: 900px) {
+  .grid4, .grid5 { grid-template-columns: repeat(2, 1fr); }
+  .grid3 { grid-template-columns: 1fr; }
+  .grid2 { grid-template-columns: 1fr; }
+}
+
+/* ─── Standalone KPI number ─── */
+.kpi {
+  font-size: 22px; font-weight: 800; color: var(--c-accent, #1e40af);
+  line-height: 1.1; margin-top: 4px;
+}
+
+/* ─── Generic list/item (used in analytics tables) ─── */
+.list { display: flex; flex-direction: column; }
+.list .item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--border, #f1f5f9);
+  gap: 12px;
+}
+.list .item:last-child { border-bottom: 0; }
 
 /* ─── Badge ─── */
 .badge {
