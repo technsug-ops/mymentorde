@@ -68,7 +68,7 @@ class ManagerAnalyticsController extends Controller
         $collectionRate    = $totalPackagePrice > 0 ? round($totalEarned / $totalPackagePrice * 100, 1) : 0;
 
         $dealerCommissions = DealerStudentRevenue::whereBetween('created_at', [$start, $end])
-            ->selectRaw('SUM(commission_amount) as total_commission, COUNT(DISTINCT dealer_code) as dealer_count')
+            ->selectRaw('SUM(total_earned) as total_commission, COUNT(DISTINCT dealer_id) as dealer_count')
             ->first();
 
         return view('manager.revenue-analytics', [
@@ -517,6 +517,7 @@ class ManagerAnalyticsController extends Controller
             ->map(fn ($g) => [
                 'count'     => $g->count(),
                 'avgRating' => round((float) $g->where('rating', '>', 0)->avg('rating'), 2),
+                'avgNps'    => round((float) $g->where('nps_score', '>=', 0)->avg('nps_score'), 1),
                 'label'     => GuestFeedback::STEP_LABELS[$g->first()->process_step] ?? $g->first()->process_step,
             ])->sortByDesc('count');
 

@@ -141,7 +141,7 @@
                 <div style="font-weight:600;text-transform:capitalize;">{{ $typeOptions[$type] ?? $type }}</div>
                 <div class="u-muted" style="font-size:11px;">{{ $data['count'] }} submission</div>
             </div>
-            <div style="text-align:right;">
+            <div style="text-align:right;min-width:120px;">
                 @if($data['avgRating'] > 0)
                 <div style="font-weight:700;color:{{ $data['avgRating'] >= 4 ? '#16a34a' : ($data['avgRating'] >= 3 ? '#f59e0b' : '#dc2626') }};">
                     ⭐ {{ number_format($data['avgRating'], 2, ',', '') }}
@@ -149,6 +149,9 @@
                 @endif
                 @if($data['avgNps'] > 0)
                 <div class="u-muted" style="font-size:11px;">NPS ort: {{ number_format($data['avgNps'], 1, ',', '') }}</div>
+                @endif
+                @if($data['avgRating'] <= 0 && $data['avgNps'] <= 0)
+                <div class="u-muted" style="font-size:12px;">— puan yok</div>
                 @endif
             </div>
         </div>
@@ -165,11 +168,17 @@
                 <div style="font-weight:600;">{{ $data['label'] }}</div>
                 <div class="u-muted" style="font-size:11px;">{{ $data['count'] }} submission</div>
             </div>
-            <div style="text-align:right;">
+            <div style="text-align:right;min-width:120px;">
                 @if($data['avgRating'] > 0)
                 <div style="font-weight:700;color:{{ $data['avgRating'] >= 4 ? '#16a34a' : ($data['avgRating'] >= 3 ? '#f59e0b' : '#dc2626') }};">
                     ⭐ {{ number_format($data['avgRating'], 2, ',', '') }}
                 </div>
+                @endif
+                @if(!empty($data['avgNps']) && $data['avgNps'] > 0)
+                <div class="u-muted" style="font-size:11px;">NPS ort: {{ number_format($data['avgNps'], 1, ',', '') }}</div>
+                @endif
+                @if($data['avgRating'] <= 0 && (empty($data['avgNps']) || $data['avgNps'] <= 0))
+                <div class="u-muted" style="font-size:12px;">— puan yok</div>
                 @endif
             </div>
         </div>
