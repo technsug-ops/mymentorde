@@ -41,7 +41,7 @@ class CompanyBulletin extends Model
     ];
 
     // Desteklenen reaksiyon emojileri
-    public const REACTIONS = ['🎉', '👍', '❤️', '🙌', '🏆'];
+    public const REACTIONS = ['🎉', '👍', '❤️', '👏', '🏆'];
 
 
     public function author()

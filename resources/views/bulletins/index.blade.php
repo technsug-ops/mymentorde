@@ -44,16 +44,17 @@
 .board-pill:hover  { background:rgba(92,74,56,.16); }
 .board-pill.active { background:#5c4a38; color:#fff; border-color:#5c4a38; }
 
-/* ── Masonry ─────────────────────────────────────────────────────── */
-.postit-grid { columns:4 260px; column-gap:18px; }
-@media (max-width:1100px) { .postit-grid { columns:3 240px; } }
-@media (max-width:760px)  { .postit-grid { columns:2 220px; } }
-@media (max-width:480px)  { .postit-grid { columns:1; } }
+/* ── Masonry — kompakt grid ──────────────────────────────────────── */
+.postit-grid { columns:5 210px; column-gap:12px; }
+@media (max-width:1200px) { .postit-grid { columns:4 200px; } }
+@media (max-width:900px)  { .postit-grid { columns:3 200px; } }
+@media (max-width:600px)  { .postit-grid { columns:2 180px; } }
+@media (max-width:420px)  { .postit-grid { columns:1; } }
 
-/* ── Post-it ─────────────────────────────────────────────────────── */
+/* ── Post-it — kompakt ───────────────────────────────────────────── */
 .postit {
     break-inside:avoid; display:inline-block; width:100%;
-    margin-bottom:18px; padding:22px 15px 13px;
+    margin-bottom:12px; padding:14px 12px 10px;
     border-radius:2px 2px 7px 7px; position:relative;
     box-shadow:2px 3px 0 rgba(0,0,0,.10), 4px 7px 16px rgba(0,0,0,.13);
     transition:transform .18s, box-shadow .18s; cursor:default;
@@ -94,23 +95,25 @@
 .pi-done { position:absolute; top:8px; right:10px; font-size:11px; color:rgba(0,0,0,.28); font-weight:700; }
 .pi-pin-badge { position:absolute; top:8px; left:9px; font-size:11px; color:rgba(0,0,0,.35); }
 
-/* ── İçerik ──────────────────────────────────────────────────────── */
-.pi-cat   { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; color:rgba(0,0,0,.45); margin-bottom:6px; }
-.pi-title { font-size:18px; font-weight:800; color:rgba(0,0,0,.82); line-height:1.4; margin-bottom:10px; word-break:break-word; }
+/* ── İçerik — kompakt ────────────────────────────────────────────── */
+.pi-cat   { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:rgba(0,0,0,.45); margin-bottom:4px; }
+.pi-title { font-size:13px; font-weight:800; color:rgba(0,0,0,.82); line-height:1.35; margin-bottom:6px; word-break:break-word; }
 .postit.read .pi-title { opacity:.55; }
-.pi-body  { font-size:15px; color:rgba(0,0,0,.72); line-height:1.75; white-space:pre-wrap; word-break:break-word; overflow:hidden; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; }
+.pi-body  { font-size:12px; color:rgba(0,0,0,.72); line-height:1.55; white-space:pre-wrap; word-break:break-word; overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
 .pi-body.expanded { -webkit-line-clamp:unset; display:block; }
-.pi-expand { font-size:13px; font-weight:700; color:rgba(0,0,0,.40); background:none; border:none; padding:3px 0 0; cursor:pointer; text-decoration:underline dotted; }
+.pi-expand { font-size:11px; font-weight:700; color:rgba(0,0,0,.40); background:none; border:none; padding:2px 0 0; cursor:pointer; text-decoration:underline dotted; }
 
-.pi-meta { font-size:12px; color:rgba(0,0,0,.45); margin-top:10px; display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
-.pi-av   { width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:9px; font-weight:900; color:#fff; background:rgba(0,0,0,.28); flex-shrink:0; }
+.pi-meta { font-size:10px; color:rgba(0,0,0,.45); margin-top:6px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.pi-av   { width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:8px; font-weight:900; color:#fff; background:rgba(0,0,0,.28); flex-shrink:0; }
 
 /* ── Reaksiyonlar ────────────────────────────────────────────────── */
-.pi-rxns { display:flex; gap:5px; flex-wrap:wrap; margin-top:12px; padding-top:10px; border-top:1px solid rgba(0,0,0,.10); }
-.pi-rxn  { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; font-size:15px; border:1.5px solid rgba(0,0,0,.10); background:rgba(255,255,255,.55); cursor:pointer; transition:all .12s; user-select:none; font-family:inherit; }
-.pi-rxn:hover { background:rgba(255,255,255,.88); transform:scale(1.12); }
-.pi-rxn.mine  { background:rgba(0,0,0,.12); border-color:rgba(0,0,0,.25); font-weight:800; }
-.pi-rxn .rc   { font-size:12px; color:rgba(0,0,0,.45); font-weight:700; min-width:6px; }
+/* Reactions — grid 5 eşit kolon, garantili tek satır */
+.pi-rxns { display:grid !important; grid-template-columns:repeat(5, minmax(0, 1fr)) !important; gap:4px !important; margin-top:8px !important; padding-top:6px !important; border-top:1px solid rgba(0,0,0,.10) !important; width:100% !important; }
+.pi-rxn  { display:flex !important; align-items:center !important; justify-content:center !important; gap:2px !important; padding:0 !important; border-radius:6px !important; font-size:13px !important; border:1px solid rgba(0,0,0,.15) !important; background:#fff !important; cursor:pointer !important; user-select:none !important; height:24px !important; width:100% !important; min-width:0 !important; box-sizing:border-box !important; overflow:hidden !important; font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif !important; }
+.pi-rxn:hover { background:#f8fafc !important; }
+.pi-rxn.mine  { background:rgba(30,64,175,.12) !important; border-color:#1e40af !important; font-weight:800 !important; }
+.pi-rxn .rc   { font-size:9px !important; color:rgba(0,0,0,.5) !important; font-weight:700 !important; }
+.pi-rxn .rc:empty { display:none !important; }
 
 /* ── Acil ────────────────────────────────────────────────────────── */
 .acil-band {

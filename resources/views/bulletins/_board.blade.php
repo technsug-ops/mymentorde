@@ -36,15 +36,16 @@ $acilList  = $bulletins->where('category','acil');
 .emb-pill:hover  { background:rgba(92,74,56,.15); }
 .emb-pill.active { background:#5c4a38; color:#fff; border-color:#5c4a38; }
 
-/* ── Masonry ─────────────────────────────────────────────────────── */
-.emb-grid { columns:3 260px; column-gap:16px; }
-@media (max-width:900px) { .emb-grid { columns:2 240px; } }
+/* ── Masonry — daha sıkışık grid ─────────────────────────────────── */
+.emb-grid { columns:4 200px; column-gap:12px; }
+@media (max-width:1200px) { .emb-grid { columns:3 200px; } }
+@media (max-width:900px) { .emb-grid { columns:2 200px; } }
 @media (max-width:520px) { .emb-grid { columns:1; } }
 
-/* ── Post-it ─────────────────────────────────────────────────────── */
+/* ── Post-it — kompakt ───────────────────────────────────────────── */
 .epi {
     break-inside:avoid; display:inline-block; width:100%;
-    margin-bottom:16px; padding:20px 14px 12px;
+    margin-bottom:10px; padding:14px 12px 10px;
     border-radius:2px 2px 6px 6px; position:relative;
     box-shadow:2px 3px 0 rgba(0,0,0,.10), 4px 6px 14px rgba(0,0,0,.14);
     transition:transform .18s, box-shadow .18s; cursor:default;
@@ -93,23 +94,52 @@ $acilList  = $bulletins->where('category','acil');
 .epi-done { position:absolute; top:7px; right:9px; font-size:9px; color:rgba(0,0,0,.25); font-weight:700; }
 .epi-pin-badge { position:absolute; top:7px; left:8px; font-size:9px; color:rgba(0,0,0,.30); }
 
-/* ── İçerik ──────────────────────────────────────────────────────── */
-.epi-cat   { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; color:rgba(0,0,0,.48); margin-bottom:6px; }
-.epi-title { font-size:16px; font-weight:800; color:rgba(0,0,0,.82); line-height:1.4; margin-bottom:10px; word-break:break-word; }
+/* ── İçerik — kompakt ────────────────────────────────────────────── */
+.epi-cat   { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:rgba(0,0,0,.48); margin-bottom:4px; }
+.epi-title { font-size:13px; font-weight:800; color:rgba(0,0,0,.82); line-height:1.35; margin-bottom:6px; word-break:break-word; }
 .epi.read .epi-title { opacity:.52; }
-.epi-body  { font-size:14px; color:rgba(0,0,0,.72); line-height:1.75; white-space:pre-wrap; word-break:break-word; overflow:hidden; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; }
+.epi-body  { font-size:12px; color:rgba(0,0,0,.72); line-height:1.55; white-space:pre-wrap; word-break:break-word; overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
 .epi-body.expanded { -webkit-line-clamp:unset; display:block; }
-.epi-more  { font-size:13px; font-weight:700; color:rgba(0,0,0,.40); background:none; border:none; padding:3px 0 0; cursor:pointer; text-decoration:underline dotted; }
+.epi-more  { font-size:11px; font-weight:700; color:rgba(0,0,0,.40); background:none; border:none; padding:2px 0 0; cursor:pointer; text-decoration:underline dotted; }
 
-.epi-meta  { font-size:12px; color:rgba(0,0,0,.45); margin-top:10px; display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
-.epi-av    { width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:9px; font-weight:900; color:#fff; background:rgba(0,0,0,.28); flex-shrink:0; }
+.epi-meta  { font-size:10px; color:rgba(0,0,0,.45); margin-top:6px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.epi-av    { width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:8px; font-weight:900; color:#fff; background:rgba(0,0,0,.28); flex-shrink:0; }
 
-/* ── Reaksiyonlar ────────────────────────────────────────────────── */
-.epi-rxns { display:flex; gap:5px; flex-wrap:wrap; margin-top:12px; padding-top:10px; border-top:1px solid rgba(0,0,0,.09); }
-.epi-rxn  { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; font-size:14px; border:1.5px solid rgba(0,0,0,.10); background:rgba(255,255,255,.55); cursor:pointer; transition:all .12s; user-select:none; font-family:inherit; }
-.epi-rxn:hover { background:rgba(255,255,255,.88); transform:scale(1.12); }
-.epi-rxn.mine  { background:rgba(0,0,0,.12); border-color:rgba(0,0,0,.25); font-weight:800; }
-.epi-rxn .erc  { font-size:11px; color:rgba(0,0,0,.35); font-weight:700; min-width:5px; }
+/* ── Reaksiyonlar v4 — grid 5 eşit, görünür arkaplan ─────────────── */
+.epi-rxns {
+    display:grid !important;
+    grid-template-columns:repeat(5, minmax(0, 1fr)) !important;
+    gap:4px !important;
+    margin-top:8px !important;
+    padding-top:6px !important;
+    border-top:1px solid rgba(0,0,0,.09) !important;
+    width:100% !important;
+}
+.epi-rxn  {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:2px !important;
+    padding:0 !important;
+    border-radius:6px !important;
+    font-size:13px !important;
+    border:1px solid rgba(100,116,139,.3) !important;
+    background:#fff !important;
+    cursor:pointer !important;
+    user-select:none !important;
+    font-family:'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif !important;
+    line-height:1 !important;
+    height:22px !important;
+    min-width:0 !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+    white-space:nowrap !important;
+}
+.epi-rxn:hover { background:rgba(255,255,255,.95) !important; }
+.epi-rxn.mine  { background:rgba(30,64,175,.12) !important; border-color:#1e40af !important; font-weight:800 !important; }
+.epi-rxn .erc  { font-size:9px !important; color:rgba(0,0,0,.5) !important; font-weight:700 !important; }
+.epi-rxn .erc:empty { display:none !important; }
 
 /* ── Acil şeridi ─────────────────────────────────────────────────── */
 .emb-acil {
@@ -190,12 +220,13 @@ $acilList  = $bulletins->where('category','acil');
             <span>{{ $aName }}</span>
             <span style="margin-left:auto;">{{ $b->published_at->format('d.m') }}</span>
         </div>
-        <div class="epi-rxns" id="embr-{{ $b->id }}">
+        <div id="embr-{{ $b->id }}" style="display:grid !important;grid-template-columns:1fr 1fr 1fr 1fr 1fr !important;gap:4px !important;margin-top:8px !important;padding-top:6px !important;border-top:1px solid rgba(0,0,0,.09) !important;width:100% !important;box-sizing:border-box !important;">
             @foreach($rxnAll as $i => $rxnEmo)
             @php $cnt=$rxnCounts[$rxnEmo]??0; @endphp
             <button class="epi-rxn {{ $myEmoji===$rxnEmo?'mine':'' }}" data-emoji="{{ $rxnEmo }}"
-                    onclick="embReact({{ $b->id }},'{{ $rxnEmo }}',this)">
-                <span>{{ $rxnEmo }}</span><span class="erc">{{ $cnt>0?$cnt:'' }}</span>
+                    onclick="embReact({{ $b->id }},'{{ $rxnEmo }}',this)"
+                    style="display:flex !important;align-items:center !important;justify-content:center !important;gap:2px !important;padding:0 !important;border-radius:6px !important;font-size:13px !important;border:1px solid rgba(100,116,139,.3) !important;background:#fff !important;cursor:pointer !important;height:22px !important;width:100% !important;min-width:0 !important;box-sizing:border-box !important;overflow:hidden !important;font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif !important;">
+                <span>{{ $rxnEmo }}</span><span class="erc" style="font-size:9px !important;color:rgba(0,0,0,.5) !important;font-weight:700 !important;">{{ $cnt>0?$cnt:'' }}</span>
             </button>
             @endforeach
         </div>
