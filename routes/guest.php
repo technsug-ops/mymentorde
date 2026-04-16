@@ -17,7 +17,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     Route::post('/registration/form/auto-save', [GuestWorkflowController::class, 'autoSaveRegistration'])->middleware('throttle:120,1')->name('guest.registration.autosave');
     Route::post('/registration/form/ajax-save', [GuestWorkflowController::class, 'ajaxSaveRegistration'])->middleware('throttle:120,1')->name('guest.registration.ajax-save');
     Route::post('/registration/form/submit', [GuestWorkflowController::class, 'submitRegistration'])->middleware('throttle:60,1')->name('guest.registration.submit');
-    Route::get('/registration/form/pdf', [GuestWorkflowController::class, 'registrationFormPdf'])->middleware('throttle:20,1')->name('guest.registration.form.pdf');
+    Route::get('/registration/form/pdf', [GuestWorkflowController::class, 'registrationFormPdf'])->middleware('throttle:60,1')->name('guest.registration.form.pdf');
     Route::get('/registration/documents', [GuestPortalController::class, 'registrationDocuments'])->name('guest.registration.documents');
     Route::post('/registration/documents/upload', [GuestWorkflowController::class, 'uploadDocument'])->middleware('throttle:60,1')->name('guest.registration.documents.upload');
     Route::delete('/registration/documents/{document}', [GuestWorkflowController::class, 'deleteDocument'])->middleware(['guest.owns.document', 'throttle:60,1'])->name('guest.registration.documents.delete');

@@ -33,7 +33,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'student.role', 'throt
     Route::get('/student/registration', [StudentPortalController::class, 'registration'])->name('student.registration');
     Route::post('/student/registration/form/auto-save', [StudentWorkflowController::class, 'autoSaveRegistration'])->middleware('throttle:60,1')->name('student.registration.autosave');
     Route::post('/student/registration/form/submit',    [StudentWorkflowController::class, 'submitRegistration'])->middleware('throttle:5,1')->name('student.registration.submit');
-    Route::get('/student/registration/form/pdf',       [StudentWorkflowController::class, 'registrationFormPdf'])->middleware('throttle:20,1')->name('student.registration.form.pdf');
+    Route::get('/student/registration/form/pdf',       [StudentWorkflowController::class, 'registrationFormPdf'])->middleware('throttle:60,1')->name('student.registration.form.pdf');
 
     // ── Belgeler ─────────────────────────────────────────────────────────────
     Route::get('/student/registration/documents',                          [StudentPortalController::class,  'registrationDocuments'])->name('student.registration.documents');
