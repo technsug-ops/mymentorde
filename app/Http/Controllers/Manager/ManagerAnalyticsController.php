@@ -104,6 +104,220 @@ class ManagerAnalyticsController extends Controller
         return view('manager.notification-stats', compact('stats'));
     }
 
+    public function seniorPerformance(Request $request)
+    {
+        [$start, $end] = $this->resolveFilters($request);
+
+        $seniors = \App\Models\User::where('role', 'senior')->orderBy('name')->get(['id', 'email', 'name']);
+        $seniorEmails = $seniors->pluck('email')->all();
+
+        // Per senior metrics
+        $rows = $seniors->map(function ($senior) use ($start, $end) {
+            $email = (string) $senior->email;
+
+            $leads = GuestApplication::where('assigned_senior_email', $email)
+                ->whereBetween('created_at', [$start, $end])
+                ->get(['id', 'lead_status', 'converted_student_id', 'created_at', 'converted_at']);
+
+            $leadCount    = $leads->count();
+            $converted    = $leads->where('lead_status', 'converted')->count();
+            $convPct      = $leadCount > 0 ? round($converted / $leadCount * 100, 1) : 0;
+            $studentIds   = $leads->pluck('converted_student_id')->filter()->values()->all();
+
+            $activeStudents = \App\Models\StudentAssignment::where('senior_email', $email)
+                ->where('is_archived', false)
+                ->count();
+
+            $revenue = empty($studentIds) ? 0
+                : (float) StudentRevenue::whereIn('student_id', $studentIds)->sum('total_earned');
+
+            // Feedback (senior-type OR general) for this senior's students
+            $feedbackStudentIds = \App\Models\StudentAssignment::where('senior_email', $email)
+                ->pluck('student_id')->all();
+            $feedbackRating = 0;
+            $feedbackCount = 0;
+            if (!empty($feedbackStudentIds)) {
+                $fb = StudentFeedback::whereIn('student_id', $feedbackStudentIds)
+                    ->whereIn('feedback_type', ['senior', 'general'])
+                    ->where('rating', '>', 0)
+                    ->whereBetween('created_at', [$start, $end])
+                    ->get(['rating']);
+                $feedbackCount = $fb->count();
+                $feedbackRating = $feedbackCount > 0 ? round($fb->avg('rating'), 2) : 0;
+            }
+
+            $tasks = \App\Models\MarketingTask::where('assigned_user_id', $senior->id)
+                ->whereBetween('created_at', [$start, $end])
+                ->get(['status', 'due_date', 'completed_at']);
+            $tasksTotal = $tasks->count();
+            $tasksDone  = $tasks->where('status', 'done')->count();
+            $tasksOverdue = $tasks->filter(fn ($t) => $t->status !== 'done' && $t->status !== 'cancelled'
+                && $t->due_date && \Carbon\Carbon::parse($t->due_date)->lt(now()))->count();
+            $taskCompletionPct = $tasksTotal > 0 ? round($tasksDone / $tasksTotal * 100, 1) : 0;
+
+            // Avg days to convert (for this senior's converted leads)
+            $avgDays = 0;
+            $convertedLeads = $leads->filter(fn ($g) => $g->converted_at && $g->created_at);
+            if ($convertedLeads->isNotEmpty()) {
+                $avgDays = round($convertedLeads->avg(fn ($g) => \Carbon\Carbon::parse($g->created_at)->diffInDays(\Carbon\Carbon::parse($g->converted_at))), 1);
+            }
+
+            // Composite score (0-100): 40% conversion + 30% feedback + 30% task completion
+            $score = round(($convPct * 0.4) + ($feedbackRating * 20 * 0.3) + ($taskCompletionPct * 0.3), 1);
+
+            return [
+                'id'              => $senior->id,
+                'name'            => $senior->name,
+                'email'           => $email,
+                'leadCount'       => $leadCount,
+                'converted'       => $converted,
+                'convPct'         => $convPct,
+                'activeStudents'  => $activeStudents,
+                'revenue'         => $revenue,
+                'feedbackRating'  => $feedbackRating,
+                'feedbackCount'   => $feedbackCount,
+                'tasksTotal'      => $tasksTotal,
+                'tasksDone'       => $tasksDone,
+                'tasksOverdue'    => $tasksOverdue,
+                'taskCompletionPct' => $taskCompletionPct,
+                'avgDaysToConvert' => $avgDays,
+                'score'           => $score,
+            ];
+        })->sortByDesc('score')->values();
+
+        // Aggregate KPIs
+        $totalSeniors = $rows->count();
+        $avgConvPct = $rows->where('leadCount', '>', 0)->avg('convPct') ?: 0;
+        $totalRevenueAll = $rows->sum('revenue');
+        $topPerformer = $rows->first();
+
+        return view('manager.senior-performance', [
+            'rows'         => $rows,
+            'totalSeniors' => $totalSeniors,
+            'avgConvPct'   => round($avgConvPct, 1),
+            'totalRevenue' => $totalRevenueAll,
+            'topPerformer' => $topPerformer,
+            'filters'      => [
+                'start_date' => $start->toDateString(),
+                'end_date'   => $end->toDateString(),
+            ],
+        ]);
+    }
+
+    public function ticketAnalytics(Request $request)
+    {
+        [$start, $end] = $this->resolveFilters($request);
+        $department = $request->query('department', 'all');
+        $priority = $request->query('priority', 'all');
+
+        $query = \App\Models\GuestTicket::whereBetween('created_at', [$start, $end]);
+        if ($department !== 'all') {
+            $query->where('department', $department);
+        }
+        if ($priority !== 'all') {
+            $query->where('priority', $priority);
+        }
+        $all = $query->get([
+            'id', 'subject', 'status', 'priority', 'department', 'assigned_user_id',
+            'created_at', 'first_response_at', 'closed_at', 'sla_due_at', 'sla_hours',
+        ]);
+
+        // KPIs
+        $total = $all->count();
+        $openCount = $all->whereIn('status', ['open', 'in_progress'])->count();
+        $resolvedCount = $all->whereIn('status', ['resolved', 'closed'])->count();
+
+        // Avg first response (hours)
+        $responded = $all->filter(fn ($t) => $t->first_response_at && $t->created_at);
+        $avgFirstResponseH = $responded->count() > 0
+            ? round($responded->avg(fn ($t) => \Carbon\Carbon::parse($t->created_at)->diffInHours(\Carbon\Carbon::parse($t->first_response_at), false)), 1)
+            : 0;
+
+        // Avg resolution time (days)
+        $closed = $all->filter(fn ($t) => $t->closed_at && $t->created_at);
+        $avgResolutionDays = $closed->count() > 0
+            ? round($closed->avg(fn ($t) => \Carbon\Carbon::parse($t->created_at)->diffInDays(\Carbon\Carbon::parse($t->closed_at), false)), 1)
+            : 0;
+
+        // SLA breach
+        $slaItems = $all->filter(fn ($t) => !empty($t->sla_due_at));
+        $slaBreach = $slaItems->filter(fn ($t) => $t->closed_at
+            ? \Carbon\Carbon::parse($t->closed_at)->gt(\Carbon\Carbon::parse($t->sla_due_at))
+            : \Carbon\Carbon::parse($t->sla_due_at)->lt(now()))->count();
+        $slaBreachPct = $slaItems->count() > 0 ? round($slaBreach / $slaItems->count() * 100, 1) : 0;
+
+        // Breakdowns
+        $byStatus = $all->groupBy('status')->map->count()->sortDesc();
+        $byPriority = $all->groupBy('priority')->map->count()->sortDesc();
+        $byDept = $all->filter(fn ($t) => !empty($t->department))->groupBy('department')->map->count()->sortDesc();
+
+        // By assignee
+        $assignedIds = $all->pluck('assigned_user_id')->filter()->unique()->values()->all();
+        $userMap = \App\Models\User::whereIn('id', $assignedIds)->pluck('name', 'id');
+        $byAssignee = $all->filter(fn ($t) => !empty($t->assigned_user_id))
+            ->groupBy('assigned_user_id')
+            ->map(function ($grp, $uid) use ($userMap) {
+                $closed = $grp->filter(fn ($t) => $t->closed_at);
+                return [
+                    'name'      => $userMap[$uid] ?? ('User #' . $uid),
+                    'total'     => $grp->count(),
+                    'open'      => $grp->whereIn('status', ['open', 'in_progress'])->count(),
+                    'resolved'  => $grp->whereIn('status', ['resolved', 'closed'])->count(),
+                    'avgRespH'  => $grp->filter(fn ($t) => $t->first_response_at && $t->created_at)->count() > 0
+                        ? round($grp->filter(fn ($t) => $t->first_response_at && $t->created_at)
+                            ->avg(fn ($t) => \Carbon\Carbon::parse($t->created_at)->diffInHours(\Carbon\Carbon::parse($t->first_response_at), false)), 1)
+                        : 0,
+                ];
+            })
+            ->sortByDesc('total');
+
+        // Daily trend
+        $trendDays = collect(range(29, 0))->map(function (int $ago) use ($all) {
+            $d = now()->subDays($ago);
+            return [
+                'label' => $d->format('d.m'),
+                'count' => $all->filter(fn ($t) => optional($t->created_at)->isSameDay($d))->count(),
+            ];
+        });
+
+        // Recent tickets
+        $recent = $all->sortByDesc('created_at')->take(15)->values()
+            ->map(fn ($t) => (object) [
+                'id'        => $t->id,
+                'subject'   => $t->subject,
+                'status'    => $t->status,
+                'priority'  => $t->priority,
+                'created_at'=> $t->created_at,
+                'assignee'  => $t->assigned_user_id ? ($userMap[$t->assigned_user_id] ?? '-') : null,
+            ]);
+
+        $departmentOptions = \App\Models\GuestTicket::distinct()->whereNotNull('department')->pluck('department')->values();
+
+        return view('manager.ticket-analytics', [
+            'total'              => $total,
+            'openCount'          => $openCount,
+            'resolvedCount'      => $resolvedCount,
+            'avgFirstResponseH'  => $avgFirstResponseH,
+            'avgResolutionDays'  => $avgResolutionDays,
+            'slaBreachPct'       => $slaBreachPct,
+            'slaBreach'          => $slaBreach,
+            'slaTotal'           => $slaItems->count(),
+            'byStatus'           => $byStatus,
+            'byPriority'         => $byPriority,
+            'byDept'             => $byDept,
+            'byAssignee'         => $byAssignee,
+            'trendDays'          => $trendDays,
+            'recent'             => $recent,
+            'departmentOptions'  => $departmentOptions,
+            'filters'            => [
+                'start_date' => $start->toDateString(),
+                'end_date'   => $end->toDateString(),
+                'department' => $department,
+                'priority'   => $priority,
+            ],
+        ]);
+    }
+
     public function conversionFunnel(Request $request)
     {
         [$start, $end] = $this->resolveFilters($request);

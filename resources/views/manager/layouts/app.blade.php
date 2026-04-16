@@ -375,6 +375,14 @@
                    class="nav-link {{ request()->is('manager/conversion-funnel*') ? 'active' : '' }}">
                     <span class="nav-icon">🎯</span> Dönüşüm Hunisi
                 </a>
+                <a href="/manager/senior-performance"
+                   class="nav-link {{ request()->is('manager/senior-performance*') ? 'active' : '' }}">
+                    <span class="nav-icon">👤</span> Danışman Performansı
+                </a>
+                <a href="/manager/ticket-analytics"
+                   class="nav-link {{ request()->is('manager/ticket-analytics*') ? 'active' : '' }}">
+                    <span class="nav-icon">🎫</span> Ticket Analitik
+                </a>
                 <a href="/manager/webhooks"
                    class="nav-link {{ request()->is('manager/webhooks*') ? 'active' : '' }}">
                     <span class="nav-icon">🔗</span> Webhook Logları
