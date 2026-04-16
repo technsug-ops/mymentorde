@@ -187,13 +187,13 @@
                    class="nav-link {{ request()->is('im*') ? 'active' : '' }}">
                     <span class="nav-icon">💬</span> İletişim Merkezi
                 </a>
+                <a href="/manager/requests"
+                   class="nav-link {{ request()->is('manager/requests*') ? 'active' : '' }}">
+                    <span class="nav-icon">📋</span> Yöneticiye Talepler
+                </a>
                 <a href="/availability"
                    class="nav-link {{ request()->is('availability*') ? 'active' : '' }}">
                     <span class="nav-icon">📡</span> Müsaitlik Ayarları
-                </a>
-                <a href="/manager/requests"
-                   class="nav-link {{ request()->is('manager/requests*') ? 'active' : '' }}">
-                    <span class="nav-icon">📋</span> Başvurular
                 </a>
             </div>
 
@@ -333,7 +333,7 @@
                 </a>
                 <a href="/my-contracts"
                    class="nav-link {{ request()->is('my-contracts*') ? 'active' : '' }}">
-                    <span class="nav-icon">📄</span> İş Sözleşmem
+                    <span class="nav-icon">📄</span> Tüm Sözleşmeler
                 </a>
             </div>
 
@@ -392,7 +392,7 @@
             </a>
             <form method="POST" action="{{ route('system.cache-clear') }}" style="margin:0 0 6px;">
                 @csrf
-                <button type="submit" class="nav-link" style="width:100%;background:none;border:none;cursor:pointer;text-align:left;font:inherit;color:inherit;padding:8px 14px;">
+                <button type="submit" class="nav-link" style="width:100%;background:none;border:none;cursor:pointer;text-align:left;font:inherit;color:#fff;padding:8px 14px;">
                     <span class="nav-icon">🗑️</span> Cache Temizle
                 </button>
             </form>
@@ -553,6 +553,24 @@ document.addEventListener('alpine:init',function(){
     var _sb=document.getElementById('premium-sidebar');
     if(_mb)_mb.addEventListener('click',function(){_sb.classList.toggle('mobile-open');if(_ov)_ov.classList.toggle('active');});
     if(_ov)_ov.addEventListener('click',function(){_sb.classList.remove('mobile-open');_ov.classList.remove('active');});
+
+    // ── Sidebar scroll position persistence ──
+    // Sayfa değişince sidebar en üste atlamasın, son scroll pozisyonu hatırlansın
+    if(_sb){
+        var SCROLL_KEY='manager_sidebar_scroll';
+        try {
+            var savedScroll=parseInt(sessionStorage.getItem(SCROLL_KEY)||'0',10);
+            if(savedScroll>0) _sb.scrollTop=savedScroll;
+        } catch(e){}
+        _sb.addEventListener('scroll',function(){
+            try { sessionStorage.setItem(SCROLL_KEY,String(_sb.scrollTop)); } catch(e){}
+        });
+        // Link'e tıklarken son pozisyonu kaydet
+        _sb.addEventListener('click',function(e){
+            var a=e.target.closest('a[href]');
+            if(a) { try { sessionStorage.setItem(SCROLL_KEY,String(_sb.scrollTop)); } catch(e){} }
+        });
+    }
     var STORE_KEY='manager_sidebar_collapsed';
     var VER='v2';
     if(localStorage.getItem(STORE_KEY+'_ver')!==VER){localStorage.removeItem(STORE_KEY);localStorage.setItem(STORE_KEY+'_ver',VER);}

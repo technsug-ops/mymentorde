@@ -133,6 +133,10 @@
             <button type="button" onclick="toggleBodyEdit()" id="editBodyBtn" class="btn alt" style="font-size:var(--tx-xs);padding:5px 12px;">✏️ Düzenle</button>
             @endif
             <button type="button" onclick="printContract()" class="btn alt" style="font-size:var(--tx-xs);padding:5px 12px;">🖨 Yazdır / PDF</button>
+            @if($contract->signed_file_path)
+                <a href="{{ route('manager.contracts-hub.preview-biz', $contract) }}" target="_blank" class="btn alt" style="font-size:var(--tx-xs);padding:5px 12px;">👁 PDF Önizle</a>
+                <a href="{{ route('manager.business-contracts.download-signed', $contract) }}" class="btn alt" style="font-size:var(--tx-xs);padding:5px 12px;">⬇ PDF İndir</a>
+            @endif
         </div>
     </div>
 

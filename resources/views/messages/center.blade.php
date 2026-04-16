@@ -11,9 +11,59 @@
 
 @push('head')
 <style>
-    .summary7 { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:10px; margin-bottom:12px; }
+    .summary7 { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; margin-bottom:14px; }
+    .mc-stat { background:var(--u-card,#fff); border:1px solid var(--u-line,#e5e9f0); border-radius:8px; padding:10px 12px; display:flex; flex-direction:column; gap:4px; min-height:0; }
+    .mc-stat-label { font-size:11px; font-weight:600; color:var(--u-muted,#64748b); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .mc-stat-val { font-size:22px; font-weight:700; color:var(--u-text,#0f172a); line-height:1.1; }
     .msg-grid  { display:grid; grid-template-columns:390px 1fr; gap:10px; }
     @media (max-width:980px) { .msg-grid { grid-template-columns:1fr; } .summary7 { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:1280px) { .summary7 { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+
+    /* Section card polish — content'in kenara yapışmasını engelle */
+    .mc-section { padding:14px 16px !important; }
+    .mc-section-head { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+    .mc-section-title { font-size:13px; font-weight:700; color:var(--u-brand,#1f6fd9); letter-spacing:.2px; }
+    .mc-section-sub { font-size:11px; color:var(--u-muted,#64748b); }
+    .mc-subtitle { margin:0 0 14px; color:var(--u-muted,#64748b); font-size:12px; }
+
+    /* Filtre form */
+    .mc-filter-form { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; }
+    .mc-filter-form select, .mc-filter-form input { font-size:13px; padding:7px 10px !important; min-height:36px !important; }
+    @media (max-width:1280px) { .mc-filter-form { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (max-width:768px)  { .mc-filter-form { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+    /* Pill links */
+    .pill-links { display:flex; flex-wrap:wrap; gap:6px; }
+    .pill-links .pill-link { padding:6px 14px; border-radius:999px; background:#fff; border:1px solid var(--u-line,#e5e9f0); font-size:12px; font-weight:600; color:var(--u-muted,#64748b); text-decoration:none; transition:all .12s; }
+    .pill-links .pill-link:hover { background:#eef5ff; border-color:#cfe0ff; color:var(--u-brand,#1f6fd9); }
+    .pill-links .pill-link.active { background:var(--u-brand,#1f6fd9); border-color:var(--u-brand,#1f6fd9); color:#fff; }
+
+    /* Thread list entry */
+    .mc-thread-list { max-height:760px; overflow:auto; border:1px solid var(--u-line,#e5e9f0); border-radius:10px; }
+    .mc-thread-item { display:block; padding:12px 14px; border-bottom:1px solid #edf1f7; text-decoration:none; color:inherit; background:#fff; transition:background .1s; }
+    .mc-thread-item:hover { background:#f8fafc; }
+    .mc-thread-item.active { background:#eef5ff; }
+    .mc-thread-item:last-child { border-bottom:none; }
+    .mc-thread-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; }
+    .mc-thread-id { font-size:12px; font-weight:700; color:var(--u-text,#0f172a); }
+    .mc-thread-status { font-size:10px; font-weight:600; padding:2px 8px; border-radius:999px; background:#e8f0fe; color:var(--u-brand,#1f6fd9); text-transform:uppercase; }
+    .mc-thread-select-row { display:flex; align-items:center; gap:6px; margin:6px 0 8px; font-size:11px; color:var(--u-muted,#64748b); }
+    .mc-thread-meta { font-size:11px; color:var(--u-muted,#64748b); line-height:1.5; }
+    .mc-thread-preview { font-size:12px; color:var(--u-text,#0f172a); margin-top:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    /* Thread Detay panel — compact */
+    .mc-detail-title { margin:0 0 10px; font-size:14px; font-weight:700; color:var(--u-text,#0f172a); }
+    .mc-detail-form { display:grid; gap:6px; margin-bottom:8px; }
+    .mc-detail-form select, .mc-detail-form input, .mc-detail-form button { font-size:12px !important; padding:6px 10px !important; min-height:32px !important; line-height:1.2 !important; }
+    .mc-detail-form button.btn-primary { font-weight:600; }
+    .mc-textarea { min-height:60px !important; font-size:13px !important; padding:8px 10px !important; }
+    .mc-send-row .btn { font-size:12px !important; padding:6px 12px !important; min-height:30px !important; }
+    .mc-send-row .eg-picker-btn { height:28px !important; width:28px !important; font-size:14px !important; }
+    .mc-msg { padding:8px 10px !important; }
+    .mc-msg-role { font-size:10px !important; padding:2px 6px !important; }
+    .mc-msg-time { font-size:10px !important; }
+    .mc-msg-body { font-size:12px !important; line-height:1.45 !important; }
+    .mc-detail-history { max-height:460px; overflow:auto; border:1px solid var(--u-line,#e5e9f0); border-radius:8px; background:#fff; }
 
     /* Textarea */
     .mc-textarea { width:100%; box-sizing:border-box; border:1px solid var(--u-line,#e5e9f0) !important; border-radius:8px !important; padding:10px 12px !important; font-size:14px !important; resize:vertical; min-height:80px; font-family:inherit; color:var(--u-text,#1a2332); background:#fff; outline:none; line-height:1.5; display:block; }
@@ -56,25 +106,25 @@
 @endpush
 
 @section('content')
-    <p class="muted" style="margin:0 0 12px;">Aday Öğrenci + Öğrenci direkt mesaj takip ve yonetim</p>
+    <p class="mc-subtitle">Aday Öğrenci + Öğrenci direkt mesaj takip ve yönetim</p>
 
     <div class="summary7">
-        <div class="panel"><div class="muted">Toplam Thread</div><div style="font-size:var(--tx-2xl);font-weight:700;">{{ (int) ($summary['total'] ?? 0) }}</div></div>
-        <div class="panel"><div class="muted">Acik</div><div style="font-size:var(--tx-2xl);font-weight:700;">{{ (int) ($summary['open'] ?? 0) }}</div></div>
-        <div class="panel"><div class="muted">Kapali</div><div style="font-size:var(--tx-2xl);font-weight:700;">{{ (int) ($summary['closed'] ?? 0) }}</div></div>
-        <div class="panel"><div class="muted">SLA Geciken</div><div style="font-size:var(--tx-2xl);font-weight:700;">{{ (int) ($summary['overdue'] ?? 0) }}</div></div>
-        <div class="panel"><div class="muted">Danışmansiz</div><div style="font-size:var(--tx-2xl);font-weight:700;">{{ (int) ($summary['unassigned'] ?? 0) }}</div></div>
-        <div class="panel"><div class="muted">Advisor Okunmamis</div><div style="font-size:var(--tx-2xl);font-weight:700;">{{ (int) ($summary['unread_for_advisor'] ?? 0) }}</div></div>
-        <div class="panel"><div class="muted">Katilimci Okunmamis</div><div style="font-size:var(--tx-2xl);font-weight:700;">{{ (int) ($summary['unread_for_participant'] ?? 0) }}</div></div>
+        <div class="mc-stat"><div class="mc-stat-label">Toplam Thread</div><div class="mc-stat-val">{{ (int) ($summary['total'] ?? 0) }}</div></div>
+        <div class="mc-stat"><div class="mc-stat-label">Acik</div><div class="mc-stat-val">{{ (int) ($summary['open'] ?? 0) }}</div></div>
+        <div class="mc-stat"><div class="mc-stat-label">Kapali</div><div class="mc-stat-val">{{ (int) ($summary['closed'] ?? 0) }}</div></div>
+        <div class="mc-stat"><div class="mc-stat-label">SLA Geciken</div><div class="mc-stat-val">{{ (int) ($summary['overdue'] ?? 0) }}</div></div>
+        <div class="mc-stat"><div class="mc-stat-label">Danışmansiz</div><div class="mc-stat-val">{{ (int) ($summary['unassigned'] ?? 0) }}</div></div>
+        <div class="mc-stat"><div class="mc-stat-label">Advisor Okunmamis</div><div class="mc-stat-val">{{ (int) ($summary['unread_for_advisor'] ?? 0) }}</div></div>
+        <div class="mc-stat"><div class="mc-stat-label">Katilimci Okunmamis</div><div class="mc-stat-val">{{ (int) ($summary['unread_for_participant'] ?? 0) }}</div></div>
     </div>
 
     {{-- Filtre --}}
-    <section class="card" style="margin-bottom:10px;border-left:3px solid var(--u-brand,#1f6fd9);">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-            <span style="font-size:var(--tx-sm);font-weight:600;color:var(--u-brand,#1f6fd9);">🔍 Filtrele</span>
-            <span class="muted" style="font-size:var(--tx-xs);">Thread listesini daralt</span>
+    <section class="card mc-section" style="margin-bottom:10px;border-left:3px solid var(--u-brand,#1f6fd9);">
+        <div class="mc-section-head">
+            <span class="mc-section-title">🔍 Filtrele</span>
+            <span class="mc-section-sub">Thread listesini daralt</span>
         </div>
-        <form method="get" action="{{ route('messages.center') }}" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;">
+        <form method="get" action="{{ route('messages.center') }}" class="mc-filter-form">
             <select name="type" class="btn" style="text-align:left;">
                 <option value="" @selected(($filters['type'] ?? '') === '')>Tum tipler</option>
                 <option value="guest" @selected(($filters['type'] ?? '') === 'guest')>Aday Öğrenci</option>
@@ -105,7 +155,7 @@
     </section>
 
     {{-- Departman Sekmeleri + Toplu İşlem --}}
-    <section class="card" style="margin-bottom:10px;border-left:3px solid var(--u-warn,#d97706);background:var(--u-bg,#f5f7fa);">
+    <section class="card mc-section" style="margin-bottom:10px;border-left:3px solid var(--u-warn,#d97706);background:var(--u-bg,#f5f7fa);">
         @php $activeDepartment = (string) ($filters['route_department'] ?? ''); @endphp
         @php $isSalesStaff = auth()->user()?->role === \App\Models\User::ROLE_SALES_STAFF; @endphp
         <div class="pill-links" style="margin-bottom:0;">
@@ -121,10 +171,10 @@
             @endif
         </div>
         @if(auth()->user()?->role !== \App\Models\User::ROLE_SALES_STAFF)
-        <div style="border-top:1px solid var(--u-line,#e5e9f0);padding-top:10px;margin-top:10px;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                <span style="font-size:var(--tx-sm);font-weight:600;color:var(--u-warn,#d97706);">⚡ Toplu İşlem</span>
-                <span class="muted" style="font-size:var(--tx-xs);">Listeden seçili thread'lere uygula</span>
+        <div style="border-top:1px solid var(--u-line,#e5e9f0);padding-top:12px;margin-top:12px;">
+            <div class="mc-section-head" style="margin-bottom:10px;">
+                <span class="mc-section-title" style="color:var(--u-warn,#d97706);">⚡ Toplu İşlem</span>
+                <span class="mc-section-sub">Listeden seçili thread'lere uygula</span>
             </div>
             <form method="post" action="{{ route('messages.center.bulk-update') }}" id="bulkUpdateForm" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;">
                 @csrf
@@ -159,28 +209,28 @@
     </section>
 
     <div class="msg-grid">
-        <section class="card">
-            <h3 style="margin:0 0 8px;">Thread Listesi</h3>
-            <div style="max-height:760px;overflow:auto;border:1px solid #dbe4f2;border-radius:10px;">
+        <section class="card mc-section">
+            <h3 style="margin:0 0 10px;font-size:14px;font-weight:700;">Thread Listesi</h3>
+            <div class="mc-thread-list">
                 @forelse($threads as $t)
                     @php $isActive = $selectedThread && (int)$selectedThread->id === (int)$t->id; @endphp
                     @php $unreadForAdvisor = (int) ($unreadAdvisorMap[$t->id] ?? 0); @endphp
-                    <a href="{{ route('messages.center', array_merge(request()->query(), ['thread_id' => $t->id])) }}" style="display:block;padding:10px;border-bottom:1px solid #e3ebf6;text-decoration:none;color:inherit;background:{{ $isActive ? '#eef5ff' : '#fff' }};">
-                        <div style="display:flex;justify-content:space-between;">
-                            <strong>#{{ $t->id }} {{ strtoupper($t->thread_type) }}</strong>
-                            <span class="muted">{{ $t->status }}</span>
+                    <a href="{{ route('messages.center', array_merge(request()->query(), ['thread_id' => $t->id])) }}" class="mc-thread-item {{ $isActive ? 'active' : '' }}">
+                        <div class="mc-thread-head">
+                            <span class="mc-thread-id">#{{ $t->id }} {{ strtoupper($t->thread_type) }}</span>
+                            <span class="mc-thread-status">{{ $t->status }}</span>
                         </div>
-                        <label style="display:flex;align-items:center;gap:6px;margin:6px 0;">
+                        <label class="mc-thread-select-row">
                             <input type="checkbox" class="thread-select" value="{{ (int) $t->id }}">
-                            <small class="muted">sec</small>
+                            <span>seç</span>
                             @if($unreadForAdvisor > 0)
-                                <span style="margin-left:auto;display:inline-block;padding:2px 8px;border-radius:999px;background:#ffe9d2;border:1px solid #f6c48b;color:#7f4100;">{{ $unreadForAdvisor }} okunmamis</span>
+                                <span style="margin-left:auto;display:inline-block;padding:2px 8px;border-radius:999px;background:#ffe9d2;border:1px solid #f6c48b;color:#7f4100;font-size:10px;font-weight:600;">{{ $unreadForAdvisor }} okunmamış</span>
                             @endif
                         </label>
-                        <div class="muted">guest:{{ $t->guest_application_id ?: '-' }} | student:{{ $t->student_id ?: '-' }}</div>
-                        <div class="muted">dept:{{ $t->department ?: '-' }} | sla:{{ (int)($t->sla_hours ?: 24) }}s | advisor:#{{ $t->advisor_user_id ?: '-' }}</div>
-                        <div class="muted">son: {{ $t->last_message_at ?: '-' }} | due: {{ $t->next_response_due_at ?: '-' }}</div>
-                        <div>{{ $t->last_message_preview ?: '-' }}</div>
+                        <div class="mc-thread-meta">guest: {{ $t->guest_application_id ?: '-' }} | student: {{ $t->student_id ?: '-' }}</div>
+                        <div class="mc-thread-meta">dept: {{ $t->department ?: '-' }} | sla: {{ (int)($t->sla_hours ?: 24) }}s | advisor: #{{ $t->advisor_user_id ?: '-' }}</div>
+                        <div class="mc-thread-meta">son: {{ $t->last_message_at ?: '-' }} | due: {{ $t->next_response_due_at ?: '-' }}</div>
+                        <div class="mc-thread-preview">{{ $t->last_message_preview ?: '-' }}</div>
                     </a>
                 @empty
                     <div class="muted" style="padding:10px;">Thread kaydi yok.</div>
@@ -188,13 +238,13 @@
             </div>
         </section>
 
-        <section class="card">
+        <section class="card mc-section">
             <div style="max-width:780px;margin:0 auto;">
             @if($selectedThread)
-                <h3 style="margin:0 0 8px;">Thread #{{ $selectedThread->id }} Detay</h3>
+                <h3 class="mc-detail-title">Thread #{{ $selectedThread->id }} Detay</h3>
 
                 @if(auth()->user()?->role !== \App\Models\User::ROLE_SALES_STAFF)
-                <form method="post" action="{{ route('messages.center.assign-advisor', $selectedThread->id) }}" style="display:grid;grid-template-columns:1fr 1fr 120px auto;gap:8px;margin-bottom:8px;">
+                <form method="post" action="{{ route('messages.center.assign-advisor', $selectedThread->id) }}" class="mc-detail-form" style="grid-template-columns:1fr 1fr 70px auto;">
                     @csrf
                     <select name="advisor_user_id" class="btn" style="text-align:left;">
                         @foreach($advisors as $a)
@@ -212,26 +262,26 @@
                     <button class="btn btn-primary" type="submit">Danışman Ata</button>
                 </form>
 
-                <form method="post" action="{{ route('messages.center.status', $selectedThread->id) }}" style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px;">
+                <form method="post" action="{{ route('messages.center.status', $selectedThread->id) }}" class="mc-detail-form" style="grid-template-columns:1fr auto;">
                     @csrf
                     <select name="status" class="btn" style="text-align:left;">
-                        <option value="open" @selected($selectedThread->status === 'open')>Acik</option>
-                        <option value="closed" @selected($selectedThread->status === 'closed')>Kapali</option>
+                        <option value="open" @selected($selectedThread->status === 'open')>Acık</option>
+                        <option value="closed" @selected($selectedThread->status === 'closed')>Kapalı</option>
                     </select>
                     <button class="btn" type="submit">Durum Güncelle</button>
                 </form>
 
                 @if((string) $selectedThread->thread_type === 'guest')
-                    <form method="post" action="{{ route('messages.center.convert-ticket', $selectedThread->id) }}" style="margin-bottom:8px;">
+                    <form method="post" action="{{ route('messages.center.convert-ticket', $selectedThread->id) }}" class="mc-detail-form">
                         @csrf
-                        <button class="btn" type="submit">Bu Thread'i Ticket'a Cevir</button>
+                        <button class="btn" type="submit">Bu Thread'i Ticket'a Çevir</button>
                     </form>
                 @endif
                 @endif
 
                 <form method="post" action="{{ route('messages.center.send', $selectedThread->id) }}" style="margin-bottom:10px;">
                     @csrf
-                    <textarea class="mc-textarea" id="mcMsgBody" name="message" rows="4" placeholder="Manager notu / yönlendirme mesajı..."></textarea>
+                    <textarea class="mc-textarea" id="mcMsgBody" name="message" rows="3" placeholder="Manager notu / yönlendirme mesajı..."></textarea>
                     <div class="mc-send-row">
                         <button class="btn btn-primary" type="submit">Mesaj Gönder</button>
                         <div class="eg-picker-wrap">
@@ -258,7 +308,7 @@
                     </div>
                 </form>
 
-                <div style="max-height:520px;overflow:auto;border:1px solid #dbe4f2;border-radius:10px;">
+                <div class="mc-detail-history">
                     @forelse($messages as $m)
                         @php
                             $isStaff = in_array((string)$m->sender_role, ['manager','senior','mentor','operations_admin','operations_staff','marketing_admin','marketing_staff','sales_admin','sales_staff','system_admin','system_staff'], true);
@@ -291,8 +341,8 @@
                     @endforelse
                 </div>
             @else
-                <h3 style="margin:0 0 8px;">Detay</h3>
-                <div class="muted">Soldan bir thread secin.</div>
+                <h3 class="mc-detail-title">Detay</h3>
+                <div class="muted" style="font-size:12px;">Soldan bir thread seçin.</div>
             @endif
             </div>{{-- /max-width wrapper --}}
         </section>

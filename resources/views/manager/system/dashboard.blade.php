@@ -88,7 +88,7 @@
 </div>
 
 {{-- ─── Hızlı Erişim ─── --}}
-<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:14px;">
+<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));gap:8px;margin-bottom:14px;">
     <a href="/manager/system/security" class="sys-quick"><span class="sq-icon">🛡</span><span class="sq-label">Güvenlik Paneli</span></a>
     <a href="/manager/system/ip-rules" class="sys-quick"><span class="sq-icon">🌐</span><span class="sq-label">IP Kuralları</span></a>
     <a href="/manager/audit-log"       class="sys-quick"><span class="sq-icon">🔍</span><span class="sq-label">Denetim Kayıtları</span></a>
@@ -97,6 +97,7 @@
     <a href="/manager/webhooks"        class="sys-quick"><span class="sq-icon">🔗</span><span class="sq-label">Webhook Logları</span></a>
     <a href="/manager/theme"           class="sys-quick"><span class="sq-icon">🎨</span><span class="sq-label">Tema Yönetimi</span></a>
     <a href="/manager/brand"           class="sys-quick"><span class="sq-icon">🏷</span><span class="sq-label">Marka Ayarları</span></a>
+    <a href="{{ route('system.post-deploy.show') }}" class="sys-quick"><span class="sq-icon">🚀</span><span class="sq-label">Post-Deploy Bakımı</span></a>
 </div>
 
 <div class="grid2" style="gap:12px;margin-bottom:12px;">

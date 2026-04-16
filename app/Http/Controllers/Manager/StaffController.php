@@ -405,6 +405,21 @@ class StaffController extends Controller
             ->with('status', "{$data['period']} dönemi KPI hedefleri kaydedildi.");
     }
 
+    public function show(User $user)
+    {
+        $cid = $this->companyId();
+        abort_if(
+            ($cid > 0 && (int) $user->company_id !== $cid) || !in_array($user->role, self::STAFF_ROLES),
+            404
+        );
+
+        return view('manager.staff.show', [
+            'user'    => $user,
+            'dept'    => $this->getDept($user->role),
+            'isAdmin' => $this->isAdmin($user->role),
+        ]);
+    }
+
     public function edit(User $user)
     {
         $cid = $this->companyId();

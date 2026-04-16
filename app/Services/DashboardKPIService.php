@@ -343,15 +343,17 @@ class DashboardKPIService
      */
     private function computeManagerTrend(Carbon $start, Carbon $end): array
     {
-        $trendStart = $start->copy()->startOfMonth();
-        $trendEnd   = $end->copy()->startOfMonth();
-        $trend      = [];
+        // Trend her zaman son 12 ayı gösterir — filtre current month'u verse de tam tarih aralığı.
+        // Filtre sadece diğer stats için (fun­nel, revenue total vs.), trend ayrı.
         $maxPoints  = 12;
-        $points     = 0;
+        $trendEnd   = $end->copy()->startOfMonth();
+        $trendStart = $trendEnd->copy()->subMonths($maxPoints - 1);
+        $trend      = [];
 
-        while ($trendStart->lte($trendEnd) && $points < $maxPoints) {
-            $bucketStart = $trendStart->copy()->startOfMonth();
-            $bucketEnd   = $trendStart->copy()->endOfMonth();
+        $cursor = $trendStart->copy();
+        while ($cursor->lte($trendEnd)) {
+            $bucketStart = $cursor->copy()->startOfMonth();
+            $bucketEnd   = $cursor->copy()->endOfMonth();
 
             $trend[] = [
                 'label'          => $bucketStart->format('Y-m'),
@@ -363,8 +365,7 @@ class DashboardKPIService
                     ->count(),
             ];
 
-            $trendStart->addMonth();
-            $points++;
+            $cursor->addMonth();
         }
 
         return $trend;

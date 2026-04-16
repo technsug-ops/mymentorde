@@ -19,15 +19,53 @@
 .doc-code { background:#f1f5f9; border:1px solid var(--border,#e2e8f0); padding:1px 7px; border-radius:4px; font-size:11px; font-family:monospace; color:#1e40af; flex-shrink:0; }
 .doc-code.rec { color:var(--muted,#64748b); border-color:transparent; }
 
-/* Checkbox grid */
-.cb-grid { display:flex; flex-wrap:wrap; gap:5px; }
-.cb-item { display:flex; align-items:center; gap:4px; font-size:11px; background:var(--bg,#f8fafc); padding:3px 8px; border-radius:5px; cursor:pointer; border:1px solid var(--border,#e2e8f0); }
-.cb-item:hover { border-color:#1e40af; color:#1e40af; }
-
 /* Edit toggle */
 .edit-toggle { font-size:12px; font-weight:600; color:#1e40af; cursor:pointer; text-decoration:none; }
 summary { list-style:none; }
 summary::-webkit-details-marker { display:none; }
+
+/* ─── Düzenleme / Yeni Harita formu ─── */
+.ur-form { background:var(--bg,#f8fafc); border:1px solid var(--border,#e2e8f0); border-radius:10px; padding:16px; }
+.ur-section { margin-bottom:14px; }
+.ur-section:last-child { margin-bottom:0; }
+.ur-section-title { font-size:10px; font-weight:700; color:#1e40af; text-transform:uppercase; letter-spacing:.06em; margin:0 0 8px; padding-bottom:5px; border-bottom:1px solid #dbe4f2; }
+
+/* Form field grid */
+.ur-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+@media(max-width:1100px){ .ur-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:700px){ .ur-grid { grid-template-columns:1fr; } }
+.ur-field { display:flex; flex-direction:column; gap:4px; }
+.ur-field.full { grid-column:1/-1; }
+.ur-field label { font-size:10px; font-weight:700; color:var(--muted,#64748b); text-transform:uppercase; letter-spacing:.04em; }
+.ur-field select, .ur-field input[type=text], .ur-field input[type=number], .ur-field textarea {
+    font-size:12px !important; padding:7px 10px !important; min-height:34px !important;
+    border:1px solid var(--border,#e2e8f0); border-radius:6px; background:#fff;
+    color:var(--text,#0f172a); line-height:1.3; font-family:inherit;
+}
+.ur-field textarea { min-height:60px !important; resize:vertical; }
+.ur-field select:focus, .ur-field input:focus, .ur-field textarea:focus { outline:none; border-color:#1e40af; box-shadow:0 0 0 2px rgba(30,64,175,.12); }
+
+/* Date pair (ay / gün) */
+.ur-date-pair { display:flex; gap:6px; }
+.ur-date-pair input { flex:1; min-width:0; }
+
+/* Aktif checkbox */
+.ur-active-row { display:flex; align-items:center; gap:8px; padding:8px 12px; background:#fff; border:1px solid var(--border,#e2e8f0); border-radius:6px; }
+.ur-active-row label { font-size:12px; font-weight:500; color:var(--text,#0f172a); cursor:pointer; margin:0; }
+
+/* Checkbox grid — daha scannable */
+.cb-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:6px; background:#fff; padding:10px; border:1px solid var(--border,#e2e8f0); border-radius:8px; max-height:280px; overflow-y:auto; }
+.cb-item { display:flex; align-items:center; gap:6px; font-size:11px; padding:5px 8px; border-radius:5px; cursor:pointer; border:1px solid transparent; transition:all .1s; color:var(--text,#0f172a); user-select:none; font-family:monospace; letter-spacing:.3px; }
+.cb-item:hover { background:#eef4ff; border-color:#dbe4f2; }
+.cb-item input[type=checkbox] { cursor:pointer; margin:0; flex-shrink:0; }
+.cb-item:has(input:checked) { background:#dbeafe; border-color:#1e40af; color:#1e40af; font-weight:700; }
+
+/* Form actions */
+.ur-actions { display:flex; gap:8px; padding-top:12px; margin-top:14px; border-top:1px solid var(--border,#e2e8f0); }
+.ur-btn-save { padding:8px 20px; background:#16a34a; color:#fff; border:none; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; transition:background .12s; }
+.ur-btn-save:hover { background:#15803d; }
+.ur-btn-cancel { padding:8px 16px; border:1px solid var(--border,#e2e8f0); background:#fff; color:var(--muted,#64748b); border-radius:7px; font-size:12px; font-weight:600; cursor:pointer; }
+.ur-btn-cancel:hover { background:#f8fafc; color:var(--text,#0f172a); }
 </style>
 @endpush
 
@@ -170,53 +208,60 @@ summary::-webkit-details-marker { display:none; }
         {{-- Düzenleme formu --}}
         <details id="edit-map-{{ $map->id }}" style="margin-top:12px;">
             <summary></summary>
-            <div style="padding-top:12px;border-top:1px solid var(--border,#e2e8f0);margin-top:2px;">
-                <div style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Düzenleme Formu</div>
-                <form method="POST" action="{{ route('manager.university-requirements.update', $map) }}">
+            <div style="padding-top:12px;">
+                <form method="POST" action="{{ route('manager.university-requirements.update', $map) }}" class="ur-form">
                     @csrf @method('PUT')
-                    <div class="grid2" style="gap:10px;margin-bottom:10px;">
-                        <div style="display:flex;flex-direction:column;gap:3px;">
-                            <label class="mgr-filter-label">Portal</label>
-                            <select name="portal_name">
-                                @foreach(['uni_assist'=>'Uni-Assist','direct'=>'Direkt','hochschulstart'=>'Hochschulstart','other'=>'Diğer'] as $val=>$lbl)
-                                    <option value="{{ $val }}" {{ $map->portal_name===$val ? 'selected' : '' }}>{{ $lbl }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div style="display:flex;flex-direction:column;gap:3px;">
-                            <label class="mgr-filter-label">Dönem</label>
-                            <select name="semester">
-                                <option value="WS"   {{ $map->semester==='WS'   ? 'selected' : '' }}>Kış (WS)</option>
-                                <option value="SS"   {{ $map->semester==='SS'   ? 'selected' : '' }}>Yaz (SS)</option>
-                                <option value="both" {{ $map->semester==='both' ? 'selected' : '' }}>Her İki Dönem</option>
-                            </select>
-                        </div>
-                        <div style="display:flex;flex-direction:column;gap:3px;">
-                            <label class="mgr-filter-label">WS Son Başvuru (Ay / Gün)</label>
-                            <div style="display:flex;gap:6px;">
-                                <input type="number" name="deadline_month_ws" value="{{ $map->deadline_month_ws }}" placeholder="Ay" style="width:80px;" min="1" max="12">
-                                <input type="number" name="deadline_day_ws"   value="{{ $map->deadline_day_ws }}"   placeholder="Gün" style="width:70px;" min="1" max="31">
+
+                    <div class="ur-section">
+                        <div class="ur-section-title">Başvuru Bilgileri</div>
+                        <div class="ur-grid">
+                            <div class="ur-field">
+                                <label>Portal</label>
+                                <select name="portal_name">
+                                    @foreach(['uni_assist'=>'Uni-Assist','direct'=>'Direkt','hochschulstart'=>'Hochschulstart','other'=>'Diğer'] as $val=>$lbl)
+                                        <option value="{{ $val }}" {{ $map->portal_name===$val ? 'selected' : '' }}>{{ $lbl }}</option>
+                                    @endforeach
+                                </select>
                             </div>
-                        </div>
-                        <div style="display:flex;flex-direction:column;gap:3px;">
-                            <label class="mgr-filter-label">SS Son Başvuru (Ay / Gün)</label>
-                            <div style="display:flex;gap:6px;">
-                                <input type="number" name="deadline_month_ss" value="{{ $map->deadline_month_ss }}" placeholder="Ay" style="width:80px;" min="1" max="12">
-                                <input type="number" name="deadline_day_ss"   value="{{ $map->deadline_day_ss }}"   placeholder="Gün" style="width:70px;" min="1" max="31">
+                            <div class="ur-field">
+                                <label>Dönem</label>
+                                <select name="semester">
+                                    <option value="WS"   {{ $map->semester==='WS'   ? 'selected' : '' }}>Kış (WS)</option>
+                                    <option value="SS"   {{ $map->semester==='SS'   ? 'selected' : '' }}>Yaz (SS)</option>
+                                    <option value="both" {{ $map->semester==='both' ? 'selected' : '' }}>Her İki Dönem</option>
+                                </select>
                             </div>
-                        </div>
-                        <div style="display:flex;flex-direction:column;gap:3px;grid-column:1/-1;">
-                            <label class="mgr-filter-label">Dil Gereksinimi</label>
-                            <input type="text" name="language_requirement" value="{{ $map->language_requirement }}" placeholder="ör. DSH-2 oder TestDaF 4x4" style="width:100%;max-width:380px;">
-                        </div>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <input type="hidden" name="is_active" value="0">
-                            <input type="checkbox" name="is_active" id="active-{{ $map->id }}" value="1" {{ $map->is_active ? 'checked' : '' }}>
-                            <label for="active-{{ $map->id }}" style="font-size:var(--tx-sm);">Aktif</label>
+                            <div class="ur-field">
+                                <label>Durum</label>
+                                <div class="ur-active-row">
+                                    <input type="hidden" name="is_active" value="0">
+                                    <input type="checkbox" name="is_active" id="active-{{ $map->id }}" value="1" {{ $map->is_active ? 'checked' : '' }}>
+                                    <label for="active-{{ $map->id }}">Aktif</label>
+                                </div>
+                            </div>
+                            <div class="ur-field">
+                                <label>WS Son Başvuru (Ay / Gün)</label>
+                                <div class="ur-date-pair">
+                                    <input type="number" name="deadline_month_ws" value="{{ $map->deadline_month_ws }}" placeholder="Ay" min="1" max="12">
+                                    <input type="number" name="deadline_day_ws"   value="{{ $map->deadline_day_ws }}"   placeholder="Gün" min="1" max="31">
+                                </div>
+                            </div>
+                            <div class="ur-field">
+                                <label>SS Son Başvuru (Ay / Gün)</label>
+                                <div class="ur-date-pair">
+                                    <input type="number" name="deadline_month_ss" value="{{ $map->deadline_month_ss }}" placeholder="Ay" min="1" max="12">
+                                    <input type="number" name="deadline_day_ss"   value="{{ $map->deadline_day_ss }}"   placeholder="Gün" min="1" max="31">
+                                </div>
+                            </div>
+                            <div class="ur-field full">
+                                <label>Dil Gereksinimi</label>
+                                <input type="text" name="language_requirement" value="{{ $map->language_requirement }}" placeholder="ör. DSH-2 oder TestDaF 4x4">
+                            </div>
                         </div>
                     </div>
-                    <div style="margin-bottom:8px;">
-                        <div class="mgr-filter-label" style="margin-bottom:5px;">Zorunlu Belgeler *</div>
+
+                    <div class="ur-section">
+                        <div class="ur-section-title">Zorunlu Belgeler *</div>
                         <div class="cb-grid">
                             @foreach($docCatalog as $code => $doc)
                             <label class="cb-item" title="{{ $doc['label_tr'] }}">
@@ -227,8 +272,9 @@ summary::-webkit-details-marker { display:none; }
                             @endforeach
                         </div>
                     </div>
-                    <div style="margin-bottom:10px;">
-                        <div class="mgr-filter-label" style="margin-bottom:5px;">Tavsiye Edilen Belgeler</div>
+
+                    <div class="ur-section">
+                        <div class="ur-section-title">Tavsiye Edilen Belgeler</div>
                         <div class="cb-grid">
                             @foreach($docCatalog as $code => $doc)
                             <label class="cb-item" title="{{ $doc['label_tr'] }}">
@@ -239,14 +285,17 @@ summary::-webkit-details-marker { display:none; }
                             @endforeach
                         </div>
                     </div>
-                    <div style="margin-bottom:10px;">
-                        <label class="mgr-filter-label" style="display:block;margin-bottom:3px;">Notlar</label>
-                        <textarea name="notes" rows="3" style="width:100%;max-width:560px;">{{ $map->notes }}</textarea>
+
+                    <div class="ur-section">
+                        <div class="ur-section-title">Notlar</div>
+                        <div class="ur-field full">
+                            <textarea name="notes" rows="3" placeholder="Önemli ek bilgiler...">{{ $map->notes }}</textarea>
+                        </div>
                     </div>
-                    <div style="display:flex;gap:8px;">
-                        <button type="submit" style="padding:6px 16px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:var(--tx-xs);font-weight:600;cursor:pointer;">Kaydet</button>
-                        <button type="button" onclick="document.getElementById('edit-map-{{ $map->id }}').open=false"
-                            style="padding:6px 12px;border:1px solid var(--border,#e2e8f0);border-radius:7px;font-size:var(--tx-xs);color:var(--muted,#64748b);background:var(--surface,#fff);cursor:pointer;">İptal</button>
+
+                    <div class="ur-actions">
+                        <button type="submit" class="ur-btn-save">Kaydet</button>
+                        <button type="button" class="ur-btn-cancel" onclick="document.getElementById('edit-map-{{ $map->id }}').open=false">İptal</button>
                     </div>
                 </form>
             </div>
@@ -260,70 +309,81 @@ summary::-webkit-details-marker { display:none; }
     <summary style="cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:#1e40af;color:#fff;border-radius:8px;font-size:var(--tx-sm);font-weight:600;list-style:none;">
         + Yeni Belge Haritası Ekle
     </summary>
-    <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:16px;margin-top:8px;">
-        <form method="POST" action="{{ route('manager.university-requirements.store') }}">
+    <div style="margin-top:8px;">
+        <form method="POST" action="{{ route('manager.university-requirements.store') }}" class="ur-form">
             @csrf
-            <div class="grid2" style="gap:10px;margin-bottom:10px;">
-                <div style="display:flex;flex-direction:column;gap:3px;">
-                    <label class="mgr-filter-label">Üniversite *</label>
-                    <select name="university_code" required style="width:100%;">
-                        <option value="">Seçin...</option>
-                        @foreach($catalog as $code => $uni)
-                            <option value="{{ $code }}">{{ $uni['name_tr'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:3px;">
-                    <label class="mgr-filter-label">Bölüm Kodu (boş = tüm bölümler)</label>
-                    <input type="text" name="department_code" placeholder="INFORMATIK" style="width:100%;">
-                </div>
-                <div style="display:flex;flex-direction:column;gap:3px;">
-                    <label class="mgr-filter-label">Derece *</label>
-                    <select name="degree_type" required>
-                        <option value="master">Master</option>
-                        <option value="bachelor">Lisans</option>
-                        <option value="phd">Doktora</option>
-                        <option value="ausbildung">Ausbildung</option>
-                    </select>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:3px;">
-                    <label class="mgr-filter-label">Dönem *</label>
-                    <select name="semester" required>
-                        <option value="WS">Kış (WS)</option>
-                        <option value="SS">Yaz (SS)</option>
-                        <option value="both">Her İki Dönem</option>
-                    </select>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:3px;">
-                    <label class="mgr-filter-label">Portal *</label>
-                    <select name="portal_name" required>
-                        <option value="uni_assist">Uni-Assist</option>
-                        <option value="direct">Direkt</option>
-                        <option value="hochschulstart">Hochschulstart</option>
-                        <option value="other">Diğer</option>
-                    </select>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:3px;">
-                    <label class="mgr-filter-label">WS Son Başvuru (Ay / Gün)</label>
-                    <div style="display:flex;gap:6px;">
-                        <input type="number" name="deadline_month_ws" placeholder="Ay" style="width:75px;" min="1" max="12">
-                        <input type="number" name="deadline_day_ws"   placeholder="Gün" style="width:65px;" min="1" max="31">
+
+            <div class="ur-section">
+                <div class="ur-section-title">Hedef Bilgileri</div>
+                <div class="ur-grid">
+                    <div class="ur-field">
+                        <label>Üniversite *</label>
+                        <select name="university_code" required>
+                            <option value="">Seçin...</option>
+                            @foreach($catalog as $code => $uni)
+                                <option value="{{ $code }}">{{ $uni['name_tr'] }}</option>
+                            @endforeach
+                        </select>
                     </div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:3px;">
-                    <label class="mgr-filter-label">SS Son Başvuru (Ay / Gün)</label>
-                    <div style="display:flex;gap:6px;">
-                        <input type="number" name="deadline_month_ss" placeholder="Ay" style="width:75px;" min="1" max="12">
-                        <input type="number" name="deadline_day_ss"   placeholder="Gün" style="width:65px;" min="1" max="31">
+                    <div class="ur-field">
+                        <label>Bölüm Kodu (boş = tüm bölümler)</label>
+                        <input type="text" name="department_code" placeholder="INFORMATIK">
                     </div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:3px;">
-                    <label class="mgr-filter-label">Dil Gereksinimi</label>
-                    <input type="text" name="language_requirement" placeholder="DSH-2 oder TestDaF 4x4" style="width:100%;">
+                    <div class="ur-field">
+                        <label>Derece *</label>
+                        <select name="degree_type" required>
+                            <option value="master">Master</option>
+                            <option value="bachelor">Lisans</option>
+                            <option value="phd">Doktora</option>
+                            <option value="ausbildung">Ausbildung</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            <div style="margin-bottom:8px;">
-                <div class="mgr-filter-label" style="margin-bottom:5px;">Zorunlu Belgeler * (en az 1)</div>
+
+            <div class="ur-section">
+                <div class="ur-section-title">Başvuru Bilgileri</div>
+                <div class="ur-grid">
+                    <div class="ur-field">
+                        <label>Portal *</label>
+                        <select name="portal_name" required>
+                            <option value="uni_assist">Uni-Assist</option>
+                            <option value="direct">Direkt</option>
+                            <option value="hochschulstart">Hochschulstart</option>
+                            <option value="other">Diğer</option>
+                        </select>
+                    </div>
+                    <div class="ur-field">
+                        <label>Dönem *</label>
+                        <select name="semester" required>
+                            <option value="WS">Kış (WS)</option>
+                            <option value="SS">Yaz (SS)</option>
+                            <option value="both">Her İki Dönem</option>
+                        </select>
+                    </div>
+                    <div class="ur-field">
+                        <label>Dil Gereksinimi</label>
+                        <input type="text" name="language_requirement" placeholder="DSH-2 oder TestDaF 4x4">
+                    </div>
+                    <div class="ur-field">
+                        <label>WS Son Başvuru (Ay / Gün)</label>
+                        <div class="ur-date-pair">
+                            <input type="number" name="deadline_month_ws" placeholder="Ay" min="1" max="12">
+                            <input type="number" name="deadline_day_ws"   placeholder="Gün" min="1" max="31">
+                        </div>
+                    </div>
+                    <div class="ur-field">
+                        <label>SS Son Başvuru (Ay / Gün)</label>
+                        <div class="ur-date-pair">
+                            <input type="number" name="deadline_month_ss" placeholder="Ay" min="1" max="12">
+                            <input type="number" name="deadline_day_ss"   placeholder="Gün" min="1" max="31">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ur-section">
+                <div class="ur-section-title">Zorunlu Belgeler * (en az 1)</div>
                 <div class="cb-grid">
                     @foreach($docCatalog as $code => $doc)
                     <label class="cb-item" title="{{ $doc['label_tr'] }}">
@@ -333,8 +393,9 @@ summary::-webkit-details-marker { display:none; }
                     @endforeach
                 </div>
             </div>
-            <div style="margin-bottom:10px;">
-                <div class="mgr-filter-label" style="margin-bottom:5px;">Tavsiye Edilen Belgeler</div>
+
+            <div class="ur-section">
+                <div class="ur-section-title">Tavsiye Edilen Belgeler</div>
                 <div class="cb-grid">
                     @foreach($docCatalog as $code => $doc)
                     <label class="cb-item" title="{{ $doc['label_tr'] }}">
@@ -344,11 +405,17 @@ summary::-webkit-details-marker { display:none; }
                     @endforeach
                 </div>
             </div>
-            <div style="margin-bottom:10px;">
-                <label class="mgr-filter-label" style="display:block;margin-bottom:3px;">Notlar</label>
-                <textarea name="notes" rows="3" placeholder="Önemli ek bilgiler..." style="width:100%;max-width:560px;"></textarea>
+
+            <div class="ur-section">
+                <div class="ur-section-title">Notlar</div>
+                <div class="ur-field full">
+                    <textarea name="notes" rows="3" placeholder="Önemli ek bilgiler..."></textarea>
+                </div>
             </div>
-            <button type="submit" style="padding:7px 18px;background:#1e40af;color:#fff;border:none;border-radius:7px;font-size:var(--tx-sm);font-weight:600;cursor:pointer;">Harita Ekle</button>
+
+            <div class="ur-actions">
+                <button type="submit" class="ur-btn-save" style="background:#1e40af;">Harita Ekle</button>
+            </div>
         </form>
     </div>
 </details>

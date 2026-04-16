@@ -34,7 +34,7 @@ class ManagerPortalPreviewController extends Controller
             ->where('student_id', $studentId)
             ->latest()
             ->limit(10)
-            ->get(['document_code', 'title', 'status', 'updated_at']);
+            ->get(['id', 'document_id', 'original_file_name', 'status', 'updated_at']);
         $notifications = NotificationDispatch::query()
             ->where('student_id', $studentId)
             ->latest()
@@ -103,7 +103,7 @@ class ManagerPortalPreviewController extends Controller
             ->where('dealer_id', $dealerCode)
             ->latest('updated_at')
             ->limit(12)
-            ->get(['student_id', 'dealer_type', 'milestones', 'updated_at']);
+            ->get(['student_id', 'dealer_type', 'milestone_progress', 'total_earned', 'total_pending', 'updated_at']);
 
         return view('dealer.dashboard', [
             'dealerCode'          => $dealerCode,
@@ -200,6 +200,8 @@ class ManagerPortalPreviewController extends Controller
             // safe defaults for preview
             'todayAppointments'    => collect(),
             'todayTasks'           => collect(),
+            'todayAssignedGuests'  => collect(),
+            'todayDocsForReview'   => collect(),
             'pendingTickets'       => collect(),
             'riskRadar'            => collect(),
             'criticalActions'      => collect(),

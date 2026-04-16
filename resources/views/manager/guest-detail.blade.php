@@ -3,6 +3,36 @@
 @section('title', 'Manager – Aday Öğrenci Detay #' . $guest->id)
 @section('page_title', 'Aday Öğrenci Detay')
 
+@push('head')
+<style>
+/* Guest detail — sol (tablo) ve sağ (form) kolonun tutarlı görünmesi için */
+.gd-panel { padding:14px 16px !important; margin-bottom:12px !important; }
+.gd-panel h2 { font-size:13px !important; font-weight:700 !important; color:var(--u-text,#0f172a); margin:0 0 10px; padding-bottom:8px; border-bottom:1px solid var(--u-line,#e5e9f0); letter-spacing:.2px; }
+.gd-table { width:100%; border-collapse:collapse; font-size:12px; }
+.gd-table td { padding:6px 0; vertical-align:top; }
+.gd-table td.lbl { color:var(--u-muted,#64748b); width:130px; font-weight:500; }
+.gd-table td strong, .gd-table td a { color:var(--u-text,#0f172a); }
+.gd-table code { font-size:10px; background:var(--u-bg,#f5f7fa); padding:1px 5px; border-radius:3px; }
+
+/* Right-column forms → match left column density */
+.gd-field { margin-bottom:10px; }
+.gd-field label { display:block; font-size:11px; font-weight:600; color:var(--u-muted,#64748b); margin-bottom:4px; text-transform:uppercase; letter-spacing:.3px; }
+.gd-field select, .gd-field input[type=text], .gd-field input[type=email], .gd-field textarea {
+    width:100%; box-sizing:border-box; font-size:12px !important; padding:7px 10px !important;
+    border:1px solid var(--u-line,#e5e9f0); border-radius:6px; background:#fff;
+    color:var(--u-text,#0f172a); line-height:1.4; min-height:32px !important;
+}
+.gd-field textarea { min-height:64px !important; resize:vertical; font-family:inherit; }
+.gd-field select:focus, .gd-field input:focus, .gd-field textarea:focus {
+    outline:none; border-color:#2563eb; box-shadow:0 0 0 2px rgba(37,99,235,.12);
+}
+.gd-readonly { font-size:12px; color:var(--u-text,#0f172a); padding:7px 10px; background:var(--u-bg,#f5f7fa); border-radius:6px; margin-bottom:10px; }
+.gd-readonly .muted { font-size:10px; color:var(--u-muted,#64748b); }
+.gd-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.gd-actions .btn { font-size:12px !important; padding:7px 16px !important; min-height:32px !important; }
+</style>
+@endpush
+
 @section('content')
 
 <div style="margin-bottom:10px;">
@@ -26,56 +56,56 @@
 
     {{-- SOL: Kişisel Bilgiler --}}
     <div>
-        <section class="panel" style="margin-bottom:12px;">
+        <section class="panel gd-panel">
             <h2>Kişisel Bilgiler</h2>
-            <table style="width:100%;border-collapse:collapse;font-size:var(--tx-sm);">
-                <tr><td class="muted" style="padding:5px 0;width:140px;">ID / Token</td>
+            <table class="gd-table">
+                <tr><td class="lbl">ID / Token</td>
                     <td>#{{ $guest->id }} / <code style="font-size:var(--tx-xs);">{{ $guest->tracking_token }}</code></td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Ad Soyad</td>
+                <tr><td class="lbl">Ad Soyad</td>
                     <td><strong>{{ $guest->first_name }} {{ $guest->last_name }}</strong></td></tr>
-                <tr><td class="muted" style="padding:5px 0;">E-posta</td>
+                <tr><td class="lbl">E-posta</td>
                     <td>{{ $guest->email }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Telefon</td>
+                <tr><td class="lbl">Telefon</td>
                     <td>{{ $guest->phone ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Cinsiyet</td>
+                <tr><td class="lbl">Cinsiyet</td>
                     <td>{{ $guest->gender ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Ülke</td>
+                <tr><td class="lbl">Ülke</td>
                     <td>{{ $guest->application_country ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Dil</td>
+                <tr><td class="lbl">Dil</td>
                     <td>{{ $guest->communication_language ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Başvuru Türü</td>
+                <tr><td class="lbl">Başvuru Türü</td>
                     <td>{{ $guest->application_type ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Kayıt Tarihi</td>
+                <tr><td class="lbl">Kayıt Tarihi</td>
                     <td>{{ optional($guest->created_at)->format('d.m.Y H:i') }}</td></tr>
             </table>
         </section>
 
-        <section class="panel" style="margin-bottom:12px;">
+        <section class="panel gd-panel">
             <h2>Hedef & Tercihler</h2>
-            <table style="width:100%;border-collapse:collapse;font-size:var(--tx-sm);">
-                <tr><td class="muted" style="padding:5px 0;width:140px;">Hedef Dönem</td>
+            <table class="gd-table">
+                <tr><td class="lbl">Hedef Dönem</td>
                     <td>{{ $guest->target_term ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Hedef Şehir</td>
+                <tr><td class="lbl">Hedef Şehir</td>
                     <td>{{ $guest->target_city ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Dil Seviyesi</td>
+                <tr><td class="lbl">Dil Seviyesi</td>
                     <td>{{ $guest->language_level ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Şube</td>
+                <tr><td class="lbl">Şube</td>
                     <td>{{ $guest->branch ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Öncelik</td>
+                <tr><td class="lbl">Öncelik</td>
                     <td>{{ $guest->priority ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Risk</td>
+                <tr><td class="lbl">Risk</td>
                     <td>{{ $guest->risk_level ?: '–' }}</td></tr>
             </table>
         </section>
 
-        <section class="panel" style="margin-bottom:12px;">
+        <section class="panel gd-panel">
             <h2>Paket & Sözleşme</h2>
-            <table style="width:100%;border-collapse:collapse;font-size:var(--tx-sm);">
-                <tr><td class="muted" style="padding:5px 0;width:140px;">Paket Kodu</td>
+            <table class="gd-table">
+                <tr><td class="lbl">Paket Kodu</td>
                     <td>{{ $guest->selected_package_code ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Paket Adı</td>
+                <tr><td class="lbl">Paket Adı</td>
                     <td>{{ $guest->selected_package_title ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Paket Fiyatı</td>
+                <tr><td class="lbl">Paket Fiyatı</td>
                     <td>{{ $guest->selected_package_price ? number_format((float)$guest->selected_package_price, 2, ',', '.') . ' EUR' : '–' }}</td></tr>
                 @php
                     [$csLbl, $csCls] = match($guest->contract_status ?? '') {
@@ -88,36 +118,36 @@
                         default         => ['–', 'badge'],
                     };
                 @endphp
-                <tr><td class="muted" style="padding:5px 0;">Sözleşme Durumu</td>
+                <tr><td class="lbl">Sözleşme Durumu</td>
                     <td><span class="badge {{ $csCls }}">{{ $csLbl }}</span></td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Sözleşme Talep</td>
+                <tr><td class="lbl">Sözleşme Talep</td>
                     <td>{{ optional($guest->contract_requested_at)->format('d.m.Y') ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Sözleşme İmza</td>
+                <tr><td class="lbl">Sözleşme İmza</td>
                     <td>{{ optional($guest->contract_signed_at)->format('d.m.Y') ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Sözleşme Onay</td>
+                <tr><td class="lbl">Sözleşme Onay</td>
                     <td>{{ optional($guest->contract_approved_at)->format('d.m.Y') ?: '–' }}</td></tr>
             </table>
         </section>
 
-        <section class="panel">
+        <section class="panel gd-panel">
             <h2>UTM / Kaynak İzleme</h2>
-            <table style="width:100%;border-collapse:collapse;font-size:var(--tx-sm);">
-                <tr><td class="muted" style="padding:5px 0;width:140px;">Lead Kaynağı</td>
+            <table class="gd-table">
+                <tr><td class="lbl">Lead Kaynağı</td>
                     <td>{{ $guest->lead_source ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Dealer Kodu</td>
+                <tr><td class="lbl">Dealer Kodu</td>
                     <td>
                         @if($guest->dealer_code)
                             <a href="/manager/dealers/{{ $guest->dealer_code }}">{{ $guest->dealer_code }}</a>
                         @else –
                         @endif
                     </td></tr>
-                <tr><td class="muted" style="padding:5px 0;">UTM Source</td>
+                <tr><td class="lbl">UTM Source</td>
                     <td>{{ $guest->utm_source ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">UTM Medium</td>
+                <tr><td class="lbl">UTM Medium</td>
                     <td>{{ $guest->utm_medium ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">UTM Campaign</td>
+                <tr><td class="lbl">UTM Campaign</td>
                     <td>{{ $guest->utm_campaign ?: '–' }}</td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Campaign Kodu</td>
+                <tr><td class="lbl">Campaign Kodu</td>
                     <td>{{ $guest->campaign_code ?: '–' }}</td></tr>
             </table>
         </section>
@@ -127,7 +157,7 @@
     <div>
 
         {{-- Durum & Lead Bilgisi --}}
-        <section class="panel" style="margin-bottom:12px;">
+        <section class="panel gd-panel">
             <h2>Lead Durumu</h2>
             @php
                 $badgeClass = match($guest->lead_status) {
@@ -147,95 +177,98 @@
                     default     => ($guest->lead_status ?: '–'),
                 };
             @endphp
-            <div style="margin-bottom:10px;">
+            <div class="gd-readonly">
                 Mevcut Durum: <span class="badge {{ $badgeClass }}">{{ $leadStatusLabel }}</span>
             </div>
 
             <form method="POST" action="/manager/guests/{{ $guest->id }}/status">
                 @csrf @method('PATCH')
-                <div style="margin-bottom:8px;">
-                    <label class="muted">Durum Güncelle</label>
-                    <select name="lead_status" style="width:100%;">
+                <div class="gd-field">
+                    <label>Durum Güncelle</label>
+                    <select name="lead_status">
                         <option value="">– Seç –</option>
                         @foreach(['new'=>'Yeni','contacted'=>'İletişime Geçildi','qualified'=>'Nitelikli','converted'=>'Dönüştü','lost'=>'Kayboldu'] as $sv => $sl)
                             <option value="{{ $sv }}" @selected($guest->lead_status === $sv)>{{ $sl }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div style="margin-bottom:8px;">
-                    <label class="muted">Öncelik</label>
-                    <select name="priority" style="width:100%;">
+                <div class="gd-field">
+                    <label>Öncelik</label>
+                    <select name="priority">
                         <option value="">– Seç –</option>
                         <option value="low"    @selected($guest->priority === 'low')>Düşük</option>
                         <option value="normal" @selected($guest->priority === 'normal')>Normal</option>
                         <option value="high"   @selected($guest->priority === 'high')>Yüksek</option>
                     </select>
                 </div>
-                <div style="margin-bottom:8px;">
-                    <label class="muted">Notlar</label>
-                    <textarea name="notes" rows="4" style="width:100%;box-sizing:border-box;">{{ $guest->notes }}</textarea>
+                <div class="gd-field">
+                    <label>Notlar</label>
+                    <textarea name="notes" rows="4">{{ $guest->notes }}</textarea>
                 </div>
-                <button class="btn btn-primary">Kaydet</button>
+                <div class="gd-actions">
+                    <button class="btn btn-primary">Kaydet</button>
+                </div>
             </form>
         </section>
 
         {{-- Eğitim Danışmanı Atama --}}
-        <section class="panel" style="margin-bottom:12px;">
+        <section class="panel gd-panel">
             <h2>Eğitim Danışmanı Ataması</h2>
             @if($guest->assigned_senior_email)
-                <div style="margin-bottom:8px;">
-                    <span class="muted">Mevcut Eğitim Danışmanı:</span>
-                    <strong>{{ $guest->assigned_senior_email }}</strong>
+                <div class="gd-readonly">
+                    Mevcut: <strong>{{ $guest->assigned_senior_email }}</strong>
                     @if($guest->assigned_at)
-                        <span class="muted" style="font-size:var(--tx-xs);">({{ optional($guest->assigned_at)->format('d.m.Y H:i') }})</span>
+                        <span class="muted">({{ optional($guest->assigned_at)->format('d.m.Y H:i') }})</span>
                     @endif
                     @if($guest->assigned_by)
-                        <span class="muted" style="font-size:var(--tx-xs);"> – atan: {{ $guest->assigned_by }}</span>
+                        <span class="muted"> – atan: {{ $guest->assigned_by }}</span>
                     @endif
                 </div>
             @else
-                <div class="muted" style="margin-bottom:8px;">Henüz senior atanmamış.</div>
+                <div class="gd-readonly muted">Henüz eğitim danışmanı atanmamış.</div>
             @endif
 
             <form method="POST" action="/manager/guests/{{ $guest->id }}/assign">
                 @csrf @method('PATCH')
-                <div style="margin-bottom:8px;">
-                    <label class="muted">Eğitim Danışmanı Seç</label>
-                    <select name="assigned_senior_email" style="width:100%;">
+                <div class="gd-field">
+                    <label>Eğitim Danışmanı Seç</label>
+                    <select name="assigned_senior_email">
                         <option value="">– Atamayı Kaldır –</option>
                         @foreach($seniorOptions as $e)
                             <option value="{{ $e }}" @selected($guest->assigned_senior_email === $e)>{{ $e }}</option>
                         @endforeach
                     </select>
                 </div>
-                <button class="btn btn-primary">Ata</button>
+                <div class="gd-actions">
+                    <button class="btn btn-primary">Ata</button>
+                </div>
             </form>
         </section>
 
         {{-- Dönüşen Öğrenci --}}
         @if($student)
-            <section class="panel" style="margin-bottom:12px;">
+            <section class="panel gd-panel">
                 <h2>Dönüşen Öğrenci</h2>
-                <table style="width:100%;border-collapse:collapse;font-size:var(--tx-sm);">
-                    <tr><td class="muted" style="padding:5px 0;width:120px;">Öğrenci ID</td>
+                <table class="gd-table">
+                    <tr><td class="lbl">Öğrenci ID</td>
                         <td><a href="/manager/students/{{ urlencode($student->student_id) }}"><strong>{{ $student->student_id }}</strong></a></td></tr>
-                    <tr><td class="muted" style="padding:5px 0;">Eğitim Danışmanı</td>
+                    <tr><td class="lbl">Eğitim Danışmanı</td>
                         <td>{{ $student->senior_email ?: '–' }}</td></tr>
-                    <tr><td class="muted" style="padding:5px 0;">Şube</td>
+                    <tr><td class="lbl">Şube</td>
                         <td>{{ $student->branch ?: '–' }}</td></tr>
-                    <tr><td class="muted" style="padding:5px 0;">Risk</td>
+                    <tr><td class="lbl">Risk</td>
                         <td>{{ $student->risk_level ?: '–' }}</td></tr>
-                    <tr><td class="muted" style="padding:5px 0;">Ödeme</td>
+                    <tr><td class="lbl">Ödeme</td>
                         <td>{{ $student->payment_status ?: '–' }}</td></tr>
                 </table>
             </section>
         @endif
 
         {{-- KVKK & Belge --}}
-        <section class="panel">
+        <section class="panel gd-panel">
             <h2>Onay & Belge</h2>
-            <table style="width:100%;border-collapse:collapse;font-size:var(--tx-sm);">
-                <tr><td class="muted" style="padding:5px 0;width:140px;">KVKK Onayı</td>
+            <table class="gd-table">
+                <tr><td class="lbl">KVKK Onayı</td>
                     <td>
                         @if($guest->kvkk_consent)
                             <span class="badge ok">Verildi</span>
@@ -243,7 +276,7 @@
                             <span class="badge danger">Verilmedi</span>
                         @endif
                     </td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Belgeler Hazır</td>
+                <tr><td class="lbl">Belgeler Hazır</td>
                     <td>
                         @if($guest->docs_ready)
                             <span class="badge ok">Evet</span>
@@ -251,7 +284,7 @@
                             <span class="badge">Hayır</span>
                         @endif
                     </td></tr>
-                <tr><td class="muted" style="padding:5px 0;">Form Gönderildi</td>
+                <tr><td class="lbl">Form Gönderildi</td>
                     <td>{{ optional($guest->registration_form_submitted_at)->format('d.m.Y H:i') ?: '–' }}</td></tr>
             </table>
         </section>

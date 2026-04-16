@@ -15,12 +15,14 @@
     .cfg-page .card {
         background: var(--u-card);
         border: 1px solid var(--u-line);
-        border-radius: 14px;
-        padding: 14px;
-        box-shadow: 0 6px 16px rgba(15, 42, 72, 0.05);
+        border-radius: 10px;
+        padding: 14px 16px;
+        box-shadow: 0 2px 8px rgba(15, 42, 72, 0.04);
+        transition: border-color .12s;
     }
-    .cfg-page .card h2 { margin: 0; font-size: 18px; }
-    .cfg-page .meta { color: var(--u-muted); font-size: 13px; margin-bottom: 10px; overflow-wrap: anywhere; word-break: break-word; }
+    .cfg-page .card:hover { border-color: #cbd5e1; }
+    .cfg-page .card h2 { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--u-text); padding-bottom: 8px; border-bottom: 1px solid var(--u-line); letter-spacing: .2px; }
+    .cfg-page .meta { color: var(--u-muted); font-size: 11px; margin-bottom: 10px; overflow-wrap: anywhere; word-break: break-word; line-height: 1.5; }
     .cfg-page .list {
         max-height: 320px;
         overflow: auto;
@@ -55,10 +57,11 @@
     .cfg-page .row > button { flex: 0 0 auto; }
     .cfg-page .row-wrap { flex-wrap: wrap; }
     .cfg-page .row-wrap > button { flex: 1 1 calc(50% - 8px); min-width: 140px; text-align: center; }
-    .cfg-page input, .cfg-page select { width: 100%; border: 1px solid var(--u-line); border-radius: 8px; padding: 9px 10px; font-size: 14px; max-width: 100%; }
+    .cfg-page input, .cfg-page select { width: 100%; border: 1px solid var(--u-line); border-radius: 6px; padding: 7px 10px; font-size: 12px; max-width: 100%; min-height: 34px; }
+    .cfg-page input:focus, .cfg-page select:focus { outline: none; border-color: #1e40af; box-shadow: 0 0 0 2px rgba(30,64,175,.12); }
     .cfg-page select { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cfg-page button { border: 0; border-radius: 8px; background: var(--u-brand); color: #fff; padding: 9px 12px; cursor: pointer; font-size: 14px; }
-    .cfg-page .status { margin-top: 8px; font-size: 13px; color: var(--u-muted); min-height: 18px; overflow-wrap: anywhere; word-break: break-word; }
+    .cfg-page button { border: 0; border-radius: 6px; background: var(--u-brand); color: #fff; padding: 7px 12px; cursor: pointer; font-size: 12px; font-weight: 600; }
+    .cfg-page .status { margin-top: 8px; font-size: 11px; color: var(--u-muted); min-height: 16px; overflow-wrap: anywhere; word-break: break-word; }
     .cfg-page .status.error { color: #b91c1c; font-weight: 600; }
     .cfg-page .systematic-invalid { border-color: #dc2626 !important; box-shadow: 0 0 0 1px rgba(220,38,38,.22); }
     .cfg-page .field-hint { margin-top: 4px; margin-bottom: 6px; font-size: 12px; color: var(--u-muted); line-height: 1.25; }
@@ -120,32 +123,45 @@
 
 @section('content')
 <div class="cfg-page">
-    <div class="panel" style="margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
-        <strong style="white-space:nowrap;">Aktif Firma:</strong>
-        <select id="companySwitchSelect" style="width:220px;" onchange="switchCompanyContext()"></select>
-        <button type="button" class="cfg-page-btn" onclick="loadCompanies()">Firmalari Yenile</button>
-        <span id="companyTopStatus" class="status status-pill" style="margin-top:0;min-width:180px;"></span>
-        <div class="cfg-search-wrap" style="margin-left:auto;">
-            <input type="search" id="cfgSearchInput" class="cfg-search-input"
-                   placeholder="Ayarlarda ara..." oninput="cfgSearch(this.value)" autocomplete="off">
+
+    {{-- Hero header --}}
+    <div style="background:linear-gradient(135deg,#eef4ff 0%,#f8faff 100%);border:1px solid #dbe4f2;border-radius:12px;padding:14px 18px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+            <div>
+                <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:3px;">⚙️ Sistem Ayarları</div>
+                <div style="font-size:11px;color:#64748b;">Firma, kullanıcı, belge, entegrasyon ve portal konfigürasyonu</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <a href="/manager/theme" class="btn alt" style="font-size:11px;padding:6px 12px;">🎨 Tema</a>
+                <a href="/student-card" class="btn alt" style="font-size:11px;padding:6px 12px;">🪪 Öğrenci Kartı</a>
+                <a href="/config/export-code/safe" class="btn alt" style="font-size:11px;padding:6px 12px;">💾 Kodu İndir</a>
+                <a href="/demo" class="btn alt" style="font-size:11px;padding:6px 12px;">🧪 Demo</a>
+            </div>
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <a href="/manager/theme" class="btn">Tema</a>
-            <a href="/student-card" class="btn">Öğrenci Kartı</a>
-            <a href="/config/export-code/safe" class="btn">Kodu İndir</a>
-            <a href="/demo" class="btn">Demo</a>
+
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div style="display:flex;gap:6px;align-items:center;">
+                <span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.3px;">Aktif Firma:</span>
+                <select id="companySwitchSelect" style="width:220px;font-size:12px;padding:7px 10px;border:1px solid #dbe4f2;border-radius:6px;" onchange="switchCompanyContext()"></select>
+                <button type="button" class="cfg-page-btn" style="font-size:11px;padding:7px 12px;" onclick="loadCompanies()">Yenile</button>
+            </div>
+            <span id="companyTopStatus" class="status status-pill" style="margin-top:0;min-width:120px;font-size:11px;"></span>
+            <div class="cfg-search-wrap" style="margin-left:auto;">
+                <input type="search" id="cfgSearchInput" class="cfg-search-input"
+                       placeholder="Ayarlarda ara..." oninput="cfgSearch(this.value)" autocomplete="off">
+            </div>
         </div>
     </div>
 
     {{-- Tab Bar --}}
     <div class="cfg-tabs">
-        <button class="cfg-tab active" data-tab="firma"       onclick="cfgTab('firma',this)">🏢 Firma &amp; Kullanıcılar</button>
+        <button class="cfg-tab active" data-tab="firma"       onclick="cfgTab('firma',this)">🏢 Firma & Kullanıcılar</button>
         <button class="cfg-tab"        data-tab="bayiler"     onclick="cfgTab('bayiler',this)">🤝 Bayiler</button>
-        <button class="cfg-tab"        data-tab="surec"       onclick="cfgTab('surec',this)">⚙ Süreç &amp; Entegrasyon</button>
+        <button class="cfg-tab"        data-tab="surec"       onclick="cfgTab('surec',this)">⚙️ Süreç & Entegrasyon</button>
         <button class="cfg-tab"        data-tab="belgeler"    onclick="cfgTab('belgeler',this)">📄 Belgeler</button>
-        <button class="cfg-tab"        data-tab="icerik"      onclick="cfgTab('icerik',this)">📝 İçerik &amp; Şablonlar</button>
+        <button class="cfg-tab"        data-tab="icerik"      onclick="cfgTab('icerik',this)">📝 İçerik & Şablonlar</button>
         <button class="cfg-tab"        data-tab="analitik"    onclick="cfgTab('analitik',this)">📊 Analitik</button>
-        <button class="cfg-tab"        data-tab="portallar"   onclick="cfgTab('portallar',this)">👥 Başvurular &amp; Portallar</button>
+        <button class="cfg-tab"        data-tab="portallar"   onclick="cfgTab('portallar',this)">👥 Başvurular & Portallar</button>
     </div>
 
     {{-- Panes — grid direkt pane üzerinde, wrapper div yok --}}

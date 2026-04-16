@@ -11,9 +11,23 @@
 
 @push('head')
 <style>
+/* ── Page wrapper & hero ── */
+.tc-hero { background:linear-gradient(135deg,#eef4ff 0%,#f8faff 100%); border:1px solid #dbe4f2; border-radius:12px; padding:14px 18px; margin-bottom:12px; }
+.tc-hero-row { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.tc-hero-title { font-size:14px; font-weight:700; color:#0f172a; margin:0 0 4px; }
+.tc-hero-desc { font-size:12px; color:var(--u-muted,#6b7280); margin:0; }
+.tc-hero-quick { display:flex; gap:6px; flex-wrap:wrap; }
+
 /* ── Card padding & spacing ── */
-.card { padding: 18px 20px; }
-.tc-stats { margin-bottom:14px; }
+.card { padding: 14px 16px; }
+.tc-stats { margin-bottom:12px; }
+
+/* ── Unified section header ── */
+.tc-sec { padding:14px 16px !important; margin-bottom:10px !important; }
+.tc-sec-head { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.tc-sec-title { font-size:12px; font-weight:700; color:var(--u-brand,#2563eb); letter-spacing:.3px; text-transform:uppercase; }
+.tc-sec-title.warn { color:#d97706; }
+.tc-sec-sub { font-size:11px; color:var(--u-muted,#64748b); }
 
 /* ── Layout helpers ── */
 .row2 { display:grid; grid-template-columns:1fr 1fr;         gap:10px; }
@@ -53,10 +67,15 @@
 .btn-link:hover { background:#dbeafe; }
 
 /* ── Stats bar ── */
-.tc-stats { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; margin-bottom:12px; }
-.s-stat { background:var(--u-card,#fff); border:1px solid var(--u-line,#e5e7eb); border-radius:10px; padding:10px 14px; }
-.s-stat .k { font-size:11px; font-weight:600; color:var(--u-muted,#6b7280); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
-.s-stat .v { font-size:22px; font-weight:700; color:var(--u-text,#111827); line-height:1; }
+.tc-stats { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin-bottom:12px; }
+.s-stat { background:var(--u-card,#fff); border:1px solid var(--u-line,#e5e7eb); border-radius:10px; padding:10px 14px; display:flex; flex-direction:column; gap:4px; transition:border-color .12s; }
+.s-stat:hover { border-color:#bfdbfe; }
+.s-stat .k { font-size:11px; font-weight:600; color:var(--u-muted,#6b7280); text-transform:uppercase; letter-spacing:.05em; }
+.s-stat .v { font-size:22px; font-weight:700; color:var(--u-text,#111827); line-height:1.1; }
+.s-stat.open .v { color:#15803d; }
+.s-stat.progress .v { color:#854d0e; }
+.s-stat.waiting .v { color:#1d4ed8; }
+.s-stat.closed .v { color:#9ca3af; }
 @media(max-width:900px){ .tc-stats { grid-template-columns:repeat(3,1fr); } }
 @media(max-width:600px){ .tc-stats { grid-template-columns:repeat(2,1fr); } }
 
@@ -121,58 +140,70 @@
 @endpush
 
 @section('content')
-    {{-- Top card: description + quick links + dept nav --}}
-    <section class="card" style="margin-bottom:12px;">
-        @php
-            $activeDepartment = (string)($routeDepartment ?? '');
-            $total      = collect($rows ?? [])->count();
-            $open       = collect($rows ?? [])->where('status','open')->count();
-            $inProgress = collect($rows ?? [])->where('status','in_progress')->count();
-            $waiting    = collect($rows ?? [])->where('status','waiting_response')->count();
-            $closed     = collect($rows ?? [])->where('status','closed')->count();
-        @endphp
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-            <span class="t-meta">Manager merkezi ticket yönetimi — departman veya email ile yönlendir.</span>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <a href="/manager/dashboard"  class="btn-link">Manager</a>
-                <a href="/tasks"              class="btn-link">Task Board</a>
-                <a href="/manager/requests"   class="btn-link">Request Center</a>
+    @php
+        $activeDepartment = (string)($routeDepartment ?? '');
+        $total      = collect($rows ?? [])->count();
+        $open       = collect($rows ?? [])->where('status','open')->count();
+        $inProgress = collect($rows ?? [])->where('status','in_progress')->count();
+        $waiting    = collect($rows ?? [])->where('status','waiting_response')->count();
+        $closed     = collect($rows ?? [])->where('status','closed')->count();
+    @endphp
+
+    {{-- Hero: title + description + quick links --}}
+    <div class="tc-hero">
+        <div class="tc-hero-row">
+            <div>
+                <div class="tc-hero-title">🎫 Ticket Center</div>
+                <p class="tc-hero-desc">Manager merkezi ticket yönetimi — departman veya e-posta ile yönlendir, SLA'yı takip et.</p>
+            </div>
+            <div class="tc-hero-quick">
+                <a href="/manager/dashboard"  class="btn-link">📊 Manager</a>
+                <a href="/tasks"              class="btn-link">✅ Task Board</a>
+                <a href="/manager/requests"   class="btn-link">📋 Yöneticiye Talepler</a>
             </div>
         </div>
-        <div class="link-group-box">
-            <span class="link-group-label">Departman Kuyrukları</span>
-            <div class="pill-links">
-                @if($roleScopedDepartment === null)
-                    {{-- Manager / system_admin: tüm sekmeler --}}
-                    <a href="/tickets-center"            class="pill-link {{ $activeDepartment===''           ? 'active':'' }}">Tüm Ticketlar</a>
-                    <a href="/tickets-center/operations" class="pill-link {{ $activeDepartment==='operations' ? 'active':'' }}">Operasyon</a>
-                    <a href="/tickets-center/finance"    class="pill-link {{ $activeDepartment==='finance'    ? 'active':'' }}">Finans</a>
-                    <a href="/tickets-center/advisory"   class="pill-link {{ $activeDepartment==='advisory'   ? 'active':'' }}">Danışmanlık</a>
-                    <a href="/tickets-center/marketing"  class="pill-link {{ $activeDepartment==='marketing'  ? 'active':'' }}">Marketing</a>
-                    <a href="/tickets-center/system"     class="pill-link {{ $activeDepartment==='system'     ? 'active':'' }}">Sistem</a>
-                @else
-                    {{-- Scoped rol: sadece kendi departmanı --}}
-                    @php $deptLabels = ['operations'=>'Operasyon','finance'=>'Finans','advisory'=>'Danışmanlık','marketing'=>'Marketing','system'=>'Sistem']; @endphp
-                    <a href="/tickets-center/{{ $roleScopedDepartment }}" class="pill-link active">
-                        {{ $deptLabels[$roleScopedDepartment] ?? $roleScopedDepartment }}
-                    </a>
-                @endif
-            </div>
+    </div>
+
+    {{-- Departman Kuyrukları --}}
+    <section class="card tc-sec">
+        <div class="tc-sec-head">
+            <span class="tc-sec-title">🗂 Departman Kuyrukları</span>
+            <span class="tc-sec-sub">Ticket'ları departmana göre filtrele</span>
+        </div>
+        <div class="pill-links">
+            @if($roleScopedDepartment === null)
+                {{-- Manager / system_admin: tüm sekmeler --}}
+                <a href="/tickets-center"            class="pill-link {{ $activeDepartment===''           ? 'active':'' }}">Tüm Ticketlar</a>
+                <a href="/tickets-center/operations" class="pill-link {{ $activeDepartment==='operations' ? 'active':'' }}">Operasyon</a>
+                <a href="/tickets-center/finance"    class="pill-link {{ $activeDepartment==='finance'    ? 'active':'' }}">Finans</a>
+                <a href="/tickets-center/advisory"   class="pill-link {{ $activeDepartment==='advisory'   ? 'active':'' }}">Danışmanlık</a>
+                <a href="/tickets-center/marketing"  class="pill-link {{ $activeDepartment==='marketing'  ? 'active':'' }}">Marketing</a>
+                <a href="/tickets-center/system"     class="pill-link {{ $activeDepartment==='system'     ? 'active':'' }}">Sistem</a>
+            @else
+                {{-- Scoped rol: sadece kendi departmanı --}}
+                @php $deptLabels = ['operations'=>'Operasyon','finance'=>'Finans','advisory'=>'Danışmanlık','marketing'=>'Marketing','system'=>'Sistem']; @endphp
+                <a href="/tickets-center/{{ $roleScopedDepartment }}" class="pill-link active">
+                    {{ $deptLabels[$roleScopedDepartment] ?? $roleScopedDepartment }}
+                </a>
+            @endif
         </div>
     </section>
 
     {{-- Stats --}}
     <div class="tc-stats">
         <div class="s-stat"><div class="k">Toplam</div><div class="v">{{ $total }}</div></div>
-        <div class="s-stat"><div class="k">Açık</div><div class="v">{{ $open }}</div></div>
-        <div class="s-stat"><div class="k">İşlemde</div><div class="v">{{ $inProgress }}</div></div>
-        <div class="s-stat"><div class="k">Yanıt Bekliyor</div><div class="v">{{ $waiting }}</div></div>
-        <div class="s-stat"><div class="k">Kapalı</div><div class="v">{{ $closed }}</div></div>
+        <div class="s-stat open"><div class="k">Açık</div><div class="v">{{ $open }}</div></div>
+        <div class="s-stat progress"><div class="k">İşlemde</div><div class="v">{{ $inProgress }}</div></div>
+        <div class="s-stat waiting"><div class="k">Yanıt Bekliyor</div><div class="v">{{ $waiting }}</div></div>
+        <div class="s-stat closed"><div class="k">Kapalı</div><div class="v">{{ $closed }}</div></div>
     </div>
 
     {{-- Filter --}}
-    <section class="card" style="margin-bottom:12px;">
-        <div class="tc-section-label" style="margin-bottom:10px;">Filtrele</div>
+    <section class="card tc-sec" style="border-left:3px solid var(--u-brand,#2563eb);">
+        <div class="tc-sec-head">
+            <span class="tc-sec-title">🔍 Filtrele</span>
+            <span class="tc-sec-sub">Ticket listesini daralt</span>
+        </div>
         <form method="GET" action="/tickets-center">
             <div class="row4">
                 <input name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Ara: konu / mesaj / email">
@@ -210,8 +241,11 @@
     </section>
 
     {{-- Bulk operations --}}
-    <section class="card" style="margin-bottom:12px;">
-        <div class="tc-section-label" style="margin-bottom:10px;">Toplu İşlem</div>
+    <section class="card tc-sec">
+        <div class="tc-sec-head">
+            <span class="tc-sec-title">⚡ Toplu İşlem</span>
+            <span class="tc-sec-sub">Listeden seçili ticket'lara uygula</span>
+        </div>
         <form method="POST" action="/tickets-center/bulk-route" id="bulkRouteForm">
             @csrf
             <input type="hidden" name="current_department" value="{{ $routeDepartment ?? '' }}">
@@ -401,11 +435,13 @@
     </section>
 
     {{-- Usage guide --}}
-    <section class="card" style="margin-top:12px;">
-        <div class="tc-section-label" style="margin-bottom:8px;">Kullanım Kılavuzu</div>
-        <ol class="t-meta" style="margin:0;padding-left:18px;line-height:2;">
+    <section class="card tc-sec" style="margin-top:12px;background:#f8fafc;">
+        <div class="tc-sec-head">
+            <span class="tc-sec-title" style="color:#64748b;">💡 Kullanım Kılavuzu</span>
+        </div>
+        <ol class="t-meta" style="margin:0;padding-left:18px;line-height:1.9;">
             <li>Ticket satırına tıkla → detay ve yönlendirme formu açılır.</li>
-            <li>Departmanı belirle, gerekirse sorumlu email gir ve <strong>Yönlendir</strong>'e bas.</li>
+            <li>Departmanı belirle, gerekirse sorumlu e-posta gir ve <strong>Yönlendir</strong>'e bas.</li>
             <li>Yönlendirme sonrası task ataması otomatik senkronlanır.</li>
             <li>Manager dışı erişim için rol-template'e <code>ticket.center.view</code> ve <code>ticket.center.route</code> izinlerini ver.</li>
         </ol>

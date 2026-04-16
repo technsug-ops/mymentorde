@@ -63,9 +63,15 @@ Route::middleware(['company.context', 'auth'])->group(function (): void {
     Route::post('/bulletins/{bulletin}/react',         [BulletinController::class, 'react'])->name('bulletins.react');
 });
 
-// ── Personel Sözleşmeleri (staff kendi sözleşmelerini görür/imzalar) ──────────
+// ── Contracts Hub (Manager) — /my-contracts tek sayfada tüm bitmiş sözleşmeler ─
+// NOT: Eski StaffContractController::index (sadece kendi sözleşmesi) kaldırıldı;
+// manager kendi iş sözleşmesini profil sayfasından görür. Sözleşme detay/upload
+// route'ları korunuyor — her personel kendi kayıtlarına show/upload yapabilir.
 Route::middleware(['company.context', 'auth'])->group(function (): void {
-    Route::get('/my-contracts',                                 [StaffContractController::class, 'index'])->name('my-contracts.index');
+    Route::get('/my-contracts',                                 [\App\Http\Controllers\Manager\ContractsHubController::class, 'index'])->name('my-contracts.index');
+    Route::get('/my-contracts/guest-download/{guest}',          [\App\Http\Controllers\Manager\ContractsHubController::class, 'downloadGuestContract'])->name('manager.contracts-hub.download-guest');
+    Route::get('/my-contracts/guest-preview/{guest}',           [\App\Http\Controllers\Manager\ContractsHubController::class, 'previewGuestContract'])->name('manager.contracts-hub.preview-guest');
+    Route::get('/my-contracts/biz-preview/{contract}',          [\App\Http\Controllers\Manager\ContractsHubController::class, 'previewBusinessContract'])->name('manager.contracts-hub.preview-biz');
     Route::get('/my-contracts/{contract}',                      [StaffContractController::class, 'show'])->name('my-contracts.show');
     Route::post('/my-contracts/{contract}/upload-signed',       [StaffContractController::class, 'uploadSigned'])->name('my-contracts.upload-signed');
 });

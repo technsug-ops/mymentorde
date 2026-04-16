@@ -27,7 +27,7 @@
                 <a class="{{ request()->is('manager/staff*') ? 'active' : '' }}" href="/manager/staff">👥 Personel</a>
                 <a class="{{ request()->is('manager/dealers*') ? 'active' : '' }}" href="/manager/dealers">Bayiler</a>
                 <a class="{{ request()->is('manager/commissions*') ? 'active' : '' }}" href="/manager/commissions">Komisyonlar</a>
-                <a class="{{ request()->is('manager/requests*') ? 'active' : '' }}" href="/manager/requests">Başvurular</a>
+                <a class="{{ request()->is('manager/requests*') ? 'active' : '' }}" href="/manager/requests">Yöneticiye Talepler</a>
                 <a class="{{ request()->is('manager/university-requirements*') ? 'active' : '' }}" href="/manager/university-requirements">🗺️ Üniversite Haritası</a>
             </div>
         </div>
@@ -61,7 +61,7 @@
                 <a class="{{ (request()->is('manager/business-contracts*') && request()->get('type') === 'staff') ? 'active' : '' }}" href="/manager/business-contracts?type=staff">Staff</a>
                 <a class="{{ (request()->is('manager/business-contracts*') && request()->get('type') === 'dealer') ? 'active' : '' }}" href="/manager/business-contracts?type=dealer">Dealer</a>
                 <a class="{{ request()->is('manager/contract-analytics*') ? 'active' : '' }}" href="/manager/contract-analytics">📊 Analitik</a>
-                <a class="{{ request()->is('my-contracts*') ? 'active' : '' }}" href="/my-contracts">📄 İş Sözleşmem</a>
+                <a class="{{ request()->is('my-contracts*') ? 'active' : '' }}" href="/my-contracts">📄 Tüm Sözleşmeler</a>
             </div>
         </div>
 

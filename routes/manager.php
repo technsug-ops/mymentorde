@@ -79,6 +79,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/staff/leaderboard',                  [StaffController::class, 'leaderboard'])->name('manager.staff.leaderboard');
     Route::get('/manager/staff/performance',                  [StaffController::class, 'performanceDashboard'])->name('manager.staff.performance');
     Route::get('/manager/staff/{user}/edit',                  [StaffController::class, 'edit'])->name('manager.staff.edit');
+    Route::get('/manager/staff/{user}',                       [StaffController::class, 'show'])->name('manager.staff.show');
     Route::put('/manager/staff/{user}',                       [StaffController::class, 'update'])->name('manager.staff.update');
     Route::post('/manager/staff/{user}/toggle',               [StaffController::class, 'toggle'])->name('manager.staff.toggle');
     Route::post('/manager/staff/{user}/kpi-targets',          [StaffController::class, 'setKpiTargets'])->name('manager.staff.kpi-targets');

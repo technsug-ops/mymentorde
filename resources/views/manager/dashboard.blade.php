@@ -5,7 +5,7 @@
 
 @push('head')
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 /* ── Manager Dashboard Hero ── */
 .mgd-hero {
@@ -893,13 +893,16 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
 <script>
 (function(){
     var trendRaw = @json($trend ?? []);
-    if (!trendRaw.length) return;
+    console.log('[mgd-trend] trendRaw:', trendRaw);
+    if (!trendRaw || !trendRaw.length) { console.warn('[mgd-trend] no data'); return; }
     var labels   = trendRaw.map(function(r){ return r.label; });
     var revenues = trendRaw.map(function(r){ return parseFloat(r.revenue)||0; });
     var approvals= trendRaw.map(function(r){ return parseInt(r.approval_count)||0; });
     var ctx = document.getElementById('mgd-trend-chart');
-    if (!ctx) return;
+    if (!ctx) { console.warn('[mgd-trend] canvas not found'); return; }
+    if (typeof Chart === 'undefined') { console.warn('[mgd-trend] Chart.js not loaded'); return; }
     new Chart(ctx, {
+        type: 'bar',
         data: {
             labels: labels,
             datasets: [
