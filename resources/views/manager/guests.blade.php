@@ -29,6 +29,14 @@
 
 @section('content')
 
+{{-- Action Bar --}}
+<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    <a href="{{ route('manager.bulk-import.index') }}" class="btn"
+       style="background:#16a34a;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;">
+        📥 Toplu Kayıt İçeri Aktar
+    </a>
+</div>
+
 {{-- KPI Strip --}}
 <div class="mgr-kpi-strip">
     <div class="mgr-kpi">
