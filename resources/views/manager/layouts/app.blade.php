@@ -227,10 +227,6 @@
                    class="nav-link {{ (request()->is('manager/staff*') || request()->is('manager/hr/persons*')) && !request()->is('manager/staff/performance*') && !request()->is('manager/staff/leaderboard*') ? 'active' : '' }}">
                     <span class="nav-icon">👥</span> Personel & Çalışanlar
                 </a>
-                <a href="/manager/staff/performance"
-                   class="nav-link {{ request()->is('manager/staff/performance*') ? 'active' : '' }}">
-                    <span class="nav-icon">📊</span> Performans & KPI
-                </a>
                 <a href="/manager/hr/leaves"
                    class="nav-link {{ request()->is('manager/hr/leaves*') ? 'active' : '' }}"
                    style="justify-content:space-between;">
@@ -291,6 +287,10 @@
                    class="nav-link {{ request()->is('manager/senior-performance*') ? 'active' : '' }}">
                     <span class="nav-icon">👤</span> Danışman Performansı
                 </a>
+                <a href="/manager/staff/performance"
+                   class="nav-link {{ request()->is('manager/staff/performance*') ? 'active' : '' }}">
+                    <span class="nav-icon">🏢</span> Personel Performans & KPI
+                </a>
                 <a href="/manager/ticket-analytics"
                    class="nav-link {{ request()->is('manager/ticket-analytics*') ? 'active' : '' }}">
                     <span class="nav-icon">🎫</span> Ticket Analitik
@@ -298,6 +298,10 @@
                 <a href="/manager/feedback-analytics"
                    class="nav-link {{ request()->is('manager/feedback-analytics*') ? 'active' : '' }}">
                     <span class="nav-icon">💬</span> Geri Bildirim Analitik
+                </a>
+                <a href="/manager/contract-analytics"
+                   class="nav-link {{ request()->is('manager/contract-analytics*') ? 'active' : '' }}">
+                    <span class="nav-icon">📝</span> Sözleşme Analitik
                 </a>
                 <a href="/manager/revenue-analytics"
                    class="nav-link {{ request()->is('manager/revenue-analytics*') ? 'active' : '' }}">
@@ -355,10 +359,6 @@
                         </a>
                     </div>
                 </div>
-                <a href="/manager/contract-analytics"
-                   class="nav-link {{ request()->is('manager/contract-analytics*') ? 'active' : '' }}">
-                    <span class="nav-icon">📊</span> Sözleşme Analitik
-                </a>
                 <a href="/my-contracts"
                    class="nav-link {{ request()->is('my-contracts*') ? 'active' : '' }}">
                     <span class="nav-icon">📄</span> Tüm Sözleşmeler

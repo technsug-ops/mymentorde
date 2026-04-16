@@ -486,7 +486,7 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
             📊 Analitik Panelleri
         </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(6, 1fr);gap:10px;">
+    <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;">
         <a href="/manager/conversion-funnel" style="text-decoration:none;background:var(--u-bg,#f8fafc);border:1px solid var(--u-line,#e2e8f0);border-left:3px solid #8b5cf6;border-radius:9px;padding:12px;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(139,92,246,.15)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
             <div style="font-size:20px;margin-bottom:4px;">🎯</div>
             <div style="font-size:11px;font-weight:700;color:var(--u-text,#0f172a);">Dönüşüm Hunisi</div>
@@ -497,6 +497,11 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
             <div style="font-size:11px;font-weight:700;color:var(--u-text,#0f172a);">Danışman Perf.</div>
             <div style="font-size:10px;color:var(--u-muted);">Skor + leaderboard</div>
         </a>
+        <a href="/manager/staff/performance" style="text-decoration:none;background:var(--u-bg,#f8fafc);border:1px solid var(--u-line,#e2e8f0);border-left:3px solid #6366f1;border-radius:9px;padding:12px;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(99,102,241,.15)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div style="font-size:20px;margin-bottom:4px;">🏢</div>
+            <div style="font-size:11px;font-weight:700;color:var(--u-text,#0f172a);">Personel Perf.</div>
+            <div style="font-size:10px;color:var(--u-muted);">Staff KPI</div>
+        </a>
         <a href="/manager/ticket-analytics" style="text-decoration:none;background:var(--u-bg,#f8fafc);border:1px solid var(--u-line,#e2e8f0);border-left:3px solid #f59e0b;border-radius:9px;padding:12px;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(245,158,11,.15)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
             <div style="font-size:20px;margin-bottom:4px;">🎫</div>
             <div style="font-size:11px;font-weight:700;color:var(--u-text,#0f172a);">Ticket Analitik</div>
@@ -506,6 +511,11 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
             <div style="font-size:20px;margin-bottom:4px;">💬</div>
             <div style="font-size:11px;font-weight:700;color:var(--u-text,#0f172a);">Geri Bildirim</div>
             <div style="font-size:10px;color:var(--u-muted);">NPS + memnuniyet</div>
+        </a>
+        <a href="/manager/contract-analytics" style="text-decoration:none;background:var(--u-bg,#f8fafc);border:1px solid var(--u-line,#e2e8f0);border-left:3px solid #0891b2;border-radius:9px;padding:12px;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(8,145,178,.15)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div style="font-size:20px;margin-bottom:4px;">📝</div>
+            <div style="font-size:11px;font-weight:700;color:var(--u-text,#0f172a);">Sözleşme Analitik</div>
+            <div style="font-size:10px;color:var(--u-muted);">İmza + risk</div>
         </a>
         <a href="/manager/revenue-analytics" style="text-decoration:none;background:var(--u-bg,#f8fafc);border:1px solid var(--u-line,#e2e8f0);border-left:3px solid #16a34a;border-radius:9px;padding:12px;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(22,163,74,.15)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
             <div style="font-size:20px;margin-bottom:4px;">💰</div>
