@@ -367,6 +367,10 @@
                    class="nav-link {{ request()->is('manager/notification-stats*') ? 'active' : '' }}">
                     <span class="nav-icon">🔔</span> Bildirim İstatistik
                 </a>
+                <a href="/manager/feedback-analytics"
+                   class="nav-link {{ request()->is('manager/feedback-analytics*') ? 'active' : '' }}">
+                    <span class="nav-icon">📊</span> Geri Bildirim Analitik
+                </a>
                 <a href="/manager/webhooks"
                    class="nav-link {{ request()->is('manager/webhooks*') ? 'active' : '' }}">
                     <span class="nav-icon">🔗</span> Webhook Logları
