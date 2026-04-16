@@ -654,13 +654,43 @@
             }
         });
         // Step panel'i (section) tamamen gizlemek için spouse_info panel'i bul
+        // ve pill'i de bulup visibility toggle et. Evli değilse: panel display:none,
+        // pill display:none → navigation step indeksi otomatik atlar (aşağıdaki
+        // click hook'unda gerekirse tekrar next'i tetikle).
         f.querySelectorAll('.grf-panel').forEach(function(panel){
             var hasSpouseField = _spouseFieldKeys.some(function(k){
                 return !!panel.querySelector('[data-field-key="' + k + '"]');
             });
-            if(hasSpouseField) panel.dataset.spouseSection = '1';
+            if(!hasSpouseField) return;
+            panel.dataset.spouseSection = '1';
+            panel.style.display = show ? '' : 'none';
+            var step = panel.getAttribute('data-step');
+            if(step !== null){
+                var pill = document.querySelector('[data-step-pill="' + step + '"]');
+                if(pill) pill.style.display = show ? '' : 'none';
+            }
         });
     }
+    // Navigasyon atlama: Evli değilse spouse panel'i "active" olursa
+    // otomatik olarak btnNextStep'i tekrar tetikle (ya da prev yönünde prev'i).
+    var _lastNavDirection = 1;
+    document.getElementById('btnNextStep')?.addEventListener('click', function(){ _lastNavDirection = 1; }, true);
+    document.getElementById('btnPrevStep')?.addEventListener('click', function(){ _lastNavDirection = -1; }, true);
+    (function(){
+        var observer = new MutationObserver(function(){
+            var active = document.querySelector('.grf-panel.active[data-spouse-section="1"]');
+            if(!active) return;
+            if(active.style.display === 'none'){
+                var btn = _lastNavDirection === -1
+                    ? document.getElementById('btnPrevStep')
+                    : document.getElementById('btnNextStep');
+                if(btn && !btn.disabled) setTimeout(function(){ btn.click(); }, 0);
+            }
+        });
+        document.querySelectorAll('.grf-panel[data-step]').forEach(function(p){
+            observer.observe(p, {attributes: true, attributeFilter: ['class']});
+        });
+    })();
     // children_count: has_children === 'yes' ise görünür + number-only + required
     function _applyChildrenCountVisibility(){
         var f = document.getElementById('guestRegistrationForm');

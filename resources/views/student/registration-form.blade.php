@@ -691,7 +691,42 @@
                 inp.setCustomValidity('');
             }
         });
+        // Panel + pill'i toplu toggle: evli değilse section tamamen gizlenir,
+        // navigasyonda otomatik atlanır (aşağıdaki MutationObserver hook'u).
+        form.querySelectorAll('.form-section[data-sec-index]').forEach(function(sec){
+            var hasSpouseField = _spouseFieldKeys.some(function(k){
+                return !!sec.querySelector('[data-field-key="' + k + '"]');
+            });
+            if(!hasSpouseField) return;
+            sec.dataset.spouseSection = '1';
+            sec.style.display = show ? '' : 'none';
+            var idx = sec.getAttribute('data-sec-index');
+            if(idx !== null){
+                var pill = document.querySelector('.srf-pill[data-pill-index="' + idx + '"]');
+                if(pill) pill.style.display = show ? '' : 'none';
+            }
+        });
     }
+    // Navigasyon atlama: Evli değilken spouse section active olursa
+    // otomatik bir next (ya da prev) daha tetikle.
+    var _srfLastDir = 1;
+    document.getElementById('nextSectionBtn')?.addEventListener('click', function(){ _srfLastDir = 1; }, true);
+    document.getElementById('prevSectionBtn')?.addEventListener('click', function(){ _srfLastDir = -1; }, true);
+    (function(){
+        var obs = new MutationObserver(function(){
+            var active = document.querySelector('.form-section.active[data-spouse-section="1"]');
+            if(!active) return;
+            if(active.style.display === 'none'){
+                var btn = _srfLastDir === -1
+                    ? document.getElementById('prevSectionBtn')
+                    : document.getElementById('nextSectionBtn');
+                if(btn && !btn.disabled) setTimeout(function(){ btn.click(); }, 0);
+            }
+        });
+        document.querySelectorAll('.form-section[data-sec-index]').forEach(function(s){
+            obs.observe(s, {attributes: true, attributeFilter: ['class']});
+        });
+    })();
     // children_count: has_children === 'yes' ise görünür + number pattern
     function _applyChildrenCountVisibilityStudent(){
         var form = document.querySelector('form');

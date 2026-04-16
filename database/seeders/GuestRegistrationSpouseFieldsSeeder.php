@@ -22,7 +22,7 @@ class GuestRegistrationSpouseFieldsSeeder extends Seeder
         $section = [
             'section_key'   => 'spouse_info',
             'section_title' => 'Eşinizle İlgili Bilgiler',
-            'section_order' => 65,
+            'section_order' => 15,
         ];
 
         // NOT: Model'in `options_json` => 'array' cast'i var. Bu yüzden

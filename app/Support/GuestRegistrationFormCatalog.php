@@ -164,10 +164,11 @@ class GuestRegistrationFormCatalog
                 ],
             ],
             [
-                // Sadece marital_status=='married' seçildiğinde görünür
-                // (client-side JS + server-side conditionalRequired ile kontrol edilir)
+                // Sadece marital_status=='married' seçildiğinde görünür.
+                // Adım 2 (personal_info hemen sonrası) konumunda — Evli seçilirse
+                // eş bilgileri derhal sorulur, değilse client-side JS bu adımı atlar.
                 'section_key' => 'spouse_info',
-                'section_order' => 65,
+                'section_order' => 15,
                 'title' => 'Eşinizle İlgili Bilgiler',
                 'fields' => [
                     self::f('spouse_full_name', 'Eşinizin adı soyadı *', 'text', true, 180),
