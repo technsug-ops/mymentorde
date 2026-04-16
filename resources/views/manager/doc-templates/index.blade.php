@@ -32,17 +32,21 @@
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
             <thead><tr style="background:var(--u-bg);">
                 <th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;">Şablon Adı</th>
-                <th style="padding:10px 14px;text-align:center;font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;width:80px;">Dil</th>
-                <th style="padding:10px 14px;text-align:center;font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;width:90px;">Durum</th>
+                <th style="padding:10px 14px;text-align:center;font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;width:70px;">Dil</th>
+                <th style="padding:10px 14px;text-align:center;font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;width:85px;">Durum</th>
                 <th style="padding:10px 14px;text-align:center;font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;width:50px;">v</th>
-                <th style="padding:10px 14px;font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;width:220px;">İşlem</th>
+                <th style="padding:10px 14px;text-align:center;font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;width:48px;">⭐</th>
+                <th style="padding:10px 14px;text-align:center;font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;width:80px;">Önizleme</th>
+                <th style="padding:10px 14px;text-align:center;font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;width:68px;">İndir</th>
+                <th style="padding:10px 14px;text-align:center;font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;width:82px;">Düzenle</th>
+                <th style="padding:10px 14px;text-align:center;font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;width:60px;">Sil</th>
             </tr></thead>
             <tbody>
             @php $prevDocType = null; @endphp
             @foreach($templates as $t)
                 @if($prevDocType !== $t->doc_type)
                 <tr style="background:linear-gradient(to right, #eff6ff, transparent);">
-                    <td colspan="5" style="padding:10px 14px;font-size:11px;font-weight:800;color:#1e40af;text-transform:uppercase;letter-spacing:.05em;border-top:2px solid #bfdbfe;">
+                    <td colspan="9" style="padding:10px 14px;font-size:11px;font-weight:800;color:#1e40af;text-transform:uppercase;letter-spacing:.05em;border-top:2px solid #bfdbfe;">
                         {{ \App\Models\DocumentBuilderTemplate::$docTypeLabels[$t->doc_type] ?? $t->doc_type }}
                     </td>
                 </tr>
@@ -60,20 +64,30 @@
                         </span>
                     </td>
                     <td style="padding:10px 14px;text-align:center;font-size:12px;color:var(--u-muted);">v{{ $t->version }}</td>
-                    <td style="padding:10px 14px;">
-                        <div style="display:flex;gap:4px;flex-wrap:nowrap;">
-                            @if(!$t->is_default)
-                            <form method="POST" action="/manager/doc-templates/{{ $t->id }}/set-default" style="display:inline;">
+                    <td style="padding:10px 14px;text-align:center;">
+                        @if($t->is_default)
+                            <span title="Varsayılan şablon" style="font-size:14px;">⭐</span>
+                        @else
+                            <form method="POST" action="/manager/doc-templates/{{ $t->id }}/set-default" style="display:inline;margin:0;">
                                 @csrf
-                                <button type="submit" class="btn alt" style="font-size:11px;padding:3px 8px;" title="Varsayılan yap">⭐</button>
+                                <button type="submit" class="btn alt" style="font-size:11px;padding:3px 8px;opacity:.4;" title="Varsayılan yap">☆</button>
                             </form>
-                            @endif
-                            <a href="/manager/doc-templates/{{ $t->id }}/edit" class="btn alt" style="font-size:11px;padding:3px 10px;">Düzenle</a>
-                            <form method="POST" action="/manager/doc-templates/{{ $t->id }}" onsubmit="return confirm('Sil?')" style="display:inline;">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn warn" style="font-size:11px;padding:3px 10px;">Sil</button>
-                            </form>
-                        </div>
+                        @endif
+                    </td>
+                    <td style="padding:10px 14px;text-align:center;">
+                        <a href="/manager/doc-templates/{{ $t->id }}/preview" target="_blank" class="btn alt" style="font-size:11px;padding:4px 10px;text-decoration:none;" title="Önizleme">👁 Gör</a>
+                    </td>
+                    <td style="padding:10px 14px;text-align:center;">
+                        <a href="/manager/doc-templates/{{ $t->id }}/download" class="btn alt" style="font-size:11px;padding:4px 10px;text-decoration:none;background:#16a34a;color:#fff;border-color:#15803d;" title="PDF indir">⬇ PDF</a>
+                    </td>
+                    <td style="padding:10px 14px;text-align:center;">
+                        <a href="/manager/doc-templates/{{ $t->id }}/edit" class="btn alt" style="font-size:11px;padding:4px 10px;text-decoration:none;">✏️ Düzenle</a>
+                    </td>
+                    <td style="padding:10px 14px;text-align:center;">
+                        <form method="POST" action="/manager/doc-templates/{{ $t->id }}" onsubmit="return confirm('Sil?')" style="display:inline;margin:0;">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn warn" style="font-size:11px;padding:4px 10px;">🗑 Sil</button>
+                        </form>
                     </td>
                 </tr>
             @endforeach
