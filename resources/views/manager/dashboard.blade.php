@@ -479,6 +479,47 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
 
 {{-- Hızlı Erişim grid kaldırıldı --}}
 
+{{-- ── Analitik Kısayolları ── --}}
+<div style="background:var(--u-card,#fff);border:1px solid var(--u-line,#e2e8f0);border-radius:12px;padding:14px 16px;margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-size:var(--tx-xs);font-weight:700;color:var(--u-muted,#64748b);text-transform:uppercase;letter-spacing:.04em;">
+            📊 Analitik Panelleri
+        </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(6, 1fr);gap:10px;">
+        <a href="/manager/conversion-funnel" style="text-decoration:none;background:var(--u-bg,#f8fafc);border:1px solid var(--u-line,#e2e8f0);border-left:3px solid #8b5cf6;border-radius:9px;padding:12px;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(139,92,246,.15)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div style="font-size:20px;margin-bottom:4px;">🎯</div>
+            <div style="font-size:11px;font-weight:700;color:var(--u-text,#0f172a);">Dönüşüm Hunisi</div>
+            <div style="font-size:10px;color:var(--u-muted);">Lead → Öğrenci</div>
+        </a>
+        <a href="/manager/senior-performance" style="text-decoration:none;background:var(--u-bg,#f8fafc);border:1px solid var(--u-line,#e2e8f0);border-left:3px solid #0ea5e9;border-radius:9px;padding:12px;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(14,165,233,.15)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div style="font-size:20px;margin-bottom:4px;">👤</div>
+            <div style="font-size:11px;font-weight:700;color:var(--u-text,#0f172a);">Danışman Perf.</div>
+            <div style="font-size:10px;color:var(--u-muted);">Skor + leaderboard</div>
+        </a>
+        <a href="/manager/ticket-analytics" style="text-decoration:none;background:var(--u-bg,#f8fafc);border:1px solid var(--u-line,#e2e8f0);border-left:3px solid #f59e0b;border-radius:9px;padding:12px;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(245,158,11,.15)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div style="font-size:20px;margin-bottom:4px;">🎫</div>
+            <div style="font-size:11px;font-weight:700;color:var(--u-text,#0f172a);">Ticket Analitik</div>
+            <div style="font-size:10px;color:var(--u-muted);">SLA + yanıt süresi</div>
+        </a>
+        <a href="/manager/feedback-analytics" style="text-decoration:none;background:var(--u-bg,#f8fafc);border:1px solid var(--u-line,#e2e8f0);border-left:3px solid #ec4899;border-radius:9px;padding:12px;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(236,72,153,.15)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div style="font-size:20px;margin-bottom:4px;">💬</div>
+            <div style="font-size:11px;font-weight:700;color:var(--u-text,#0f172a);">Geri Bildirim</div>
+            <div style="font-size:10px;color:var(--u-muted);">NPS + memnuniyet</div>
+        </a>
+        <a href="/manager/revenue-analytics" style="text-decoration:none;background:var(--u-bg,#f8fafc);border:1px solid var(--u-line,#e2e8f0);border-left:3px solid #16a34a;border-radius:9px;padding:12px;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(22,163,74,.15)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div style="font-size:20px;margin-bottom:4px;">💰</div>
+            <div style="font-size:11px;font-weight:700;color:var(--u-text,#0f172a);">Gelir Analitik</div>
+            <div style="font-size:10px;color:var(--u-muted);">Paket + senior bazlı</div>
+        </a>
+        <a href="/manager/notification-stats" style="text-decoration:none;background:var(--u-bg,#f8fafc);border:1px solid var(--u-line,#e2e8f0);border-left:3px solid #64748b;border-radius:9px;padding:12px;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(100,116,139,.15)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div style="font-size:20px;margin-bottom:4px;">🔔</div>
+            <div style="font-size:11px;font-weight:700;color:var(--u-text,#0f172a);">Bildirim İst.</div>
+            <div style="font-size:10px;color:var(--u-muted);">Kanal + kategori</div>
+        </a>
+    </div>
+</div>
+
 {{-- ── Personel Özeti ── --}}
 @if(isset($staffMetrics) && $staffMetrics['total'] > 0)
 @php

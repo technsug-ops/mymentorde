@@ -282,6 +282,34 @@
             </div>
 
             <div class="nav-section">
+                <div class="nav-section-label">📊 Analitik & Raporlar</div>
+                <a href="/manager/conversion-funnel"
+                   class="nav-link {{ request()->is('manager/conversion-funnel*') ? 'active' : '' }}">
+                    <span class="nav-icon">🎯</span> Dönüşüm Hunisi
+                </a>
+                <a href="/manager/senior-performance"
+                   class="nav-link {{ request()->is('manager/senior-performance*') ? 'active' : '' }}">
+                    <span class="nav-icon">👤</span> Danışman Performansı
+                </a>
+                <a href="/manager/ticket-analytics"
+                   class="nav-link {{ request()->is('manager/ticket-analytics*') ? 'active' : '' }}">
+                    <span class="nav-icon">🎫</span> Ticket Analitik
+                </a>
+                <a href="/manager/feedback-analytics"
+                   class="nav-link {{ request()->is('manager/feedback-analytics*') ? 'active' : '' }}">
+                    <span class="nav-icon">💬</span> Geri Bildirim Analitik
+                </a>
+                <a href="/manager/revenue-analytics"
+                   class="nav-link {{ request()->is('manager/revenue-analytics*') ? 'active' : '' }}">
+                    <span class="nav-icon">💰</span> Gelir Analitik
+                </a>
+                <a href="/manager/notification-stats"
+                   class="nav-link {{ request()->is('manager/notification-stats*') ? 'active' : '' }}">
+                    <span class="nav-icon">🔔</span> Bildirim İstatistik
+                </a>
+            </div>
+
+            <div class="nav-section">
                 <div class="nav-section-label">Belgeler & Sözleşmeler</div>
                 @can('dam.view')
                 <a href="{{ route('manager.dam.index') }}"
@@ -362,26 +390,6 @@
                 <a href="/manager/gdpr-dashboard"
                    class="nav-link {{ request()->is('manager/gdpr-dashboard*') ? 'active' : '' }}">
                     <span class="nav-icon">🔒</span> GDPR Paneli
-                </a>
-                <a href="/manager/notification-stats"
-                   class="nav-link {{ request()->is('manager/notification-stats*') ? 'active' : '' }}">
-                    <span class="nav-icon">🔔</span> Bildirim İstatistik
-                </a>
-                <a href="/manager/feedback-analytics"
-                   class="nav-link {{ request()->is('manager/feedback-analytics*') ? 'active' : '' }}">
-                    <span class="nav-icon">📊</span> Geri Bildirim Analitik
-                </a>
-                <a href="/manager/conversion-funnel"
-                   class="nav-link {{ request()->is('manager/conversion-funnel*') ? 'active' : '' }}">
-                    <span class="nav-icon">🎯</span> Dönüşüm Hunisi
-                </a>
-                <a href="/manager/senior-performance"
-                   class="nav-link {{ request()->is('manager/senior-performance*') ? 'active' : '' }}">
-                    <span class="nav-icon">👤</span> Danışman Performansı
-                </a>
-                <a href="/manager/ticket-analytics"
-                   class="nav-link {{ request()->is('manager/ticket-analytics*') ? 'active' : '' }}">
-                    <span class="nav-icon">🎫</span> Ticket Analitik
                 </a>
                 <a href="/manager/webhooks"
                    class="nav-link {{ request()->is('manager/webhooks*') ? 'active' : '' }}">
