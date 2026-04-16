@@ -56,14 +56,23 @@
             </div>
 
             {{-- section_templates --}}
+            @php
+                // Blade parser iç içe {{ }} ile çakışmasın diye default değer
+                // PHP bloğunda hazırlanıp sadece değişken echo'lanıyor.
+                $_defaultSecTpl = "{\n  \"greeting\": \"Sehr geehrte Damen und Herren,\",\n  \"intro\": \"ich möchte mich um einen Studienplatz im Fach {%target_program%} bewerben.\",\n  \"body\": \"{%motivation_text%}\",\n  \"closing\": \"Mit freundlichen Grüßen,\\n{%full_name%}\"\n}";
+                $_defaultSecTpl = str_replace(['{%','%}'], ['{{','}}'], $_defaultSecTpl);
+                $_secTplValue = old('section_templates', $tpl ? json_encode($tpl->section_templates, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) : $_defaultSecTpl);
+                $_openBraces = '{' . '{';
+                $_closeBraces = '}' . '}';
+            @endphp
             <div>
                 <label style="display:block;font-size:12px;font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">
                     Bölüm İçerikleri (JSON object) *
                 </label>
                 <textarea name="section_templates" required rows="12"
-                          style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid var(--u-line);border-radius:8px;font-size:13px;background:var(--u-card);color:var(--u-text);font-family:monospace;resize:vertical;">{{ old('section_templates', $tpl ? json_encode($tpl->section_templates, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) : "{\n  \"greeting\": \"Sehr geehrte Damen und Herren,\",\n  \"intro\": \"ich möchte mich um einen Studienplatz im Fach {{target_program}} bewerben.\",\n  \"body\": \"{{motivation_text}}\",\n  \"closing\": \"Mit freundlichen Grüßen,\\n{{full_name}}\"\n}") }}</textarea>
+                          style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid var(--u-line);border-radius:8px;font-size:13px;background:var(--u-card);color:var(--u-text);font-family:monospace;resize:vertical;">{{ $_secTplValue }}</textarea>
                 <div style="font-size:11px;color:var(--u-muted);margin-top:3px;">
-                    Desteklenen değişkenler: <code>{{'{{'}}full_name{{'}}'}}</code>, <code>{{'{{'}}target_program{{'}}'}}</code>, <code>{{'{{'}}motivation_text{{'}}'}}</code>, <code>{{'{{'}}birth_date{{'}}'}}</code>, <code>{{'{{'}}phone{{'}}'}}</code>, <code>{{'{{'}}email{{'}}'}}</code>
+                    Desteklenen değişkenler: <code>{{ $_openBraces }}full_name{{ $_closeBraces }}</code>, <code>{{ $_openBraces }}target_program{{ $_closeBraces }}</code>, <code>{{ $_openBraces }}motivation_text{{ $_closeBraces }}</code>, <code>{{ $_openBraces }}birth_date{{ $_closeBraces }}</code>, <code>{{ $_openBraces }}phone{{ $_closeBraces }}</code>, <code>{{ $_openBraces }}email{{ $_closeBraces }}</code>
                 </div>
             </div>
 

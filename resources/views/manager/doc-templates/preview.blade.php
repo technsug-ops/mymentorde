@@ -19,9 +19,10 @@
     </div>
 </div>
 
+@php $_braces = '{' . '{'; $_cbraces = '}' . '}'; @endphp
 <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#1e3a8a;line-height:1.6;">
     ℹ️ <strong>Bilgi:</strong> Aşağıdaki önizleme örnek verilerle doldurulmuştur (Mustafa Yılmaz, TU Berlin vb.).
-    Öğrenci belgesini oluştururken <code>{{ '{{first_name}}' }}</code> gibi placeholder'lar kendi bilgileriyle otomatik değiştirilir.
+    Öğrenci belgesini oluştururken <code>{{ $_braces }}first_name{{ $_cbraces }}</code> gibi placeholder'lar kendi bilgileriyle otomatik değiştirilir.
 </div>
 
 <div style="background:#fff;border:1px solid var(--u-line);border-radius:10px;padding:40px 50px;box-shadow:0 2px 8px rgba(0,0,0,.06);max-width:800px;margin:0 auto;font-family:'Segoe UI', Tahoma, sans-serif;font-size:13px;line-height:1.75;color:#1a1a1a;">
