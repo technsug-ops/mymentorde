@@ -32,6 +32,31 @@ class GuestApplicationController extends Controller
 
     public function create()
     {
+        return $this->renderApplyForm();
+    }
+
+    public function createForPartner(string $code)
+    {
+        $dealer = \App\Models\Dealer::where('code', $code)
+            ->where('is_active', true)
+            ->where('is_archived', false)
+            ->first();
+
+        if (!$dealer) {
+            abort(404, 'Bayi bulunamadı veya aktif değil.');
+        }
+
+        return $this->renderApplyForm([
+            'partner' => $dealer,
+            'prefill' => [
+                'dealer_code'  => $dealer->code,
+                'lead_source'  => 'partner_' . strtolower($dealer->code),
+            ],
+        ]);
+    }
+
+    private function renderApplyForm(array $extra = [])
+    {
         $suggestions = $this->buildApplySuggestions(120);
         $leadSourceOptions = $this->getLeadSourceOptions();
         $studentTypes = StudentType::query()
@@ -45,7 +70,7 @@ class GuestApplicationController extends Controller
             ->limit(4)
             ->get(['name', 'description', 'channel', 'target_country']);
 
-        return view('apply.create', [
+        return view('apply.create', array_merge([
             'dealerCodes' => $suggestions['dealer_codes'],
             'campaignValues' => $suggestions['campaign_values'],
             'branchValues' => $suggestions['branch_values'],
@@ -54,7 +79,9 @@ class GuestApplicationController extends Controller
             'activeCampaigns' => $activeCampaigns,
             'applicationCountries' => ApplicationCountryCatalog::options(),
             'kvkkText' => $this->getApplyKvkkText(),
-        ]);
+            'partner' => null,
+            'prefill' => [],
+        ], $extra));
     }
 
     public function suggestions(Request $request)

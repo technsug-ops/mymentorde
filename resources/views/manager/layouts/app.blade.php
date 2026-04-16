@@ -215,6 +215,10 @@
                    class="nav-link {{ request()->is('manager/dealers*') ? 'active' : '' }}">
                     <span class="nav-icon">🏪</span> Bayi Yönetimi
                 </a>
+                <a href="/manager/bulk-import/guests"
+                   class="nav-link {{ request()->is('manager/bulk-import*') ? 'active' : '' }}">
+                    <span class="nav-icon">📥</span> Toplu Kayıt İçeri Aktar
+                </a>
             </div>
 
             <div class="nav-section">

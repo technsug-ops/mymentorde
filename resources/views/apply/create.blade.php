@@ -319,6 +319,13 @@
     </style>
 </head>
 <body>
+@if(!empty($partner))
+<div style="position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg, #1e40af, #3b82f6);color:#fff;padding:10px 20px;text-align:center;font-size:13px;font-weight:600;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15);">
+    🤝 <strong>{{ $partner->name }}</strong> ile işbirliği başvurusu
+    <span style="opacity:.85;margin-left:10px;font-weight:400;">· Bayi Kodu: {{ $partner->code }}</span>
+</div>
+<div style="height:42px;"></div>
+@endif
 <div class="shell">
 
     {{-- ── SOL MARKA PANELİ ─────────────────────────── --}}
@@ -576,8 +583,16 @@
             <div class="field" style="margin-bottom:4px;">
                 <label>Bayi / Referans kodu <span style="font-weight:400;color:#8aa0be;">(opsiyonel)</span></label>
                 <input id="applyDealerCode" name="dealer_code" list="applyDealerSuggestions"
-                       placeholder="Varsa bayi ya da referans kodunu girin" value="{{ old('dealer_code') }}">
+                       placeholder="Varsa bayi ya da referans kodunu girin"
+                       value="{{ old('dealer_code', $prefill['dealer_code'] ?? '') }}"
+                       @if(!empty($prefill['dealer_code'])) readonly style="background:#f3f4f6;cursor:not-allowed;" @endif>
+                @if(!empty($prefill['dealer_code']))
+                <div style="font-size:11px;color:#16a34a;margin-top:3px;font-weight:600;">✓ Partner başvurusu — kod otomatik dolduruldu</div>
+                @endif
             </div>
+            @if(!empty($prefill['lead_source']))
+            <input type="hidden" name="lead_source" value="{{ $prefill['lead_source'] }}">
+            @endif
             <datalist id="applyDealerSuggestions">
                 @foreach(($dealerCodes ?? []) as $dealerCode)
                     <option value="{{ $dealerCode }}"></option>

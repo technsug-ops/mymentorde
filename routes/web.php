@@ -80,6 +80,12 @@ Route::middleware(['company.context'])->group(function () {
         ->middleware(['field.rule.validator:student_registration,application_type', 'throttle:30,1'])
         ->name('apply.store');
     Route::get('/apply/success', [GuestApplicationController::class, 'success'])->middleware('throttle:20,1')->name('apply.success');
+    // ── Partner/Bayi özel landing: /apply/partner/{dealer_code} ──
+    // Formu aynı (apply.create) ama dealer_code prefill edilir ve partner logosu gösterilir.
+    Route::get('/apply/partner/{code}', [GuestApplicationController::class, 'createForPartner'])
+        ->where('code', '[A-Za-z0-9_-]{3,64}')
+        ->middleware('throttle:60,1')
+        ->name('apply.partner');
 });
 
 // GDPR çerez onayı (auth gerektirmez, anonim ziyaretçiler için)

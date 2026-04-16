@@ -226,6 +226,13 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::delete('/manager/bulletins/{bulletin}',    [BulletinManagerController::class, 'destroy'])->name('manager.bulletins.destroy');
     Route::get('/manager/bulletins/{bulletin}/analytics', [BulletinManagerController::class, 'analytics'])->name('manager.bulletins.analytics');
 
+    // ─── Toplu Kayıt İçeri Aktarma (Excel/CSV) ───────────────────────────────
+    Route::get('/manager/bulk-import/guests',             [\App\Http\Controllers\Manager\BulkImportController::class, 'index'])->name('manager.bulk-import.index');
+    Route::get('/manager/bulk-import/guests/template',    [\App\Http\Controllers\Manager\BulkImportController::class, 'template'])->name('manager.bulk-import.template');
+    Route::post('/manager/bulk-import/guests/preview',    [\App\Http\Controllers\Manager\BulkImportController::class, 'preview'])->name('manager.bulk-import.preview');
+    Route::post('/manager/bulk-import/guests/commit',     [\App\Http\Controllers\Manager\BulkImportController::class, 'commit'])->name('manager.bulk-import.commit');
+    Route::post('/manager/bulk-import/guests/reset',      [\App\Http\Controllers\Manager\BulkImportController::class, 'reset'])->name('manager.bulk-import.reset');
+
     // ─── Document Builder Templates ───────────────────────────────────────────
     Route::get('/manager/doc-templates',                        [\App\Http\Controllers\Manager\DocTemplateController::class, 'index'])->name('manager.doc-templates.index');
     Route::get('/manager/doc-templates/create',                 [\App\Http\Controllers\Manager\DocTemplateController::class, 'create'])->name('manager.doc-templates.create');
