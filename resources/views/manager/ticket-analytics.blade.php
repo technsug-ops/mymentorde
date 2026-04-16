@@ -86,8 +86,8 @@
 {{-- Trend Chart --}}
 <div class="card" style="padding:16px;margin-bottom:20px;">
     <div class="card-title" style="font-weight:700;margin-bottom:12px;">📈 Günlük Ticket Trendi (30 gün)</div>
-    <div style="position:relative;height:180px;width:100%;">
-        <canvas id="ticketTrendChart"></canvas>
+    <div style="position:relative;height:180px;width:100%;max-height:180px;overflow:hidden;">
+        <canvas id="ticketTrendChart" style="max-height:180px!important;"></canvas>
     </div>
 </div>
 

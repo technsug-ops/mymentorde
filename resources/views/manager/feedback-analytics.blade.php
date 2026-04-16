@@ -104,8 +104,8 @@
 <div class="grid2" style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;">
     <div class="card" style="padding:16px;">
         <div class="card-title" style="font-weight:700;margin-bottom:12px;">📈 Günlük Trend (30 gün)</div>
-        <div style="position:relative;height:220px;width:100%;">
-            <canvas id="trendChart"></canvas>
+        <div style="position:relative;height:220px;width:100%;max-height:220px;overflow:hidden;">
+            <canvas id="trendChart" style="max-height:220px!important;"></canvas>
         </div>
     </div>
     <div class="card" style="padding:16px;">
