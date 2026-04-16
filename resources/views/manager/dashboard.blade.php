@@ -221,15 +221,22 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
             </div>
         </div>
     </div>
-    <div class="mgd-hero-actions">
-        <a class="mgd-hero-btn primary" href="/manager/guests">Aday Öğrenci Yönetimi</a>
-        <a class="mgd-hero-btn ghost" href="/manager/students">Öğrenciler</a>
-        <a class="mgd-hero-btn ghost" href="/manager/seniors">Eğitim Danışmanları</a>
-        <a class="mgd-hero-btn ghost" href="/manager/dealers">Bayiler</a>
-        <a class="mgd-hero-btn ghost" href="/manager/commissions">Komisyonlar</a>
-        <a class="mgd-hero-btn ghost" href="/tasks">Görevler</a>
-        <a class="mgd-hero-btn ghost" href="/config">Ayarlar</a>
-        <a class="mgd-hero-btn ghost" href="/logout">Çıkış</a>
+
+    {{-- Aylık Hedef Progress Bar --}}
+    @php
+        $monthlyTarget = (float) (env('MONTHLY_REVENUE_TARGET') ?: 12000);
+        $monthlyActual = (float) ($stats['monthly_revenue'] ?? 0);
+        $targetPct     = $monthlyTarget > 0 ? min(100, round($monthlyActual / $monthlyTarget * 100, 1)) : 0;
+        $targetColor   = $targetPct >= 100 ? '#16a34a' : ($targetPct >= 75 ? '#3b82f6' : ($targetPct >= 50 ? '#d97706' : '#dc2626'));
+    @endphp
+    <div style="margin-top:14px;padding:10px 14px;background:rgba(255,255,255,.12);border-radius:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:6px;color:rgba(255,255,255,.9);">
+            <span style="font-weight:700;text-transform:uppercase;letter-spacing:.3px;">🎯 Aylık Gelir Hedefi</span>
+            <span><strong style="font-size:14px;">%{{ $targetPct }}</strong> · {{ number_format($monthlyActual, 0, ',', '.') }} / {{ number_format($monthlyTarget, 0, ',', '.') }} EUR</span>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,.2);border-radius:999px;overflow:hidden;">
+            <div style="height:100%;width:{{ $targetPct }}%;background:{{ $targetColor }};border-radius:999px;transition:width .4s;"></div>
+        </div>
     </div>
 </div>
 
@@ -362,8 +369,8 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
     $opsClass    = $anyFail ? 'danger' : ($anyStale ? 'warn' : 'ok');
 @endphp
 
-{{-- KPI Strip — kompakt 7 chip --}}
-<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:12px;">
+{{-- KPI Strip — kompakt 5 chip (Bildirim + Ops kaldırıldı, sidebar'da zaten var) --}}
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px;">
 
     <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:10px 12px;border-top:3px solid #1e40af;">
         <div style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Aylık Gelir</div>
@@ -389,79 +396,88 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
         <div style="font-size:var(--tx-xs);color:var(--muted,#64748b);margin-top:2px;">EUR · pending</div>
     </div>
 
-    <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:10px 12px;border-top:3px solid {{ $stats['risk_score'] > 50 ? '#dc2626' : ($stats['risk_score'] > 20 ? '#d97706' : '#16a34a') }};">
-        <div style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Risk Skoru</div>
+    @php $highRiskCount = ($riskyStudents ?? collect())->count(); $riskTop5 = ($riskyStudents ?? collect())->take(5); @endphp
+    <div id="riskKpiTile" style="position:relative;background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:10px 12px;border-top:3px solid {{ $stats['risk_score'] > 50 ? '#dc2626' : ($stats['risk_score'] > 20 ? '#d97706' : '#16a34a') }};cursor:pointer;transition:border-color .12s;" onmouseover="this.style.borderColor='#dc2626';" onmouseout="this.style.borderColor='var(--border,#e2e8f0)';" onclick="toggleRiskPopover(event)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:3px;">
+            <div style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;">Risk Skoru</div>
+            @if($highRiskCount > 0)
+                <span style="font-size:10px;font-weight:700;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;padding:1px 6px;border-radius:999px;">{{ $highRiskCount }} riskli</span>
+            @endif
+        </div>
         <div style="font-size:var(--tx-lg);font-weight:800;color:{{ $stats['risk_score'] > 50 ? '#dc2626' : ($stats['risk_score'] > 20 ? '#d97706' : '#16a34a') }};line-height:1;">{{ $stats['risk_score'] }}</div>
-        <div style="font-size:var(--tx-xs);color:var(--muted,#64748b);margin-top:2px;">overdue %{{ number_format($stats['risk_breakdown']['overdue_rate'], 1) }}</div>
-    </div>
+        <div style="font-size:var(--tx-xs);color:var(--muted,#64748b);margin-top:2px;">overdue %{{ number_format($stats['risk_breakdown']['overdue_rate'], 1) }} · tıkla ↓</div>
 
-    <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:10px 12px;border-top:3px solid {{ $stats['notification_failed'] > 0 ? '#dc2626' : '#16a34a' }};">
-        <div style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Bildirim</div>
-        <div style="font-size:var(--tx-lg);font-weight:800;color:var(--text,#0f172a);line-height:1;">{{ $stats['notification_queued'] }}</div>
-        <div style="font-size:var(--tx-xs);color:{{ $stats['notification_failed'] > 0 ? '#dc2626' : 'var(--muted,#64748b)' }};margin-top:2px;">failed: {{ $stats['notification_failed'] }} · 24h: {{ $stats['notification_sent_24h'] }}</div>
+        {{-- Popover (default hidden) --}}
+        @if($riskTop5->isNotEmpty())
+        <div id="riskPopover" style="display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:100;background:#fff;border:1px solid var(--u-line,#e5e9f0);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:10px;width:320px;cursor:default;" onclick="event.stopPropagation();">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--u-line,#e5e9f0);">
+                <span style="font-size:11px;font-weight:700;color:var(--u-muted,#64748b);text-transform:uppercase;letter-spacing:.3px;">⚠️ Yüksek Risk ({{ $highRiskCount }})</span>
+                <a href="/manager/students?risk=high" style="font-size:10px;color:#1e40af;font-weight:600;text-decoration:none;">Tümü →</a>
+            </div>
+            @foreach($riskTop5 as $rs)
+            @php
+                $score = (int) ($rs->current_score ?? 0);
+                $color = $score >= 70 ? '#dc2626' : ($score >= 50 ? '#d97706' : '#6b7280');
+            @endphp
+            <a href="/manager/students/{{ urlencode($rs->student_id ?? '') }}" style="display:flex;align-items:center;gap:8px;padding:5px 4px;font-size:12px;text-decoration:none;color:inherit;border-radius:5px;transition:background .1s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='';">
+                <span style="color:{{ $color }};font-weight:700;min-width:24px;font-size:11px;">{{ $score }}</span>
+                <span style="flex:1;min-width:0;color:var(--u-text,#0f172a);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $rs->student?->name ?? 'Bilinmiyor' }}</span>
+                <span style="width:50px;height:3px;background:var(--u-line,#e5e9f0);border-radius:999px;overflow:hidden;flex-shrink:0;">
+                    <span style="display:block;height:100%;width:{{ min($score, 100) }}%;background:{{ $color }};"></span>
+                </span>
+            </a>
+            @endforeach
+        </div>
+        @endif
     </div>
+    <script nonce="{{ $cspNonce ?? '' }}">
+    (function(){
+        window.toggleRiskPopover = function(e) {
+            e.stopPropagation();
+            var pop = document.getElementById('riskPopover');
+            if (!pop) return;
+            pop.style.display = pop.style.display === 'block' ? 'none' : 'block';
+        };
+        document.addEventListener('click', function(e) {
+            var tile = document.getElementById('riskKpiTile');
+            if (tile && !tile.contains(e.target)) {
+                var pop = document.getElementById('riskPopover');
+                if (pop) pop.style.display = 'none';
+            }
+        });
+    })();
+    </script>
 
-    <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:10px 12px;border-top:3px solid {{ $anyFail ? '#dc2626' : ($anyStale ? '#d97706' : '#16a34a') }};display:flex;flex-direction:column;justify-content:space-between;">
-        <div style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Ops</div>
-        <span class="badge {{ $opsClass }}" style="font-size:var(--tx-xs);padding:2px 10px;width:fit-content;">{{ $opsLabel }}</span>
-        <div style="font-size:var(--tx-xs);color:var(--muted,#64748b);margin-top:4px;">mvp: {{ $mvp['last_result'] ?? 'n/a' }} · api: {{ $apiReg['last_result'] ?? 'n/a' }}</div>
-    </div>
+    {{-- Bildirim ve Ops tile'ları kaldırıldı. --}}
 
 </div>
 
-{{-- Risk Skoru Widget --}}
-@if(($riskyStudents ?? collect())->isNotEmpty())
-<div class="card" style="padding:20px 24px;margin-top:16px;margin-bottom:16px;">
-    <div style="font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-        🚨 <span>Yüksek Riskli Öğrenciler</span>
-        <span style="font-size:11px;color:var(--u-muted);font-weight:400;">(En yüksek risk skoru)</span>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-        @foreach($riskyStudents as $rs)
-        <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--u-bg);border-radius:8px;border:1px solid var(--u-line);">
-            <div style="width:36px;height:36px;border-radius:50%;background:{{ ($rs->current_score ?? 0) >= 70 ? '#fef2f2' : '#fffbeb' }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:{{ ($rs->current_score ?? 0) >= 70 ? '#dc2626' : '#d97706' }};flex-shrink:0;">
-                {{ $rs->current_score ?? 0 }}
-            </div>
-            <div style="flex:1;min-width:0;">
-                <div style="font-size:13px;font-weight:600;color:var(--u-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $rs->student?->name ?? 'Bilinmiyor' }}</div>
-                <div style="font-size:11px;color:var(--u-muted);">{{ $rs->student?->email ?? '' }}</div>
-            </div>
-            <div style="width:80px;height:6px;background:var(--u-line);border-radius:999px;overflow:hidden;flex-shrink:0;">
-                <div style="height:100%;width:{{ min($rs->current_score ?? 0, 100) }}%;background:{{ ($rs->current_score ?? 0) >= 70 ? '#dc2626' : '#d97706' }};border-radius:999px;"></div>
-            </div>
-        </div>
-        @endforeach
-    </div>
+{{-- ── Bugün Aksiyon Merkezi (sadece sıfırdan farklı uyarılar) ── --}}
+@php
+    $actionItems = array_filter([
+        $stats['overdue_outcomes'] > 0 ? ['cnt' => $stats['overdue_outcomes'], 'label' => 'Geciken outcome', 'href' => '/manager/requests', 'cls' => 'danger', 'icon' => '⏰'] : null,
+        $stats['pending_approvals'] > 0 ? ['cnt' => $stats['pending_approvals'], 'label' => 'Bekleyen onay', 'href' => '/manager/requests', 'cls' => 'warn', 'icon' => '📋'] : null,
+        $stats['upcoming_outcomes'] > 0 ? ['cnt' => $stats['upcoming_outcomes'], 'label' => '7 gün içinde deadline', 'href' => '/manager/requests', 'cls' => 'warn', 'icon' => '📅'] : null,
+        $stats['notification_failed'] > 0 ? ['cnt' => $stats['notification_failed'], 'label' => 'Bildirim hatası', 'href' => '/manager/notification-stats', 'cls' => 'danger', 'icon' => '🔔'] : null,
+    ]);
+@endphp
+@if(!empty($actionItems))
+<div style="background:linear-gradient(135deg,#fef2f2 0%,#fff 100%);border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="font-size:11px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0;">⚡ Aksiyon Bekliyor</span>
+    @foreach($actionItems as $item)
+    <a href="{{ $item['href'] }}" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#fff;border:1px solid {{ $item['cls'] === 'danger' ? '#fecaca' : '#fde68a' }};border-radius:20px;text-decoration:none;color:var(--u-text,#0f172a);font-size:12px;transition:all .12s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+        <span>{{ $item['icon'] }}</span>
+        <strong style="color:{{ $item['cls'] === 'danger' ? '#dc2626' : '#d97706' }};font-weight:800;">{{ $item['cnt'] }}</strong>
+        <span>{{ $item['label'] }}</span>
+        <span style="color:var(--u-muted,#64748b);font-size:10px;">→</span>
+    </a>
+    @endforeach
 </div>
 @endif
 
-{{-- ── Hızlı Erişim ── --}}
-<div class="mgd-quick-grid">
-    <a class="mgd-quick-link" href="/manager/students">
-        <span class="mgd-quick-icon" style="background:#1e40af;">Ö</span>
-        Öğrenciler
-    </a>
-    <a class="mgd-quick-link" href="/manager/guests">
-        <span class="mgd-quick-icon" style="background:#1e40af;">G</span>
-        Aday Öğrenciler
-    </a>
-    <a class="mgd-quick-link" href="/manager/dealers">
-        <span class="mgd-quick-icon" style="background:#1e40af;">D</span>
-        Dealer'lar
-    </a>
-    <a class="mgd-quick-link" href="/manager/seniors">
-        <span class="mgd-quick-icon" style="background:#1e40af;">S</span>
-        Eğitim Danışmanları
-    </a>
-    <a class="mgd-quick-link" href="/manager/contract-template">
-        <span class="mgd-quick-icon" style="background:#1e40af;">Z</span>
-        Sözleşmeler
-    </a>
-    <a class="mgd-quick-link" href="/manager/commissions">
-        <span class="mgd-quick-icon" style="background:#1e40af;">R</span>
-        Raporlar
-    </a>
-</div>
+{{-- Risk widget kaldırıldı — KPI tile'daki "N riskli" badge'ine tıklayarak popover açılıyor --}}
+
+{{-- Hızlı Erişim grid kaldırıldı --}}
 
 {{-- ── Personel Özeti ── --}}
 @if(isset($staffMetrics) && $staffMetrics['total'] > 0)
@@ -484,7 +500,7 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
 
     <div style="display:flex;flex-direction:column;gap:8px;">
 
-        {{-- Satır 1: 4 KPI chip --}}
+        {{-- 4 KPI chip --}}
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
             <div style="background:var(--u-bg,#f8fafc);border:1px solid var(--u-line,#e2e8f0);border-radius:9px;padding:10px 12px;border-top:3px solid #1e40af;">
                 <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Toplam Personel</div>
@@ -511,7 +527,7 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
             </div>
         </div>
 
-        {{-- Satır 2: Top 3 --}}
+        {{-- Top 3 --}}
         @if($sm['top3']->isNotEmpty())
         <div style="background:var(--u-bg,#f8fafc);border:1px solid var(--u-line,#e2e8f0);border-radius:9px;padding:10px 14px;">
             <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">🏅 Bu Ay En İyi 3 Personel</div>
@@ -581,93 +597,15 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
     </section>
 </div>
 
-{{-- Portal Preview --}}
-<div class="grid3" style="margin-bottom:12px;">
-    <div class="panel">
-        <div class="muted" style="font-size:var(--tx-xs);margin-bottom:4px;">STUDENT ÖNIZLEME</div>
-        <div style="display:flex;gap:6px;">
-            <input id="pvStudentId" list="pvStudentIdSuggestions" placeholder="BCS100001…" style="flex:1;min-width:0;border:1.5px solid #cbd5e1;border-radius:7px;padding:6px 10px;font-size:var(--tx-sm);outline:none;">
-            <button class="btn" type="button" onclick="openStudentPreview()" style="white-space:nowrap;background:#1e40af;color:#fff;border-color:#1e40af;">Aç →</button>
-        </div>
-        <div class="muted" style="font-size:var(--tx-xs);margin-top:4px;">Öğrenci ID ile portal önizleme</div>
-    </div>
-    <div class="panel">
-        <div class="muted" style="font-size:var(--tx-xs);margin-bottom:4px;">ADVISORY ÖNIZLEME</div>
-        <div style="display:flex;gap:6px;">
-            <input id="pvSeniorEmail" list="pvSeniorEmailSuggestions" placeholder="senior@example.com…" style="flex:1;min-width:0;border:1.5px solid #cbd5e1;border-radius:7px;padding:6px 10px;font-size:var(--tx-sm);outline:none;">
-            <button class="btn" type="button" onclick="openSeniorPreview()" style="white-space:nowrap;background:#1e40af;color:#fff;border-color:#1e40af;">Aç →</button>
-        </div>
-        <div class="muted" style="font-size:var(--tx-xs);margin-top:4px;">Eğitim Danışmanı / mentor e-postası ile</div>
-    </div>
-    <div class="panel">
-        <div class="muted" style="font-size:var(--tx-xs);margin-bottom:4px;">DEALER ÖNIZLEME</div>
-        <div style="display:flex;gap:6px;">
-            <input id="pvDealerCode" list="pvDealerCodeSuggestions" placeholder="Dealer kodu…" style="flex:1;min-width:0;border:1.5px solid #cbd5e1;border-radius:7px;padding:6px 10px;font-size:var(--tx-sm);outline:none;">
-            <button class="btn" type="button" onclick="openDealerPreview()" style="white-space:nowrap;background:#1e40af;color:#fff;border-color:#1e40af;">Aç →</button>
-        </div>
-        <div class="muted" style="font-size:var(--tx-xs);margin-top:4px;">Dealer kodu ile portal önizleme</div>
-    </div>
-</div>
-<datalist id="pvStudentIdSuggestions">
-    @foreach (($previewSuggestions['student_ids'] ?? []) as $sid)<option value="{{ $sid }}"></option>@endforeach
-</datalist>
-<datalist id="pvSeniorEmailSuggestions">
-    @foreach (($previewSuggestions['senior_emails'] ?? []) as $se)<option value="{{ $se }}"></option>@endforeach
-</datalist>
-<datalist id="pvDealerCodeSuggestions">
-    @foreach (($previewSuggestions['dealer_codes'] ?? []) as $dc)<option value="{{ $dc }}"></option>@endforeach
-</datalist>
+{{-- Portal Preview ve Snapshot Oluştur formu kaldırıldı.
+     Preview'a ihtiyaç varsa /manager/students|seniors|dealers listelerinden erişilir.
+     Snapshot rapor üretimi /manager/reports sayfasına taşınmalı (henüz yok, eklenecek). --}}
 
-{{-- Snapshot Oluştur --}}
-<section class="panel" style="margin-bottom:12px;">
-    <div style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Snapshot Oluştur</div>
-    <form method="POST" action="/manager/dashboard/snapshot" style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
-        @csrf
-        <input type="hidden" name="start_date" value="{{ $filters['start_date'] }}">
-        <input type="hidden" name="end_date" value="{{ $filters['end_date'] }}">
-        <input type="hidden" name="senior_email" value="{{ $filters['senior_email'] }}">
-        <div>
-            <label class="muted">Rapor Tipi</label>
-            <select name="report_type">
-                @foreach(['manual','weekly','monthly','quarterly','yearly'] as $rt)
-                    <option value="{{ $rt }}" {{ $rt === 'monthly' ? 'selected' : '' }}>{{ $rt }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div style="min-width:280px;">
-            <label class="muted">Alıcılar</label>
-            <div id="snapshotChips" style="display:flex;flex-wrap:wrap;gap:5px;min-height:34px;border:1px solid var(--u-line);border-radius:8px;padding:5px 8px;background:var(--u-card);margin-bottom:5px;">
-                <span class="muted" id="snapshotChipsEmpty" style="font-size:var(--tx-xs);line-height:24px;">Henüz alıcı eklenmedi</span>
-            </div>
-            <input type="hidden" id="snapshotSentTo" name="sent_to" value="">
-            <input type="text" id="snapshotManualEmail" placeholder="Manuel e-posta gir..." list="managerEmailSuggestions" style="width:100%;">
-        </div>
-        <div>
-            <label class="muted">Listeden Ekle</label>
-            <select id="snapshotSentToPick">
-                <option value="">– Seç –</option>
-                @foreach ($seniors as $senior)
-                    <option value="{{ $senior->email }}">{{ $senior->name }}</option>
-                @endforeach
-                @if(auth()->check() && auth()->user()->email)
-                    <option value="{{ auth()->user()->email }}">{{ auth()->user()->email }} (ben)</option>
-                @endif
-            </select>
-        </div>
-        <button class="btn" type="button" onclick="appendSnapshotRecipient()" style="font-size:var(--tx-xs);padding:5px 12px;">Ekle</button>
-        <button class="btn" type="submit" style="font-size:var(--tx-xs);padding:5px 12px;">Snapshot Kaydet</button>
-    </form>
-    <datalist id="managerEmailSuggestions">
-        @foreach ($seniors as $senior)<option value="{{ $senior->email }}"></option>@endforeach
-        @if(auth()->check() && auth()->user()->email)<option value="{{ auth()->user()->email }}"></option>@endif
-    </datalist>
-</section>
-
-{{-- Acil & Durum --}}
+{{-- Acil & Durum detay (yukardaki aksiyon merkezi özetin kompakt versiyonu) --}}
 <div class="grid2" style="margin-bottom:12px;">
 
     <section class="card" style="padding:14px 16px;">
-        <div style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Acil & Tıkanıklıklar</div>
+        <div style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Durum Paneli (Tüm Kategoriler)</div>
         @php
             $urgencies = [
                 [
@@ -1110,7 +1048,9 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
 
 </div>
 
-{{-- Son Rapor Snapshotları --}}
+{{-- Son Rapor Snapshotları tablosu kaldırıldı — reports sayfasına taşınacak.
+     Aşağıdaki kodu görmüyorsan normaldir; tam blok silindi. --}}
+@if(false)
 <section class="card" style="padding:14px 16px;">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
         <span style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;">Son Rapor Snapshotları</span>
@@ -1250,25 +1190,8 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
         <div style="margin-top:10px;">{{ $recentReports->links() }}</div>
     @endif
 </section>
-
-
-<script>
-function openStudentPreview() {
-    var val = document.getElementById('pvStudentId').value.trim();
-    if (!val) { alert('Lütfen bir Öğrenci ID girin.'); return; }
-    window.open('/manager/preview/student/' + encodeURIComponent(val), '_blank');
-}
-function openSeniorPreview() {
-    var val = document.getElementById('pvSeniorEmail').value.trim();
-    if (!val) { alert('Lütfen bir Eğitim Danışmanı e-postası girin.'); return; }
-    window.open('/manager/preview/senior/' + encodeURIComponent(val), '_blank');
-}
-function openDealerPreview() {
-    var val = document.getElementById('pvDealerCode').value.trim();
-    if (!val) { alert('Lütfen bir Dealer kodu girin.'); return; }
-    window.open('/manager/preview/dealer/' + encodeURIComponent(val), '_blank');
-}
-</script>
+@endif
+{{-- /Son Rapor Snapshotları (disabled) --}}
 </div>{{-- /dash-main-content --}}
 
 @push('scripts')

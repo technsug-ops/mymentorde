@@ -100,6 +100,47 @@
     <a href="{{ route('system.post-deploy.show') }}" class="sys-quick"><span class="sq-icon">🚀</span><span class="sq-label">Post-Deploy Bakımı</span></a>
 </div>
 
+{{-- Portal Önizleme — Manager herhangi bir kullanıcının portalını önizleyebilir --}}
+<section class="panel" style="padding:14px 16px;margin-bottom:12px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--u-line);">
+        <span style="font-size:11px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.3px;">👁 Portal Önizleme</span>
+        <span style="font-size:11px;color:var(--u-muted);">Öğrenci / Eğitim Danışmanı / Dealer portallarını manager olarak görüntüle</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        <div style="background:var(--u-bg);border:1px solid var(--u-line);border-radius:8px;padding:10px 12px;">
+            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;">🎓 Öğrenci Portal</div>
+            <div style="display:flex;gap:6px;">
+                <input id="pvStudentId" placeholder="BCS100001..." style="flex:1;min-width:0;border:1px solid var(--u-line);border-radius:6px;padding:6px 10px;font-size:12px;outline:none;">
+                <button class="btn" type="button" onclick="pvOpen('student','pvStudentId')" style="font-size:11px;padding:6px 12px;background:#1e40af;color:#fff;border:none;border-radius:6px;cursor:pointer;">Aç →</button>
+            </div>
+            <div style="font-size:10px;color:var(--u-muted);margin-top:4px;">Öğrenci ID ile</div>
+        </div>
+        <div style="background:var(--u-bg);border:1px solid var(--u-line);border-radius:8px;padding:10px 12px;">
+            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;">👔 Eğitim Danışmanı Portal</div>
+            <div style="display:flex;gap:6px;">
+                <input id="pvSeniorEmail" placeholder="senior@example.com" style="flex:1;min-width:0;border:1px solid var(--u-line);border-radius:6px;padding:6px 10px;font-size:12px;outline:none;">
+                <button class="btn" type="button" onclick="pvOpen('senior','pvSeniorEmail')" style="font-size:11px;padding:6px 12px;background:#1e40af;color:#fff;border:none;border-radius:6px;cursor:pointer;">Aç →</button>
+            </div>
+            <div style="font-size:10px;color:var(--u-muted);margin-top:4px;">E-posta ile</div>
+        </div>
+        <div style="background:var(--u-bg);border:1px solid var(--u-line);border-radius:8px;padding:10px 12px;">
+            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;">🤝 Dealer Portal</div>
+            <div style="display:flex;gap:6px;">
+                <input id="pvDealerCode" placeholder="LEA-000001..." style="flex:1;min-width:0;border:1px solid var(--u-line);border-radius:6px;padding:6px 10px;font-size:12px;outline:none;">
+                <button class="btn" type="button" onclick="pvOpen('dealer','pvDealerCode')" style="font-size:11px;padding:6px 12px;background:#1e40af;color:#fff;border:none;border-radius:6px;cursor:pointer;">Aç →</button>
+            </div>
+            <div style="font-size:10px;color:var(--u-muted);margin-top:4px;">Dealer kodu ile</div>
+        </div>
+    </div>
+</section>
+<script nonce="{{ $cspNonce ?? '' }}">
+window.pvOpen = function(type, inputId) {
+    var val = document.getElementById(inputId).value.trim();
+    if (!val) { alert('Lütfen bir değer girin.'); return; }
+    window.open('/manager/preview/' + type + '/' + encodeURIComponent(val), '_blank');
+};
+</script>
+
 <div class="grid2" style="gap:12px;margin-bottom:12px;">
 
     {{-- Aktif Oturumlar --}}

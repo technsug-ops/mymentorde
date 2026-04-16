@@ -44,7 +44,7 @@
     <form method="GET" action="/manager/students" style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;">
         <div style="display:flex;flex-direction:column;gap:3px;">
             <label class="mgr-filter-label">Ara</label>
-            <input name="q" value="{{ $q }}" placeholder="Öğrenci ID veya eğitim danışmanı e-posta…" style="width:230px;">
+            <input name="q" value="{{ $q }}" placeholder="Öğrenci ID / e-posta..." style="width:230px;" title="Öğrenci ID veya eğitim danışmanı e-posta ile ara">
         </div>
         <div style="display:flex;flex-direction:column;gap:3px;">
             <label class="mgr-filter-label">Eğitim Danışmanı</label>
