@@ -481,7 +481,15 @@
     $cfg   = $catCfg[$cat]??['label'=>$cat,'icon'=>'📌','color'=>'#6366f1'];
     $cDone = $items->filter(fn($m)=>$m->isCompleted())->count();
     $cTot  = $items->count();
-    $cPct  = $cTot>0 ? round($cDone/$cTot*100) : 0;
+
+    // Üstteki kategori kartlarıyla aynı adımlı ilerleme mantığı
+    $pMainCode  = $catMainMilestone[$cat] ?? null;
+    $pStepProg  = $pMainCode ? ($milestoneProgress[$pMainCode] ?? null) : null;
+    $pHasStep   = $pStepProg && $pStepProg['total'] > 1;
+    $pCur       = $pHasStep ? $pStepProg['current'] : $cDone;
+    $pTotal     = $pHasStep ? $pStepProg['total'] : $cTot;
+    $pPct       = $pTotal > 0 ? round($pCur / $pTotal * 100) : 0;
+    $pUnit      = $pHasStep ? 'adım' : 'adım tamamlandı';
 @endphp
 <div class="jm-panel {{ $cat===$firstActiveCat?'active':'' }}"
      id="panel-{{ $cat }}"
@@ -491,11 +499,11 @@
         <div class="jm-panel-hdr-icon">{{ $cfg['icon'] }}</div>
         <div>
             <div class="jm-panel-hdr-name">{{ $cfg['label'] }}</div>
-            <div class="jm-panel-hdr-sub">{{ $cDone }} / {{ $cTot }} adım tamamlandı</div>
+            <div class="jm-panel-hdr-sub">{{ $pCur }} / {{ $pTotal }} {{ $pUnit }}</div>
         </div>
         <div class="jm-panel-hdr-right">
             <div class="jm-ph-pbar-wrap">
-                <div class="jm-ph-pbar-fill" style="width:{{ $cPct }}%"></div>
+                <div class="jm-ph-pbar-fill" style="width:{{ $pPct }}%"></div>
             </div>
             <div class="jm-ph-pct">%{{ $cPct }}</div>
         </div>
