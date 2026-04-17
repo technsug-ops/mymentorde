@@ -38,6 +38,15 @@ class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
 
+        // ── Çıkış sonrası "Geri" butonu güvenliği ──
+        // Auth sayfaları tarayıcı cache'ine alınmasın — logout sonrası
+        // geri tuşuna basıldığında eski sayfa görünmesin.
+        if (auth()->check()) {
+            $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+            $response->headers->set('Pragma', 'no-cache');
+            $response->headers->set('Expires', 'Sat, 01 Jan 2000 00:00:00 GMT');
+        }
+
         // style-src: 'unsafe-inline' yeterli — CSP3'te nonce+unsafe-inline birlikte kullanılınca
         // Chrome unsafe-inline'ı görmezden gelip nonce gerektiriyor. Tüm <style> blokları kırılıyor.
         // Nonce şimdilik sadece script-src için, style-src'ye EKLENMEZ.
