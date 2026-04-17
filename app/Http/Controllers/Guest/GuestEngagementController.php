@@ -92,7 +92,7 @@ class GuestEngagementController extends Controller
         if ($guest) {
             $timelineService = app(GuestTimelineService::class);
             $count           = GuestTimelineMilestone::where('guest_application_id', $guest->id)->count();
-            if ($count === 0) {
+            if ($count < 22) {
                 $timelineService->generateMilestones($guest);
             }
             // Retroaktif: daha önce yapılmış aksiyonların milestone'larını otomatik tamamla

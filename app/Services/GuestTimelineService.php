@@ -31,19 +31,35 @@ class GuestTimelineService
         }
 
         $milestones = [
-            ['code' => 'form_complete',    'label' => 'Kayıt Formu Tamamla',        'target_date' => now()->addDays(7),                'category' => 'registration'],
-            ['code' => 'docs_upload',      'label' => 'Zorunlu Belgeleri Yükle',    'target_date' => now()->addDays(14),               'category' => 'documents'],
-            ['code' => 'package_select',   'label' => 'Paket Seç',                  'target_date' => now()->addDays(10),               'category' => 'contract'],
-            ['code' => 'contract_sign',    'label' => 'Sözleşme İmzala',            'target_date' => now()->addDays(21),               'category' => 'contract'],
-            ['code' => 'uni_apply',        'label' => 'Üniversite Başvurusu',       'target_date' => $targetDate->copy()->subMonths(4), 'category' => 'university'],
-            ['code' => 'uni_assist',       'label' => 'Uni-Assist Başvurusu',       'target_date' => $targetDate->copy()->subMonths(3), 'category' => 'university'],
-            ['code' => 'blocked_account',  'label' => 'Bloke Hesap Aç',            'target_date' => $targetDate->copy()->subMonths(2), 'category' => 'visa'],
-            ['code' => 'health_insurance', 'label' => 'Sağlık Sigortası Başvurusu', 'target_date' => $targetDate->copy()->subMonths(2), 'category' => 'visa'],
-            ['code' => 'visa_appointment', 'label' => 'Vize Randevusu',             'target_date' => $targetDate->copy()->subMonths(2), 'category' => 'visa'],
-            ['code' => 'visa_apply',       'label' => 'Vize Başvurusu',             'target_date' => $targetDate->copy()->subWeeks(6),  'category' => 'visa'],
-            ['code' => 'flight_book',      'label' => 'Uçak Bileti Al',             'target_date' => $targetDate->copy()->subWeeks(4),  'category' => 'travel'],
-            ['code' => 'accommodation',    'label' => 'Konaklama Kesinleştir',      'target_date' => $targetDate->copy()->subWeeks(3),  'category' => 'travel'],
-            ['code' => 'arrival',          'label' => "Almanya'ya Varış!",          'target_date' => $targetDate->copy()->subWeeks(1),  'category' => 'arrival'],
+            // ── Kayıt (1 adım) ──
+            ['code' => 'form_complete',      'label' => 'Kayıt Formu Tamamla',          'target_date' => now()->addDays(7),                  'category' => 'registration'],
+            // ── Belgeler (1 adım) ──
+            ['code' => 'docs_upload',        'label' => 'Zorunlu Belgeleri Yükle',      'target_date' => now()->addDays(14),                 'category' => 'documents'],
+            // ── Sözleşme (2 adım) ──
+            ['code' => 'package_select',     'label' => 'Paket Seç',                    'target_date' => now()->addDays(10),                 'category' => 'contract'],
+            ['code' => 'contract_sign',      'label' => 'Sözleşme İmzala',              'target_date' => now()->addDays(21),                 'category' => 'contract'],
+            // ── Üniversite (5 adım) ──
+            ['code' => 'uni_assist_reg',     'label' => 'Uni-Assist Kaydı Oluştur',     'target_date' => $targetDate->copy()->subMonths(5),  'category' => 'university'],
+            ['code' => 'uni_docs_prep',      'label' => 'Başvuru Belgelerini Hazırla',   'target_date' => $targetDate->copy()->subMonths(4)->subDays(15), 'category' => 'university'],
+            ['code' => 'uni_apply',          'label' => 'Üniversite Başvurusu Yap',      'target_date' => $targetDate->copy()->subMonths(4),  'category' => 'university'],
+            ['code' => 'uni_fee_pay',        'label' => 'Başvuru Ücretini Öde',          'target_date' => $targetDate->copy()->subMonths(3)->subDays(15), 'category' => 'university'],
+            ['code' => 'uni_acceptance',     'label' => 'Kabul Mektubu (Zulassung)',     'target_date' => $targetDate->copy()->subMonths(3),  'category' => 'university'],
+            // ── Vize (6 adım) ──
+            ['code' => 'blocked_account',    'label' => 'Sperrkonto (Bloke Hesap) Aç',  'target_date' => $targetDate->copy()->subMonths(3),  'category' => 'visa'],
+            ['code' => 'health_insurance',   'label' => 'Sağlık Sigortası Yaptır',      'target_date' => $targetDate->copy()->subMonths(2)->subDays(15), 'category' => 'visa'],
+            ['code' => 'visa_docs_prep',     'label' => 'Vize Evraklarını Hazırla',      'target_date' => $targetDate->copy()->subMonths(2)->subDays(10), 'category' => 'visa'],
+            ['code' => 'visa_appointment',   'label' => 'Vize Randevusu Al',             'target_date' => $targetDate->copy()->subMonths(2),  'category' => 'visa'],
+            ['code' => 'visa_apply',         'label' => 'Vize Başvurusu Yap',            'target_date' => $targetDate->copy()->subWeeks(6),   'category' => 'visa'],
+            ['code' => 'visa_approval',      'label' => 'Vize Onayı Al',                 'target_date' => $targetDate->copy()->subWeeks(4)->subDays(3), 'category' => 'visa'],
+            // ── Seyahat (3 adım) ──
+            ['code' => 'flight_book',        'label' => 'Uçak Bileti Al',               'target_date' => $targetDate->copy()->subWeeks(4),   'category' => 'travel'],
+            ['code' => 'accommodation',      'label' => 'Konaklama / Yurt Kesinleştir', 'target_date' => $targetDate->copy()->subWeeks(3),   'category' => 'travel'],
+            ['code' => 'travel_checklist',   'label' => 'Bavul & Checklist Hazırla',     'target_date' => $targetDate->copy()->subWeeks(2),   'category' => 'travel'],
+            // ── Varış (4 adım) ──
+            ['code' => 'arrival',            'label' => "Almanya'ya Varış",             'target_date' => $targetDate->copy()->subWeeks(1),   'category' => 'arrival'],
+            ['code' => 'anmeldung',          'label' => 'Adres Tescili (Anmeldung)',     'target_date' => $targetDate->copy()->subDays(3),    'category' => 'arrival'],
+            ['code' => 'bank_account',       'label' => 'Banka Hesabı Aç',              'target_date' => $targetDate->copy()->subDays(1),    'category' => 'arrival'],
+            ['code' => 'immatrikulation',    'label' => 'Üniversite Kayıt (Immatrikulation)', 'target_date' => $targetDate->copy(),            'category' => 'arrival'],
         ];
 
         foreach ($milestones as $idx => $m) {
