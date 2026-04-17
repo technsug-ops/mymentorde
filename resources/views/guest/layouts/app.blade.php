@@ -595,8 +595,19 @@ document.addEventListener('alpine:init',function(){
         var q=this.value.trim();
         if(q.length<2){box.style.display='none';return;}
         gsTimer=setTimeout(function(){
-            fetch('/guest/search?q='+encodeURIComponent(q),{headers:{'Accept':'application/json'}})
-                .then(function(r){return r.json();})
+            var csrf = document.querySelector('meta[name="csrf-token"]');
+            fetch('/guest/search?q='+encodeURIComponent(q),{
+                credentials:'same-origin',
+                headers:{
+                    'Accept':'application/json',
+                    'X-Requested-With':'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrf ? csrf.content : ''
+                }
+            })
+                .then(function(r){
+                    if(!r.ok) throw new Error('HTTP '+r.status);
+                    return r.json();
+                })
                 .then(function(d){
                     box.innerHTML=(d.results&&d.results.length)
                         ?d.results.map(function(x){return '<a href="'+x.url+'" style="display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-bottom:1px solid var(--border,#f3f4f6);text-decoration:none;color:var(--text,#111827);">'
@@ -604,7 +615,11 @@ document.addEventListener('alpine:init',function(){
                             +'<div><div style="font-size:13px;font-weight:600;">'+x.title+'</div><div style="font-size:11px;color:var(--muted,#9ca3af);">'+x.sub+' &mdash; '+(x.date||'')+'</div></div></a>';}).join('')
                         :'<div style="padding:12px;font-size:13px;color:var(--muted,#9ca3af);text-align:center;">Sonuç bulunamadı.</div>';
                     box.style.display='block';
-                }).catch(function(){});
+                }).catch(function(e){
+                    console.error('Arama hatası:',e);
+                    box.innerHTML='<div style="padding:12px;font-size:12px;color:#dc2626;text-align:center;">Arama hatası: '+e.message+'</div>';
+                    box.style.display='block';
+                });
         },300);
     });
     document.addEventListener('click',function(e){
