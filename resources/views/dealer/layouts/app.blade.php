@@ -439,5 +439,6 @@ document.addEventListener('alpine:init',function(){
 @stack('scripts')
 
 @include('partials.welcome-video-modal', ['wvPortal' => 'dealer'])
+@include('partials.promo-popup')
 </body>
 </html>

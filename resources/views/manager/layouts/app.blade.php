@@ -407,6 +407,10 @@
                    class="nav-link {{ request()->is('manager/brand*') ? 'active' : '' }}">
                     <span class="nav-icon">🏷</span> Marka Ayarları
                 </a>
+                <a href="/manager/promo-popups"
+                   class="nav-link {{ request()->is('manager/promo-popups*') ? 'active' : '' }}">
+                    <span class="nav-icon">📺</span> Tanıtım Popup'ları
+                </a>
                 <a href="/config"
                    class="nav-link {{ request()->is('config*') ? 'active' : '' }}">
                     <span class="nav-icon">⚙</span> Sistem Ayarları
@@ -635,5 +639,6 @@ document.getElementById('sozlesme-btn')?.addEventListener('click', function() {
 <script nonce="{{ $cspNonce ?? '' }}">window.__giphyKey={{ Js::from(config('services.giphy.key','')) }};</script>
 @stack('scripts')
 @include('partials.push-init')
+@include('partials.promo-popup')
 </body>
 </html>

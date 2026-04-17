@@ -88,6 +88,23 @@ Route::middleware(['company.context'])->group(function () {
         ->name('apply.partner');
 });
 
+// Promo popup: aktif popup'ı JSON döner (tüm portal layout'ları bu endpoint'i çağırır)
+Route::get('/api/promo-popup', function (\Illuminate\Http\Request $request) {
+    $user = $request->user();
+    if (!$user) return response()->json(null);
+    $role  = strtolower($user->role ?? 'guest');
+    $page  = (string) $request->query('page', '');
+    $now   = now();
+    $popup = \App\Models\PromoPopup::where('is_active', true)
+        ->where(fn ($q) => $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now))
+        ->where(fn ($q) => $q->whereNull('ends_at')->orWhere('ends_at', '>', $now))
+        ->whereJsonContains('target_roles', $role)
+        ->when($page !== '', fn ($q) => $q->whereJsonContains('target_pages', $page))
+        ->orderBy('priority')
+        ->first(['id', 'title', 'video_url', 'video_type', 'description', 'delay_seconds', 'frequency']);
+    return response()->json($popup);
+})->middleware(['auth', 'throttle:60,1'])->name('api.promo-popup');
+
 // GDPR çerez onayı (auth gerektirmez, anonim ziyaretçiler için)
 Route::post('/cookie-consent', function(\Illuminate\Http\Request $r) {
     if (auth()->check()) {

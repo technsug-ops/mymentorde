@@ -226,6 +226,15 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::delete('/manager/bulletins/{bulletin}',    [BulletinManagerController::class, 'destroy'])->name('manager.bulletins.destroy');
     Route::get('/manager/bulletins/{bulletin}/analytics', [BulletinManagerController::class, 'analytics'])->name('manager.bulletins.analytics');
 
+    // ─── Tanıtım Popup Yönetimi ──────────────────────────────────────────────
+    Route::get('/manager/promo-popups',                    [\App\Http\Controllers\Manager\PromoPopupController::class, 'index'])->name('manager.promo-popups.index');
+    Route::get('/manager/promo-popups/create',             [\App\Http\Controllers\Manager\PromoPopupController::class, 'create'])->name('manager.promo-popups.create');
+    Route::post('/manager/promo-popups',                   [\App\Http\Controllers\Manager\PromoPopupController::class, 'store'])->name('manager.promo-popups.store');
+    Route::get('/manager/promo-popups/{popup}/edit',       [\App\Http\Controllers\Manager\PromoPopupController::class, 'edit'])->name('manager.promo-popups.edit');
+    Route::put('/manager/promo-popups/{popup}',            [\App\Http\Controllers\Manager\PromoPopupController::class, 'update'])->name('manager.promo-popups.update');
+    Route::delete('/manager/promo-popups/{popup}',         [\App\Http\Controllers\Manager\PromoPopupController::class, 'destroy'])->name('manager.promo-popups.destroy');
+    Route::post('/manager/promo-popups/{popup}/toggle',    [\App\Http\Controllers\Manager\PromoPopupController::class, 'toggle'])->name('manager.promo-popups.toggle');
+
     // ─── Toplu Kayıt İçeri Aktarma (Excel/CSV) ───────────────────────────────
     Route::get('/manager/bulk-import/guests',             [\App\Http\Controllers\Manager\BulkImportController::class, 'index'])->name('manager.bulk-import.index');
     Route::get('/manager/bulk-import/guests/template',    [\App\Http\Controllers\Manager\BulkImportController::class, 'template'])->name('manager.bulk-import.template');

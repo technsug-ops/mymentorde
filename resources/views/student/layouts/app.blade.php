@@ -515,5 +515,6 @@ if('serviceWorker' in navigator){
 @stack('scripts')
 
 @include('partials.welcome-video-modal', ['wvPortal' => 'student'])
+@include('partials.promo-popup')
 </body>
 </html>

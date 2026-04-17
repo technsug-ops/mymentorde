@@ -570,5 +570,6 @@ document.addEventListener('alpine:init',function(){
 <script defer src="{{ Vite::asset('resources/js/icon-switcher.js') }}"></script>
 <script nonce="{{ $cspNonce ?? '' }}">window.__giphyKey={{ Js::from(config('services.giphy.key','')) }};</script>
 @stack('scripts')
+@include('partials.promo-popup')
 </body>
 </html>

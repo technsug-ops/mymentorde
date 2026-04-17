@@ -633,5 +633,6 @@ if('serviceWorker' in navigator){
         base: 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/'
     });
 </script>
+@include('partials.promo-popup')
 </body>
 </html>
