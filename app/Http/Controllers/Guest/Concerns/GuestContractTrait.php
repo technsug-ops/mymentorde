@@ -262,6 +262,9 @@ trait GuestContractTrait
             vars: ['guest_id' => (string) $guest->id]
         );
 
+        // Timeline: "Sözleşme İmzala" milestone'unu otomatik işaretle
+        app(\App\Services\GuestTimelineService::class)->complete($guest, 'contract_sign');
+
         return redirect()->route('guest.contract.signed-thanks');
     }
 
@@ -308,6 +311,9 @@ trait GuestContractTrait
             companyId: (int) ($guest->company_id ?: 0)
         );
         $this->taskAutomationService->ensureSignedContractTask($guest);
+
+        // Timeline: dijital imzayla da "Sözleşme İmzala" milestone'u tamamlanır
+        app(\App\Services\GuestTimelineService::class)->complete($guest, 'contract_sign');
 
         return response()->json(['success' => true, 'message' => 'Sözleşme başarıyla imzalandı.']);
     }

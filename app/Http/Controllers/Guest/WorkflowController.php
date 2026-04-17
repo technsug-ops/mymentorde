@@ -211,6 +211,9 @@ class WorkflowController extends Controller
         $this->createRegistrationSnapshot($guest, $request, $mergedDraft, $warnings->count());
         $this->taskAutomationService->ensureGuestRegistrationReviewTask($guest);
 
+        // Timeline: "Kayıt Formu Tamamla" milestone'unu otomatik işaretle
+        app(\App\Services\GuestTimelineService::class)->complete($guest, 'form_complete');
+
         $status = $warnings->isNotEmpty()
             ? 'Form gonderildi. Kural uyari sayisi: '.$warnings->count()
             : 'Form gonderildi.';
@@ -267,6 +270,9 @@ class WorkflowController extends Controller
         ]);
         $guest->status_message = 'Hizmet paketi seçildi. Sözleşme aşaması bekleniyor.'; // @internal
         $guest->save();
+
+        // Timeline: "Paket Seç" milestone'unu otomatik işaretle
+        app(\App\Services\GuestTimelineService::class)->complete($guest, 'package_select');
 
         return redirect()->route('guest.services')->with('status', 'Paket secimi kaydedildi.');
     }

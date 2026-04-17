@@ -95,6 +95,9 @@ class GuestEngagementController extends Controller
             if ($count === 0) {
                 $timelineService->generateMilestones($guest);
             }
+            // Retroaktif: daha önce yapılmış aksiyonların milestone'larını otomatik tamamla
+            $timelineService->syncCompletions($guest);
+
             $data['milestones'] = GuestTimelineMilestone::where('guest_application_id', $guest->id)
                 ->orderBy('sort_order')
                 ->get();

@@ -100,4 +100,34 @@ class GuestTimelineService
             ->whereNull('completed_at')
             ->update(['completed_at' => now()]);
     }
+
+    /**
+     * Retroaktif sync: geçmişte yapılmış aksiyonların milestone'larını otomatik tamamla.
+     * Timeline sayfası her açıldığında çağrılır (idempotent — zaten tamamlanan milestone tekrar güncellenmez).
+     */
+    public function syncCompletions(GuestApplication $guest): void
+    {
+        // Kayıt formu gönderilmişse
+        if ($guest->registration_form_submitted_at) {
+            $this->complete($guest, 'form_complete');
+        }
+
+        // En az 1 belge yüklenmişse
+        $ownerId = trim((string) ($guest->converted_student_id ?? '')) !== ''
+            ? (string) $guest->converted_student_id
+            : 'GST-' . str_pad((string) $guest->id, 8, '0', STR_PAD_LEFT);
+        if (\App\Models\Document::where('student_id', $ownerId)->exists()) {
+            $this->complete($guest, 'docs_upload');
+        }
+
+        // Paket seçilmişse
+        if (!empty($guest->selected_package_code)) {
+            $this->complete($guest, 'package_select');
+        }
+
+        // Sözleşme imzalanmışsa
+        if (in_array($guest->contract_status ?? '', ['signed_uploaded', 'approved', 'active'], true)) {
+            $this->complete($guest, 'contract_sign');
+        }
+    }
 }
