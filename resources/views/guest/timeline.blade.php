@@ -434,14 +434,31 @@
 </div>
 
 {{-- ══ CATEGORY CARDS ══ --}}
+@php
+    // Kategori → ana milestone kodu eşleştirmesi (adımlı ilerleme göstermek için)
+    $catMainMilestone = [
+        'registration' => 'form_complete',
+        'documents'    => 'docs_upload',
+        'contract'     => 'contract_sign',
+    ];
+@endphp
 <div class="jm-cats">
     @foreach($grouped as $cat => $items)
     @php
         $cfg     = $catCfg[$cat]??['label'=>$cat,'icon'=>'📌','color'=>'#6366f1'];
         $cDone   = $items->filter(fn($m)=>$m->isCompleted())->count();
         $cTot    = $items->count();
-        $cPct    = $cTot>0 ? round($cDone/$cTot*100) : 0;
-        $allDone = $cDone===$cTot && $cTot>0;
+
+        // Adımlı ilerleme varsa onu kullan (1/6 belgeler, 3/8 form vs.)
+        $mainCode = $catMainMilestone[$cat] ?? null;
+        $stepProg = $mainCode ? ($milestoneProgress[$mainCode] ?? null) : null;
+        $hasStepProg = $stepProg && $stepProg['total'] > 1;
+
+        $displayCur  = $hasStepProg ? $stepProg['current'] : $cDone;
+        $displayTot  = $hasStepProg ? $stepProg['total'] : $cTot;
+        $displayPct  = $displayTot > 0 ? round($displayCur / $displayTot * 100) : 0;
+        $displayUnit = $hasStepProg ? 'adım' : 'tamamlandı';
+        $allDone     = $displayPct >= 100;
     @endphp
     <div class="jm-cat {{ $cat===$firstActiveCat?'active':'' }}"
          id="cat-{{ $cat }}"
@@ -450,9 +467,9 @@
         @if($allDone)<div class="jm-cat-done">✓</div>@endif
         <div class="jm-cat-icon">{{ $cfg['icon'] }}</div>
         <div class="jm-cat-name">{{ $cfg['label'] }}</div>
-        <div class="jm-cat-count">{{ $cDone }}/{{ $cTot }} tamamlandı</div>
+        <div class="jm-cat-count" style="font-weight:700;{{ $displayPct > 0 && $displayPct < 100 ? 'color:var(--jm-c);' : '' }}">{{ $displayCur }}/{{ $displayTot }} {{ $displayUnit }}</div>
         <div class="jm-cat-bar">
-            <div class="jm-cat-bar-fill" style="width:{{ $cPct }}%"></div>
+            <div class="jm-cat-bar-fill" style="width:{{ $displayPct }}%"></div>
         </div>
     </div>
     @endforeach

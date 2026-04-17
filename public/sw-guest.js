@@ -3,7 +3,7 @@
  * K3: PWA + offline destek
  */
 
-const CACHE_NAME = 'mentorde-guest-v1';
+const CACHE_NAME = 'mentorde-guest-v2';
 const OFFLINE_URL = '/guest/offline';
 
 // Önbelleğe alınacak statik kaynaklar
