@@ -192,7 +192,7 @@ class GuestContentController extends Controller
                 ]));
 
             \App\Models\GuestTicket::where('guest_application_id', $guest->id)
-                ->where(fn ($w) => $w->where('subject', 'like', $needle)->orWhere('body', 'like', $needle))
+                ->where(fn ($w) => $w->where('subject', 'like', $needle)->orWhere('message', 'like', $needle))
                 ->limit(4)
                 ->get(['id', 'subject', 'status', 'created_at'])
                 ->each(fn ($t) => $results->push([
