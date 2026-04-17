@@ -505,7 +505,7 @@
             <div class="jm-ph-pbar-wrap">
                 <div class="jm-ph-pbar-fill" style="width:{{ $pPct }}%"></div>
             </div>
-            <div class="jm-ph-pct">%{{ $cPct }}</div>
+            <div class="jm-ph-pct">%{{ $pPct }}</div>
         </div>
     </div>
 
