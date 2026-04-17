@@ -467,7 +467,7 @@
         @if($allDone)<div class="jm-cat-done">✓</div>@endif
         <div class="jm-cat-icon">{{ $cfg['icon'] }}</div>
         <div class="jm-cat-name">{{ $cfg['label'] }}</div>
-        <div class="jm-cat-count" style="font-weight:700;{{ $displayPct > 0 && $displayPct < 100 ? 'color:var(--jm-c);' : '' }}">{{ $displayCur }}/{{ $displayTot }} {{ $displayUnit }}</div>
+        <div class="jm-cat-count" style="font-weight:700;">{{ $displayCur }}/{{ $displayTot }} {{ $displayUnit }}</div>
         <div class="jm-cat-bar">
             <div class="jm-cat-bar-fill" style="width:{{ $displayPct }}%"></div>
         </div>
