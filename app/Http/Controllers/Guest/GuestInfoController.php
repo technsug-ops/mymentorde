@@ -99,8 +99,11 @@ class GuestInfoController extends Controller
             'depositCosts'          => $depositCosts,
             'depositTotal'          => $depositTotal,
             'eurTryRate'            => $eurTryRate,
-            'grandTotalEur'         => $yearlyLiving + $fixedTotal + $depositTotal + $packagePrice + $extraTotal,
-            'grandTotalTry'         => ($yearlyLiving + $fixedTotal + $depositTotal + $packagePrice + $extraTotal) * ($eurTryRate ?? 40),
+            // Sperrkonto yaşam giderlerini KAPSAR (€934/ay × 12 = €11.208).
+            // Yıllık yaşam (€880/ay × 12) Sperrkonto'dan karşılandığı için
+            // toplama yalnızca ikisinden BÜYÜK olanı dahil edilir (çift sayım engeli).
+            'grandTotalEur'         => max($yearlyLiving, $depositTotal) + $fixedTotal + $packagePrice + $extraTotal,
+            'grandTotalTry'         => (max($yearlyLiving, $depositTotal) + $fixedTotal + $packagePrice + $extraTotal) * ($eurTryRate ?? 40),
             'turkey_private_yearly' => config('cost_calculator.turkey_private_yearly_try', 150000),
             'germany_total_try'     => (($yearlyLiving + $fixedTotal) * ($eurTryRate ?? 40)),
         ];
