@@ -101,6 +101,7 @@ class GuestEngagementController extends Controller
             $data['milestones'] = GuestTimelineMilestone::where('guest_application_id', $guest->id)
                 ->orderBy('sort_order')
                 ->get();
+            $data['milestoneProgress'] = $timelineService->computeProgress($guest);
         } else {
             $data['milestones'] = collect();
         }

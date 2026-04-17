@@ -504,18 +504,43 @@
             $dT  = !$isC ? ($isO ? abs($dL).'g geçti' : $dL.'g kaldı') : '';
             $dCl = $isO?'late':($isU?'soon':'');
         @endphp
+        @php
+            $prog = ($milestoneProgress[$m->milestone_code] ?? null);
+            $hasProg = $prog && $prog['total'] > 1;
+            $pPct = $prog['pct'] ?? 0;
+            $pLbl = $hasProg ? ($prog['current'] . '/' . $prog['total']) : null;
+            // SVG ring params (r=16, circumference=100.53)
+            $ringC = 100.53;
+            $ringD = round($ringC * (1 - $pPct / 100), 2);
+        @endphp
         <div class="jm-item {{ $isC?'idone':'' }}">
             <div class="jm-bullet {{ $bCl }}">{{ $isC?'✓':($m->sort_order+1) }}</div>
             <div class="jm-card {{ $cls }}">
-                <div class="jm-card-title">{{ $m->label }}</div>
-                <div class="jm-card-date">
-                    <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v4M11 1v4M1 7h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                    {{ $m->target_date->format('d M Y') }}
-                    @if($isC && $m->completed_at) &nbsp;·&nbsp; ✓ {{ $m->completed_at->format('d M') }}'de tamamlandı @endif
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <div style="flex:1;min-width:0;">
+                        <div class="jm-card-title">{{ $m->label }}</div>
+                        <div class="jm-card-date">
+                            <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v4M11 1v4M1 7h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                            {{ $m->target_date->format('d M Y') }}
+                            @if($isC && $m->completed_at) &nbsp;·&nbsp; ✓ {{ $m->completed_at->format('d M') }}'de tamamlandı @endif
+                        </div>
+                    </div>
+                    @if($hasProg && !$isC)
+                    <div style="flex-shrink:0;text-align:center;" title="{{ $pLbl }} ({{ $pPct }}%)">
+                        <svg width="38" height="38" viewBox="0 0 36 36" style="transform:rotate(-90deg);">
+                            <circle cx="18" cy="18" r="16" fill="none" stroke="rgba(0,0,0,.08)" stroke-width="3"/>
+                            <circle cx="18" cy="18" r="16" fill="none" stroke="{{ $pPct >= 100 ? '#16a34a' : ($pPct >= 50 ? '#f59e0b' : '#3b82f6') }}" stroke-width="3" stroke-linecap="round" stroke-dasharray="{{ $ringC }}" stroke-dashoffset="{{ $ringD }}" style="transition:stroke-dashoffset .4s ease;"/>
+                        </svg>
+                        <div style="font-size:10px;font-weight:700;color:var(--u-muted,#64748b);margin-top:-26px;position:relative;">{{ $pLbl }}</div>
+                    </div>
+                    @endif
                 </div>
                 <div class="jm-card-foot">
                     <span class="jm-chip {{ $cls }}">{{ $chT }}</span>
                     @if($dT)<span class="jm-chip-d {{ $dCl }}">{{ $dT }}</span>@endif
+                    @if($hasProg && !$isC)
+                    <span class="jm-chip-d" style="color:{{ $pPct >= 100 ? '#16a34a' : ($pPct >= 50 ? '#d97706' : '#3b82f6') }};font-weight:700;">%{{ $pPct }}</span>
+                    @endif
                 </div>
             </div>
         </div>

@@ -102,6 +102,75 @@ class GuestTimelineService
     }
 
     /**
+     * Milestone bazında ilerleme hesapla: [current, total, percent]
+     * Binary milestone'lar (paket, sözleşme) → 0 veya 100.
+     * Adımlı milestone'lar (form=8 step, docs=N required) → kademeli.
+     */
+    public function computeProgress(GuestApplication $guest): array
+    {
+        $progress = [];
+
+        // ── form_complete: 8 kayıt formu adımı ──
+        $draft = is_array($guest->registration_form_draft) ? $guest->registration_form_draft : [];
+        $companyId = (int) ($guest->company_id ?: 0);
+        try {
+            $groups = app(\App\Services\GuestRegistrationFieldSchemaService::class)->groups($companyId);
+        } catch (\Throwable $e) {
+            $groups = \App\Support\GuestRegistrationFormCatalog::groups();
+        }
+        $totalSteps = count($groups);
+        $filledSteps = 0;
+        foreach ($groups as $group) {
+            $fields = $group['fields'] ?? [];
+            $requiredFields = array_filter($fields, fn ($f) => !empty($f['required']));
+            if (empty($requiredFields)) {
+                $filledSteps++;
+                continue;
+            }
+            $allFilled = true;
+            foreach ($requiredFields as $f) {
+                $key = $f['key'] ?? '';
+                if ($key === '' || empty(trim((string) ($draft[$key] ?? '')))) {
+                    $allFilled = false;
+                    break;
+                }
+            }
+            if ($allFilled) {
+                $filledSteps++;
+            }
+        }
+        $progress['form_complete'] = ['current' => $filledSteps, 'total' => $totalSteps, 'pct' => $totalSteps > 0 ? round($filledSteps / $totalSteps * 100) : 0];
+
+        // ── docs_upload: zorunlu belge sayısı ──
+        $appType = trim((string) ($guest->application_type ?? ''));
+        $ownerId = trim((string) ($guest->converted_student_id ?? '')) !== ''
+            ? (string) $guest->converted_student_id
+            : 'GST-' . str_pad((string) $guest->id, 8, '0', STR_PAD_LEFT);
+        $requiredCodes = collect();
+        if ($appType !== '') {
+            $requiredCodes = \App\Models\GuestRequiredDocument::where('application_type', $appType)
+                ->where('is_active', true)->where('is_required', true)
+                ->pluck('category_code')
+                ->map(fn ($v) => strtoupper(trim((string) $v)))
+                ->filter()->unique()->values();
+        }
+        $uploadedCodes = \App\Models\Document::where('student_id', $ownerId)
+            ->whereIn('status', ['uploaded', 'approved'])
+            ->with('category:id,code')->get()
+            ->map(fn ($d) => strtoupper(trim((string) ($d->category->code ?? ''))))
+            ->filter()->unique()->values();
+        $totalDocs = $requiredCodes->count();
+        $doneDocs = $requiredCodes->intersect($uploadedCodes)->count();
+        $progress['docs_upload'] = ['current' => $doneDocs, 'total' => $totalDocs, 'pct' => $totalDocs > 0 ? round($doneDocs / $totalDocs * 100) : 0];
+
+        // ── Binary milestones ──
+        $progress['package_select'] = ['current' => !empty($guest->selected_package_code) ? 1 : 0, 'total' => 1, 'pct' => !empty($guest->selected_package_code) ? 100 : 0];
+        $progress['contract_sign'] = ['current' => in_array($guest->contract_status ?? '', ['signed_uploaded', 'approved', 'active'], true) ? 1 : 0, 'total' => 1, 'pct' => in_array($guest->contract_status ?? '', ['signed_uploaded', 'approved', 'active'], true) ? 100 : 0];
+
+        return $progress;
+    }
+
+    /**
      * Retroaktif sync: geçmişte yapılmış aksiyonların milestone'larını otomatik tamamla.
      * Timeline sayfası her açıldığında çağrılır (idempotent — zaten tamamlanan milestone tekrar güncellenmez).
      */
