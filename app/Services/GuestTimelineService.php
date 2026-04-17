@@ -112,11 +112,8 @@ class GuestTimelineService
             $this->complete($guest, 'form_complete');
         }
 
-        // En az 1 belge yüklenmişse
-        $ownerId = trim((string) ($guest->converted_student_id ?? '')) !== ''
-            ? (string) $guest->converted_student_id
-            : 'GST-' . str_pad((string) $guest->id, 8, '0', STR_PAD_LEFT);
-        if (\App\Models\Document::where('student_id', $ownerId)->exists()) {
+        // Tüm zorunlu belgeler yüklenmişse (docs_ready flag'i controller'da hesaplanır)
+        if ($guest->docs_ready) {
             $this->complete($guest, 'docs_upload');
         }
 

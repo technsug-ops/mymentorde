@@ -97,8 +97,10 @@ trait GuestDocumentTrait
             ]
         );
 
-        // Timeline: ilk belge yüklendiğinde "Zorunlu Belgeleri Yükle" milestone'unu tamamla
-        app(\App\Services\GuestTimelineService::class)->complete($guest, 'docs_upload');
+        // Timeline: tüm zorunlu belgeler tamamlandığında milestone'u işaretle
+        if ($docsReady) {
+            app(\App\Services\GuestTimelineService::class)->complete($guest, 'docs_upload');
+        }
 
         if ($docsReady) {
             return redirect()->route('guest.registration.documents')->with('docs_complete', true);
