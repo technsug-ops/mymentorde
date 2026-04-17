@@ -163,9 +163,27 @@ class GuestTimelineService
         $doneDocs = $requiredCodes->intersect($uploadedCodes)->count();
         $progress['docs_upload'] = ['current' => $doneDocs, 'total' => $totalDocs, 'pct' => $totalDocs > 0 ? round($doneDocs / $totalDocs * 100) : 0];
 
-        // ── Binary milestones ──
+        // ── package_select: binary ──
         $progress['package_select'] = ['current' => !empty($guest->selected_package_code) ? 1 : 0, 'total' => 1, 'pct' => !empty($guest->selected_package_code) ? 100 : 0];
-        $progress['contract_sign'] = ['current' => in_array($guest->contract_status ?? '', ['signed_uploaded', 'approved', 'active'], true) ? 1 : 0, 'total' => 1, 'pct' => in_array($guest->contract_status ?? '', ['signed_uploaded', 'approved', 'active'], true) ? 100 : 0];
+
+        // ── contract_sign: 4 aşama (Talep → İnceleme → İmza → Onay) ──
+        $contractStages = [
+            'pending_manager'  => 1, // Talep edildi
+            'requested'        => 2, // İnceleme / gönderildi
+            'signed_uploaded'  => 3, // İmzalandı
+            'approved'         => 4, // Onaylandı
+            'active'           => 4,
+        ];
+        $cStatus = strtolower(trim((string) ($guest->contract_status ?? 'not_requested')));
+        $cStep = $contractStages[$cStatus] ?? 0;
+        $cTotal = 4;
+        $progress['contract_sign'] = [
+            'current' => $cStep,
+            'total'   => $cTotal,
+            'pct'     => $cTotal > 0 ? round($cStep / $cTotal * 100) : 0,
+            'stages'  => ['Talep', 'İnceleme', 'İmza', 'Onay'],
+            'stage'   => $cStep,
+        ];
 
         return $progress;
     }
