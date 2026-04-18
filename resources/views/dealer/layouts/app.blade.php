@@ -438,7 +438,6 @@ document.addEventListener('alpine:init',function(){
 <script nonce="{{ $cspNonce ?? '' }}">window.__giphyKey={{ Js::from(config('services.giphy.key','')) }};</script>
 @stack('scripts')
 
-@include('partials.welcome-video-modal', ['wvPortal' => 'dealer'])
 @include('partials.promo-popup')
 </body>
 </html>

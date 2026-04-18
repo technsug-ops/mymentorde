@@ -630,8 +630,6 @@ document.addEventListener('alpine:init',function(){
 }());
 </script>
 
-@stack('welcome-modal')
-
 {{-- PWA Service Worker --}}
 <script nonce="{{ $cspNonce ?? '' }}">
 if('serviceWorker' in navigator){

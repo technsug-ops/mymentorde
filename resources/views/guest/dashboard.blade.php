@@ -726,10 +726,6 @@
 
 @endsection
 
-@push('welcome-modal')
-    @include('partials.welcome-video-modal', ['wvPortal' => 'guest'])
-@endpush
-
 {{-- ── Onboarding Modal ── --}}
 @if(!empty($onboardingSteps) && ($onboardingPending ?? false))
 @php
