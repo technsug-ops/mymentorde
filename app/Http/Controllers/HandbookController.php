@@ -123,7 +123,13 @@ class HandbookController extends Controller
             return $body;
         }
 
-        return $body; // default: include
+        // Section 9+ — Son Değişiklikler / Changelog → sadece staff
+        if (preg_match('/## 9[\. ]/u', $heading)) {
+            return in_array($role, $staffRoles) ? $body : false;
+        }
+
+        // Bilinmeyen section'lar → sadece staff görsün (güvenli default)
+        return in_array($role, $staffRoles) ? $body : false;
     }
 
     /**

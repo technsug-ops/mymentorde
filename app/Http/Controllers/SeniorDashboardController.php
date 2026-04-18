@@ -215,6 +215,77 @@ class SeniorDashboardController extends Controller
                 ->count(),
         ];
 
+        // ── Analytics metrikleri (audit gap fix) ─────────────────────────
+
+        // Randevu tamamlanma oranı
+        $appointmentStats = ['total' => 0, 'completed' => 0, 'noshow' => 0, 'rate' => 0];
+        if ($studentIds->isNotEmpty()) {
+            $allAppts = StudentAppointment::whereIn('student_id', $studentIds->all())->get(['status']);
+            $appointmentStats['total'] = $allAppts->count();
+            $appointmentStats['completed'] = $allAppts->where('status', 'completed')->count();
+            $appointmentStats['noshow'] = $allAppts->whereIn('status', ['no_show', 'cancelled'])->count();
+            $appointmentStats['rate'] = $appointmentStats['total'] > 0
+                ? round($appointmentStats['completed'] / $appointmentStats['total'] * 100) : 0;
+        }
+
+        // Ticket çözüm süresi (ort. saat)
+        $ticketResolution = null;
+        if ($studentIds->isNotEmpty()) {
+            $resolvedTickets = GuestTicket::query()
+                ->whereHas('guestApplication', fn ($q) => $q->whereIn('converted_student_id', $studentIds->all()))
+                ->whereIn('status', ['resolved', 'closed'])
+                ->whereNotNull('closed_at')
+                ->get(['created_at', 'closed_at']);
+            if ($resolvedTickets->count() > 0) {
+                $ticketResolution = round($resolvedTickets->avg(fn ($t) => $t->created_at->diffInHours($t->closed_at)), 1);
+            }
+        }
+
+        // NPS ortalaması
+        $npsAvg = null;
+        try {
+            if (\App\Support\SchemaCache::hasTable('student_feedbacks')) {
+                $npsData = \Illuminate\Support\Facades\DB::table('student_feedbacks')
+                    ->whereIn('student_id', $studentIds->isEmpty() ? [''] : $studentIds->all())
+                    ->whereNotNull('nps_score')
+                    ->selectRaw('AVG(nps_score) as avg_nps, COUNT(*) as cnt')
+                    ->first();
+                if ($npsData && (int) $npsData->cnt > 0) {
+                    $npsAvg = round((float) $npsData->avg_nps, 1);
+                }
+            }
+        } catch (\Throwable $e) { /* tablo yoksa sessizce geç */ }
+
+        // Belge onay oranı
+        $docApprovalRate = 0;
+        if ($studentIds->isNotEmpty()) {
+            $totalDocs = Document::whereIn('student_id', $studentIds->all())->count();
+            $approvedDocs = Document::whereIn('student_id', $studentIds->all())->where('status', 'approved')->count();
+            $docApprovalRate = $totalDocs > 0 ? round($approvedDocs / $totalDocs * 100) : 0;
+        }
+
+        // Aylık süreç sonuçları trend (son 6 ay)
+        $monthlyOutcomes = [];
+        if ($studentIds->isNotEmpty()) {
+            for ($m = 5; $m >= 0; $m--) {
+                $ms = now()->subMonths($m)->startOfMonth();
+                $me = now()->subMonths($m)->endOfMonth();
+                $monthlyOutcomes[] = [
+                    'label' => $ms->translatedFormat('M'),
+                    'count' => ProcessOutcome::whereIn('student_id', $studentIds->all())
+                        ->whereBetween('created_at', [$ms, $me])->count(),
+                ];
+            }
+        }
+
+        $seniorAnalytics = [
+            'appointmentStats'  => $appointmentStats,
+            'ticketResolution'  => $ticketResolution,
+            'npsAvg'            => $npsAvg,
+            'docApprovalRate'   => $docApprovalRate,
+            'monthlyOutcomes'   => $monthlyOutcomes,
+        ];
+
         return view('senior.dashboard', [
             'activeStudentCount'   => $activeStudentCount,
             'archivedStudentCount' => $archivedStudentCount,
@@ -238,6 +309,7 @@ class SeniorDashboardController extends Controller
             'riskRadar'            => $riskRadar,
             'criticalActions'      => $criticalActions,
             'weeklyPerformance'    => $weeklyPerformance,
+            'seniorAnalytics'      => $seniorAnalytics,
         ]);
     }
 
@@ -438,5 +510,88 @@ class SeniorDashboardController extends Controller
         $quality = $this->documentBuilderService->qualityScore((string) ($result['content'] ?? ''), $docType);
 
         return response()->json(['ok' => true, 'preview' => $result, 'quality' => $quality]);
+    }
+
+    /**
+     * Senior global search — atanmış öğrenciler, belgeler, biletler, KB makaleleri.
+     */
+    public function globalSearch(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $q = trim($request->query('q', ''));
+        if (mb_strlen($q) < 2) {
+            return response()->json(['error' => 'Minimum 2 karakter.'], 422);
+        }
+
+        $seniorEmail = strtolower(trim((string) $request->user()?->email));
+        $needle      = '%' . $q . '%';
+        $results     = collect();
+
+        // 1. Atanmış öğrenciler / adaylar
+        GuestApplication::query()
+            ->whereRaw('lower(assigned_senior_email) = ?', [$seniorEmail])
+            ->where(fn ($w) => $w->where('full_name', 'like', $needle)
+                ->orWhere('email', 'like', $needle)
+                ->orWhere('application_country', 'like', $needle))
+            ->limit(5)
+            ->get(['id', 'full_name', 'email', 'application_type', 'updated_at'])
+            ->each(fn ($g) => $results->push([
+                'type'  => 'student',
+                'icon'  => '🎓',
+                'title' => $g->full_name ?: $g->email,
+                'sub'   => 'Öğrenci — ' . ($g->application_type ?: '-'),
+                'url'   => '/senior/students/' . $g->id,
+                'date'  => $g->updated_at?->format('d.m.Y'),
+            ]));
+
+        // 2. Belgeler
+        Document::where(fn ($w) => $w->where('original_file_name', 'like', $needle)
+                ->orWhere('title', 'like', $needle))
+            ->limit(5)
+            ->get(['id', 'student_id', 'original_file_name', 'status', 'updated_at'])
+            ->each(fn ($d) => $results->push([
+                'type'  => 'document',
+                'icon'  => '📄',
+                'title' => $d->original_file_name,
+                'sub'   => 'Belge — ' . $d->status . ' — ' . $d->student_id,
+                'url'   => '/senior/students?doc=' . $d->id,
+                'date'  => $d->updated_at?->format('d.m.Y'),
+            ]));
+
+        // 3. Destek biletleri
+        GuestTicket::where(fn ($w) => $w->where('subject', 'like', $needle)
+                ->orWhere('message', 'like', $needle))
+            ->limit(5)
+            ->get(['id', 'subject', 'status', 'created_at'])
+            ->each(fn ($t) => $results->push([
+                'type'  => 'ticket',
+                'icon'  => '🎫',
+                'title' => $t->subject,
+                'sub'   => 'Bilet — ' . $t->status,
+                'url'   => '/senior/tickets',
+                'date'  => $t->created_at?->format('d.m.Y'),
+            ]));
+
+        // 4. Bilgi bankası
+        if (\Illuminate\Support\Facades\Schema::hasTable('knowledge_base_articles')) {
+            \App\Models\KnowledgeBaseArticle::where('is_published', true)
+                ->where(fn ($w) => $w->where('title_tr', 'like', $needle)
+                    ->orWhere('body_tr', 'like', $needle))
+                ->limit(5)
+                ->get(['id', 'title_tr', 'category', 'updated_at'])
+                ->each(fn ($m) => $results->push([
+                    'type'  => 'material',
+                    'icon'  => '📚',
+                    'title' => $m->title_tr,
+                    'sub'   => 'Materyal — ' . ($m->category ?: '-'),
+                    'url'   => '/senior/knowledge-base',
+                    'date'  => $m->updated_at?->format('d.m.Y'),
+                ]));
+        }
+
+        return response()->json([
+            'query'   => $q,
+            'results' => $results->take(15)->values(),
+            'total'   => $results->count(),
+        ]);
     }
 }

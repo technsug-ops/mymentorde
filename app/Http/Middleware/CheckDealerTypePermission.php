@@ -45,7 +45,15 @@ class CheckDealerTypePermission
         $allowed = (bool) ($permissions[$permissionKey] ?? false);
 
         if (!$allowed) {
-            abort(Response::HTTP_FORBIDDEN, 'Dealer tipi yetkiniz bu alani gormeye uygun degil.');
+            if ($request->expectsJson()) {
+                abort(Response::HTTP_FORBIDDEN, 'Bu özellik mevcut paketinizde kullanılamaz.');
+            }
+
+            return response()->view('dealer.permission-denied', [
+                'permissionKey' => $permissionKey,
+                'dealerType'    => $dealerType,
+                'dealer'        => $dealer,
+            ], Response::HTTP_FORBIDDEN);
         }
 
         $request->attributes->set('dealer_record', $dealer);

@@ -565,6 +565,69 @@ class ManagerPortalController extends Controller
         ));
     }
 
+    // ─── BAYİ TİPİ YÖNETİMİ ─────────────────────────────────────────────────
+
+    public function dealerTypes(): View
+    {
+        $types = \App\Models\DealerType::where('is_active', true)->orderBy('id')->get();
+
+        $permissionLabels = [
+            'canAccessSupport'       => ['label' => 'Danışman Desteği',     'desc' => 'Advisor sayfasına erişim'],
+            'canAccessTraining'      => ['label' => 'Eğitim Merkezi',       'desc' => 'KB makaleleri ve sertifika'],
+            'canAccessCalculator'    => ['label' => 'Komisyon Hesaplama',   'desc' => 'Komisyon simülatörü'],
+            'canViewStudentDetails'  => ['label' => 'Öğrenci Detayları',    'desc' => 'Lead detay sayfasında öğrenci bilgisi'],
+            'canViewDocuments'       => ['label' => 'Belge Görüntüleme',    'desc' => 'Öğrenci belgelerini görebilme'],
+            'canUploadDocuments'     => ['label' => 'Belge Yükleme',        'desc' => 'Öğrenci adına belge yükleme'],
+            'canMessageStudent'      => ['label' => 'Öğrenciye Mesaj',      'desc' => 'Direkt mesaj gönderme'],
+            'canViewProcessDetails'  => ['label' => 'Süreç Takibi',         'desc' => 'Başvuru süreç detaylarını görme'],
+            'canViewFinancials'      => ['label' => 'Finansal Bilgiler',    'desc' => 'Kazanç ve ödeme sayfaları'],
+            'canViewTerritoryStats'  => ['label' => 'Bölge İstatistikleri', 'desc' => 'Coğrafi performans verileri'],
+        ];
+
+        // Her tip kaç dealer kullanıyor
+        $dealerCounts = \App\Models\Dealer::where('is_active', true)
+            ->selectRaw('dealer_type_code, COUNT(*) as cnt')
+            ->groupBy('dealer_type_code')
+            ->pluck('cnt', 'dealer_type_code');
+
+        return view('manager.dealer-types', compact('types', 'permissionLabels', 'dealerCounts'));
+    }
+
+    public function updateDealerType(Request $request, string $code): \Illuminate\Http\RedirectResponse
+    {
+        $type = \App\Models\DealerType::where('code', $code)->firstOrFail();
+
+        $validated = $request->validate([
+            'name_tr'         => ['required', 'string', 'max:200'],
+            'tier'            => ['required', 'integer', 'min:1', 'max:5'],
+            'dashboardLevel'  => ['required', 'string', 'in:basic,standard,advanced'],
+        ]);
+
+        // Boolean permissions
+        $boolPerms = [
+            'canAccessSupport', 'canAccessTraining', 'canAccessCalculator',
+            'canViewStudentDetails', 'canViewDocuments', 'canUploadDocuments',
+            'canMessageStudent', 'canViewProcessDetails', 'canViewFinancials',
+            'canViewTerritoryStats',
+        ];
+
+        $perms = $type->permissions ?? [];
+        $perms['tier'] = (int) $validated['tier'];
+        $perms['dashboardLevel'] = $validated['dashboardLevel'];
+
+        foreach ($boolPerms as $perm) {
+            $perms[$perm] = $request->boolean($perm);
+        }
+
+        $type->name_tr = $validated['name_tr'];
+        $type->permissions = $perms;
+        $type->save();
+
+        \Illuminate\Support\Facades\Cache::flush();
+
+        return redirect()->route('manager.dealer-types')->with('status', "{$type->name_tr} güncellendi.");
+    }
+
     // ─── KOMİSYON YÖNETİMİ ──────────────────────────────────────────────────
 
     public function commissions(Request $request): View

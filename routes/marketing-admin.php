@@ -49,6 +49,7 @@ Route::middleware(['company.context', 'auth', 'marketing.access'])
         })->where('mode', 'marketing|sales')->name('switch-mode');
 
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('marketing-admin.dashboard');
+        Route::get('/search', [DashboardController::class, 'globalSearch'])->middleware('throttle:60,1')->name('marketing-admin.search');
         Route::get('/suggestions/audience', [DashboardController::class, 'audienceSuggestions']);
 
         // ─── Pazarlama Ekibi Route'ları (sales rolleri giremez) ─────────────

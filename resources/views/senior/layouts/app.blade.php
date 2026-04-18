@@ -330,16 +330,22 @@
 
         {{-- Topbar --}}
         <header class="topbar">
-            <div class="topbar-left">
+            <div class="topbar-left" style="flex:0 1 auto;">
                 <button class="icon-btn" id="premium-menu-btn"
                         style="display:none;">☰</button>
                 <button class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
                 <div>
-                    <div class="topbar-title">@yield('page_title', 'Eğitim Danışmanı Paneliı')</div>
+                    <div class="topbar-title">@yield('page_title', 'Eğitim Danışmanı Paneli')</div>
                     @hasSection('page_subtitle')
                         <div class="topbar-sub">@yield('page_subtitle')</div>
                     @endif
                 </div>
+            </div>
+            {{-- Global search (topbar center) --}}
+            <div style="position:relative;flex:1 1 300px;max-width:520px;margin:0 20px;" id="gs-wrap">
+                <input type="text" id="gs-input" placeholder="🔍 Ara..." autocomplete="off" minlength="2"
+                       style="width:100%;padding:9px 16px;border:1px solid var(--border,#d1d5db);border-radius:10px;font-size:14px;background:var(--surface,#f9fafb);color:var(--text,#111);outline:none;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+                <div id="gs-results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;min-width:400px;background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:9000;max-height:400px;overflow-y:auto;"></div>
             </div>
             <div class="topbar-right">
                 @yield('topbar-actions')
@@ -569,6 +575,46 @@ document.addEventListener('alpine:init',function(){
 
 <script defer src="{{ Vite::asset('resources/js/icon-switcher.js') }}"></script>
 <script nonce="{{ $cspNonce ?? '' }}">window.__giphyKey={{ Js::from(config('services.giphy.key','')) }};</script>
+
+{{-- Global search JS --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    var gsTimer;
+    var inp=document.getElementById('gs-input');
+    var box=document.getElementById('gs-results');
+    if(!inp)return;
+    inp.addEventListener('input',function(){
+        clearTimeout(gsTimer);
+        var q=this.value.trim();
+        if(q.length<2){box.style.display='none';return;}
+        gsTimer=setTimeout(function(){
+            var csrf=document.querySelector('meta[name="csrf-token"]');
+            fetch('/senior/search?q='+encodeURIComponent(q),{
+                credentials:'same-origin',
+                headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':csrf?csrf.content:''}
+            }).then(function(r){
+                if(!r.ok) throw new Error('HTTP '+r.status);
+                return r.json();
+            }).then(function(d){
+                box.innerHTML=(d.results&&d.results.length)
+                    ?d.results.map(function(x){return '<a href="'+x.url+'" style="display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-bottom:1px solid var(--border,#f3f4f6);text-decoration:none;color:var(--text,#111827);">'
+                        +'<span style="font-size:16px;flex-shrink:0;">'+x.icon+'</span>'
+                        +'<div><div style="font-size:13px;font-weight:600;">'+x.title+'</div><div style="font-size:11px;color:var(--muted,#9ca3af);">'+x.sub+' &mdash; '+(x.date||'')+'</div></div></a>';}).join('')
+                    :'<div style="padding:12px;font-size:13px;color:var(--muted,#9ca3af);text-align:center;">Sonuç bulunamadı.</div>';
+                box.style.display='block';
+            }).catch(function(e){
+                box.innerHTML='<div style="padding:12px;font-size:12px;color:var(--muted,#9ca3af);text-align:center;">Arama bu modülde henüz aktif değil.</div>';
+                box.style.display='block';
+            });
+        },300);
+    });
+    document.addEventListener('click',function(e){
+        var wrap=document.getElementById('gs-wrap');
+        if(wrap&&!wrap.contains(e.target))box.style.display='none';
+    });
+}());
+</script>
+
 @stack('scripts')
 @include('partials.promo-popup')
 </body>

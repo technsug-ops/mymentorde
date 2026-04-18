@@ -1277,6 +1277,77 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
 })();
 </script>
 @endpush
+
+{{-- ── Manager Analytics (audit gap fix) ── --}}
+@if(!empty($managerAnalytics))
+<div style="margin-top:20px;">
+    <div style="font-size:14px;font-weight:700;color:var(--u-text,#111);margin-bottom:14px;">📊 Platform Analitikleri</div>
+
+    {{-- Platform toplamları --}}
+    @if(!empty($managerAnalytics['platformTotals']))
+    @php $pt = $managerAnalytics['platformTotals']; @endphp
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;">
+        <div class="card" style="text-align:center;padding:14px;border-top:3px solid #3b82f6;">
+            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;">Toplam Aday</div>
+            <div style="font-size:22px;font-weight:800;color:#3b82f6;margin:4px 0;">{{ $pt['total_guests'] }}</div>
+        </div>
+        <div class="card" style="text-align:center;padding:14px;border-top:3px solid #16a34a;">
+            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;">Öğrenci</div>
+            <div style="font-size:22px;font-weight:800;color:#16a34a;margin:4px 0;">{{ $pt['total_students'] }}</div>
+        </div>
+        <div class="card" style="text-align:center;padding:14px;border-top:3px solid #f59e0b;">
+            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;">Aktif Bayi</div>
+            <div style="font-size:22px;font-weight:800;color:#f59e0b;margin:4px 0;">{{ $pt['total_dealers'] }}</div>
+        </div>
+        <div class="card" style="text-align:center;padding:14px;border-top:3px solid #8b5cf6;">
+            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;">Danışman</div>
+            <div style="font-size:22px;font-weight:800;color:#8b5cf6;margin:4px 0;">{{ $pt['total_seniors'] }}</div>
+        </div>
+        <div class="card" style="text-align:center;padding:14px;border-top:3px solid #ec4899;">
+            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;">Toplam Gelir</div>
+            <div style="font-size:22px;font-weight:800;color:#ec4899;margin:4px 0;">{{ number_format($pt['total_revenue'], 0, ',', '.') }}€</div>
+        </div>
+    </div>
+    @endif
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+        {{-- Gelir Tahmini --}}
+        @if(!empty($managerAnalytics['revenueForecast']))
+        @php $rf = $managerAnalytics['revenueForecast']; @endphp
+        <div class="card" style="padding:18px 20px;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:12px;">📈 Gelir Tahmini (90 Gün)</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                <div style="background:var(--u-bg,#f8fafc);border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:20px;font-weight:800;color:#3b82f6;">{{ number_format($rf['avg_monthly'], 0, ',', '.') }}€</div>
+                    <div style="font-size:10px;color:var(--u-muted);">Aylık Ortalama</div>
+                </div>
+                <div style="background:var(--u-bg,#f8fafc);border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:20px;font-weight:800;color:#16a34a;">{{ number_format($rf['forecast_90d'], 0, ',', '.') }}€</div>
+                    <div style="font-size:10px;color:var(--u-muted);">90 Gün Projeksiyon</div>
+                </div>
+            </div>
+            <div style="font-size:11px;color:var(--u-muted);">Son 3 ay ortalamasına dayalı basit projeksiyon</div>
+        </div>
+        @endif
+
+        {{-- Dealer Risk Skoru --}}
+        @if(!empty($managerAnalytics['dealerRisk']))
+        <div class="card" style="padding:18px 20px;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:12px;">⚠️ Dealer Aktivite Riski</div>
+            @foreach(array_slice($managerAnalytics['dealerRisk'], 0, 6) as $dr)
+                <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--u-line,#f1f5f9);font-size:12px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:{{ $dr['risk'] === 'high' ? '#ef4444' : ($dr['risk'] === 'medium' ? '#f59e0b' : '#16a34a') }};flex-shrink:0;"></span>
+                    <span style="flex:1;font-weight:600;">{{ $dr['name'] }}</span>
+                    <span style="color:var(--u-muted);">{{ $dr['total_leads'] }} lead</span>
+                    <span style="font-size:11px;color:{{ $dr['risk'] === 'high' ? '#ef4444' : '#64748b' }};">{{ $dr['days_inactive'] }}g inaktif</span>
+                </div>
+            @endforeach
+        </div>
+        @endif
+    </div>
+</div>
+@endif
+
 @endsection
 
 @push('scripts')

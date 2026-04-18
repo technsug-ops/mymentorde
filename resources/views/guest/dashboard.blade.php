@@ -684,6 +684,31 @@
     <div class="gdb-social-live"><span class="gdb-social-live-dot"></span> Canlı</div>
 </div>
 
+{{-- ── Başvuru Durumun ── --}}
+@if(!empty($guestAnalytics))
+<div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:18px 20px;margin-bottom:16px;">
+    <div style="font-size:13px;font-weight:700;color:var(--text,#111);margin-bottom:12px;">📊 Başvuru Durumun</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+        <div style="text-align:center;padding:10px;background:var(--bg,#f8fafc);border-radius:8px;">
+            <div style="font-size:20px;font-weight:800;color:#3b82f6;">{{ $guestAnalytics['daysSinceRegistration'] ?? 0 }}</div>
+            <div style="font-size:10px;color:var(--muted,#64748b);">Gün (kayıttan beri)</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--bg,#f8fafc);border-radius:8px;">
+            <div style="font-size:20px;font-weight:800;color:#16a34a;">{{ $guestAnalytics['docStats']['approved'] ?? 0 }}</div>
+            <div style="font-size:10px;color:var(--muted,#64748b);">Onaylı Belge</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--bg,#f8fafc);border-radius:8px;">
+            <div style="font-size:20px;font-weight:800;color:#f59e0b;">{{ $guestAnalytics['docStats']['uploaded'] ?? 0 }}</div>
+            <div style="font-size:10px;color:var(--muted,#64748b);">İnceleme Bekleyen</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--bg,#f8fafc);border-radius:8px;">
+            <div style="font-size:20px;font-weight:800;color:#ef4444;">{{ $guestAnalytics['docStats']['rejected'] ?? 0 }}</div>
+            <div style="font-size:10px;color:var(--muted,#64748b);">Reddedilen</div>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- ── Timeline ── --}}
 @php $activityFeedSafe = $activityFeed ?? []; @endphp
 @if(!empty($activityFeedSafe))

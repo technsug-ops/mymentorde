@@ -411,4 +411,83 @@
 })();
 </script>
 @endpush
+
+{{-- ── Derinlemesine Analitikler (audit gap fix) ── --}}
+@if(!empty($mktgAnalytics))
+<div style="margin-top:20px;">
+    <div style="font-size:14px;font-weight:700;color:var(--u-text,#111);margin-bottom:14px;">📊 Derinlemesine Analitikler</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+        {{-- Email Kampanya Performansı --}}
+        @if(!empty($mktgAnalytics['email']))
+        @php $em = $mktgAnalytics['email']; @endphp
+        <div style="background:var(--u-card,#fff);border:1px solid var(--u-line,#e2e8f0);border-radius:10px;padding:18px 20px;">
+            <div style="font-size:13px;font-weight:700;color:var(--u-text,#111);margin-bottom:12px;">📧 Email Kampanya Performansı</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+                <div style="text-align:center;padding:8px;background:var(--u-bg,#f8fafc);border-radius:6px;">
+                    <div style="font-size:18px;font-weight:800;color:#3b82f6;">%{{ $em['open_rate'] }}</div>
+                    <div style="font-size:10px;color:var(--u-muted,#64748b);">Açılma Oranı</div>
+                </div>
+                <div style="text-align:center;padding:8px;background:var(--u-bg,#f8fafc);border-radius:6px;">
+                    <div style="font-size:18px;font-weight:800;color:#16a34a;">%{{ $em['click_rate'] }}</div>
+                    <div style="font-size:10px;color:var(--u-muted,#64748b);">Tıklama Oranı</div>
+                </div>
+                <div style="text-align:center;padding:8px;background:var(--u-bg,#f8fafc);border-radius:6px;">
+                    <div style="font-size:18px;font-weight:800;color:#8b5cf6;">{{ $em['registrations'] }}</div>
+                    <div style="font-size:10px;color:var(--u-muted,#64748b);">Kayıt Dönüşüm</div>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;font-size:11px;color:var(--u-muted,#64748b);">
+                <span>{{ $em['campaigns'] }} kampanya</span>
+                <span>{{ $em['sent'] }} gönderim</span>
+                <span>{{ $em['bounced'] }} bounce</span>
+            </div>
+        </div>
+        @endif
+
+        {{-- Haftalık Lead Trendi --}}
+        @if(!empty($mktgAnalytics['weeklyLeads']))
+        <div style="background:var(--u-card,#fff);border:1px solid var(--u-line,#e2e8f0);border-radius:10px;padding:18px 20px;">
+            <div style="font-size:13px;font-weight:700;color:var(--u-text,#111);margin-bottom:12px;">📈 Haftalık Lead Trendi</div>
+            @php $mxW = max(1, max(array_column($mktgAnalytics['weeklyLeads'], 'count'))); @endphp
+            <div style="display:flex;align-items:flex-end;gap:6px;height:80px;">
+                @foreach($mktgAnalytics['weeklyLeads'] as $wk)
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">
+                        <span style="font-size:10px;font-weight:700;">{{ $wk['count'] }}</span>
+                        <div style="width:100%;background:#3b82f6;border-radius:3px 3px 0 0;min-height:2px;height:{{ round($wk['count'] / $mxW * 60) }}px;"></div>
+                        <span style="font-size:9px;color:var(--u-muted,#94a3b8);">{{ $wk['label'] }}</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+    </div>
+
+    {{-- Kaynak Kalite Skoru + Etkinlik Memnuniyeti --}}
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:16px;">
+        @if(!empty($mktgAnalytics['sourceQuality']))
+        <div style="background:var(--u-card,#fff);border:1px solid var(--u-line,#e2e8f0);border-radius:10px;padding:18px 20px;">
+            <div style="font-size:13px;font-weight:700;color:var(--u-text,#111);margin-bottom:12px;">🎯 Kaynak Kalite Skoru</div>
+            @foreach($mktgAnalytics['sourceQuality'] as $sq)
+                <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--u-line,#f1f5f9);font-size:12px;">
+                    <span style="flex:1;font-weight:600;">{{ $sq['source'] }}</span>
+                    <span style="color:var(--u-muted,#64748b);">{{ $sq['total'] }} lead</span>
+                    <span style="color:#16a34a;font-weight:700;">{{ $sq['converted'] }} dönüşüm</span>
+                    <span style="background:{{ $sq['rate'] >= 20 ? '#dcfce7' : ($sq['rate'] >= 5 ? '#fef9c3' : '#fef2f2') }};color:{{ $sq['rate'] >= 20 ? '#166534' : ($sq['rate'] >= 5 ? '#854d0e' : '#991b1b') }};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">%{{ $sq['rate'] }}</span>
+                </div>
+            @endforeach
+        </div>
+        @endif
+
+        <div style="background:var(--u-card,#fff);border:1px solid var(--u-line,#e2e8f0);border-radius:10px;padding:18px 20px;">
+            <div style="font-size:13px;font-weight:700;color:var(--u-text,#111);margin-bottom:12px;">🎪 Etkinlik Memnuniyeti</div>
+            <div style="text-align:center;padding:20px 0;">
+                <div style="font-size:36px;font-weight:800;color:#8b5cf6;">{{ $mktgAnalytics['eventSatisfaction'] ?? '-' }}</div>
+                <div style="font-size:12px;color:var(--u-muted,#64748b);margin-top:4px;">/ 10 ortalama skor</div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 @endsection

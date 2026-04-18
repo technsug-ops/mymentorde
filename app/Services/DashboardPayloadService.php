@@ -155,6 +155,53 @@ class DashboardPayloadService
 
         $riskyStudents = $this->kpi->riskyStudents($cid, 5);
 
+        // ── Manager Analytics (audit gap fix) ────────────────────────────────
+        $managerAnalytics = [];
+        try {
+            // Dealer risk skoru — son 30 gün aktivitesiz dealer'lar
+            $dealerRisk = \App\Models\Dealer::where('is_active', true)->where('is_archived', false)
+                ->get(['code', 'name', 'dealer_type_code', 'created_at'])
+                ->map(function ($d) {
+                    $lastLead = \App\Models\GuestApplication::where('dealer_code', $d->code)->latest()->value('created_at');
+                    $daysSince = $lastLead ? (int) $lastLead->diffInDays(now()) : (int) $d->created_at->diffInDays(now());
+                    $totalLeads = \App\Models\GuestApplication::where('dealer_code', $d->code)->count();
+                    $convertedLeads = \App\Models\GuestApplication::where('dealer_code', $d->code)
+                        ->where(fn ($q) => $q->whereNotNull('converted_student_id')->orWhere('lead_status', 'converted'))->count();
+                    return [
+                        'code' => $d->code, 'name' => $d->name, 'type' => $d->dealer_type_code,
+                        'days_inactive' => $daysSince, 'total_leads' => $totalLeads, 'converted' => $convertedLeads,
+                        'risk' => $daysSince > 30 ? 'high' : ($daysSince > 14 ? 'medium' : 'low'),
+                    ];
+                })->sortByDesc('days_inactive')->values()->all();
+            $managerAnalytics['dealerRisk'] = $dealerRisk;
+
+            // Gelir tahmini (basit projeksiyon — son 3 ay ortalaması × 3)
+            $revenueHistory = [];
+            for ($m = 2; $m >= 0; $m--) {
+                $ms = now()->subMonths($m)->startOfMonth();
+                $me = now()->subMonths($m)->endOfMonth();
+                $earned = (float) \App\Models\DealerStudentRevenue::whereBetween('updated_at', [$ms, $me])->sum('total_earned');
+                $revenueHistory[] = $earned;
+            }
+            $avgMonthly = count($revenueHistory) > 0 ? array_sum($revenueHistory) / count($revenueHistory) : 0;
+            $managerAnalytics['revenueForecast'] = [
+                'last3months' => $revenueHistory,
+                'avg_monthly' => round($avgMonthly, 2),
+                'forecast_90d' => round($avgMonthly * 3, 2),
+            ];
+
+            // Toplam platform metrikleri
+            $managerAnalytics['platformTotals'] = [
+                'total_guests'   => \App\Models\GuestApplication::count(),
+                'total_students' => \App\Models\GuestApplication::whereNotNull('converted_student_id')->count(),
+                'total_dealers'  => \App\Models\Dealer::where('is_active', true)->count(),
+                'total_seniors'  => User::where('role', 'senior')->where('is_active', true)->count(),
+                'total_revenue'  => round((float) \App\Models\DealerStudentRevenue::sum('total_earned'), 2),
+            ];
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Manager analytics failed', ['error' => $e->getMessage()]);
+        }
+
         return [
             'stats'                  => $stats,
             'funnel'                 => $funnel,
@@ -185,6 +232,7 @@ class DashboardPayloadService
             ],
             'staffMetrics'           => $staffMetrics,
             'riskyStudents'          => $riskyStudents,
+            'managerAnalytics'       => $managerAnalytics,
         ];
     }
 

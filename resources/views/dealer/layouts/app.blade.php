@@ -129,12 +129,15 @@
                         {{ $tierPerms->tierLabel() }} · {{ $dealerUser?->dealer_code ?: '-' }}
                     </div>
                 </div>
-                @php $dlBrandName = config('brand.name', 'MentorDE'); $dlBrandLogo = config('brand.logo_url') ?: config('brand.logo_path'); @endphp
-                @if($dlBrandLogo)
-                    <div class="brand-logo" style="width:28px;height:28px;flex-shrink:0;background:transparent;padding:0;" title="{{ $dlBrandName }}"><img src="{{ $dlBrandLogo }}" alt="{{ $dlBrandName }}" style="max-height:28px;max-width:28px;object-fit:contain;"></div>
-                @else
-                    <div class="brand-logo" style="width:28px;height:28px;font-size:11px;flex-shrink:0;" title="{{ $dlBrandName }}">{{ strtoupper(mb_substr($dlBrandName, 0, 1)) }}</div>
-                @endif
+                @php
+                    $dlBrandName = config('brand.name', 'MentorDE');
+                    $dlBrandLogo = config('brand.logo_url') ?: config('brand.logo_path');
+                    $dlBrandInitial = strtoupper(mb_substr($dlBrandName, 0, 1));
+                @endphp
+                <div class="brand-logo" style="width:32px;height:32px;font-size:12px;flex-shrink:0;overflow:hidden;background:rgba(255,255,255,.15);border-radius:8px;" title="{{ $dlBrandName }}">
+                    @if(!empty($dlBrandLogo))<img src="{{ $dlBrandLogo }}" alt="{{ $dlBrandName }}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">@endif
+                    <span style="{{ !empty($dlBrandLogo)?'display:none;':'display:flex;' }}align-items:center;justify-content:center;width:100%;height:100%;color:#fff;font-weight:700;">{{ $dlBrandInitial }}</span>
+                </div>
             </div>
             <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">{{ $dlBrandName }} · Bayi Portalı</div>
             <div style="height:1px;background:rgba(255,255,255,.12);margin-top:12px;"></div>
@@ -210,7 +213,7 @@
                     <span class="nav-icon">📚</span> Eğitim Merkezi
                 </a>
                 @endif
-                {{-- Tier 2+ --}}
+                {{-- Tier 2+ : Referans, Performans, Takvim --}}
                 @if($tierPerms->isStandard())
                 <a href="/dealer/referral-links"
                    class="nav-link {{ request()->is('dealer/referral-links') ? 'active' : '' }}">
@@ -220,9 +223,6 @@
                    class="nav-link {{ request()->is('dealer/performance') ? 'active' : '' }}">
                     <span class="nav-icon">📊</span> Performans Raporu
                 </a>
-                @endif
-                {{-- Tier 3 --}}
-                @if($tierPerms->isAdvanced())
                 <a href="/dealer/calendar"
                    class="nav-link {{ request()->is('dealer/calendar') ? 'active' : '' }}">
                     <span class="nav-icon">📅</span> Takvimim

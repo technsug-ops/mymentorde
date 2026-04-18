@@ -141,9 +141,14 @@ class DealerEarningsController extends Controller
                 ->whereIn('status', ['requested', 'approved'])->sum('amount');
         }
 
-        $netAvailable = max(0.0, $totalPending - $pendingRequestTotal);
+        // Bonus: unlocked ise çekilebilir bakiyeye ekle
+        $bonusAdd = 0.0;
+        if ($data['dealer'] instanceof \App\Models\Dealer && $data['dealer']->isBonusUnlocked()) {
+            $bonusAdd = (float) ($data['dealer']->signup_bonus_amount ?? 0);
+        }
+        $netAvailable = max(0.0, $totalPending - $pendingRequestTotal + $bonusAdd);
 
-        return view('dealer.payments', $data + compact('accounts', 'payoutRequests', 'totalPending', 'pendingRequestTotal', 'netAvailable'));
+        return view('dealer.payments', $data + compact('accounts', 'payoutRequests', 'totalPending', 'pendingRequestTotal', 'netAvailable', 'bonusAdd'));
     }
 
     public function addPayoutAccount(Request $request)

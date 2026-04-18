@@ -252,6 +252,11 @@
                 <div class="dl-item-name">{{ $r->first_name }} {{ $r->last_name }}</div>
                 <div class="dl-item-chips">
                     <span class="dl-badge {{ $statusKey }}">{{ $statusLbl }}</span>
+                    @if(($r->referral_type ?? '') === 'confirmed_referral')
+                        <span class="dl-badge" style="background:#dcfce7;color:#166534;">Kesin</span>
+                    @elseif(($r->referral_type ?? '') === 'recommendation')
+                        <span class="dl-badge" style="background:#fef9c3;color:#854d0e;">Tavsiye</span>
+                    @endif
                     @if($r->application_type)
                         <span class="dl-badge neutral">{{ $r->application_type }}</span>
                     @endif

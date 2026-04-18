@@ -307,7 +307,7 @@
 
         {{-- Topbar --}}
         <header class="topbar">
-            <div class="topbar-left">
+            <div class="topbar-left" style="flex:0 1 auto;">
                 <button class="icon-btn" id="premium-menu-btn"
                         style="display:none;">☰</button>
                 <button class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
@@ -318,14 +318,14 @@
                     @endif
                 </div>
             </div>
+            {{-- Global search (topbar center) --}}
+            <div style="position:relative;flex:1 1 300px;max-width:520px;margin:0 20px;" id="gs-wrap">
+                <input type="text" id="gs-input" placeholder="🔍 Ara..." autocomplete="off" minlength="2"
+                       style="width:100%;padding:9px 16px;border:1px solid var(--border,#d1d5db);border-radius:10px;font-size:14px;background:var(--surface,#f9fafb);color:var(--text,#111);outline:none;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+                <div id="gs-results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;min-width:400px;background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:9000;max-height:400px;overflow-y:auto;"></div>
+            </div>
+
             <div class="topbar-right">
-                @yield('topbar-actions')
-                {{-- Global search --}}
-                <div style="position:relative;max-width:240px;" id="gs-wrap">
-                    <input type="text" id="gs-input" placeholder="Ara..." autocomplete="off" minlength="2"
-                           style="width:100%;padding:6px 10px;border:1px solid var(--border,#e2e8f0);border-radius:8px;font-size:13px;background:var(--surface,#fff);color:var(--text,#111);outline:none;">
-                    <div id="gs-results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:9000;max-height:360px;overflow-y:auto;"></div>
-                </div>
                 <button class="icon-btn" id="dm-btn" title="Tema">🌙</button>
                 <button class="icon-btn" id="design-btn" title="Tasarım Teması">🎨</button>
                 <div class="avatar" style="width:36px;height:36px;font-size:13px;" title="{{ $user?->name ?? 'Öğrenci' }}">

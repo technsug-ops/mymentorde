@@ -208,8 +208,70 @@ class DashboardController extends Controller
             ];
         });
 
+        // ── Non-cached analytics (audit gap fix) ──
+        $mktgAnalytics = [];
+        try {
+            // Email kampanya performansı
+            if (\App\Support\SchemaCache::hasTable('email_campaigns')) {
+                $emailCampaigns = \Illuminate\Support\Facades\DB::table('email_campaigns')
+                    ->selectRaw('COUNT(*) as total, SUM(COALESCE(stat_sent,0)) as sent, SUM(COALESCE(stat_opened,0)) as opened, SUM(COALESCE(stat_clicked,0)) as clicked, SUM(COALESCE(stat_bounced,0)) as bounced, SUM(COALESCE(stat_guest_registrations,0)) as registrations')
+                    ->first();
+                $mktgAnalytics['email'] = [
+                    'campaigns' => (int) ($emailCampaigns->total ?? 0),
+                    'sent'      => (int) ($emailCampaigns->sent ?? 0),
+                    'opened'    => (int) ($emailCampaigns->opened ?? 0),
+                    'clicked'   => (int) ($emailCampaigns->clicked ?? 0),
+                    'bounced'   => (int) ($emailCampaigns->bounced ?? 0),
+                    'registrations' => (int) ($emailCampaigns->registrations ?? 0),
+                    'open_rate' => ((int) ($emailCampaigns->sent ?? 0)) > 0 ? round(((int) $emailCampaigns->opened) / ((int) $emailCampaigns->sent) * 100, 1) : 0,
+                    'click_rate' => ((int) ($emailCampaigns->sent ?? 0)) > 0 ? round(((int) $emailCampaigns->clicked) / ((int) $emailCampaigns->sent) * 100, 1) : 0,
+                ];
+            }
+
+            // Haftalık lead trendi (son 8 hafta)
+            $weeklyLeads = [];
+            for ($w = 7; $w >= 0; $w--) {
+                $ws = now()->subWeeks($w)->startOfWeek();
+                $we = now()->subWeeks($w)->endOfWeek();
+                $weeklyLeads[] = [
+                    'label' => $ws->format('d.m'),
+                    'count' => (int) GuestApplication::whereBetween('created_at', [$ws, $we])->count(),
+                ];
+            }
+            $mktgAnalytics['weeklyLeads'] = $weeklyLeads;
+
+            // Lead kaynak kalite skoru (dönüşüm oranına göre sıralı)
+            $sourceQuality = GuestApplication::query()
+                ->whereNotNull('lead_source')->where('lead_source', '!=', '')
+                ->selectRaw("lead_source, COUNT(*) as total, SUM(CASE WHEN converted_to_student = 1 OR converted_student_id IS NOT NULL THEN 1 ELSE 0 END) as converted")
+                ->groupBy('lead_source')
+                ->having('total', '>=', 2)
+                ->orderByDesc('converted')
+                ->limit(8)
+                ->get()
+                ->map(fn ($r) => [
+                    'source' => (string) $r->lead_source,
+                    'total'  => (int) $r->total,
+                    'converted' => (int) $r->converted,
+                    'rate' => (int) $r->total > 0 ? round((int) $r->converted / (int) $r->total * 100, 1) : 0,
+                ])->values()->all();
+            $mktgAnalytics['sourceQuality'] = $sourceQuality;
+
+            // Etkinlik memnuniyet ortalaması
+            if (\App\Support\SchemaCache::hasTable('marketing_events')) {
+                $eventSat = \Illuminate\Support\Facades\DB::table('marketing_events')
+                    ->whereNotNull('metric_satisfaction_score')
+                    ->where('metric_satisfaction_score', '>', 0)
+                    ->selectRaw('AVG(metric_satisfaction_score) as avg_sat, COUNT(*) as cnt')
+                    ->first();
+                $mktgAnalytics['eventSatisfaction'] = $eventSat && (int) $eventSat->cnt > 0 ? round((float) $eventSat->avg_sat, 1) : null;
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Marketing analytics calculation failed', ['error' => $e->getMessage()]);
+        }
+
         return view('marketing-admin.dashboard.index', array_merge(
-            ['pageTitle' => 'Marketing+Sales Dashboard'],
+            ['pageTitle' => 'Marketing+Sales Dashboard', 'mktgAnalytics' => $mktgAnalytics],
             $data,
         ));
     }
@@ -457,5 +519,82 @@ class DashboardController extends Controller
         }
 
         return array_values(array_unique($types));
+    }
+
+    /**
+     * Marketing Admin global search — kampanyalar, adaylar, CMS içerik, görevler.
+     */
+    public function globalSearch(Request $request): JsonResponse
+    {
+        $q = trim($request->query('q', ''));
+        if (mb_strlen($q) < 2) {
+            return response()->json(['error' => 'Minimum 2 karakter.'], 422);
+        }
+
+        $needle  = '%' . $q . '%';
+        $results = collect();
+
+        // 1. Kampanyalar
+        MarketingCampaign::where(fn ($w) => $w->where('name', 'like', $needle)
+                ->orWhere('channel', 'like', $needle))
+            ->limit(5)
+            ->get(['id', 'name', 'channel', 'status', 'updated_at'])
+            ->each(fn ($c) => $results->push([
+                'type'  => 'campaign',
+                'icon'  => '📢',
+                'title' => $c->name,
+                'sub'   => 'Kampanya — ' . ($c->channel ?: '-') . ' — ' . ($c->status ?: '-'),
+                'url'   => '/mktg-admin/campaigns/' . $c->id,
+                'date'  => $c->updated_at?->format('d.m.Y'),
+            ]));
+
+        // 2. Adaylar (Guest Applications)
+        GuestApplication::where(fn ($w) => $w->where('full_name', 'like', $needle)
+                ->orWhere('email', 'like', $needle))
+            ->limit(5)
+            ->get(['id', 'full_name', 'email', 'application_type', 'updated_at'])
+            ->each(fn ($g) => $results->push([
+                'type'  => 'lead',
+                'icon'  => '🎓',
+                'title' => $g->full_name ?: $g->email,
+                'sub'   => 'Aday — ' . ($g->application_type ?: '-'),
+                'url'   => '/mktg-admin/sales-pipeline',
+                'date'  => $g->updated_at?->format('d.m.Y'),
+            ]));
+
+        // 3. CMS İçerik
+        if (\App\Support\SchemaCache::hasTable('cms_contents')) {
+            \App\Models\Marketing\CmsContent::where(fn ($w) => $w->where('title_tr', 'like', $needle)
+                    ->orWhere('title_en', 'like', $needle))
+                ->limit(5)
+                ->get(['id', 'slug', 'title_tr', 'type', 'status'])
+                ->each(fn ($c) => $results->push([
+                    'type'  => 'content',
+                    'icon'  => '📖',
+                    'title' => $c->title_tr,
+                    'sub'   => 'İçerik — ' . ($c->type ?: '-') . ' — ' . ($c->status ?: '-'),
+                    'url'   => '/mktg-admin/cms/content/' . $c->id . '/edit',
+                    'date'  => '',
+                ]));
+        }
+
+        // 4. Görevler
+        MarketingTask::where(fn ($w) => $w->where('title', 'like', $needle))
+            ->limit(5)
+            ->get(['id', 'title', 'status', 'due_date'])
+            ->each(fn ($t) => $results->push([
+                'type'  => 'task',
+                'icon'  => '✅',
+                'title' => $t->title,
+                'sub'   => 'Görev — ' . ($t->status ?: '-'),
+                'url'   => '/mktg-admin/tasks',
+                'date'  => $t->due_date?->format('d.m.Y'),
+            ]));
+
+        return response()->json([
+            'query'   => $q,
+            'results' => $results->take(15)->values(),
+            'total'   => $results->count(),
+        ]);
     }
 }

@@ -47,14 +47,17 @@ trait DealerPortalTrait
                 ->where('dealer_code', $dealerCode)
                 ->latest()
                 ->limit(500)
-                ->get(['id', 'converted_student_id', 'created_at']);
+                ->get(['id', 'converted_student_id', 'lead_status', 'created_at']);
 
             $totalEarned    = (float) $revenues->sum(fn ($r) => (float) ($r->total_earned ?? 0));
             $totalPending   = (float) $revenues->sum(fn ($r) => (float) ($r->total_pending ?? 0));
             $monthRevenue   = (float) $revenues
                 ->filter(fn ($r) => optional($r->updated_at)?->greaterThanOrEqualTo(now()->startOfMonth()))
                 ->sum(fn ($r) => (float) ($r->total_earned ?? 0));
-            $convertedCount = $guestLeads->filter(fn ($g) => trim((string) ($g->converted_student_id ?? '')) !== '')->count();
+            $convertedCount = $guestLeads->filter(fn ($g) =>
+                trim((string) ($g->converted_student_id ?? '')) !== ''
+                || ($g->lead_status ?? '') === 'converted'
+            )->count();
             $total          = $guestLeads->count();
 
             return [
@@ -70,12 +73,32 @@ trait DealerPortalTrait
 
         $tierPerms = DealerTierPermissions::for($dealer);
 
+        // Bonus durumu
+        $bonus = [
+            'amount'      => (float) ($dealer->signup_bonus_amount ?? 100),
+            'status'      => (string) ($dealer->signup_bonus_status ?? 'locked'),
+            'unlocked_at' => $dealer->signup_bonus_unlocked_at ?? null,
+            'label'       => match ((string) ($dealer->signup_bonus_status ?? 'locked')) {
+                'locked'   => 'Kilitli',
+                'pending'  => 'Beklemede',
+                'unlocked' => 'Çekilebilir',
+                default    => '-',
+            },
+            'progress'    => match ((string) ($dealer->signup_bonus_status ?? 'locked')) {
+                'locked'   => 0,
+                'pending'  => 50,
+                'unlocked' => 100,
+                default    => 0,
+            },
+        ];
+
         return [
             'dealerCode'  => $dealerCode,
             'dealer'      => $dealer,
             'dealerStats' => $dealerStats,
             'dealerLink'  => $dealerCode !== '' ? url('/apply').'?ref='.urlencode($dealerCode) : null,
             'tierPerms'   => $tierPerms,
+            'bonus'       => $bonus,
         ];
     }
 

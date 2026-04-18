@@ -111,6 +111,8 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::post('/manager/seniors/{email}/targets',         [ManagerPortalController::class, 'setSeniorTargets'])->name('manager.seniors.targets')->where('email', '[^/]+');
     Route::get('/manager/dealers',                          [ManagerPortalController::class, 'dealers'])->name('manager.dealers');
     Route::get('/manager/dealers/{code}',                   [ManagerPortalController::class, 'dealerShow'])->name('manager.dealers.show');
+    Route::get('/manager/dealer-types',                     [ManagerPortalController::class, 'dealerTypes'])->name('manager.dealer-types');
+    Route::post('/manager/dealer-types/{code}',             [ManagerPortalController::class, 'updateDealerType'])->name('manager.dealer-types.update');
     Route::get('/manager/commissions',                      [ManagerPortalController::class, 'commissions'])->name('manager.commissions');
     Route::patch('/manager/commissions/{payout}/approve',   [ManagerPortalController::class, 'approveCommission'])->name('manager.commissions.approve');
     Route::patch('/manager/commissions/{payout}/reject',    [ManagerPortalController::class, 'rejectCommission'])->name('manager.commissions.reject');

@@ -45,6 +45,7 @@ class DealerLeadController extends Controller
             'email'              => ['nullable', 'email', 'max:190'],
             'application_type'   => ['required', 'string', 'max:64'],
             'application_country'=> ['nullable', 'string', 'max:120'],
+            'referral_type'      => ['required', 'in:recommendation,confirmed_referral'],
             'notes'              => ['nullable', 'string', 'max:2000'],
             'kvkk_consent'       => ['accepted'],
         ]);
@@ -62,6 +63,7 @@ class DealerLeadController extends Controller
             'application_country' => trim((string) ($data['application_country'] ?? 'de')) ?: 'de',
             'lead_source'         => 'dealer_form',
             'dealer_code'         => $base['dealerCode'],
+            'referral_type'       => trim((string) ($data['referral_type'] ?? 'recommendation')),
             'branch'              => (string) ($base['dealer']?->dealer_type_code ?? ''),
             'priority'            => 'normal',
             'risk_level'          => 'normal',
@@ -109,6 +111,12 @@ class DealerLeadController extends Controller
         ], 'dealer', (string) ($request->user()?->email ?? 'dealer'));
 
         $this->queueDealerLeadNotifications($guest, (string) ($request->user()?->email ?? ''));
+
+        // Bonus: locked → pending (ilk lead yönlendirildi)
+        if ($base['dealer'] instanceof \App\Models\Dealer) {
+            $base['dealer']->advanceBonusToPending();
+            \Illuminate\Support\Facades\Cache::forget("dealer_stats_{$base['dealerCode']}");
+        }
 
         return redirect('/dealer/leads')->with('status', 'Yönlendirme kaydedildi. Guest kaydı oluşturuldu.');
     }
@@ -164,7 +172,7 @@ class DealerLeadController extends Controller
             $rows = $baseQuery->latest()->paginate(25, [
                 'id', 'tracking_token', 'first_name', 'last_name', 'email', 'phone',
                 'application_type', 'lead_status', 'lead_source', 'utm_source', 'converted_student_id',
-                'assigned_senior_email', 'contract_status', 'selected_package_code', 'created_at',
+                'assigned_senior_email', 'contract_status', 'selected_package_code', 'referral_type', 'created_at',
             ]);
         }
 
@@ -319,6 +327,9 @@ class DealerLeadController extends Controller
 
         if (!empty($updates)) {
             $lead->forceFill($updates)->save();
+
+            // Dealer stats cache'ini temizle — sayaçlar hemen güncellensin
+            \Illuminate\Support\Facades\Cache::forget("dealer_stats_{$data['dealerCode']}");
         }
 
         return redirect("/dealer/leads/{$lead->id}")->with('status', 'Lead bilgileri güncellendi.');

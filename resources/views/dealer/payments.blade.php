@@ -182,7 +182,12 @@
     <div class="pay-kpi" style="border-top-color:#16a34a;">
         <div class="pay-kpi-label">Net Kullanılabilir</div>
         <div class="pay-kpi-val" style="color:#15803d;">{{ number_format($netAvailable ?? 0, 2, ',', '.') }}</div>
-        <div class="pay-kpi-sub">EUR · min. 100 EUR talep</div>
+        <div class="pay-kpi-sub">
+            EUR · min. 100 EUR talep
+            @if(($bonusAdd ?? 0) > 0)
+                <br><span style="color:#16a34a;font-weight:600;">+{{ number_format($bonusAdd, 2, ',', '.') }} € bonus dahil</span>
+            @endif
+        </div>
     </div>
     <div class="pay-kpi accounts">
         <div class="pay-kpi-label">Kayıtlı Hesap</div>
@@ -190,6 +195,23 @@
         <div class="pay-kpi-sub">banka hesabı</div>
     </div>
 </div>
+
+{{-- Bonus durumu kartı --}}
+@if(!empty($bonus) && ($bonus['status'] ?? 'locked') !== 'unlocked')
+    @php $bs = $bonus['status'] ?? 'locked'; @endphp
+    <div style="background:{{ $bs === 'pending' ? '#dbeafe' : '#fef3c7' }};border:1px solid {{ $bs === 'pending' ? '#93c5fd' : '#fbbf24' }};border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;font-size:13px;">
+        <span style="font-size:22px;">{{ $bs === 'pending' ? '⏳' : '🔒' }}</span>
+        <div>
+            <strong>Hoş Geldin Bonusu: {{ number_format((float) ($bonus['amount'] ?? 100), 2, ',', '.') }} €</strong>
+            — Durum: <strong>{{ $bonus['label'] ?? '-' }}</strong>
+            @if($bs === 'locked')
+                · İlk öğrenci yönlendirmenizi yapın.
+            @else
+                · Öğrenciniz sözleşme imzalayıp ödeme yapınca çekilebilir olur.
+            @endif
+        </div>
+    </div>
+@endif
 
 <div class="grid2" style="align-items:start;">
 

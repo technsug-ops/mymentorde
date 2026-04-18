@@ -200,7 +200,6 @@ a.srd-kpi-card:hover::after {
                 <span class="srd-hero-badge">Eğitim Danışmanı</span>
                 <span class="srd-hero-badge">{{ $activeStudentCount }} aktif öğrenci</span>
                 @if($unread > 0)<span class="srd-hero-badge alert">{{ $unread }} okunmamış</span>@endif
-                @if($overdue > 0)<span class="srd-hero-badge alert">{{ $overdue }} geciken task</span>@endif
             </div>
         </div>
         <div class="srd-hero-stats">
@@ -721,4 +720,59 @@ function srdAcc(btn) {
 })();
 </script>
 @endpush
+
+{{-- ── Performans Analitikleri ── --}}
+@if(!empty($seniorAnalytics))
+@php $sa = $seniorAnalytics; @endphp
+<div style="margin-top:20px;">
+    <div style="font-size:14px;font-weight:700;color:var(--text,#111);margin-bottom:14px;">📊 Performans Analitikleri</div>
+
+    {{-- Metrik kartları --}}
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;">
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:14px;text-align:center;border-top:3px solid #3b82f6;">
+            <div style="font-size:10px;font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;margin-bottom:6px;">Randevu Tamamlama</div>
+            <div style="font-size:22px;font-weight:800;color:#3b82f6;">%{{ $sa['appointmentStats']['rate'] }}</div>
+            <div style="font-size:10px;color:var(--muted,#94a3b8);">{{ $sa['appointmentStats']['completed'] }}/{{ $sa['appointmentStats']['total'] }} tamamlandı</div>
+        </div>
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:14px;text-align:center;border-top:3px solid #f59e0b;">
+            <div style="font-size:10px;font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;margin-bottom:6px;">No-Show / İptal</div>
+            <div style="font-size:22px;font-weight:800;color:#f59e0b;">{{ $sa['appointmentStats']['noshow'] }}</div>
+            <div style="font-size:10px;color:var(--muted,#94a3b8);">toplam randevu kayıp</div>
+        </div>
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:14px;text-align:center;border-top:3px solid #16a34a;">
+            <div style="font-size:10px;font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;margin-bottom:6px;">Ticket Çözüm Süresi</div>
+            <div style="font-size:22px;font-weight:800;color:#16a34a;">{{ $sa['ticketResolution'] !== null ? $sa['ticketResolution'] . ' sa' : '-' }}</div>
+            <div style="font-size:10px;color:var(--muted,#94a3b8);">ortalama çözüm</div>
+        </div>
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:14px;text-align:center;border-top:3px solid #8b5cf6;">
+            <div style="font-size:10px;font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;margin-bottom:6px;">NPS Skoru</div>
+            <div style="font-size:22px;font-weight:800;color:#8b5cf6;">{{ $sa['npsAvg'] !== null ? $sa['npsAvg'] : '-' }}</div>
+            <div style="font-size:10px;color:var(--muted,#94a3b8);">öğrenci memnuniyeti</div>
+        </div>
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:14px;text-align:center;border-top:3px solid #ec4899;">
+            <div style="font-size:10px;font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;margin-bottom:6px;">Belge Onay Oranı</div>
+            <div style="font-size:22px;font-weight:800;color:#ec4899;">%{{ $sa['docApprovalRate'] }}</div>
+            <div style="font-size:10px;color:var(--muted,#94a3b8);">onaylanan / toplam</div>
+        </div>
+    </div>
+
+    {{-- Aylık süreç sonuçları trend --}}
+    @if(!empty($sa['monthlyOutcomes']))
+    <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:16px 18px;">
+        <div style="font-size:12px;font-weight:700;color:var(--muted,#64748b);margin-bottom:10px;">Aylık Süreç Sonuçları (son 6 ay)</div>
+        @php $maxMo = max(1, max(array_column($sa['monthlyOutcomes'], 'count'))); @endphp
+        <div style="display:flex;align-items:flex-end;gap:8px;height:70px;">
+            @foreach($sa['monthlyOutcomes'] as $mo)
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">
+                    <span style="font-size:11px;font-weight:700;color:var(--text,#111);">{{ $mo['count'] }}</span>
+                    <div style="width:100%;background:#8b5cf6;border-radius:3px 3px 0 0;min-height:2px;height:{{ round($mo['count'] / $maxMo * 50) }}px;"></div>
+                    <span style="font-size:10px;color:var(--muted,#94a3b8);">{{ $mo['label'] }}</span>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+</div>
+@endif
+
 @endsection

@@ -91,8 +91,41 @@
     </div>
 </div>
 
+{{-- Yönlendirme Tipi Seçimi --}}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;" id="referral-type-picker">
+    <label style="cursor:pointer;">
+        <input type="radio" name="referral_type" value="recommendation" style="display:none;" checked>
+        <div class="lf-card" id="rt-recommendation" style="border:2px solid #16a34a;transition:border-color .2s,box-shadow .2s;box-shadow:0 0 0 3px rgba(22,163,74,.15);">
+            <div style="padding:20px;text-align:center;">
+                <div style="font-size:32px;margin-bottom:8px;">📋</div>
+                <div style="font-size:15px;font-weight:700;color:var(--text,#111);margin-bottom:6px;">Tavsiye Yönlendirme</div>
+                <div style="font-size:12px;color:var(--muted,#64748b);line-height:1.5;">
+                    Bu kişi henüz karar vermedi.<br>
+                    Yönlendirme ile potansiyel müşteri olabilir.
+                </div>
+                <div style="margin-top:10px;display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;background:#fef9c3;color:#854d0e;">Potansiyel</div>
+            </div>
+        </div>
+    </label>
+    <label style="cursor:pointer;">
+        <input type="radio" name="referral_type" value="confirmed_referral" style="display:none;">
+        <div class="lf-card" id="rt-confirmed" style="border:2px solid transparent;transition:border-color .2s,box-shadow .2s;">
+            <div style="padding:20px;text-align:center;">
+                <div style="font-size:32px;margin-bottom:8px;">✅</div>
+                <div style="font-size:15px;font-weight:700;color:var(--text,#111);margin-bottom:6px;">Kesin Yönlendirme</div>
+                <div style="font-size:12px;color:var(--muted,#64748b);line-height:1.5;">
+                    Bu kişi ile görüşüldü.<br>
+                    Kayıt için hazır, kesin potansiyel müşteri.
+                </div>
+                <div style="margin-top:10px;display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">Kesin Kayıt</div>
+            </div>
+        </div>
+    </label>
+</div>
+
 <form method="POST" action="{{ route('dealer.lead-create.store') }}">
 @csrf
+<input type="hidden" name="referral_type" id="referral_type_hidden" value="recommendation">
 <div class="grid2" style="align-items:start;">
 
     {{-- Kisisel Bilgiler --}}
@@ -193,4 +226,31 @@
 </div>
 
 @endif
+
+@push('scripts')
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    var radios = document.querySelectorAll('#referral-type-picker input[type=radio]');
+    var hidden = document.getElementById('referral_type_hidden');
+    var cardRec = document.getElementById('rt-recommendation');
+    var cardCon = document.getElementById('rt-confirmed');
+
+    function updateCards(){
+        var val = document.querySelector('#referral-type-picker input[type=radio]:checked')?.value || 'recommendation';
+        if(hidden) hidden.value = val;
+        if(cardRec){
+            cardRec.style.borderColor = val === 'recommendation' ? '#16a34a' : 'transparent';
+            cardRec.style.boxShadow = val === 'recommendation' ? '0 0 0 3px rgba(22,163,74,.15)' : 'none';
+        }
+        if(cardCon){
+            cardCon.style.borderColor = val === 'confirmed_referral' ? '#16a34a' : 'transparent';
+            cardCon.style.boxShadow = val === 'confirmed_referral' ? '0 0 0 3px rgba(22,163,74,.15)' : 'none';
+        }
+    }
+
+    radios.forEach(function(r){ r.addEventListener('change', updateCards); });
+    updateCards();
+}());
+</script>
+@endpush
 @endsection

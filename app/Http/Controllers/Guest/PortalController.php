@@ -262,6 +262,33 @@ class PortalController extends Controller
         }
         $data['activityFeed'] = $activityFeed;
 
+        // ── Guest Analytics (audit gap fix) ──
+        $guestAnalytics = [];
+        if ($guest) {
+            // UTM kaynak şeffaflığı
+            $guestAnalytics['source'] = [
+                'utm_source'   => $guest->utm_source ?: null,
+                'utm_medium'   => $guest->utm_medium ?: null,
+                'utm_campaign' => $guest->utm_campaign ?: null,
+                'lead_source'  => $guest->lead_source ?: null,
+                'dealer_code'  => $guest->dealer_code ?: null,
+            ];
+
+            // Süreçte geçen süre
+            $guestAnalytics['daysSinceRegistration'] = $guest->created_at ? (int) $guest->created_at->diffInDays(now()) : 0;
+
+            // Belge durumu özeti
+            $docStats = ['uploaded' => 0, 'approved' => 0, 'rejected' => 0, 'missing' => 0];
+            $ownerId = $guest->converted_student_id ?: ('GST-' . str_pad((string) $guest->id, 8, '0', STR_PAD_LEFT));
+            $docs = \App\Models\Document::where('student_id', $ownerId)->get(['status']);
+            $docStats['uploaded'] = $docs->where('status', 'uploaded')->count();
+            $docStats['approved'] = $docs->where('status', 'approved')->count();
+            $docStats['rejected'] = $docs->where('status', 'rejected')->count();
+            $docStats['total'] = $docs->count();
+            $guestAnalytics['docStats'] = $docStats;
+        }
+        $data['guestAnalytics'] = $guestAnalytics;
+
         return view('guest.dashboard', $data);
     }
 

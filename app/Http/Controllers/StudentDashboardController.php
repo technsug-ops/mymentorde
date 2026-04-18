@@ -365,8 +365,30 @@ class StudentDashboardController extends Controller
             ->limit(5)
             ->get(['id', 'title_tr', 'summary_tr', 'cover_image_url', 'seo_canonical_url', 'slug']);
 
+        // ── Student Analytics (audit gap fix) ──
+        $studentAnalytics = [];
+        if ($studentId !== '') {
+            // Checklist tamamlama hızı
+            $doneItems = collect($checklistItems ?? [])->where('is_done', true);
+            $totalItems = collect($checklistItems ?? []);
+            $studentAnalytics['checklistRate'] = $totalItems->count() > 0
+                ? round($doneItems->count() / $totalItems->count() * 100) : 0;
+
+            // Belge istatistikleri
+            $studentAnalytics['docStats'] = $docSummary ?? ['approved' => 0, 'pending' => 0, 'rejected' => 0, 'total' => 0];
+
+            // Süreçte geçen gün
+            $studentAnalytics['daysSinceStart'] = $guestApplication?->created_at
+                ? (int) $guestApplication->created_at->diffInDays(now()) : 0;
+
+            // Achievement sayısı
+            $studentAnalytics['achievementCount'] = count($achievements ?? []);
+            $studentAnalytics['achievementPoints'] = $achievementPoints ?? 0;
+        }
+
         return view('student.dashboard', [
             'user' => $user,
+            'studentAnalytics' => $studentAnalytics,
             'studentId' => $studentId,
             'guestApplication' => $guestApplication,
             'assignment' => $assignment,

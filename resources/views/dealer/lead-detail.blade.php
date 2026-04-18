@@ -7,8 +7,15 @@
     <section class="card">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;">
             <div>
-                <h2 style="margin:0 0 6px;">#{{ $lead->id }} {{ $lead->first_name }} {{ $lead->last_name }}</h2>
-                <div class="muted">token: {{ $lead->tracking_token }} | oluşma: {{ optional($lead->created_at)->format('Y-m-d H:i') }}</div>
+                <h2 style="margin:0 0 6px;">
+                    #{{ $lead->id }} {{ $lead->first_name }} {{ $lead->last_name }}
+                    @if(($lead->referral_type ?? '') === 'confirmed_referral')
+                        <span style="font-size:12px;font-weight:700;padding:2px 10px;border-radius:20px;background:#dcfce7;color:#166534;vertical-align:middle;">Kesin Yönlendirme</span>
+                    @elseif(($lead->referral_type ?? '') === 'recommendation')
+                        <span style="font-size:12px;font-weight:700;padding:2px 10px;border-radius:20px;background:#fef9c3;color:#854d0e;vertical-align:middle;">Tavsiye</span>
+                    @endif
+                </h2>
+                <div class="muted">Kayıt: {{ optional($lead->created_at)->format('d.m.Y H:i') }}</div>
                 <div class="muted">email: {{ $lead->email }} | tel: {{ $lead->phone ?: '-' }}</div>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">

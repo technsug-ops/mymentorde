@@ -50,6 +50,7 @@ Route::middleware(['company.context', 'auth', 'senior.role'])->group(function ()
     Route::get('/senior/performance', [SeniorPerformanceController::class, 'performance'])->name('senior.performance');
     Route::get('/senior/performance/report-print', [SeniorPerformanceController::class, 'performanceReportPrint'])->name('senior.performance.report-print');
     Route::get('/senior/performance/report-csv', [SeniorPerformanceController::class, 'performanceReportCsv'])->name('senior.performance.report-csv');
+    Route::get('/senior/search', [\App\Http\Controllers\SeniorDashboardController::class, 'globalSearch'])->middleware('throttle:60,1')->name('senior.search');
     Route::get('/senior/profile', [SeniorProfileController::class, 'profile'])->name('senior.profile');
     Route::get('/senior/settings', [SeniorProfileController::class, 'settings'])->name('senior.settings');
     Route::post('/senior/profile', [SeniorProfileController::class, 'updateProfile'])->middleware('throttle:10,1')->name('senior.profile.update');
