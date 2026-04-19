@@ -82,17 +82,20 @@
     gap: 14px;
 }
 @media (max-width: 600px) { .sprf-field-grid { grid-template-columns: 1fr; } }
+.sprf-field { min-width: 0; }
 .sprf-field label {
     display: block; font-size: 12px; font-weight: 600;
     color: #374151; margin-bottom: 6px;
 }
 .sprf-field input,
+.sprf-field select,
 .sprf-field textarea {
     width: 100%; padding: 9px 12px;
     border: 1.5px solid #d1d5db; border-radius: 8px;
     font-size: 14px; color: #111827; background: #fff;
     transition: border-color .15s, box-shadow .15s;
     box-sizing: border-box; font-family: inherit;
+    max-width: 100%;
 }
 .sprf-field input:focus, .sprf-field textarea:focus {
     outline: none; border-color: #7c3aed;
@@ -421,12 +424,12 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="sprf-field" style="display:flex;gap:8px;">
-                    <div style="flex:1;">
+                <div class="sprf-field" style="display:flex;gap:8px;min-width:0;">
+                    <div style="flex:1;min-width:0;">
                         <label>Başlangıç</label>
                         <input type="date" name="start_date" value="{{ old('start_date') }}" min="{{ date('Y-m-d') }}">
                     </div>
-                    <div style="flex:1;">
+                    <div style="flex:1;min-width:0;">
                         <label>Bitiş</label>
                         <input type="date" name="end_date" value="{{ old('end_date') }}" min="{{ date('Y-m-d') }}">
                     </div>

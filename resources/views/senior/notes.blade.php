@@ -17,10 +17,10 @@
 @endphp
 
 {{-- Gradient Header --}}
-<div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:20px 24px;margin-bottom:16px;color:#fff;">
-    <div style="font-size:var(--tx-xl);font-weight:800;letter-spacing:-.3px;margin-bottom:4px;">📝 Gizli Notlar</div>
-    <div style="font-size:var(--tx-sm);opacity:.8;margin-bottom:16px;">Öğrenci bazlı iç notlar — yalnızca senior ekibi görür</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+<div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:14px 16px;margin-bottom:14px;color:#fff;">
+    <div style="font-size:16px;font-weight:800;margin-bottom:2px;">📝 Gizli Notlar</div>
+    <div style="font-size:var(--tx-sm);opacity:.8;margin-bottom:10px;">Öğrenci bazlı iç notlar — yalnızca senior ekibi görür</div>
+    <div class="mob-chip-grid" style="display:flex;gap:8px;flex-wrap:wrap;">
         @foreach([
             ['label'=>'Toplam',   'count'=>$totalCnt,    'prio'=>'all'],
             ['label'=>'Pinned',   'count'=>$pinnedCnt,   'prio'=>'pinned'],
@@ -85,9 +85,12 @@
                 @if($isPinned)
                     <span style="font-size:var(--tx-sm);" title="Sabitlenmiş">📌</span>
                 @endif
-                <span style="font-weight:800;font-size:var(--tx-sm);color:var(--u-text);">{{ $row->student_id }}</span>
-                @if($row->category)
+                <span style="font-weight:800;font-size:var(--tx-sm);color:var(--u-text);">{{ ($nameMap[$row->student_id] ?? '') ?: $row->student_id }}</span>
+                <span style="font-size:var(--tx-xs);color:var(--u-muted);font-family:monospace;">{{ $row->student_id }}</span>
+                @if($row->category && $row->category !== 'system')
                     <span style="background:var(--u-bg);border:1px solid var(--u-line);border-radius:999px;padding:2px 10px;font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);">{{ $row->category }}</span>
+                @elseif($row->category === 'system')
+                    <span style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:999px;padding:2px 10px;font-size:var(--tx-xs);font-weight:600;color:#16a34a;">⚙ Otomatik</span>
                 @endif
             </div>
             <div style="display:flex;align-items:center;gap:6px;">

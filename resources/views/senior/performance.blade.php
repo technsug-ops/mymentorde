@@ -15,36 +15,33 @@
 @section('content')
 
 {{-- Gradient Header --}}
-<div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:20px 24px;margin-bottom:16px;color:#fff;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
-        <div>
-            <div style="font-size:var(--tx-xl);font-weight:800;letter-spacing:-.3px;margin-bottom:4px;">📊 Performans Metrikleri</div>
-            <div style="font-size:var(--tx-sm);opacity:.8;">Eğitim Danışmanı raporu · dönüşüm, risk, süreç hızı</div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+<div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:14px 16px;margin-bottom:14px;color:#fff;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;">
+        <div style="font-size:16px;font-weight:800;">📊 Performans Metrikleri</div>
+        <div style="display:flex;gap:6px;">
             <a href="/senior/performance/report-print" target="_blank"
-               style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:7px 14px;font-size:var(--tx-xs);font-weight:700;color:#fff;text-decoration:none;">
-                🖨 Yazdır / PDF
+               style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:#fff;text-decoration:none;">
+                🖨 PDF
             </a>
             <a href="/senior/performance/report-csv"
-               style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:7px 14px;font-size:var(--tx-xs);font-weight:700;color:#fff;text-decoration:none;">
-                📥 CSV İndir
+               style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:#fff;text-decoration:none;">
+                📥 CSV
             </a>
         </div>
     </div>
+    <div style="font-size:var(--tx-sm);opacity:.8;margin-bottom:10px;">Eğitim Danışmanı raporu · dönüşüm, risk, süreç hızı</div>
 
-    {{-- KPI chips in header --}}
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+    {{-- KPI chips in header - kompakt --}}
+    <div class="kpi-row-compact" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
         @foreach([
-            ['Aktif Öğrenci',      $activeStudents ?? 0,      '🎓'],
-            ['Bu Ay Outcome',      $outcomeThisMonth ?? 0,    '🏁'],
-            ['Belge Onay Bekliyor',$pendingDocApprovals ?? 0, '📄'],
-            ['Randevu Bekliyor',   $pendingAppointments ?? 0, '📅'],
+            ['Aktif Öğrenci',       $activeStudents ?? 0,      '🎓'],
+            ['Bu Ay Outcome',       $outcomeThisMonth ?? 0,    '🏁'],
+            ['Belge Bekliyor',      $pendingDocApprovals ?? 0, '📄'],
+            ['Randevu Bekliyor',    $pendingAppointments ?? 0, '📅'],
         ] as [$lbl,$val,$ic])
-        <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:10px 16px;text-align:center;min-width:90px;">
-            <div style="font-size:var(--tx-lg);">{{ $ic }}</div>
-            <div style="font-size:var(--tx-xl);font-weight:800;line-height:1.1;margin:2px 0;">{{ $val }}</div>
-            <div style="font-size:var(--tx-xs);opacity:.8;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">{{ $lbl }}</div>
+        <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px 4px;text-align:center;min-width:0;">
+            <div style="font-size:18px;font-weight:800;line-height:1;">{{ $val }}</div>
+            <div style="font-size:9px;opacity:.8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $ic }} {{ $lbl }}</div>
         </div>
         @endforeach
     </div>
@@ -104,7 +101,7 @@
 {{-- Dönüşüm Funnel --}}
 <div style="background:var(--u-card);border:1px solid var(--u-line);border-radius:12px;padding:18px 20px;margin-bottom:12px;">
     <div style="font-size:var(--tx-sm);font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;">🏗 Dönüşüm Funnel</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+    <div class="kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
         @foreach([
             ['Toplam Lead',         $guestCount ?? 0,      null,           '#7c3aed'],
             ['Sözleşme İmzaladı',   $contractSigned ?? 0,  $guestCount,    '#6d28d9'],

@@ -254,7 +254,8 @@
 
         <form method="GET" action="{{ url('/senior/services') }}" class="sr-stu-filter">
             <input type="text" name="q" value="{{ $filters['q'] ?? '' }}"
-                   placeholder="Isim veya ogrenci ID..." style="flex:1;min-width:0;">
+                   placeholder="Isim veya ogrenci ID..." style="flex:1;min-width:0;"
+                   onfocus="setTimeout(()=>{this.scrollIntoView({behavior:'smooth',block:'center'});},300);">
             <select name="package" onchange="this.form.submit()">
                 <option value="all" @selected(($filters['package'] ?? 'all') === 'all')>Tum Paketler</option>
                 @foreach($packages ?? [] as $p)

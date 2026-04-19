@@ -351,39 +351,48 @@
             <div class="token-hint">Bu kodu saklayın — başvuru durumunuzu sorgulamak için kullanılır.</div>
         </div>
 
-        <a class="primary-btn" href="{{ route('login') }}">
+        <a class="primary-btn" href="{{ route('login', ['email' => $portalEmail ?? $row->email, 'from_apply' => 1]) }}">
             Portala Giriş Yap →
         </a>
 
         <div class="info-list">
-            @if(session('assigned_senior_email'))
+            @if(!empty($assignedSenior))
             <div class="info-row">
                 <div class="info-row-icon">&#128100;</div>
                 <div class="info-row-body">
                     <div class="lbl">Atanan Danışman</div>
-                    <div class="val">{{ session('assigned_senior_email') }}</div>
+                    <div class="val">{{ $assignedSenior }}</div>
                 </div>
             </div>
             @endif
 
-            @if(session('portal_email'))
+            @if(!empty($portalEmail))
             <div class="info-row">
                 <div class="info-row-icon">&#128274;</div>
                 <div class="info-row-body">
                     <div class="lbl">Portal Girişi</div>
-                    <div class="val">{{ session('portal_email') }}</div>
+                    <div class="val">{{ $portalEmail }}</div>
                     <div class="note">Adres: <a href="/login" style="color:var(--primary);font-weight:600;">/login</a></div>
                 </div>
             </div>
             @endif
 
-            @if(session('portal_password'))
-            <div class="info-row">
-                <div class="info-row-icon">&#128273;</div>
-                <div class="info-row-body">
-                    <div class="lbl">İlk Giriş Şifresi</div>
-                    <div class="val" style="font-family:'Courier New',monospace;letter-spacing:.05em;">{{ session('portal_password') }}</div>
-                    <div class="note">İlk girişten sonra Ayarlar'dan şifrenizi değiştirin.</div>
+            @if(!empty($portalPassword))
+            <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:10px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                    <div style="width:28px;height:28px;background:var(--primary);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🔑</div>
+                    <div style="flex:1;">
+                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:#8aa0be;">İlk Giriş Şifresi</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:1px;">Bu şifre bir kez gösterilir</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;background:#f4f8ff;border:1px solid var(--line-s);border-radius:10px;padding:4px 4px 4px 14px;">
+                    <div id="pwdBox" style="flex:1;font-family:'SFMono-Regular','Courier New',monospace;font-size:17px;font-weight:700;letter-spacing:.12em;color:var(--primary);user-select:all;cursor:text;">{{ $portalPassword }}</div>
+                    <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('pwdBox').innerText).then(()=>{this.innerText='✓ Kopyalandı';this.style.background='#22643a';setTimeout(()=>{this.innerText='Kopyala';this.style.background='var(--primary)';},1800);})" style="background:var(--primary);color:#fff;border:none;padding:10px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s;font-family:inherit;">Kopyala</button>
+                </div>
+                <div style="margin-top:10px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;">
+                    <span style="color:#d97706;">⚠</span>
+                    Şifreyi kaydetmeyi unutmayın. İlk girişten sonra Ayarlar'dan değiştirebilirsiniz.
                 </div>
             </div>
             @else
@@ -391,8 +400,8 @@
                 <div class="info-row-icon">&#128273;</div>
                 <div class="info-row-body">
                     <div class="lbl">Giriş Şifresi</div>
-                    <div class="val">Mevcut şifrenizle giriş yapabilirsiniz.</div>
-                    <div class="note">Şifrenizi unuttuysanız <a href="{{ route('password.request') }}" style="color:var(--primary);font-weight:600;">şifre sıfırlama</a> sayfasını kullanın.</div>
+                    <div class="val">E-posta adresinize gönderilen şifre ile giriş yapın.</div>
+                    <div class="note">Şifreyi alamadıysanız <a href="{{ route('password.request') }}" style="color:var(--primary);font-weight:600;">şifre sıfırlama</a> sayfasını kullanın.</div>
                 </div>
             </div>
             @endif

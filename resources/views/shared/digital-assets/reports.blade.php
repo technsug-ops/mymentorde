@@ -23,7 +23,18 @@
     ];
 @endphp
 
-<div style="max-width:1280px;margin:0 auto;padding:18px 24px;">
+<style>
+.da-reports-wrap .da-filename { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block; max-width:100%; }
+@media(max-width:600px){
+    .da-reports-wrap { padding:10px 12px !important; }
+    .da-reports-wrap [style*="grid-template-columns:1fr 1fr"],
+    .da-reports-wrap [style*="grid-template-columns:1fr 2fr"],
+    .da-reports-wrap [style*="grid-template-columns: 1fr 1fr"],
+    .da-reports-wrap [style*="grid-template-columns: 1fr 2fr"] { grid-template-columns: 1fr !important; }
+    .da-reports-wrap > div { padding: 12px !important; }
+}
+</style>
+<div class="da-reports-wrap" style="max-width:1280px;margin:0 auto;padding:18px 24px;min-width:0;overflow:hidden;">
     {{-- Back link --}}
     <a href="{{ route($routePrefix . '.index') }}" style="display:inline-flex;align-items:center;gap:6px;color:var(--u-muted,#64748b);text-decoration:none;font-size:13px;margin-bottom:14px">
         ← Dosyalara Dön
@@ -50,18 +61,18 @@
         @endforeach
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;min-width:0;">
         {{-- En çok indirilen --}}
-        <div style="background:#fff;border:1px solid var(--u-line);border-radius:12px;padding:18px">
+        <div style="background:#fff;border:1px solid var(--u-line);border-radius:12px;padding:18px;min-width:0;overflow:hidden;">
             <h3 style="font-size:14px;font-weight:700;margin:0 0 12px;color:var(--u-text)">🏆 En Çok İndirilen</h3>
             @forelse($topDownloaded as $i => $asset)
-                <div style="display:flex;align-items:center;gap:10px;padding:8px 0;{{ !$loop->last ? 'border-bottom:1px solid #f1f5f9;' : '' }}">
-                    <span style="background:#f1f5f9;color:#475569;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;min-width:26px;text-align:center">{{ $i + 1 }}</span>
-                    <div style="flex:1;min-width:0">
-                        <div style="font-size:13px;font-weight:600;color:var(--u-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $asset->name }}</div>
-                        <div style="font-size:11px;color:var(--u-muted)">{{ $categoryEmoji[$asset->category] ?? '📎' }} {{ $fmtSize((int) $asset->size_bytes) }}</div>
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 0;min-width:0;{{ !$loop->last ? 'border-bottom:1px solid #f1f5f9;' : '' }}">
+                    <span style="background:#f1f5f9;color:#475569;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;min-width:26px;text-align:center;flex-shrink:0;">{{ $i + 1 }}</span>
+                    <div style="flex:1;min-width:0;overflow:hidden;">
+                        <div class="da-filename" style="font-size:13px;font-weight:600;color:var(--u-text);" title="{{ $asset->name }}">{{ $asset->name }}</div>
+                        <div style="font-size:11px;color:var(--u-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $categoryEmoji[$asset->category] ?? '📎' }} {{ $fmtSize((int) $asset->size_bytes) }}</div>
                     </div>
-                    <span style="font-size:13px;font-weight:700;color:#1e40af">{{ $asset->download_count }}↓</span>
+                    <span style="font-size:13px;font-weight:700;color:#1e40af;flex-shrink:0;">{{ $asset->download_count }}↓</span>
                 </div>
             @empty
                 <div style="color:var(--u-muted);font-size:12px;text-align:center;padding:20px">Henüz indirme yok</div>
@@ -69,7 +80,7 @@
         </div>
 
         {{-- 30 gün aktivite özeti --}}
-        <div style="background:#fff;border:1px solid var(--u-line);border-radius:12px;padding:18px">
+        <div style="background:#fff;border:1px solid var(--u-line);border-radius:12px;padding:18px;min-width:0;overflow:hidden;">
             <h3 style="font-size:14px;font-weight:700;margin:0 0 12px;color:var(--u-text)">📈 Son 30 Gün Aktivite</h3>
             @forelse($activitySummary as $entry)
                 <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;{{ !$loop->last ? 'border-bottom:1px solid #f1f5f9;' : '' }}">
@@ -82,15 +93,15 @@
         </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 2fr;gap:18px">
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:18px;min-width:0;">
         {{-- En aktif kullanıcılar --}}
-        <div style="background:#fff;border:1px solid var(--u-line);border-radius:12px;padding:18px">
+        <div style="background:#fff;border:1px solid var(--u-line);border-radius:12px;padding:18px;min-width:0;overflow:hidden;">
             <h3 style="font-size:14px;font-weight:700;margin:0 0 12px;color:var(--u-text)">👥 En Aktif Kullanıcılar (30gün)</h3>
             @forelse($topUsers as $i => $u)
-                <div style="display:flex;align-items:center;gap:10px;padding:7px 0;{{ !$loop->last ? 'border-bottom:1px solid #f1f5f9;' : '' }}">
-                    <span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;min-width:26px;text-align:center">{{ $i + 1 }}</span>
-                    <span style="flex:1;font-size:13px;color:var(--u-text)">{{ $u->user_name ?: 'Bilinmeyen' }}</span>
-                    <span style="font-size:12px;font-weight:700;color:var(--u-muted)">{{ $u->count }}</span>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 0;min-width:0;{{ !$loop->last ? 'border-bottom:1px solid #f1f5f9;' : '' }}">
+                    <span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;min-width:26px;text-align:center;flex-shrink:0;">{{ $i + 1 }}</span>
+                    <span style="flex:1;min-width:0;font-size:13px;color:var(--u-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $u->user_name ?: 'Bilinmeyen' }}</span>
+                    <span style="font-size:12px;font-weight:700;color:var(--u-muted);flex-shrink:0;">{{ $u->count }}</span>
                 </div>
             @empty
                 <div style="color:var(--u-muted);font-size:12px;text-align:center;padding:20px">Kayıt yok</div>
@@ -98,15 +109,19 @@
         </div>
 
         {{-- Son aktiviteler --}}
-        <div style="background:#fff;border:1px solid var(--u-line);border-radius:12px;padding:18px">
+        <div style="background:#fff;border:1px solid var(--u-line);border-radius:12px;padding:18px;min-width:0;overflow:hidden;">
             <h3 style="font-size:14px;font-weight:700;margin:0 0 12px;color:var(--u-text)">🕑 Son Aktiviteler</h3>
             <div style="max-height:420px;overflow-y:auto">
                 @forelse($recentActivity as $log)
-                    <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9;font-size:12px">
-                        <span style="color:var(--u-muted);flex-shrink:0;min-width:80px">{{ $log->created_at->diffForHumans() }}</span>
-                        <span style="color:var(--u-text);font-weight:600;min-width:140px">{{ $actionLabels[$log->action] ?? $log->action }}</span>
-                        <span style="color:var(--u-muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $log->target_name ?: '—' }}</span>
-                        <span style="color:var(--u-muted);flex-shrink:0">{{ $log->user_name ?: 'Sistem' }}</span>
+                    <div class="da-activity-row" style="padding:9px 0;border-bottom:1px solid #f1f5f9;font-size:12px;min-width:0;">
+                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:3px;">
+                            <span style="color:var(--u-muted);flex-shrink:0;font-size:11px;">{{ $log->created_at->diffForHumans() }}</span>
+                            <span style="color:var(--u-text);font-weight:600;flex-shrink:0;">{{ $actionLabels[$log->action] ?? $log->action }}</span>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;min-width:0;">
+                            <span style="color:var(--u-muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $log->target_name }}">{{ $log->target_name ?: '—' }}</span>
+                            <span style="color:var(--u-muted);flex-shrink:0;font-size:11px;">{{ $log->user_name ?: 'Sistem' }}</span>
+                        </div>
                     </div>
                 @empty
                     <div style="color:var(--u-muted);font-size:12px;text-align:center;padding:20px">Kayıt yok</div>

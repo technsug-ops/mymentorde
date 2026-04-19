@@ -190,18 +190,29 @@
             $isKisisel  = request()->is('senior/performance*','senior/profile*','senior/settings*','my-contracts*');
         @endphp
         <div style="padding:14px 14px 0;">
-            <div style="display:flex;align-items:center;gap:10px;">
-                <div class="avatar" style="width:46px;height:46px;font-size:17px;flex-shrink:0;">{{ $initials }}</div>
+            {{-- Brand logo + adı — sidebar'ın üstünde --}}
+            @php
+                $logoBg = ($brandLogoBg ?? 'light');
+                $logoBgStyle = match($logoBg) {
+                    'dark'        => 'background:#1a1a2e;',
+                    'transparent' => 'background:transparent;',
+                    default       => 'background:#fff;',
+                };
+            @endphp
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(255,255,255,.05);border-radius:10px;" title="{{ $brandName }}">
+                @if(!empty($brandLogoUrl))
+                    <div style="height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;{{ $logoBgStyle }}border-radius:8px;padding:4px 6px;">
+                        <img src="{{ $brandLogoUrl }}" alt="{{ $brandName }}" style="height:100%;width:auto;max-width:80px;object-fit:contain;display:block;" onerror="this.parentElement.style.display='none';this.parentElement.nextElementSibling.style.display='flex';">
+                    </div>
+                    <span style="display:none;width:44px;height:44px;align-items:center;justify-content:center;background:#fff;color:var(--u-brand,#7c3aed);font-weight:800;border-radius:10px;font-size:18px;flex-shrink:0;">{{ $brandInitial }}</span>
+                @else
+                    <span style="display:flex;width:44px;height:44px;align-items:center;justify-content:center;background:#fff;color:var(--u-brand,#7c3aed);font-weight:800;border-radius:10px;font-size:18px;flex-shrink:0;">{{ $brandInitial }}</span>
+                @endif
                 <div style="flex:1;min-width:0;">
-                    <div class="user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $name }}</div>
-                    <div class="user-role">Eğitim Danışmanı</div>
-                </div>
-                <div class="brand-logo" style="width:28px;height:28px;font-size:11px;flex-shrink:0;overflow:hidden;" title="{{ $brandName }}">
-                    @if(!empty($brandLogoUrl))<img src="{{ $brandLogoUrl }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">@endif
-                    <span style="{{ !empty($brandLogoUrl)?'display:none;':'display:flex;' }}align-items:center;justify-content:center;width:100%;height:100%;">{{ $brandInitial }}</span>
+                    <div style="font-size:15px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $brandName }}</div>
+                    <div style="font-size:11px;color:var(--muted);font-weight:600;">Eğitim Danışmanı Paneli</div>
                 </div>
             </div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">{{ $brandName }} · Eğitim Danışmanı Paneli</div>
             <div style="height:1px;background:rgba(255,255,255,.12);margin-top:12px;"></div>
         </div>
 
@@ -299,10 +310,8 @@
                 </div>
                 <div class="nav-acc-body" style="{{ $isKisisel ? '' : 'display:none;' }}">
                     <a href="/senior/performance" class="nav-link {{ request()->is('senior/performance*') ? 'active' : '' }}"><span class="nav-icon">📊</span> Performansım</a>
-                    <a href="/senior/profile"     class="nav-link {{ request()->is('senior/profile*','my-contracts*') ? 'active' : '' }}"><span class="nav-icon">👤</span> Profil & Sözleşmeler</a>
+                    <a href="/senior/profile"     class="nav-link {{ request()->is('senior/profile*','my-contracts*','hr/my/leaves*') ? 'active' : '' }}"><span class="nav-icon">👤</span> Profil & Sözleşmeler</a>
                     <a href="/senior/settings"    class="nav-link {{ request()->is('senior/settings*') ? 'active' : '' }}"><span class="nav-icon">⚙️</span> Ayarlar</a>
-                    <a href="/availability"       class="nav-link {{ request()->is('availability*') ? 'active' : '' }}"><span class="nav-icon">📡</span> Müsaitlik Ayarları</a>
-                    <a href="/hr/my/leaves"       class="nav-link {{ request()->is('hr/my/leaves*') ? 'active' : '' }}"><span class="nav-icon">🏖️</span> İzin Taleplerim</a>
                 </div>
             </div>
 

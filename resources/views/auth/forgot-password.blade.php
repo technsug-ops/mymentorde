@@ -51,7 +51,25 @@
 </head>
 <body>
 <div class="card">
-    <div class="logo">Mentor<span>DE</span></div>
+    @php
+        $fpBrand   = $brandName ?? config('brand.name', 'MentorDE');
+        $fpLogoUrl = $brandLogoUrl ?? '';
+        $fpLogoBg  = $brandLogoBg ?? 'light';
+        $fpLogoBgStyle = match($fpLogoBg) {
+            'dark'        => 'background:#1a1a2e;padding:8px 12px;border-radius:8px;',
+            'transparent' => '',
+            default       => 'background:#fff;padding:8px 12px;border-radius:8px;',
+        };
+    @endphp
+    <div class="logo" style="margin-bottom:16px;">
+        @if($fpLogoUrl)
+            <div style="display:inline-block;{{ $fpLogoBgStyle }}">
+                <img src="{{ $fpLogoUrl }}" alt="{{ $fpBrand }}" style="height:40px;width:auto;max-width:160px;object-fit:contain;display:block;">
+            </div>
+        @else
+            Mentor<span>DE</span>
+        @endif
+    </div>
     <h1>Şifremi Unuttum</h1>
     <p class="desc">E-posta adresinizi girin. Şifre sıfırlama bağlantısı göndereceğiz.</p>
 

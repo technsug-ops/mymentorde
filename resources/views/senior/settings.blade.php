@@ -85,7 +85,7 @@
                     <span>✅ Randevuları otomatik onayla</span>
                 </label>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
                 <div class="sset-field">
                     <label>Slot Süresi (dk)</label>
                     <input type="number" min="15" max="180" step="5" name="appointment_slot_minutes"
@@ -97,14 +97,11 @@
                         value="{{ old('appointment_buffer_minutes', data_get($portalPrefs ?? [], 'settings.appointment_buffer_minutes', 15)) }}">
                 </div>
             </div>
+            <button type="submit"
+                style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:var(--tx-sm);font-weight:700;cursor:pointer;">
+                💾 Tercihleri Kaydet
+            </button>
         </div>
-    </div>
-
-    <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
-        <button type="submit"
-            style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:var(--tx-sm);font-weight:700;cursor:pointer;">
-            💾 Tercihleri Kaydet
-        </button>
     </div>
 </form>
 

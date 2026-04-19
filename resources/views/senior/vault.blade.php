@@ -39,22 +39,16 @@
 @endif
 
 {{-- Gradient Header --}}
-<div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:20px 24px;margin-bottom:16px;color:#fff;">
-    <div style="font-size:var(--tx-xl);font-weight:800;letter-spacing:-.3px;margin-bottom:4px;">🔐 Hesap Kasası</div>
-    <div style="font-size:var(--tx-sm);opacity:.8;margin-bottom:16px;">Öğrenci portal hesaplarını yönetin. Görünürlük açık olanlar öğrencinin hesap kasası sayfasında görünür.</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 16px;display:flex;flex-direction:column;align-items:center;">
-            <span style="font-size:var(--tx-xl);font-weight:800;">{{ $vaultList->count() }}</span>
-            <span style="font-size:var(--tx-xs);opacity:.8;margin-top:1px;">Toplam</span>
+<div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:14px 16px;margin-bottom:14px;color:#fff;">
+    <div style="font-size:16px;font-weight:800;margin-bottom:2px;">🔐 Hesap Kasası</div>
+    <div style="font-size:var(--tx-sm);opacity:.8;margin-bottom:10px;">Öğrenci portal hesaplarını yönetin. Görünürlük açık olanlar öğrencinin hesap kasası sayfasında görünür.</div>
+    <div style="display:flex;gap:6px;">
+        @foreach([['val'=>$vaultList->count(),'lbl'=>'Toplam'],['val'=>$visibleCnt,'lbl'=>'Öğrenciye Açık'],['val'=>$hiddenCnt,'lbl'=>'Gizli']] as $kpi)
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:8px;padding:8px 4px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;line-height:1;">{{ $kpi['val'] }}</div>
+            <div style="font-size:9px;opacity:.75;margin-top:2px;">{{ $kpi['lbl'] }}</div>
         </div>
-        <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 16px;display:flex;flex-direction:column;align-items:center;">
-            <span style="font-size:var(--tx-xl);font-weight:800;">{{ $visibleCnt }}</span>
-            <span style="font-size:var(--tx-xs);opacity:.8;margin-top:1px;">Öğrenciye Açık</span>
-        </div>
-        <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 16px;display:flex;flex-direction:column;align-items:center;">
-            <span style="font-size:var(--tx-xl);font-weight:800;">{{ $hiddenCnt }}</span>
-            <span style="font-size:var(--tx-xs);opacity:.8;margin-top:1px;">Gizli</span>
-        </div>
+        @endforeach
     </div>
 </div>
 

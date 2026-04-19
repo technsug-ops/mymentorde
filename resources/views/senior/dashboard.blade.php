@@ -124,8 +124,7 @@ a.srd-kpi-card:hover::after {
     gap: 10px;
 }
 @media (max-width: 900px) {
-    .srd-list-item { flex-direction: column; }
-    .srd-list-item > div:last-child { text-align: left; }
+    .srd-list-item { padding: 10px; }
 }
 /* hide default top bar on dashboard */
 .top { display: none !important; }
@@ -505,20 +504,45 @@ function seniorBannerClick(id, slug) {
         </div>
         <div class="srd-list srd-acc-list" id="acc-students">
             @forelse($recentStudents as $s)
-                @php $sName = $guestMap[$s->student_id] ?? null; @endphp
-                <div class="srd-list-item">
-                    <div>
-                        <strong>{{ $sName ?: $s->student_id }}</strong>
-                        @if($sName)<div class="muted" style="font-size:var(--tx-xs);">{{ $s->student_id }}</div>@endif
-                        <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">
-                            @if($s->branch)<span class="badge info">{{ $s->branch }}</span>@endif
-                            @if($s->risk_level)<span class="badge {{ in_array($s->risk_level, ['high','critical']) ? 'danger' : 'warn' }}">risk: {{ $s->risk_level }}</span>@endif
-                            @if($s->payment_status)<span class="badge {{ $s->payment_status === 'paid' ? 'ok' : 'pending' }}">{{ $s->payment_status }}</span>@endif
+                @php
+                    $sName = $guestMap[$s->student_id] ?? null;
+                    $displayName = $sName ?: $s->student_id;
+                    $initials = collect(explode(' ', trim($displayName)))->map(fn($w) => mb_substr($w, 0, 1))->take(2)->implode('');
+                    $riskColor = in_array($s->risk_level, ['high','critical']) ? '#dc2626' : ($s->risk_level === 'normal' ? '#16a34a' : '#f59e0b');
+                    $stageLabels = [
+                        'application_prep'  => '📝 Başvuru',
+                        'uni_assist'        => '🏛 Uni-Assist',
+                        'visa_application'  => '🛂 Vize',
+                        'language_course'   => '🗣 Dil',
+                        'residence'         => '🏠 İkamet',
+                        'official_services' => '📋 Resmi',
+                    ];
+                    $stage = $stageMap[$s->student_id] ?? null;
+                    $stageLabel = $stage ? ($stageLabels[$stage] ?? $stage) : null;
+                @endphp
+                <div class="srd-list-item" style="align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--u-line);">
+                    <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;position:relative;">
+                        {{ strtoupper($initials) }}
+                        <span style="position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;border-radius:50%;background:{{ $s->is_archived ? '#9ca3af' : '#16a34a' }};border:2px solid var(--u-card,#fff);"></span>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <strong style="font-size:13px;color:var(--u-text);">{{ $displayName }}</strong>
+                            @if($s->risk_level)
+                                <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:{{ $riskColor }};" title="Risk: {{ $s->risk_level }}"></span>
+                            @endif
+                        </div>
+                        <div style="font-size:10px;color:var(--u-muted);font-family:monospace;">{{ $s->student_id }}</div>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px;align-items:center;">
+                            @if($stageLabel)
+                                <span style="font-size:10px;background:#f5f3ff;color:#6d28d9;padding:2px 8px;border-radius:999px;font-weight:700;border:1px solid #ddd6fe;">{{ $stageLabel }}</span>
+                            @endif
+                            @if($s->branch)<span style="font-size:9px;background:#eef4fb;color:#2a567a;padding:1px 7px;border-radius:999px;font-weight:600;">{{ $s->branch }}</span>@endif
+                            @if($s->payment_status)<span style="font-size:9px;background:{{ $s->payment_status === 'paid' ? '#dcfce7' : '#fef3c7' }};color:{{ $s->payment_status === 'paid' ? '#166534' : '#92400e' }};padding:1px 7px;border-radius:999px;font-weight:600;">{{ $s->payment_status }}</span>@endif
                         </div>
                     </div>
-                    <div style="text-align:right;flex-shrink:0;">
-                        <span class="badge {{ $s->is_archived ? 'danger' : 'ok' }}">{{ $s->is_archived ? 'arşiv' : 'aktif' }}</span>
-                        <div class="muted" style="font-size:var(--tx-xs);margin-top:4px;">{{ $s->updated_at?->format('d.m.Y') }}</div>
+                    <div style="text-align:right;flex-shrink:0;font-size:10px;color:var(--u-muted);">
+                        {{ $s->updated_at?->format('d.m') }}
                     </div>
                 </div>
             @empty
@@ -628,17 +652,19 @@ function seniorBannerClick(id, slug) {
                 @php
                     $tCls = match((string) $t->status) { 'done','completed' => 'ok', 'in_progress' => 'info', 'blocked' => 'danger', default => 'pending' };
                 @endphp
-                <div class="srd-list-item">
-                    <div>
-                        <strong>{{ \Illuminate\Support\Str::limit((string) $t->title, 40) }}</strong>
-                        <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">
-                            <span class="badge {{ $tCls }}">{{ $t->status }}</span>
-                            @if($t->priority === 'urgent' || $t->priority === 'high')
-                                <span class="badge danger">{{ $t->priority }}</span>
-                            @endif
-                        </div>
+                <div class="srd-list-item" style="align-items:center;gap:10px;">
+                    <div style="flex:1;min-width:0;">
+                        <strong style="font-size:13px;">{{ \Illuminate\Support\Str::limit((string) $t->title, 40) }}</strong>
+                        <div class="muted" style="font-size:10px;margin-top:2px;">{{ $t->due_date ? \Carbon\Carbon::parse($t->due_date)->format('d.m.Y') : '-' }}</div>
                     </div>
-                    <div class="muted" style="font-size:var(--tx-xs);flex-shrink:0;">{{ $t->due_date ? \Carbon\Carbon::parse($t->due_date)->format('d.m.Y') : '-' }}</div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;">
+                        <span class="badge {{ $tCls }}" style="font-size:10px;">{{ $t->status }}</span>
+                        @if($t->priority === 'urgent')
+                            <span class="badge danger" style="font-size:10px;">{{ $t->priority }}</span>
+                        @elseif($t->priority === 'high')
+                            <span class="badge warn" style="font-size:10px;">{{ $t->priority }}</span>
+                        @endif
+                    </div>
                 </div>
             @empty
                 <div class="srd-list-item muted">Görev kaydı yok.</div>

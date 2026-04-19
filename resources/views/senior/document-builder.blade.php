@@ -60,6 +60,12 @@
         .doc-module .head-left { display:flex; flex-direction:column; gap:3px; }
         .doc-module .head-title { font-size:16px; font-weight:700; color:var(--u-text); }
         .doc-module .head-desc { font-size:12px; color:var(--u-muted); }
+        @media(max-width:600px){
+            .doc-module summary { padding:10px; }
+            .doc-module .head-title { font-size:13px; }
+            .doc-module .head-desc { font-size:10px; }
+            .doc-module .doc-pill { font-size:10px !important; padding:2px 8px !important; }
+        }
         .doc-module .head-right { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
         .doc-module-body { padding:12px; background:var(--u-card); }
         .doc-jumpbar { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
@@ -182,7 +188,7 @@
         {{-- Tabs + KPI --}}
         <div style="padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
             {{-- Tab pills --}}
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <div class="doc-tabs-bar" style="display:flex;gap:6px;flex-wrap:wrap;">
                 @php
                     $tabs = [
                         ['cv',         '📝', 'CV'],
@@ -202,19 +208,19 @@
             </div>
 
             {{-- KPI strip --}}
-            <div style="display:flex;gap:0;border:1px solid var(--u-line);border-radius:10px;overflow:hidden;flex-shrink:0;">
+            <div class="doc-kpi-strip" style="display:flex;gap:0;border:1px solid var(--u-line);border-radius:10px;overflow:hidden;flex-shrink:0;">
                 @foreach([
                     ['Toplam','#7c3aed',$builderCount,'🎫'],
                     ['CV','#7c3aed',$cvCount,'📝'],
                     ['Motivasyon','#d97706',$motivationCount,'✉️'],
                     ['Referans','#16a34a',$referenceCount,'👤'],
                 ] as [$lbl,$clr,$val,$ico])
-                <div style="text-align:center;padding:8px 14px;border-right:1px solid var(--u-line);background:var(--u-bg);">
+                <div style="text-align:center;padding:8px 14px;border-right:1px solid var(--u-line);background:var(--u-bg);flex:1;min-width:0;">
                     <div style="font-size:var(--tx-base);font-weight:800;color:{{ $clr }};line-height:1;">{{ $val }}</div>
-                    <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-top:2px;white-space:nowrap;">{{ $ico }} {{ $lbl }}</div>
+                    <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $ico }} {{ $lbl }}</div>
                 </div>
                 @endforeach
-                <div style="text-align:center;padding:8px 14px;background:var(--u-bg);">
+                <div class="hide-mobile" style="text-align:center;padding:8px 14px;background:var(--u-bg);">
                     <div style="font-size:var(--tx-base);font-weight:800;color:var(--u-text);line-height:1;">{{ $builderCount > 0 ? round(($cvCount/$builderCount)*100) : 0 }}%</div>
                     <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-top:2px;white-space:nowrap;">📊 CV Oranı</div>
                 </div>
@@ -225,12 +231,11 @@
     <details class="doc-module doc-tab-panel active" id="module-cv" data-doc-tab-panel="cv" open>
         <summary>
             <div class="head-left">
-                <div class="head-title">1) CV Modülü (React Builder)</div>
+                <div class="head-title">1) CV Modülü</div>
                 <div class="head-desc">Profesyonel Almanca CV/Lebenslauf oluşturma akışı</div>
             </div>
             <div class="head-right">
                 <span class="doc-pill">{{ $cvCount }} çıktı</span>
-                <span class="doc-pill">React</span>
             </div>
         </summary>
         <div class="doc-module-body">

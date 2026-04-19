@@ -93,10 +93,16 @@ class SeniorVaultController extends Controller
             ->get(['first_name', 'last_name', 'converted_student_id'])
             ->keyBy('converted_student_id');
 
-        $studentOptions = $studentIds->map(function ($sid) use ($guestMap) {
+        $assignNameMap = \DB::table('student_assignments')
+            ->whereIn('student_id', $studentIds->all())
+            ->whereNotNull('display_name')
+            ->pluck('display_name', 'student_id');
+
+        $studentOptions = $studentIds->map(function ($sid) use ($guestMap, $assignNameMap) {
             $g    = $guestMap->get($sid);
             $name = $g ? trim((string) $g->first_name . ' ' . (string) $g->last_name) : '';
-            return ['id' => $sid, 'label' => $name !== '' ? "{$sid} — {$name}" : $sid];
+            if ($name === '') $name = $assignNameMap[$sid] ?? '';
+            return ['id' => $sid, 'label' => $name !== '' ? "{$name} · {$sid}" : $sid];
         })->values();
 
         return view('senior.vault', [

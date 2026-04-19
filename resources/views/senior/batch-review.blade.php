@@ -25,11 +25,13 @@
 @section('content')
 
 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-    <h2 style="margin:0;">📋 Toplu Belge İnceleme</h2>
+    <div>
+        <h2 style="margin:0;font-size:16px;">📋 Toplu Belge İnceleme</h2>
+        <span class="br-key-hint hide-mobile" style="display:inline-block;margin-top:4px;">⌨️ A=Onayla · R=Reddet · N=Not · ↑↓ Gezin</span>
+    </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-        <span class="br-key-hint">⌨️ A=Onayla · R=Reddet · N=Not · ↑↓ Gezin</span>
         @foreach(['uploaded' => 'Bekleyenler', 'approved' => 'Onaylananlar', 'rejected' => 'Reddedilenler', 'all' => 'Tümü'] as $s => $lbl)
-        <a class="btn {{ $statusFilter === $s ? 'ok' : 'alt' }}" href="/senior/batch-review?status={{ $s }}">{{ $lbl }}</a>
+        <a class="btn {{ $statusFilter === $s ? 'ok' : 'alt' }}" href="/senior/batch-review?status={{ $s }}" style="font-size:12px;padding:5px 10px;">{{ $lbl }}</a>
         @endforeach
     </div>
 </div>

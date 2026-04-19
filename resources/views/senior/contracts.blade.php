@@ -5,13 +5,13 @@
 @section('content')
 @php
 $statusLabels = [
-    'all'              => 'Tümü',
     'requested'        => 'Sözleşme Bekleniyor',
     'signed_uploaded'  => 'İmza Yüklendi',
     'approved'         => 'Onaylandı',
+    'reopen_requested' => 'Yeniden Değerlendirme',
     'rejected'         => 'Reddedildi',
     'cancelled'        => 'İptal Edildi',
-    'reopen_requested' => 'Yeniden Değerlendirme',
+    'all'              => 'Tüm Sözleşmeler',
 ];
 $statusBadge = [
     'requested'        => 'warn',
@@ -30,8 +30,8 @@ $counts    = $counts ?? [];
 {{-- Gradient Header + Status Chips --}}
 <div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:20px 24px;margin-bottom:16px;color:#fff;">
     <div style="font-size:var(--tx-xl);font-weight:800;letter-spacing:-.3px;margin-bottom:4px;">📋 Sözleşme Yönetimi</div>
-    <div style="font-size:var(--tx-sm);opacity:.8;margin-bottom:16px;">Aday Öğrenci ve öğrenci sözleşmeleri</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <div class="mob-hero-sub" style="font-size:var(--tx-sm);opacity:.8;margin-bottom:16px;">Aday Öğrenci ve öğrenci sözleşmeleri</div>
+    <div class="mob-chip-grid" style="display:flex;gap:8px;flex-wrap:wrap;">
         @foreach($statusLabels as $val => $label)
         @php
             $cnt    = $counts[$val] ?? 0;
@@ -40,7 +40,7 @@ $counts    = $counts ?? [];
                       .($curQ ? '&q='.urlencode($curQ) : '')
                       .($curType !== 'all' ? '&type='.$curType : '');
         @endphp
-        <a href="{{ $url }}" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-size:var(--tx-xs);font-weight:700;text-decoration:none;transition:all .15s;
+        <a href="{{ $url }}" class="{{ $loop->last ? 'kpi-full' : '' }}" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-size:var(--tx-xs);font-weight:700;text-decoration:none;transition:all .15s;
             background:{{ $active ? 'rgba(255,255,255,.3)' : 'rgba(255,255,255,.12)' }};
             color:#fff;
             border:1.5px solid {{ $active ? 'rgba(255,255,255,.7)' : 'rgba(255,255,255,.2)' }};">
@@ -108,14 +108,9 @@ $counts    = $counts ?? [];
     <div style="padding:16px 18px;border-bottom:1px solid var(--u-line);transition:background .12s;" onmouseover="this.style.background='var(--u-bg)'" onmouseout="this.style.background=''">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
             <div style="flex:1;min-width:0;">
-                {{-- Name + type badge + email --}}
+                {{-- Name + email --}}
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
                     <span style="font-weight:800;font-size:var(--tx-base);color:var(--u-text);">{{ $fullName ?: ($row->email ?? '—') }}</span>
-                    @if($isGuest)
-                        <span class="badge info" style="font-size:var(--tx-xs);">Aday Öğrenci</span>
-                    @else
-                        <span style="font-size:var(--tx-xs);background:#eef4fb;color:#2a567a;border:1px solid #c0d5ee;border-radius:999px;padding:1px 8px;font-weight:700;">Öğrenci</span>
-                    @endif
                     <span style="font-size:var(--tx-xs);color:var(--u-muted);">{{ $row->email ?? '' }}</span>
                 </div>
 
@@ -141,8 +136,13 @@ $counts    = $counts ?? [];
                 @endif
             </div>
 
-            {{-- Status badge --}}
-            <div style="flex-shrink:0;text-align:right;">
+            {{-- Type + Status badges --}}
+            <div style="flex-shrink:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                @if($isGuest)
+                    <span class="badge info" style="font-size:var(--tx-xs);">Aday Öğrenci</span>
+                @else
+                    <span style="font-size:var(--tx-xs);background:#eef4fb;color:#2a567a;border:1px solid #c0d5ee;border-radius:999px;padding:1px 8px;font-weight:700;">Öğrenci</span>
+                @endif
                 <span class="badge {{ $bCls }}" style="font-size:var(--tx-xs);">{{ $statusLabels[$cs] ?? $cs }}</span>
             </div>
         </div>

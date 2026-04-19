@@ -1,4 +1,12 @@
-@extends('manager.layouts.app')
+@php
+    $role = auth()->user()?->role;
+    $availLayout = match(true) {
+        in_array($role, ['senior','mentor']) => 'senior.layouts.app',
+        in_array($role, ['marketing_admin','marketing_staff','sales_admin','sales_staff']) => 'marketing-admin.layouts.app',
+        default => 'manager.layouts.app',
+    };
+@endphp
+@extends($availLayout)
 
 @section('title', 'Müsaitlik & Çalışma Saatleri')
 @section('page_title', 'Müsaitlik Ayarları')

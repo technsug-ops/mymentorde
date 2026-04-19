@@ -61,28 +61,28 @@
 @section('content')
 
 {{-- Gradient Header --}}
-<div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:20px 24px;margin-bottom:16px;color:#fff;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
-        <div>
-            <div style="font-size:var(--tx-xl);font-weight:800;letter-spacing:-.3px;margin-bottom:4px;">📚 Materyaller & Bilgi Bankası</div>
-            <div style="font-size:var(--tx-sm);opacity:.8;">Öğrenci ve guest'e yönelik eğitim içerikleri</div>
-        </div>
+<div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:14px 16px;margin-bottom:14px;color:#fff;">
+    <div style="margin-bottom:10px;">
+        <div style="font-size:16px;font-weight:800;margin-bottom:2px;">📚 Materyaller & Bilgi Bankası</div>
+        <div style="font-size:var(--tx-sm);opacity:.8;">Öğrenci ve guest'e yönelik eğitim içerikleri</div>
     </div>
     {{-- Filter chips --}}
     @php
         $activePublished = $filters['published'] ?? 'all';
         $activeRole      = $filters['role'] ?? 'all';
         $activeQ         = $filters['q'] ?? '';
+        $kPasif = max(0, ($kTotal ?? 0) - ($kPublished ?? 0));
         $kFilters = [
-            ['Toplam',  $kTotal ?? 0,     '📦', url('/senior/knowledge-base'),                    $activePublished==='all' && $activeRole==='all' && $activeQ===''],
-            ['Yayında', $kPublished ?? 0, '✅', url('/senior/knowledge-base').'?published=yes',   $activePublished==='yes'],
-            ['Öğrenci', $kStudent ?? 0,   '🎓', url('/senior/knowledge-base').'?role=student',    $activeRole==='student'],
-            ['Aday Öğrenci',   $kGuest ?? 0,     '👤', url('/senior/knowledge-base').'?role=guest',      $activeRole==='guest'],
+            ['Aday Öğrenci', $kGuest ?? 0,     '👤', url('/senior/knowledge-base').'?role=guest',      $activeRole==='guest',           false],
+            ['Öğrenci',      $kStudent ?? 0,   '🎓', url('/senior/knowledge-base').'?role=student',    $activeRole==='student',          false],
+            ['Yayında',      $kPublished ?? 0, '✅', url('/senior/knowledge-base').'?published=yes',   $activePublished==='yes',         false],
+            ['Pasif',        $kPasif,          '⏸', url('/senior/knowledge-base').'?published=no',    $activePublished==='no',          false],
+            ['Toplam',       $kTotal ?? 0,     '📦', url('/senior/knowledge-base'),                    $activePublished==='all' && $activeRole==='all' && $activeQ==='', true],
         ];
     @endphp
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        @foreach($kFilters as [$lbl,$val,$ic,$href,$isActive])
-        <a href="{{ $href }}"
+    <div class="mob-chip-grid" style="display:flex;gap:8px;flex-wrap:wrap;">
+        @foreach($kFilters as [$lbl,$val,$ic,$href,$isActive,$isFull])
+        <a href="{{ $href }}" class="{{ $isFull ? 'kpi-full' : '' }}"
            style="display:flex;align-items:center;gap:10px;
                   background:{{ $isActive ? 'rgba(255,255,255,.28)' : 'rgba(255,255,255,.12)' }};
                   border:1.5px solid {{ $isActive ? 'rgba(255,255,255,.7)' : 'rgba(255,255,255,.25)' }};

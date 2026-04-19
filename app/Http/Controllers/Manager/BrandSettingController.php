@@ -21,14 +21,19 @@ class BrandSettingController extends Controller
                             ->where('setting_key', 'brand_logo_url')
                             ->value('setting_value') ?? '';
 
-        return view('manager.brand', compact('brandName', 'brandLogoUrl'));
+        $brandLogoBg = MarketingAdminSetting::where('company_id', $cid)
+                            ->where('setting_key', 'brand_logo_bg')
+                            ->value('setting_value') ?? 'light';
+
+        return view('manager.brand', compact('brandName', 'brandLogoUrl', 'brandLogoBg'));
     }
 
     public function update(Request $request)
     {
         $data = $request->validate([
-            'brand_name'    => 'required|string|max:60',
-            'brand_logo_url'=> 'nullable|url|max:500',
+            'brand_name'     => 'required|string|max:60',
+            'brand_logo_url' => 'nullable|url|max:500',
+            'brand_logo_bg'  => 'nullable|in:light,dark,transparent',
         ]);
 
         $cid = auth()->user()?->company_id ?? 0;
@@ -41,6 +46,11 @@ class BrandSettingController extends Controller
         MarketingAdminSetting::updateOrCreate(
             ['company_id' => $cid, 'setting_key' => 'brand_logo_url'],
             ['setting_value' => $data['brand_logo_url'] ?? '', 'updated_by_user_id' => auth()->id()]
+        );
+
+        MarketingAdminSetting::updateOrCreate(
+            ['company_id' => $cid, 'setting_key' => 'brand_logo_bg'],
+            ['setting_value' => $data['brand_logo_bg'] ?? 'light', 'updated_by_user_id' => auth()->id()]
         );
 
         // Tüm portallardaki brand cache'ini temizle

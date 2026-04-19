@@ -209,14 +209,18 @@ class AppServiceProvider extends ServiceProvider
                     $logoUrl = MarketingAdminSetting::where('company_id', $cid)
                                    ->where('setting_key', 'brand_logo_url')
                                    ->value('setting_value') ?: $fallbackLogo;
-                    return ['name' => $name, 'logo_url' => $logoUrl];
+                    $logoBg  = MarketingAdminSetting::where('company_id', $cid)
+                                   ->where('setting_key', 'brand_logo_bg')
+                                   ->value('setting_value') ?: 'light';
+                    return ['name' => $name, 'logo_url' => $logoUrl, 'logo_bg' => $logoBg];
                 } catch (\Throwable) {
-                    return ['name' => $fallbackName, 'logo_url' => $fallbackLogo];
+                    return ['name' => $fallbackName, 'logo_url' => $fallbackLogo, 'logo_bg' => 'light'];
                 }
             });
             $view->with('brandName',    $brand['name']);
             $view->with('brandInitial', strtoupper(mb_substr($brand['name'], 0, 1)));
             $view->with('brandLogoUrl', $brand['logo_url']);
+            $view->with('brandLogoBg',  $brand['logo_bg'] ?? 'light');
         });
 
         View::composer('manager.layouts.app', function ($view): void {

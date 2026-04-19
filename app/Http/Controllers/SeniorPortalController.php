@@ -247,10 +247,17 @@ class SeniorPortalController extends Controller
             ->get(['first_name', 'last_name', 'converted_student_id'])
             ->keyBy('converted_student_id');
 
-        $studentOptions = $studentIds->map(function ($sid) use ($guestMap) {
+        // Fallback: student_assignments.display_name
+        $assignNameMap = \DB::table('student_assignments')
+            ->whereIn('student_id', $studentIds->all())
+            ->whereNotNull('display_name')
+            ->pluck('display_name', 'student_id');
+
+        $studentOptions = $studentIds->map(function ($sid) use ($guestMap, $assignNameMap) {
             $g    = $guestMap->get($sid);
             $name = $g ? trim((string) $g->first_name . ' ' . (string) $g->last_name) : '';
-            return ['id' => $sid, 'label' => $name !== '' ? $name : $sid];
+            if ($name === '') $name = $assignNameMap[$sid] ?? '';
+            return ['id' => $sid, 'label' => $name !== '' ? ($name . ' · ' . $sid) : $sid];
         })->values();
 
         $allDocs    = collect();
@@ -683,15 +690,31 @@ class SeniorPortalController extends Controller
                 : [];
         })->countBy()->all();
 
+        // Arama yaparken student_assignments.display_name'den de eşleşenleri bul
+        $searchSids = $studentIds->all();
+        if ($q !== '') {
+            $matchedSids = \DB::table('student_assignments')
+                ->whereIn('student_id', $studentIds->all())
+                ->where('display_name', 'like', "%{$q}%")
+                ->pluck('student_id')
+                ->all();
+            if (!empty($matchedSids)) {
+                $searchSids = array_unique(array_merge($searchSids, $matchedSids));
+            }
+        }
+
         $services = $studentIds->isEmpty()
             ? collect()
             : GuestApplication::query()
                 ->whereIn('converted_student_id', $studentIds->all())
-                ->when($q !== '', function ($w) use ($q) {
-                    $w->where(function ($x) use ($q) {
+                ->when($q !== '', function ($w) use ($q, $matchedSids) {
+                    $w->where(function ($x) use ($q, $matchedSids) {
                         $x->where('converted_student_id', 'like', "%{$q}%")
                             ->orWhere('first_name', 'like', "%{$q}%")
                             ->orWhere('last_name', 'like', "%{$q}%");
+                        if (!empty($matchedSids)) {
+                            $x->orWhereIn('converted_student_id', $matchedSids);
+                        }
                     });
                 })
                 ->when($package !== '' && $package !== 'all', fn ($w) => $w->where('selected_package_code', $package))
@@ -747,8 +770,27 @@ class SeniorPortalController extends Controller
                 ->limit(200)
                 ->get(['id', 'student_id', 'category', 'priority', 'content', 'is_pinned', 'created_at']);
 
+        // Öğrenci isimlerini çek — önce users, sonra guest_applications, sonra student_assignments.display_name
+        $noteStudentIds = $notes->pluck('student_id')->unique()->filter();
+        $nameMap = collect();
+        if ($noteStudentIds->isNotEmpty()) {
+            $sids = $noteStudentIds->all();
+            $userMap = \App\Models\User::whereIn('student_id', $sids)->pluck('name', 'student_id');
+            $guestMap = \App\Models\GuestApplication::whereIn('converted_student_id', $sids)
+                ->get(['converted_student_id', 'first_name', 'last_name'])
+                ->keyBy('converted_student_id')
+                ->map(fn($g) => trim($g->first_name . ' ' . $g->last_name));
+            $assignMap = \DB::table('student_assignments')->whereIn('student_id', $sids)
+                ->whereNotNull('display_name')
+                ->pluck('display_name', 'student_id');
+            $nameMap = collect($sids)->mapWithKeys(fn($sid) => [
+                $sid => ($userMap[$sid] ?? $guestMap[$sid] ?? $assignMap[$sid] ?? null)
+            ])->filter();
+        }
+
         return view('senior.notes', [
             'notes'        => $notes,
+            'nameMap'      => $nameMap,
             'filters'      => compact('q', 'priority'),
             'sidebarStats' => $this->sidebarStats($request),
         ]);

@@ -285,9 +285,19 @@
                     </div>
                 </div>
             </div>
-            <div class="brand-footer">
-                Hesabınız yok mu? &nbsp;·&nbsp; <a href="/apply" style="color:#7fb3f5;text-decoration:none;">Ücretsiz başvurun →</a>
-            </div>
+            {{-- CTA kartı - apply'dan gelmemiş kullanıcılara --}}
+            @unless(request()->query('from_apply'))
+            <a href="/apply" class="cta-card" style="display:block;margin-top:20px;padding:18px 20px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:14px;text-decoration:none;color:#fff;box-shadow:0 8px 24px rgba(99,102,241,.35);transition:transform .15s,box-shadow .15s;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="font-size:32px;flex-shrink:0;">🎓</div>
+                    <div style="flex:1;">
+                        <div style="font-size:16px;font-weight:800;margin-bottom:3px;">Ücretsiz Başvuru</div>
+                        <div style="font-size:12px;opacity:.95;line-height:1.4;">3 dakikada başvurunu tamamla, danışmanınla hemen tanış!</div>
+                    </div>
+                    <div style="font-size:22px;flex-shrink:0;">→</div>
+                </div>
+            </a>
+            @endunless
         </section>
 
         <section class="panel auth" aria-label="Giriş formu">
@@ -302,17 +312,21 @@
                 <div class="error">{{ $errors->first() }}</div>
             @endif
 
-            <form method="POST" action="/login">
+            @php
+                $prefillEmail = old('email') ?: request()->query('email', '');
+                $cameFromApply = (bool) request()->query('from_apply');
+            @endphp
+            <form method="POST" action="/login" autocomplete="off">
                 @csrf
 
                 <div class="field">
                     <label for="email">E-posta</label>
-                    <input id="email" type="email" name="email" placeholder="ornek@example.com" value="{{ old('email') }}" required autofocus>
+                    <input id="email" type="email" name="email" placeholder="ornek@example.com" value="{{ $prefillEmail }}" required autofocus autocomplete="username">
                 </div>
 
                 <div class="field">
                     <label for="password">Şifre</label>
-                    <input id="password" type="password" name="password" placeholder="Şifrenizi girin" required>
+                    <input id="password" type="password" name="password" placeholder="Şifrenizi girin" required autocomplete="off">
                 </div>
 
                 <div class="row">
@@ -324,6 +338,23 @@
 
                 <button class="primary-btn" type="submit">Giriş Yap</button>
             </form>
+
+            @unless(request()->query('from_apply'))
+            {{-- Ayırıcı --}}
+            <div style="display:flex;align-items:center;gap:10px;margin:18px 0 12px;color:#9ca3af;font-size:12px;">
+                <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+                <span>veya</span>
+                <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+            </div>
+
+            {{-- Apply CTA --}}
+            <a href="/apply" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border:2px solid #7c3aed;border-radius:10px;background:#faf5ff;color:#7c3aed;font-size:14px;font-weight:700;text-decoration:none;transition:all .15s;" onmouseover="this.style.background='#7c3aed';this.style.color='#fff';" onmouseout="this.style.background='#faf5ff';this.style.color='#7c3aed';">
+                ✨ Ücretsiz Hesap Oluştur
+            </a>
+            <div style="text-align:center;margin-top:8px;font-size:11px;color:#9ca3af;">
+                Henüz hesabın yok mu? 3 dakikada başvur!
+            </div>
+            @endunless
 
         </section>
     </div>

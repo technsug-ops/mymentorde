@@ -26,11 +26,12 @@
 <div style="padding:10px 16px;border-radius:8px;background:#16a34a;color:#fff;margin-bottom:14px;font-weight:600;font-size:var(--tx-sm);">✓ {{ session('status') }}</div>
 @endif
 
-{{-- Gradient Header --}}
-<div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:20px 24px;margin-bottom:16px;color:#fff;">
-    <div style="font-size:var(--tx-xl);font-weight:800;letter-spacing:-.3px;margin-bottom:4px;">📅 Randevularım</div>
-    <div style="font-size:var(--tx-sm);opacity:.8;margin-bottom:16px;">Öğrenci görüşmeleri ve takip randevuları</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+{{-- Gradient Header — kompakt --}}
+<div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:14px 16px;margin-bottom:14px;color:#fff;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:16px;font-weight:800;">📅 Randevularım</div>
+    </div>
+    <div style="display:flex;gap:6px;">
         @foreach([
             ['label'=>'Toplam',     'count'=>$totalCnt,     'status'=>'all'],
             ['label'=>'Yaklaşan',   'count'=>$scheduledCnt, 'status'=>'scheduled'],
@@ -41,12 +42,11 @@
             $active = $filterStatus === $chip['status'];
             $href   = url('/senior/appointments').'?status='.$chip['status'].($filterQ ? '&q='.urlencode($filterQ) : '');
         @endphp
-        <a href="{{ $href }}" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-size:var(--tx-xs);font-weight:700;text-decoration:none;transition:all .15s;
-            background:{{ $active ? 'rgba(255,255,255,.3)' : 'rgba(255,255,255,.12)' }};
-            color:#fff;
-            border:1.5px solid {{ $active ? 'rgba(255,255,255,.7)' : 'rgba(255,255,255,.2)' }};">
+        <a href="{{ $href }}" style="flex:1;text-align:center;padding:6px 4px;border-radius:8px;font-size:10px;font-weight:700;text-decoration:none;
+            background:{{ $active ? 'rgba(255,255,255,.25)' : 'rgba(255,255,255,.1)' }};
+            color:#fff;border:1px solid {{ $active ? 'rgba(255,255,255,.6)' : 'transparent' }};">
+            <div style="font-size:18px;font-weight:800;line-height:1;">{{ $chip['count'] }}</div>
             {{ $chip['label'] }}
-            <span style="background:rgba(255,255,255,.22);border-radius:999px;padding:1px 8px;font-size:var(--tx-xs);">{{ $chip['count'] }}</span>
         </a>
         @endforeach
     </div>

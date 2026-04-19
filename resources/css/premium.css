@@ -615,6 +615,21 @@ body {
   .hide-mobile { display: none !important; }
   .mob-accordion summary { cursor: pointer; padding: 8px 0; }
   .mob-accordion summary::marker { font-size: 12px; }
+  .mob-hero-sub { display: none !important; }
+  .mob-chip-grid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; }
+  .mob-chip-grid a { border-radius: 8px !important; padding: 6px 10px !important; justify-content: flex-start !important; font-size: 10px !important; width: 100% !important; box-sizing: border-box !important; text-align: left !important; }
+  .mob-chip-grid a.kpi-full { justify-content: center !important; text-align: center !important; }
+  /* Klavye açıldığında input'un görünür kalması için sayfa altına padding */
+  .content { padding-bottom: 300px !important; }
+  /* Document Builder category tabs */
+  .doc-tabs-bar { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 5px !important; width: 100%; }
+  .doc-tabs-bar button { justify-content: center !important; padding: 8px 6px !important; font-size: 11px !important; }
+  /* CV Builder tabs */
+  .cv-steps { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 5px !important; width: 100%; }
+  .cv-steps button { padding: 8px 6px !important; font-size: 11px !important; justify-content: center !important; }
+  .cv-actions { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 5px !important; width: 100%; }
+  .cv-actions > * { font-size: 11px !important; padding: 8px 6px !important; justify-content: center !important; }
+  .cv-actions > button:last-child { grid-column: span 2; background: #7c3aed !important; color: #fff !important; font-weight: 600 !important; }
   .content { padding: 10px; }
   .topbar { padding: 0 10px; }
   .topbar-title { max-width: 140px; }

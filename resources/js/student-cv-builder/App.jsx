@@ -288,12 +288,13 @@ const Field = ({ label, required, children, style }) => (
 // ─── Step definitions ──────────────────────────────────────────────────────────
 
 const STEPS = [
-  { id: 0, icon: <Play size={14} />, labelTr: 'Video Rehber', labelEn: 'Video Guide', labelDe: 'Video-Guide' },
   { id: 1, icon: <User size={14} />, labelTr: 'Kişisel Bilgiler', labelEn: 'Personal Data', labelDe: 'Persönliche Daten' },
   { id: 2, icon: <GraduationCap size={14} />, labelTr: 'Eğitim', labelEn: 'Education', labelDe: 'Schulbildung' },
   { id: 3, icon: <Code size={14} />, labelTr: 'Beceriler', labelEn: 'Skills', labelDe: 'Fähigkeiten' },
   { id: 4, icon: <Eye size={14} />, labelTr: 'Önizleme', labelEn: 'Preview', labelDe: 'Vorschau' },
 ];
+
+const VIDEO_STEP = { id: 0, icon: <Play size={14} />, labelTr: 'Video Rehber', labelEn: 'Video Guide', labelDe: 'Video-Guide' };
 
 const stepLabel = (step, lang) =>
   lang === 'en' ? step.labelEn : lang === 'de' ? step.labelDe : step.labelTr;
@@ -426,9 +427,9 @@ const CVBuilderModule = ({ bridge = {} }) => {
   return (
     <div style={{ fontFamily: 'inherit', color: 'var(--u-text)' }}>
       {/* Top bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
+      <div className="cv-topbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
         {/* Step navigator */}
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div className="cv-steps" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {STEPS.map((step) => {
             const isDone = completedSteps.includes(step.id);
             const isActive = currentStep === step.id;
@@ -449,7 +450,7 @@ const CVBuilderModule = ({ bridge = {} }) => {
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="cv-actions" style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           {saveState.message && (
             <span style={{ fontSize: 13, color: saveState.status === 'error' ? '#dc2626' : '#16a34a', fontWeight: 500 }}>
               {saveState.message}
@@ -460,6 +461,9 @@ const CVBuilderModule = ({ bridge = {} }) => {
               <Globe size={14} /> {lang.toUpperCase()}
             </button>
           )}
+          <button onClick={() => setCurrentStep(0)} style={{ ...S.btnSecondary, padding: '7px 12px', fontSize: 12, background: currentStep === 0 ? '#7c3aed' : 'var(--u-line)', color: currentStep === 0 ? '#fff' : 'var(--u-text)' }}>
+            <Play size={14} /> {stepLabel(VIDEO_STEP, lang)}
+          </button>
           <button onClick={() => setShowInstructions(true)} style={{ ...S.btnSecondary, padding: '7px 12px', fontSize: 12 }}>
             <Info size={14} /> Rehber
           </button>

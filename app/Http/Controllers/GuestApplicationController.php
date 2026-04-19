@@ -236,11 +236,16 @@ class GuestApplicationController extends Controller
 
         $this->queueOnRegisterNotifications($row, $assignedSeniorEmail, $generatedPassword);
 
-        return redirect()
-            ->route('apply.success', ['token' => $row->tracking_token])
-            ->with('portal_email', $row->email)
-            ->with('assigned_senior_email', $assignedSeniorEmail ?: null)
-            ->with('portal_password', $generatedPassword);
+        // Geçici şifre cache'e yaz (5 dk) — tracking token ile çek
+        if ($generatedPassword) {
+            \Cache::put("apply_password_{$row->tracking_token}", [
+                'password' => $generatedPassword,
+                'email'    => $row->email,
+                'senior'   => $assignedSeniorEmail ?: null,
+            ], now()->addMinutes(5));
+        }
+
+        return redirect()->route('apply.success', ['token' => $row->tracking_token]);
     }
 
     public function success(Request $request)
@@ -249,7 +254,16 @@ class GuestApplicationController extends Controller
         abort_if($token === '', 404);
 
         $row = GuestApplication::query()->where('tracking_token', $token)->firstOrFail();
-        return view('apply.success', ['row' => $row]);
+
+        // Cache'den şifre bilgisini al (ilk gösterimde mevcut, sonra kaybolur)
+        $cred = \Cache::pull("apply_password_{$token}");
+
+        return view('apply.success', [
+            'row'            => $row,
+            'portalEmail'    => $cred['email'] ?? $row->email,
+            'portalPassword' => $cred['password'] ?? null,
+            'assignedSenior' => $cred['senior'] ?? null,
+        ]);
     }
 
 

@@ -71,6 +71,26 @@
                 @error('brand_logo_url')<div style="color:var(--c-danger);font-size:12px;margin-top:4px;">{{ $message }}</div>@enderror
             </div>
 
+            {{-- Logo arka plan rengi --}}
+            <div style="margin-bottom:28px;">
+                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Logo Arka Plan Rengi <span style="color:var(--muted);font-weight:400;">(logonuzun rengine göre seçin)</span></label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    @foreach([
+                        ['light','⚪ Açık (Beyaz)','Koyu/renkli logolar için'],
+                        ['dark','⚫ Koyu','Beyaz/açık renkli logolar için'],
+                        ['transparent','🫥 Şeffaf','Sidebar rengiyle uyumlu SVG logolar için'],
+                    ] as [$val,$lbl,$desc])
+                    <label style="flex:1;min-width:180px;display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border:1.5px solid {{ ($brandLogoBg ?? 'light') === $val ? 'var(--u-brand,#7c3aed)' : 'var(--u-line)' }};border-radius:8px;cursor:pointer;background:{{ ($brandLogoBg ?? 'light') === $val ? 'var(--accent-soft,rgba(124,58,237,.08))' : 'var(--u-bg)' }};">
+                        <input type="radio" name="brand_logo_bg" value="{{ $val }}" {{ ($brandLogoBg ?? 'light') === $val ? 'checked' : '' }} style="margin-top:2px;accent-color:var(--u-brand,#7c3aed);">
+                        <div>
+                            <div style="font-size:13px;font-weight:700;">{{ $lbl }}</div>
+                            <div style="font-size:11px;color:var(--muted);margin-top:2px;">{{ $desc }}</div>
+                        </div>
+                    </label>
+                    @endforeach
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-primary" style="padding:11px 28px;font-size:15px;">
                 💾 Kaydet & Yayınla
             </button>

@@ -46,16 +46,38 @@ class SeniorDashboardController extends Controller
 
         $studentIds = (clone $base)->pluck('student_id')->filter()->unique()->values();
 
-        // İsim haritası: student_id → "Ad Soyad"
-        $guestMap = $studentIds->isEmpty() ? collect() : GuestApplication::query()
-            ->whereIn('converted_student_id', $studentIds->all())
-            ->get(['converted_student_id', 'first_name', 'last_name'])
-            ->mapWithKeys(fn ($g) => [$g->converted_student_id => trim($g->first_name . ' ' . $g->last_name)]);
+        // İsim haritası: student_id → "Ad Soyad" (users → guest_applications → student_assignments.display_name)
+        $guestMap = collect();
+        if ($studentIds->isNotEmpty()) {
+            $sids = $studentIds->all();
+            $userMap = \App\Models\User::whereIn('student_id', $sids)->pluck('name', 'student_id');
+            $gMap = GuestApplication::whereIn('converted_student_id', $sids)
+                ->get(['converted_student_id', 'first_name', 'last_name'])
+                ->mapWithKeys(fn ($g) => [$g->converted_student_id => trim($g->first_name . ' ' . $g->last_name)]);
+            $assignMap = \DB::table('student_assignments')->whereIn('student_id', $sids)
+                ->whereNotNull('display_name')
+                ->pluck('display_name', 'student_id');
+            $guestMap = collect($sids)->mapWithKeys(fn ($sid) => [
+                $sid => ($userMap[$sid] ?? $gMap[$sid] ?? $assignMap[$sid] ?? null)
+            ])->filter();
+        }
 
         $recentStudents = (clone $base)
             ->latest('updated_at')
             ->limit(10)
             ->get(['student_id', 'branch', 'dealer_id', 'risk_level', 'payment_status', 'is_archived', 'updated_at']);
+
+        // Her öğrencinin son süreç aşamasını bul
+        $stageMap = collect();
+        if ($recentStudents->isNotEmpty()) {
+            $rsIds = $recentStudents->pluck('student_id')->all();
+            $stageMap = \DB::table('process_outcomes')
+                ->whereIn('student_id', $rsIds)
+                ->orderByDesc('created_at')
+                ->get(['student_id', 'process_step'])
+                ->groupBy('student_id')
+                ->map(fn($g) => $g->first()->process_step);
+        }
 
         $recentOutcomes = $studentIds->isEmpty()
             ? collect()
@@ -292,6 +314,7 @@ class SeniorDashboardController extends Controller
             'pendingApprovalCount' => $pendingApprovalCount,
             'guestMap'             => $guestMap,
             'recentStudents'       => $recentStudents,
+            'stageMap'             => $stageMap,
             'recentOutcomes'       => $recentOutcomes,
             'recentNotes'          => $recentNotes,
             'recentNotifications'  => $recentNotifications,
@@ -337,6 +360,24 @@ class SeniorDashboardController extends Controller
             ->where('converted_to_student', true)
             ->orderByDesc('id')
             ->get(['id', 'converted_student_id', 'first_name', 'last_name', 'email', 'registration_form_draft']);
+
+        // Guest kaydı olmayan assignments için fallback (display_name'den)
+        $guestSids = $guests->pluck('converted_student_id')->all();
+        $missingSids = $studentIds->reject(fn($sid) => in_array($sid, $guestSids))->all();
+        if (!empty($missingSids)) {
+            $extras = \DB::table('student_assignments')
+                ->whereIn('student_id', $missingSids)
+                ->get(['id','student_id','display_name'])
+                ->map(fn($r) => (object)[
+                    'id' => 'sa_' . $r->id,
+                    'converted_student_id' => $r->student_id,
+                    'first_name' => $r->display_name ?: $r->student_id,
+                    'last_name' => '',
+                    'email' => '',
+                    'registration_form_draft' => [],
+                ]);
+            $guests = $guests->concat($extras)->values();
+        }
 
         $selectedGuestId = (int) $request->query('guest_id', $guests->first()?->id ?? 0);
         $selectedGuest = $selectedGuestId > 0 ? $guests->firstWhere('id', $selectedGuestId) : null;
