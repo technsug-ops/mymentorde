@@ -139,6 +139,33 @@ html,body{height:100%;overflow:hidden}
 .hub-gif-grid img:hover{border-color:var(--u-brand,#4577c4)}
 .hub-gif-loading{text-align:center;padding:18px;color:var(--u-muted);font-size:12px}
 .hub-bubble img.hub-gif-img{max-width:100%;border-radius:6px;display:block;margin-top:2px}
+
+/* ── Responsive: mobilde WhatsApp tarzı tek panel ── */
+@media(max-width:768px){
+    html,body{overflow:auto !important;height:auto !important}
+    .shell{height:auto !important;overflow:auto !important}
+    .main{height:auto !important;overflow:auto !important}
+    .main-inner{overflow:auto !important;padding-bottom:0 !important}
+    .hub-wrap{flex-direction:column !important;height:auto !important;min-height:calc(100vh - 140px)}
+    .hub-left{width:100% !important;min-width:0 !important;border-right:none !important;border-bottom:1px solid var(--u-line)}
+    .hub-right{min-height:0}
+    /* Konuşma seçiliyse: listeyi gizle, thread göster */
+    .hub-wrap.has-thread .hub-left{display:none !important}
+    .hub-wrap.has-thread .hub-right{flex:1}
+    /* Konuşma seçili değilse: thread paneli gizle */
+    .hub-wrap:not(.has-thread) .hub-right{display:none !important}
+    /* Geri butonu sadece mobilde */
+    .hub-back-btn{display:inline-flex !important;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;border:1px solid var(--u-line);background:var(--u-card,#fff);text-decoration:none;font-size:18px;color:var(--u-text);flex-shrink:0;cursor:pointer;z-index:10}
+    .hub-messages{max-height:calc(100vh - 300px)}
+    .hub-item-list{max-height:calc(100vh - 280px)}
+    .hub-emoji-picker,.hub-gif-picker{width:min(310px,calc(100vw - 40px))}
+    /* FAB'lar mesaj alanının üstüne binmesin */
+    .dark-toggle{display:none !important}
+    #qn-fab{display:none !important}
+}
+@media(min-width:769px){
+    .hub-back-btn{display:none !important}
+}
 </style>
 @endpush
 
@@ -165,7 +192,11 @@ window.__hub = {
 };
 </script>
 
-<div class="hub-wrap">
+@php
+    $hasActiveThread = ($tab === 'customer' && $customerData && $customerData['selectedThread'])
+                    || ($tab === 'internal' && $internalData && ($internalData['selected'] ?? null));
+@endphp
+<div class="hub-wrap {{ $hasActiveThread ? 'has-thread' : '' }}" id="hubWrap">
 
     {{-- ══ SOL PANEL ══ --}}
     <div class="hub-left">
@@ -619,6 +650,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.target.id === 'hubStartDmBtn' || e.target.closest('#hubStartDmBtn')) { hubStartDm(); return; }
         if (e.target.id === 'hubCreateRoomBtn' || e.target.closest('#hubCreateRoomBtn')) { hubCreateRoom(); return; }
         if (e.target.id === 'hubCreateGroupBtn' || e.target.closest('#hubCreateGroupBtn')) { hubCreateGroup(); return; }
+
+        // Mobil geri butonu — thread'i gizle, listeyi göster
+        t = e.target.closest('.hub-back-btn');
+        if (t) {
+            e.preventDefault();
+            var wrap = document.getElementById('hubWrap');
+            if (wrap) wrap.classList.remove('has-thread');
+            return;
+        }
     });
 });
 </script>

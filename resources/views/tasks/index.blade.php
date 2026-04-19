@@ -217,7 +217,7 @@ a.tb-stat:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); background:#f0f6ff; }
 @endpush
 
 @section('content')
-    <section class="card board-top">
+    <section class="card board-top hide-mobile">
         @php $activeDepartment = (string)($routeDepartment ?? ''); @endphp
         <div class="board-title">
             <div>
@@ -298,22 +298,22 @@ a.tb-stat:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); background:#f0f6ff; }
         @endif
     </div>
 
-    <div class="tb-stats" style="grid-template-columns:repeat(8,minmax(0,1fr));margin-bottom:12px;">
-        <a class="tb-stat" href="{{ $baseUrl }}" style="text-decoration:none;cursor:pointer;" title="Tüm tasklar"><div class="tb-lbl">Toplam</div><div class="tb-val">{{ $stats['total'] ?? 0 }}</div></a>
+    <div class="tb-stats kpi-row" style="grid-template-columns:repeat(8,minmax(0,1fr));margin-bottom:12px;">
         <a class="tb-stat" href="{{ $baseUrl }}?status=todo" style="text-decoration:none;cursor:pointer;" title="Yapılacakları göster"><div class="tb-lbl">Yapılacak</div><div class="tb-val">{{ $stats['todo'] ?? 0 }}</div></a>
         <a class="tb-stat" href="{{ $baseUrl }}?status=in_progress" style="text-decoration:none;cursor:pointer;" title="Devam edenleri göster"><div class="tb-lbl">Devam Eden</div><div class="tb-val">{{ $stats['in_progress'] ?? 0 }}</div></a>
         <a class="tb-stat tb-review" href="{{ $baseUrl }}?status=in_review" style="text-decoration:none;cursor:pointer;" title="İncelemedeleri göster"><div class="tb-lbl">İncelemede</div><div class="tb-val">{{ $stats['in_review'] ?? 0 }}</div></a>
         <a class="tb-stat tb-hold" href="{{ $baseUrl }}?status=hold_block" style="text-decoration:none;cursor:pointer;" title="Beklemedeki ve bloke taskları göster"><div class="tb-lbl">Beklemede + Bloke</div><div class="tb-val">{{ ($stats['on_hold'] ?? 0) + ($stats['blocked'] ?? 0) }}</div></a>
-        <a class="tb-stat" href="{{ $baseUrl }}?status=done" style="text-decoration:none;cursor:pointer;" title="Tamamlananları göster"><div class="tb-lbl">Tamamlanan</div><div class="tb-val">{{ $stats['done'] ?? 0 }}</div></a>
         <a class="tb-stat tb-overdue" href="{{ $baseUrl }}?sla=overdue" style="text-decoration:none;cursor:pointer;" title="Gecikenleri göster"><div class="tb-lbl">Geciken</div><div class="tb-val">{{ $stats['overdue'] ?? 0 }}</div></a>
+        <a class="tb-stat" href="{{ $baseUrl }}?status=done" style="text-decoration:none;cursor:pointer;" title="Tamamlananları göster"><div class="tb-lbl">Tamamlanan</div><div class="tb-val">{{ $stats['done'] ?? 0 }}</div></a>
+        <a class="tb-stat" href="{{ $baseUrl }}" style="text-decoration:none;cursor:pointer;" title="Tüm tasklar"><div class="tb-lbl">Toplam</div><div class="tb-val">{{ $stats['total'] ?? 0 }}</div></a>
         <a class="tb-stat tb-cancelled" href="{{ $baseUrl }}?status=cancelled" style="text-decoration:none;cursor:pointer;" title="İptal edilenleri göster"><div class="tb-lbl">İptal</div><div class="tb-val">{{ $stats['cancelled'] ?? 0 }}</div></a>
     </div>
 
     <div id="view-list">
     <div class="grid2">
-        <section class="card">
-            <h3>Yeni Task</h3>
-            <form method="POST" action="/tasks">
+        <details class="card mob-accordion">
+            <summary><h3 style="margin:0;display:inline;">Yeni Task</h3></summary>
+            <form method="POST" action="/tasks" style="margin-top:12px;">
                 @csrf
                 <div class="row2">
                     <input class="full" name="title" placeholder="Baslik" required>
@@ -379,11 +379,11 @@ a.tb-stat:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); background:#f0f6ff; }
                     <a class="btn alt" href="/tasks">Yenile</a>
                 </div>
             </form>
-        </section>
+        </details>
 
-        <section class="card">
-            <h3>Filtre</h3>
-            <form method="GET" action="/tasks">
+        <details class="card mob-accordion">
+            <summary><h3 style="margin:0;display:inline;">Filtre</h3></summary>
+            <form method="GET" action="/tasks" style="margin-top:12px;">
                 <div class="row2">
                     <select name="status">
                         <option value="">Tum durumlar</option>
@@ -430,11 +430,11 @@ a.tb-stat:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); background:#f0f6ff; }
                     <a class="btn alt" href="{{ ($routeDepartment ?? '') !== '' ? ('/tasks/'.$routeDepartment) : '/tasks' }}">Temizle</a>
                 </div>
             </form>
-        </section>
+        </details>
     </div>
 
     {{-- ── v3 — Template Uygula ─────────────────────────────────────────── --}}
-    <details class="card" id="tpl-apply-wrap" style="margin-bottom:16px;">
+    <details class="card hide-mobile" id="tpl-apply-wrap" style="margin-bottom:16px;">
         <summary style="cursor:pointer;font-weight:600;font-size:14px;list-style:none;display:flex;align-items:center;gap:8px;">
             <span style="font-size:18px;">📋</span> Şablondan Task Oluştur
             <span style="font-size:12px;font-weight:400;color:var(--u-muted);margin-left:4px;">(Hazır şablon seç, otomatik görev listesi oluştur)</span>
@@ -1271,6 +1271,13 @@ window.tlToggle = function(id) {
         document.addEventListener('DOMContentLoaded', function () { switchView(pref); });
     } else {
         switchView(pref);
+    }
+})();
+
+// Desktop'ta mob-accordion'ları açık başlat
+(function(){
+    if (window.innerWidth > 600) {
+        document.querySelectorAll('.mob-accordion').forEach(function(d){ d.setAttribute('open',''); });
     }
 })();
 </script>

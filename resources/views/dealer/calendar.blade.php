@@ -86,7 +86,7 @@
 <div style="background:var(--bg,#f1f5f9);border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:16px 20px;margin-top:16px;">
     <div style="font-size:var(--tx-xs);font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#64748b);margin-bottom:8px;">💡 Takvim Hakkında</div>
     <ul style="margin:0;padding-left:18px;">
-        <li style="font-size:var(--tx-sm);color:var(--muted,#64748b);margin-bottom:5px;">Mavi: o gün oluşturulan lead. Yeşil: student'a dönüşüm tarihi. Turuncu: ödeme gerçekleşme tarihi.</li>
+        <li style="font-size:var(--tx-sm);color:var(--muted,#64748b);margin-bottom:5px;">Mavi: o gün oluşturulan lead. Yeşil: öğrenciye dönüşüm tarihi. Turuncu: ödeme gerçekleşme tarihi.</li>
         <li style="font-size:var(--tx-sm);color:var(--muted,#64748b);">Etkinliklere tıklayarak ilgili lead detayına gidebilirsiniz.</li>
     </ul>
 </div>

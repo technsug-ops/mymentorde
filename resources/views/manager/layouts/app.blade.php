@@ -446,7 +446,7 @@
             <div class="topbar-left">
                 <button class="icon-btn" id="premium-menu-btn"
                         style="display:none;">☰</button>
-                <button class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
+                <button type="button" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
                 <div>
                     <div class="topbar-title">@yield('page_title', 'Manager Portalı')</div>
                     @hasSection('page_subtitle')
@@ -494,7 +494,7 @@
 <div id="premium-overlay"
      style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;"></div>
 <style>
-    #premium-overlay.active { display:block; }
+    #premium-overlay.active { display:block !important; }
     @media(max-width:900px){
         #premium-menu-btn{display:flex!important;}
     }
@@ -583,7 +583,7 @@ document.addEventListener('alpine:init',function(){
 (function(){
     // ── Mobile hamburger + back btn (CSP-safe) ──
     var _bb=document.getElementById('premium-back-btn');
-    if(_bb){_bb.addEventListener('click',function(){history.back();});}
+    if(_bb){_bb.addEventListener('click',function(){window.history.back();});}
     var _mb=document.getElementById('premium-menu-btn');
     var _ov=document.getElementById('premium-overlay');
     var _sb=document.getElementById('premium-sidebar');

@@ -2,7 +2,7 @@
 
 @section('title', 'Öğrenci Yönlendir')
 @section('page_title', 'Öğrenci Yönlendir')
-@section('page_subtitle', 'Kanal 1 — Doğrudan form ile guest yönlendirme')
+@section('page_subtitle', 'Kanal 1 — Doğrudan form ile aday öğrenci yönlendirme')
 
 @push('head')
 <style>
@@ -218,7 +218,7 @@
 <div class="lf-guide" style="margin-top:20px;">
     <div class="lf-guide-title">💡 Nasıl Çalışır?</div>
     <ul>
-        <li>Form gönderilince sistem otomatik bir guest kaydı oluşturur ve dealer kodunu ilişkilendirir.</li>
+        <li>Form gönderilince sistem otomatik bir aday öğrenci kaydı oluşturur ve dealer kodunu ilişkilendirir.</li>
         <li>KVKK onayı işaretlenmeden kayıt oluşturulmaz — bu zorunludur.</li>
         <li>Kayıt oluştuktan sonra <strong>Yönlendirmelerim</strong> ekranında durumu takip edebilirsin.</li>
         <li>Referans linki ile gelen başvurular için ayrıca <strong>Referans Linklerim</strong> ekranını kullan.</li>

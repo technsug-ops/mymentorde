@@ -211,7 +211,7 @@
 .gdb-social {
     background: var(--u-card); border-radius: 12px; padding: 14px 18px;
     box-shadow: 0 1px 3px rgba(0,0,0,.04); border: 1px solid var(--u-line);
-    display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;
 }
 .gdb-social-avatars { display: flex; }
 .gdb-social-avatars span {

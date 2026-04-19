@@ -233,7 +233,7 @@ $maxConv  = $topLeads->max('lead_score') ?: 100;
             <li><strong>Tier Dağılımı:</strong> Bar uzunluğu o tier'daki lead sayısını gösterir. En kalabalık tier hangisi? Çoğu lead Cold/Warm'da yığılıyorsa scoring veya lead kalitesi sorunu var.</li>
             <li><strong>Dönüşüm % hedefleri:</strong> Cold &lt;5% normal · Warm %10–20 · Hot %25–40 · Sales Ready %50+ · Champion %70+ — bu bantların altındaysa tier'a özel aksiyon şart.</li>
             <li><strong>Aksiyon sinyalleri:</strong> Besle (içerik/bilgi), Temas Kur (sıcak temas), İlerlet (demo/teklif), Kapat (sözleşmeye yönlendir), Öncelikli (kaynak harca).</li>
-            <li><strong>Champion Dönüşüm düşükse:</strong> En yüksek puanlı leadler kapanmıyor — senior aksiyon zamanlaması veya teklif kalitesi sorunlu.</li>
+            <li><strong>Champion Dönüşüm düşükse:</strong> En yüksek puanlı leadler kapanmıyor — danışman aksiyon zamanlaması veya teklif kalitesi sorunlu.</li>
             <li>Scoring kural kalibrasyonu için <a href="/mktg-admin/scoring/config" style="color:var(--u-brand,#1e40af);">Scoring → Kural Yapılandırma</a> sayfasını kullan.</li>
         </ol>
     </details>

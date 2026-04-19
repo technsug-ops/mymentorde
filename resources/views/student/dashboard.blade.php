@@ -106,7 +106,9 @@
     .sd-hero-title { font-size:17px; }
 }
 @media(max-width:600px){
+    .sd-steps { grid-template-columns:repeat(2,1fr); }
     .sd-grid-4,.sd-ql { grid-template-columns:1fr; }
+    .sd-grid-2,.sd-grid-3 { grid-template-columns:1fr; }
 }
 .jm-minimalist .sd-journey,.jm-minimalist .sd-card,.jm-minimalist .sd-stat { box-shadow:none; }
 </style>
@@ -148,7 +150,7 @@
         <h2 style="font-size:20px;font-weight:800;letter-spacing:-.3px;">{{ $stageGreet }}</h2>
         <p style="font-size:13px;color:var(--u-muted);margin-top:2px;">{{ $stageSub }}</p>
     </div>
-    <div style="display:flex;gap:8px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <a href="/student/messages" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--u-line);background:var(--u-card);color:var(--u-text);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">✉ Danismana Mesaj</a>
         <a href="/student/tickets" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--u-line);background:var(--u-card);color:var(--u-text);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">📞 Destek</a>
     </div>

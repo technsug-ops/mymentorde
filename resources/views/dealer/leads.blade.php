@@ -193,7 +193,7 @@
         <div class="dl-filter-row">
             <div class="dl-filter-group grow">
                 <span class="dl-filter-label">Ara</span>
-                <input name="q" value="{{ $filterQ ?? '' }}" placeholder="İsim / e-posta / telefon / student ID">
+                <input name="q" value="{{ $filterQ ?? '' }}" placeholder="İsim / e-posta / telefon / öğrenci ID">
             </div>
             <div class="dl-filter-group md">
                 <span class="dl-filter-label">Durum</span>

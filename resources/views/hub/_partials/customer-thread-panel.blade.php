@@ -14,6 +14,7 @@
 
 {{-- Başlık --}}
 <div class="hub-thread-head">
+    <a href="#" class="hub-back-btn" id="hubBackCustomer">←</a>
     <div>
         <strong>{{ $threadLabel }}</strong>
         @if($thread->status === 'open')

@@ -469,16 +469,16 @@ function seniorBannerClick(id, slug) {
         <div style="margin-bottom:10px;">
             <h3 style="margin:0;">🎯 Risk Radar & Haftalık</h3>
         </div>
-        <div style="display:flex;gap:10px;margin-bottom:12px;">
-            <div style="flex:1;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px;text-align:center;">
+        <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:100px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px;text-align:center;">
                 <div style="font-size:var(--tx-xl);font-weight:700;color:#dc2626;">{{ $riskRadar->count() }}</div>
                 <div style="font-size:var(--tx-xs);color:#9ca3af;margin-top:2px;">Risk'li Öğrenci</div>
             </div>
-            <div style="flex:1;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px;text-align:center;">
+            <div style="flex:1;min-width:100px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px;text-align:center;">
                 <div style="font-size:var(--tx-xl);font-weight:700;color:#16a34a;">{{ $weeklyPerformance['docs_approved'] }}</div>
                 <div style="font-size:var(--tx-xs);color:#9ca3af;margin-top:2px;">Belge Onaylandı</div>
             </div>
-            <div style="flex:1;background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:10px;text-align:center;">
+            <div style="flex:1;min-width:100px;background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:10px;text-align:center;">
                 <div style="font-size:var(--tx-xl);font-weight:700;color:#7c3aed;">{{ $weeklyPerformance['outcomes'] }}</div>
                 <div style="font-size:var(--tx-xs);color:#9ca3af;margin-top:2px;">Outcome</div>
             </div>

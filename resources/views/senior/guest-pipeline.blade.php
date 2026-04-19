@@ -5,12 +5,16 @@
 @push('head')
 <style>
 /* ── Board ── */
-.pipe-wrap  { overflow-x:auto; padding-bottom:24px; }
-.pipe-board { display:flex; gap:10px; align-items:flex-start; padding:2px 2px 4px; width:100%; box-sizing:border-box; }
+.pipe-wrap  { overflow-x:scroll; -webkit-overflow-scrolling:touch; padding-bottom:24px; touch-action:pan-x pan-y; }
+.pipe-wrap::-webkit-scrollbar { height:6px; }
+.pipe-wrap::-webkit-scrollbar-thumb { background:#c4b5fd; border-radius:3px; }
+.pipe-wrap::-webkit-scrollbar-track { background:var(--u-line,#e5e9f0); border-radius:3px; }
+.content { overflow-x:auto !important; }
+.pipe-board { display:flex; gap:10px; align-items:flex-start; padding:2px 2px 4px; min-width:max-content; }
 
 /* ── Column ── */
 .pipe-col {
-    flex:1; min-width:160px;
+    flex:0 0 200px; min-width:200px;
     background:var(--u-card);
     border:1px solid var(--u-line);
     border-radius:14px;
@@ -103,7 +107,7 @@ $langLabels = ['tr'=>'TR','en'=>'EN','de'=>'DE','ar'=>'AR','fr'=>'FR','ru'=>'RU'
     </div>
 
     {{-- KPI chips --}}
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+    <div style="display:flex;gap:6px;margin-top:14px;">
         @foreach([
             ['label'=>'Toplam',        'val'=>$stats['total'],      'bg'=>'rgba(255,255,255,.15)'],
             ['label'=>'Yeni',          'val'=>$stats['new'],        'bg'=>'rgba(255,255,255,.1)'],
@@ -111,9 +115,9 @@ $langLabels = ['tr'=>'TR','en'=>'EN','de'=>'DE','ar'=>'AR','fr'=>'FR','ru'=>'RU'
             ['label'=>'Sözleşmeli',    'val'=>$stats['contracted'], 'bg'=>'rgba(255,255,255,.1)'],
             ['label'=>'Dönüştürülen',  'val'=>$stats['converted'],  'bg'=>'rgba(255,255,255,.1)'],
         ] as $chip)
-        <div style="background:{{ $chip['bg'] }};border-radius:8px;padding:6px 14px;text-align:center;">
-            <div style="font-size:18px;font-weight:800;line-height:1;">{{ $chip['val'] }}</div>
-            <div style="font-size:10px;opacity:.8;margin-top:1px;">{{ $chip['label'] }}</div>
+        <div style="flex:1;background:{{ $chip['bg'] }};border-radius:8px;padding:5px 4px;text-align:center;min-width:0;">
+            <div style="font-size:16px;font-weight:800;line-height:1;">{{ $chip['val'] }}</div>
+            <div style="font-size:9px;opacity:.8;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $chip['label'] }}</div>
         </div>
         @endforeach
     </div>

@@ -44,12 +44,12 @@
     </h3>
     <div class="calc-form-row">
         <div class="calc-field">
-            <label for="calc-students">Ogrenci Sayisi</label>
-            <input type="number" id="calc-students" min="1" value="5" placeholder="ornek: 10">
+            <label for="calc-students">Öğrenci Sayısı</label>
+            <input type="number" id="calc-students" min="1" value="5" placeholder="örnek: 10">
         </div>
         <div class="calc-field">
-            <label for="calc-package">Ortalama Paket Tutari (EUR)</label>
-            <input type="number" id="calc-package" min="0" value="5000" placeholder="ornek: 5000">
+            <label for="calc-package">Ortalama Paket Tutarı (EUR)</label>
+            <input type="number" id="calc-package" min="0" value="5000" placeholder="örnek: 5000">
         </div>
     </div>
 
@@ -118,13 +118,13 @@
 @if($studentRevenues->isNotEmpty())
 <div class="calc-card">
     <h3 style="margin:0 0 6px;font-size:15px;font-weight:800;color:var(--u-text,#0f172a);">
-        Son Gelir Kayitlari
+        Son Gelir Kayıtları
     </h3>
-    <p style="font-size:12px;color:var(--u-muted,#64748b);margin:0 0 10px;">Son 20 ogrenci gelir kaydı</p>
+    <p style="font-size:12px;color:var(--u-muted,#64748b);margin:0 0 10px;">Son 20 öğrenci gelir kaydı</p>
     <div class="rev-list">
         @foreach($studentRevenues as $rev)
         <div class="rev-item">
-            <div class="ri-id">Ogr. #{{ $rev->student_id }}</div>
+            <div class="ri-id">Öğr. #{{ $rev->student_id }}</div>
             <div class="ri-body">
                 <div class="ri-meta">
                     Tip: {{ $rev->dealer_type ?? '-' }}

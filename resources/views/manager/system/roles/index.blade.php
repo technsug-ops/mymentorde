@@ -97,15 +97,16 @@
                 <label style="font-size:11px;font-weight:700;color:var(--u-muted);display:block;margin-bottom:4px;">Ana Rol</label>
                 <select name="parent_role" required style="width:100%;padding:8px 12px;border:1.5px solid var(--u-line);border-radius:8px;font-size:13px;background:var(--u-bg);color:var(--u-text);">
                     <option value="">— Rol seçin —</option>
-                    @foreach([
-                        'manager','senior','mentor',
-                        'system_admin','system_staff',
-                        'operations_admin','operations_staff',
-                        'finance_admin','finance_staff',
-                        'marketing_admin','marketing_staff',
-                        'sales_admin','sales_staff',
-                    ] as $r)
-                    <option value="{{ $r }}">{{ str_replace('_', ' ', $r) }}</option>
+                    @php $roleLabels = [
+                        'manager'=>'Manager','senior'=>'Eğitim Danışmanı','mentor'=>'Mentor',
+                        'system_admin'=>'Sistem Admin','system_staff'=>'Sistem Staff',
+                        'operations_admin'=>'Operasyon Admin','operations_staff'=>'Operasyon Staff',
+                        'finance_admin'=>'Finans Admin','finance_staff'=>'Finans Staff',
+                        'marketing_admin'=>'Pazarlama Admin','marketing_staff'=>'Pazarlama Staff',
+                        'sales_admin'=>'Satış Admin','sales_staff'=>'Satış Staff',
+                    ]; @endphp
+                    @foreach($roleLabels as $r => $lbl)
+                    <option value="{{ $r }}">{{ $lbl }}</option>
                     @endforeach
                 </select>
             </div>

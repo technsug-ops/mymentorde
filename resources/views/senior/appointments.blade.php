@@ -60,31 +60,27 @@
         <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);">
             <span style="font-weight:700;font-size:var(--tx-sm);">🕐 Çalışma Saatleri</span>
         </div>
-        <div style="padding:4px 0;">
-            @foreach(($weeklySchedule ?? []) as $day => $row)
-            @php
-                $enabled = $row['enabled'] ?? false;
-            @endphp
-            <div style="display:grid;grid-template-columns:100px 60px 1fr;gap:8px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--u-line);font-size:var(--tx-xs);">
-                <div style="font-weight:700;color:var(--u-text);">{{ $dayLabels[$day] ?? $day }}</div>
-                <div>
-                    @if($enabled)
-                        <span class="badge ok" style="font-size:var(--tx-xs);">Açık</span>
-                    @else
-                        <span class="badge" style="font-size:var(--tx-xs);color:var(--u-muted);">Kapalı</span>
-                    @endif
-                </div>
-                <div style="color:var(--u-muted);">
-                    @if($enabled)
-                        {{ $row['start'] ?? '—' }} – {{ $row['end'] ?? '—' }}
-                        @if($row['note'] ?? '')&nbsp;·&nbsp;<em>{{ $row['note'] }}</em>@endif
-                    @else
-                        —
-                    @endif
-                </div>
+        @php
+            $schedule = collect($weeklySchedule ?? []);
+            $openDays = $schedule->filter(fn($r) => $r['enabled'] ?? false);
+            $closedDays = $schedule->filter(fn($r) => !($r['enabled'] ?? false));
+        @endphp
+        <div class="kpi-row" style="display:grid;grid-template-columns:repeat({{ $openDays->count() }},1fr);gap:8px;padding:12px 16px;text-align:center;">
+            @foreach($openDays as $day => $row)
+            <div class="{{ $loop->last && $openDays->count() % 2 !== 0 ? 'kpi-full' : '' }}" style="background:var(--u-bg);border:1px solid var(--u-line);border-radius:8px;padding:8px 4px;">
+                <div style="font-size:12px;font-weight:700;color:var(--u-text);margin-bottom:3px;">{{ mb_substr($dayLabels[$day] ?? $day, 0, 3) }}</div>
+                <div style="font-size:11px;color:var(--u-ok);font-weight:600;">{{ $row['start'] ?? '' }}</div>
+                <div style="font-size:11px;color:var(--u-muted);">{{ $row['end'] ?? '' }}</div>
             </div>
             @endforeach
         </div>
+        @if($closedDays->isNotEmpty())
+        <div style="padding:4px 16px 12px;text-align:center;">
+            <span style="font-size:11px;color:var(--u-muted);">
+                {{ $closedDays->map(fn($r,$k) => mb_substr($dayLabels[$k] ?? $k, 0, 3))->implode(', ') }} — Kapalı
+            </span>
+        </div>
+        @endif
     </div>
 
     {{-- Randevu Ayarları --}}

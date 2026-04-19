@@ -44,7 +44,7 @@
 </div>
 
 {{-- KPI strip --}}
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+<div class="kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
     @foreach([
         ['label'=>'Aktif Öğrenci', 'val'=>$active->count(),    'color'=>'#7c3aed','icon'=>'🎓','sub'=>'toplam atanmış'],
         ['label'=>'Aday Öğrenci Havuzu',  'val'=>$guestPool->count(),  'color'=>'#7c3aed','icon'=>'👤','sub'=>'dönüşüm bekleniyor'],
@@ -85,7 +85,7 @@
 {{-- Risk Pipeline --}}
 <div style="background:var(--u-card);border:1px solid var(--u-line);border-radius:10px;padding:16px;margin-bottom:14px;">
     <div style="font-size:var(--tx-xs);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--u-muted);margin-bottom:12px;">Risk Pipeline</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+    <div class="kpi-row-compact" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
         @foreach([
             ['key'=>'critical','label'=>'Kritik', 'color'=>'#dc2626','bg'=>'#fff5f5','border'=>'#f2b8b8','icon'=>'🔴'],
             ['key'=>'high',    'label'=>'Yüksek', 'color'=>'#b91c1c','bg'=>'#fff8f0','border'=>'#f2d4c7','icon'=>'🟠'],
@@ -93,7 +93,7 @@
             ['key'=>'low',     'label'=>'Düşük',  'color'=>'#166534','bg'=>'#f0fdf4','border'=>'#bbf7d0','icon'=>'🟢'],
         ] as $rg)
         @php $cnt = $byRisk[$rg['key']]->count(); @endphp
-        <a href="?risk={{ $rg['key'] }}" style="background:{{ $cnt > 0 ? $rg['bg'] : 'var(--u-bg)' }};border:1px solid {{ $cnt > 0 ? $rg['border'] : 'var(--u-line)' }};border-radius:10px;padding:14px;text-align:center;text-decoration:none;display:block;transition:all .15s;{{ $cnt === 0 ? 'opacity:.5;' : '' }}"
+        <a href="?risk={{ $rg['key'] }}" style="background:{{ $cnt > 0 ? $rg['bg'] : 'var(--u-bg)' }};border:1px solid {{ $cnt > 0 ? $rg['border'] : 'var(--u-line)' }};border-radius:8px;padding:8px 4px;text-align:center;text-decoration:none;display:block;transition:all .15s;{{ $cnt === 0 ? 'opacity:.5;' : '' }}"
            onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
             <div style="font-size:var(--tx-lg);">{{ $rg['icon'] }}</div>
             <div style="font-size:var(--tx-2xl);font-weight:800;color:{{ $rg['color'] }};margin:4px 0 2px;line-height:1;">{{ $cnt }}</div>

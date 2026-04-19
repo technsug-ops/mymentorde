@@ -17,7 +17,29 @@
 .ts-back  { display:inline-flex; align-items:center; gap:5px; font-size:13px; color:var(--u-brand); text-decoration:none; font-weight:600; }
 .ts-back:hover { text-decoration:underline; }
 .ts-grid  { display:grid; grid-template-columns:1fr 300px; gap:16px; align-items:start; }
-@media(max-width:880px){ .ts-grid { grid-template-columns:1fr; } }
+@media(max-width:880px){
+  .ts-grid { grid-template-columns:1fr; }
+  /* Sağ sütun: Bilgiler+Takipçiler yan yana, açılınca tam satır */
+  .ts-sidebar { display:grid !important; grid-template-columns:1fr 1fr; gap:10px; }
+  .ts-sidebar-full { grid-column:span 2; }
+  .mob-collapse.open { grid-column:span 2; }
+  .ts-sidebar-full { grid-column:span 2 !important; width:66.67% !important; margin:0 auto !important; }
+  .ts-sidebar-full .ts-sec-hd { font-size:11px !important; padding:8px 12px !important; white-space:nowrap; }
+  #qn-fab { z-index:200 !important; }
+  .ts-hero { padding:16px 18px; }
+  .ts-hero-title { font-size:1.1rem; }
+  .ts-actions { gap:5px; display:grid !important; grid-template-columns:1fr 1fr 1fr 1fr; }
+  .ts-actions .btn, .ts-actions button { font-size:11px !important; padding:7px 6px !important; min-height:0 !important; text-align:center; white-space:nowrap; }
+  .dark-toggle { display:none !important; }
+  #qn-fab.in-topbar { position:static !important; width:36px !important; height:36px !important; font-size:16px !important; box-shadow:none !important; border-radius:8px !important; background:var(--u-card,#fff) !important; border:1px solid var(--u-line) !important; color:var(--u-text) !important; }
+  #qn-panel { max-width:calc(100vw - 24px) !important; right:12px !important; bottom:auto !important; top:70px !important; position:fixed !important; }
+  /* Aktivite ve Takipçiler akordiyona dönüşsün */
+  .mob-collapse .ts-sec-body { display:none; }
+  .mob-collapse.open .ts-sec-body { display:block; }
+  .mob-collapse .ts-sec-hd { cursor:pointer; }
+  .mob-collapse .ts-sec-hd::after { content:'▼'; font-size:10px; margin-left:auto; }
+  .mob-collapse.open .ts-sec-hd::after { content:'▲'; }
+}
 
 /* ── Hero ── */
 .ts-hero  { background:var(--u-card); border:1px solid var(--u-line); border-radius:14px; padding:20px 24px; margin-bottom:14px; border-left:5px solid #e2e8f0; }
@@ -47,7 +69,8 @@
 .ts-sec-body { padding:12px 16px; }
 
 /* ── Actions ── */
-.ts-actions { display:flex; flex-wrap:wrap; gap:8px; padding:12px 16px; }
+.ts-actions { display:flex; flex-wrap:wrap; gap:6px; padding:12px 16px; }
+.ts-actions form { display:contents; }
 .ts-hold-bar { background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:8px 14px; font-size:var(--tx-sm,.8125rem); color:#92400e; margin:0 16px 12px; }
 
 /* ── Meta rows ── */
@@ -169,17 +192,17 @@ elseif (in_array($st, ['conversation_quick_request','conversation_response_due',
             <span class="badge {{ $sPri === 'urgent' ? 'danger' : ($sPri === 'high' ? 'warn' : 'info') }}" style="font-size:12px;">{{ $prioLabels[$sPri] ?? $sPri }}</span>
             @if($dueDate)
                 <span class="badge {{ $isOverdue ? 'danger' : ($isDueToday ? 'warn' : '') }}" style="font-size:12px;">
-                    📅 {{ $dueDate }}{{ $isOverdue ? ' — Gecikti' : ($isDueToday ? ' — Bugün' : '') }}
+                    {{ $isOverdue ? '⚠' : ($isDueToday ? '⏰' : '📅') }} {{ $dueDate }}
                 </span>
+            @endif
+            @if($srcLink)
+                <a href="{{ $srcLink }}" class="ts-src-chip">↗ {{ $srcLabel }}</a>
             @endif
             @if($task->is_recurring)
                 <span class="badge info" style="font-size:12px;">🔁 {{ ucfirst($task->recurrence_pattern ?? 'Tekrarlı') }}</span>
             @endif
             @if($totalCount > 0)
                 <span class="badge {{ $doneCount === $totalCount ? 'ok' : 'info' }}" style="font-size:12px;">☑ {{ $doneCount }}/{{ $totalCount }}</span>
-            @endif
-            @if($srcLink)
-                <a href="{{ $srcLink }}" class="ts-src-chip">↗ {{ $srcLabel }}</a>
             @endif
         </div>
         @if($task->description)
@@ -203,36 +226,22 @@ elseif (in_array($st, ['conversation_quick_request','conversation_response_due',
             {{-- Aksiyonlar --}}
             @if($canEdit)
             <div class="ts-sec">
-                <div class="ts-sec-hd">Aksiyonlar</div>
+                <div class="ts-sec-hd"><span>Aksiyonlar</span><span style="font-size:10px;font-weight:500;color:var(--u-muted);letter-spacing:0;text-transform:none;">#{{ $task->id }} • {{ $task->updated_at?->format('d.m.Y H:i') }}</span></div>
                 <div class="ts-actions">
-                    @if(in_array($sStatus, ['todo','in_progress','blocked']))
-                        <form method="POST" action="/tasks/{{ $task->id }}/request-review">@csrf
-                            <button class="btn alt" style="font-size:13px;">🔍 İncelemeye Gönder</button>
-                        </form>
-                    @endif
-                    @if($sStatus === 'in_review')
-                        <form method="POST" action="/tasks/{{ $task->id }}/approve">@csrf
-                            <button class="btn ok" style="font-size:13px;">✅ Onayla / Tamamla</button>
-                        </form>
-                        <form method="POST" action="/tasks/{{ $task->id }}/request-revision">@csrf
-                            <button class="btn warn" style="font-size:13px;">↩ Revizyon İste</button>
-                        </form>
-                    @endif
+                    {{-- Birincil aksiyon (yeşil) --}}
                     @if($sStatus === 'todo')
                         <form method="POST" action="/tasks/{{ $task->id }}/done">@csrf
                             <button class="btn ok" style="font-size:13px;">✔ Tamamla</button>
                         </form>
                     @endif
-                    @if($sStatus === 'on_hold')
-                        <form method="POST" action="/tasks/{{ $task->id }}/resume">@csrf
-                            <button class="btn ok" style="font-size:13px;">▶ Devam Et</button>
+                    @if($sStatus === 'in_review')
+                        <form method="POST" action="/tasks/{{ $task->id }}/approve">@csrf
+                            <button class="btn ok" style="font-size:13px;">✅ Onayla</button>
                         </form>
                     @endif
-                    @if(!in_array($sStatus, ['done','cancelled','on_hold']))
-                        <form method="POST" action="/tasks/{{ $task->id }}/hold"
-                              onsubmit="var r=prompt('Bekleme nedeni:','');if(r!==null){this.querySelector('[name=hold_reason]').value=r;}else{event.preventDefault();}">
-                            @csrf <input type="hidden" name="hold_reason" value="">
-                            <button class="btn alt" style="font-size:13px;">⏸ Beklet</button>
+                    @if($sStatus === 'on_hold')
+                        <form method="POST" action="/tasks/{{ $task->id }}/resume">@csrf
+                            <button class="btn ok" style="font-size:13px;">▶ Devam</button>
                         </form>
                     @endif
                     @if($sStatus === 'done')
@@ -240,9 +249,32 @@ elseif (in_array($st, ['conversation_quick_request','conversation_response_due',
                             <button class="btn alt" style="font-size:13px;">↩ Yeniden Aç</button>
                         </form>
                     @endif
+
+                    {{-- İkincil aksiyonlar --}}
+                    @if(in_array($sStatus, ['todo','in_progress','blocked']))
+                        <form method="POST" action="/tasks/{{ $task->id }}/request-review">@csrf
+                            <button class="btn alt" style="font-size:13px;">🔍 İncelet</button>
+                        </form>
+                    @endif
+                    @if($sStatus === 'in_review')
+                        <form method="POST" action="/tasks/{{ $task->id }}/request-revision">@csrf
+                            <button class="btn alt" style="font-size:13px;">↩ Revizyon</button>
+                        </form>
+                    @endif
+
+                    {{-- Beklet --}}
+                    @if(!in_array($sStatus, ['done','cancelled','on_hold']))
+                        <form method="POST" action="/tasks/{{ $task->id }}/hold"
+                              onsubmit="var r=prompt('Bekleme nedeni:','');if(r!==null){this.querySelector('[name=hold_reason]').value=r;}else{event.preventDefault();}">
+                            @csrf <input type="hidden" name="hold_reason" value="">
+                            <button class="btn alt" style="font-size:13px;">⏸ Beklet</button>
+                        </form>
+                    @endif
+
+                    {{-- Yıkıcı: İptal (her zaman son) --}}
                     @if(!in_array($sStatus, ['done','cancelled']))
                         <form method="POST" action="/tasks/{{ $task->id }}/cancel" onsubmit="return confirm('İptal edilsin mi?')">@csrf
-                            <button class="btn warn" style="font-size:13px;">✕ İptal Et</button>
+                            <button class="btn warn" style="font-size:13px;">✕ İptal</button>
                         </form>
                     @endif
                 </div>
@@ -301,7 +333,7 @@ elseif (in_array($st, ['conversation_quick_request','conversation_response_due',
 
             {{-- Aktivite Günlüğü --}}
             @if($activityLogs->count() > 0)
-            <div class="ts-sec">
+            <div class="ts-sec mob-collapse">
                 <div class="ts-sec-hd">Aktivite Günlüğü</div>
                 <div class="ts-sec-body" style="padding:8px 16px;">
                     @foreach($activityLogs as $log)
@@ -320,10 +352,10 @@ elseif (in_array($st, ['conversation_quick_request','conversation_response_due',
         </div>
 
         {{-- ── Sağ sütun ── --}}
-        <div>
+        <div class="ts-sidebar">
 
             {{-- Bilgiler --}}
-            <div class="ts-sec">
+            <div class="ts-sec mob-collapse">
                 <div class="ts-sec-hd">Bilgiler</div>
                 <div class="ts-sec-body" style="padding:8px 16px;">
                     <div class="ts-row">
@@ -415,7 +447,7 @@ elseif (in_array($st, ['conversation_quick_request','conversation_response_due',
             </div>
 
             {{-- Takipçiler --}}
-            <div class="ts-sec">
+            <div class="ts-sec mob-collapse">
                 <div class="ts-sec-hd">
                     <span>Takipçiler ({{ $watchers->count() }})</span>
                     <form method="POST" action="/tasks/{{ $task->id }}/watch">
@@ -436,7 +468,7 @@ elseif (in_array($st, ['conversation_quick_request','conversation_response_due',
 
             {{-- Düzenle --}}
             @if($canEdit)
-            <div class="ts-sec">
+            <div class="ts-sec ts-sidebar-full">
                 <div class="ts-sec-hd">
                     <span>Düzenle</span>
                     <button onclick="this.closest('.ts-sec').querySelector('.ts-ef').style.display=this.closest('.ts-sec').querySelector('.ts-ef').style.display==='none'?'block':'none'" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--u-brand);font-weight:700;padding:0;">Aç / Kapat</button>
@@ -477,10 +509,6 @@ elseif (in_array($st, ['conversation_quick_request','conversation_response_due',
             </div>
             @endif
 
-            {{-- Son güncelleme --}}
-            <div style="font-size:11px;color:var(--u-muted);padding:4px 2px;text-align:center;">
-                #{{ $task->id }} &bull; {{ $task->updated_at?->format('d.m.Y H:i') }}
-            </div>
         </div>
     </div>
 </div>
@@ -490,6 +518,27 @@ elseif (in_array($st, ['conversation_quick_request','conversation_response_due',
     var TASK_ID = {{ $task->id }};
     var _csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
     var roleLabels = @json($roleLabels ?? []);
+
+    // Mob-collapse akordiyonlar (mobilde)
+    document.querySelectorAll('.mob-collapse .ts-sec-hd').forEach(function(hd){
+        hd.addEventListener('click', function(){
+            if (window.innerWidth <= 880) {
+                this.closest('.mob-collapse').classList.toggle('open');
+            }
+        });
+    });
+
+    // QN FAB'ı topbar'a taşı (mobilde)
+    if (window.innerWidth <= 880) {
+        var qnFab = document.getElementById('qn-fab');
+        var topRight = document.querySelector('.topbar-right');
+        if (qnFab && topRight) {
+            var dmBtn = document.getElementById('dm-btn');
+            if (dmBtn) { topRight.insertBefore(qnFab, dmBtn); }
+            else { topRight.prepend(qnFab); }
+            qnFab.classList.add('in-topbar');
+        }
+    }
 
     function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 

@@ -344,14 +344,71 @@ body {
 /* ─── Responsive ─── */
 @media (max-width: 900px) {
   .sidebar { transform: translateX(-100%); }
-  .sidebar.mobile-open { transform: translateX(0); }
+  .sidebar.mobile-open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,.3); }
   .main { margin-left: 0; }
   .kpi-row { grid-template-columns: repeat(2, 1fr); }
   .col2, .col3, .col3-1 { grid-template-columns: 1fr; }
-}
-@media (max-width: 600px) {
-  .kpi-row { grid-template-columns: 1fr; }
+  .card { padding: 14px; }
   .content { padding: 16px; }
+  .nav-link { min-height: 44px; }
+  .icon-btn { width: 44px; height: 44px; }
+  #gs-wrap { max-width: 140px !important; }
+
+  /* Inline style grid'leri tablet'te max 2 kolona düşür */
+  [style*="grid-template-columns: repeat(4"] { grid-template-columns: repeat(2, 1fr) !important; }
+  [style*="grid-template-columns: repeat(5"] { grid-template-columns: repeat(2, 1fr) !important; }
+  [style*="grid-template-columns: repeat(6"] { grid-template-columns: repeat(2, 1fr) !important; }
+  [style*="grid-template-columns:repeat(4"]  { grid-template-columns: repeat(2, 1fr) !important; }
+  [style*="grid-template-columns:repeat(5"]  { grid-template-columns: repeat(2, 1fr) !important; }
+  [style*="grid-template-columns:repeat(6"]  { grid-template-columns: repeat(2, 1fr) !important; }
+  [style*="grid-template-columns: 1fr 1fr 1fr"] { grid-template-columns: 1fr 1fr !important; }
+  [style*="grid-template-columns:1fr 1fr 1fr"]  { grid-template-columns: 1fr 1fr !important; }
+}
+
+@media (max-width: 640px) {
+  #gs-wrap    { display: none !important; }
+  #design-btn { display: none !important; }
+  .topbar-left  { gap: 6px; }
+  .topbar-right { gap: 4px; }
+  .topbar-title { font-size: var(--tx-sm); }
+  .icon-btn { width: 44px; height: 44px; font-size: 14px; }
+
+  /* Tüm inline grid'ler 1 kolona (KPI hariç) */
+  [style*="grid-template-columns"]:not(.kpi-row):not(.kpi-row-compact) { grid-template-columns: 1fr !important; }
+  .kpi-row[style*="grid-template-columns"] { grid-template-columns: repeat(2, 1fr) !important; }
+  .kpi-row-compact { font-size: 11px; }
+
+  /* Tablolar yatay scroll */
+  .content table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  /* Form input'lar — iOS zoom engelleme */
+  .content input[type="text"],
+  .content input[type="email"],
+  .content input[type="date"],
+  .content select,
+  .content textarea { width: 100% !important; box-sizing: border-box; font-size: 16px; }
+
+  .content { padding: 12px; }
+  .dark-toggle { display: none !important; }
+  #toast-container { right: 12px !important; left: 12px !important; max-width: none !important; }
+  .msg-preview { max-width: 100%; }
+}
+
+@media (max-width: 600px) {
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .kpi-full { grid-column: span 2; }
+  .hide-mobile { display: none !important; }
+  .content { padding: 10px; }
+  .topbar { padding: 0 10px; }
+  .topbar-title { max-width: 140px; }
+
+  [style*="grid-template-columns: 1fr 1fr"]  { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns:1fr 1fr"]   { grid-template-columns: 1fr !important; }
 }
 
 /* ─── Scrollbar (minimal) ─── */

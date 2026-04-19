@@ -13,7 +13,7 @@
 /* Journey progress */
 .dd-journey { background:var(--surface,#fff); border:1px solid var(--border,#e2e8f0); border-radius:14px; padding:22px 24px; margin-bottom:18px; }
 .dd-journey-title { font-size:13px; font-weight:700; color:var(--muted,#64748b); text-transform:uppercase; letter-spacing:.04em; margin-bottom:14px; }
-.dd-steps { display:flex; gap:0; align-items:flex-start; }
+.dd-steps { display:flex; gap:0; align-items:flex-start; overflow-x:auto; -webkit-overflow-scrolling:touch; }
 .dd-step { flex:1; text-align:center; position:relative; }
 .dd-step-dot { width:32px; height:32px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; border:2px solid #e2e8f0; background:#f8fafc; color:#94a3b8; transition:all .3s; }
 .dd-step.done .dd-step-dot  { background:#16a34a; border-color:#16a34a; color:#fff; }
@@ -62,6 +62,11 @@
 .dd-quick-icon { font-size:24px; margin-bottom:6px; }
 .dd-quick-label { font-size:12px; font-weight:600; }
 @media(max-width:700px){ .dd-quick { grid-template-columns:1fr 1fr; } }
+@media(max-width:480px){
+    .dd-kpis { grid-template-columns:1fr; }
+    .dd-quick { grid-template-columns:1fr; }
+    .dd-step-label { font-size:9px; }
+}
 </style>
 @endpush
 

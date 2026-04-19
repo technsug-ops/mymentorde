@@ -310,7 +310,7 @@
             <div class="topbar-left" style="flex:0 1 auto;">
                 <button class="icon-btn" id="premium-menu-btn"
                         style="display:none;">☰</button>
-                <button class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
+                <button type="button" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
                 <div>
                     <div class="topbar-title">@yield('page_title', 'Öğrenci Portalı')</div>
                     @hasSection('page_subtitle')
@@ -322,7 +322,7 @@
             <div style="position:relative;flex:1 1 300px;max-width:520px;margin:0 20px;" id="gs-wrap">
                 <input type="text" id="gs-input" placeholder="🔍 Ara..." autocomplete="off" minlength="2"
                        style="width:100%;padding:9px 16px;border:1px solid var(--border,#d1d5db);border-radius:10px;font-size:14px;background:var(--surface,#f9fafb);color:var(--text,#111);outline:none;box-shadow:0 1px 3px rgba(0,0,0,.06);">
-                <div id="gs-results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;min-width:400px;background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:9000;max-height:400px;overflow-y:auto;"></div>
+                <div id="gs-results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;min-width:min(400px,calc(100vw - 32px));background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:9000;max-height:400px;overflow-y:auto;"></div>
             </div>
 
             <div class="topbar-right">
@@ -358,7 +358,7 @@
 <div id="premium-overlay"
      style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;"></div>
 <style>
-    #premium-overlay.active { display:block; }
+    #premium-overlay.active { display:block !important; }
     @media(max-width:900px){
         #premium-menu-btn{display:flex!important;}
     }
@@ -448,7 +448,7 @@ document.addEventListener('alpine:init',function(){
     function getCollapsed(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'[]');}catch(e){return[];}}
     function saveCollapsed(arr){localStorage.setItem(STORE_KEY,JSON.stringify(arr));}
     var _bb=document.getElementById('premium-back-btn');
-    if(_bb){_bb.addEventListener('click',function(){history.back();});}
+    if(_bb){_bb.addEventListener('click',function(){window.history.back();});}
     // ── Mobile hamburger (CSP-safe) ──
     var _mb=document.getElementById('premium-menu-btn');
     var _ov=document.getElementById('premium-overlay');

@@ -82,6 +82,24 @@
 .im-user-avatar-sm { width:32px;height:32px;border-radius:50%;background:var(--u-brand,#4577c4);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0; }
 .im-user-name { flex:1;font-size:13px;font-weight:500;color:var(--u-text);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 .im-role-chip { font-size:10px;background:#eef4fb;color:#3a6db5;border-radius:4px;padding:2px 6px;white-space:nowrap;flex-shrink:0; }
+
+/* ── Responsive: mobilde sadece bir panel görünsün ── */
+@media(max-width:768px){
+    .im-layout { display:block !important; }
+    /* Konuşma seçiliyse listeyi gizle, thread'i göster */
+    .im-layout.has-thread .im-convlist { display:none; }
+    .im-layout.has-thread .im-thread { display:block; }
+    /* Konuşma seçili değilse thread gizli (zaten yok) */
+    .im-convlist { max-height:calc(100vh - 200px); overflow-y:auto; }
+    .chat-list { max-height:calc(100vh - 340px); }
+    .bubble { max-width:90%; }
+    .im-emoji-picker,.im-gif-picker { width:min(290px, calc(100vw - 40px)); }
+    /* Geri butonu */
+    .im-back-btn { display:inline-flex !important; }
+}
+@media(min-width:769px){
+    .im-back-btn { display:none !important; }
+}
 </style>
 @endpush
 
@@ -120,10 +138,10 @@ window.__im = {
 };
 </script>
 
-<div style="display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start">
+<div class="im-layout {{ $selected ? 'has-thread' : '' }}" style="display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start">
 
     {{-- Sol: Konuşma Listesi --}}
-    <section class="panel" style="padding:0;overflow:hidden;">
+    <section class="panel im-convlist" style="padding:0;overflow:hidden;">
         <div style="padding:10px 12px;border-bottom:1px solid var(--u-line);">
             <strong style="font-size:12px;color:var(--u-muted);text-transform:uppercase;letter-spacing:.4px;">Konuşmalar</strong>
             <input type="text" id="imSearch" placeholder="Ara…" oninput="imFilterConvs(this.value)"
@@ -266,11 +284,13 @@ window.__im = {
         $isMuted  = $selPart?->is_muted;
         $isPinned = $selPart?->is_pinned;
     @endphp
-    <section class="panel composer-panel">
+    <section class="panel composer-panel im-thread">
     <div style="max-width:780px;margin:0 auto;">
         {{-- Thread header --}}
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--u-line);">
-            <div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <a href="/im?tab={{ request('tab','internal') }}" class="im-back-btn" style="display:none;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--u-line);text-decoration:none;font-size:16px;color:var(--u-text);flex-shrink:0;">←</a>
+                <div>
                 <strong style="font-size:14px;">{{ $displayTitle }}</strong>
                 <div class="muted" style="font-size:11px;margin-top:2px;">
                     @if($selected->type === 'group')
@@ -286,7 +306,8 @@ window.__im = {
                         <span class="badge ok">💬 Sohbet</span> · Bireysel mesajlaşma
                     @endif
                 </div>
-            </div>
+                </div>{{-- /title block --}}
+            </div>{{-- /back+title row --}}
             <div style="display:flex;gap:4px;align-items:center;">
                 @if(in_array($selected->type, ['group','room']))
                 <button type="button" onclick="imToggleMembers()" title="Üyeleri yönet"

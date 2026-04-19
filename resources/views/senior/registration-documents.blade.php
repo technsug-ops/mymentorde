@@ -26,7 +26,7 @@
 </div>
 
 {{-- KPI strip --}}
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+<div class="kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
     @foreach([
         ['label'=>'Toplam',     'val'=>$total,    'color'=>'#7c3aed','icon'=>'📋','st'=>'all'],
         ['label'=>'Onaylandı',  'val'=>$approved, 'color'=>'#16a34a','icon'=>'✅','st'=>'approved'],

@@ -555,6 +555,18 @@ body {
   .content { padding: 16px; }
   .quick-actions { grid-template-columns: 1fr; }
   .timeline-steps { min-width: 400px; }
+
+  /* Inline style grid'leri tablet'te max 2 kolona düşür */
+  [style*="grid-template-columns: repeat(4"] { grid-template-columns: repeat(2, 1fr) !important; }
+  [style*="grid-template-columns: repeat(5"] { grid-template-columns: repeat(2, 1fr) !important; }
+  [style*="grid-template-columns: repeat(6"] { grid-template-columns: repeat(2, 1fr) !important; }
+  [style*="grid-template-columns:repeat(4"]  { grid-template-columns: repeat(2, 1fr) !important; }
+  [style*="grid-template-columns:repeat(5"]  { grid-template-columns: repeat(2, 1fr) !important; }
+  [style*="grid-template-columns:repeat(6"]  { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* 3-col inline grid'ler de 2-col'a */
+  [style*="grid-template-columns: 1fr 1fr 1fr"] { grid-template-columns: 1fr 1fr !important; }
+  [style*="grid-template-columns:1fr 1fr 1fr"]  { grid-template-columns: 1fr 1fr !important; }
 }
 
 @media (max-width: 640px) {
@@ -565,7 +577,9 @@ body {
   .topbar-title { font-size: var(--tx-sm); }
   .icon-btn { width: 44px; height: 44px; font-size: var(--tx-base); }
 
-  [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns"]:not(.kpi-row):not(.kpi-row-compact) { grid-template-columns: 1fr !important; }
+  .kpi-row[style*="grid-template-columns"] { grid-template-columns: repeat(2, 1fr) !important; }
+  .kpi-row-compact { font-size: 11px; }  /* inline grid-template-columns korunur */
 
   .content table {
     display: block;
@@ -582,8 +596,8 @@ body {
 
   .content { padding: 12px; }
 
-  /* Dark toggle: chat FAB ile çakışmasın */
-  .dark-toggle { bottom: 86px; }
+  /* Dark toggle: topbar'da zaten var, mobilde FAB gereksiz */
+  .dark-toggle { display: none !important; }
 
   /* Toast: mobile'da ortala */
   #toast-container { right: 12px !important; left: 12px !important; max-width: none !important; }
@@ -596,10 +610,18 @@ body {
 }
 
 @media (max-width: 600px) {
-  .kpi-row { grid-template-columns: 1fr; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .kpi-full { grid-column: span 2; }
+  .hide-mobile { display: none !important; }
+  .mob-accordion summary { cursor: pointer; padding: 8px 0; }
+  .mob-accordion summary::marker { font-size: 12px; }
   .content { padding: 10px; }
   .topbar { padding: 0 10px; }
   .topbar-title { max-width: 140px; }
+
+  /* 2-col inline grid'ler telefonda 1-col'a */
+  [style*="grid-template-columns: 1fr 1fr"]  { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns:1fr 1fr"]   { grid-template-columns: 1fr !important; }
 }
 
 /* ─── Scrollbar ─── */

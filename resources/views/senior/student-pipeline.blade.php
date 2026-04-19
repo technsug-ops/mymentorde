@@ -5,12 +5,15 @@
 @push('head')
 <style>
 /* ── Board ── */
-.pipe-wrap  { overflow-x:auto; padding-bottom:24px; }
-.pipe-board { display:flex; gap:10px; align-items:flex-start; padding:2px 2px 4px; width:100%; box-sizing:border-box; }
+.pipe-wrap  { overflow-x:scroll; -webkit-overflow-scrolling:touch; padding-bottom:24px; touch-action:pan-x pan-y; }
+.pipe-wrap::-webkit-scrollbar { height:6px; }
+.pipe-wrap::-webkit-scrollbar-thumb { background:#c4b5fd; border-radius:3px; }
+.pipe-board { display:flex; gap:10px; align-items:flex-start; padding:2px 2px 4px; min-width:max-content; }
+.content { overflow-x:auto !important; }
 
 /* ── Column ── */
 .pipe-col {
-    flex:1; min-width:160px;
+    flex:0 0 200px; min-width:200px;
     background:var(--u-card);
     border:1px solid var(--u-line);
     border-radius:14px;
@@ -121,57 +124,49 @@ $avatarColors = ['#7c3aed','#6366f1','#0891b2','#059669','#d97706','#dc2626','#0
 @endphp
 
 {{-- Gradient Header --}}
-<div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:20px 24px;margin-bottom:16px;color:#fff;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
-        <div>
-            <div style="font-size:var(--tx-xl);font-weight:800;letter-spacing:-.3px;margin-bottom:4px;">🗂 Öğrenci Pipeline</div>
-            <div style="font-size:var(--tx-sm);opacity:.8;">Drag & drop ile öğrenci aşamalarını yönetin</div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <a href="/senior/students" style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:7px 14px;font-size:var(--tx-xs);font-weight:700;color:#fff;text-decoration:none;">☰ Liste</a>
-            <a href="/senior/process-tracking" style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:7px 14px;font-size:var(--tx-xs);font-weight:700;color:#fff;text-decoration:none;">🗂 Süreç Takibi</a>
+@php
+    $highRisk = 0; $withContract = 0;
+    foreach($columns as $col) {
+        foreach($col['cards'] as $c) {
+            if(($c['risk'] ?? '') === 'high') $highRisk++;
+            if($c['contract'] ?? false) $withContract++;
+        }
+    }
+@endphp
+<div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:14px 16px;margin-bottom:12px;color:#fff;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="font-size:16px;font-weight:800;letter-spacing:-.3px;">🗂 Öğrenci Pipeline</div>
+        <div style="display:flex;gap:6px;">
+            <a href="/senior/students" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:#fff;text-decoration:none;">☰ Liste</a>
+            <a href="/senior/process-tracking" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:#fff;text-decoration:none;">🗂 Süreç</a>
         </div>
     </div>
 
-    {{-- Summary chips --}}
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <div style="background:rgba(255,255,255,.18);border-radius:10px;padding:8px 16px;display:flex;align-items:center;gap:8px;">
-            <span style="font-size:var(--tx-lg);">🎓</span>
-            <div>
-                <div style="font-size:var(--tx-xl);font-weight:800;line-height:1;">{{ $totalStudents }}</div>
-                <div style="font-size:var(--tx-xs);opacity:.75;text-transform:uppercase;letter-spacing:.04em;">Toplam</div>
-            </div>
+    {{-- 5 KPI yan yana --}}
+    @php
+        $newCount = count($columns[0]['cards'] ?? []);
+        $activeCount = $totalStudents - $newCount;
+    @endphp
+    <div style="display:flex;gap:6px;">
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:8px;padding:8px 4px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;line-height:1;">{{ $totalStudents }}</div>
+            <div style="font-size:9px;opacity:.75;margin-top:2px;">Toplam</div>
         </div>
-        @php
-            $highRisk = 0; $withContract = 0;
-            foreach($columns as $col) {
-                foreach($col['cards'] as $c) {
-                    if(($c['risk'] ?? '') === 'high') $highRisk++;
-                    if($c['contract'] ?? false) $withContract++;
-                }
-            }
-        @endphp
-        <div style="background:rgba(220,38,38,.25);border:1px solid rgba(220,38,38,.4);border-radius:10px;padding:8px 16px;display:flex;align-items:center;gap:8px;">
-            <span style="font-size:var(--tx-lg);">⚠️</span>
-            <div>
-                <div style="font-size:var(--tx-xl);font-weight:800;line-height:1;">{{ $highRisk }}</div>
-                <div style="font-size:var(--tx-xs);opacity:.75;text-transform:uppercase;letter-spacing:.04em;">Yüksek Risk</div>
-            </div>
+        <div style="flex:1;background:rgba(255,255,255,.1);border-radius:8px;padding:8px 4px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;line-height:1;">{{ $newCount }}</div>
+            <div style="font-size:9px;opacity:.75;margin-top:2px;">Yeni</div>
         </div>
-        <div style="background:rgba(22,163,74,.2);border:1px solid rgba(22,163,74,.35);border-radius:10px;padding:8px 16px;display:flex;align-items:center;gap:8px;">
-            <span style="font-size:var(--tx-lg);">✅</span>
-            <div>
-                <div style="font-size:var(--tx-xl);font-weight:800;line-height:1;">{{ $withContract }}</div>
-                <div style="font-size:var(--tx-xs);opacity:.75;text-transform:uppercase;letter-spacing:.04em;">Sözleşmeli</div>
-            </div>
+        <div style="flex:1;background:rgba(255,255,255,.1);border-radius:8px;padding:8px 4px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;line-height:1;">{{ $activeCount }}</div>
+            <div style="font-size:9px;opacity:.75;margin-top:2px;">Aktif</div>
         </div>
-        <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:8px 14px;display:flex;gap:6px;flex-wrap:wrap;">
-            @foreach($columns as $col)
-            <div style="text-align:center;min-width:32px;">
-                <div style="font-size:var(--tx-sm);font-weight:800;">{{ count($col['cards']) }}</div>
-                <div style="font-size:var(--tx-xs);opacity:.7;white-space:nowrap;">{{ mb_substr($col['label'],0,6) }}</div>
-            </div>
-            @endforeach
+        <div style="flex:1;background:rgba(220,38,38,.3);border-radius:8px;padding:8px 4px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;line-height:1;">{{ $highRisk }}</div>
+            <div style="font-size:9px;opacity:.75;margin-top:2px;">⚠ Risk</div>
+        </div>
+        <div style="flex:1;background:rgba(22,163,74,.25);border-radius:8px;padding:8px 4px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;line-height:1;">{{ $withContract }}</div>
+            <div style="font-size:9px;opacity:.75;margin-top:2px;">✅ Sözleşme</div>
         </div>
     </div>
 </div>

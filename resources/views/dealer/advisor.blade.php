@@ -2,7 +2,7 @@
 
 @section('title', 'Danışmanım')
 @section('page_title', 'Danışmanım')
-@section('page_subtitle', 'Bağlı seniorlar, destek talepleri ve iletişim')
+@section('page_subtitle', 'Bağlı eğitim danışmanları, destek talepleri ve iletişim')
 
 @push('head')
 <style>
@@ -163,7 +163,7 @@
     <div class="adv-card-head">
         <h3>👨‍🏫 Bağlı Eğitim Danışmanları</h3>
         @if($seniors->isNotEmpty())
-            <span class="adv-badge neutral">{{ $seniors->count() }} senior</span>
+            <span class="adv-badge neutral">{{ $seniors->count() }} danışman</span>
         @endif
     </div>
     @forelse($seniors as $s)
@@ -185,7 +185,7 @@
         </div>
     </div>
     @empty
-    <div class="adv-empty">Henüz bağlı senior görünmüyor.</div>
+    <div class="adv-empty">Henüz bağlı eğitim danışmanı görünmüyor.</div>
     @endforelse
 </div>
 @endif
@@ -261,9 +261,9 @@
 <div class="adv-guide">
     <div class="adv-guide-title">💡 Nasıl Çalışır?</div>
     <ul>
-        <li>Bu ekran dealer'a bağlı öğrencilerin çalıştığı seniorları ve destek taleplerini gösterir.</li>
+        <li>Bu ekran dealer'a bağlı öğrencilerin çalıştığı eğitim danışmanlarını ve destek taleplerini gösterir.</li>
         <li>Yeni Destek Talebi formu ile komisyon, lead takip ve operasyon sorularını iletebilirsin.</li>
-        <li>WhatsApp butonu ile senior ile anında iletişim başlatabilirsin.</li>
+        <li>WhatsApp butonu ile danışman ile anında iletişim başlatabilirsin.</li>
         <li>Ticket listesi dealer kaynaklı destek taleplerinin durumunu özetler.</li>
     </ul>
 </div>

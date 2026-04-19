@@ -287,7 +287,7 @@ $roleLabels = [
         <ol style="margin:0;padding-left:18px;font-size:var(--tx-sm);color:var(--u-muted,#64748b);line-height:1.7;">
             <li>Ad, e-posta ve rol seçip <strong>Davet Et</strong> butonuyla yeni üye ekle. Yetkiler boş bırakılırsa role varsayılan yetkileri atanır.</li>
             <li>Üye satırında <strong>Düzenle</strong>'ye tıkla → satır içi form açılır, rol ve yetkiler güncellenebilir.</li>
-            <li><strong>Kaldır:</strong> Ekip kaydını siler ve kullanıcıyı student rolüne çeker (hesap aktif kalır).</li>
+            <li><strong>Kaldır:</strong> Ekip kaydını siler ve kullanıcıyı öğrenci rolüne çeker (hesap aktif kalır).</li>
             <li><strong>Hesabı Pasif Yap & Kaldır:</strong> Ekipten çıkarır + hesabı devre dışı bırakır (giriş yapamaz).</li>
             <li>Rol renkleri: <span style="color:#1e40af;font-weight:600;">Mktg Admin</span> · <span style="color:#0891b2;font-weight:600;">Sales Admin</span> · <span style="color:#d97706;font-weight:600;">Mktg Staff</span> · <span style="color:#64748b;font-weight:600;">Sales Staff</span></li>
         </ol>
@@ -309,7 +309,7 @@ function toggleEdit(uid) {
     }
 }
 function confirmRemove(form) {
-    return confirm('Bu kullanıcı ekipten çıkarılacak (rol student\'a düşer). Emin misiniz?');
+    return confirm('Bu kullanıcı ekipten çıkarılacak (rol öğrenciye düşer). Emin misiniz?');
 }
 function confirmDeactivate() {
     return confirm('Bu kullanıcı ekipten çıkarılacak VE hesabı pasif yapılacak. Emin misiniz?');

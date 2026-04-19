@@ -19,7 +19,7 @@
 <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
     <div>
         <h1 style="margin:0;">📊 Geri Bildirim Analitik</h1>
-        <div class="u-muted" style="font-size:var(--tx-sm);">Guest + Öğrenci submission'larının KPI'ları</div>
+        <div class="u-muted" style="font-size:var(--tx-sm);">Aday Öğrenci + Öğrenci geri bildirim KPI'ları</div>
     </div>
     <a class="btn" href="{{ route('manager.feedback-analytics.export', request()->query()) }}"
        style="background:#16a34a;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600;">
@@ -39,7 +39,7 @@
     <div>
         <label class="u-muted" style="font-size:11px;display:block;margin-bottom:4px;">KAYNAK</label>
         <select name="source" style="padding:6px 8px;border:1px solid var(--u-line);border-radius:6px;">
-            <option value="all"     @selected($filters['source']==='all')>Hepsi (Guest + Öğrenci)</option>
+            <option value="all"     @selected($filters['source']==='all')>Hepsi (Aday Öğrenci + Öğrenci)</option>
             <option value="guest"   @selected($filters['source']==='guest')>Aday Öğrenci</option>
             <option value="student" @selected($filters['source']==='student')>Öğrenci</option>
         </select>

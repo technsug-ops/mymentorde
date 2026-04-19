@@ -23,14 +23,14 @@
     $activePriority = $filters['priority'] ?? 'all';
     $activeQ        = $filters['q']        ?? '';
     $kpiItems = [
-        ['label'=>'Toplam', 'color'=>'#7c3aed', 'val'=>$kTotal,   'icon'=>'🎫', 'param'=>'status',   'value'=>'all'],
-        ['label'=>'Açık',   'color'=>'#7c3aed', 'val'=>$kOpen,    'icon'=>'📂', 'param'=>'status',   'value'=>'open'],
-        ['label'=>'Bekleyen','color'=>'#d97706','val'=>$kPending,  'icon'=>'⏳', 'param'=>'status',   'value'=>'pending'],
-        ['label'=>'Kapalı', 'color'=>'#16a34a', 'val'=>$kClosed,  'icon'=>'✅', 'param'=>'status',   'value'=>'closed'],
-        ['label'=>'Acil',   'color'=>'#dc2626', 'val'=>$kUrgent,  'icon'=>'🚨', 'param'=>'priority', 'value'=>'urgent'],
+        ['label'=>'Acil',    'color'=>'#dc2626', 'val'=>$kUrgent,  'icon'=>'🚨', 'param'=>'priority', 'value'=>'urgent'],
+        ['label'=>'Bekleyen','color'=>'#d97706', 'val'=>$kPending, 'icon'=>'⏳', 'param'=>'status',   'value'=>'pending'],
+        ['label'=>'Açık',    'color'=>'#7c3aed', 'val'=>$kOpen,    'icon'=>'📂', 'param'=>'status',   'value'=>'open'],
+        ['label'=>'Kapalı',  'color'=>'#16a34a', 'val'=>$kClosed,  'icon'=>'✅', 'param'=>'status',   'value'=>'closed'],
+        ['label'=>'Toplam',  'color'=>'#7c3aed', 'val'=>$kTotal,   'icon'=>'🎫', 'param'=>'status',   'value'=>'all', 'full'=>true],
     ];
 @endphp
-<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;">
+<div class="kpi-row" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;">
     @foreach($kpiItems as $k)
     @php
         $isActive = ($k['param'] === 'status' && $activeStatus === $k['value'])
@@ -39,7 +39,7 @@
         $borderStyle = $isActive ? "border:2px solid {$k['color']};" : 'border:1px solid var(--u-line);';
         $bgStyle = $isActive ? "background:{$k['color']}18;" : 'background:var(--u-card);';
     @endphp
-    <a href="{{ $href }}" style="{{ $bgStyle }}{{ $borderStyle }}border-radius:10px;padding:12px 14px;text-align:center;text-decoration:none;display:block;cursor:pointer;transition:all .15s;"
+    <a href="{{ $href }}" class="{{ !empty($k['full']) ? 'kpi-full' : '' }}" style="{{ $bgStyle }}{{ $borderStyle }}border-radius:10px;padding:12px 14px;text-align:center;text-decoration:none;display:block;cursor:pointer;transition:all .15s;"
         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.08)'"
         onmouseout="this.style.transform='';this.style.boxShadow=''">
         <div style="font-size:var(--tx-xl);line-height:1;">{{ $k['icon'] }}</div>
