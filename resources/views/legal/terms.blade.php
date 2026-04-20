@@ -107,18 +107,18 @@
         <li>Bu koşullar Türkiye Cumhuriyeti hukukuna tabidir.</li>
         <li>Tüketici uyuşmazlıklarında Tüketici Hakem Heyetleri ve Tüketici Mahkemeleri yetkilidir.</li>
         <li>Ticari uyuşmazlıklarda İstanbul Anadolu Mahkemeleri ve İcra Daireleri yetkilidir.</li>
-        <li>Uyuşmazlıkları öncelikli olarak iyi niyetle çözmeyi teşvik ederiz: <a href="mailto:destek@mentorde.com">destek@mentorde.com</a></li>
+        <li>Uyuşmazlıkları öncelikli olarak iyi niyetle çözmeyi teşvik ederiz: <a href="mailto:support@mentorde.com">support@mentorde.com</a></li>
     </ul>
 
     <h2>12. Hesabın Kapatılması</h2>
     <p>
-        Hesabınızı dilediğiniz zaman <a href="mailto:destek@mentorde.com">destek@mentorde.com</a> adresine yazarak kapatabilirsiniz.
+        Hesabınızı dilediğiniz zaman <a href="mailto:support@mentorde.com">support@mentorde.com</a> adresine yazarak kapatabilirsiniz.
         Devam eden bir danışmanlık sözleşmeniz varsa, sözleşme hükümleri uygulanmaya devam eder.
         Yasal zorunluluk dışında tüm kişisel verileriniz 30 gün içinde silinir veya anonimleştirilir.
     </p>
 
     <h2>13. İletişim</h2>
     <p>
-        Koşullar hakkında sorularınız için: <a href="mailto:destek@mentorde.com">destek@mentorde.com</a>
+        Koşullar hakkında sorularınız için: <a href="mailto:support@mentorde.com">support@mentorde.com</a>
     </p>
 @endsection
