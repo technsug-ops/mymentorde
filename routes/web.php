@@ -16,6 +16,11 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/login');
 Route::view('/landing/mentorde', 'landing.mentorde')->name('landing.mentorde');
 
+// ── Yasal Sayfalar (Privacy / Terms) ─────────────────────────────────────────
+// SaaS gerekliliği: Google OAuth consent screen + KVKK/GDPR uyumu için public erişim
+Route::view('/privacy', 'legal.privacy')->name('legal.privacy');
+Route::view('/terms',   'legal.terms')->name('legal.terms');
+
 Route::middleware(['auth', 'manager.role'])->group(function (): void {
     Route::get('/demo', fn() => view('demo.index'));
     Route::get('/demo/checklist', fn() => view('demo.checklist'));

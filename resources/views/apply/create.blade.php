@@ -617,6 +617,11 @@
                 KVKK aydınlatma metnini okudum ve kabul ediyorum.
                 <button type="button" class="link-btn" id="kvkkOpenBtn">KVKK Metnini Oku</button>
             </label>
+            <div style="font-size:12px;color:#64748b;margin:6px 0 0 22px;">
+                Başvuru yaparak
+                <a href="{{ route('legal.privacy') }}" target="_blank" style="color:#2563eb;">Gizlilik Politikası</a> ve
+                <a href="{{ route('legal.terms') }}" target="_blank" style="color:#2563eb;">Kullanım Koşulları</a>'nı kabul etmiş olursunuz.
+            </div>
 
             <button type="submit" class="submit-btn" id="applySubmitBtn">Başvuruyu Gönder →</button>
         </form>

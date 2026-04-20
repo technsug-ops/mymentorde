@@ -407,6 +407,13 @@
             </div>
             @endunless
 
+            {{-- Yasal Linkler --}}
+            <div style="margin-top:22px;padding-top:14px;border-top:1px solid #eef2f7;text-align:center;font-size:12px;color:#9ca3af;">
+                <a href="{{ route('legal.privacy') }}" style="color:#6b7280;text-decoration:none;margin:0 6px;">Gizlilik Politikası</a>
+                ·
+                <a href="{{ route('legal.terms') }}" style="color:#6b7280;text-decoration:none;margin:0 6px;">Kullanım Koşulları</a>
+            </div>
+
         </section>
     </div>
 
