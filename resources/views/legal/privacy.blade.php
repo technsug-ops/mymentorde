@@ -18,7 +18,7 @@
     <h2>1. Veri Sorumlusu</h2>
     <p>
         Kişisel verilerinizin işlenmesinden <strong>{{ config('brand.name', 'MentorDE') }}</strong> sorumludur.
-        İletişim: <a href="mailto:destek@mentorde.com">destek@mentorde.com</a>
+        İletişim: <a href="mailto:support@mentorde.com">support@mentorde.com</a>
     </p>
 
     <h2>2. Topladığımız Veriler</h2>
@@ -100,7 +100,7 @@
         <li>Açık rızayı geri çekme — geçmiş işlemleri etkilemez</li>
         <li>Veri Koruma Otoritesi'ne (KVKK Kurumu / yerel AB otoriteleri) şikâyet</li>
     </ul>
-    <p>Taleplerinizi <a href="mailto:destek@mentorde.com">destek@mentorde.com</a> adresine iletebilirsiniz. 30 gün içinde yanıt veririz.</p>
+    <p>Taleplerinizi <a href="mailto:support@mentorde.com">support@mentorde.com</a> adresine iletebilirsiniz. 30 gün içinde yanıt veririz.</p>
 
     <h2>8. Veri Güvenliği</h2>
     <ul>
@@ -130,7 +130,7 @@
 
     <h2>12. İletişim</h2>
     <p>
-        Gizlilik soruları için: <a href="mailto:destek@mentorde.com">destek@mentorde.com</a><br>
-        Veri Koruma Sorumlusu: <a href="mailto:destek@mentorde.com">destek@mentorde.com</a>
+        Gizlilik soruları için: <a href="mailto:support@mentorde.com">support@mentorde.com</a><br>
+        Veri Koruma Sorumlusu: <a href="mailto:support@mentorde.com">support@mentorde.com</a>
     </p>
 @endsection

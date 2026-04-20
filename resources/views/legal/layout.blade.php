@@ -152,7 +152,7 @@
         © {{ date('Y') }} {{ config('brand.name', 'MentorDE') }} ·
         <a href="{{ route('legal.privacy') }}">Gizlilik Politikası</a> ·
         <a href="{{ route('legal.terms') }}">Kullanım Koşulları</a> ·
-        <a href="mailto:destek@mentorde.com">İletişim</a>
+        <a href="mailto:support@mentorde.com">İletişim</a>
     </footer>
 </body>
 </html>
