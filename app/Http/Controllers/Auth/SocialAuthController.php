@@ -8,6 +8,7 @@ use App\Models\GuestApplication;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -15,9 +16,6 @@ use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
 {
-    /**
-     * Google OAuth redirect — kullanıcıyı Google consent ekranına gönderir.
-     */
     public function redirectToGoogle()
     {
         return Socialite::driver('google')
@@ -25,23 +23,18 @@ class SocialAuthController extends Controller
             ->redirect();
     }
 
-    /**
-     * Google callback — find-or-create user + login.
-     *
-     * Flow:
-     *  1. Google'dan user bilgisi al (email verified garanti)
-     *  2. Sistemde aynı email varsa → bağla ve login yap (auto-link)
-     *  3. Yoksa → guest rolünde yeni user + guest_application oluştur, login yap
-     *  4. Rol'e göre redirect (role middleware'ları devraldığı için redirectByRole uyumlu)
-     */
     public function handleGoogleCallback(Request $request)
     {
         try {
             $googleUser = Socialite::driver('google')->user();
         } catch (\Throwable $e) {
-            Log::warning('Google OAuth callback failed', ['error' => $e->getMessage()]);
+            Log::error('Google OAuth callback failed', [
+                'error' => $e->getMessage(),
+                'class' => get_class($e),
+                'trace' => substr($e->getTraceAsString(), 0, 1500),
+            ]);
             return redirect('/login')->withErrors([
-                'email' => 'Google ile giriş başarısız oldu. Tekrar dene veya e-posta/şifre ile giriş yap.',
+                'email' => 'Google ile giriş başarısız oldu: ' . $e->getMessage(),
             ]);
         }
 
@@ -52,28 +45,53 @@ class SocialAuthController extends Controller
             ]);
         }
 
-        // 1) Mevcut user var mı? (soft-deleted dahil — duplicate key hatasını önle)
-        $user = User::withTrashed()->where('email', $email)->first();
-        if ($user && $user->trashed()) {
-            // Soft-deleted hesap — restore et (kullanıcı tekrar giriş yapmak istiyor)
-            $user->restore();
+        // Find-or-create atomic: transaction + withoutGlobalScopes + withTrashed
+        try {
+            $user = DB::transaction(function () use ($email, $googleUser) {
+                return $this->findOrCreateUser($email, $googleUser);
+            });
+        } catch (\Throwable $e) {
+            Log::error('Google OAuth user provisioning failed', [
+                'email' => $email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect('/login')->withErrors([
+                'email' => 'Kayıt oluşturulurken bir hata oluştu: ' . $e->getMessage(),
+            ]);
         }
 
-        // Google name parsing (her iki branch için kullanılır)
+        // Hesap kilitli kontrolü
+        if ($user->locked_until && now()->lt($user->locked_until)) {
+            $minutesLeft = (int) now()->diffInMinutes($user->locked_until, false);
+            return redirect('/login')->withErrors([
+                'email' => "Hesap geçici olarak kilitlendi. {$minutesLeft} dakika sonra tekrar deneyin.",
+            ]);
+        }
+
+        // Login + session regenerate
+        Auth::login($user, true);
+        $request->session()->regenerate();
+        $request->session()->put('current_company_id', (int) ($user->company_id ?? 0));
+
+        return app(AuthController::class)->redirectByRole();
+    }
+
+    protected function findOrCreateUser(string $email, $googleUser): User
+    {
+        // Name parsing
         $displayName = trim((string) ($googleUser->getName() ?? '')) ?: (explode('@', $email)[0] ?: 'Google User');
         $firstName   = Str::of($displayName)->explode(' ')->first() ?: 'Guest';
         $lastName    = (string) Str::of($displayName)->explode(' ')->skip(1)->implode(' ');
         if ($lastName === '') $lastName = '-';
 
-        if ($user) {
-            // Hesap kilitli kontrolü
-            if ($user->locked_until && now()->lt($user->locked_until)) {
-                $minutesLeft = (int) now()->diffInMinutes($user->locked_until, false);
-                return redirect('/login')->withErrors([
-                    'email' => "Hesap geçici olarak kilitlendi. {$minutesLeft} dakika sonra tekrar deneyin.",
-                ]);
-            }
+        // Soft-deleted ve tüm scope'lar dahil — duplicate key hatasını önle
+        $user = User::withTrashed()->withoutGlobalScopes()->where('email', $email)->first();
 
+        if ($user) {
+            if ($user->trashed()) {
+                $user->restore();
+            }
             // Google bilgilerini user'a bağla (ilk kez login ise)
             $updates = [];
             if (empty($user->google_id)) {
@@ -88,11 +106,11 @@ class SocialAuthController extends Controller
                 $user->forceFill($updates)->save();
             }
         } else {
-            // 2) Yeni guest kullanıcı oluştur
+            // Yeni guest kullanıcı oluştur
             $user = User::create([
                 'name'              => $displayName,
                 'email'             => $email,
-                'password'          => Hash::make(Str::random(40)), // dummy — Google ile giriş yapacak
+                'password'          => Hash::make(Str::random(40)),
                 'role'              => User::ROLE_GUEST,
                 'google_id'         => (string) $googleUser->getId(),
                 'email_verified_at' => now(),
@@ -100,29 +118,22 @@ class SocialAuthController extends Controller
         }
 
         // Guest role user'lar için guest_application kaydı garanti et
-        // (hem yeni kayıt hem de sonradan Google bağlayan existing guest için)
         if ((string) $user->role === User::ROLE_GUEST) {
             GuestApplication::firstOrCreate(
                 ['email' => $email],
                 [
-                    'guest_user_id'    => $user->id,
-                    'first_name'       => $firstName,
-                    'last_name'        => $lastName,
-                    'tracking_token'   => Str::upper(Str::random(12)),
-                    'status'           => 'new',
-                    'contract_status'  => 'not_requested',
-                    'application_type' => 'bachelor',
+                    'guest_user_id'       => $user->id,
+                    'first_name'          => $firstName,
+                    'last_name'           => $lastName,
+                    'tracking_token'      => Str::upper(Str::random(12)),
+                    'status'              => 'new',
+                    'contract_status'     => 'not_requested',
+                    'application_type'    => 'bachelor',
                     'application_country' => 'Türkiye',
                 ]
             );
         }
 
-        // 3) Login + session regenerate
-        Auth::login($user, true);
-        $request->session()->regenerate();
-        $request->session()->put('current_company_id', (int) ($user->company_id ?? 0));
-
-        // 4) Role redirect (AuthController::redirectByRole ile aynı logic)
-        return app(AuthController::class)->redirectByRole();
+        return $user;
     }
 }
