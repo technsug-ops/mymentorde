@@ -207,18 +207,13 @@
         <div class="msg-foot-main">
             <div class="eg-picker-wrap">
                 <button type="button" class="eg-picker-btn" onclick="egTogglePicker('emoji','studentMsgBody')" title="Emoji">😊</button>
-                <button type="button" class="eg-picker-btn" onclick="egTogglePicker('gif','studentMsgBody')" title="GIF" style="font-size:var(--tx-xs);font-weight:700">GIF</button>
                 <div class="eg-emoji-picker" id="egEmojiPicker_studentMsgBody">
                     <div class="eg-emoji-cats" id="egEmojiCats_studentMsgBody"></div>
                     <div class="eg-emoji-grid" id="egEmojiGrid_studentMsgBody"></div>
                 </div>
-                <div class="eg-gif-picker" id="egGifPicker_studentMsgBody">
-                    <div class="eg-gif-search"><input type="text" placeholder="🔍 GIF ara…" oninput="egGifSearch(this.value,'studentMsgBody')"></div>
-                    <div class="eg-gif-grid" id="egGifGrid_studentMsgBody"><div class="hub-gif-loading">Yükleniyor…</div></div>
-                </div>
             </div>
             <textarea id="studentMsgBody" name="message" rows="1"
-                      placeholder="Danışmanınıza mesaj yazın… (Enter = gönder, Shift+Enter = satır)"
+                      placeholder="Mesajınızı yazın…"
                       oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,110)+'px'"
                       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();document.getElementById('studentSendForm').requestSubmit()}"
             ></textarea>

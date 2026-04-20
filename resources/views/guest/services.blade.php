@@ -248,6 +248,20 @@
     </div>
 </div>
 
+{{-- Paket seçilmiş + sözleşme henüz istenmemişse → kalıcı CTA banner --}}
+@if($selectedPackageTitle && empty($contractRequested))
+<div style="background:linear-gradient(135deg,#0d9488,#14b8a6);color:#fff;border-radius:12px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 4px 14px rgba(13,148,136,.25);">
+    <div style="font-size:28px;flex-shrink:0;">📋</div>
+    <div style="flex:1;min-width:200px;">
+        <div style="font-size:14px;font-weight:800;margin-bottom:2px;">Paket seçiminiz tamamlandı ✓</div>
+        <div style="font-size:12px;opacity:.95;">Artık sözleşme talebinde bulunabilirsiniz.</div>
+    </div>
+    <a href="{{ route('guest.contract') }}" style="background:#fff;color:#0d9488;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;">
+        Sözleşme Sürecine Git →
+    </a>
+</div>
+@endif
+
 {{-- ── Paketler başlık bandı ── --}}
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
     <div style="flex:1;height:1px;background:var(--u-line);"></div>
@@ -666,17 +680,17 @@
         <div style="font-size:56px;margin-bottom:12px;">🎉</div>
         <div style="font-size:22px;font-weight:800;color:var(--u-text);margin-bottom:8px;">Tebrikler!</div>
         <div style="font-size:14px;color:var(--u-muted);line-height:1.6;margin-bottom:24px;">
-            Paket seciminiz kesinlesti.<br>
-            Simdi sozlesme surecine gecebilirsin.
+            Paket seçiminiz kesinleşti.<br>
+            Şimdi sözleşme sürecine geçebilirsin.
         </div>
         <a href="{{ route('guest.contract') }}"
            style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:12px;background:linear-gradient(135deg,#0d9488,#14b8a6);color:#fff;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(13,148,136,.3);">
-            Sozlesmeme Git →
+            Sözleşmeme Git →
         </a>
         <div style="margin-top:14px;">
             <button type="button" onclick="document.getElementById('pkgConfirmModal').style.display='none'"
                     style="background:none;border:none;font-size:13px;color:var(--u-muted);cursor:pointer;padding:4px 8px;">
-                Burada kalayim
+                Burada kalayım
             </button>
         </div>
     </div>

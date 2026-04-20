@@ -14,6 +14,176 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0,0,0,.1);
 }
+
+/* ── Hero (Option B: compact & data-forward) ── */
+.city-hero {
+    color: #fff; border-radius: 14px; margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08); overflow: hidden;
+}
+.city-hero-body {
+    display: flex; align-items: stretch; gap: 24px; padding: 26px 28px;
+}
+.city-hero-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.city-hero-header { display: flex; flex-direction: column; gap: 6px; }
+.city-hero-label {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+    opacity: .82; margin-bottom: 2px;
+}
+.city-hero-marker {
+    display: inline-block; width: 5px; height: 16px; background: rgba(255,255,255,.75); border-radius: 3px;
+}
+.city-hero-title {
+    font-size: 34px; font-weight: 800; line-height: 1.1; margin: 0;
+    letter-spacing: -.5px;
+}
+.city-hero-tagline { font-size: 14px; opacity: .88; line-height: 1.4; margin-bottom: 4px; }
+
+.city-hero-stats {
+    display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 4px;
+}
+.city-hero-stat {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 11px; border-radius: 20px;
+    background: rgba(255,255,255,.18); backdrop-filter: blur(6px);
+    font-size: 12px; font-weight: 600; line-height: 1;
+    border: 1px solid rgba(255,255,255,.12);
+}
+.city-hero-stat-ico { font-size: 13px; }
+.city-hero-overview {
+    font-size: 13px; opacity: .92; line-height: 1.55; margin-top: 10px;
+    padding-top: 12px; border-top: 1px solid rgba(255,255,255,.18);
+    max-width: 620px;
+}
+
+.city-hero-video {
+    position: relative; width: 260px; aspect-ratio: 16/9; border-radius: 12px;
+    overflow: hidden; border: 2px solid rgba(255,255,255,.3); cursor: pointer;
+    padding: 0; flex-shrink: 0; background: #000; align-self: center;
+    transition: transform .15s, border-color .15s, box-shadow .2s;
+    box-shadow: 0 6px 22px rgba(0,0,0,.25);
+}
+.city-hero-video:hover { transform: scale(1.03); border-color: rgba(255,255,255,.6); box-shadow: 0 8px 28px rgba(0,0,0,.35); }
+.city-hero-play {
+    width: 46px; height: 46px; background: rgba(220,38,38,.95); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,.5);
+}
+.city-hero-play svg { width: 18px; height: 18px; }
+@media (max-width: 720px) {
+    /* Mobil: Video banner üstte (full-width), altta kompakt metin */
+    .city-hero { border-radius: 12px; }
+    .city-hero-body {
+        display: flex; flex-direction: column; gap: 0; padding: 0;
+    }
+    .city-hero-video { order: -1; }
+    .city-hero-main  { order: 0; }
+    .city-hero-video {
+        width: 100%; aspect-ratio: 16/9; border-radius: 12px 12px 0 0;
+        border: none; box-shadow: none; display: block;
+    }
+    .city-hero-video::after {
+        /* Alt kısımda gradient fade — metin alanıyla yumuşak geçiş */
+        content: ''; position: absolute; inset: auto 0 0 0; height: 40%;
+        background: linear-gradient(to bottom, transparent, rgba(0,0,0,.25));
+        pointer-events: none;
+    }
+    .city-hero-video:hover { transform: none; }
+    .city-hero-play { width: 50px; height: 50px; }
+    .city-hero-play svg { width: 20px; height: 20px; }
+    .city-hero-video span { font-size: .72rem !important; margin-top: 4px; }
+
+    .city-hero-main {
+        padding: 14px 16px 16px;
+    }
+    .city-hero-header { gap: 3px; margin-bottom: 10px; }
+    .city-hero-label { font-size: 10px; letter-spacing: .7px; opacity: .85; }
+    .city-hero-marker { height: 11px; width: 3px; }
+    .city-hero-title { font-size: 24px; letter-spacing: -.3px; line-height: 1.1; }
+    .city-hero-tagline { font-size: 12.5px; line-height: 1.35; opacity: .85; }
+
+    /* Stats: inline ayraçlı tek satır (pill yerine) */
+    .city-hero-stats {
+        gap: 0; margin: 0; padding-top: 10px;
+        border-top: 1px solid rgba(255,255,255,.2);
+        display: flex; align-items: center; flex-wrap: wrap; row-gap: 4px;
+    }
+    .city-hero-stat {
+        background: none; border: none; padding: 0 10px 0 0; border-radius: 0;
+        font-size: 12px; opacity: .92; position: relative;
+    }
+    .city-hero-stat + .city-hero-stat { padding-left: 10px; }
+    .city-hero-stat + .city-hero-stat::before {
+        content: ''; position: absolute; left: 0; top: 4px; bottom: 4px;
+        width: 1px; background: rgba(255,255,255,.3);
+    }
+    .city-hero-stat-ico { font-size: 12px; }
+
+    .city-hero-overview { display: none; }
+}
+@media (max-width: 420px) {
+    .city-hero-title { font-size: 22px; }
+    .city-hero-main { padding: 12px 14px 14px; }
+}
+
+/* ── Şehir Navigasyonu ── */
+.city-nav-wrap { margin-bottom: 20px; position: relative; }
+.city-nav {
+    display: flex; gap: 8px; flex-wrap: wrap;
+}
+.city-nav-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 20px;
+    font-size: var(--tx-xs); font-weight: 600;
+    text-decoration: none; white-space: nowrap;
+    background: var(--u-card); color: var(--u-text);
+    border: 1px solid var(--u-line);
+    transition: border-color .15s, transform .1s;
+}
+.city-nav-pill:hover { border-color: var(--u-brand); text-decoration: none; }
+.city-nav-pill.active {
+    background: var(--u-brand, #2563eb); color: #fff; border-color: var(--u-brand, #2563eb);
+}
+.city-nav-ico { font-size: 14px; line-height: 1; }
+
+/* Ok butonları (sadece mobilde görünür) */
+.city-nav-arrow { display: none; }
+
+/* Mobil: yatay scroll (single row) + ok butonları */
+@media (max-width: 720px) {
+    .city-nav-wrap {
+        margin-left: -4px; margin-right: -4px;
+        padding: 0 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .city-nav {
+        flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+        padding: 2px 36px;
+        scroll-snap-type: x proximity;
+        mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+    }
+    .city-nav::-webkit-scrollbar { display: none; }
+    .city-nav-pill { flex-shrink: 0; scroll-snap-align: start; padding: 7px 12px; }
+    .city-nav-pill.active { scroll-snap-align: center; }
+
+    /* Ok butonları */
+    .city-nav-arrow {
+        display: flex; align-items: center; justify-content: center;
+        position: absolute; top: 50%; transform: translateY(-50%);
+        width: 30px; height: 30px; border-radius: 50%;
+        background: var(--u-card); color: var(--u-text);
+        border: 1px solid var(--u-line);
+        font-size: 22px; font-weight: 700; line-height: 1;
+        cursor: pointer; z-index: 2; padding: 0; padding-bottom: 3px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.12);
+        transition: opacity .2s, transform .1s;
+    }
+    .city-nav-arrow:hover { transform: translateY(-50%) scale(1.08); }
+    .city-nav-arrow:active { transform: translateY(-50%) scale(.95); }
+    .city-nav-arrow.prev { left: 2px; }
+    .city-nav-arrow.next { right: 2px; }
+    .city-nav-arrow[data-hidden="1"] { opacity: 0; pointer-events: none; }
+}
 </style>
 @endpush
 
@@ -26,57 +196,72 @@
     $collarIcon = ['beyaz yaka'=>'👔', 'mavi yaka'=>'🔧', 'her ikisi'=>'⚡'];
 @endphp
 
-{{-- Hero --}}
-<div class="card" style="background:{{ $c['hero_color'] ?? 'var(--u-brand)' }};color:#fff;margin-bottom:20px;">
-    <div class="card-body" style="padding:28px;">
-        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-            <div style="font-size:48px;line-height:1;">{{ $c['emoji'] ?? '🏙' }}</div>
-            <div style="flex:1;min-width:200px;">
-                <div style="font-size:var(--tx-xs);opacity:.8;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">{{ $c['state'] ?? '' }} Eyaleti</div>
-                <div style="font-size:var(--tx-2xl);font-weight:800;margin-bottom:4px;">{{ $c['name'] ?? '' }}</div>
-                <div style="font-size:var(--tx-sm);opacity:.85;">{{ $c['tagline'] ?? '' }}</div>
-            </div>
+{{-- Hero (B: compact + data-forward) --}}
+@php
+    $heroVid   = $c['hero_video_id'] ?? '';
+    $heroThumb = $c['hero_video_thumb'] ?? '';
+    $thumbSrc  = $heroThumb ?: ($heroVid ? "https://img.youtube.com/vi/{$heroVid}/maxresdefault.jpg" : '');
 
-            {{-- Video Thumbnail --}}
-            @php $heroVid = $c['hero_video_id'] ?? ''; @endphp
-            @if($heroVid)
-            <button data-vid-open="{{ $heroVid }}"
-                    style="position:relative;width:380px;height:214px;border-radius:12px;overflow:hidden;border:3px solid rgba(255,255,255,.4);cursor:pointer;padding:0;flex-shrink:0;background:#000;">
-                <img src="https://img.youtube.com/vi/{{ $heroVid }}/mqdefault.jpg"
-                     alt="{{ $c['name'] }} video"
-                     style="width:100%;height:100%;object-fit:cover;opacity:.85;">
-                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
-                    <div style="width:52px;height:52px;background:rgba(255,0,0,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.4);">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
-                    </div>
-                    <span style="font-size:.72rem;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.8);">▶ Videoyu İzle</span>
+    $heroOverview = trim($c['overview'] ?? '');
+    if (mb_strlen($heroOverview) > 100) {
+        $cut = mb_substr($heroOverview, 0, 100);
+        $lastSpace = mb_strrpos($cut, ' ');
+        $heroOverview = ($lastSpace !== false ? mb_substr($cut, 0, $lastSpace) : $cut) . '…';
+    }
+@endphp
+<div class="city-hero" style="background:{{ $c['hero_color'] ?? 'var(--u-brand)' }};">
+    <div class="city-hero-body">
+        <div class="city-hero-main">
+            <div class="city-hero-header">
+                <div class="city-hero-label">
+                    <span class="city-hero-marker"></span>
+                    {{ $c['state'] ?? '' }} Eyaleti
                 </div>
-            </button>
-            @endif
-
-            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
-                <span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:var(--tx-xs);">👥 {{ $c['population'] ?? '' }}</span>
-                <span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:var(--tx-xs);">🎓 {{ $c['student_pop'] ?? '' }} öğrenci</span>
-                <span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:var(--tx-xs);">💶 {{ $costLabels[$idx] }}</span>
+                <h1 class="city-hero-title">{{ $c['name'] ?? '' }}</h1>
+                <div class="city-hero-tagline">{{ $c['tagline'] ?? '' }}</div>
             </div>
+
+            <div class="city-hero-stats">
+                <span class="city-hero-stat"><span class="city-hero-stat-ico">👥</span>{{ $c['population'] ?? '' }}</span>
+                <span class="city-hero-stat"><span class="city-hero-stat-ico">🎓</span>{{ $c['student_pop'] ?? '' }} öğrenci</span>
+                <span class="city-hero-stat"><span class="city-hero-stat-ico">💶</span>{{ $costLabels[$idx] }}</span>
+            </div>
+
+            @if($heroOverview)
+            <div class="city-hero-overview">{{ $heroOverview }}</div>
+            @endif
         </div>
-        @if(!empty($c['overview']))
-        <div style="margin-top:16px;font-size:var(--tx-sm);opacity:.9;line-height:1.6;max-width:700px;border-top:1px solid rgba(255,255,255,.2);padding-top:14px;">
-            {{ $c['overview'] }}
-        </div>
+
+        @if($heroVid)
+        <button data-vid-open="{{ $heroVid }}" class="city-hero-video">
+            <img src="{{ $thumbSrc }}"
+                 alt="{{ $c['name'] }} video"
+                 onerror="this.src='https://img.youtube.com/vi/{{ $heroVid }}/hqdefault.jpg';"
+                 style="width:100%;height:100%;object-fit:cover;opacity:.92;">
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">
+                <div class="city-hero-play">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+                <span style="font-size:.66rem;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.8);">Videoyu İzle</span>
+            </div>
+        </button>
         @endif
     </div>
 </div>
 
-{{-- Şehir Navigasyonu --}}
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
-    @foreach($allCities ?? [] as $key => $ac)
-    <a href="{{ route('guest.city-detail', $key) }}"
-       style="padding:6px 14px;border-radius:20px;font-size:var(--tx-xs);font-weight:600;text-decoration:none;
-              {{ $key === ($c['slug'] ?? '') ? 'background:var(--u-brand,#2563eb);color:#fff;' : 'background:var(--u-card);color:var(--u-text);border:1px solid var(--u-line);' }}">
-        {{ $ac['emoji'] ?? '' }} {{ $ac['name'] }}
-    </a>
-    @endforeach
+{{-- Şehir Navigasyonu — yatay scroll (mobil) / wrap (desktop) --}}
+<div class="city-nav-wrap">
+    <button type="button" class="city-nav-arrow prev" aria-label="Önceki şehirler" data-city-nav-dir="-1">‹</button>
+    <div class="city-nav" id="cityNavTrack">
+        @foreach($allCities ?? [] as $key => $ac)
+        <a href="{{ route('guest.city-detail', $key) }}"
+           class="city-nav-pill {{ $key === ($c['slug'] ?? '') ? 'active' : '' }}">
+            <span class="city-nav-ico">{{ $ac['emoji'] ?? '' }}</span>
+            <span class="city-nav-name">{{ $ac['name'] }}</span>
+        </a>
+        @endforeach
+    </div>
+    <button type="button" class="city-nav-arrow next" aria-label="Sonraki şehirler" data-city-nav-dir="1">›</button>
 </div>
 
 <div class="col2" style="margin-bottom:20px;">
@@ -628,6 +813,41 @@ function cityVidClose(){
     document.body.style.overflow = '';
 }
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') cityVidClose(); });
+
+// City nav: scroll active pill into view + arrow button behavior (mobile)
+(function(){
+    var track = document.getElementById('cityNavTrack');
+    if (!track) return;
+
+    // Aktif şehri ortala
+    var active = track.querySelector('.city-nav-pill.active');
+    if (active && active.scrollIntoView) {
+        active.scrollIntoView({ block: 'nearest', inline: 'center' });
+    }
+
+    // Ok butonları
+    var prevBtn = document.querySelector('.city-nav-arrow.prev');
+    var nextBtn = document.querySelector('.city-nav-arrow.next');
+
+    function updateArrows(){
+        if (!prevBtn || !nextBtn) return;
+        var max = track.scrollWidth - track.clientWidth - 2;
+        prevBtn.dataset.hidden = track.scrollLeft <= 4 ? '1' : '0';
+        nextBtn.dataset.hidden = track.scrollLeft >= max ? '1' : '0';
+    }
+
+    [prevBtn, nextBtn].forEach(function(btn){
+        if (!btn) return;
+        btn.addEventListener('click', function(){
+            var dir = parseInt(btn.dataset.cityNavDir || '1', 10);
+            track.scrollBy({ left: dir * Math.max(track.clientWidth * 0.7, 180), behavior: 'smooth' });
+        });
+    });
+
+    track.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows);
+    updateArrows();
+})();
 </script>
 
 @endsection

@@ -550,7 +550,7 @@ body {
   #gs-wrap { max-width: 140px !important; }
   .topbar-right { gap: 4px; }
   .nav-link { min-height: 44px; }
-  .icon-btn { width: 44px; height: 44px; }
+  .icon-btn { width: 44px; height: 44px; font-size: 20px; }
   .card { padding: 14px; }
   .content { padding: 16px; }
   .quick-actions { grid-template-columns: 1fr; }
@@ -575,7 +575,7 @@ body {
   .topbar-left  { gap: 6px; }
   .topbar-right { gap: 4px; }
   .topbar-title { font-size: var(--tx-sm); }
-  .icon-btn { width: 44px; height: 44px; font-size: var(--tx-base); }
+  .icon-btn { width: 44px; height: 44px; font-size: 20px; }
 
   [style*="grid-template-columns"]:not(.kpi-row):not(.kpi-row-compact) { grid-template-columns: 1fr !important; }
   .kpi-row[style*="grid-template-columns"] { grid-template-columns: repeat(2, 1fr) !important; }
@@ -630,8 +630,13 @@ body {
   .cv-actions { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 5px !important; width: 100%; }
   .cv-actions > * { font-size: 11px !important; padding: 8px 6px !important; justify-content: center !important; }
   .cv-actions > button:last-child { grid-column: span 2; background: #7c3aed !important; color: #fff !important; font-weight: 600 !important; }
-  .content { padding: 10px; }
-  .topbar { padding: 0 10px; }
+  .content { padding: 10px; padding-top: calc(var(--header-h) + 10px); }
+  .topbar {
+    padding: 0 10px;
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 60;
+    box-shadow: 0 1px 8px rgba(0,0,0,.06);
+  }
   .topbar-title { max-width: 140px; }
 
   /* 2-col inline grid'ler telefonda 1-col'a */

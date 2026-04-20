@@ -60,8 +60,9 @@ class SecurityHeaders
         $viteStyle  = '';
         $viteConnect = '';
         if (app()->environment('local')) {
-            $viteHosts = 'http://localhost:* http://127.0.0.1:* http://[::1]:*';
-            $wsHosts   = 'ws://localhost:* ws://127.0.0.1:* ws://[::1]:*';
+            // IPv6 formatı ([::1]) CSP parser'ını bozar — localhost + 127.0.0.1 yeterli
+            $viteHosts = 'http://localhost:* http://127.0.0.1:*';
+            $wsHosts   = 'ws://localhost:* ws://127.0.0.1:*';
             $viteScript  = ' ' . $viteHosts;
             $viteStyle   = ' ' . $viteHosts;
             $viteConnect = ' ' . $viteHosts . ' ' . $wsHosts;

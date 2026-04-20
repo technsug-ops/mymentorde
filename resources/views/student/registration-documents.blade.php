@@ -117,10 +117,48 @@
 .sdoc .filter-label { font-size:10px; font-weight:700; color:var(--light); text-transform:uppercase; letter-spacing:1px; margin-right:6px; }
 
 /* ═══ CATEGORY TABS ═══ */
-.sdoc .cat-tabs { display:flex; gap:0; padding:0 20px; border-bottom:1px solid var(--line-light); overflow-x:auto; }
-.sdoc .cat-tab { padding:10px 16px; font-size:12px; font-weight:600; color:var(--muted); border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; font-family:inherit; transition:all 0.15s; position:relative; }
-.sdoc .cat-tab:hover { color:var(--text); }
-.sdoc .cat-tab.active { color:var(--brand); border-bottom-color:var(--brand); }
+.sdoc .cat-tabs-wrap { position:relative; border-bottom:1px solid var(--line-light); }
+.sdoc .cat-tabs { display:flex; gap:0; padding:0 20px; overflow-x:auto; scrollbar-width:none; }
+.sdoc .cat-tabs::-webkit-scrollbar { display:none; }
+.sdoc .cat-tabs-arrow {
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:26px; height:26px; border-radius:50%;
+    background:var(--card); color:var(--text);
+    border:1px solid var(--line);
+    font-size:18px; font-weight:700; line-height:1;
+    cursor:pointer; z-index:2; padding:0 0 2px;
+    box-shadow:0 2px 6px rgba(0,0,0,.1);
+    display:none; align-items:center; justify-content:center;
+    transition:opacity .2s, transform .1s;
+}
+.sdoc .cat-tabs-arrow.prev { left:4px; }
+.sdoc .cat-tabs-arrow.next { right:4px; }
+.sdoc .cat-tabs-arrow:hover { transform:translateY(-50%) scale(1.08); }
+.sdoc .cat-tabs-arrow:active { transform:translateY(-50%) scale(.95); }
+.sdoc .cat-tabs-arrow[data-show="1"] { display:flex; }
+.sdoc .cat-tabs-arrow[data-hidden="1"] { opacity:0; pointer-events:none; }
+.sdoc .cat-tabs { gap:6px; padding:10px 20px; }
+.sdoc .cat-tab {
+    padding:7px 14px; font-size:12px; font-weight:600;
+    color:var(--muted); background:var(--card);
+    border:1.5px solid var(--line); border-radius:20px;
+    cursor:pointer; white-space:nowrap; font-family:inherit;
+    transition:all .15s; position:relative;
+    display:inline-flex; align-items:center; gap:4px;
+}
+.sdoc .cat-tab:hover {
+    color:var(--brand);
+    border-color:var(--brand);
+    background:color-mix(in srgb, var(--brand) 8%, var(--card));
+    transform:translateY(-1px);
+    box-shadow:0 2px 8px color-mix(in srgb, var(--brand) 20%, transparent);
+}
+.sdoc .cat-tab.active {
+    color:#fff; background:var(--brand);
+    border-color:var(--brand);
+    box-shadow:0 2px 8px color-mix(in srgb, var(--brand) 35%, transparent);
+}
+.sdoc .cat-tab.active:hover { transform:translateY(-1px); }
 .sdoc .cat-tab .tab-badge { display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; border-radius:9px; font-size:9px; font-weight:700; margin-left:6px; padding:0 5px; }
 .sdoc .cat-tab .tab-badge.red { background:var(--danger-light); color:var(--danger); }
 .sdoc .cat-tab .tab-badge.green { background:var(--ok-light); color:var(--ok); }
@@ -205,11 +243,52 @@
 /* ═══ RESPONSIVE ═══ */
 @media (max-width:1024px) { .sdoc .grid-4 { grid-template-columns:1fr 1fr; } }
 @media (max-width:740px) {
-    .sdoc .grid-4 { grid-template-columns:1fr; }
+    .sdoc .grid-4 { grid-template-columns:1fr 1fr; gap:8px; }
+    .sdoc .stat-card { padding:12px; gap:10px; }
+    .sdoc .stat-icon { width:34px; height:34px; font-size:15px; }
+    .sdoc .stat-value { font-size:17px; }
+    .sdoc .stat-label { font-size:10px; }
+    .sdoc .journey-top { padding:14px 16px 10px; }
+    .sdoc .journey-title h3 { font-size:13px; }
+    .sdoc .journey-pct { font-size:20px; }
+    .sdoc .journey-bar-wrap { padding:0 16px; }
     .sdoc .journey-steps { grid-template-columns:repeat(3,1fr); }
-    .sdoc .doc-card { grid-template-columns:36px 1fr; }
-    .sdoc .doc-card .doc-actions { grid-column:1/-1; }
-    .sdoc .hero-task { padding:20px; }
+    .sdoc .j-step { padding:10px 4px; gap:4px; }
+    .sdoc .j-step-num { width:22px; height:22px; font-size:9px; }
+    .sdoc .j-step-name { font-size:9px; }
+    .sdoc .doc-card {
+        grid-template-columns:36px 1fr; gap:12px;
+        padding:12px 10px;
+    }
+    .sdoc .doc-card .doc-actions { grid-column:1/-1; flex-wrap:wrap; gap:6px; }
+    .sdoc .doc-icon-wrap { width:36px; height:36px; font-size:16px; }
+    .sdoc .doc-name { font-size:12.5px; }
+    .sdoc .doc-meta { font-size:10.5px; }
+    .sdoc .doc-btn { padding:6px 12px; font-size:11px; }
+    .sdoc .hero-task { padding:18px 18px 20px; gap:16px; flex-direction:column; align-items:flex-start; }
+    .sdoc .hero-title { font-size:18px; }
+    .sdoc .hero-sub { font-size:12.5px; margin-bottom:12px; }
+    .sdoc .ring { width:54px; height:54px; }
+    .sdoc .ring-text { font-size:13px; }
+    .sdoc .section-header { padding:12px 16px; }
+    .sdoc .section-header h4 { font-size:13px; }
+    .sdoc .filter-pills { padding:10px 16px; gap:6px; }
+    .sdoc .filter-pill { padding:4px 10px; font-size:10.5px; }
+    .sdoc .cat-tabs {
+        padding:10px 34px 12px;
+        mask-image:linear-gradient(to right, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%);
+    }
+    .sdoc .cat-tab {
+        padding:6px 12px; font-size:11.5px;
+    }
+    .sdoc .cat-tab:hover { transform:none; }
+    .sdoc .cat-tabs-arrow[data-show="1"] { display:flex; }
+    .sdoc .doc-list { padding:4px 14px 14px; }
+    .sdoc .doc-group-title { font-size:11px; padding:12px 0 6px; }
+    .sdoc .alert-bar { padding:10px 14px; font-size:12px; }
+}
+@media (max-width:480px) {
+    .sdoc .journey-steps { grid-template-columns:repeat(2,1fr); }
 }
 </style>
 @endpush
@@ -455,11 +534,15 @@
 
             {{-- Category tabs --}}
             @if($topCats->count() > 1)
-            <div class="cat-tabs">
-                <button class="cat-tab active" data-cattab="all">Tümü</button>
-                @foreach($topCats as $tc)
-                    <button class="cat-tab" data-cattab="{{ $tc }}">{{ $documentTopCategoryLabels[$tc] ?? $tc }}@if(($categoryMissing[$tc] ?? 0) > 0)<span class="tab-badge red">{{ $categoryMissing[$tc] }}</span>@endif</button>
-                @endforeach
+            <div class="cat-tabs-wrap">
+                <button type="button" class="cat-tabs-arrow prev" aria-label="Önceki" data-cattabs-dir="-1">‹</button>
+                <div class="cat-tabs" id="catTabsTrack">
+                    <button class="cat-tab active" data-cattab="all">Tümü</button>
+                    @foreach($topCats as $tc)
+                        <button class="cat-tab" data-cattab="{{ $tc }}">{{ $documentTopCategoryLabels[$tc] ?? $tc }}@if(($categoryMissing[$tc] ?? 0) > 0)<span class="tab-badge red">{{ $categoryMissing[$tc] }}</span>@endif</button>
+                    @endforeach
+                </div>
+                <button type="button" class="cat-tabs-arrow next" aria-label="Sonraki" data-cattabs-dir="1">›</button>
             </div>
             @endif
 
@@ -760,6 +843,40 @@
     // Celebration close
     var dc=document.getElementById('docsCompleteClose');
     if(dc) dc.addEventListener('click',function(){var m=document.getElementById('docsCompleteModal');if(m)m.style.display='none'});
+
+    // Category tabs scroll arrows (mobile)
+    var catTrack = document.getElementById('catTabsTrack');
+    if (catTrack) {
+        var prevBtn = document.querySelector('.cat-tabs-arrow.prev');
+        var nextBtn = document.querySelector('.cat-tabs-arrow.next');
+        function updateCatArrows(){
+            var isMobile = window.innerWidth <= 740;
+            var overflows = catTrack.scrollWidth > catTrack.clientWidth + 2;
+            [prevBtn, nextBtn].forEach(function(b){
+                if (!b) return;
+                b.dataset.show = (isMobile && overflows) ? '1' : '0';
+            });
+            if (!isMobile || !overflows) return;
+            var max = catTrack.scrollWidth - catTrack.clientWidth - 2;
+            prevBtn.dataset.hidden = catTrack.scrollLeft <= 4 ? '1' : '0';
+            nextBtn.dataset.hidden = catTrack.scrollLeft >= max ? '1' : '0';
+        }
+        [prevBtn, nextBtn].forEach(function(b){
+            if (!b) return;
+            b.addEventListener('click', function(){
+                var dir = parseInt(b.dataset.cattabsDir || '1', 10);
+                catTrack.scrollBy({ left: dir * Math.max(catTrack.clientWidth * 0.7, 140), behavior: 'smooth' });
+            });
+        });
+        catTrack.addEventListener('scroll', updateCatArrows, { passive: true });
+        window.addEventListener('resize', updateCatArrows);
+        updateCatArrows();
+        // Scroll active tab into view on load
+        var activeTab = catTrack.querySelector('.cat-tab.active');
+        if (activeTab && activeTab.scrollIntoView) {
+            activeTab.scrollIntoView({ block: 'nearest', inline: 'center' });
+        }
+    }
 })();
 </script>
 @endsection

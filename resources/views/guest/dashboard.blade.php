@@ -288,7 +288,12 @@
     cursor: pointer; padding: 2px; line-height: 1;
 }
 @media(max-width:600px){
-    .gdb-advisor { width: calc(100vw - 32px); right: 16px; bottom: 16px; }
+    .gdb-advisor { width: 240px; right: 12px; bottom: 16px; padding: 12px; gap: 8px; }
+    .gdb-advisor-av { width: 32px; height: 32px; font-size: 11px; }
+    .gdb-advisor-name { font-size: 12px; }
+    .gdb-advisor-role { font-size: 10px; }
+    .gdb-advisor-msg { font-size: 11px; line-height: 1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .gdb-advisor-cta { padding: 7px 12px; font-size: 11px; }
 }
 
 /* ── Timeline ── */
@@ -436,14 +441,14 @@
         'done'  => 'Tüm adımları tamamladın. Artık resmi ' . config('brand.name', 'MentorDE') . ' öğrencisisin!',
     };
 
-    // ── Step states (Belgeler PARALEL — form'a bağlı değil) ──
+    // ── Step states (Her adım paralel erişilebilir) ──
     $step1 = $formCompleted ? 'done' : 'active';
     $step2 = $docsCompleted ? 'done' : 'active';
-    $step3 = $packageSelected ? 'done' : (($formCompleted && $docsCompleted) ? 'active' : 'locked');
+    $step3 = $packageSelected ? 'done' : 'active';
 
     $step1Status = $formCompleted ? 'Tamamlandı ✓' : 'Şimdi başla';
     $step2Status = $docsCompleted ? 'Onaylandı ✓' : 'Şimdi yükle';
-    $step3Status = $packageSelected ? 'Seçildi ✓' : (($formCompleted && $docsCompleted) ? 'Şimdi seç' : 'Sonraki adım');
+    $step3Status = $packageSelected ? 'Seçildi ✓' : 'Paket seç';
 @endphp
 
 {{-- ── Greeting ── --}}

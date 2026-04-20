@@ -3,32 +3,34 @@
  * K3: PWA + offline destek
  */
 
-const CACHE_NAME = 'mentorde-guest-v2';
+const CACHE_NAME = 'mentorde-guest-v3';
 const OFFLINE_URL = '/guest/offline';
 
-// Önbelleğe alınacak statik kaynaklar
+// Önbelleğe alınacak statik kaynaklar — Vite build'i hash'li ürettiği için CSS burada statik değil
 const PRECACHE = [
     '/guest/offline',
-    '/css/portal-unified-v2.css',
     '/favicon.ico',
 ];
 
-// Install: offline sayfasını önbelleğe al
+// Install: tek tek dene, hata olsa bile diğerleri cache'lensin (addAll atomic)
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE))
+        caches.open(CACHE_NAME).then((cache) =>
+            Promise.allSettled(PRECACHE.map((url) => cache.add(url).catch(() => null)))
+        )
     );
     self.skipWaiting();
 });
 
-// Activate: eski cache'leri temizle
+// Activate: eski cache'leri temizle + clients.claim() waitUntil içinde (async timing fix)
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((keys) =>
-            Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-        )
+        (async () => {
+            const keys = await caches.keys();
+            await Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)));
+            try { await self.clients.claim(); } catch(e) {}
+        })()
     );
-    self.clients.claim();
 });
 
 // Fetch: network first, offline fallback

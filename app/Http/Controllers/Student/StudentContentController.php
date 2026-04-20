@@ -97,14 +97,29 @@ class StudentContentController extends Controller
             ->where('status', 'published')
             ->orderBy('featured_order')
             ->orderByDesc('published_at')
-            ->get(['id', 'slug', 'title_tr', 'summary_tr', 'content_tr', 'cover_image_alt', 'cover_image_url', 'tags', 'is_featured']);
+            ->get(['id', 'slug', 'title_tr', 'summary_tr', 'content_tr', 'cover_image_alt', 'cover_image_url', 'tags', 'is_featured', 'video_url', 'video_thumbnail_url']);
 
-        return view('student.info.success-stories', array_merge($base, ['cmsStories' => $cmsStories]));
+        $heroVideo = $cmsStories->where('is_featured', true)->whereNotNull('video_url')->first()
+            ?? $cmsStories->whereNotNull('video_url')->first();
+        $heroId = $heroVideo?->id;
+        $cmsVideos = $cmsStories
+            ->whereNotNull('video_url')
+            ->when($heroId, fn ($c) => $c->where('id', '!=', $heroId))
+            ->take(3)->values();
+
+        return view('student.info.success-stories', array_merge($base, [
+            'cmsStories' => $cmsStories,
+            'heroVideo'  => $heroVideo,
+            'cmsVideos'  => $cmsVideos,
+        ]));
     }
 
     public function infoLivingGuide(Request $request)
     {
-        return view('student.info.living-guide', $this->baseData($request, 'info', 'Almanya\'da Yaşam Rehberi', ''));
+        $base = $this->baseData($request, 'info', 'Almanya\'da Yaşam Rehberi', '');
+        $base['cities']     = config('cost_calculator.cities', []);
+        $base['eurTryRate'] = app(CurrencyRateService::class)->getRate('EUR', 'TRY');
+        return view('student.info.living-guide', $base);
     }
 
     public function infoDocumentGuide(Request $request)

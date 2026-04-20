@@ -208,7 +208,13 @@
 }
 @media (max-width: 640px) {
     .db-nav { flex-direction: column; align-items: flex-start; }
-    .db-kpi-strip { gap: 10px; }
+    .db-kpi-strip { gap: 0; width: 100%; }
+    .db-kpi-strip > div { padding: 6px 8px !important; }
+    .db-kpi-strip > div > div:first-child { font-size: 13px !important; }
+    .db-kpi-strip > div > div:last-child { font-size: 9.5px !important; }
+}
+@media (max-width: 600px) {
+    .db-tab { padding: 5px 10px !important; font-size: 11px !important; }
 }
     </style>
 @endpush
@@ -311,19 +317,19 @@
         </div>
 
         {{-- KPI strip --}}
-        <div style="display:flex;gap:0;border:1px solid var(--u-line);border-radius:10px;overflow:hidden;flex-shrink:0;">
+        <div class="db-kpi-strip" style="display:flex;gap:0;border:1px solid var(--u-line);border-radius:10px;overflow:hidden;flex-shrink:0;">
             @foreach([
                 ['CV','#7c3aed',$cvCount,'📝'],
                 ['Motivasyon','#d97706',$motivationCount,'✉️'],
                 ['Referans','#16a34a',$referenceCount,'👤'],
                 ['Toplam','#64748b',$builderCount,'🎫'],
             ] as [$lbl,$clr,$val,$ico])
-            <div style="text-align:center;padding:8px 14px;border-right:1px solid var(--u-line);background:var(--u-bg);">
+            <div style="text-align:center;padding:8px 14px;border-right:1px solid var(--u-line);background:var(--u-bg);flex:1;min-width:0;">
                 <div style="font-size:var(--tx-base);font-weight:800;color:{{ $clr }};line-height:1;">{{ $val }}</div>
-                <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-top:2px;white-space:nowrap;">{{ $ico }} {{ $lbl }}</div>
+                <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $ico }} {{ $lbl }}</div>
             </div>
             @endforeach
-            <div style="text-align:center;padding:8px 14px;background:var(--u-bg);">
+            <div class="hide-mobile" style="text-align:center;padding:8px 14px;background:var(--u-bg);">
                 <div style="font-size:var(--tx-base);font-weight:800;color:var(--u-text);line-height:1;">
                     {{ $motivationExists ? '✓' : '—' }}
                 </div>
@@ -333,7 +339,7 @@
     </div>
 </div>
 
-{{-- ── Panel 1: CV (React Builder) ── --}}
+{{-- ── Panel 1: CV Modülü ── --}}
 <div class="db-panel active" id="panel-cv">
     <div id="student-cv-builder-root"></div>
 </div>

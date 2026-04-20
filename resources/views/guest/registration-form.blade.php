@@ -365,6 +365,7 @@
                                                 $inputType = match(true) {
                                                     $type === 'email' => 'email',
                                                     $type === 'phone' => 'tel',
+                                                    $type === 'month' => 'month',
                                                     $isGrade => 'number',
                                                     default => 'text',
                                                 };
@@ -775,9 +776,40 @@
             if(holder) holder.remove();
         }
     }
+    // Maksimum bitiş tarihleri (İlkokul/Ortaokul bugün, Lise +4 yıl)
+    function _todayIso(){
+        var d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+    function _plusYearsIso(years){
+        var d = new Date();
+        d.setFullYear(d.getFullYear() + years);
+        return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+    var _eduMaxEnd = {
+        'primary_end_date': { max: _todayIso(),        label: 'İlkokul bitiş tarihi bugünden sonra olamaz.' },
+        'middle_end_date':  { max: _todayIso(),        label: 'Ortaokul bitiş tarihi bugünden sonra olamaz.' },
+        'high_end_date':    { max: _plusYearsIso(4),   label: 'Lise bitiş tarihi en fazla 4 yıl sonra olabilir.' },
+    };
     function _validateEduDates(){
         var f = document.getElementById('guestRegistrationForm');
         if(!f) return;
+        // 0) Bitiş tarihi max sınırı (gelecekte olamaz - lise hariç +4 yıl)
+        Object.keys(_eduMaxEnd).forEach(function(key){
+            var el = f.querySelector('[name="' + key + '"]');
+            if(!el) return;
+            if(_isHidden(el)) { el.setCustomValidity(''); _setEduErr(el,''); return; }
+            var rule = _eduMaxEnd[key];
+            el.max = rule.max;
+            var v = (el.value || '').trim();
+            if(v && v > rule.max){
+                el.setCustomValidity(rule.label);
+                _setEduErr(el, rule.label);
+            } else if(el.validity.customError && el.validationMessage === rule.label){
+                el.setCustomValidity('');
+                _setEduErr(el, '');
+            }
+        });
         // 1) Her kademe için min duration + dinamik start max (end - minYears)
         _eduDurationRules.forEach(function(r){
             var sEl = f.querySelector('[name="' + r[0] + '"]');
@@ -786,7 +818,7 @@
             if(_isHidden(sEl) || _isHidden(eEl)) { eEl.setCustomValidity(''); _setEduErr(eEl,''); return; }
             var s = (sEl.value || '').trim();
             var e = (eEl.value || '').trim();
-            // Start seçildiyse end.min = start + minYears
+            // Start seçildiyse end.min = start + minYears (ama end.max zaten yukarıda set edildi)
             if(s){
                 var minEnd = _addYears(s, r[2]);
                 if(minEnd) eEl.min = minEnd;
@@ -796,7 +828,9 @@
                 var maxStart = _addYears(e, -r[2]);
                 if(maxStart) sEl.max = maxStart;
             }
-            if(!s || !e) { eEl.setCustomValidity(''); _setEduErr(eEl,''); return; }
+            if(!s || !e) return; // custom errors korunsun
+            // Sadece duration error yoksa duration kontrolü yap
+            if(eEl.validity.customError && _eduMaxEnd[r[1]] && eEl.validationMessage === _eduMaxEnd[r[1]].label) return;
             var minEnd2 = _addYears(s, r[2]);
             if(e < s) {
                 var msg = r[3] + ' bitiş tarihi başlama tarihinden önce olamaz.';

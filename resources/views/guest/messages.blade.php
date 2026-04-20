@@ -181,6 +181,9 @@
     padding: 10px 14px 10px;
     background: var(--u-card);
 }
+@media(max-width:600px){
+    .gm-foot { padding: 10px 12px calc(80px + env(safe-area-inset-bottom, 0px)); }
+}
 .gm-foot-row { display: flex; align-items: flex-end; gap: 8px; }
 .gm-foot-row textarea {
     flex: 1; border: 1.5px solid var(--u-line); border-radius: 22px;
@@ -191,6 +194,9 @@
     transition: border-color .15s;
 }
 .gm-foot-row textarea:focus { outline: none; border-color: var(--u-brand); }
+.gm-foot-row textarea::placeholder { color: #9ca3af; opacity: 1; }
+/* Messages sayfasındayken floating chat FAB'ı gizle — zaten mesaj sayfasındayız */
+.gchat-fab, .gchat-panel { display: none !important; }
 .gm-foot-extras {
     display: flex; align-items: center; gap: 6px; margin-top: 7px; padding: 0 4px;
 }
@@ -199,6 +205,8 @@
     padding: 4px 8px; font-size: 11px; font-family: inherit;
     background: var(--u-bg); color: var(--u-muted);
 }
+.gm-dep-label { display: inline-flex; align-items: center; gap: 5px; }
+.gm-dep-label-text { font-size: 11px; color: var(--u-muted); font-weight: 600; }
 .gm-ql-label { display: flex; align-items: center; gap: 4px; font-size: 11px; cursor: pointer; color: var(--u-muted); }
 .gm-attach-name { font-size: 11px; color: var(--u-muted); margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
 
@@ -440,18 +448,13 @@
             <div class="gm-foot-row">
                 <div class="eg-picker-wrap">
                     <button type="button" class="eg-picker-btn" onclick="egTogglePicker('emoji','guestMsgBody')" title="Emoji">😊</button>
-                    <button type="button" class="eg-picker-btn" onclick="egTogglePicker('gif','guestMsgBody')" title="GIF" style="font-size:var(--tx-xs);font-weight:800;letter-spacing:-.5px;">GIF</button>
                     <div class="eg-emoji-picker" id="egEmojiPicker_guestMsgBody">
                         <div class="eg-emoji-cats" id="egEmojiCats_guestMsgBody"></div>
                         <div class="eg-emoji-grid" id="egEmojiGrid_guestMsgBody"></div>
                     </div>
-                    <div class="eg-gif-picker" id="egGifPicker_guestMsgBody">
-                        <div class="eg-gif-search"><input type="text" placeholder="🔍 GIF ara…" oninput="egGifSearch(this.value,'guestMsgBody')"></div>
-                        <div class="eg-gif-grid" id="egGifGrid_guestMsgBody"><div class="hub-gif-loading">Yükleniyor…</div></div>
-                    </div>
                 </div>
                 <textarea id="guestMsgBody" name="message" rows="1"
-                          placeholder="Danışmanınıza mesaj yazın… (Enter = gönder)"
+                          placeholder="Mesajınızı yazın…"
                           oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,110)+'px'"
                           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.submit()}"
                 >{{ old('message') }}</textarea>
@@ -462,11 +465,14 @@
                 <button class="btn ok" type="submit" style="flex-shrink:0;padding:9px 20px;border-radius:20px;">Gönder</button>
             </div>
             <div class="gm-foot-extras">
-                <select name="department">
-                    @php $dep = old('department', (string)($thread->department ?: 'advisory')); @endphp
-                    <option value="advisory" @selected($dep==='advisory')>Danışmanlık</option>
-                    <option value="system"   @selected($dep==='system')>Sistem / Teknik</option>
-                </select>
+                <label class="gm-dep-label">
+                    <span class="gm-dep-label-text">Konu:</span>
+                    <select name="department">
+                        @php $dep = old('department', (string)($thread->department ?: 'advisory')); @endphp
+                        <option value="advisory" @selected($dep==='advisory')>Danışmanlık</option>
+                        <option value="system"   @selected($dep==='system')>Sistem / Teknik</option>
+                    </select>
+                </label>
                 <label class="gm-ql-label">
                     <input type="checkbox" name="quick_request" value="1" @checked(old('quick_request'))>
                     ⚡ Öncelikli

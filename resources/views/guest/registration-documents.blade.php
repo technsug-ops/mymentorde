@@ -149,7 +149,7 @@
 .sdoc .cel-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(22,163,74,0.35); color:#fff; text-decoration:none; }
 .sdoc .sdoc-hidden { display:none !important; } .sdoc .sdoc-collapsed { display:none !important; }
 @media (max-width:1024px) { .sdoc .grid-4 { grid-template-columns:1fr 1fr; } }
-@media (max-width:740px) { .sdoc .grid-4 { grid-template-columns:1fr; } .sdoc .journey-steps { grid-template-columns:repeat(3,1fr); } .sdoc .doc-card { grid-template-columns:36px 1fr; } .sdoc .doc-card .doc-actions { grid-column:1/-1; } .sdoc .hero-task { padding:20px; flex-direction:column; gap:16px; } }
+@media (max-width:740px) { .sdoc .grid-4 { grid-template-columns:1fr 1fr; gap:8px; } .sdoc .stat-card { padding:12px; gap:10px; } .sdoc .stat-value { font-size:18px; } .sdoc .stat-label { font-size:11px; } .sdoc .journey-steps { grid-template-columns:repeat(3,1fr); } .sdoc .doc-card { grid-template-columns:36px 1fr; } .sdoc .doc-card .doc-actions { grid-column:1/-1; } .sdoc .hero-task { padding:20px; flex-direction:column; gap:16px; } .sdoc .section-header { padding:10px 14px; } .sdoc .filter-pills { padding:10px 12px; gap:5px; } .sdoc .filter-label { display:none; } .sdoc .filter-pill { font-size:10px; padding:5px 10px; flex:1; text-align:center; min-width:0; white-space:nowrap; } .sdoc .filter-pill .cnt { margin-left:2px; } .sdoc .cat-tabs { padding:0 12px; } .sdoc .cat-tab { padding:8px 10px; font-size:11px; } }
 </style>
 @endpush
 
@@ -277,7 +277,7 @@
 
         <div class="section-card" id="docsSection">
             <div class="section-header"><h4>📂 Belgelerim</h4><span style="font-size:11px;color:var(--light);">{{ $uploadedCount }}/{{ $allCount }} tamamlandı</span></div>
-            <div class="filter-pills"><span class="filter-label">Filtre</span><button class="filter-pill active" data-filter="urgent">Önce Zorunlu<span class="cnt">({{ $missingRequired }})</span></button><button class="filter-pill" data-filter="all">Tümü<span class="cnt">({{ $allCount }})</span></button><button class="filter-pill" data-filter="uploaded">Yüklenen<span class="cnt">({{ $uploadedCount }})</span></button><button class="filter-pill" data-filter="missing">Eksik<span class="cnt">({{ $allCount - $uploadedCount }})</span></button></div>
+            <div class="filter-pills"><span class="filter-label">Filtre</span><button class="filter-pill active" data-filter="urgent">Önce Zorunlu</button><button class="filter-pill" data-filter="all">Tümü<span class="cnt">({{ $allCount }})</span></button><button class="filter-pill" data-filter="uploaded">Yüklenen<span class="cnt">({{ $uploadedCount }})</span></button><button class="filter-pill" data-filter="missing">Eksik<span class="cnt">({{ $allCount - $uploadedCount }})</span></button></div>
             @if($topCats->count() > 1)
             <div class="cat-tabs"><button class="cat-tab active" data-cattab="all">Tümü</button>@foreach($topCats as $tc)<button class="cat-tab" data-cattab="{{ $tc }}">{{ $documentTopCategoryLabels[$tc] ?? $tc }}@if(($categoryMissing[$tc] ?? 0) > 0)<span class="tab-badge red">{{ $categoryMissing[$tc] }}</span>@endif</button>@endforeach</div>
             @endif

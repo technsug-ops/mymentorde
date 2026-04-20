@@ -292,8 +292,8 @@
         <header class="topbar">
             <div class="topbar-left" style="flex:0 1 auto;">
                 <button class="icon-btn" id="premium-menu-btn"
-                        style="display:none;">☰</button>
-                <button type="button" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
+                        style="display:none;font-size:22px;line-height:1;width:44px;height:44px;flex-shrink:0;border:1px solid var(--u-line,#e5e7eb);background:var(--u-card,#fff);border-radius:10px;">☰</button>
+                <a href="{{ route('guest.dashboard') }}" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:22px;line-height:1;width:44px;height:44px;flex-shrink:0;border:1px solid var(--u-line,#e5e7eb);background:var(--u-card,#fff);border-radius:10px;text-decoration:none;display:flex;align-items:center;justify-content:center;">&#8592;</a>
                 <div>
                     <div class="topbar-title">@yield('page_title', config('brand.name', 'MentorDE'))</div>
                     @hasSection('page_subtitle')
@@ -398,6 +398,29 @@
 
 {{-- Floating Chat Widget --}}
 @php $scn = $seniorCard ?? null; @endphp
+<style>
+.gchat-fab{position:fixed;bottom:24px;right:24px;z-index:9999;width:52px;height:52px;background:var(--u-brand,#2563eb);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.4);border:none;color:#fff;transition:transform .2s;}
+.gchat-fab:hover{transform:scale(1.08);}
+.gchat-badge{position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+.gchat-panel{position:fixed;bottom:86px;right:24px;z-index:9998;width:320px;background:var(--u-card,#fff);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.18);border:1px solid var(--u-line,#e5e7eb);display:none;flex-direction:column;max-height:420px;overflow:hidden;}
+.gchat-panel.open{display:flex;}
+.gchat-header{background:linear-gradient(135deg,#2563eb,#1e40af);padding:12px 14px;display:flex;align-items:center;gap:10px;}
+.gchat-avatar{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+.gchat-header-name{font-weight:700;color:#fff;font-size:13px;}
+.gchat-status{font-size:11px;color:rgba(255,255,255,.85);display:flex;align-items:center;gap:4px;}
+.gchat-status-dot{width:8px;height:8px;border-radius:50%;background:#9ca3af;}
+.gchat-status-dot.online{background:#22c55e;}
+.gchat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:120px;max-height:240px;}
+.gchat-bubble{max-width:80%;padding:8px 12px;border-radius:12px;font-size:12px;line-height:1.5;}
+.gchat-bubble.in{background:var(--u-bg,#f3f4f6);color:var(--u-text,#111);border-radius:12px 12px 12px 2px;align-self:flex-start;}
+.gchat-bubble.out{background:var(--u-brand,#2563eb);color:#fff;border-radius:12px 12px 2px 12px;align-self:flex-end;}
+.gchat-bubble-time{font-size:10px;opacity:.6;margin-top:2px;}
+.gchat-input-row{display:flex;gap:8px;padding:10px;border-top:1px solid var(--u-line,#f3f4f6);}
+.gchat-input{flex:1;border:1px solid var(--u-line,#e5e7eb);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;resize:none;background:var(--u-card,#fff);color:var(--u-text,#111);}
+.gchat-send{background:var(--u-brand,#2563eb);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;}
+.gchat-empty{font-size:12px;color:var(--u-muted,#6b7280);text-align:center;padding:16px 0;}
+@media(max-width:640px){.gchat-fab{bottom:24px;right:16px;width:48px;height:48px;font-size:20px;}.gchat-panel{width:calc(100vw - 32px);right:16px;bottom:80px;max-height:60vh;}}
+</style>
 <div>
     <button class="gchat-fab" id="gchatFab" title="Danışmana Mesaj">
         💬
@@ -419,6 +442,7 @@
                 </div>
             </div>
             <a href="{{ route('guest.messages') }}" style="font-size:11px;color:rgba(255,255,255,.8);text-decoration:none;white-space:nowrap;">Tümünü Gör →</a>
+            <button type="button" id="gchatClose" title="Kapat" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:26px;height:26px;border-radius:50%;font-size:16px;line-height:1;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;">✕</button>
         </div>
         <div class="gchat-messages" id="gchatMessages">
             <div class="gchat-empty" id="gchatEmpty">Danışmanınıza mesaj yazın.</div>
@@ -511,8 +535,7 @@ document.addEventListener('alpine:init',function(){
     var _sb=document.getElementById('premium-sidebar');
     if(_mb){_mb.addEventListener('click',function(){_sb.classList.toggle('mobile-open');if(_ov)_ov.classList.toggle('active');});}
     if(_ov){_ov.addEventListener('click',function(){_sb.classList.remove('mobile-open');_ov.classList.remove('active');});}
-    var _bb=document.getElementById('premium-back-btn');
-    if(_bb){_bb.addEventListener('click',function(){window.history.back();});}
+    // Back button artık inline onclick ile yönetiliyor (referrer fallback)
     // ── Sidebar nav collapse ──
     var labels=document.querySelectorAll('.nav-section-label');
     var collapsed=getCollapsed();
@@ -639,13 +662,24 @@ if('serviceWorker' in navigator){
 }
 </script>
 {{-- Twemoji: emoji'leri renkli SVG'ye dönüştür --}}
-<script defer src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous" onload="__tryTwemoji()"></script>
 <script nonce="{{ $cspNonce ?? '' }}">
-    twemoji.parse(document.body, {
-        folder: 'svg',
-        ext: '.svg',
-        base: 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/'
-    });
+    window.__tryTwemoji = function() {
+        if (typeof twemoji === 'undefined') return;
+        try {
+            twemoji.parse(document.body, {
+                folder: 'svg',
+                ext: '.svg',
+                base: 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/'
+            });
+        } catch(e) {}
+    };
+    // Fallback: DOM ready olduğunda da dene
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', __tryTwemoji);
+    } else {
+        __tryTwemoji();
+    }
 </script>
 @include('partials.promo-popup')
 </body>

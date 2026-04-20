@@ -1,7 +1,7 @@
 @extends('guest.layouts.app')
 
-@section('title', 'Sozlesme')
-@section('page_title', 'Sozlesme')
+@section('title', 'Sözleşme')
+@section('page_title', 'Sözleşme')
 
 @push('head')
 <script>if(localStorage.getItem('mentorde_design')==='minimalist'){document.documentElement.classList.add('jm-minimalist');}</script>
@@ -204,12 +204,12 @@
     $formRequiredTotal  = (int) ($formRequiredTotal  ?? 0);
 
     $statusLabel = match($status) {
-        'pending_manager'  => 'Danisman Hazirliyor',
+        'pending_manager'  => 'Danışman Hazirliyor',
         'requested'        => 'Imza Bekleniyor',
-        'signed_uploaded'  => 'Firma Onayi Bekleniyor',
-        'approved'         => 'Onaylandi',
+        'signed_uploaded'  => 'Firma Onayı Bekleniyor',
+        'approved'         => 'Onaylandı',
         'rejected'         => 'Reddedildi',
-        'cancelled'        => 'Iptal Edildi',
+        'cancelled'        => 'İptal Edildi',
         'reopen_requested' => 'Yeniden Degerlendirme',
         default            => 'Talep Edilmedi',
     };
@@ -223,9 +223,9 @@
     };
 
     $prereqs = [
-        ['label' => 'Kayit Formu', 'done' => !empty($formCompleted), 'value' => !empty($formCompleted) ? 'Tamam' : 'Eksik', 'link' => route('guest.registration.form')],
+        ['label' => 'Kayıt Formu', 'done' => !empty($formCompleted), 'value' => !empty($formCompleted) ? 'Tamam' : 'Eksik', 'link' => route('guest.registration.form')],
         ['label' => 'Belgeler',    'done' => !empty($docsCompleted), 'value' => !empty($docsCompleted) ? 'Tamam' : 'Eksik', 'link' => route('guest.registration.documents')],
-        ['label' => 'Paket',       'done' => !empty($packageSelected), 'value' => !empty($packageSelected) ? ($guest?->selected_package_title ?: 'Secildi') : 'Yapilmadi', 'link' => route('guest.services')],
+        ['label' => 'Paket',       'done' => !empty($packageSelected), 'value' => !empty($packageSelected) ? ($guest?->selected_package_title ?: 'Seçildi') : 'Yapılmadı', 'link' => route('guest.services')],
     ];
     $allPrereqsDone = collect($prereqs)->every(fn($p) => $p['done']);
 
@@ -238,10 +238,10 @@
         default                => 0,
     };
     $funnelSteps = [
-        ['name' => 'Talep Et',      'sub' => match(true) { $stepActive > 0 => 'Tamamlandi', default => 'Simdi baslat' }],
-        ['name' => 'Hazirlanma',     'sub' => match(true) { $stepActive > 1 => 'Tamamlandi', $stepActive === 1 => 'Hazirlaniyor...', default => 'Talep sonrasi' }],
-        ['name' => 'Oku & Imzala',   'sub' => match(true) { $status === 'rejected' => 'Reddedildi - tekrar imzala', $stepActive > 2 => 'Imzalandi', $stepActive === 2 => 'Imzani bekliyor', default => 'Imza sonrasi' }],
-        ['name' => 'Firma Onayi',    'sub' => match(true) { $stepActive > 3 => 'Onaylandi', $stepActive === 3 => 'Onay bekleniyor', default => '—' }],
+        ['name' => 'Talep Et',      'sub' => match(true) { $stepActive > 0 => 'Tamamlandı', default => 'Şimdi başlat' }],
+        ['name' => 'Hazırlanma',     'sub' => match(true) { $stepActive > 1 => 'Tamamlandı', $stepActive === 1 => 'Hazırlanıyor...', default => 'Talep sonrasi' }],
+        ['name' => 'Oku & İmzala',   'sub' => match(true) { $status === 'rejected' => 'Reddedildi - tekrar imzala', $stepActive > 2 => 'İmzalandi', $stepActive === 2 => 'İmzanı bekliyor', default => 'Imza sonrasi' }],
+        ['name' => 'Firma Onayı',    'sub' => match(true) { $stepActive > 3 => 'Onaylandı', $stepActive === 3 => 'Onay bekleniyor', default => '—' }],
     ];
 
     $allowContractUpdate = in_array($status, ['requested', 'signed_uploaded', 'rejected'], true);
@@ -251,14 +251,14 @@
 {{-- ── Page Header ── --}}
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
     <div>
-        <div style="font-size:var(--tx-lg);font-weight:800;color:var(--u-text);">Sozlesme</div>
+        <div style="font-size:var(--tx-lg);font-weight:800;color:var(--u-text);">Sözleşme</div>
         <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-top:2px;">
             @if($status === 'approved') Tum surec tamamlandi.
-            @elseif($status === 'not_requested') Paketini sectin — simdi sozlesme surecini baslat.
-            @elseif($status === 'pending_manager') Danisman sozlesmeni hazirliyor.
-            @elseif($status === 'requested') Sozlesmen hazir — oku ve imzala.
-            @elseif($status === 'signed_uploaded') Imzali sozlesmen firma onayinda.
-            @else Sozlesme surecini takip et.
+            @elseif($status === 'not_requested') Paketini seçtin — şimdi sözleşme sürecini başlat.
+            @elseif($status === 'pending_manager') Danışman sözleşmeni hazırlıyor.
+            @elseif($status === 'requested') Sözleşmen hazir — oku ve imzala.
+            @elseif($status === 'signed_uploaded') İmzalı sözleşmen firma onayında.
+            @else Sözleşme sürecini takip et.
             @endif
         </div>
     </div>
@@ -283,19 +283,21 @@
 
 {{-- ── Prereq eksik uyarisi ── --}}
 @if(!$allPrereqsDone)
-<div class="gc-alert info" style="margin-bottom:20px;">
-    <span class="gc-alert-icon">ℹ</span>
-    <div class="gc-alert-body">
-        <strong>Sozlesme talebi icin tamamlanmasi gerekenler:</strong>
-        <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">
-            @foreach($prereqs as $p)
-                @if(!$p['done'])
-                <a href="{{ $p['link'] }}" style="padding:5px 10px;border-radius:6px;background:#fff;border:1px solid var(--u-line);font-size:var(--tx-xs);font-weight:600;text-decoration:none;color:var(--u-brand);">
-                    {{ $p['label'] }}: {{ $p['value'] }} →
-                </a>
-                @endif
-            @endforeach
-        </div>
+@php $missingCount = collect($prereqs)->where('done', false)->count(); @endphp
+<div style="background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:16px;color:var(--u-brand,#2563eb);">ℹ</span>
+        <strong style="font-size:13px;color:var(--u-brand,#2563eb);">{{ $missingCount }} eksik adım var</strong>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:6px;">
+        @foreach($prereqs as $p)
+            @if(!$p['done'])
+            <a href="{{ $p['link'] }}" style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 12px;border-radius:8px;background:var(--u-card,#fff);border:1px solid rgba(37,99,235,.25);font-size:11px;font-weight:700;text-decoration:none;color:var(--u-brand,#2563eb);transition:all .15s;">
+                <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $p['label'] }}</span>
+                <span style="flex-shrink:0;">→</span>
+            </a>
+            @endif
+        @endforeach
     </div>
 </div>
 @endif
@@ -304,13 +306,13 @@
 @if($status === 'rejected')
     <div class="gc-hero red" style="margin-bottom:14px;">
         <div style="font-size:28px;margin-bottom:8px;">⚠️</div>
-        <div class="gc-hero-title">Sozlesmeniz reddedildi</div>
+        <div class="gc-hero-title">Sözleşmeniz reddedildi</div>
         <div class="gc-hero-sub" style="max-width:100%;">
             <strong>Red sebebi:</strong> {{ $guest?->status_message ?? 'Belirtilmedi.' }}
         </div>
         <div style="margin-top:10px;padding:10px 14px;background:rgba(255,255,255,.12);border-radius:8px;font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;">
-            Sozlesmenizi duzeltip tekrar imzalayabilir veya yeni imzali dosya yukleyebilirsiniz.<br>
-            Asagidaki imza seceneklerini kullanarak tekrar gonderebilirsiniz.
+            Sözleşmenizi düzeltip tekrar imzalayabilir veya yeni imzalı dosya yükleyebilirsiniz.<br>
+            Aşağıdaki imza seçeneklerini kullanarak tekrar gönderebilirsiniz.
         </div>
     </div>
 @endif
@@ -319,12 +321,12 @@
     <div class="gc-alert warn">
         <span class="gc-alert-icon">⛔</span>
         <div class="gc-alert-body">
-            <strong>Sozlesme Iptal Edildi</strong>
-            Danismanlik firmaniz tarafindan sozlesmeniz iptal edilmistir.
+            <strong>Sözleşme İptal Edildi</strong>
+            Danışmanlik firmanız tarafından sözleşmeniz iptal edilmistir.
         </div>
     </div>
     <form method="POST" action="{{ route('guest.contract.reopen-request') }}"
-          onsubmit="return confirm('Yeniden degerlendirme talebi gondermek istediginizden emin misiniz?');"
+          onsubmit="return confirm('Yeniden degerlendirme talebi göndermek istediginizden emin misiniz?');"
           style="margin-bottom:20px;">
         @csrf
         <label style="display:block;font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);margin-bottom:6px;">Talebinizin nedeni <span style="color:var(--u-danger);">*</span></label>
@@ -339,7 +341,7 @@
         <span class="gc-alert-icon">⏳</span>
         <div class="gc-alert-body">
             <strong>Yeniden Degerlendirme Talebiniz Iletildi</strong>
-            Danisman ekibimiz talebinizi inceliyor.
+            Danışman ekibimiz talebinizi inceliyor.
             @if(!empty($guest?->reopen_requested_at))
                 <br><span style="font-size:var(--tx-xs);">Talep tarihi: {{ optional($guest->reopen_requested_at)->format('d.m.Y H:i') }}</span>
             @endif
@@ -353,14 +355,14 @@
 @if($status === 'not_requested')
     <div class="gc-hero teal">
         <div class="gc-hero-badge"><span class="pulse"></span> Siradaki adim</div>
-        <div class="gc-hero-title">Sozlesme talebini olustur</div>
-        <div class="gc-hero-sub">On kosullarin tamamlandi. Talep butonuna tikladiginda danismanin sozlesmeni hazirlayacak ve sana iletecek.</div>
+        <div class="gc-hero-title">Sözleşme talebini oluştur</div>
+        <div class="gc-hero-sub">Ön koşulların tamamlandi. Talep butonuna tıkladığında danışmanin sözleşmeni hazırlayacak ve sana iletecek.</div>
         <form method="POST" action="{{ route('guest.contract.request') }}" id="contractRequestForm" style="display:inline;">
             @csrf
-            <button type="submit" class="gc-hero-btn" id="contractRequestButton" @disabled(!$allPrereqsDone)>📄 Sozlesme Talep Et</button>
+            <button type="submit" class="gc-hero-btn" id="contractRequestButton" @disabled(!$allPrereqsDone)>📄 Sözleşme Talep Et</button>
         </form>
         <div class="gc-hero-meta">
-            <span>⏱️ Hazirlanma suresi: ~1 is gunu</span>
+            <span>⏱️ Hazırlanma suresi: ~1 iş günü</span>
             <span>📧 E-posta ile bilgilendirileceksin</span>
         </div>
     </div>
@@ -381,27 +383,27 @@
 
     <div class="gc-tip">
         <div class="gc-tip-icon">💡</div>
-        <div><h5>Sonraki adimlar ne olacak?</h5><p>Talep ettikten sonra danismanin sozlesmeyi hazirlayacak. Hazir olunca okuyup dijital imza veya fiziksel imzali dosya yukleyerek gondereceksin.</p></div>
+        <div><h5>Sonraki adımlar ne olacak?</h5><p>Talep ettikten sonra danışmanin sözleşmeyi hazırlayacak. Hazir olunca okuyup dijital imza veya fiziksel imzalı dosya yükleyerek göndereceksin.</p></div>
     </div>
 @endif
 
 {{-- ══════════════════════════════════════════
-     STATE 2: pending_manager — Hazirlaniyor
+     STATE 2: pending_manager — Hazırlanıyor
 ══════════════════════════════════════════ --}}
 @if($status === 'pending_manager')
     <div class="gc-hero blue">
-        <div class="gc-hero-badge"><span class="pulse"></span> Danisman calisiyor</div>
-        <div class="gc-hero-title">Sozlesmen hazirlaniyor</div>
-        <div class="gc-hero-sub">Talebini aldik. Danismanin sozlesmeni hazirlayip sisteme yukleyecek. Hazir oldugunda e-posta ile bilgilendirileceksin.</div>
+        <div class="gc-hero-badge"><span class="pulse"></span> Danışman calisiyor</div>
+        <div class="gc-hero-title">Sözleşmen hazırlanıyor</div>
+        <div class="gc-hero-sub">Talebini aldik. Danışmanin sözleşmeni hazırlayıp sisteme yükleyecek. Hazir oldugunda e-posta ile bilgilendirileceksin.</div>
         <div class="gc-hero-meta">
-            <span>⏱️ Tahmini: 1 is gunu</span>
+            <span>⏱️ Tahmini: 1 iş günü</span>
             <span>📧 E-posta bildirimi alacaksin</span>
         </div>
     </div>
 
     @if(!empty($contractStepper) && $contractStepper->count() > 0)
     <div class="gc-proc">
-        <div class="gc-proc-head">📋 Sozlesme Sureci</div>
+        <div class="gc-proc-head">📋 Sözleşme Süreçi</div>
         @foreach($contractStepper as $cs)
         <div class="gc-proc-step {{ $cs['status'] === 'done' ? 'is-done' : ($cs['status'] === 'active' ? 'is-now' : 'is-wait') }}">
             <div class="gc-proc-dot {{ $cs['status'] === 'done' ? 'done' : ($cs['status'] === 'active' ? 'now' : 'wait') }}">{{ $cs['status'] === 'done' ? '✓' : $cs['icon'] }}</div>
@@ -413,7 +415,7 @@
     @endif
 
     <div style="display:flex;gap:8px;margin-bottom:20px;">
-        <form method="POST" action="{{ route('guest.contract.withdraw') }}" onsubmit="return confirm('Sozlesme talebinizi geri cekmek istediginize emin misiniz?');">
+        <form method="POST" action="{{ route('guest.contract.withdraw') }}" onsubmit="return confirm('Sözleşme talebinizi geri çekmek istediğinize emin misiniz?');">
             @csrf
             <button type="submit" class="btn warn" style="font-size:var(--tx-xs);">Talebi Geri Cek</button>
         </form>
@@ -421,18 +423,18 @@
 
     <div class="gc-tip">
         <div class="gc-tip-icon">☕</div>
-        <div><h5>Su an yapman gereken bir sey yok</h5><p>Danismanin sozlesmeyi hazirlarken sen rahatlikla bekleyebilirsin.</p></div>
+        <div><h5>Şu an yapman gereken bir sey yok</h5><p>Danışmanin sözleşmeyi hazirlarken sen rahatlıkla bekleyebilirsin.</p></div>
     </div>
 @endif
 
 {{-- ══════════════════════════════════════════
-     STATE 3: requested — Oku & Imzala
+     STATE 3: requested — Oku & İmzala
 ══════════════════════════════════════════ --}}
 @if(in_array($status, ['requested', 'rejected'], true))
     <div class="gc-hero {{ $status === 'rejected' ? 'purple' : 'purple' }}">
-        <div class="gc-hero-badge"><span class="pulse"></span> {{ $status === 'rejected' ? 'Duzeltme gerekli' : 'Senin siran' }}</div>
-        <div class="gc-hero-title">{{ $status === 'rejected' ? 'Sozlesmeni duzelt ve tekrar imzala' : 'Sozlesmeni oku ve imzala' }}</div>
-        <div class="gc-hero-sub">{{ $status === 'rejected' ? 'Sozlesmen reddedildi. Asagidaki imza seceneklerini kullanarak duzeltilmis sozlesmeyi tekrar gonderebilirsin.' : 'Danismanin sozlesmeyi hazirladi. Asagida okuyup imzalayabilir veya imzali dosyayi yukleyebilirsin.' }}</div>
+        <div class="gc-hero-badge"><span class="pulse"></span> {{ $status === 'rejected' ? 'Düzeltme gerekli' : 'Senin siran' }}</div>
+        <div class="gc-hero-title">{{ $status === 'rejected' ? 'Sözleşmeni düzelt ve tekrar imzala' : 'Sözleşmeni oku ve imzala' }}</div>
+        <div class="gc-hero-sub">{{ $status === 'rejected' ? 'Sözleşmen reddedildi. Aşağıdaki imza seçeneklerini kullanarak düzeltilmis sözleşmeyi tekrar gönderebilirsin.' : 'Danışmanin sözleşmeyi hazırladı. Aşağıda okuyup imzalayabilir veya imzalı dosyayi yükleyebilirsin.' }}</div>
     </div>
 
     {{-- Contract viewer --}}
@@ -440,20 +442,19 @@
     <div class="gc-viewer no-print" id="contractTextSection">
         <div class="gc-viewer-top">
             <div>
-                <div class="gc-viewer-title">📜 Sozlesme Metni</div>
+                <div class="gc-viewer-title">📜 Sözleşme Metni</div>
                 <div class="gc-viewer-meta">
                     Sablon: <strong>{{ $contractTemplateCode !== '' ? $contractTemplateCode : '-' }}</strong>
-                    · Olusturulma: <strong>{{ $contractGeneratedAt ? \Carbon\Carbon::parse($contractGeneratedAt)->format('d.m.Y H:i') : '-' }}</strong>
+                    · Oluşturulma: <strong>{{ $contractGeneratedAt ? \Carbon\Carbon::parse($contractGeneratedAt)->format('d.m.Y H:i') : '-' }}</strong>
                 </div>
             </div>
             <div style="display:flex;gap:6px;" class="no-print">
-                <a href="#" class="gc-viewer-btn" onclick="event.preventDefault();window.print()">⬇ Indir</a>
-                <button type="button" class="gc-viewer-btn" onclick="window.print()">🖨 Yazdir</button>
+                <button type="button" class="gc-viewer-btn" onclick="window.print()" title="Yazdır veya PDF olarak kaydet">🖨 Yazdır / PDF</button>
             </div>
         </div>
         <div class="gc-read-bar"><div class="gc-read-fill" id="gcReadFill"></div></div>
         <div class="gc-viewer-body" id="gcContractBody" onscroll="gcUpdateReadProgress(this)">{{ $contractSnapshotText }}</div>
-        <div class="gc-scroll-hint" id="gcScrollHint">📖 Lutfen sozlesmeyi tamamen okuyun</div>
+        <div class="gc-scroll-hint" id="gcScrollHint">📖 Lutfen sözleşmeyi tamamen okuyun</div>
 
         @if($contractAnnexKvkkText !== '')
         <div style="padding:0 18px 12px;">
@@ -492,8 +493,8 @@
         </div>
         <div class="gc-sign-opt" onclick="document.getElementById('signedUploadForm')?.scrollIntoView({behavior:'smooth',block:'center'})">
             <div class="ico">📎</div>
-            <div class="ttl">Dosya Yukle</div>
-            <div class="sub">Imzali PDF veya fotografi yukle</div>
+            <div class="ttl">Dosya Yükle</div>
+            <div class="sub">İmzalı PDF veya fotografi yükle</div>
         </div>
     </div>
     @endif
@@ -506,15 +507,15 @@
             <button type="button" class="gc-viewer-btn" id="signClearBtn">Temizle</button>
         </div>
         <div style="padding:14px 18px;">
-            <p style="margin:0 0 12px;font-size:var(--tx-xs);color:var(--u-muted);">Sozlesmeyi asagidaki alana parmagini veya farenle imzalayabilirsin.</p>
+            <p style="margin:0 0 12px;font-size:var(--tx-xs);color:var(--u-muted);">Sözleşmeyi aşağıdaki alana parmagini veya farenle imzalayabilirsin.</p>
             <div style="border:2px dashed var(--u-line);border-radius:10px;overflow:hidden;background:var(--u-bg);position:relative;transition:border-color .2s;" id="sigCanvasWrap">
                 <canvas id="signatureCanvas" width="680" height="160" style="width:100%;height:160px;cursor:crosshair;display:block;touch-action:none;"></canvas>
-                <div id="signCanvasPlaceholder" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:var(--tx-sm);color:#9ca3af;pointer-events:none;">Imzanizi buraya cizin</div>
+                <div id="signCanvasPlaceholder" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:var(--tx-sm);color:#9ca3af;pointer-events:none;">İmzanızi buraya cizin</div>
             </div>
             <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;align-items:flex-start;">
                 <label style="display:flex;align-items:flex-start;gap:6px;font-size:var(--tx-xs);color:var(--u-text);cursor:pointer;flex:1;min-width:200px;">
                     <input type="checkbox" id="signConsentCheck" style="margin-top:2px;flex-shrink:0;width:14px;height:14px;accent-color:var(--u-brand);">
-                    <span>Sozlesmeyi okudum, tum sartlari kabul ediyorum ve bu dijital imzanin yasal gecerliligi oldugunu onayliyorum.</span>
+                    <span>Sözleşmeyi okudum, tum sartlari kabul ediyorum ve bu dijital imzanın yasal gecerliligi oldugunu onayliyorum.</span>
                 </label>
                 <button type="button" id="signSubmitBtn" class="gc-submit" style="margin:0;width:auto;min-width:140px;padding:10px 16px;font-size:var(--tx-xs);">✅ Dijital Imzayi Gonder</button>
             </div>
@@ -535,7 +536,7 @@
     @if($contractSnapshotText !== '')
     <div class="gc-viewer no-print" style="margin-bottom:20px;" id="signedUploadSection">
         <div class="gc-viewer-top">
-            <div class="gc-viewer-title">📎 Imzali Dosya Yukle</div>
+            <div class="gc-viewer-title">📎 İmzalı Dosya Yükle</div>
         </div>
         <div style="padding:16px 18px;">
             @if($contractSignedFilePath !== '')
@@ -548,21 +549,21 @@
                 @csrf
                 <label class="gc-file-label" for="signedContractFile">
                     <span style="font-size:var(--tx-lg);">📎</span>
-                    <span id="signedFileName">Dosya secmek icin tiklayin (PDF, JPG, PNG — maks. 10 MB)</span>
+                    <span id="signedFileName">Dosya secmek için tiklayin (PDF, JPG, PNG — maks. 10 MB)</span>
                 </label>
                 <input type="file" id="signedContractFile" name="signed_contract" accept=".pdf,.jpg,.jpeg,.png" required
                        style="display:none;" onchange="var s=this.files[0];document.getElementById('signedFileName').textContent=s?s.name:'Dosya secilmedi';">
                 <div style="display:flex;flex-direction:column;gap:8px;margin:12px 0;">
                     <label style="display:flex;align-items:flex-start;gap:6px;font-size:var(--tx-xs);cursor:pointer;">
                         <input type="checkbox" name="consent_contract" required style="margin-top:2px;flex-shrink:0;width:14px;height:14px;accent-color:var(--u-brand);">
-                        <span>Sozlesme metnini okudum ve tum sartlari kabul ediyorum.</span>
+                        <span>Sözleşme metnini okudum ve tum sartlari kabul ediyorum.</span>
                     </label>
                     <label style="display:flex;align-items:flex-start;gap:6px;font-size:var(--tx-xs);cursor:pointer;">
                         <input type="checkbox" name="consent_kvkk" required style="margin-top:2px;flex-shrink:0;width:14px;height:14px;accent-color:var(--u-brand);">
-                        <span>KVKK kapsaminda kisisel verilerimin danismanlik surecinde islenmesine onay veriyorum.</span>
+                        <span>KVKK kapsaminda kisisel verilerimin danışmanlik sürecinde islenmesine onay veriyorum.</span>
                     </label>
                 </div>
-                <button type="submit" class="btn ok" style="min-width:180px;">Imzali Dosyayi Gonder</button>
+                <button type="submit" class="btn ok" style="min-width:180px;">İmzalı Dosyayi Gonder</button>
             </form>
         </div>
     </div>
@@ -575,17 +576,17 @@
 @if($status === 'signed_uploaded')
     <div class="gc-hero amber">
         <div class="gc-hero-badge"><span class="pulse"></span> Firma inceliyor</div>
-        <div class="gc-hero-title">Imzali sozlesmen gonderildi</div>
-        <div class="gc-hero-sub">Danismanin imzali sozlesmeni inceliyor. Onaylandiginda resmi {{ config('brand.name', 'MentorDE') }} ogrencisi olacaksin!</div>
+        <div class="gc-hero-title">İmzalı sözleşmen gonderildi</div>
+        <div class="gc-hero-sub">Danışmanin imzalı sözleşmeni inceliyor. Onaylandıginda resmi {{ config('brand.name', 'MentorDE') }} ogrencisi olacaksin!</div>
         <div class="gc-hero-meta">
-            <span>⏱️ Tahmini: 1-2 is gunu</span>
+            <span>⏱️ Tahmini: 1-2 iş günü</span>
             <span>📧 Sonuc e-posta ile bildirilecek</span>
         </div>
     </div>
 
     @if(!empty($contractStepper) && $contractStepper->count() > 0)
     <div class="gc-proc">
-        <div class="gc-proc-head">📋 Sozlesme Sureci</div>
+        <div class="gc-proc-head">📋 Sözleşme Süreçi</div>
         @foreach($contractStepper as $cs)
         <div class="gc-proc-step {{ $cs['status'] === 'done' ? 'is-done' : ($cs['status'] === 'active' ? 'is-now' : 'is-wait') }}">
             <div class="gc-proc-dot {{ $cs['status'] === 'done' ? 'done' : ($cs['status'] === 'active' ? 'now' : 'wait') }}">{{ $cs['status'] === 'done' ? '✓' : $cs['icon'] }}</div>
@@ -598,45 +599,45 @@
 
     <div class="gc-tip">
         <div class="gc-tip-icon">🎉</div>
-        <div><h5>Neredeyse tamam!</h5><p>Imzali sozlesmen danismana ulasti. Onay geldiginde artik resmi ogrencimiz olacaksin.</p></div>
+        <div><h5>Neredeyse tamam!</h5><p>İmzalı sözleşmen danışmana ulasti. Onay geldiginde artik resmi ogrencimiz olacaksin.</p></div>
     </div>
 @endif
 
 {{-- ══════════════════════════════════════════
-     STATE 5: approved — Tamamlandi
+     STATE 5: approved — Tamamlandı
 ══════════════════════════════════════════ --}}
 @if($status === 'approved')
     <div class="gc-celebrate">
         <div class="emoji">🎓</div>
         <h2>Tebrikler!</h2>
-        <p>Sozlesmen onaylandi. Artik resmi {{ config('brand.name', 'MentorDE') }} ogrencisisin! Almanya yolculugun resmen basladi.</p>
+        <p>Sözleşmen onaylandi. Artik resmi {{ config('brand.name', 'MentorDE') }} ogrencisisin! Almanya yolculugun resmen basladi.</p>
     </div>
 
     <div class="gc-info-grid">
         <div class="gc-info-card">
             <div class="gc-info-icon" style="background:rgba(22,163,74,.08);">📝</div>
-            <div><div style="font-size:11px;color:var(--u-muted);">Kayit Formu</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);">✓ Tamamlandi</div></div>
+            <div><div style="font-size:11px;color:var(--u-muted);">Kayıt Formu</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);">✓ Tamamlandı</div></div>
         </div>
         <div class="gc-info-card">
             <div class="gc-info-icon" style="background:rgba(22,163,74,.08);">📄</div>
-            <div><div style="font-size:11px;color:var(--u-muted);">Belgeler</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);">✓ Onaylandi</div></div>
+            <div><div style="font-size:11px;color:var(--u-muted);">Belgeler</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);">✓ Onaylandı</div></div>
         </div>
         <div class="gc-info-card">
             <div class="gc-info-icon" style="background:rgba(22,163,74,.08);">📜</div>
-            <div><div style="font-size:11px;color:var(--u-muted);">Sozlesme</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);">✓ Onaylandi</div></div>
+            <div><div style="font-size:11px;color:var(--u-muted);">Sözleşme</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);">✓ Onaylandı</div></div>
         </div>
     </div>
 
     <div class="gc-tip" style="background:linear-gradient(135deg,rgba(22,163,74,.04),rgba(22,163,74,.02));border-color:rgba(22,163,74,.12);">
         <div class="gc-tip-icon" style="background:rgba(22,163,74,.08);">🚀</div>
-        <div><h5 style="color:#065f46;">Sirada ne var?</h5><p style="color:#047857;">Danismanin seninle iletisime gecerek universite basvuru surecini baslatacak.</p></div>
+        <div><h5 style="color:#065f46;">Sirada ne var?</h5><p style="color:#047857;">Danışmanin seninle iletisime gecerek universite basvuru sürecini başlatacak.</p></div>
     </div>
 @endif
 
 {{-- ── Contract Update Request ── --}}
 @if($allowContractUpdate)
 <div class="gc-viewer no-print" style="margin-bottom:20px;">
-    <div class="gc-viewer-top"><div class="gc-viewer-title">🔄 Sozlesmeyi Guncelle Talebi</div></div>
+    <div class="gc-viewer-top"><div class="gc-viewer-title">🔄 Sözleşmeyi Guncelle Talebi</div></div>
     <div style="padding:16px 18px;">
         <div class="gc-alert info" style="margin-bottom:10px;">
             <span class="gc-alert-icon">ℹ</span>
@@ -681,8 +682,8 @@
 {{-- ── Help Card (always visible) ── --}}
 <div class="gc-help">
     <div style="font-size:24px;">💬</div>
-    <div><strong>Sorunuz mu var?</strong><p>Sozlesme hakkinda herhangi bir sorunuz varsa danismaninizla gorusebilirsiniz.</p></div>
-    <a href="{{ route('guest.messages') }}" class="gc-help-btn">Danismana Sor</a>
+    <div><strong>Sorunuz mu var?</strong><p>Sözleşme hakkinda herhangi bir sorunuz varsa danışmaninizla gorusebilirsiniz.</p></div>
+    <a href="{{ route('guest.messages') }}" class="gc-help-btn">Danışmana Sor</a>
 </div>
 
 {{-- ── HTML Print Layout (antetli kagit) ── --}}
@@ -694,11 +695,11 @@
     @else
         <div style="text-align:center;padding-bottom:16px;border-bottom:2px solid #333;margin-bottom:24px;">
             <div style="font-size:18pt;font-weight:700;letter-spacing:1px;">{{ config('brand.name', 'MentorDE') }}</div>
-            <div style="font-size:9pt;color:#666;margin-top:4px;">{{ config('brand.tagline', 'Yurt Disi Egitim Danismanligi') }}</div>
+            <div style="font-size:9pt;color:#666;margin-top:4px;">{{ config('brand.tagline', 'Yurt Disi Egitim Danışmanligi') }}</div>
         </div>
     @endif
 
-    {{-- Sozlesme metni --}}
+    {{-- Sözleşme metni --}}
     <div id="contractPrintBody" style="white-space:pre-wrap;font-size:11pt;line-height:1.7;">{{ $contractSnapshotText }}</div>
 
     {{-- Ekler --}}
@@ -720,7 +721,7 @@
         {!! $printFooterHtml !!}
     @else
         <div style="margin-top:32px;padding-top:12px;border-top:1px solid #ccc;font-size:8pt;color:#999;text-align:center;">
-            Bu belge {{ config('brand.name', 'MentorDE') }} sistemi uzerinden olusturulmustur. · {{ now()->format('d.m.Y') }}
+            Bu belge {{ config('brand.name', 'MentorDE') }} sistemi uzerinden oluşturulmustur. · {{ now()->format('d.m.Y') }}
         </div>
     @endif
 </div>
@@ -729,7 +730,7 @@
 {{-- ── Error Popup ── --}}
 <div id="contractErrorPopup" class="gc-popup-overlay" aria-hidden="true">
     <div class="gc-popup-card">
-        <h4 class="gc-popup-title">Sozlesme talebi gonderilemedi</h4>
+        <h4 class="gc-popup-title">Sözleşme talebi gonderilemedi</h4>
         <div id="contractErrorPopupBody" class="muted" style="white-space:pre-wrap;line-height:1.5;"></div>
         <div style="margin-top:14px;display:flex;justify-content:flex-end;"><button type="button" class="btn" id="contractErrorPopupClose">Tamam</button></div>
     </div>
@@ -751,7 +752,7 @@ function gcUpdateReadProgress(el) {
     var fill = document.getElementById('gcReadFill');
     var hint = document.getElementById('gcScrollHint');
     if (fill) fill.style.width = Math.min(pct, 100) + '%';
-    if (pct > 90 && hint) { hint.textContent = '✅ Sozlesmeyi tamamen okudunuz'; hint.style.color = 'var(--u-ok)'; }
+    if (pct > 90 && hint) { hint.textContent = '✅ Sözleşmeyi tamamen okudunuz'; hint.style.color = 'var(--u-ok)'; }
 }
 </script>
 <script defer src="{{ Vite::asset('resources/js/guest-contract.js') }}"></script>
@@ -786,7 +787,7 @@ function gcUpdateReadProgress(el) {
 
     document.getElementById('signSubmitBtn').addEventListener('click', function () {
         const fb = document.getElementById('signFeedback');
-        if (!hasMark) { showFb('error', 'Lutfen once imzanizi cizin.'); return; }
+        if (!hasMark) { showFb('error', 'Lutfen once imzanızi cizin.'); return; }
         if (!document.getElementById('signConsentCheck').checked) { showFb('error', 'Onay kutusunu isaretleyin.'); return; }
         const btn = this;
         btn.disabled = true; btn.textContent = 'Gonderiliyor...';
@@ -798,7 +799,7 @@ function gcUpdateReadProgress(el) {
         })
         .then(r => r.json())
         .then(d => {
-            if (d.success) { showFb('ok', '✓ Dijital imzaniz basariyla kaydedildi.'); setTimeout(() => location.reload(), 1500); }
+            if (d.success) { showFb('ok', '✓ Dijital imzanız basariyla kaydedildi.'); setTimeout(() => location.reload(), 1500); }
             else { showFb('error', d.message || 'Hata olustu.'); btn.disabled = false; btn.textContent = 'Dijital Imzayi Gonder'; }
         })
         .catch(() => { showFb('error', 'Baglanti hatasi.'); btn.disabled = false; btn.textContent = 'Dijital Imzayi Gonder'; });

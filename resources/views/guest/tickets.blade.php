@@ -6,6 +6,8 @@
 @push('head')
 <script>if(localStorage.getItem('mentorde_design')==='minimalist'){document.documentElement.classList.add('jm-minimalist');}</script>
 <style>
+/* Tickets sayfasında gchat FAB'ı gizle — form zaten var, üst üste binmesin */
+.gchat-fab, .gchat-panel { display: none !important; }
 /* ── gt-* Guest Tickets v2 ── */
 
 /* KPI Bar */
@@ -64,6 +66,13 @@
 
 /* Ticket list */
 .gt-list { display:flex; flex-direction:column; gap:10px; }
+.gt-list-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+.gt-list-title { font-size:var(--tx-sm); font-weight:800; color:var(--u-text); }
+.gt-list-sub { font-size:var(--tx-xs); font-weight:400; color:var(--u-muted); }
+@media(max-width:640px){
+    .gt-list-head { flex-direction:column; align-items:flex-start; gap:4px; }
+    .gt-list-sub { font-size:11px; line-height:1.4; }
+}
 .gt-card {
     background:var(--u-card); border:1px solid var(--u-line);
     border-radius:12px; overflow:hidden;
@@ -307,17 +316,23 @@
 
     {{-- ══ RIGHT: Ticket List ══ --}}
     <div>
-        <div style="font-size:var(--tx-sm);font-weight:800;color:var(--u-text);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
-            <span>📂 Mevcut Destek Taleplerim</span>
-            <span style="font-size:var(--tx-xs);font-weight:400;color:var(--u-muted);">Açtığın talepleri buradan takip edebilir, yanıt ekleyebilirsin</span>
-        </div>
         @if($tickets->isEmpty())
-            <div class="card" style="text-align:center;padding:48px 20px;color:var(--u-muted);">
-                <div style="font-size:48px;margin-bottom:14px;">🎫</div>
-                <div style="font-size:var(--tx-base);font-weight:600;color:var(--u-text);margin-bottom:6px;">Henüz destek talebi açmadınız</div>
-                <div style="font-size:var(--tx-sm);max-width:280px;margin:0 auto;line-height:1.5;">Sol paneldeki formu doldurarak ilk talebinizi oluşturabilirsiniz.</div>
+            <div class="card" style="padding:20px;">
+                <div class="gt-list-head" style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--u-line);">
+                    <span class="gt-list-title">📂 Mevcut Destek Taleplerim</span>
+                    <span class="gt-list-sub">Açtığın talepleri buradan takip edebilir, yanıt ekleyebilirsin</span>
+                </div>
+                <div style="text-align:center;padding:28px 10px 14px;color:var(--u-muted);">
+                    <div style="font-size:48px;margin-bottom:14px;">🎫</div>
+                    <div style="font-size:var(--tx-base);font-weight:600;color:var(--u-text);margin-bottom:6px;">Henüz destek talebi açmadınız</div>
+                    <div style="font-size:var(--tx-sm);max-width:280px;margin:0 auto;line-height:1.5;">Sol paneldeki formu doldurarak ilk talebinizi oluşturabilirsiniz.</div>
+                </div>
             </div>
         @else
+            <div class="gt-list-head">
+                <span class="gt-list-title">📂 Mevcut Destek Taleplerim</span>
+                <span class="gt-list-sub">Açtığın talepleri buradan takip edebilir, yanıt ekleyebilirsin</span>
+            </div>
             <div class="gt-list">
             @foreach($tickets as $ticket)
                 @php

@@ -30,13 +30,26 @@
     background: var(--theme-accent-guest); border-radius: 2px; flex-shrink: 0;
 }
 
-.fb-type-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
-.fb-type-tab {
-    padding: 7px 14px; border-radius: 8px; border: 1px solid var(--u-line);
-    background: var(--u-bg); font-size: 12px; font-weight: 600; cursor: pointer;
-    color: var(--u-muted); transition: all .15s;
+.fb-type-tabs {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px;
 }
-.fb-type-tab.active { background: var(--theme-accent-guest); border-color: var(--theme-accent-guest); color: #fff; }
+.fb-type-tab {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 5px; padding: 12px 6px; border-radius: 10px; border: 1.5px solid var(--u-line);
+    background: var(--u-bg); font-size: 12px; font-weight: 700; cursor: pointer;
+    color: var(--u-muted); transition: all .18s; line-height: 1.1;
+}
+.fb-type-ico { font-size: 20px; line-height: 1; }
+.fb-type-lbl { font-size: 12px; }
+.fb-type-tab:hover { border-color: var(--u-muted); transform: translateY(-1px); }
+.fb-type-tab.active {
+    background: var(--theme-accent-guest); border-color: var(--theme-accent-guest);
+    color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,.22);
+}
+@media (max-width: 560px) {
+    .fb-type-tabs { grid-template-columns: repeat(2, 1fr); gap: 9px; }
+    .fb-type-tab  { padding: 14px 8px; font-size: 13px; }
+}
 
 .fb-stars { display: flex; gap: 6px; margin: 8px 0 14px; }
 .fb-star {
@@ -150,7 +163,10 @@
                 @endphp
                 @foreach($types as $val => [$ico, $lbl])
                 <button type="button" class="fb-type-tab {{ $val==='general' ? 'active' : '' }}"
-                        data-val="{{ $val }}" onclick="setType(this)">{{ $ico }} {{ $lbl }}</button>
+                        data-val="{{ $val }}" onclick="setType(this)">
+                    <span class="fb-type-ico">{{ $ico }}</span>
+                    <span class="fb-type-lbl">{{ $lbl }}</span>
+                </button>
                 @endforeach
             </div>
 

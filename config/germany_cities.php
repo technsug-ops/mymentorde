@@ -8,7 +8,8 @@ return [
         'emoji'       => '🏔',
         'tagline'     => 'Teknoloji, finans ve prestijin başkenti',
         'hero_color'  => 'linear-gradient(135deg,#1d4ed8,#7c3aed)',
-        'hero_video_id' => 'LzLOhMsjpsw',  // YouTube video ID (boşsa gösterilmez)
+        'hero_video_id' => 'LzLOhMsjpsw',     // YouTube video ID (boşsa gösterilmez)
+        'hero_video_thumb' => 'https://images.unsplash.com/photo-1595867818082-083862f3d630?w=800&q=80',              // Özel kapak resmi URL'i (boşsa YouTube'dan alınır). Ör: '/img/cities/munich-cover.jpg'
         'cost_index'  => 5, // 1-5 pahalılık
         'student_pop' => '120.000+',
         'population'  => '1,56 milyon',
@@ -215,6 +216,7 @@ return [
         'tagline'     => 'Sanat, teknoloji ve tarihin başkenti',
         'hero_color'  => 'linear-gradient(135deg,#2563eb,#0891b2)',
         'hero_video_id' => 'LzLOhMsjpsw',
+        'hero_video_thumb' => 'https://images.unsplash.com/photo-1560969184-10fe8719e047?w=800&q=80',
         'cost_index'  => 3,
         'student_pop' => '180.000+',
         'population'  => '3,7 milyon',
@@ -322,6 +324,8 @@ return [
         'tagline'     => 'Liman şehri, ticaret ve lojistiğin kalbi',
         'hero_color'  => 'linear-gradient(135deg,#dc2626,#d97706)',
         'hero_video_id' => 'LzLOhMsjpsw',
+
+        'hero_video_thumb' => 'https://images.unsplash.com/photo-1552751753-0fc84ae3a766?w=800&q=80',
         'cost_index'  => 3,
         'student_pop' => '90.000+',
         'population'  => '1,85 milyon',
@@ -395,6 +399,8 @@ return [
         'tagline'     => 'Avrupa\'nın finans merkezi',
         'hero_color'  => 'linear-gradient(135deg,#0891b2,#16a34a)',
         'hero_video_id' => 'LzLOhMsjpsw',
+
+        'hero_video_thumb' => 'https://images.unsplash.com/photo-1577185748577-b842fd77e9c7?w=800&q=80',
         'cost_index'  => 4,
         'student_pop' => '60.000+',
         'population'  => '770.000',
@@ -468,6 +474,8 @@ return [
         'tagline'     => 'Medya, kültür ve uygun fiyatlı yaşam',
         'hero_color'  => 'linear-gradient(135deg,#7c3aed,#0891b2)',
         'hero_video_id' => 'LzLOhMsjpsw',
+
+        'hero_video_thumb' => 'https://images.unsplash.com/photo-1598892886985-a6e2b28a5a22?w=800&q=80',
         'cost_index'  => 2,
         'student_pop' => '90.000+',
         'population'  => '1,08 milyon',
@@ -541,6 +549,8 @@ return [
         'tagline'     => 'Otomotiv ve mühendisliğin kalbi',
         'hero_color'  => 'linear-gradient(135deg,#dc2626,#7c3aed)',
         'hero_video_id' => 'LzLOhMsjpsw',
+
+        'hero_video_thumb' => 'https://images.unsplash.com/photo-1583079889956-c0c4dd6f61c1?w=800&q=80',
         'cost_index'  => 4,
         'student_pop' => '70.000+',
         'population'  => '635.000',
@@ -617,6 +627,8 @@ return [
         'tagline'     => 'Moda, tasarım ve uluslararası iş dünyasının kalbi',
         'hero_color'  => 'linear-gradient(135deg,#0891b2,#2563eb)',
         'hero_video_id' => 'LzLOhMsjpsw',
+
+        'hero_video_thumb' => 'https://images.unsplash.com/photo-1624085568108-36410d0b87bd?w=800&q=80',
         'cost_index'  => 4,
         'student_pop' => '55.000+',
         'population'  => '640.000',
@@ -696,6 +708,8 @@ return [
         'tagline'     => 'Güçlü mühendislik eğitimi, uygun yaşam maliyeti',
         'hero_color'  => 'linear-gradient(135deg,#7c3aed,#16a34a)',
         'hero_video_id' => 'LzLOhMsjpsw',
+
+        'hero_video_thumb' => 'https://images.unsplash.com/photo-1609856878074-cf31e21ccb6d?w=800&q=80',
         'cost_index'  => 2,
         'student_pop' => '45.000+',
         'population'  => '560.000',
@@ -779,6 +793,8 @@ return [
         'tagline'     => 'Teknoloji, fuarlar ve sakin öğrenci yaşamı',
         'hero_color'  => 'linear-gradient(135deg,#16a34a,#0891b2)',
         'hero_video_id' => 'LzLOhMsjpsw',
+
+        'hero_video_thumb' => 'https://images.unsplash.com/photo-1584267385494-9fdd9a71ad75?w=800&q=80',
         'cost_index'  => 2,
         'student_pop' => '50.000+',
         'population'  => '535.000',
@@ -864,6 +880,8 @@ return [
         'tagline'     => 'Tarihin ve Bavyera mühendisliğinin güçlü şehri',
         'hero_color'  => 'linear-gradient(135deg,#dc2626,#d97706)',
         'hero_video_id' => 'LzLOhMsjpsw',
+
+        'hero_video_thumb' => 'https://images.unsplash.com/photo-1599566175617-5c0e95a15f4c?w=800&q=80',
         'cost_index'  => 3,
         'student_pop' => '45.000+',
         'population'  => '520.000',

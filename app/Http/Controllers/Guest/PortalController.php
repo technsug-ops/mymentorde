@@ -431,6 +431,7 @@ class PortalController extends Controller
         $data['selectedPackagePrice']= (string) ($guest?->selected_package_price ?? '');
         $data['selectedExtras']      = is_array($guest?->selected_extra_services) ? $guest->selected_extra_services : [];
         $data['packageSelectedAt']   = $guest?->package_selected_at;
+        $data['contractRequested']   = in_array((string)($guest?->contract_status ?? 'not_requested'), ['requested','signed_uploaded','pending_manager','approved','reopen_requested'], true);
 
         $allExtras = collect(config('service_packages.extra_services', []))->where('is_active', true);
         $data['serviceCategories'] = collect(config('service_packages.service_categories', []))

@@ -265,6 +265,26 @@
                    class="nav-link {{ request()->is('student/materials*') ? 'active' : '' }}">
                     <span class="nav-icon">📚</span> Materyaller
                 </a>
+                <a href="{{ route('student.info.university-guide') }}"
+                   class="nav-link {{ request()->routeIs('student.info.university-guide') ? 'active' : '' }}">
+                    <span class="nav-icon">🎓</span> Üniversite Rehberi
+                </a>
+                <a href="{{ route('student.info.living-guide') }}"
+                   class="nav-link {{ request()->routeIs('student.info.living-guide') ? 'active' : '' }}">
+                    <span class="nav-icon">🏙</span> Yaşam Rehberi
+                </a>
+                <a href="{{ route('student.info.vize-guide') }}"
+                   class="nav-link {{ request()->routeIs('student.info.vize-guide') ? 'active' : '' }}">
+                    <span class="nav-icon">🛂</span> Vize & Sperrkonto
+                </a>
+                <a href="{{ route('student.info.document-guide') }}"
+                   class="nav-link {{ request()->routeIs('student.info.document-guide') ? 'active' : '' }}">
+                    <span class="nav-icon">📋</span> Belge Rehberi
+                </a>
+                <a href="{{ route('student.info.success-stories') }}"
+                   class="nav-link {{ request()->routeIs('student.info.success-stories') ? 'active' : '' }}">
+                    <span class="nav-icon">⭐</span> Başarı Hikayeleri
+                </a>
                 <a href="{{ route('student.discover') }}"
                    class="nav-link {{ request()->routeIs('student.discover') ? 'active' : '' }}">
                     <span class="nav-icon">🧭</span> Icerikler
@@ -310,7 +330,7 @@
             <div class="topbar-left" style="flex:0 1 auto;">
                 <button class="icon-btn" id="premium-menu-btn"
                         style="display:none;">☰</button>
-                <button type="button" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
+                <a href="/student/dashboard" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:22px;line-height:1;width:44px;height:44px;flex-shrink:0;border:1px solid var(--u-line,#e5e7eb);background:var(--u-card,#fff);border-radius:10px;text-decoration:none;display:flex;align-items:center;justify-content:center;">&#8592;</a>
                 <div>
                     <div class="topbar-title">@yield('page_title', 'Öğrenci Portalı')</div>
                     @hasSection('page_subtitle')
@@ -448,7 +468,7 @@ document.addEventListener('alpine:init',function(){
     function getCollapsed(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'[]');}catch(e){return[];}}
     function saveCollapsed(arr){localStorage.setItem(STORE_KEY,JSON.stringify(arr));}
     var _bb=document.getElementById('premium-back-btn');
-    if(_bb){_bb.addEventListener('click',function(){window.history.back();});}
+    // Back button artık inline onclick ile yönetiliyor (çakışma önlendi)
     // ── Mobile hamburger (CSP-safe) ──
     var _mb=document.getElementById('premium-menu-btn');
     var _ov=document.getElementById('premium-overlay');

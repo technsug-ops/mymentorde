@@ -107,8 +107,12 @@
 }
 @media(max-width:600px){
     .sd-steps { grid-template-columns:repeat(2,1fr); }
-    .sd-grid-4,.sd-ql { grid-template-columns:1fr; }
+    .sd-grid-4 { grid-template-columns:1fr 1fr; gap:8px; }
+    .sd-ql { grid-template-columns:1fr; }
     .sd-grid-2,.sd-grid-3 { grid-template-columns:1fr; }
+    .sd-stat { padding:10px; gap:8px; }
+    .sd-stat-icon { width:34px; height:34px; flex-shrink:0; }
+    .sd-stat-icon svg { width:16px; height:16px; }
 }
 .jm-minimalist .sd-journey,.jm-minimalist .sd-card,.jm-minimalist .sd-stat { box-shadow:none; }
 </style>
@@ -391,20 +395,20 @@
 @if(!empty($studentAnalytics))
 <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:18px 20px;margin-top:16px;">
     <div style="font-size:13px;font-weight:700;color:var(--text,#111);margin-bottom:12px;">📊 Süreç Analitiklerin</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
-        <div style="text-align:center;padding:10px;background:var(--bg,#f8fafc);border-radius:8px;">
+    <div class="kpi-row-compact" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+        <div style="text-align:center;padding:10px 6px;background:var(--bg,#f8fafc);border-radius:8px;min-width:0;">
             <div style="font-size:20px;font-weight:800;color:#3b82f6;">{{ $studentAnalytics['daysSinceStart'] ?? 0 }}</div>
             <div style="font-size:10px;color:var(--muted,#64748b);">Gün (süreç başlangıcı)</div>
         </div>
-        <div style="text-align:center;padding:10px;background:var(--bg,#f8fafc);border-radius:8px;">
+        <div style="text-align:center;padding:10px 6px;background:var(--bg,#f8fafc);border-radius:8px;min-width:0;">
             <div style="font-size:20px;font-weight:800;color:#16a34a;">%{{ $studentAnalytics['checklistRate'] ?? 0 }}</div>
             <div style="font-size:10px;color:var(--muted,#64748b);">Checklist Tamamlama</div>
         </div>
-        <div style="text-align:center;padding:10px;background:var(--bg,#f8fafc);border-radius:8px;">
+        <div style="text-align:center;padding:10px 6px;background:var(--bg,#f8fafc);border-radius:8px;min-width:0;">
             <div style="font-size:20px;font-weight:800;color:#8b5cf6;">{{ $studentAnalytics['achievementCount'] ?? 0 }}</div>
             <div style="font-size:10px;color:var(--muted,#64748b);">Başarım Rozeti</div>
         </div>
-        <div style="text-align:center;padding:10px;background:var(--bg,#f8fafc);border-radius:8px;">
+        <div style="text-align:center;padding:10px 6px;background:var(--bg,#f8fafc);border-radius:8px;min-width:0;">
             <div style="font-size:20px;font-weight:800;color:#f59e0b;">{{ $studentAnalytics['achievementPoints'] ?? 0 }}</div>
             <div style="font-size:10px;color:var(--muted,#64748b);">Toplam Puan</div>
         </div>

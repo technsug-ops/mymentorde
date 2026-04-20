@@ -471,7 +471,7 @@
             <div class="topbar-left">
                 <button class="icon-btn" id="premium-menu-btn"
                         style="display:none;">☰</button>
-                <button type="button" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;">&#8592;</button>
+                <a href="/mktg-admin/dashboard" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:22px;line-height:1;width:44px;height:44px;flex-shrink:0;border:1px solid var(--u-line,#e5e7eb);background:var(--u-card,#fff);border-radius:10px;text-decoration:none;display:flex;align-items:center;justify-content:center;">&#8592;</a>
                 <div>
                     <div class="topbar-title">{{ $pageTitle ?? ($topMode === 'sales' ? 'Sales Panel' : 'Marketing Admin') }}</div>
                     @hasSection('page_subtitle')
@@ -600,7 +600,7 @@ function __dmToggle(){
 // ── Mobile hamburger + back btn (CSP-safe) ──
 (function(){
     var _bb=document.getElementById('premium-back-btn');
-    if(_bb){_bb.addEventListener('click',function(){window.history.back();});}
+    // Back button artık inline onclick ile yönetiliyor (çakışma önlendi)
     var _mb=document.getElementById('premium-menu-btn');
     var _ov=document.getElementById('premium-overlay');
     var _sb=document.getElementById('premium-sidebar');

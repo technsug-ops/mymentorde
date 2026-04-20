@@ -208,6 +208,16 @@
             Onay sürecinde mesaj gönderebilir, belgelerinizi takip edebilir ve danışmanınızla iletişim kurabilirsiniz. Sorunuz için destek talebi oluşturabilirsiniz.
         </div>
 
+        {{-- CTA Butonları --}}
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;">
+            <a href="{{ route('guest.messages') }}" style="flex:1;min-width:160px;padding:12px 20px;background:linear-gradient(135deg,#0d9488,#14b8a6);color:#fff;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;box-shadow:0 4px 14px rgba(13,148,136,.25);">
+                💬 Danışmanına Mesaj
+            </a>
+            <a href="{{ route('guest.dashboard') }}" style="flex:1;min-width:160px;padding:12px 20px;background:var(--u-card);color:var(--u-text);border:1.5px solid var(--u-line);border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;">
+                🏠 Dashboard'a Dön
+            </a>
+        </div>
+
     </div>{{-- /LEFT --}}
 
     {{-- ══ RIGHT ══ --}}

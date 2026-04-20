@@ -83,10 +83,10 @@
     box-shadow: 0 10px 28px color-mix(in srgb, var(--jm-c) 22%, transparent);
 }
 .jm-cat.active {
-    background: var(--jm-c);
+    background: color-mix(in srgb, var(--jm-c) 10%, var(--u-card));
     border-color: var(--jm-c);
     transform: translateY(-4px);
-    box-shadow: 0 14px 36px color-mix(in srgb, var(--jm-c) 38%, transparent);
+    box-shadow: 0 14px 36px color-mix(in srgb, var(--jm-c) 22%, transparent);
 }
 
 /* icon circle */
@@ -98,21 +98,21 @@
     transition: background .15s;
 }
 .jm-cat.active .jm-cat-icon {
-    background: rgba(255,255,255,.22);
+    background: color-mix(in srgb, var(--jm-c) 25%, transparent);
 }
 
 .jm-cat-name {
     font-size: 13px; font-weight: 800; color: var(--u-text);
     margin-bottom: 3px; line-height: 1.2;
 }
-.jm-cat.active .jm-cat-name { color: #fff; }
+.jm-cat.active .jm-cat-name { color: var(--u-text); }
 
 .jm-cat-count {
     font-size: 11px;
     color: var(--jm-c);
     font-weight: 600;
 }
-.jm-cat.active .jm-cat-count { color: rgba(255,255,255,.75); }
+.jm-cat.active .jm-cat-count { color: var(--jm-c); font-weight: 700; }
 
 /* mini progress bar */
 .jm-cat-bar {
@@ -120,13 +120,13 @@
     background: color-mix(in srgb, var(--jm-c) 18%, transparent);
     overflow: hidden;
 }
-.jm-cat.active .jm-cat-bar { background: rgba(255,255,255,.2); }
+.jm-cat.active .jm-cat-bar { background: color-mix(in srgb, var(--jm-c) 18%, transparent); }
 .jm-cat-bar-fill {
     height: 100%; border-radius: 99px;
     background: var(--jm-c);
     transition: width .5s;
 }
-.jm-cat.active .jm-cat-bar-fill { background: #fff; }
+.jm-cat.active .jm-cat-bar-fill { background: var(--jm-c); }
 
 /* all-done check badge */
 .jm-cat-done {

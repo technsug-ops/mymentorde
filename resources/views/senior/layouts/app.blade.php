@@ -342,7 +342,7 @@
             <div class="topbar-left" style="flex:0 1 auto;">
                 <button class="icon-btn" id="premium-menu-btn"
                         style="display:none;">☰</button>
-                <button type="button" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:18px;line-height:1;" onclick="window.location='/senior/dashboard'">&#8592;</button>
+                <a href="/senior/dashboard" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:22px;line-height:1;width:44px;height:44px;flex-shrink:0;border:1px solid var(--u-line,#e5e7eb);background:var(--u-card,#fff);border-radius:10px;text-decoration:none;display:flex;align-items:center;justify-content:center;">&#8592;</a>
                 <div>
                     <div class="topbar-title">@yield('page_title', 'Eğitim Danışmanı Paneli')</div>
                     @hasSection('page_subtitle')

@@ -740,19 +740,27 @@ class WorkflowController extends Controller
         if (!$thread) {
             return response()->json(['messages' => [], 'unread' => 0]);
         }
-        $after = (int) $request->query('after', 0);
+        $after = (int) ($request->query('after') ?? $request->query('after_id', 0));
         $msgs = DmMessage::query()
             ->where('thread_id', $thread->id)
             ->when($after > 0, fn ($q) => $q->where('id', '>', $after))
             ->orderByDesc('id')
             ->limit(20)
-            ->get(['id', 'sender_role', 'sender_name', 'message', 'is_read', 'created_at'])
+            ->get(['id', 'sender_role', 'sender_user_id', 'message', 'is_read_by_participant', 'created_at'])
             ->reverse()
-            ->values();
+            ->values()
+            ->map(fn ($m) => [
+                'id' => $m->id,
+                'sender_role' => $m->sender_role,
+                'sender_name' => '',
+                'message' => $m->message,
+                'is_read' => (bool) $m->is_read_by_participant,
+                'created_at' => $m->created_at,
+            ]);
 
         $unread = DmMessage::where('thread_id', $thread->id)
             ->where('sender_role', '!=', 'guest')
-            ->where('is_read', false)
+            ->where('is_read_by_participant', false)
             ->count();
 
         $isAdvisorTyping = Cache::has("dm_typing_{$thread->id}_advisor");
