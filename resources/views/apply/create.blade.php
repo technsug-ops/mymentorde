@@ -443,11 +443,11 @@
             <div class="sub">Bilgilerini gir, seni en kısa sürede arayalım.</div>
         </div>
 
-        {{-- Hata --}}
+        {{-- Hata — controller'dan HTML link içerebilir (strip_tags allowlist) --}}
         @if($errors->any())
             <div class="error-box">
                 @foreach($errors->all() as $error)
-                    <div>{{ $error }}</div>
+                    <div>{!! strip_tags($error, '<a><br><strong><b>') !!}</div>
                 @endforeach
             </div>
         @endif

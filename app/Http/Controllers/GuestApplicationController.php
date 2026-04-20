@@ -139,13 +139,13 @@ class GuestApplicationController extends Controller
             ->whereNull('deleted_at')
             ->first(['id', 'tracking_token', 'email', 'guest_user_id']);
         if ($duplicate) {
-            // Duplicate başvuru: kullanıcıya açık mesaj ver
+            // Duplicate başvuru: kullanıcıya açık mesaj ver (HTML linkler içerir, view @raw ile render ediyor)
             return back()
                 ->withInput()
                 ->withErrors([
                     'email' => 'Bu e-posta adresiyle zaten bir başvuru bulunmaktadır. '
-                        . 'Portala giriş yapmak için /login sayfasını kullanın. '
-                        . 'Şifrenizi hatırlamıyorsanız "Şifremi Unuttum" bağlantısını kullanabilirsiniz.',
+                        . 'Portala giriş yapmak için <a href="/login" style="color:#2563eb;font-weight:700;text-decoration:underline;">giriş sayfasını</a> kullanın. '
+                        . 'Şifrenizi hatırlamıyorsanız <a href="/forgot-password" style="color:#2563eb;font-weight:700;text-decoration:underline;">Şifremi Unuttum</a> bağlantısını kullanabilirsiniz.',
                 ]);
         }
 
