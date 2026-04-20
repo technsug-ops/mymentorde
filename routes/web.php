@@ -72,6 +72,27 @@ Route::middleware(['auth', 'manager.role'])->group(function (): void {
     Route::get('/system/post-deploy', function () {
         return view('system.post-deploy');
     })->name('system.post-deploy.show');
+
+    // Demo student hesabını zengin verilerle doldur (FullyTransitionedStudentSeeder)
+    // KAS SSH yok, seeder'ı buradan tetikle. student@my.mentorde.com veya
+    // student@mentorde.local hesabı olan her ortamda çalışır.
+    Route::post('/system/seed-demo-student', function () {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('db:seed', [
+                '--class' => 'FullyTransitionedStudentSeeder',
+                '--force' => true,
+            ]);
+            return response()->json([
+                'ok'     => true,
+                'output' => trim(\Illuminate\Support\Facades\Artisan::output()),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'ok'    => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    })->middleware('throttle:3,1')->name('system.seed-demo-student');
 });
 Route::get('/go/{code}', TrackedLinkRedirectController::class)->name('tracked-link.redirect');
 

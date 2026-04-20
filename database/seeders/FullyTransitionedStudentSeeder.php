@@ -13,19 +13,31 @@ use Illuminate\Support\Str;
 
 /**
  * Demo icin tam gecisli (kontrat imzali, vize surecinde, universite basvurusu yapilmis)
- * student@mentorde.local hesabina zengin demo veri yukler.
+ * test student hesabina zengin demo veri yukler.
  *
+ * Hem local (student@mentorde.local) hem prod (student@my.mentorde.com) destekler.
  * Calistirma:  php artisan db:seed --class=FullyTransitionedStudentSeeder
  */
 class FullyTransitionedStudentSeeder extends Seeder
 {
+    /** Test student account adaylari - hangisi varsa o zenginlestirilir */
+    protected const CANDIDATE_EMAILS = [
+        'student@mentorde.local',
+        'student@my.mentorde.com',
+    ];
+
     public function run(): void
     {
         $companyId = (int) (Company::query()->where('is_active', true)->orderBy('id')->value('id') ?? 1);
 
-        $student = User::withoutGlobalScopes()->where('email', 'student@mentorde.local')->first();
+        $student = null;
+        foreach (self::CANDIDATE_EMAILS as $email) {
+            $student = User::withoutGlobalScopes()->where('email', $email)->first();
+            if ($student) break;
+        }
+
         if (! $student) {
-            $this->command->warn('student@mentorde.local bulunamadi. Once DevUserSeeder calistir.');
+            $this->command->warn('Test student bulunamadi (' . implode(', ', self::CANDIDATE_EMAILS) . '). Once DevUserSeeder calistir.');
             return;
         }
 

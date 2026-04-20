@@ -34,37 +34,65 @@
         <div id="pdOutput" style="display:none;margin-top:20px;background:#0f172a;color:#e2e8f0;padding:14px;border-radius:8px;font-family:monospace;font-size:11px;line-height:1.6;white-space:pre-wrap;max-height:400px;overflow:auto;"></div>
     </div>
 
+    {{-- Demo Student Zenginleştirme --}}
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-top:20px;">
+        <h2 style="margin:0 0 12px;font-size:18px;color:#0f172a;">🎓 Demo Student Hesabı</h2>
+        <p style="font-size:13px;color:#64748b;line-height:1.6;margin:0 0 16px;">
+            <code>student@my.mentorde.com</code> (veya local'de <code>student@mentorde.local</code>) hesabını demo sırasında zengin görünsün diye
+            dolu bir pipeline ile besler: imzalı sözleşme, 3 üniversite başvurusu (TU Berlin kabul), vize hazırlık, konut, 9 checklist, 5 randevu, 4 ödeme.
+        </p>
+        <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px;margin-bottom:16px;font-size:12px;color:#92400e;">
+            ⚠️ <strong>updateOrInsert</strong> kullanır — mevcut demo verileri günceller, kullanıcının gerçek kayıtlarını ezmez. Ama test kullanıcısı üzerinde çalışır, <strong>canlı müşteride kullanma</strong>.
+        </div>
+
+        <form id="sdForm" method="POST" action="{{ route('system.seed-demo-student') }}">
+            @csrf
+            <button type="submit" id="sdBtn"
+                    style="padding:12px 24px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">
+                🎓 Demo Verisini Yükle
+            </button>
+        </form>
+
+        <div id="sdOutput" style="display:none;margin-top:20px;background:#0f172a;color:#e2e8f0;padding:14px;border-radius:8px;font-family:monospace;font-size:11px;line-height:1.6;white-space:pre-wrap;max-height:300px;overflow:auto;"></div>
+    </div>
+
 </div>
 
 <script nonce="{{ $cspNonce ?? '' }}">
-document.getElementById('pdForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var btn = document.getElementById('pdBtn');
-    var out = document.getElementById('pdOutput');
-    btn.disabled = true;
-    btn.textContent = '⏳ Çalışıyor...';
-    out.style.display = 'block';
-    out.textContent = 'Komutlar çalıştırılıyor...\n';
+function __postJson(formId, btnId, outId, doneLabel, retryLabel){
+    document.getElementById(formId).addEventListener('submit', function(e){
+        e.preventDefault();
+        var btn = document.getElementById(btnId);
+        var out = document.getElementById(outId);
+        var originalBg = btn.style.background;
+        btn.disabled = true;
+        btn.textContent = '⏳ Çalışıyor...';
+        out.style.display = 'block';
+        out.textContent = 'Çalıştırılıyor...\n';
 
-    var fd = new FormData(e.target);
-    fetch(e.target.action, {
-        method: 'POST',
-        body: fd,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        credentials: 'same-origin'
-    })
-    .then(r => r.json())
-    .then(data => {
-        out.textContent = JSON.stringify(data, null, 2);
-        btn.textContent = '✅ Tamamlandı';
-        btn.style.background = '#16a34a';
-    })
-    .catch(err => {
-        out.textContent = 'HATA: ' + err.message;
-        btn.disabled = false;
-        btn.textContent = '🚀 Tekrar Dene';
-        btn.style.background = '#dc2626';
+        var fd = new FormData(e.target);
+        fetch(e.target.action, {
+            method: 'POST',
+            body: fd,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        })
+        .then(r => r.json())
+        .then(data => {
+            out.textContent = JSON.stringify(data, null, 2);
+            btn.textContent = doneLabel;
+            btn.style.background = '#16a34a';
+        })
+        .catch(err => {
+            out.textContent = 'HATA: ' + err.message;
+            btn.disabled = false;
+            btn.textContent = retryLabel;
+            btn.style.background = '#dc2626';
+        });
     });
-});
+}
+
+__postJson('pdForm', 'pdBtn', 'pdOutput', '✅ Tamamlandı', '🚀 Tekrar Dene');
+__postJson('sdForm', 'sdBtn', 'sdOutput', '✅ Demo Yüklendi', '🎓 Tekrar Dene');
 </script>
 @endsection
