@@ -135,6 +135,19 @@ class StudentContentController extends Controller
         return view('student.info.vize-guide', $base);
     }
 
+    public function infoCityDetail(Request $request, string $slug)
+    {
+        $cities = \App\Models\GermanyCity::allAsConfig();
+        if (!isset($cities[$slug])) {
+            abort(404);
+        }
+        $cityName = $cities[$slug]['name'] ?? 'Şehir';
+        $base = $this->baseData($request, 'info', $cityName . ' — Almanya\'da Yaşam', '');
+        $base['city']      = $cities[$slug];
+        $base['allCities'] = $cities;
+        return view('student.info.city-detail', $base);
+    }
+
     // ── Content Hub (Keşfet) ─────────────────────────────────────────────────
 
     public function discoverPage(Request $request)

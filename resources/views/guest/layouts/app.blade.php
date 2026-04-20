@@ -137,9 +137,37 @@
             $profilePct   = (int) ($profileCompletionPercent ?? $progressPercent ?? 0);
             $sideDisplayName = trim(($guest?->first_name ?? '').' '.($guest?->last_name ?? '')) ?: ($user?->email ?? 'Kullanıcı');
         @endphp
+        @php
+            $glBrandName    = $brandName ?? config('brand.name', 'MentorDE');
+            $glBrandLogo    = $brandLogoUrl ?? (config('brand.logo_url') ?: config('brand.logo_path'));
+            $glBrandInitial = $brandInitial ?? strtoupper(mb_substr($glBrandName, 0, 1));
+            $glLogoBg       = $brandLogoBg ?? 'light';
+            $glLogoBgStyle  = match($glLogoBg) {
+                'dark'        => 'background:#1a1a2e;',
+                'transparent' => 'background:transparent;',
+                default       => 'background:#fff;',
+            };
+        @endphp
         <div style="padding:14px 14px 0;">
+            {{-- Brand logo block --}}
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(255,255,255,.05);border-radius:10px;margin-bottom:12px;" title="{{ $glBrandName }}">
+                @if(!empty($glBrandLogo))
+                    <div style="height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;{{ $glLogoBgStyle }}border-radius:8px;padding:4px 6px;">
+                        <img src="{{ $glBrandLogo }}" alt="{{ $glBrandName }}" style="height:100%;width:auto;max-width:80px;object-fit:contain;display:block;" onerror="this.parentElement.style.display='none';this.parentElement.nextElementSibling.style.display='flex';">
+                    </div>
+                    <span style="display:none;width:44px;height:44px;align-items:center;justify-content:center;background:#fff;color:var(--u-brand,#2563eb);font-weight:800;border-radius:10px;font-size:18px;flex-shrink:0;">{{ $glBrandInitial }}</span>
+                @else
+                    <span style="display:flex;width:44px;height:44px;align-items:center;justify-content:center;background:#fff;color:var(--u-brand,#2563eb);font-weight:800;border-radius:10px;font-size:18px;flex-shrink:0;">{{ $glBrandInitial }}</span>
+                @endif
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:15px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $glBrandName }}</div>
+                    <div style="font-size:11px;color:var(--muted);font-weight:600;">Aday Öğrenci Portalı</div>
+                </div>
+            </div>
+
+            {{-- User block --}}
             <div style="display:flex;align-items:center;gap:10px;">
-                <div class="avatar" style="width:46px;height:46px;font-size:17px;flex-shrink:0;">
+                <div class="avatar" style="width:42px;height:42px;font-size:15px;flex-shrink:0;">
                     @if ($sidePhoto !== '')
                         <img src="{{ asset('storage/'.$sidePhoto) }}" alt="Profil" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
                     @else
@@ -150,14 +178,7 @@
                     <div class="user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $sideDisplayName }}</div>
                     <div class="user-role">Aday Öğrenci</div>
                 </div>
-                @php $glBrandName = config('brand.name', 'MentorDE'); $glBrandLogo = config('brand.logo_url') ?: config('brand.logo_path'); @endphp
-                @if($glBrandLogo)
-                    <div class="brand-logo" style="width:28px;height:28px;flex-shrink:0;background:transparent;padding:0;" title="{{ $glBrandName }}"><img src="{{ $glBrandLogo }}" alt="{{ $glBrandName }}" style="max-height:28px;max-width:28px;object-fit:contain;"></div>
-                @else
-                    <div class="brand-logo" style="width:28px;height:28px;font-size:11px;flex-shrink:0;" title="{{ $glBrandName }}">{{ strtoupper(mb_substr($glBrandName, 0, 1)) }}</div>
-                @endif
             </div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">{{ $glBrandName }} · Öğrenci Portalı</div>
             @if($profilePct > 0)
             <div style="margin-top:8px;">
                 <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px;">

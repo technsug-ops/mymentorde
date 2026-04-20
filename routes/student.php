@@ -150,6 +150,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'student.role', 'throt
     Route::get('/student/info/living-guide',     [StudentContentController::class, 'infoLivingGuide'])->name('student.info.living-guide');
     Route::get('/student/info/document-guide',   [StudentContentController::class, 'infoDocumentGuide'])->name('student.info.document-guide');
     Route::get('/student/info/vize-guide',       [StudentContentController::class, 'infoVizeGuide'])->name('student.info.vize-guide');
+    Route::get('/student/info/city/{slug}',      [StudentContentController::class, 'infoCityDetail'])->name('student.info.city-detail')->where('slug', '[a-z-]+');
 
     // ── Content Hub (Keşfet) ─────────────────────────────────────────────────
     Route::get('/student/discover',                   [StudentContentController::class, 'discoverPage'])->name('student.discover');

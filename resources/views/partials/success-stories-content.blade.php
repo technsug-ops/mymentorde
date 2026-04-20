@@ -308,8 +308,8 @@ $ssCta = $ssIsStudent
     : ['href' => route('guest.registration.form'), 'title' => 'Sen de bu ailenin bir parçası ol', 'sub' => 'Danışmanın seni bekliyor. Almanya yolculuğuna bugün başla.', 'label' => 'Başvurumu Tamamla'];
 
 // City tile route — guest route is public, works from both portals
-$cityTileRoute = function ($slug) {
-    return route('guest.city-detail', $slug);
+$cityTileRoute = function ($slug) use ($ssIsStudent) {
+    return $ssIsStudent ? route('student.info.city-detail', $slug) : route('guest.city-detail', $slug);
 };
 
 $srcMeta = [

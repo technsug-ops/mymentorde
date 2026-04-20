@@ -79,7 +79,11 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        // Tarayıcının tüm cache/cookie/storage'ını temizle — bfcache dahil.
+        // Böylece logout sonrası "geri" + "ileri" ile eski portal içeriğine erişilemez.
+        return redirect('/login')->withHeaders([
+            'Clear-Site-Data' => '"cache", "cookies", "storage"',
+        ]);
     }
 
     public function redirectByRole()

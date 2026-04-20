@@ -175,7 +175,7 @@ $ugCostRoute = $ugIsStudent
                 </div>
                 <div style="font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.5;margin-bottom:8px;">{{ $c['desc'] }}</div>
                 @if($slug)
-                <a href="{{ route('guest.city-detail', $slug) }}" style="font-size:var(--tx-xs);font-weight:700;color:var(--u-brand,#2563eb);text-decoration:none;">
+                <a href="{{ $ugIsStudent ? route('student.info.city-detail', $slug) : route('guest.city-detail', $slug) }}" style="font-size:var(--tx-xs);font-weight:700;color:var(--u-brand,#2563eb);text-decoration:none;">
                     Detaylı Rehber →
                 </a>
                 @endif

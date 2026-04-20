@@ -144,20 +144,41 @@
             $roleLabel  = $isAdmin ? 'Admin' : 'Staff';
             $topMode    = $panelMode;
         @endphp
-        {{-- Sidebar Header (merged brand + user) --}}
+        {{-- Sidebar Header (brand + user) --}}
+        @php
+            $maLogoBg = $brandLogoBg ?? 'light';
+            $maLogoBgStyle = match($maLogoBg) {
+                'dark'        => 'background:#1a1a2e;',
+                'transparent' => 'background:transparent;',
+                default       => 'background:#fff;',
+            };
+            $maPortalLabel = $panelMode === 'sales' ? 'Satış Paneli' : 'Pazarlama Paneli';
+        @endphp
         <div style="padding:14px 14px 0;">
+            {{-- Brand logo block --}}
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(255,255,255,.05);border-radius:10px;margin-bottom:12px;" title="{{ $brandName }}">
+                @if(!empty($brandLogoUrl))
+                    <div style="height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;{{ $maLogoBgStyle }}border-radius:8px;padding:4px 6px;">
+                        <img src="{{ $brandLogoUrl }}" alt="{{ $brandName }}" style="height:100%;width:auto;max-width:80px;object-fit:contain;display:block;" onerror="this.parentElement.style.display='none';this.parentElement.nextElementSibling.style.display='flex';">
+                    </div>
+                    <span style="display:none;width:44px;height:44px;align-items:center;justify-content:center;background:#fff;color:#6d28d9;font-weight:800;border-radius:10px;font-size:18px;flex-shrink:0;">{{ $brandInitial }}</span>
+                @else
+                    <span style="display:flex;width:44px;height:44px;align-items:center;justify-content:center;background:#fff;color:#6d28d9;font-weight:800;border-radius:10px;font-size:18px;flex-shrink:0;">{{ $brandInitial }}</span>
+                @endif
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:15px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $brandName }}</div>
+                    <div style="font-size:11px;color:var(--muted);font-weight:600;">{{ $maPortalLabel }}</div>
+                </div>
+            </div>
+
+            {{-- User block --}}
             <div style="display:flex;align-items:center;gap:10px;">
-                <div class="avatar" style="width:46px;height:46px;font-size:17px;flex-shrink:0;">{{ $mktgInitials }}</div>
+                <div class="avatar" style="width:42px;height:42px;font-size:15px;flex-shrink:0;">{{ $mktgInitials }}</div>
                 <div style="flex:1;min-width:0;">
                     <div class="user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $mktgUser?->name ?? 'Marketing' }}</div>
                     <div class="user-role" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $roleLabel }}</div>
                 </div>
-                <div class="brand-logo" style="width:28px;height:28px;font-size:11px;flex-shrink:0;overflow:hidden;" title="{{ $brandName }}">
-                    @if(!empty($brandLogoUrl))<img src="{{ $brandLogoUrl }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">@endif
-                    <span style="{{ !empty($brandLogoUrl)?'display:none;':'display:flex;' }}align-items:center;justify-content:center;width:100%;height:100%;">{{ $brandInitial }}</span>
-                </div>
             </div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">{{ $brandName }} · {{ $panelMode === 'sales' ? 'Sales' : 'Marketing' }}</div>
             <div style="height:1px;background:rgba(255,255,255,.12);margin-top:12px;"></div>
         </div>
 

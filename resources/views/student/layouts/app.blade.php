@@ -138,9 +138,37 @@
             $isAraclar  = request()->is('student/document-builder*','student/materials*');
             $isHesap    = request()->is('student/notifications*','student/payments*','student/profile*','student/settings*','student/feedback*');
         @endphp
+        @php
+            $slBrandName    = $brandName ?? config('brand.name', 'MentorDE');
+            $slBrandLogo    = $brandLogoUrl ?? (config('brand.logo_url') ?: config('brand.logo_path'));
+            $slBrandInitial = $brandInitial ?? strtoupper(mb_substr($slBrandName, 0, 1));
+            $slLogoBg       = $brandLogoBg ?? 'light';
+            $slLogoBgStyle  = match($slLogoBg) {
+                'dark'        => 'background:#1a1a2e;',
+                'transparent' => 'background:transparent;',
+                default       => 'background:#fff;',
+            };
+        @endphp
         <div style="padding:14px 14px 0;">
+            {{-- Brand logo block --}}
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(255,255,255,.05);border-radius:10px;margin-bottom:12px;" title="{{ $slBrandName }}">
+                @if(!empty($slBrandLogo))
+                    <div style="height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;{{ $slLogoBgStyle }}border-radius:8px;padding:4px 6px;">
+                        <img src="{{ $slBrandLogo }}" alt="{{ $slBrandName }}" style="height:100%;width:auto;max-width:80px;object-fit:contain;display:block;" onerror="this.parentElement.style.display='none';this.parentElement.nextElementSibling.style.display='flex';">
+                    </div>
+                    <span style="display:none;width:44px;height:44px;align-items:center;justify-content:center;background:#fff;color:var(--u-brand,#7c3aed);font-weight:800;border-radius:10px;font-size:18px;flex-shrink:0;">{{ $slBrandInitial }}</span>
+                @else
+                    <span style="display:flex;width:44px;height:44px;align-items:center;justify-content:center;background:#fff;color:var(--u-brand,#7c3aed);font-weight:800;border-radius:10px;font-size:18px;flex-shrink:0;">{{ $slBrandInitial }}</span>
+                @endif
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:15px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $slBrandName }}</div>
+                    <div style="font-size:11px;color:var(--muted);font-weight:600;">Öğrenci Portalı</div>
+                </div>
+            </div>
+
+            {{-- User block --}}
             <div style="display:flex;align-items:center;gap:10px;">
-                <div class="avatar" style="width:46px;height:46px;font-size:17px;flex-shrink:0;">
+                <div class="avatar" style="width:42px;height:42px;font-size:15px;flex-shrink:0;">
                     @if ($sidePhoto !== '')
                         <img src="{{ asset('storage/'.$sidePhoto) }}" alt="Profil" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
                     @else
@@ -151,14 +179,7 @@
                     <div class="user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $user?->name ?? 'Öğrenci' }}</div>
                     <div class="user-role">Öğrenci</div>
                 </div>
-                @php $slBrandName = config('brand.name', 'MentorDE'); $slBrandLogo = config('brand.logo_url') ?: config('brand.logo_path'); @endphp
-                @if($slBrandLogo)
-                    <div class="brand-logo" style="width:28px;height:28px;flex-shrink:0;background:transparent;padding:0;" title="{{ $slBrandName }}"><img src="{{ $slBrandLogo }}" alt="{{ $slBrandName }}" style="max-height:28px;max-width:28px;object-fit:contain;"></div>
-                @else
-                    <div class="brand-logo" style="width:28px;height:28px;font-size:11px;flex-shrink:0;" title="{{ $slBrandName }}">{{ strtoupper(mb_substr($slBrandName, 0, 1)) }}</div>
-                @endif
             </div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">{{ $slBrandName }} · Öğrenci Portalı</div>
             @if($sideProgressPct > 0)
             <div style="margin-top:8px;">
                 <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px;">

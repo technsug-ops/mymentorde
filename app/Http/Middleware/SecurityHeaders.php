@@ -39,9 +39,15 @@ class SecurityHeaders
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
 
         // ── Çıkış sonrası "Geri" butonu güvenliği ──
-        // Auth sayfaları tarayıcı cache'ine alınmasın — logout sonrası
-        // geri tuşuna basıldığında eski sayfa görünmesin.
-        if (auth()->check()) {
+        // Hem auth'lu sayfalar hem de login/password gibi hassas guest sayfaları
+        // tarayıcı bfcache'ine alınmasın. Bu sayede:
+        // (a) Logout sonrası geri tuşu eski dashboard'ı göstermez
+        // (b) Login sonrası geri tuşu login'e gitse de hemen server'a düşüp
+        //     guest middleware auth'lu user'ı dashboard'a redirect eder.
+        $isAuthPage = $request->routeIs('login')
+                      || $request->routeIs('password.*')
+                      || $request->is('login', 'logout', 'forgot-password', 'reset-password/*');
+        if (auth()->check() || $isAuthPage) {
             $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
             $response->headers->set('Pragma', 'no-cache');
             $response->headers->set('Expires', 'Sat, 01 Jan 2000 00:00:00 GMT');

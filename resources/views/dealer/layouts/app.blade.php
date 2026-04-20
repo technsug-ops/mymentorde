@@ -117,9 +117,37 @@
                 $tierPerms = \App\Support\DealerTierPermissions::for($__sidebarDealer);
             }
         @endphp
+        @php
+            $dlBrandName    = $brandName ?? config('brand.name', 'MentorDE');
+            $dlBrandLogo    = $brandLogoUrl ?? (config('brand.logo_url') ?: config('brand.logo_path'));
+            $dlBrandInitial = $brandInitial ?? strtoupper(mb_substr($dlBrandName, 0, 1));
+            $dlLogoBg       = $brandLogoBg ?? 'light';
+            $dlLogoBgStyle  = match($dlLogoBg) {
+                'dark'        => 'background:#1a1a2e;',
+                'transparent' => 'background:transparent;',
+                default       => 'background:#fff;',
+            };
+        @endphp
         <div style="padding:14px 14px 0;">
+            {{-- Brand logo block --}}
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(255,255,255,.05);border-radius:10px;margin-bottom:12px;" title="{{ $dlBrandName }}">
+                @if(!empty($dlBrandLogo))
+                    <div style="height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;{{ $dlLogoBgStyle }}border-radius:8px;padding:4px 6px;">
+                        <img src="{{ $dlBrandLogo }}" alt="{{ $dlBrandName }}" style="height:100%;width:auto;max-width:80px;object-fit:contain;display:block;" onerror="this.parentElement.style.display='none';this.parentElement.nextElementSibling.style.display='flex';">
+                    </div>
+                    <span style="display:none;width:44px;height:44px;align-items:center;justify-content:center;background:#fff;color:#dc2626;font-weight:800;border-radius:10px;font-size:18px;flex-shrink:0;">{{ $dlBrandInitial }}</span>
+                @else
+                    <span style="display:flex;width:44px;height:44px;align-items:center;justify-content:center;background:#fff;color:#dc2626;font-weight:800;border-radius:10px;font-size:18px;flex-shrink:0;">{{ $dlBrandInitial }}</span>
+                @endif
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:15px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $dlBrandName }}</div>
+                    <div style="font-size:11px;color:var(--muted);font-weight:600;">Bayi Portalı</div>
+                </div>
+            </div>
+
+            {{-- User block --}}
             <div style="display:flex;align-items:center;gap:10px;">
-                <div class="avatar" style="width:46px;height:46px;font-size:17px;flex-shrink:0;">{{ $dealerInitials }}</div>
+                <div class="avatar" style="width:42px;height:42px;font-size:15px;flex-shrink:0;">{{ $dealerInitials }}</div>
                 <div style="flex:1;min-width:0;">
                     <div class="user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $dealerUser?->name ?? 'Bayi' }}</div>
                     <div class="user-role">
@@ -129,17 +157,7 @@
                         {{ $tierPerms->tierLabel() }} · {{ $dealerUser?->dealer_code ?: '-' }}
                     </div>
                 </div>
-                @php
-                    $dlBrandName = config('brand.name', 'MentorDE');
-                    $dlBrandLogo = config('brand.logo_url') ?: config('brand.logo_path');
-                    $dlBrandInitial = strtoupper(mb_substr($dlBrandName, 0, 1));
-                @endphp
-                <div class="brand-logo" style="width:32px;height:32px;font-size:12px;flex-shrink:0;overflow:hidden;background:rgba(255,255,255,.15);border-radius:8px;" title="{{ $dlBrandName }}">
-                    @if(!empty($dlBrandLogo))<img src="{{ $dlBrandLogo }}" alt="{{ $dlBrandName }}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">@endif
-                    <span style="{{ !empty($dlBrandLogo)?'display:none;':'display:flex;' }}align-items:center;justify-content:center;width:100%;height:100%;color:#fff;font-weight:700;">{{ $dlBrandInitial }}</span>
-                </div>
             </div>
-            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;margin-top:6px;padding-left:56px;">{{ $dlBrandName }} · Bayi Portalı</div>
             <div style="height:1px;background:rgba(255,255,255,.12);margin-top:12px;"></div>
         </div>
 
