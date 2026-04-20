@@ -41,6 +41,17 @@
             font-size: 15px; font-weight: 600; cursor: pointer; transition: background .15s;
         }
         .btn-submit:hover { background: var(--primary-2); }
+        .pwd-wrap { position: relative; }
+        .pwd-wrap input { padding-right: 42px; }
+        .pwd-toggle {
+            position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
+            background: transparent; border: none; cursor: pointer;
+            width: 32px; height: 32px; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            color: #6b7e99; padding: 0;
+            transition: background .15s, color .15s;
+        }
+        .pwd-toggle:hover { background: rgba(31,102,209,.08); color: var(--primary); }
         .alert { padding: 12px 14px; border-radius: 8px; margin-bottom: 18px; font-size: 14px; }
         .alert.err { background: var(--danger-bg); border: 1px solid var(--danger-line); color: var(--danger-text); }
         .back-link { display: block; text-align: center; margin-top: 20px; font-size: 13px; color: var(--muted); }
@@ -71,14 +82,39 @@
 
         <div class="field">
             <label for="password">Yeni Şifre</label>
-            <input type="password" id="password" name="password" required autocomplete="new-password">
+            <div class="pwd-wrap">
+                <input type="password" id="password" name="password" required autocomplete="new-password">
+                <button type="button" class="pwd-toggle" aria-label="Şifreyi göster" onclick="
+                    var i=document.getElementById('password');
+                    var show = i.type === 'password';
+                    i.type = show ? 'text' : 'password';
+                    this.setAttribute('aria-label', show ? 'Şifreyi gizle' : 'Şifreyi göster');
+                    this.querySelector('.eye-open').style.display = show ? 'none' : 'block';
+                    this.querySelector('.eye-closed').style.display = show ? 'block' : 'none';
+                ">
+                    <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+            </div>
             <div class="hint">En az 8 karakter; büyük/küçük harf, rakam ve özel karakter içermeli.</div>
         </div>
 
         <div class="field">
             <label for="password_confirmation">Şifre Tekrar</label>
-            <input type="password" id="password_confirmation" name="password_confirmation"
-                   required autocomplete="new-password">
+            <div class="pwd-wrap">
+                <input type="password" id="password_confirmation" name="password_confirmation" required autocomplete="new-password">
+                <button type="button" class="pwd-toggle" aria-label="Şifreyi göster" onclick="
+                    var i=document.getElementById('password_confirmation');
+                    var show = i.type === 'password';
+                    i.type = show ? 'text' : 'password';
+                    this.setAttribute('aria-label', show ? 'Şifreyi gizle' : 'Şifreyi göster');
+                    this.querySelector('.eye-open').style.display = show ? 'none' : 'block';
+                    this.querySelector('.eye-closed').style.display = show ? 'block' : 'none';
+                ">
+                    <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+            </div>
         </div>
 
         <button type="submit" class="btn-submit">Şifremi Güncelle</button>

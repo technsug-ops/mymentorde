@@ -205,6 +205,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         'company_id',
         'name',
         'email',
+        'google_id',
         'role',
         'student_id',
         'dealer_code',

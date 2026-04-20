@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\Auth\TwoFactorSetupController;
 use App\Http\Controllers\AuthController;
@@ -156,11 +157,25 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/forgot-password', [ForgotPasswordController::class, 'send'])
         ->name('password.email')
         ->middleware('throttle:5,1');
-    Route::get('/reset-password/{token}', [ResetPasswordController::class, 'show'])->name('password.reset');
-    Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
-        ->name('password.update')
-        ->middleware('throttle:5,1');
 });
+
+// ── Password reset: auth'lu kullanıcılar da erişebilsin ──────────────────────
+// Reset link'e tıklandığında mevcut session ne olursa olsun form gösterilmeli.
+// Aksi takdirde auth'lu user reset link'e bastığında dashboard'a atılır ve
+// şifre form'u hiç görünmez — bu bir güvenlik açığıdır (şifre sıfırlanmaz).
+Route::get('/reset-password/{token}', [ResetPasswordController::class, 'show'])->name('password.reset');
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
+    ->name('password.update')
+    ->middleware('throttle:5,1');
+
+// ── Google OAuth ─────────────────────────────────────────────────────────────
+// guest middleware yok — kullanıcı zaten login'se callback'te session regenerate edilir
+Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToGoogle'])
+    ->middleware('throttle:10,1')
+    ->name('auth.google.redirect');
+Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])
+    ->middleware('throttle:20,1')
+    ->name('auth.google.callback');
 
 Route::middleware(['company.context', 'auth'])->group(function (): void {
     Route::match(['GET', 'POST'], '/logout', [AuthController::class, 'logout']);
