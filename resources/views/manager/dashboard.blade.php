@@ -784,7 +784,12 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
                 cutout: '62%',
                 plugins: {
                     legend: { display: false },
-                    tooltip: { callbacks: { label: function(c){ return ' '+c.label+': '+c.parsed; } } }
+                    tooltip: {
+                        callbacks: {
+                            title: function(){ return ''; },
+                            label: function(c){ return c.label + ': ' + c.parsed; }
+                        }
+                    }
                 }
             }
         });

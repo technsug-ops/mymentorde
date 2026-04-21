@@ -314,22 +314,22 @@ class DashboardKPIService
         $funnelBase = max($activeStudents, 1);
         $funnel = [
             [
-                'label' => 'Aktif Ogrenci',
+                'label' => 'Aktif Öğrenci',
                 'count' => $activeStudents,
                 'rate'  => $activeStudents > 0 ? 100.0 : 0.0,
             ],
             [
-                'label' => 'Belge Yukleyen',
+                'label' => 'Belge Yükleyen',
                 'count' => $studentsWithDocs,
                 'rate'  => round(($studentsWithDocs / $funnelBase) * 100, 1),
             ],
             [
-                'label' => 'Sonuc Ogrenciye Acik',
+                'label' => 'Sonuç Açıklandı',
                 'count' => $studentsWithVisibleOutcome,
                 'rate'  => round(($studentsWithVisibleOutcome / $funnelBase) * 100, 1),
             ],
             [
-                'label' => 'Pending Approval Ogrencisi',
+                'label' => 'Onay Bekliyor',
                 'count' => $studentsPendingApproval,
                 'rate'  => round(($studentsPendingApproval / $funnelBase) * 100, 1),
             ],

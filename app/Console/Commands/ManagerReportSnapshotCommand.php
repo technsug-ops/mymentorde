@@ -128,10 +128,10 @@ class ManagerReportSnapshotCommand extends Command
 
         $funnelBase = max($activeStudents, 1);
         $funnel = [
-            ['label' => 'Aktif Ogrenci',              'count' => $activeStudents,             'rate' => $activeStudents > 0 ? 100.0 : 0.0],
-            ['label' => 'Belge Yukleyen',              'count' => $studentsWithDocs,           'rate' => round(($studentsWithDocs / $funnelBase) * 100, 1)],
-            ['label' => 'Sonuc Ogrenciye Acik',        'count' => $studentsWithVisibleOutcome, 'rate' => round(($studentsWithVisibleOutcome / $funnelBase) * 100, 1)],
-            ['label' => 'Pending Approval Ogrencisi',  'count' => $studentsPendingApproval,   'rate' => round(($studentsPendingApproval / $funnelBase) * 100, 1)],
+            ['label' => 'Aktif Öğrenci',   'count' => $activeStudents,             'rate' => $activeStudents > 0 ? 100.0 : 0.0],
+            ['label' => 'Belge Yükleyen',  'count' => $studentsWithDocs,           'rate' => round(($studentsWithDocs / $funnelBase) * 100, 1)],
+            ['label' => 'Sonuç Açıklandı', 'count' => $studentsWithVisibleOutcome, 'rate' => round(($studentsWithVisibleOutcome / $funnelBase) * 100, 1)],
+            ['label' => 'Onay Bekliyor',   'count' => $studentsPendingApproval,    'rate' => round(($studentsPendingApproval / $funnelBase) * 100, 1)],
         ];
 
         $trendStart = $start->copy()->startOfMonth();
