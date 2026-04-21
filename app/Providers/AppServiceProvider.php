@@ -202,6 +202,13 @@ class AppServiceProvider extends ServiceProvider
             $view->with('uiThemeCssVars', PortalTheme::toCssVars($theme));
         });
 
+        // Public sayfalar (login, /apply, /randevu) için ortak tema —
+        // Manager /manager/brand → "Public sayfa teması" radio ile seçilir,
+        // üçünü birden etkiler.
+        View::composer(['auth.login', 'apply.create', 'booking.public.landing'], function ($view): void {
+            $view->with('publicTheme', \App\Support\PublicTheme::resolve());
+        });
+
         // ── Global brand ayarları — tüm portallarda firma adı + logo ────────
         // White-label: önce DB'den (manager panelden) oku, yoksa config('brand.*')'a düş
         View::composer('*', function ($view): void {

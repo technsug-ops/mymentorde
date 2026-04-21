@@ -4,24 +4,25 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('brand.name', 'MentorDE') }} Login</title>
+    @php $pt = $publicTheme ?? \App\Support\PublicTheme::resolve(); @endphp
     <style>
         :root {
-            --bg: #eef3fb;
+            --bg: {{ $pt['body_bg_lin1'] }};
             --panel: #ffffff;
-            --line: #d8e2f0;
-            --line-strong: #c6d5ea;
-            --ink: #11243d;
-            --muted: #5f7392;
-            --primary: #1f66d1;
-            --primary-2: #1149a8;
-            --navy: #132f59;
+            --line: {{ $pt['line'] }};
+            --line-strong: {{ $pt['line_strong'] }};
+            --ink: {{ $pt['text'] }};
+            --muted: {{ $pt['muted'] }};
+            --primary: {{ $pt['primary'] }};
+            --primary-2: {{ $pt['primary_dark'] }};
+            --navy: {{ $pt['primary_deep'] }};
             --danger-bg: #fff0f0;
             --danger-line: #efb0b0;
             --danger-text: #a32323;
             --ok-bg: #eefaf1;
             --ok-line: #bfe7c8;
             --ok-text: #22643a;
-            --shadow: 0 18px 40px rgba(15, 30, 60, .12);
+            --shadow: 0 18px 40px rgba({{ $pt['focus_shadow_rgb'] }}, .14);
         }
         * { box-sizing: border-box; }
         body {
@@ -30,9 +31,9 @@
             font-family: "Segoe UI", Tahoma, sans-serif;
             color: var(--ink);
             background:
-                radial-gradient(circle at 10% 10%, #dce9ff 0, transparent 38%),
-                radial-gradient(circle at 90% 15%, #e6f2ff 0, transparent 35%),
-                linear-gradient(160deg, #ecf2fb 0%, #f7faff 100%);
+                radial-gradient(circle at 10% 10%, {{ $pt['body_bg_r1'] }} 0, transparent 38%),
+                radial-gradient(circle at 90% 15%, {{ $pt['body_bg_r2'] }} 0, transparent 35%),
+                linear-gradient(160deg, {{ $pt['body_bg_lin1'] }} 0%, {{ $pt['body_bg_lin2'] }} 100%);
             padding: 24px;
             display: grid;
             place-items: center;
@@ -54,8 +55,8 @@
         .brand {
             padding: 24px;
             background:
-                linear-gradient(180deg, rgba(19,47,89,.98), rgba(16,37,72,.97)),
-                #10264a;
+                linear-gradient(180deg, {{ $pt['brand_gradient_1'] }}, {{ $pt['brand_gradient_2'] }}),
+                {{ $pt['brand_fallback'] }};
             color: #fff;
             position: relative;
             overflow: hidden;
@@ -74,9 +75,9 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            border: 1px solid rgba(255,255,255,.18);
-            background: rgba(255,255,255,.06);
-            color: #dbe8ff;
+            border: 1px solid rgba(255,255,255,.22);
+            background: rgba(255,255,255,.08);
+            color: {{ $pt['brand_text_soft'] }};
             border-radius: 999px;
             padding: 6px 10px;
             font-size: 12px;
@@ -90,7 +91,7 @@
         }
         .brand p {
             margin: 0 0 18px;
-            color: #d9e6fa;
+            color: {{ $pt['brand_text_soft'] }};
             line-height: 1.45;
             max-width: 42ch;
         }
@@ -200,13 +201,13 @@
             color: #6b7e99; padding: 0;
             transition: background .15s, color .15s;
         }
-        .pwd-toggle:hover { background: rgba(31,102,209,.08); color: var(--primary); }
+        .pwd-toggle:hover { background: rgba({{ $pt['focus_shadow_rgb'] }},.08); color: var(--primary); }
         .pwd-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
         input:focus {
             outline: none;
-            border-color: #7faaf2;
+            border-color: var(--primary);
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(31,102,209,.10);
+            box-shadow: 0 0 0 3px rgba({{ $pt['focus_shadow_rgb'] }},.14);
         }
         .row {
             display: flex;
@@ -243,7 +244,7 @@
             color: #fff;
             cursor: pointer;
             transition: transform .05s ease, box-shadow .15s ease, filter .15s ease;
-            box-shadow: 0 8px 18px rgba(31,102,209,.22);
+            box-shadow: 0 8px 18px {{ $pt['submit_shadow'] }};
         }
         .primary-btn:hover { filter: brightness(1.03); }
         .primary-btn:active { transform: translateY(1px); }
@@ -300,7 +301,7 @@
             </div>
             {{-- CTA kartı - apply'dan gelmemiş kullanıcılara --}}
             @unless(request()->query('from_apply'))
-            <a href="/apply" class="cta-card" style="display:block;margin-top:20px;padding:18px 20px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:14px;text-decoration:none;color:#fff;box-shadow:0 8px 24px rgba(99,102,241,.35);transition:transform .15s,box-shadow .15s;">
+            <a href="/apply" class="cta-card" style="display:block;margin-top:20px;padding:18px 20px;background:linear-gradient(135deg,{{ $pt['primary'] }},{{ $pt['primary_dark'] }});border-radius:14px;text-decoration:none;color:#fff;box-shadow:0 8px 24px rgba({{ $pt['focus_shadow_rgb'] }},.35);transition:transform .15s,box-shadow .15s;">
                 <div style="display:flex;align-items:center;gap:14px;">
                     <div style="font-size:32px;flex-shrink:0;">🎓</div>
                     <div style="flex:1;">
@@ -399,7 +400,12 @@
             </div>
 
             {{-- Apply CTA --}}
-            <a href="/apply" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border:2px solid #7c3aed;border-radius:10px;background:#faf5ff;color:#7c3aed;font-size:14px;font-weight:700;text-decoration:none;transition:all .15s;" onmouseover="this.style.background='#7c3aed';this.style.color='#fff';" onmouseout="this.style.background='#faf5ff';this.style.color='#7c3aed';">
+            <a href="/apply" class="apply-cta-btn" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border:2px solid {{ $pt['primary'] }};border-radius:10px;background:{{ $pt['primary_soft'] }};color:{{ $pt['primary'] }};font-size:14px;font-weight:700;text-decoration:none;transition:all .15s;"
+                data-hover-bg="{{ $pt['primary'] }}"
+                data-base-bg="{{ $pt['primary_soft'] }}"
+                data-base-color="{{ $pt['primary'] }}"
+                onmouseover="this.style.background=this.dataset.hoverBg;this.style.color='#fff';"
+                onmouseout="this.style.background=this.dataset.baseBg;this.style.color=this.dataset.baseColor;">
                 ✨ Ücretsiz Hesap Oluştur
             </a>
             <div style="text-align:center;margin-top:8px;font-size:11px;color:#9ca3af;">

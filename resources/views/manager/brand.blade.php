@@ -91,6 +91,30 @@
                 </div>
             </div>
 
+            {{-- ═══ PUBLIC SAYFA TEMASI (login + /apply + /randevu) ═══ --}}
+            <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--u-line);">
+                <h2 style="margin:0 0 4px;font-size:16px;color:var(--u-text);">🎨 Public Sayfa Teması</h2>
+                <p style="font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.6;">
+                    <strong>Login, Başvuru Formu (/apply) ve Randevu Landing (/randevu)</strong> sayfalarının renk paleti.
+                    Tek seçim üç sayfayı birden etkiler.
+                </p>
+
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    @foreach ([
+                        ['mentorde','🟣 MentorDE Mor','Kurumsal mor + altın sarı (marka rengi)'],
+                        ['navy','🔵 Navy Blue','Klasik lacivert + mavi (önceki tasarım)'],
+                    ] as [$val, $lbl, $desc])
+                        <label style="flex:1;min-width:220px;display:flex;align-items:flex-start;gap:8px;padding:12px 14px;border:1.5px solid {{ ($publicThemePreset ?? 'mentorde') === $val ? 'var(--u-brand,#5b2e91)' : 'var(--u-line)' }};border-radius:8px;cursor:pointer;background:{{ ($publicThemePreset ?? 'mentorde') === $val ? 'rgba(91,46,145,.06)' : 'var(--u-bg)' }};">
+                            <input type="radio" name="public_theme_preset" value="{{ $val }}" {{ ($publicThemePreset ?? 'mentorde') === $val ? 'checked' : '' }} style="margin-top:2px;accent-color:#5b2e91;">
+                            <div>
+                                <div style="font-size:13px;font-weight:700;">{{ $lbl }}</div>
+                                <div style="font-size:11px;color:var(--muted);margin-top:2px;">{{ $desc }}</div>
+                            </div>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+
             {{-- ═══ LANDING /randevu CMS AYARLARI ═══ --}}
             <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--u-line);">
                 <h2 style="margin:0 0 4px;font-size:16px;color:var(--u-text);">📺 Landing Sayfası — /randevu</h2>

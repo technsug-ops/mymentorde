@@ -38,9 +38,15 @@ class BrandSettingController extends Controller
                             ->where('setting_key', 'landing_hero_welcome_body')
                             ->value('setting_value') ?? '';
 
+        // Public sayfa teması (login + /apply + /randevu ortak)
+        $publicThemePreset = MarketingAdminSetting::where('company_id', $cid)
+                            ->where('setting_key', 'public_theme_preset')
+                            ->value('setting_value') ?? 'mentorde';
+
         return view('manager.brand', compact(
             'brandName', 'brandLogoUrl', 'brandLogoBg',
-            'landingVideoUrl', 'landingWelcomeTitle', 'landingWelcomeBody'
+            'landingVideoUrl', 'landingWelcomeTitle', 'landingWelcomeBody',
+            'publicThemePreset'
         ));
     }
 
@@ -53,6 +59,7 @@ class BrandSettingController extends Controller
             'landing_hero_video_url'       => 'nullable|url|max:500',
             'landing_hero_welcome_title'   => 'nullable|string|max:120',
             'landing_hero_welcome_body'    => 'nullable|string|max:2000',
+            'public_theme_preset'          => 'nullable|in:mentorde,navy',
         ]);
 
         $cid = auth()->user()?->company_id ?? 0;
@@ -64,6 +71,7 @@ class BrandSettingController extends Controller
             'landing_hero_video_url'     => $this->normalizeVideoUrl($data['landing_hero_video_url'] ?? ''),
             'landing_hero_welcome_title' => $data['landing_hero_welcome_title'] ?? '',
             'landing_hero_welcome_body'  => $data['landing_hero_welcome_body'] ?? '',
+            'public_theme_preset'        => $data['public_theme_preset'] ?? 'mentorde',
         ];
 
         foreach ($settings as $key => $value) {
@@ -73,11 +81,12 @@ class BrandSettingController extends Controller
             );
         }
 
-        // Tüm portallardaki brand cache'ini temizle
+        // Tüm portallardaki brand + landing + theme cache'ini temizle
         Cache::forget("brand_settings_{$cid}");
         Cache::forget("landing_cms_{$cid}");
+        \App\Support\PublicTheme::flushCache($cid);
 
-        return back()->with('status', 'Marka ve landing ayarları kaydedildi.');
+        return back()->with('status', 'Marka, landing ve tema ayarları kaydedildi.');
     }
 
     /**
