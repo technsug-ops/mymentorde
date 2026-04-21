@@ -167,6 +167,21 @@
 
 @section('content')
 
+@include('partials.manager-hero', [
+    'label' => 'Komisyon Takibi',
+    'title' => 'Kazançlarım',
+    'sub'   => 'Referansından dönen öğrencilerden bu ay ve tüm zamanlar toplam kazancın, bekleyen ve ödenmiş tutarlar bir arada.',
+    'icon'  => '💶',
+    'bg'    => 'https://images.unsplash.com/photo-1579621970590-9d624316904b?w=1400&q=80',
+    'tone'  => 'green',
+    'stats' => [
+        ['icon' => '💰', 'text' => '€' . number_format((float) ($summary['earned'] ?? 0), 0, ',', '.') . ' toplam'],
+        ['icon' => '📅', 'text' => '€' . number_format((float) ($summary['month'] ?? 0), 0, ',', '.') . ' bu ay'],
+        ['icon' => '⏳', 'text' => '€' . number_format((float) ($summary['pending'] ?? 0), 0, ',', '.') . ' bekleyen'],
+        ['icon' => '✅', 'text' => '€' . number_format((float) ($summary['paid'] ?? 0), 0, ',', '.') . ' ödenen'],
+    ],
+])
+
 {{-- KPI strip --}}
 <div class="earn-kpi-strip">
     <div class="earn-kpi total">

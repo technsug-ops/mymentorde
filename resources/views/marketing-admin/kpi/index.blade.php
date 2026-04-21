@@ -9,6 +9,17 @@
 @endsection
 
 @section('content')
+
+@include('partials.manager-hero', [
+    'label' => 'Performans Özeti',
+    'title' => 'KPI Dashboard',
+    'sub'   => 'Dönem bazlı pazarlama ve satış performans metrikleri. Hedef vs gerçek karşılaştırması, trendler ve sapma uyarıları.',
+    'icon'  => '📊',
+    'bg'    => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=80',
+    'tone'  => 'teal',
+    'stats' => [],
+])
+
 <style>
 details summary::-webkit-details-marker { display:none; }
 details summary { outline:none; list-style:none; }

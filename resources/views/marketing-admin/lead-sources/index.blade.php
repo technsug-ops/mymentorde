@@ -17,6 +17,17 @@
 @endsection
 
 @section('content')
+
+@include('partials.manager-hero', [
+    'label' => 'Kaynak Analitik',
+    'title' => 'Lead Kaynakları',
+    'sub'   => 'Organik, reklam, partner, referans — lead\'lerin hangi kanaldan geldiği ve kanal bazlı dönüşüm performansı.',
+    'icon'  => '🌐',
+    'bg'    => 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1400&q=80',
+    'tone'  => 'indigo',
+    'stats' => [],
+])
+
 <style>
 details summary::-webkit-details-marker { display:none; }
 details summary { outline:none; list-style:none; }

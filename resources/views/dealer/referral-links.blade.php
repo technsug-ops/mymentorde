@@ -122,6 +122,25 @@
 @section('content')
 
 @php
+    $dsHero = $dealerStats ?? [];
+@endphp
+
+@include('partials.manager-hero', [
+    'label' => 'Growth Araçları',
+    'title' => 'Referans Linkleri',
+    'sub'   => 'UTM takibi, QR kod üretimi ve kaynak bazlı performans analizi. Hangi link en çok dönüşüm getiriyor, tek bakışta gör.',
+    'icon'  => '🔗',
+    'bg'    => 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1400&q=80',
+    'tone'  => 'purple',
+    'stats' => [
+        ['icon' => '📥', 'text' => ($dsHero['guest_total'] ?? 0) . ' toplam lead'],
+        ['icon' => '✅', 'text' => ($dsHero['converted_total'] ?? 0) . ' dönüşen'],
+        ['icon' => '📈', 'text' => '%' . ($dsHero['conversion_rate'] ?? 0) . ' dönüşüm'],
+        ['icon' => '📊', 'text' => ($stats['total'] ?? 0) . ' son 30 gün'],
+    ],
+])
+
+@php
     $ds           = $dealerStats ?? [];
     $sourceBreakdown = $recent->groupBy(fn($r) => (string)($r->utm_source ?: $r->lead_source ?: 'unknown'))->map->count()->sortDesc();
     $todayCount   = $recent->filter(fn($r) => optional($r->created_at)?->isToday())->count();

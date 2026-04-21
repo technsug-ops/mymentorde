@@ -61,6 +61,20 @@
 
 @section('content')
 
+@include('partials.manager-hero', [
+    'label' => 'Aktivite Takvimi',
+    'title' => 'Takvimim',
+    'sub'   => 'Lead gelişleri, dönüşümler ve ödemeler — tüm referans aktivitelerin kronolojik sırayla. Hangi aylar yoğun, görselle anla.',
+    'icon'  => '📅',
+    'bg'    => 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=1400&q=80',
+    'tone'  => 'indigo',
+    'stats' => [
+        ['icon' => '🔵', 'text' => 'Lead'],
+        ['icon' => '🟢', 'text' => 'Dönüşüm'],
+        ['icon' => '🟠', 'text' => 'Ödeme'],
+    ],
+])
+
 {{-- Legend --}}
 <div class="cal-legend-bar">
     <span style="font-size:var(--tx-xs);font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#64748b);margin-right:4px;">Renk Kodu:</span>

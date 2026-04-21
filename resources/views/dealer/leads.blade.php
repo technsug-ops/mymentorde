@@ -142,6 +142,22 @@
 @endpush
 
 @section('content')
+
+@include('partials.manager-hero', [
+    'label' => 'Referans Akışı',
+    'title' => 'Aday Öğrencilerim',
+    'sub'   => 'Senin referansınla gelen tüm lead\'ler, aşama durumu ve dönüşüm performansı. Her yeni başvuru burada görünür.',
+    'icon'  => '🎯',
+    'bg'    => 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1400&q=80',
+    'tone'  => 'blue',
+    'stats' => [
+        ['icon' => '📥', 'text' => ($dealerStats['guest_total'] ?? 0) . ' toplam lead'],
+        ['icon' => '✅', 'text' => ($dealerStats['converted_total'] ?? 0) . ' dönüşen'],
+        ['icon' => '📈', 'text' => '%' . ($dealerStats['conversion_rate'] ?? 0) . ' dönüşüm'],
+        ['icon' => '📦', 'text' => ($packetCount ?? 0) . ' paket seçili'],
+    ],
+])
+
 @php
     $stats  = $dealerStats ?? [];
     $stages = [

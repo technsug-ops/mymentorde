@@ -4,6 +4,17 @@
 @section('page_subtitle', 'Ekip Yönetimi — marketing/sales kullanıcıları, roller ve yetki yönetimi')
 
 @section('content')
+
+@include('partials.manager-hero', [
+    'label' => 'Ekip & Yetki',
+    'title' => 'Ekip Yönetimi',
+    'sub'   => 'Marketing ve sales ekibinin üyeleri, rolleri ve yetki grupları. Yeni üye ekle, rol ata, izin setlerini yönet.',
+    'icon'  => '👥',
+    'bg'    => 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1400&q=80',
+    'tone'  => 'indigo',
+    'stats' => [],
+])
+
 <style>
 details summary::-webkit-details-marker { display:none; }
 details summary { outline:none; list-style:none; }

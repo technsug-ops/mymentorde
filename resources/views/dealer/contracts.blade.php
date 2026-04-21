@@ -4,10 +4,18 @@
 @section('page_title', 'Sözleşmelerim')
 
 @section('content')
-<div class="page-header" style="margin-bottom:20px;">
-    <h1 style="margin:0;font-size:var(--tx-xl);font-weight:700;">Sözleşmelerim</h1>
-    <p style="margin:4px 0 0;color:var(--u-muted);font-size:var(--tx-sm);">{{ config('brand.name', 'MentorDE') }} ile imzaladığınız ortaklık ve operasyon sözleşmeleri</p>
-</div>
+
+@include('partials.manager-hero', [
+    'label' => 'Ortaklık Belgeleri',
+    'title' => 'Sözleşmelerim',
+    'sub'   => config('brand.name', 'MentorDE') . ' ile imzaladığın ortaklık ve operasyon sözleşmeleri — durum, son tarih ve imza akışı bir arada.',
+    'icon'  => '📜',
+    'bg'    => 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1400&q=80',
+    'tone'  => 'slate',
+    'stats' => [
+        ['icon' => '📄', 'text' => $contracts->count() . ' sözleşme'],
+    ],
+])
 
 @if(session('success'))
     <div style="background:var(--badge-ok-bg);color:var(--badge-ok-fg);padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:var(--tx-sm);">{{ session('success') }}</div>

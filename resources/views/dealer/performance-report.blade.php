@@ -85,6 +85,21 @@
     $maxEarned      = max(1, $trend->max('earned'));
 @endphp
 
+@include('partials.manager-hero', [
+    'label' => 'Performans Analitik',
+    'title' => 'Performans Raporu',
+    'sub'   => 'Aylık lead/dönüşüm/kazanç trendleri ve toplam istatistiklerin. Hangi ay pik yaptı, nerede yavaşladı görebilirsin.',
+    'icon'  => '🏆',
+    'bg'    => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=80',
+    'tone'  => 'teal',
+    'stats' => [
+        ['icon' => '📥', 'text' => ($ds['guest_total'] ?? 0) . ' toplam lead'],
+        ['icon' => '✅', 'text' => ($ds['converted_total'] ?? 0) . ' dönüşen'],
+        ['icon' => '📈', 'text' => '%' . ($ds['conversion_rate'] ?? 0) . ' dönüşüm'],
+        ['icon' => '💶', 'text' => '€' . number_format($totalEarned, 0, ',', '.') . ' kazanç'],
+    ],
+])
+
 {{-- KPI --}}
 <div class="perf-kpi-strip">
     <div class="perf-kpi leads">

@@ -8,6 +8,19 @@
 @section('page_subtitle', 'Reklam bütçe ve dönüşüm metrik yönetimi')
 
 @section('content')
+
+@include('partials.manager-hero', [
+    'label' => 'Reklam Yönetimi',
+    'title' => 'Kampanyalar',
+    'sub'   => 'Google/Meta/TikTok reklam kampanyaları, bütçe kullanımı ve dönüşüm metrikleri. Hangi kanal ROI açısından kazandırıyor, tek bakışta gör.',
+    'icon'  => '📢',
+    'bg'    => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1400&q=80',
+    'tone'  => 'rose',
+    'stats' => [
+        ['icon' => '📊', 'text' => (isset($campaigns) ? $campaigns->count() : 0) . ' kampanya'],
+    ],
+])
+
 @php
 $stLabels = ['draft'=>'Taslak','active'=>'Aktif','paused'=>'Duraklatıldı','completed'=>'Tamamlandı','cancelled'=>'İptal'];
 $chLabels = ['google_ads'=>'Google Ads','instagram_ads'=>'Instagram Ads','facebook_ads'=>'Facebook Ads','youtube_ads'=>'YouTube Ads','tiktok_ads'=>'TikTok Ads','email'=>'E-posta','other'=>'Diğer'];

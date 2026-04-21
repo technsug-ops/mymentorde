@@ -165,6 +165,21 @@
 
 @section('content')
 
+@include('partials.manager-hero', [
+    'label' => 'Ödeme Yönetimi',
+    'title' => 'Ödemelerim',
+    'sub'   => 'Birikmiş komisyon, bekleyen talepler ve net kullanılabilir tutar. Ödeme talebini buradan başlat, hesaplarını yönet.',
+    'icon'  => '💳',
+    'bg'    => 'https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=1400&q=80',
+    'tone'  => 'teal',
+    'stats' => [
+        ['icon' => '💰', 'text' => '€' . number_format($totalPending ?? 0, 0, ',', '.') . ' birikmiş'],
+        ['icon' => '⏳', 'text' => '€' . number_format($pendingRequestTotal ?? 0, 0, ',', '.') . ' bekleyen'],
+        ['icon' => '✅', 'text' => '€' . number_format($netAvailable ?? 0, 0, ',', '.') . ' kullanılabilir'],
+        ['icon' => '🏦', 'text' => ($accounts->count() ?? 0) . ' hesap'],
+    ],
+])
+
 {{-- KPI --}}
 <div class="pay-kpi-strip">
     <div class="pay-kpi balance">

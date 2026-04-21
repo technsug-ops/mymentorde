@@ -9,6 +9,17 @@
 @section('page_subtitle', 'Otomasyon Workflowları — tetikleyici bazlı otomatik iletişim dizileri')
 
 @section('content')
+
+@include('partials.manager-hero', [
+    'label' => 'Otomasyon Sistemi',
+    'title' => 'Workflows & Automation',
+    'sub'   => 'Lead besleme, e-posta dizisi, hatırlatma ve tetikleyici workflow tanımları. Manuel işleri otomasyona çevir.',
+    'icon'  => '⚡',
+    'bg'    => 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1400&q=80',
+    'tone'  => 'amber',
+    'stats' => [],
+])
+
 <style>
 details summary::-webkit-details-marker { display:none; }
 details summary { outline:none; list-style:none; }
