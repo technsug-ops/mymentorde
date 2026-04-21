@@ -119,6 +119,40 @@
         .l-hero-media-video iframe {
             position:absolute; top:0; left:0; width:100%; height:100%; border:0;
         }
+        .l-hero-media-close {
+            position:absolute; top:8px; right:8px; z-index:3;
+            width:32px; height:32px; border-radius:50%;
+            background:rgba(0,0,0,.6); color:#fff; border:none;
+            display:none; align-items:center; justify-content:center;
+            cursor:pointer; font-size:16px; font-weight:700;
+            line-height:1; padding:0;
+            transition:background .15s;
+        }
+        .l-hero-media-close:hover { background:rgba(0,0,0,.85); }
+
+        /* === Sticky floating (scroll ile) === */
+        .l-hero-media {
+            transition:all .35s cubic-bezier(.4,0,.2,1);
+        }
+        .l-hero-media.is-floating {
+            position:fixed;
+            bottom:20px; right:20px;
+            width:340px; max-width:calc(100vw - 40px);
+            z-index:60;
+            border:2px solid var(--primary-soft);
+            box-shadow:0 12px 40px rgba(91,46,145,.28);
+            border-radius:12px;
+        }
+        .l-hero-media.is-floating .l-hero-media-close { display:flex; }
+        .l-hero-media.is-floating .l-hero-welcome,
+        .l-hero-media.is-floating .l-hero-video-caption { display:none; }
+        .l-hero-media-anchor {
+            transition:min-height .35s;
+        }
+        @media(max-width:520px){
+            .l-hero-media.is-floating { width:280px; bottom:12px; right:12px; }
+        }
+
         .l-hero-welcome {
             padding:32px 26px;
             background:linear-gradient(135deg, var(--primary-soft) 0%, #fff 60%);
@@ -387,30 +421,43 @@
         </div>
 
         {{-- SAĞ: Video veya Welcome kartı (CMS kontrollü) --}}
-        <div class="l-hero-media">
-            @if (!empty($landingCms['video_url']))
-                <div class="l-hero-media-video">
-                    <iframe
-                        src="{{ $landingCms['video_url'] }}"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen></iframe>
-                </div>
-                @if (!empty($landingCms['welcome_body']))
-                    <div class="l-hero-video-caption">
-                        💬 {{ \Illuminate\Support\Str::limit($landingCms['welcome_body'], 200) }}
+        {{-- Anchor sticky davranışta orijinal yeri tutar, video floating olunca boşluk kalmasın diye --}}
+        <div class="l-hero-media-anchor" id="heroMediaAnchor">
+            <div class="l-hero-media" id="heroMedia">
+                @if (!empty($landingCms['video_url']))
+                    @php
+                        // Autoplay + mute base params (modern browser autoplay policy)
+                        $baseUrl = $landingCms['video_url'];
+                        $sep = str_contains($baseUrl, '?') ? '&' : '?';
+                        // İlk yüklemede autoplay KAPALI; 3 saniye sonra JS ile yeniden yükleyeceğiz
+                        $initialSrc = $baseUrl . $sep . 'mute=1&rel=0&playsinline=1';
+                    @endphp
+                    <button type="button" class="l-hero-media-close" id="heroMediaClose" aria-label="Videoyu kapat" title="Videoyu kapat">✕</button>
+                    <div class="l-hero-media-video">
+                        <iframe
+                            id="heroMediaIframe"
+                            src="{{ $initialSrc }}"
+                            data-base-src="{{ $baseUrl }}"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                    </div>
+                    @if (!empty($landingCms['welcome_body']))
+                        <div class="l-hero-video-caption">
+                            💬 {{ \Illuminate\Support\Str::limit($landingCms['welcome_body'], 200) }}
+                        </div>
+                    @endif
+                @else
+                    <div class="l-hero-welcome">
+                        <div class="l-hero-welcome-icon">👋</div>
+                        <h3>{{ $landingCms['welcome_title'] ?? 'Hoş Geldin!' }}</h3>
+                        @foreach (explode("\n", trim((string) ($landingCms['welcome_body'] ?? ''))) as $para)
+                            @if (trim($para) !== '')
+                                <p>{{ $para }}</p>
+                            @endif
+                        @endforeach
                     </div>
                 @endif
-            @else
-                <div class="l-hero-welcome">
-                    <div class="l-hero-welcome-icon">👋</div>
-                    <h3>{{ $landingCms['welcome_title'] ?? 'Hoş Geldin!' }}</h3>
-                    @foreach (explode("\n", trim((string) ($landingCms['welcome_body'] ?? ''))) as $para)
-                        @if (trim($para) !== '')
-                            <p>{{ $para }}</p>
-                        @endif
-                    @endforeach
-                </div>
-            @endif
+            </div>
         </div>
     </div>
 </section>
@@ -648,6 +695,7 @@
 </footer>
 
 <script>
+// Senior arama
 (function(){
     var search = document.getElementById('l-search');
     if (!search) return;
@@ -658,6 +706,80 @@
             card.style.display = (q === '' || haystack.indexOf(q) !== -1) ? '' : 'none';
         });
     });
+})();
+
+// Hero video: 3 sn sonra autoplay + scroll ile floating + close butonu
+(function(){
+    var iframe = document.getElementById('heroMediaIframe');
+    var media  = document.getElementById('heroMedia');
+    var anchor = document.getElementById('heroMediaAnchor');
+    var closeBtn = document.getElementById('heroMediaClose');
+    if (!iframe || !media || !anchor) return;
+
+    var dismissed = false;  // Kullanıcı X ile kapattıysa bir daha floating gösterme
+    var autoplayStarted = false;
+
+    // Helper: iframe src'ine autoplay param ekle
+    function enableAutoplay() {
+        if (autoplayStarted) return;
+        autoplayStarted = true;
+        var baseSrc = iframe.getAttribute('data-base-src') || iframe.src;
+        var sep = baseSrc.indexOf('?') !== -1 ? '&' : '?';
+        iframe.src = baseSrc + sep + 'autoplay=1&mute=1&rel=0&playsinline=1';
+    }
+
+    // 3 saniye sonra otomatik oynat
+    setTimeout(enableAutoplay, 3000);
+
+    // IntersectionObserver — anchor viewport dışına çıkınca floating
+    if ('IntersectionObserver' in window) {
+        var anchorHeight = 0;
+        var syncAnchorHeight = function(){
+            // Floating olmadan önceki yüksekliği kilitleyelim ki layout shift olmasın
+            if (!media.classList.contains('is-floating')) {
+                anchorHeight = media.offsetHeight;
+            }
+        };
+        syncAnchorHeight();
+        window.addEventListener('resize', syncAnchorHeight);
+
+        var observer = new IntersectionObserver(function(entries){
+            entries.forEach(function(entry){
+                if (dismissed) {
+                    media.classList.remove('is-floating');
+                    anchor.style.minHeight = '';
+                    return;
+                }
+                if (entry.isIntersecting) {
+                    // Orijinal yerine dön
+                    media.classList.remove('is-floating');
+                    anchor.style.minHeight = '';
+                } else {
+                    // Scroll aşağı — floating moda geç
+                    if (anchorHeight > 0) {
+                        anchor.style.minHeight = anchorHeight + 'px';
+                    }
+                    media.classList.add('is-floating');
+                    // Floating'e geçerken autoplay henüz başlamadıysa başlat
+                    enableAutoplay();
+                }
+            });
+        }, { threshold: 0, rootMargin: '-80px 0px 0px 0px' });
+
+        observer.observe(anchor);
+    }
+
+    // Close butonu — floating pencereyi gizle (kalıcı, bu oturum)
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function(){
+            dismissed = true;
+            media.classList.remove('is-floating');
+            media.style.display = 'none';
+            anchor.style.minHeight = '';
+            // Video'yu durdur (src'yi sıfırla)
+            if (iframe) iframe.src = 'about:blank';
+        });
+    }
 })();
 </script>
 
