@@ -143,6 +143,8 @@
     </div>
 </div>
 
+@include('partials.student-process-tabs', ['active' => 'visa'])
+
 @php
 $steps = [
     ['key' => 'not_started', 'label' => 'Başlangıç',   'icon' => '📋'],

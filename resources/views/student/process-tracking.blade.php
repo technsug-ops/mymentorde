@@ -277,6 +277,10 @@
     </div>
 </div>
 
+@include('partials.student-process-tabs', ['active' => 'general'])
+
+
+
 {{-- ── Sıradaki Adım CTA ── --}}
 @if(isset($nextExpectedStep) && $nextExpectedStep)
 <div class="pt-next-cta">

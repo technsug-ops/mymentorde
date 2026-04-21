@@ -128,6 +128,8 @@
     </div>
 </div>
 
+@include('partials.student-process-tabs', ['active' => 'housing'])
+
 @if($accommodation)
 
 {{-- Durum Kartı --}}
