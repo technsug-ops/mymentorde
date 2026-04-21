@@ -134,6 +134,47 @@ Route::middleware(['auth', 'manager.role'])->group(function (): void {
         }
     })->middleware('throttle:2,1')->name('system.cleanup-prod-test');
 
+    // Laravel log'un son 200 satırını göster (prod'da SSH yok, intermittent 500'leri teşhis için)
+    Route::get('/system/tail-log', function (\Illuminate\Http\Request $request) {
+        $lines = max(50, min(1000, (int) $request->query('lines', 200)));
+        $level = trim((string) $request->query('level', ''));
+
+        $logPath = storage_path('logs/laravel.log');
+        if (!is_file($logPath)) {
+            return response('Log dosyası bulunamadı: ' . $logPath, 404)
+                ->header('Content-Type', 'text/plain; charset=UTF-8');
+        }
+
+        // Son X satırı verimli şekilde oku
+        $fh = fopen($logPath, 'r');
+        if (!$fh) {
+            return response('Log dosyası açılamadı.', 500)->header('Content-Type', 'text/plain');
+        }
+        $pos = -1;
+        $buffer = '';
+        $bytes = filesize($logPath);
+        $chunkSize = 4096;
+        $collected = [];
+        while ($bytes > 0 && count($collected) <= $lines) {
+            $read = min($chunkSize, $bytes);
+            $bytes -= $read;
+            fseek($fh, $bytes);
+            $buffer = fread($fh, $read) . $buffer;
+            $collected = explode("\n", $buffer);
+            if ($bytes === 0) break;
+        }
+        fclose($fh);
+
+        $collected = array_slice($collected, -$lines);
+        if ($level !== '') {
+            $lv = strtolower($level);
+            $collected = array_filter($collected, fn ($l) => stripos($l, '.' . $lv . ':') !== false || stripos($l, '['.$lv.']') !== false);
+        }
+
+        return response(implode("\n", $collected), 200)
+            ->header('Content-Type', 'text/plain; charset=UTF-8');
+    })->middleware('throttle:30,1')->name('system.tail-log');
+
     // users.email değişince bağlı tablolardaki email drift'i kapatır
     // (guest_applications.email, senior_email, assigned_senior_email vb.)
     Route::post('/system/sync-user-email-relations', function () {
