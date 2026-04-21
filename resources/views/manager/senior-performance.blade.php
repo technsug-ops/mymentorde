@@ -4,6 +4,16 @@
 
 @section('content')
 
+@php
+    $mgrHeroStats = [
+        ['icon' => '👥', 'text' => ($totalSeniors ?? 0) . ' aktif danışman'],
+        ['icon' => '📈', 'text' => '%' . ($avgConvPct ?? 0) . ' ort. dönüşüm'],
+        ['icon' => '💶', 'text' => '€' . number_format(($totalRevenue ?? 0), 0, ',', '.') . ' toplam gelir'],
+    ];
+    if (!empty($topPerformer)) {
+        $mgrHeroStats[] = ['icon' => '🥇', 'text' => 'Top: ' . $topPerformer['name']];
+    }
+@endphp
 @include('partials.manager-hero', [
     'label' => 'Performans Analitik',
     'title' => 'Danışman Performans Panosu',
@@ -11,12 +21,7 @@
     'icon'  => '🏆',
     'bg'    => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=80',
     'tone'  => 'teal',
-    'stats' => [
-        ['icon' => '👥', 'text' => ($totalSeniors ?? 0) . ' aktif danışman'],
-        ['icon' => '📈', 'text' => '%' . ($avgConvPct ?? 0) . ' ort. dönüşüm'],
-        ['icon' => '💶', 'text' => '€' . number_format(($totalRevenue ?? 0), 0, ',', '.') . ' toplam gelir'],
-        @if(!empty($topPerformer))['icon' => '🥇', 'text' => 'Top: ' . $topPerformer['name']],@endif
-    ],
+    'stats' => $mgrHeroStats,
 ])
 
 <form method="GET" class="card" style="margin-bottom:20px;display:flex;gap:10px;align-items:end;flex-wrap:wrap;padding:14px;">

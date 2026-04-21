@@ -29,12 +29,13 @@
     ];
     $mh = $mhTones[$tone ?? 'blue'] ?? $mhTones['blue'];
     $mhBg = $bg ?? '';
+    $mhBgCss = $mhBg !== '' ? $mh['fallback'] . " url('" . $mhBg . "') center/cover" : $mh['fallback'];
 @endphp
 <style>
 .mgr-hero {
     color:#fff; border-radius:14px; margin-bottom:16px; overflow:hidden;
     box-shadow:0 6px 24px rgba(0,0,0,.1); position:relative;
-    background:{{ $mh['fallback'] }}@if($mhBg !== '') url('{{ $mhBg }}') center/cover@endif;
+    background:{!! $mhBgCss !!};
 }
 .mgr-hero::before {
     content:''; position:absolute; inset:0;
