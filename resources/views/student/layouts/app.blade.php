@@ -236,6 +236,14 @@
                    class="nav-link {{ request()->is('student/appointments*') ? 'active' : '' }}">
                     <span class="nav-icon">📅</span> Randevular
                 </a>
+                <a href="/student/calendar"
+                   class="nav-link {{ request()->is('student/calendar*') ? 'active' : '' }}">
+                    <span class="nav-icon">🗓</span> Takvimim
+                </a>
+                <a href="/student/checklist"
+                   class="nav-link {{ request()->is('student/checklist*') ? 'active' : '' }}">
+                    <span class="nav-icon">✅</span> Yapilacaklar
+                </a>
             </div>
 
             <div class="nav-section">
