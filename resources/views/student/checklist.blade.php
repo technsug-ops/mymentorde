@@ -7,8 +7,8 @@
 <style>
 /* ══════ Hero (Option B) ══════ */
 .cl-hero { color:#fff; border-radius:14px; margin-bottom:16px; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,.1); position:relative;
-    background:#065f46 url('https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=1400&q=80') center/cover; }
-.cl-hero::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(6,95,70,.93) 0%, rgba(16,185,129,.85) 100%); }
+    background:#4c1d95 url('https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=1400&q=80') center/cover; }
+.cl-hero::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(76,29,149,.92) 0%, rgba(124,58,237,.85) 100%); }
 .cl-hero-body { position:relative; display:flex; align-items:center; gap:20px; padding:22px 26px; }
 .cl-hero-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:7px; }
 .cl-hero-label { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; opacity:.85; }

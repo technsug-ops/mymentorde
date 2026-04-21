@@ -180,17 +180,17 @@ class StudentProgressController extends Controller
         if ($studentId !== '') {
             StudentAppointment::where('student_id', $studentId)
                 ->whereNotNull('scheduled_at')
-                ->whereIn('status', ['pending', 'confirmed'])
+                ->whereIn('status', ['pending', 'requested', 'scheduled', 'confirmed'])
                 ->limit(50)
-                ->get(['id', 'scheduled_at', 'duration_minutes', 'topic', 'status', 'meeting_url'])
+                ->get(['id', 'scheduled_at', 'duration_minutes', 'title', 'status', 'meeting_url'])
                 ->each(function ($a) use (&$events) {
                     $end = $a->scheduled_at->copy()->addMinutes((int) ($a->duration_minutes ?? 45));
                     $events->push([
                         'id'    => 'apt-' . $a->id,
-                        'title' => '📅 ' . (($a->topic ?? '') ?: 'Randevu'),
+                        'title' => '📅 ' . (($a->title ?? '') ?: 'Randevu'),
                         'start' => $a->scheduled_at->toIso8601String(),
                         'end'   => $end->toIso8601String(),
-                        'color' => $a->status === 'confirmed' ? '#22c55e' : '#f59e0b',
+                        'color' => in_array($a->status, ['scheduled', 'confirmed'], true) ? '#22c55e' : '#f59e0b',
                         'url'   => $a->meeting_url ?: '/student/appointments',
                     ]);
                 });
