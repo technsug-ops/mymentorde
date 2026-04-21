@@ -120,6 +120,21 @@ Route::middleware(['auth', 'manager.role'])->group(function (): void {
             return response()->json(['ok' => false, 'error' => $e->getMessage()], 500);
         }
     })->middleware('throttle:2,1')->name('system.cleanup-prod-test');
+
+    // guest_registration_fields'ta eksik section/field'ları default catalog'dan tamamlar
+    // (insertOrIgnore mantığı — mevcutlara dokunmaz). Örn. Adım 2 "Adres ve Başvuru"
+    // prod'da eksikse onu ekler.
+    Route::post('/system/repair-registration-fields', function () {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('system:repair-registration-fields');
+            return response()->json([
+                'ok'     => true,
+                'output' => trim(\Illuminate\Support\Facades\Artisan::output()),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['ok' => false, 'error' => $e->getMessage()], 500);
+        }
+    })->middleware('throttle:5,1')->name('system.repair-registration-fields');
 });
 Route::get('/go/{code}', TrackedLinkRedirectController::class)->name('tracked-link.redirect');
 
