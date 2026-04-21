@@ -6,8 +6,8 @@
 @php
     $appts       = $appointments ?? collect();
     $totalCnt    = $appts->count();
-    $scheduledCnt= $appts->whereIn('status',['scheduled','confirmed','requested'])->count();
-    $completedCnt= $appts->where('status','completed')->count();
+    $scheduledCnt= $appts->whereIn('status',['scheduled','confirmed','requested','pending'])->count();
+    $completedCnt= $appts->whereIn('status',['done','completed'])->count();
     $cancelledCnt= $appts->where('status','cancelled')->count();
     $dayLabels   = [
         'monday'    => 'Pazartesi',
@@ -35,7 +35,7 @@
         @foreach([
             ['label'=>'Toplam',     'count'=>$totalCnt,     'status'=>'all'],
             ['label'=>'Yaklaşan',   'count'=>$scheduledCnt, 'status'=>'scheduled'],
-            ['label'=>'Tamamlanan', 'count'=>$completedCnt, 'status'=>'completed'],
+            ['label'=>'Tamamlanan', 'count'=>$completedCnt, 'status'=>'done'],
             ['label'=>'İptal',      'count'=>$cancelledCnt, 'status'=>'cancelled'],
         ] as $chip)
         @php
@@ -134,7 +134,7 @@
                 <option value="requested" @selected($filterStatus === 'requested')>Talep Edildi</option>
                 <option value="scheduled" @selected($filterStatus === 'scheduled')>Planlandı</option>
                 <option value="confirmed" @selected($filterStatus === 'confirmed')>Onaylandı</option>
-                <option value="completed" @selected($filterStatus === 'completed')>Tamamlandı</option>
+                <option value="done"      @selected($filterStatus === 'done')>Tamamlandı</option>
                 <option value="cancelled" @selected($filterStatus === 'cancelled')>İptal</option>
             </select>
         </div>
@@ -157,7 +157,7 @@
         $apptBadge = match($row->status ?? '') {
             'scheduled'  => 'info',
             'confirmed'  => 'ok',
-            'completed'  => 'ok',
+            'completed', 'done' => 'ok',
             'cancelled'  => 'danger',
             'pending'    => 'warn',
             'requested'  => 'pending',
@@ -166,7 +166,7 @@
         $apptLabel = match($row->status ?? '') {
             'scheduled'  => 'Planlandı',
             'confirmed'  => 'Onaylandı',
-            'completed'  => 'Tamamlandı',
+            'completed', 'done' => 'Tamamlandı',
             'cancelled'  => 'İptal',
             'pending'    => 'Bekliyor',
             'requested'  => 'Talep Edildi',
@@ -278,12 +278,25 @@
 
         {{-- Cancel form --}}
         <div id="appt-cancel-{{ $row->id }}" style="display:none;margin-top:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px;">
-            <form method="POST" action="{{ route('senior.appointments.cancel', $row->id) }}" onsubmit="return confirm('Bu randevuyu iptal etmek istediğinden emin misin? Google Takvim\'den de silinecek.');">
+            <form method="POST" action="{{ route('senior.appointments.cancel', $row->id) }}" onsubmit="return apptCancelValidate({{ $row->id }});">
                 @csrf
                 <div style="font-size:var(--tx-sm);color:#991b1b;font-weight:600;margin-bottom:8px;">Randevuyu İptal Et</div>
-                <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-bottom:8px;">İptal sebebini öğrenciyle paylaşmak için bir not ekleyebilirsin (opsiyonel).</div>
-                <input type="text" name="cancel_reason" maxlength="250" placeholder="İptal sebebi..."
-                       style="width:100%;border:1px solid #fecaca;border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);background:#fff;color:var(--u-text);margin-bottom:10px;">
+                <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-bottom:8px;">Analiz için iptal nedenini seç — sonra bu verilerle hangi sebepler en sık iptali tetikliyor görebileceğiz.</div>
+                <select name="cancel_category" id="cancel-cat-{{ $row->id }}" required onchange="apptCancelToggleOther({{ $row->id }})"
+                        style="width:100%;border:1px solid #fecaca;border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);background:#fff;color:var(--u-text);margin-bottom:8px;">
+                    <option value="">— Neden seç —</option>
+                    <option value="student_no_show">Öğrenci gelmedi / cevap vermedi</option>
+                    <option value="student_request">Öğrenci iptal istedi</option>
+                    <option value="reschedule">Yeni tarihe ertelendi</option>
+                    <option value="senior_unavailable">Danışman müsait değil</option>
+                    <option value="duplicate">Yanlışlıkla açıldı / mükerrer</option>
+                    <option value="not_needed">Artık gerek kalmadı</option>
+                    <option value="technical">Teknik sorun (görüntülü bağlantı vb.)</option>
+                    <option value="other">Diğer</option>
+                </select>
+                <textarea name="cancel_reason" id="cancel-reason-{{ $row->id }}" rows="2" maxlength="500"
+                          placeholder="Açıklama (Diğer seçersen zorunlu, diğerlerinde opsiyonel)"
+                          style="width:100%;border:1px solid #fecaca;border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);background:#fff;color:var(--u-text);margin-bottom:10px;resize:vertical;"></textarea>
                 <div style="display:flex;gap:6px;">
                     <button type="submit" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:var(--tx-sm);font-weight:700;cursor:pointer;">✕ İptal Et</button>
                     <button type="button" onclick="toggleSec('appt-cancel-{{ $row->id }}')" style="background:#fff;color:var(--u-text);border:1px solid #fecaca;border-radius:7px;padding:8px 14px;font-size:var(--tx-sm);cursor:pointer;">Vazgeç</button>
@@ -341,6 +354,33 @@
 function toggleSec(id) {
     const el = document.getElementById(id);
     if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function apptCancelToggleOther(id) {
+    const cat = document.getElementById('cancel-cat-' + id);
+    const ta  = document.getElementById('cancel-reason-' + id);
+    if (!cat || !ta) return;
+    if (cat.value === 'other') {
+        ta.required = true;
+        ta.placeholder = 'Açıklama (zorunlu) — Diğer seçildi';
+        ta.focus();
+    } else {
+        ta.required = false;
+        ta.placeholder = 'Açıklama (opsiyonel)';
+    }
+}
+function apptCancelValidate(id) {
+    const cat = document.getElementById('cancel-cat-' + id);
+    const ta  = document.getElementById('cancel-reason-' + id);
+    if (!cat || !cat.value) {
+        alert('Lütfen bir iptal nedeni seç.');
+        return false;
+    }
+    if (cat.value === 'other' && (!ta.value || ta.value.trim().length < 3)) {
+        alert('Diğer için açıklama yazmalısın.');
+        ta.focus();
+        return false;
+    }
+    return confirm('Bu randevuyu iptal etmek istediğinden emin misin? Google Takvim\'den de silinecek.');
 }
 </script>
 

@@ -127,12 +127,34 @@ class SeniorAppointmentController extends Controller
             abort(403);
         }
 
-        $reason = $request->string('cancel_reason')->trim()->limit(250)->toString();
+        $validCategories = [
+            'student_no_show',
+            'student_request',
+            'reschedule',
+            'senior_unavailable',
+            'duplicate',
+            'not_needed',
+            'technical',
+            'other',
+        ];
+
+        $data = $request->validate([
+            'cancel_category' => ['required', 'string', 'in:' . implode(',', $validCategories)],
+            'cancel_reason'   => ['nullable', 'string', 'max:500'],
+        ]);
+
+        // 'Diğer' seçildiyse açıklama zorunlu
+        if ($data['cancel_category'] === 'other' && empty(trim($data['cancel_reason'] ?? ''))) {
+            return back()
+                ->withErrors(['cancel_reason' => 'Diğer seçildiğinde açıklama zorunludur.'])
+                ->withInput();
+        }
 
         $appointment->update([
-            'status'        => 'cancelled',
-            'cancelled_at'  => now(),
-            'cancel_reason' => $reason,
+            'status'          => 'cancelled',
+            'cancelled_at'    => now(),
+            'cancel_category' => $data['cancel_category'],
+            'cancel_reason'   => $data['cancel_reason'] ?: null,
         ]);
 
         return back()->with('status', 'Randevu iptal edildi' . ($appointment->google_event_id ? ' ve takvimden kaldırıldı.' : '.'));

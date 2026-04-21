@@ -23,12 +23,27 @@ class StudentAppointment extends Model
         'status',
         'cancelled_at',
         'cancel_reason',
+        'cancel_category',
+        'google_event_id',
+        'google_synced_at',
     ];
 
     protected $casts = [
-        'requested_at' => 'datetime',
-        'scheduled_at' => 'datetime',
-        'cancelled_at' => 'datetime',
+        'requested_at'      => 'datetime',
+        'scheduled_at'      => 'datetime',
+        'cancelled_at'      => 'datetime',
+        'google_synced_at'  => 'datetime',
+    ];
+
+    public const CANCEL_CATEGORY_LABELS = [
+        'student_no_show'    => 'Öğrenci gelmedi',
+        'student_request'    => 'Öğrenci iptal istedi',
+        'reschedule'         => 'Yeni tarihe ertelendi',
+        'senior_unavailable' => 'Danışman müsait değil',
+        'duplicate'          => 'Yanlışlıkla açıldı / mükerrer',
+        'not_needed'         => 'Artık gerek kalmadı',
+        'technical'          => 'Teknik sorun',
+        'other'              => 'Diğer',
     ];
 }
 
