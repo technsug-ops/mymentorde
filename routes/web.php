@@ -93,6 +93,33 @@ Route::middleware(['auth', 'manager.role'])->group(function (): void {
             ], 500);
         }
     })->middleware('throttle:3,1')->name('system.seed-demo-student');
+
+    // Prod test temizliği: 11 canonical user dışındakileri siler, emailleri @panel.mentorde.com yapar.
+    // Önce GET ile rapor sayfası (dry-run), sonra POST ile gerçek çalıştırma.
+    Route::get('/system/cleanup-prod-test', function () {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('system:cleanup-prod-test', ['--dry-run' => true]);
+            $output = \Illuminate\Support\Facades\Artisan::output();
+        } catch (\Throwable $e) {
+            $output = 'HATA: ' . $e->getMessage();
+        }
+        return view('system.cleanup-prod-test', ['dryRunOutput' => $output]);
+    })->name('system.cleanup-prod-test.show');
+
+    Route::post('/system/cleanup-prod-test', function (\Illuminate\Http\Request $request) {
+        if ($request->input('confirm') !== 'DELETE_ALL_TEST_DATA') {
+            return response()->json(['ok' => false, 'error' => 'Confirmation token gerekli.'], 422);
+        }
+        try {
+            \Illuminate\Support\Facades\Artisan::call('system:cleanup-prod-test');
+            return response()->json([
+                'ok'     => true,
+                'output' => trim(\Illuminate\Support\Facades\Artisan::output()),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['ok' => false, 'error' => $e->getMessage()], 500);
+        }
+    })->middleware('throttle:2,1')->name('system.cleanup-prod-test');
 });
 Route::get('/go/{code}', TrackedLinkRedirectController::class)->name('tracked-link.redirect');
 
