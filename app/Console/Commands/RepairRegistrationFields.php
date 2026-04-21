@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Models\GuestRegistrationField;
 use App\Support\GuestRegistrationFormCatalog;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class RepairRegistrationFields extends Command
@@ -26,7 +26,9 @@ class RepairRegistrationFields extends Command
         if ($companyArg !== null) {
             $companyIds = [(int) $companyArg];
         } else {
-            $companyIds = GuestRegistrationField::query()
+            // DB::table direct — BelongsToCompany global scope bypass
+            $companyIds = DB::table('guest_registration_fields')
+                ->select('company_id')
                 ->distinct()
                 ->pluck('company_id')
                 ->map(fn ($v) => (int) $v)
@@ -55,13 +57,15 @@ class RepairRegistrationFields extends Command
 
     private function repairFor(int $companyId): int
     {
-        $existing = GuestRegistrationField::query()
+        // DB::table direct — BelongsToCompany global scope'u bypass et.
+        // Unique constraint (company_id, field_key) olduğundan sadece field_key ile kontrol.
+        $existingFieldKeys = DB::table('guest_registration_fields')
             ->where('company_id', $companyId)
-            ->get(['section_key', 'field_key'])
-            ->map(fn ($r) => $r->section_key . '|' . $r->field_key)
+            ->pluck('field_key')
+            ->map(fn ($v) => (string) $v)
             ->values()
             ->all();
-        $existingSet = array_flip($existing);
+        $existingSet = array_flip($existingFieldKeys);
 
         $rows = [];
         $now = CarbonImmutable::now();
@@ -76,7 +80,7 @@ class RepairRegistrationFields extends Command
                 if ($sectionKey === '' || $fieldKey === '') {
                     continue;
                 }
-                if (isset($existingSet[$sectionKey . '|' . $fieldKey])) {
+                if (isset($existingSet[$fieldKey])) {
                     continue;
                 }
 
@@ -111,7 +115,8 @@ class RepairRegistrationFields extends Command
             return 0;
         }
 
-        GuestRegistrationField::query()->insert($rows);
+        // insertOrIgnore — defensive: unique key conflict varsa sessizce atlar
+        DB::table('guest_registration_fields')->insertOrIgnore($rows);
         return count($rows);
     }
 
