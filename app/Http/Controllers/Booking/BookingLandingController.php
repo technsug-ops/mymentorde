@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Booking;
 
 use App\Http\Controllers\Controller;
+use App\Models\MarketingAdminSetting;
 use App\Models\SeniorBookingSetting;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 /**
@@ -50,6 +52,35 @@ class BookingLandingController extends Controller
 
         return view('booking.public.landing', [
             'seniors' => $list,
+            'landingCms' => $this->loadLandingCms(),
         ]);
+    }
+
+    /**
+     * @return array{video_url:string, welcome_title:string, welcome_body:string}
+     */
+    private function loadLandingCms(): array
+    {
+        $cid = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
+
+        return Cache::remember("landing_cms_{$cid}", 300, function () use ($cid): array {
+            $rows = MarketingAdminSetting::query()
+                ->withoutGlobalScopes()
+                ->where('company_id', $cid)
+                ->whereIn('setting_key', [
+                    'landing_hero_video_url',
+                    'landing_hero_welcome_title',
+                    'landing_hero_welcome_body',
+                ])
+                ->pluck('setting_value', 'setting_key')
+                ->map(fn ($v) => (string) $v)
+                ->all();
+
+            return [
+                'video_url'     => (string) ($rows['landing_hero_video_url'] ?? ''),
+                'welcome_title' => (string) ($rows['landing_hero_welcome_title'] ?? 'Hoş geldin! 👋'),
+                'welcome_body'  => (string) ($rows['landing_hero_welcome_body'] ?? 'Almanya\'ya üniversite başvurusu yapmayı düşünüyorsan doğru yerdesin. Uzman danışmanlarımızla birebir görüşerek süreç hakkında tüm sorularına yanıt bulabilirsin. Randevu almak tamamen ücretsiz.'),
+            ];
+        });
     }
 }

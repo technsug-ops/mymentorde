@@ -91,19 +91,56 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="padding:11px 28px;font-size:15px;">
+            {{-- ═══ LANDING /randevu CMS AYARLARI ═══ --}}
+            <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--u-line);">
+                <h2 style="margin:0 0 4px;font-size:16px;color:var(--u-text);">📺 Landing Sayfası — /randevu</h2>
+                <p style="font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.6;">Public randevu landing sayfasının hero bölümünde sağ tarafta görünen karşılama videosu + tanıtım metni.</p>
+
+                <div style="margin-bottom:14px;">
+                    <label style="display:block;font-size:13px;font-weight:700;margin-bottom:5px;">🎬 Tanıtım videosu URL'i</label>
+                    <input type="url"
+                           name="landing_hero_video_url"
+                           value="{{ old('landing_hero_video_url', $landingVideoUrl ?? '') }}"
+                           placeholder="https://www.youtube.com/embed/XXXXX veya Vimeo embed URL"
+                           style="width:100%;padding:9px 12px;border:1.5px solid var(--u-line);border-radius:8px;font-size:13px;font-family:monospace;">
+                    <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+                        ⚠️ Watch URL yerine <strong>embed URL</strong> kullan: YouTube'da videoyu aç → Paylaş → Göm → iframe src'i kopyala. Boş bırakılırsa video yerine karşılama metni gösterilir.
+                    </div>
+                </div>
+
+                <div style="margin-bottom:14px;">
+                    <label style="display:block;font-size:13px;font-weight:700;margin-bottom:5px;">👋 Karşılama başlığı</label>
+                    <input type="text"
+                           name="landing_hero_welcome_title"
+                           value="{{ old('landing_hero_welcome_title', $landingWelcomeTitle ?? '') }}"
+                           maxlength="120"
+                           placeholder="Hoş Geldin!"
+                           style="width:100%;padding:9px 12px;border:1.5px solid var(--u-line);border-radius:8px;font-size:13px;">
+                </div>
+
+                <div style="margin-bottom:6px;">
+                    <label style="display:block;font-size:13px;font-weight:700;margin-bottom:5px;">📝 Karşılama metni (süreç anlatımı)</label>
+                    <textarea name="landing_hero_welcome_body"
+                              rows="4"
+                              maxlength="2000"
+                              placeholder="Randevu sürecini, neler sunduğunuzu, ziyaretçiye ne yapması gerektiğini açıklayan kısa metin..."
+                              style="width:100%;padding:9px 12px;border:1.5px solid var(--u-line);border-radius:8px;font-size:13px;resize:vertical;line-height:1.6;">{{ old('landing_hero_welcome_body', $landingWelcomeBody ?? '') }}</textarea>
+                    <div style="font-size:11px;color:var(--muted);margin-top:4px;">Video yoksa bu metin + başlık kart olarak gösterilir. Video varsa video altında küçük açıklama olarak çıkar.</div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="padding:11px 28px;font-size:15px;margin-top:18px;">
                 💾 Kaydet & Yayınla
             </button>
         </form>
     </div>
 
     <div class="card" style="padding:20px 24px;margin-top:16px;background:var(--bg);">
-        <div style="font-size:13px;font-weight:700;margin-bottom:10px;">ℹ️ Bu ayar neyi etkiler?</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;">ℹ️ Bu ayarlar neyi etkiler?</div>
         <ul style="font-size:13px;color:var(--muted);line-height:2;margin:0;padding-left:18px;">
-            <li>Tüm portal sidebar'larındaki firma adı ve logo</li>
-            <li>Manager, Eğitim Danışmanı, Marketing Admin, Staff Panel</li>
-            <li>Tarayıcı sekme başlıkları (kısmen)</li>
-            <li>Değişiklik anlık olarak tüm kullanıcılara yansır</li>
+            <li><strong>Marka adı + logo:</strong> Tüm portal sidebar'ları + landing + sekme başlıkları</li>
+            <li><strong>Landing video + karşılama:</strong> panel.mentorde.com/randevu hero sağ bölümü</li>
+            <li>Değişiklik anlık olarak tüm kullanıcılara yansır (5 dk cache)</li>
         </ul>
     </div>
 </div>
