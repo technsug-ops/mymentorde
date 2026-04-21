@@ -224,13 +224,9 @@
                     @endif
                 </a>
                 <a href="/student/process-tracking"
-                   class="nav-link {{ request()->is('student/process-tracking*','student/visa*','student/housing*') ? 'active' : '' }}">
+                   class="nav-link {{ request()->is('student/process-tracking*','student/visa*','student/housing*','student/university-applications*','student/institution-documents*') ? 'active' : '' }}">
                     <span class="nav-icon">📊</span> Surec Takibi
-                    <span class="nav-badge" style="background:rgba(124,58,237,.12);color:#7c3aed;font-size:9px;padding:1px 6px;border-radius:6px;margin-left:auto;" title="Vize + Konut dahil">🛂🏠</span>
-                </a>
-                <a href="/student/university-applications"
-                   class="nav-link {{ request()->is('student/university-applications*','student/institution-documents*') ? 'active' : '' }}">
-                    <span class="nav-icon">🎓</span> Universiteler
+                    <span class="nav-badge" style="background:rgba(124,58,237,.12);color:#7c3aed;font-size:9px;padding:1px 6px;border-radius:6px;margin-left:auto;" title="Üniversite + Vize + Konut dahil">🎓🛂🏠</span>
                 </a>
                 <a href="/student/appointments"
                    class="nav-link {{ request()->is('student/appointments*') ? 'active' : '' }}">

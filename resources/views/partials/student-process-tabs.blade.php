@@ -23,6 +23,9 @@
     <a href="/student/process-tracking" class="pt-tab {{ $pt_active === 'general' ? 'pt-tab--active' : '' }}">
         <span>🎯</span> Genel Süreç
     </a>
+    <a href="/student/university-applications" class="pt-tab {{ $pt_active === 'universities' ? 'pt-tab--active' : '' }}">
+        <span>🎓</span> Üniversiteler
+    </a>
     <a href="/student/visa" class="pt-tab {{ $pt_active === 'visa' ? 'pt-tab--active' : '' }}">
         <span>🛂</span> Vize Takibi
     </a>

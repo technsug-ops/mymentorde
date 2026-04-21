@@ -5,6 +5,21 @@
 
 @push('head')
 <style>
+/* ══════ Hero (Option B) ══════ */
+.ua-hero { color:#fff; border-radius:14px; margin-bottom:16px; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,.1); position:relative;
+    background:#581c87 url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1400&q=80') center/cover; }
+.ua-hero::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(88,28,135,.93) 0%, rgba(147,51,234,.82) 100%); }
+.ua-hero-body { position:relative; display:flex; align-items:center; gap:20px; padding:22px 26px; }
+.ua-hero-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:7px; }
+.ua-hero-label { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; opacity:.85; }
+.ua-hero-marker { display:inline-block; width:5px; height:14px; background:rgba(255,255,255,.75); border-radius:3px; }
+.ua-hero-title { font-size:24px; font-weight:800; line-height:1.1; margin:0; letter-spacing:-.3px; }
+.ua-hero-sub { font-size:12.5px; opacity:.88; line-height:1.5; max-width:560px; }
+.ua-hero-stats { display:flex; gap:7px; flex-wrap:wrap; margin-top:8px; padding-top:12px; border-top:1px solid rgba(255,255,255,.2); }
+.ua-hero-stat { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:18px; background:rgba(255,255,255,.18); font-size:11.5px; font-weight:600; line-height:1; border:1px solid rgba(255,255,255,.12); }
+.ua-hero-icon { font-size:50px; line-height:1; flex-shrink:0; opacity:.88; filter:drop-shadow(0 4px 12px rgba(0,0,0,.25)); }
+@media (max-width:640px){ .ua-hero-body { gap:14px; padding:18px; align-items:flex-start; } .ua-hero-title { font-size:20px; } .ua-hero-sub { font-size:12px; } .ua-hero-icon { font-size:36px; } }
+
 /* ── ua-* University Applications scoped ── */
 
 /* Stats strip */
@@ -132,6 +147,26 @@
     $rejected = $apps->where('status','rejected')->count();
     $instDocs = $institutionDocs ?? collect();
 @endphp
+
+{{-- ══════ Hero ══════ --}}
+<div class="ua-hero">
+    <div class="ua-hero-body">
+        <div class="ua-hero-main">
+            <div class="ua-hero-label"><span class="ua-hero-marker"></span>Akademik Başvurular</div>
+            <h1 class="ua-hero-title">Üniversite Başvurularım</h1>
+            <div class="ua-hero-sub">Uni-Assist, Hochschulstart ve direkt başvurular — tüm tercihlerinin durumu ve gerekli belgeler bir arada.</div>
+            <div class="ua-hero-stats">
+                <span class="ua-hero-stat">🎓 {{ $total }} başvuru</span>
+                @if($accepted > 0)<span class="ua-hero-stat">✅ {{ $accepted }} kabul</span>@endif
+                <span class="ua-hero-stat">⏳ {{ $pending }} beklemede</span>
+                @if($rejected > 0)<span class="ua-hero-stat">❌ {{ $rejected }} red</span>@endif
+            </div>
+        </div>
+        <div class="ua-hero-icon">🎓</div>
+    </div>
+</div>
+
+@include('partials.student-process-tabs', ['active' => 'universities'])
 
 {{-- ── STATS ── --}}
 <div class="ua-stats">
