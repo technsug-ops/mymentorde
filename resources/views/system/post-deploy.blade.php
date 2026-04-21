@@ -56,6 +56,26 @@
         <div id="sdOutput" style="display:none;margin-top:20px;background:#0f172a;color:#e2e8f0;padding:14px;border-radius:8px;font-family:monospace;font-size:11px;line-height:1.6;white-space:pre-wrap;max-height:300px;overflow:auto;"></div>
     </div>
 
+    {{-- User Email Relations Sync --}}
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-top:20px;">
+        <h2 style="margin:0 0 12px;font-size:18px;color:#0f172a;">🔗 Email Drift Düzelt</h2>
+        <p style="font-size:13px;color:#64748b;line-height:1.6;margin:0 0 16px;">
+            Prod cleanup sırasında <code>users.email</code> değişti ama bağlı tablolardaki (<code>guest_applications.email</code>, <code>student_assignments.senior_email</code>, <code>guest_applications.assigned_senior_email</code>, <code>student_appointments.senior_email</code>) eski email değerler kaldı.
+            <strong>Bu drift /guest/services 404 hatalarına yol açıyor.</strong> Bu buton drift'i kapatır.
+            İdempotent — tekrar çalıştırmak zararsız.
+        </p>
+
+        <form id="emailSyncForm" method="POST" action="{{ route('system.sync-user-email-relations') }}">
+            @csrf
+            <button type="submit" id="emailSyncBtn"
+                    style="padding:12px 24px;background:#f59e0b;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">
+                🔗 Email Drift'ini Düzelt
+            </button>
+        </form>
+
+        <div id="emailSyncOutput" style="display:none;margin-top:20px;background:#0f172a;color:#e2e8f0;padding:14px;border-radius:8px;font-family:monospace;font-size:11px;line-height:1.6;white-space:pre-wrap;max-height:300px;overflow:auto;"></div>
+    </div>
+
     {{-- Registration Fields Repair --}}
     <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-top:20px;">
         <h2 style="margin:0 0 12px;font-size:18px;color:#0f172a;">🧩 Kayıt Formu Alanlarını Tamamla</h2>
@@ -114,5 +134,6 @@ function __postJson(formId, btnId, outId, doneLabel, retryLabel){
 __postJson('pdForm', 'pdBtn', 'pdOutput', '✅ Tamamlandı', '🚀 Tekrar Dene');
 __postJson('sdForm', 'sdBtn', 'sdOutput', '✅ Demo Yüklendi', '🎓 Tekrar Dene');
 __postJson('rfForm', 'rfBtn', 'rfOutput', '✅ Alanlar Tamamlandı', '🧩 Tekrar Dene');
+__postJson('emailSyncForm', 'emailSyncBtn', 'emailSyncOutput', '✅ Drift Düzeltildi', '🔗 Tekrar Dene');
 </script>
 @endsection

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class CleanupProdTestData extends Command
 {
@@ -151,7 +152,12 @@ class CleanupProdTestData extends Command
                     . (isset($updates['dealer_code']) ? ", dealer={$updates['dealer_code']}" : '');
 
                 if (!$dryRun) {
+                    $oldEmail = (string) $user->email;
                     User::where('id', $user->id)->update($updates);
+                    // Email drift önleme: bağlı tablolardaki eski email'i yeni email'le
+                    // eşitle (guest_applications.email, senior_email, assigned_senior_email,
+                    // student_appointments.senior_email). Idempotent.
+                    $this->propagateEmailChange($oldEmail, $newEmail);
                 }
             }
             $report['email_updates'] = $emailUpdates;
@@ -227,6 +233,60 @@ class CleanupProdTestData extends Command
             'updated_at'       => now(),
         ]);
         return $code;
+    }
+
+    /**
+     * Kalan user'ın email'i değişince bağlı tablolardaki eski email'i yeni'ye güncelle.
+     * Tek bir user'ın değişimi için idempotent tek update pass.
+     */
+    private function propagateEmailChange(string $oldEmail, string $newEmail): void
+    {
+        if (strcasecmp($oldEmail, $newEmail) === 0) {
+            return;
+        }
+        $old = strtolower($oldEmail);
+        $new = strtolower($newEmail);
+
+        // guest_applications.email (guest kullanıcısı için)
+        DB::table('guest_applications')
+            ->whereRaw('LOWER(email) = ?', [$old])
+            ->update(['email' => $new, 'updated_at' => now()]);
+
+        // guest_applications.assigned_senior_email
+        DB::table('guest_applications')
+            ->whereRaw('LOWER(assigned_senior_email) = ?', [$old])
+            ->update(['assigned_senior_email' => $new, 'updated_at' => now()]);
+
+        // student_assignments.senior_email
+        if (Schema::hasTable('student_assignments')) {
+            DB::table('student_assignments')
+                ->whereRaw('LOWER(senior_email) = ?', [$old])
+                ->update(['senior_email' => $new, 'updated_at' => now()]);
+        }
+
+        // student_appointments.senior_email + student_email
+        if (Schema::hasTable('student_appointments')) {
+            DB::table('student_appointments')
+                ->whereRaw('LOWER(senior_email) = ?', [$old])
+                ->update(['senior_email' => $new, 'updated_at' => now()]);
+            DB::table('student_appointments')
+                ->whereRaw('LOWER(student_email) = ?', [$old])
+                ->update(['student_email' => $new, 'updated_at' => now()]);
+        }
+
+        // manager_reports.senior_email
+        if (Schema::hasTable('manager_reports')) {
+            DB::table('manager_reports')
+                ->whereRaw('LOWER(senior_email) = ?', [$old])
+                ->update(['senior_email' => $new, 'updated_at' => now()]);
+        }
+
+        // senior_performance_snapshots.senior_email
+        if (Schema::hasTable('senior_performance_snapshots')) {
+            DB::table('senior_performance_snapshots')
+                ->whereRaw('LOWER(senior_email) = ?', [$old])
+                ->update(['senior_email' => $new, 'updated_at' => now()]);
+        }
     }
 
     private function countAndDelete(string $table, string $column, array $keepValues, bool $dryRun): int
