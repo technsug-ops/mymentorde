@@ -33,6 +33,8 @@ Route::middleware(['company.context', 'auth', 'senior.role'])->group(function ()
     Route::delete('/senior/language-courses/{course}', [SeniorPortalController::class, 'languageCourseDelete'])->middleware('throttle:20,1')->name('senior.language-courses.delete');
     Route::get('/senior/appointments', [SeniorAppointmentController::class, 'appointments'])->name('senior.appointments');
     Route::post('/senior/appointments/{appointment}/confirm', [SeniorAppointmentController::class, 'appointmentConfirm'])->middleware('throttle:20,1')->name('senior.appointments.confirm');
+    Route::post('/senior/appointments/{appointment}/update', [SeniorAppointmentController::class, 'appointmentUpdate'])->middleware('throttle:30,1')->name('senior.appointments.update');
+    Route::post('/senior/appointments/{appointment}/cancel', [SeniorAppointmentController::class, 'appointmentCancel'])->middleware('throttle:20,1')->name('senior.appointments.cancel');
     Route::get('/senior/tickets', [SeniorPortalController::class, 'tickets'])->name('senior.tickets');
     Route::get('/senior/materials', [SeniorProfileController::class, 'materials'])->name('senior.materials');
     Route::post('/senior/knowledge-base/{article}/toggle-role', [SeniorKnowledgeBaseController::class, 'knowledgeBaseToggleRole'])->middleware('throttle:30,1')->name('senior.kb.toggle-role');

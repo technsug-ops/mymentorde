@@ -206,6 +206,92 @@
             </div>
         </div>
 
+        {{-- Edit + Cancel actions for scheduled/confirmed --}}
+        @if(in_array($row->status ?? '', ['scheduled', 'confirmed', 'pending'], true))
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+            <button onclick="toggleSec('appt-edit-{{ $row->id }}')" type="button"
+                    style="background:#6d28d9;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:var(--tx-xs);font-weight:700;cursor:pointer;">
+                ✏️ Düzenle
+            </button>
+            <button onclick="toggleSec('appt-cancel-{{ $row->id }}')" type="button"
+                    style="background:#fee2e2;color:#b91c1c;border:1px solid #fecaca;border-radius:7px;padding:7px 14px;font-size:var(--tx-xs);font-weight:700;cursor:pointer;">
+                ✕ İptal Et
+            </button>
+            @if($row->google_event_id)
+                <span style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:14px;background:rgba(22,163,74,.1);color:#16a34a;font-size:10.5px;font-weight:700;">
+                    📅 Google'da senkronize
+                </span>
+            @endif
+        </div>
+
+        {{-- Edit form --}}
+        <div id="appt-edit-{{ $row->id }}" style="display:none;margin-top:12px;background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:14px;">
+            <form method="POST" action="{{ route('senior.appointments.update', $row->id) }}">
+                @csrf
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                    <div style="grid-column:1/-1;">
+                        <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);margin-bottom:4px;">Başlık *</div>
+                        <input type="text" name="title" required value="{{ $row->title }}" maxlength="190"
+                               style="width:100%;border:1px solid #d8b4fe;border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);background:#fff;color:var(--u-text);">
+                    </div>
+                    <div>
+                        <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);margin-bottom:4px;">Tarih & Saat *</div>
+                        <input type="datetime-local" name="scheduled_at" required
+                               value="{{ optional($row->scheduled_at)->format('Y-m-d\TH:i') }}"
+                               style="width:100%;border:1px solid #d8b4fe;border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);background:#fff;color:var(--u-text);">
+                    </div>
+                    <div>
+                        <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);margin-bottom:4px;">Süre (dk)</div>
+                        <input type="number" name="duration_minutes" min="15" max="180"
+                               value="{{ $row->duration_minutes ?? 60 }}"
+                               style="width:100%;border:1px solid #d8b4fe;border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);background:#fff;color:var(--u-text);">
+                    </div>
+                    <div>
+                        <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);margin-bottom:4px;">Kanal</div>
+                        <select name="channel"
+                                style="width:100%;border:1px solid #d8b4fe;border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);background:#fff;color:var(--u-text);">
+                            <option value="online"    @selected(($row->channel ?? '')==='online')>Online (Google Meet)</option>
+                            <option value="phone"     @selected(($row->channel ?? '')==='phone')>Telefon</option>
+                            <option value="in_person" @selected(($row->channel ?? '')==='in_person')>Ofiste</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);margin-bottom:4px;">Toplantı URL (opsiyonel)</div>
+                        <input type="url" name="meeting_url" value="{{ $row->meeting_url }}" placeholder="https://meet.google.com/..."
+                               style="width:100%;border:1px solid #d8b4fe;border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);background:#fff;color:var(--u-text);">
+                    </div>
+                    <div style="grid-column:1/-1;">
+                        <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);margin-bottom:4px;">Not</div>
+                        <textarea name="note" rows="2" maxlength="1000"
+                                  style="width:100%;border:1px solid #d8b4fe;border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);background:#fff;color:var(--u-text);resize:vertical;">{{ $row->note }}</textarea>
+                    </div>
+                </div>
+                <div style="display:flex;gap:6px;">
+                    <button type="submit" style="background:#6d28d9;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:var(--tx-sm);font-weight:700;cursor:pointer;">💾 Kaydet</button>
+                    <button type="button" onclick="toggleSec('appt-edit-{{ $row->id }}')" style="background:#fff;color:var(--u-text);border:1px solid #d8b4fe;border-radius:7px;padding:8px 14px;font-size:var(--tx-sm);cursor:pointer;">Vazgeç</button>
+                </div>
+                <div style="margin-top:8px;font-size:var(--tx-xs);color:var(--u-muted);">
+                    💡 Değişiklikler Google Takvim'e otomatik yansır.
+                </div>
+            </form>
+        </div>
+
+        {{-- Cancel form --}}
+        <div id="appt-cancel-{{ $row->id }}" style="display:none;margin-top:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px;">
+            <form method="POST" action="{{ route('senior.appointments.cancel', $row->id) }}" onsubmit="return confirm('Bu randevuyu iptal etmek istediğinden emin misin? Google Takvim\'den de silinecek.');">
+                @csrf
+                <div style="font-size:var(--tx-sm);color:#991b1b;font-weight:600;margin-bottom:8px;">Randevuyu İptal Et</div>
+                <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-bottom:8px;">İptal sebebini öğrenciyle paylaşmak için bir not ekleyebilirsin (opsiyonel).</div>
+                <input type="text" name="cancel_reason" maxlength="250" placeholder="İptal sebebi..."
+                       style="width:100%;border:1px solid #fecaca;border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);background:#fff;color:var(--u-text);margin-bottom:10px;">
+                <div style="display:flex;gap:6px;">
+                    <button type="submit" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:var(--tx-sm);font-weight:700;cursor:pointer;">✕ İptal Et</button>
+                    <button type="button" onclick="toggleSec('appt-cancel-{{ $row->id }}')" style="background:#fff;color:var(--u-text);border:1px solid #fecaca;border-radius:7px;padding:8px 14px;font-size:var(--tx-sm);cursor:pointer;">Vazgeç</button>
+                </div>
+            </form>
+        </div>
+        @endif
+
         {{-- Confirm form for 'requested' --}}
         @if(($row->status ?? '') === 'requested')
         <div style="margin-top:10px;">

@@ -90,4 +90,51 @@ class SeniorAppointmentController extends Controller
 
         return back()->with('status', 'Randevu onaylandı' . ($appointment->external_event_id ? ' ve takvime eklendi.' : '.'));
     }
+
+    /**
+     * Onaylanmış randevuyu düzenle (title, scheduled_at, süre, kanal, not).
+     * Observer'ın saved hook'u Google Calendar'a otomatik sync yapar.
+     */
+    public function appointmentUpdate(Request $request, StudentAppointment $appointment): \Illuminate\Http\RedirectResponse
+    {
+        $seniorEmail = $this->seniorEmail($request);
+        if (strtolower((string) $appointment->senior_email) !== $seniorEmail) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'title'            => ['required', 'string', 'max:190'],
+            'scheduled_at'     => ['required', 'date'],
+            'duration_minutes' => ['nullable', 'integer', 'min:15', 'max:180'],
+            'channel'          => ['nullable', 'string', 'in:online,phone,in_person,office'],
+            'note'             => ['nullable', 'string', 'max:1000'],
+            'meeting_url'      => ['nullable', 'url', 'max:400'],
+        ]);
+
+        $appointment->update($data);
+
+        return back()->with('status', 'Randevu güncellendi ve takvim senkronize edildi.');
+    }
+
+    /**
+     * Randevuyu iptal et (status = cancelled).
+     * Observer'ın saved hook'u Google Calendar'dan event'i siler.
+     */
+    public function appointmentCancel(Request $request, StudentAppointment $appointment): \Illuminate\Http\RedirectResponse
+    {
+        $seniorEmail = $this->seniorEmail($request);
+        if (strtolower((string) $appointment->senior_email) !== $seniorEmail) {
+            abort(403);
+        }
+
+        $reason = $request->string('cancel_reason')->trim()->limit(250)->toString();
+
+        $appointment->update([
+            'status'        => 'cancelled',
+            'cancelled_at'  => now(),
+            'cancel_reason' => $reason,
+        ]);
+
+        return back()->with('status', 'Randevu iptal edildi' . ($appointment->google_event_id ? ' ve takvimden kaldırıldı.' : '.'));
+    }
 }
