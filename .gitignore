@@ -47,3 +47,4 @@ DEV_LOGIN_CREDENTIALS.md
 # Tek seferlik KASSERVER setup script — git'e GİRMEZ, manuel FTP upload
 /public/_kasserver_init.php
 /public/_setup*.php
+.env z

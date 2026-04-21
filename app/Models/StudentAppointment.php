@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class StudentAppointment extends Model
 {
@@ -45,5 +46,11 @@ class StudentAppointment extends Model
         'technical'          => 'Teknik sorun',
         'other'              => 'Diğer',
     ];
+
+    /** Booking modülü: public widget'tan geldiyse karşı taraf (invitee meta). */
+    public function publicBooking(): HasOne
+    {
+        return $this->hasOne(PublicBooking::class, 'student_appointment_id');
+    }
 }
 

@@ -190,6 +190,9 @@
                     @if($calLabel)
                         <span class="badge info" style="font-size:var(--tx-xs);">{{ $calLabel }}</span>
                     @endif
+                    @if($row->publicBooking)
+                        <span class="badge" style="font-size:var(--tx-xs);background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;">🌐 Public Booking</span>
+                    @endif
                 </div>
                 <div style="font-size:var(--tx-xs);color:var(--u-muted);display:flex;gap:12px;flex-wrap:wrap;">
                     <span>👤 {{ $row->student_id ?? '—' }}</span>
@@ -200,6 +203,17 @@
                         <a href="{{ $row->meeting_url }}" target="_blank" style="color:var(--u-brand);font-weight:600;text-decoration:none;">🔗 Toplantı Bağlantısı</a>
                     @endif
                 </div>
+                @if($row->publicBooking)
+                    @php $pb = $row->publicBooking; @endphp
+                    <div style="margin-top:6px;padding:8px 10px;background:#eff6ff;border-left:3px solid #3b82f6;border-radius:4px;font-size:var(--tx-xs);color:#1e3a8a;">
+                        <div><strong>Invitee:</strong> {{ $pb->invitee_name }} · <a href="mailto:{{ $pb->invitee_email }}" style="color:#1e40af;">{{ $pb->invitee_email }}</a>
+                            @if($pb->invitee_phone) · 📞 {{ $pb->invitee_phone }}@endif
+                        </div>
+                        @if($pb->notes)
+                            <div style="margin-top:3px;"><strong>Not:</strong> {{ $pb->notes }}</div>
+                        @endif
+                    </div>
+                @endif
                 @if(!empty($row->notes))
                     <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-top:4px;font-style:italic;">{{ $row->notes }}</div>
                 @endif
@@ -237,14 +251,24 @@
                     <div>
                         <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);margin-bottom:4px;">Tarih & Saat *</div>
                         <input type="datetime-local" name="scheduled_at" required
+                               data-collision-check="{{ $row->id }}"
                                value="{{ optional($row->scheduled_at)->format('Y-m-d\TH:i') }}"
                                style="width:100%;border:1px solid #d8b4fe;border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);background:#fff;color:var(--u-text);">
                     </div>
                     <div>
                         <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);margin-bottom:4px;">Süre (dk)</div>
                         <input type="number" name="duration_minutes" min="15" max="180"
+                               data-collision-check="{{ $row->id }}"
                                value="{{ $row->duration_minutes ?? 60 }}"
                                style="width:100%;border:1px solid #d8b4fe;border-radius:7px;padding:8px 10px;font-size:var(--tx-sm);background:#fff;color:var(--u-text);">
+                    </div>
+                    <div id="collision-warn-{{ $row->id }}" style="grid-column:1/-1;display:none;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px 12px;font-size:var(--tx-xs);color:#92400e;">
+                        <div style="font-weight:700;margin-bottom:4px;">⚠️ Çakışma Uyarısı</div>
+                        <div id="collision-detail-{{ $row->id }}"></div>
+                        <label style="display:flex;align-items:center;gap:6px;margin-top:8px;cursor:pointer;">
+                            <input type="checkbox" name="override_collision" value="1">
+                            <span>Bilinçli olarak üst üste bindir (önerilmez)</span>
+                        </label>
                     </div>
                     <div>
                         <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);margin-bottom:4px;">Kanal</div>
@@ -382,6 +406,64 @@ function apptCancelValidate(id) {
     }
     return confirm('Bu randevuyu iptal etmek istediğinden emin misin? Google Takvim\'den de silinecek.');
 }
+
+// Collision check — scheduled_at veya duration değişince senior'un başka
+// aktif randevusu ile çakışıyor mu kontrol et, uyarı kutusu göster.
+(function(){
+    var checkUrl = @json(route('senior.appointments.check-collision'));
+    var csrf     = @json(csrf_token());
+    var timers   = {};
+
+    function runCheck(apptId){
+        var editBox = document.getElementById('appt-edit-' + apptId);
+        if (!editBox) return;
+        var dt  = editBox.querySelector('input[name="scheduled_at"]');
+        var dur = editBox.querySelector('input[name="duration_minutes"]');
+        if (!dt || !dt.value) return;
+
+        var fd = new FormData();
+        fd.append('_token', csrf);
+        fd.append('scheduled_at', dt.value);
+        fd.append('duration_minutes', (dur && dur.value) ? dur.value : 30);
+        fd.append('except_id', apptId);
+
+        fetch(checkUrl, {
+            method: 'POST',
+            body: fd,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(j){
+            var warnBox = document.getElementById('collision-warn-' + apptId);
+            var detail  = document.getElementById('collision-detail-' + apptId);
+            if (!warnBox || !detail) return;
+            if (j.ok && j.collision && j.conflicts && j.conflicts.length) {
+                var html = 'Bu saatte çakışan randevu(lar) var:<ul style="margin:6px 0 0 18px;padding:0;">';
+                j.conflicts.forEach(function(c){
+                    html += '<li><strong>' + c.scheduled_at + '</strong> · ' + c.title + ' · ' + c.student_id + ' (' + c.duration + ' dk)</li>';
+                });
+                html += '</ul>';
+                detail.innerHTML = html;
+                warnBox.style.display = '';
+            } else {
+                warnBox.style.display = 'none';
+                var cb = warnBox.querySelector('input[name="override_collision"]');
+                if (cb) cb.checked = false;
+            }
+        })
+        .catch(function(){ /* sessizce yut */ });
+    }
+
+    document.addEventListener('input', function(e){
+        var el = e.target;
+        if (!el || !el.matches) return;
+        if (!el.matches('[data-collision-check]')) return;
+        var apptId = el.getAttribute('data-collision-check');
+        clearTimeout(timers[apptId]);
+        timers[apptId] = setTimeout(function(){ runCheck(apptId); }, 400);
+    });
+})();
 </script>
 
 @endsection

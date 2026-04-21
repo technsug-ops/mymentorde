@@ -20,6 +20,7 @@ class SeniorAppointmentController extends Controller
         $status = trim((string) $request->query('status', 'all'));
 
         $appointments = StudentAppointment::query()
+            ->with('publicBooking')
             ->whereRaw('lower(senior_email) = ?', [$email])
             ->when($q !== '', function ($w) use ($q) {
                 $w->where(function ($x) use ($q) {
@@ -89,6 +90,58 @@ class SeniorAppointmentController extends Controller
         }
 
         return back()->with('status', 'Randevu onaylandı' . ($appointment->external_event_id ? ' ve takvime eklendi.' : '.'));
+    }
+
+    /**
+     * AJAX: Verilen tarih/süre ile senior'un başka bir randevusu çakışıyor mu?
+     * Booking modülü public_bookings + mevcut student_appointments ikisini de kontrol eder.
+     */
+    public function checkCollision(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $email = $this->seniorEmail($request);
+        $data  = $request->validate([
+            'scheduled_at'     => ['required', 'date'],
+            'duration_minutes' => ['nullable', 'integer', 'min:15', 'max:240'],
+            'except_id'        => ['nullable', 'integer'],
+        ]);
+
+        $duration  = (int) ($data['duration_minutes'] ?? 30);
+        $start     = \Carbon\CarbonImmutable::parse($data['scheduled_at']);
+        $end       = $start->copy()->addMinutes($duration);
+        $exceptId  = (int) ($data['except_id'] ?? 0);
+
+        $conflicts = [];
+
+        // 1. Mevcut student_appointments — senior'un aynı aralıkta başka aktif randevusu
+        $rows = StudentAppointment::query()
+            ->whereRaw('lower(senior_email) = ?', [$email])
+            ->whereNotIn('status', ['cancelled', 'canceled', 'done', 'completed'])
+            ->when($exceptId > 0, fn ($w) => $w->where('id', '!=', $exceptId))
+            ->where('scheduled_at', '<', $end->toDateTimeString())
+            ->where('scheduled_at', '>=', $start->copy()->subHours(4)->toDateTimeString())
+            ->limit(10)
+            ->get(['id', 'title', 'scheduled_at', 'duration_minutes', 'status', 'student_id']);
+
+        foreach ($rows as $r) {
+            $rStart = \Carbon\CarbonImmutable::parse($r->scheduled_at);
+            $rEnd   = $rStart->copy()->addMinutes((int) ($r->duration_minutes ?? 30));
+            // Overlap check: start < rEnd AND end > rStart
+            if ($start->lessThan($rEnd) && $end->greaterThan($rStart)) {
+                $conflicts[] = [
+                    'id'           => $r->id,
+                    'title'        => $r->title,
+                    'scheduled_at' => $rStart->format('d.m.Y H:i'),
+                    'duration'     => (int) ($r->duration_minutes ?? 30),
+                    'student_id'   => $r->student_id,
+                ];
+            }
+        }
+
+        return response()->json([
+            'ok'        => true,
+            'collision' => !empty($conflicts),
+            'conflicts' => $conflicts,
+        ]);
     }
 
     /**
