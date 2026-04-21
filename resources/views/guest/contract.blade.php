@@ -353,38 +353,77 @@
      STATE 1: not_requested — Talep Et
 ══════════════════════════════════════════ --}}
 @if($status === 'not_requested')
-    <div class="gc-hero teal">
-        <div class="gc-hero-badge"><span class="pulse"></span> Siradaki adim</div>
-        <div class="gc-hero-title">Sözleşme talebini oluştur</div>
-        <div class="gc-hero-sub">Ön koşulların tamamlandi. Talep butonuna tıkladığında danışmanin sözleşmeni hazırlayacak ve sana iletecek.</div>
-        <form method="POST" action="{{ route('guest.contract.request') }}" id="contractRequestForm" style="display:inline;">
-            @csrf
-            <button type="submit" class="gc-hero-btn" id="contractRequestButton" @disabled(!$allPrereqsDone)>📄 Sözleşme Talep Et</button>
-        </form>
-        <div class="gc-hero-meta">
-            <span>⏱️ Hazırlanma suresi: ~1 iş günü</span>
-            <span>📧 E-posta ile bilgilendirileceksin</span>
-        </div>
-    </div>
-
     @if($allPrereqsDone)
-    <div class="gc-info-grid">
-        @foreach($prereqs as $p)
-        <div class="gc-info-card">
-            <div class="gc-info-icon" style="background:rgba(22,163,74,.08);">{{ $loop->index === 0 ? '📝' : ($loop->index === 1 ? '📄' : '📦') }}</div>
-            <div>
-                <div style="font-size:11px;color:var(--u-muted);">{{ $p['label'] }}</div>
-                <div style="font-size:14px;font-weight:700;color:var(--u-ok);">✓ {{ $p['value'] }}</div>
+        {{-- Tüm ön koşullar tamam — yeşil hero, aktif buton --}}
+        <div class="gc-hero teal">
+            <div class="gc-hero-badge"><span class="pulse"></span> Siradaki adim</div>
+            <div class="gc-hero-title">Sözleşme talebini oluştur</div>
+            <div class="gc-hero-sub">Ön koşulların tamamlandı. Talep butonuna tıkladığında danışmanın sözleşmeni hazırlayacak ve sana iletecek.</div>
+            <form method="POST" action="{{ route('guest.contract.request') }}" id="contractRequestForm" style="display:inline;">
+                @csrf
+                <button type="submit" class="gc-hero-btn" id="contractRequestButton">📄 Sözleşme Talep Et</button>
+            </form>
+            <div class="gc-hero-meta">
+                <span>⏱️ Hazırlanma suresi: ~1 iş günü</span>
+                <span>📧 E-posta ile bilgilendirileceksin</span>
             </div>
         </div>
-        @endforeach
-    </div>
-    @endif
 
-    <div class="gc-tip">
-        <div class="gc-tip-icon">💡</div>
-        <div><h5>Sonraki adımlar ne olacak?</h5><p>Talep ettikten sonra danışmanin sözleşmeyi hazırlayacak. Hazir olunca okuyup dijital imza veya fiziksel imzalı dosya yükleyerek göndereceksin.</p></div>
-    </div>
+        <div class="gc-info-grid">
+            @foreach($prereqs as $p)
+            <div class="gc-info-card">
+                <div class="gc-info-icon" style="background:rgba(22,163,74,.08);">{{ $loop->index === 0 ? '📝' : ($loop->index === 1 ? '📄' : '📦') }}</div>
+                <div>
+                    <div style="font-size:11px;color:var(--u-muted);">{{ $p['label'] }}</div>
+                    <div style="font-size:14px;font-weight:700;color:var(--u-ok);">✓ {{ $p['value'] }}</div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        <div class="gc-tip">
+            <div class="gc-tip-icon">💡</div>
+            <div><h5>Sonraki adımlar ne olacak?</h5><p>Talep ettikten sonra danışmanın sözleşmeyi hazırlayacak. Hazır olunca okuyup dijital imza veya fiziksel imzalı dosya yükleyerek göndereceksin.</p></div>
+        </div>
+    @else
+        {{-- Eksik ön koşul var — gri hero, disabled + açıklayıcı buton --}}
+        @php $missingList = collect($prereqs)->where('done', false); @endphp
+        <div class="gc-hero" style="background:linear-gradient(135deg,#f1f5f9 0%,#e2e8f0 100%);color:#334155;">
+            <div class="gc-hero-badge" style="background:rgba(100,116,139,.12);color:#475569;"><span>🔒</span> Henüz talep edilemez</div>
+            <div class="gc-hero-title" style="color:#0f172a;">Sözleşme talebi için {{ $missingList->count() }} adım eksik</div>
+            <div class="gc-hero-sub" style="color:#475569;">
+                Sözleşme talep edebilmen için aşağıdaki adımları tamamlamalısın. Eksikleri bitirince buton otomatik olarak aktif olacak.
+            </div>
+            <button type="button"
+                    class="gc-hero-btn"
+                    disabled
+                    style="opacity:.5;cursor:not-allowed;background:#94a3b8;"
+                    title="Ön koşullar tamamlanmadan talep edilemez">
+                🔒 Sözleşme Talep Et ({{ $missingList->count() }} eksik)
+            </button>
+            <div class="gc-hero-meta" style="color:#64748b;">
+                <span>📋 Eksik adım sayısı: {{ $missingList->count() }}</span>
+                <span>👇 Aşağıdan devam et</span>
+            </div>
+        </div>
+
+        <div style="background:#fff7ed;border:1px solid #fdba74;border-radius:12px;padding:16px 18px;margin-bottom:16px;">
+            <div style="font-weight:700;color:#9a3412;font-size:14px;margin-bottom:10px;">Eksik ön koşullar:</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                @foreach($missingList as $p)
+                    <a href="{{ $p['link'] }}" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#fff;border:1px solid #fed7aa;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;color:#9a3412;transition:background .15s;">
+                        <span>⬜ {{ $p['label'] }}</span>
+                        <span style="color:#ea580c;">Tamamla →</span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="gc-tip">
+            <div class="gc-tip-icon">💡</div>
+            <div><h5>Neden bu adımlar gerekli?</h5><p>Sözleşme hazırlanmadan önce kayıt formu, belgeler ve paket seçimi tamamlanmış olmalı — bunlar sözleşmenin içeriğini belirleyen kritik bilgiler.</p></div>
+        </div>
+    @endif
 @endif
 
 {{-- ══════════════════════════════════════════

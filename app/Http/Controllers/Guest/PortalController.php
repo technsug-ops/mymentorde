@@ -41,6 +41,16 @@ class PortalController extends Controller
     public function dashboard(Request $request)
     {
         $guest = $this->resolveGuest($request);
+
+        // Guest application bulunamadıysa: kullanıcı email'i guest_applications
+        // tablosunda karşılık bulmuyor (cleanup sonrası drift olabilir veya
+        // kayıt henüz oluşmamış). 500 yerine açıklayıcı bir sayfa gönder.
+        if (!$guest) {
+            return view('guest.dashboard-no-application', [
+                'userEmail' => (string) ($request->user()?->email ?? ''),
+            ]);
+        }
+
         $data  = $this->viewData->build($request, $guest);
 
         $data['activeCampaigns'] = MarketingCampaign::query()

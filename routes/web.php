@@ -66,6 +66,19 @@ Route::middleware(['auth', 'manager.role'])->group(function (): void {
         } catch (\Throwable $e) {
             $output['route_clear_error'] = $e->getMessage();
         }
+        // Auto-repair adımları — cleanup sonrası drift'leri kapatır
+        try {
+            \Illuminate\Support\Facades\Artisan::call('system:sync-user-email-relations');
+            $output['sync_user_emails'] = trim(\Illuminate\Support\Facades\Artisan::output());
+        } catch (\Throwable $e) {
+            $output['sync_user_emails_error'] = $e->getMessage();
+        }
+        try {
+            \Illuminate\Support\Facades\Artisan::call('system:repair-registration-fields');
+            $output['repair_registration_fields'] = trim(\Illuminate\Support\Facades\Artisan::output());
+        } catch (\Throwable $e) {
+            $output['repair_registration_fields_error'] = $e->getMessage();
+        }
         return response()->json(['ok' => true, 'output' => $output]);
     })->middleware('throttle:5,1')->name('system.post-deploy');
 

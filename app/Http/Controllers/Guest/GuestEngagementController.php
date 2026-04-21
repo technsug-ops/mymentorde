@@ -87,24 +87,26 @@ class GuestEngagementController extends Controller
     public function timeline(Request $request)
     {
         $guest = $this->resolveGuest($request);
+
+        if (!$guest) {
+            // Guest application yok → dashboard'daki açıklayıcı sayfaya yönlendir
+            return redirect()->route('guest.dashboard');
+        }
+
         $data  = $this->buildViewData($request, $guest);
 
-        if ($guest) {
-            $timelineService = app(GuestTimelineService::class);
-            $count           = GuestTimelineMilestone::where('guest_application_id', $guest->id)->count();
-            if ($count < 22) {
-                $timelineService->generateMilestones($guest);
-            }
-            // Retroaktif: daha önce yapılmış aksiyonların milestone'larını otomatik tamamla
-            $timelineService->syncCompletions($guest);
-
-            $data['milestones'] = GuestTimelineMilestone::where('guest_application_id', $guest->id)
-                ->orderBy('sort_order')
-                ->get();
-            $data['milestoneProgress'] = $timelineService->computeProgress($guest);
-        } else {
-            $data['milestones'] = collect();
+        $timelineService = app(GuestTimelineService::class);
+        $count           = GuestTimelineMilestone::where('guest_application_id', $guest->id)->count();
+        if ($count < 22) {
+            $timelineService->generateMilestones($guest);
         }
+        // Retroaktif: daha önce yapılmış aksiyonların milestone'larını otomatik tamamla
+        $timelineService->syncCompletions($guest);
+
+        $data['milestones'] = GuestTimelineMilestone::where('guest_application_id', $guest->id)
+            ->orderBy('sort_order')
+            ->get();
+        $data['milestoneProgress'] = $timelineService->computeProgress($guest);
 
         return view('guest.timeline', $data);
     }
