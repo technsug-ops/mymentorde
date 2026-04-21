@@ -188,17 +188,19 @@
 /* Hidden nav for JS compat */
 .grf-hidden { display: none; }
 
-/* Autosave toast */
+/* Autosave toast — minimal ✓ badge */
 .grf-toast {
     position: fixed; bottom: 20px; right: 20px;
-    background: var(--u-text); color: #fff;
-    padding: 10px 18px; border-radius: 10px;
-    font-size: 13px; font-weight: 600;
-    display: flex; align-items: center; gap: 8px;
-    opacity: 0; transform: translateY(8px);
+    width: 40px; height: 40px;
+    background: var(--u-ok, #10b981); color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700; line-height: 1;
+    opacity: 0; transform: translateY(8px) scale(.9);
     transition: all .3s; z-index: 100; pointer-events: none;
+    box-shadow: 0 4px 12px rgba(16,185,129,.35);
 }
-.grf-toast.show { opacity: 1; transform: translateY(0); }
+.grf-toast.show { opacity: 1; transform: translateY(0) scale(1); }
 
 /* ── Responsive ── */
 @media(max-width:900px){
@@ -321,8 +323,8 @@
                                     <div class="form-group{{ $isFilled ? ' is-filled' : '' }}{{ $isWide ? ' grf-full' : '' }}" data-field-key="{{ $key }}">
                                         <div class="label-row">
                                             <label>{{ $label }} @if($required)<span class="required-star">*</span>@endif</label>
-                                            @if($isFilled && in_array($key, ['first_name','last_name','email','phone']))
-                                                <span class="grf-prefilled" title="Kayıttan otomatik dolduruldu">✓</span>
+                                            @if($isFilled && in_array($key, ['first_name','last_name','email','phone','gender','communication_language','application_country','application_type']))
+                                                <span class="grf-prefilled" title="Başvuru formundan otomatik dolduruldu">✓</span>
                                             @endif
                                         </div>
                                         @if(!empty($field['help_text']))
@@ -444,8 +446,8 @@
     </div>
 </div>
 
-{{-- Autosave toast --}}
-<div class="grf-toast" id="grfToast"><span style="width:8px;height:8px;border-radius:50%;background:var(--u-ok);"></span> Otomatik kaydedildi</div>
+{{-- Autosave toast — sadece ✓ (B9) --}}
+<div class="grf-toast" id="grfToast" role="status" aria-label="Kaydedildi">✓</div>
 
 <script defer src="{{ Vite::asset('resources/js/guest-registration-form.js') }}"></script>
 <script nonce="{{ $cspNonce ?? '' }}">
