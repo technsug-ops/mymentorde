@@ -240,10 +240,14 @@
     $completionPct = $requiredTotal > 0 ? (int)round(($requiredFilled / $requiredTotal) * 100) : 0;
     $groupCount = count($registrationFieldGroups ?? []);
 
-    $stepIcons = ['👤', '📍', '🎓', '🗣️', '💰', '👨‍👩‍👧', '📂'];
-    $stepShortNames = ['Kişisel', 'Adres', 'Eğitim', 'Dil', 'Finans', 'Aile', 'Ek Bilgi'];
+    // spouse_info section catalog'da section_order=15 (personal_info hemen sonrası).
+    // Evli değilse client-side JS bu adımı gizler. Etiket dizileri 8 girişli,
+    // index 1'de spouse_info'ya karşılık gelen entry var.
+    $stepIcons = ['👤', '💍', '📍', '🎓', '🗣️', '💰', '👨‍👩‍👧', '📂'];
+    $stepShortNames = ['Kişisel', 'Eş', 'Adres', 'Eğitim', 'Dil', 'Finans', 'Aile', 'Ek Bilgi'];
     $stepWhys = [
         'Üniversite başvurularında kimlik bilgilerin gerekli. Bu bilgiler sadece senin dosyanda kalır ve üçüncü kişilerle paylaşılmaz.',
+        'Evli iseniz eşinize ait kimlik ve iletişim bilgileri eş ikametgah / vize başvurusu için gerekli olabilir. Evli değilseniz bu adım atlanır.',
         'Adres bilgilerin üniversite kabul mektuplarının gönderimi ve vize başvurun için kullanılacak.',
         'Sana en uygun üniversite ve programı bulmamız için eğitim bilgilerin çok önemli.',
         'Dil seviyen, hazırlık programı ihtiyacını ve başvurabileceğin üniversiteleri belirler.',
