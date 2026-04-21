@@ -53,6 +53,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'company.context' => \App\Http\Middleware\SetCompanyContext::class,
             'task.access' => \App\Http\Middleware\EnsureTaskAccess::class,
             'require.2fa' => \App\Http\Middleware\Require2FA::class,
+            'module' => \App\Http\Middleware\ModuleEnabled::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

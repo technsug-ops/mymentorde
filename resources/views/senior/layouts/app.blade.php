@@ -265,6 +265,9 @@
                     <a href="/senior/guest-pipeline"         class="nav-link {{ request()->is('senior/guest-pipeline*') ? 'active' : '' }}" style="padding-left:32px;font-size:var(--tx-xs);"><span class="nav-icon" style="font-size:11px;">🌀</span> Aday Öğrenci Pipeline</a>
                     <a href="/senior/student-pipeline"       class="nav-link {{ request()->is('senior/student-pipeline*') ? 'active' : '' }}" style="padding-left:32px;font-size:var(--tx-xs);"><span class="nav-icon" style="font-size:11px;">🗂</span> Pipeline Kanban</a>
                     <a href="/senior/appointments"           class="nav-link {{ request()->is('senior/appointments*') ? 'active' : '' }}"><span class="nav-icon">📅</span> Randevularım</a>
+                    @module('booking')
+                    <a href="/senior/booking-settings"       class="nav-link {{ request()->is('senior/booking-settings*') ? 'active' : '' }}"><span class="nav-icon">🗓️</span> Randevu Ayarları</a>
+                    @endmodule
                     <a href="/senior/contracts"              class="nav-link {{ request()->is('senior/contracts*') ? 'active' : '' }}"><span class="nav-icon">📜</span> Sözleşmeler</a>
                     <a href="/senior/batch-review"           class="nav-link {{ request()->is('senior/batch-review*') ? 'active' : '' }}"><span class="nav-icon">⚡</span> Toplu İnceleme</a>
                 </div>

@@ -192,6 +192,10 @@ class AppServiceProvider extends ServiceProvider
         // Kullanım: <script @cspNonce> veya <script nonce="{{ $cspNonce ?? '' }}">
         Blade::directive('cspNonce', fn () => '<?php echo \'nonce="\' . (app()->bound(\'csp-nonce\') ? app(\'csp-nonce\') : \'\') . \'"\'; ?>');
 
+        // Modül toggle direktifi — SaaS tier'lama için.
+        // Kullanım: @module('booking') ... @endmodule
+        Blade::if('module', fn (string $module) => \App\Support\ModuleAccess::enabled($module));
+
         View::composer('*', function ($view): void {
             $theme = PortalTheme::resolve();
             $view->with('uiTheme', $theme);
