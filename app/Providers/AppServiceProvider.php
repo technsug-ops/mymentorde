@@ -76,6 +76,9 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\DigitalAsset::observe(\App\Observers\AuditObserver::class);
         \App\Models\DigitalAssetFolder::observe(\App\Observers\AuditObserver::class);
 
+        // ── Google Calendar sync: StudentAppointment saved/deleted → push
+        \App\Models\StudentAppointment::observe(\App\Observers\StudentAppointmentObserver::class);
+
         // ── DAM route macro ────────────────────────────────────────────────
         // Tek yerden tanımlı, tüm portallar tek satırla çağırır:
         //   Route::dam('manager/digital-assets', 'manager.dam.');

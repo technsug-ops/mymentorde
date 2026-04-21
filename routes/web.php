@@ -203,6 +203,26 @@ Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleC
     ->middleware('throttle:20,1')
     ->name('auth.google.callback');
 
+// ── Google Calendar Integration (ayrı scope, login'den bağımsız) ─────────────
+Route::middleware(['auth'])->group(function (): void {
+    Route::get('/integrations/google-calendar/connect',
+        [\App\Http\Controllers\Integrations\GoogleCalendarController::class, 'connect'])
+        ->middleware('throttle:10,1')
+        ->name('integrations.google-calendar.connect');
+    Route::get('/integrations/google-calendar/callback',
+        [\App\Http\Controllers\Integrations\GoogleCalendarController::class, 'callback'])
+        ->middleware('throttle:20,1')
+        ->name('integrations.google-calendar.callback');
+    Route::post('/integrations/google-calendar/disconnect',
+        [\App\Http\Controllers\Integrations\GoogleCalendarController::class, 'disconnect'])
+        ->middleware('throttle:10,1')
+        ->name('integrations.google-calendar.disconnect');
+    Route::post('/integrations/google-calendar/toggle',
+        [\App\Http\Controllers\Integrations\GoogleCalendarController::class, 'toggle'])
+        ->middleware('throttle:20,1')
+        ->name('integrations.google-calendar.toggle');
+});
+
 Route::middleware(['company.context', 'auth'])->group(function (): void {
     Route::match(['GET', 'POST'], '/logout', [AuthController::class, 'logout']);
 });

@@ -56,9 +56,12 @@ class SeniorProfileController extends Controller
     {
         $prefs = $this->seniorPortalPreferences($request);
 
+        $googleCalConn = \App\Models\GoogleCalendarConnection::where('user_id', $request->user()->id)->first();
+
         return view('senior.settings', [
-            'portalPrefs'  => $prefs,
-            'sidebarStats' => $this->sidebarStats($request),
+            'portalPrefs'   => $prefs,
+            'sidebarStats'  => $this->sidebarStats($request),
+            'googleCalConn' => $googleCalConn,
         ]);
     }
 

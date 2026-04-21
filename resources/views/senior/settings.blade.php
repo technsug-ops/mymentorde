@@ -131,4 +131,73 @@
     </form>
 </div>
 
+{{-- ══════ Google Calendar Entegrasyonu ══════ --}}
+<div class="card" style="margin-top:20px;padding:20px;">
+    <h3 style="margin:0 0 16px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:22px;">📅</span>
+        Google Calendar Entegrasyonu
+        @if($googleCalConn)
+            <span style="background:rgba(22,163,74,.15);color:#16a34a;font-size:11px;padding:3px 10px;border-radius:10px;font-weight:700;">✓ Bağlı</span>
+        @else
+            <span style="background:rgba(148,163,184,.15);color:#64748b;font-size:11px;padding:3px 10px;border-radius:10px;font-weight:600;">Bağlı değil</span>
+        @endif
+    </h3>
+    <p style="font-size:13px;color:var(--u-muted);margin:0 0 16px;line-height:1.6;">
+        Öğrencilerinle oluşturduğun randevular otomatik olarak Google Takvim'ine eklenir, güncellenir ve iptal edildiğinde silinir. Online randevular için Google Meet linki de otomatik üretilir.
+    </p>
+
+    @if($googleCalConn)
+        <div style="background:var(--u-bg,#f8fafc);border:1px solid var(--u-line);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                <div>
+                    <div style="font-size:13px;font-weight:700;color:var(--u-text);">{{ $googleCalConn->google_email }}</div>
+                    <div style="font-size:11px;color:var(--u-muted);margin-top:2px;">
+                        Takvim: <code>{{ $googleCalConn->calendar_id }}</code>
+                        @if($googleCalConn->last_synced_at)
+                            · Son sync: {{ $googleCalConn->last_synced_at->diffForHumans() }}
+                        @endif
+                        @if($googleCalConn->last_sync_status === 'failed')
+                            · <span style="color:#dc2626;font-weight:700;">⚠ Son sync başarısız</span>
+                        @endif
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <form method="POST" action="{{ route('integrations.google-calendar.toggle') }}" style="margin:0;">
+                        @csrf
+                        <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                            <input type="checkbox" name="sync_push" value="1" {{ $googleCalConn->sync_push ? 'checked' : '' }} onchange="this.form.submit()">
+                            Otomatik sync
+                        </label>
+                    </form>
+                    <form method="POST" action="{{ route('integrations.google-calendar.disconnect') }}" style="margin:0;" onsubmit="return confirm('Google Calendar bağlantısını kaldır?');">
+                        @csrf
+                        <button type="submit" style="background:transparent;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">
+                            Bağlantıyı Kaldır
+                        </button>
+                    </form>
+                </div>
+            </div>
+            @if($googleCalConn->last_sync_error)
+                <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--u-line);font-size:11px;color:#dc2626;">
+                    Hata: {{ \Illuminate\Support\Str::limit($googleCalConn->last_sync_error, 200) }}
+                </div>
+            @endif
+        </div>
+    @else
+        <a href="{{ route('integrations.google-calendar.connect') }}"
+           style="display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border:1.5px solid #dadce0;border-radius:10px;background:#fff;color:#3c4043;font-size:13px;font-weight:600;text-decoration:none;">
+            <svg width="18" height="18" viewBox="0 0 48 48">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            Google Calendar'ı Bağla
+        </a>
+        <div style="font-size:11px;color:var(--u-muted);margin-top:8px;">
+            Bağlantı sonrası randevu oluşturma/güncelleme/iptal işlemlerin otomatik olarak takvime yansır.
+        </div>
+    @endif
+</div>
+
 @endsection
