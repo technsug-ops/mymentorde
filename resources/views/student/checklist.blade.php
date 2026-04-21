@@ -40,6 +40,25 @@
 .cl-desc { font-size:12px; color:#6b7280; margin-top:3px; line-height:1.4; }
 .cl-meta { display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:5px; }
 .cl-empty { text-align:center; padding:40px 0; color:#9ca3af; font-size:14px; }
+
+/* Kategori + tarih rozetleri — mor tema ile uyumlu ve subtle */
+.cl-item .cl-cat-badge {
+    display:inline-flex; align-items:center; gap:3px;
+    padding:2px 8px; border-radius:10px;
+    background:rgba(124,58,237,.10); color:#7c3aed;
+    font-size:var(--tx-xs); font-weight:600;
+    border:1px solid rgba(124,58,237,.18);
+}
+.cl-item .cl-date-badge {
+    display:inline-flex; align-items:center; gap:3px;
+    padding:2px 8px; border-radius:10px;
+    background:var(--u-bg,#f8fafc); color:var(--u-muted,#64748b);
+    font-size:var(--tx-xs); font-weight:500;
+    border:1px solid var(--u-line,#e5e7eb);
+}
+.cl-item .cl-date-badge.danger {
+    background:rgba(220,38,38,.08); color:#dc2626; border-color:rgba(220,38,38,.22);
+}
 </style>
 @endpush
 
@@ -118,16 +137,16 @@
                 <div class="cl-desc">{{ $item->description }}</div>
             @endif
             <div class="cl-meta">
-                <span class="badge info" style="font-size:var(--tx-xs);">{{ $catLabel }}</span>
+                <span class="cl-cat-badge">{{ $catLabel }}</span>
                 @if($item->due_date)
                     @if($isOverdue)
-                        <span class="badge danger" style="font-size:var(--tx-xs);">⏰ {{ $item->due_date->format('d.m.Y') }} — gecikti</span>
+                        <span class="cl-date-badge danger">⏰ {{ $item->due_date->format('d.m.Y') }} — gecikti</span>
                     @else
-                        <span class="badge" style="font-size:var(--tx-xs);">📅 {{ $item->due_date->format('d.m.Y') }}</span>
+                        <span class="cl-date-badge">📅 {{ $item->due_date->format('d.m.Y') }}</span>
                     @endif
                 @endif
                 @if($item->is_done && $item->done_at)
-                    <span class="badge ok" style="font-size:var(--tx-xs);">✓ {{ $item->done_at->format('d.m.Y') }}</span>
+                    <span class="cl-date-badge">✓ {{ $item->done_at->format('d.m.Y') }}</span>
                 @endif
             </div>
         </div>
