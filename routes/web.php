@@ -143,11 +143,13 @@ Route::get('/share/{token}', [\App\Http\Controllers\Shared\DigitalAssetControlle
     ->middleware('throttle:60,1')
     ->name('dam.share.public');
 
-// ── Public Booking Widget (booking modülü) ──────────────────────────────────
+// ── Public Booking Widget + Landing (booking modülü) ────────────────────────
 // Auth opsiyonel: senior settings.is_public=true ise herkes erişebilir,
 // aksi halde login student/guest gereklidir (controller kontrol eder).
 Route::middleware(['company.context', 'module:booking'])->group(function (): void {
     $bc = \App\Http\Controllers\Booking\PublicBookingController::class;
+    Route::get('/randevu', [\App\Http\Controllers\Booking\BookingLandingController::class, 'index'])
+        ->middleware('throttle:60,1')->name('booking.landing');
     Route::get('/book/{slug}',                       [$bc, 'show'])->middleware('throttle:60,1')->name('booking.public.show');
     Route::post('/book/{slug}/slots',                [$bc, 'slots'])->middleware('throttle:120,1')->name('booking.public.slots');
     Route::post('/book/{slug}/confirm',              [$bc, 'confirm'])->middleware('throttle:10,1')->name('booking.public.confirm');

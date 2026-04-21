@@ -267,6 +267,7 @@
                     <a href="/senior/appointments"           class="nav-link {{ request()->is('senior/appointments*') ? 'active' : '' }}"><span class="nav-icon">📅</span> Randevularım</a>
                     @module('booking')
                     <a href="/senior/booking-settings"       class="nav-link {{ request()->is('senior/booking-settings*') ? 'active' : '' }}"><span class="nav-icon">🗓️</span> Randevu Ayarları</a>
+                    <a href="/senior/earnings"               class="nav-link {{ request()->is('senior/earnings*') ? 'active' : '' }}"><span class="nav-icon">💰</span> Kazançlarım</a>
                     @endmodule
                     <a href="/senior/contracts"              class="nav-link {{ request()->is('senior/contracts*') ? 'active' : '' }}"><span class="nav-icon">📜</span> Sözleşmeler</a>
                     <a href="/senior/batch-review"           class="nav-link {{ request()->is('senior/batch-review*') ? 'active' : '' }}"><span class="nav-icon">⚡</span> Toplu İnceleme</a>

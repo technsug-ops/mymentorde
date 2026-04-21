@@ -163,6 +163,13 @@
                 <span class="apt-hero-stat">✅ {{ $done }} tamamlandı</span>
                 @if($cancelled > 0)<span class="apt-hero-stat">❌ {{ $cancelled }} iptal</span>@endif
             </div>
+            @module('booking')
+            <div style="margin-top:14px;">
+                <a href="{{ route('booking.landing') }}" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#1e40af;border:1px solid #e2e8f0;padding:10px 18px;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                    📅 Yeni Randevu Al
+                </a>
+            </div>
+            @endmodule
         </div>
         <div class="apt-hero-icon">📆</div>
     </div>

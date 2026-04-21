@@ -234,6 +234,12 @@
 
             <div class="nav-section">
                 <div class="nav-section-label">İletişim</div>
+                @module('booking')
+                <a href="{{ route('booking.landing') }}"
+                   class="nav-link {{ request()->is('randevu','book*') ? 'active' : '' }}">
+                    <span class="nav-icon">📅</span> Randevu Al
+                </a>
+                @endmodule
                 <a href="{{ route('guest.messages') }}"
                    class="nav-link {{ request()->routeIs('guest.messages') ? 'active' : '' }}">
                     <span class="nav-icon">💬</span> Mesajlar

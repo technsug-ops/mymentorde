@@ -152,5 +152,8 @@ Route::middleware(['company.context', 'auth', 'senior.role'])->group(function ()
         Route::delete('/senior/booking-settings/patterns/{pattern}', [$c, 'destroyPattern'])->middleware('throttle:60,1')->name('senior.booking-settings.patterns.destroy');
         Route::post('/senior/booking-settings/exceptions',           [$c, 'storeException'])->middleware('throttle:60,1')->name('senior.booking-settings.exceptions.store');
         Route::delete('/senior/booking-settings/exceptions/{exception}', [$c, 'destroyException'])->middleware('throttle:60,1')->name('senior.booking-settings.exceptions.destroy');
+
+        // Earnings dashboard
+        Route::get('/senior/earnings', [\App\Http\Controllers\Booking\SeniorEarningsController::class, 'index'])->name('senior.earnings');
     });
 });

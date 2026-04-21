@@ -302,4 +302,17 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
     // ── El Kitabı ─────────────────────────────────────────────────────────────
     Route::get('/manager/handbook', [HandbookController::class, 'manager'])->name('manager.handbook');
     Route::get('/manager/handbook/download', [HandbookController::class, 'download'])->defaults('role', 'manager')->name('manager.handbook.download');
+
+    // ── Booking modülü: Manager pricing + tax + payment + commission cockpit ──
+    Route::middleware('module:booking')->group(function (): void {
+        $b = \App\Http\Controllers\Booking\ManagerBookingPricingController::class;
+        Route::get('/manager/booking-pricing',                      [$b, 'index'])->name('manager.booking-pricing');
+        Route::post('/manager/booking-pricing/pricing',             [$b, 'updatePricing'])->middleware('throttle:20,1')->name('manager.booking-pricing.update');
+        Route::post('/manager/booking-pricing/payment',             [$b, 'updatePaymentSettings'])->middleware('throttle:20,1')->name('manager.booking-pricing.payment.update');
+        Route::post('/manager/booking-pricing/tax',                 [$b, 'storeTaxRule'])->middleware('throttle:30,1')->name('manager.booking-pricing.tax.store');
+        Route::post('/manager/booking-pricing/tax/{rule}/toggle',   [$b, 'toggleTaxRule'])->middleware('throttle:60,1')->name('manager.booking-pricing.tax.toggle');
+        Route::delete('/manager/booking-pricing/tax/{rule}',        [$b, 'destroyTaxRule'])->middleware('throttle:30,1')->name('manager.booking-pricing.tax.destroy');
+        Route::post('/manager/booking-pricing/commission',          [$b, 'storeCommissionRule'])->middleware('throttle:30,1')->name('manager.booking-pricing.commission.store');
+        Route::delete('/manager/booking-pricing/commission/{rule}', [$b, 'destroyCommissionRule'])->middleware('throttle:30,1')->name('manager.booking-pricing.commission.destroy');
+    });
 });

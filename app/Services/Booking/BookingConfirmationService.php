@@ -5,6 +5,7 @@ namespace App\Services\Booking;
 use App\Models\GuestApplication;
 use App\Models\PublicBooking;
 use App\Models\SeniorBookingSetting;
+use App\Models\SeniorEarning;
 use App\Models\StudentAppointment;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -20,7 +21,8 @@ use Illuminate\Support\Facades\Log;
 class BookingConfirmationService
 {
     public function __construct(
-        private readonly SlotGeneratorService $slotGenerator = new SlotGeneratorService()
+        private readonly SlotGeneratorService $slotGenerator = new SlotGeneratorService(),
+        private readonly PricingResolver $pricingResolver = new PricingResolver()
     ) {
     }
 
@@ -58,45 +60,86 @@ class BookingConfirmationService
         // Re-check: slot hala boş mu?
         $this->assertSlotAvailable($settings, $startsAt, $endsAt);
 
-        return DB::transaction(function () use ($input, $settings, $startsAt, $endsAt) {
+        // Sözleşmeli user mi?
+        $isContracted = $this->isContractedUser(
+            $input['student_user_id'] ?? null,
+            $input['guest_application_id'] ?? null
+        );
+
+        // Pricing hesapla (is_payment_enabled=false veya sözleşmeli → hepsi 0)
+        $pricing = $this->pricingResolver->resolve(
+            companyId: (int) $settings->company_id,
+            durationMinutes: (int) $settings->slot_duration,
+            customerCountryCode: $input['customer_country_code'] ?? null,
+            customerType: $input['customer_type'] ?? 'b2c',
+            seniorUserId: (int) $settings->senior_user_id,
+            serviceType: $input['service_type'] ?? null,
+            isContractedUser: $isContracted
+        );
+
+        return DB::transaction(function () use ($input, $settings, $startsAt, $endsAt, $pricing, $isContracted) {
+            // Default status = confirmed (ödeme yok veya ücretsiz)
+            // Phase 5'te Stripe açılırsa pending_payment path devreye girer.
+            $status = 'confirmed';
+            $paymentStatus = 'free';
+            if (!$pricing['is_free'] && $pricing['payment_enabled']) {
+                $status = 'pending_confirm';
+                $paymentStatus = 'pending_payment';
+            }
+
             // 1. public_bookings row
             $booking = PublicBooking::create([
-                'company_id'           => $settings->company_id,
-                'senior_user_id'       => $settings->senior_user_id,
-                'booked_by_user_id'    => $input['booked_by_user_id'] ?? null,
-                'student_user_id'      => $input['student_user_id'] ?? null,
-                'guest_application_id' => $input['guest_application_id'] ?? null,
-                'invitee_name'         => $input['invitee_name'],
-                'invitee_email'        => $input['invitee_email'],
-                'invitee_phone'        => $input['invitee_phone'] ?? null,
-                'starts_at'            => $startsAt->setTimezone('UTC'),
-                'ends_at'              => $endsAt->setTimezone('UTC'),
-                'status'               => 'confirmed',
-                'notes'                => $input['notes'] ?? null,
+                'company_id'            => $settings->company_id,
+                'senior_user_id'        => $settings->senior_user_id,
+                'booked_by_user_id'     => $input['booked_by_user_id'] ?? null,
+                'student_user_id'       => $input['student_user_id'] ?? null,
+                'guest_application_id'  => $input['guest_application_id'] ?? null,
+                'invitee_name'          => $input['invitee_name'],
+                'invitee_email'         => $input['invitee_email'],
+                'invitee_phone'         => $input['invitee_phone'] ?? null,
+                'customer_country_code' => $input['customer_country_code'] ?? null,
+                'customer_type'         => $input['customer_type'] ?? 'b2c',
+                'is_contracted_user'    => $isContracted,
+                'starts_at'             => $startsAt->setTimezone('UTC'),
+                'ends_at'               => $endsAt->setTimezone('UTC'),
+                'status'                => $status,
+                'notes'                 => $input['notes'] ?? null,
+                'amount_net_cents'      => $pricing['amount_net_cents'],
+                'tax_rate_pct_applied'  => $pricing['tax_rate_pct'],
+                'tax_amount_cents'      => $pricing['tax_amount_cents'],
+                'amount_gross_cents'    => $pricing['amount_gross_cents'],
+                'currency'              => $pricing['currency'],
+                'payment_status'        => $paymentStatus,
             ]);
 
-            // 2. student_appointments row (Google Calendar sync için)
-            $studentId = $this->resolveStudentIdForBooking($booking);
-            $senior    = User::query()->withoutGlobalScopes()->where('id', $settings->senior_user_id)->first();
+            // 2. student_appointments row (Google Calendar sync için) — sadece confirmed ise
+            if ($status === 'confirmed') {
+                $studentId = $this->resolveStudentIdForBooking($booking);
+                $senior    = User::query()->withoutGlobalScopes()->where('id', $settings->senior_user_id)->first();
 
-            $appointment = StudentAppointment::create([
-                'company_id'       => $settings->company_id,
-                'student_id'       => $studentId,
-                'student_email'    => $input['invitee_email'],
-                'senior_email'     => $senior?->email,
-                'title'            => $settings->display_name ?: 'Randevu',
-                'note'             => $this->formatAppointmentNote($booking),
-                'scheduled_at'     => $startsAt->setTimezone('UTC'),
-                'duration_minutes' => (int) $settings->slot_duration,
-                'channel'          => 'online',
-                'status'           => 'scheduled',
-            ]);
+                $appointment = StudentAppointment::create([
+                    'company_id'       => $settings->company_id,
+                    'student_id'       => $studentId,
+                    'student_email'    => $input['invitee_email'],
+                    'senior_email'     => $senior?->email,
+                    'title'            => $settings->display_name ?: 'Randevu',
+                    'note'             => $this->formatAppointmentNote($booking),
+                    'scheduled_at'     => $startsAt->setTimezone('UTC'),
+                    'duration_minutes' => (int) $settings->slot_duration,
+                    'channel'          => 'online',
+                    'status'           => 'scheduled',
+                ]);
 
-            // 3. Link back
-            $booking->update(['student_appointment_id' => $appointment->id]);
+                // 3. Link back
+                $booking->update(['student_appointment_id' => $appointment->id]);
 
-            // 4. Mail bildirim (fail-safe, booking'i bozmasın)
-            $this->sendConfirmationMails($booking, $settings, $senior);
+                // 4. Earnings record — free path: tüm tutarlar 0
+                $this->recordEarning($booking, $appointment, $pricing);
+
+                // 5. Mail bildirim (fail-safe)
+                $this->sendConfirmationMails($booking, $settings, $senior);
+            }
+            // pending_payment path → Stripe redirect Phase 5'te eklenecek
 
             return $booking->fresh();
         });
@@ -164,6 +207,66 @@ class BookingConfirmationService
             }
         }
         throw new \DomainException('Seçtiğiniz saat artık boş değil. Lütfen başka bir saat seçin.');
+    }
+
+    /**
+     * Sözleşmeli user mi? (ücretsiz yol kontrolü)
+     *   - role=student → true (converted & imzalı olduğundan)
+     *   - role=guest + contract_status signed/approved → true
+     *   - diğer her şey → false
+     */
+    public function isContractedUser(?int $studentUserId, ?int $guestApplicationId): bool
+    {
+        if ($studentUserId) {
+            $user = User::query()->withoutGlobalScopes()->where('id', $studentUserId)->first();
+            if ($user && $user->role === User::ROLE_STUDENT) {
+                return true;
+            }
+        }
+        if ($guestApplicationId) {
+            $guest = GuestApplication::query()
+                ->withoutGlobalScopes()
+                ->where('id', $guestApplicationId)
+                ->first(['contract_status']);
+            if ($guest && in_array($guest->contract_status, ['signed', 'approved'], true)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Her booking için kazanç kaydı yaz — is_free veya sözleşmeli user ise
+     * tutarlar 0 ama kayıt tutulur (rapor için).
+     */
+    private function recordEarning(
+        PublicBooking $booking,
+        StudentAppointment $appointment,
+        array $pricing
+    ): void {
+        try {
+            SeniorEarning::create([
+                'company_id'             => $booking->company_id,
+                'senior_user_id'         => $booking->senior_user_id,
+                'public_booking_id'      => $booking->id,
+                'student_appointment_id' => $appointment->id,
+                'amount_net_cents'       => $pricing['amount_net_cents'],
+                'tax_rate_pct_applied'   => $pricing['tax_rate_pct'],
+                'tax_amount_cents'       => $pricing['tax_amount_cents'],
+                'amount_gross_cents'     => $pricing['amount_gross_cents'],
+                'commission_pct_applied' => $pricing['commission_pct'],
+                'commission_cents'       => $pricing['commission_cents'],
+                'senior_payout_cents'    => $pricing['senior_payout_cents'],
+                'currency'               => $pricing['currency'],
+                'status'                 => 'recorded',
+                'recorded_at'            => now(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Senior earning record failed', [
+                'booking_id' => $booking->id,
+                'error'      => $e->getMessage(),
+            ]);
+        }
     }
 
     private function resolveStudentIdForBooking(PublicBooking $booking): string
