@@ -99,9 +99,36 @@ class GoogleCalendarController extends Controller
         }
 
         $conn->update([
-            'sync_push' => (bool) $request->boolean('sync_push', $conn->sync_push),
+            'sync_push' => $request->boolean('sync_push'),
+            'sync_pull' => $request->boolean('sync_pull'),
         ]);
 
         return back()->with('status', 'Senkronizasyon ayarları kaydedildi.');
+    }
+
+    /** Manuel pull — "Şimdi Senkronize Et" butonu. */
+    public function manualPull(Request $request, \App\Services\GoogleCalendarService $service)
+    {
+        $user = Auth::user();
+        $conn = GoogleCalendarConnection::where('user_id', $user->id)->first();
+        if (! $conn) {
+            return back()->with('status', 'Önce Google Calendar\'ı bağlayın.');
+        }
+
+        // Manuel pull için geçici olarak sync_pull'u true yapmadan da çalışsın
+        if (! $conn->sync_pull) {
+            $conn->update(['sync_pull' => true]);
+        }
+
+        try {
+            $stats = $service->pullForConnection($conn);
+            $msg = "Sync tamam: {$stats['processed']} event işlendi, {$stats['updated']} güncellendi, {$stats['cancelled']} iptal edildi.";
+            if ($stats['errors'] > 0) {
+                $msg .= " ⚠ {$stats['errors']} hata — log'a bakın.";
+            }
+            return back()->with('status', $msg);
+        } catch (\Throwable $e) {
+            return back()->with('status', '❌ Sync hatası: ' . $e->getMessage());
+        }
     }
 }

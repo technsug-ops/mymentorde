@@ -221,6 +221,10 @@ Route::middleware(['auth'])->group(function (): void {
         [\App\Http\Controllers\Integrations\GoogleCalendarController::class, 'toggle'])
         ->middleware('throttle:20,1')
         ->name('integrations.google-calendar.toggle');
+    Route::post('/integrations/google-calendar/sync-now',
+        [\App\Http\Controllers\Integrations\GoogleCalendarController::class, 'manualPull'])
+        ->middleware('throttle:10,1')
+        ->name('integrations.google-calendar.sync-now');
 });
 
 Route::middleware(['company.context', 'auth'])->group(function (): void {

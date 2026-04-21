@@ -232,3 +232,11 @@ Schedule::command('university:deadline-reminder')
     ->dailyAt('08:00')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/university-deadline-reminder.log'));
+
+// ─── Google Calendar 2-way Sync (Pull) ───────────────────────────────────────
+// Portal'a Google'dan değişen event'leri çeker. Push observer ile anında,
+// pull ise 15 dk'da bir — senior Google tarafında değişiklik yaparsa burada yakalanır.
+Schedule::command('calendar:pull-google')
+    ->everyFifteenMinutes()
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/calendar-pull-google.log'));

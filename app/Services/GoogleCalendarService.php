@@ -132,6 +132,150 @@ class GoogleCalendarService
         return true;
     }
 
+    /**
+     * Google'dan değişen event'leri çek, local randevulara yansıt.
+     *
+     * Güvenlik yaklaşımı: SADECE google_event_id ile eşleşen mevcut randevular güncellenir/silinir.
+     * Google'da portal'dan bağımsız oluşturulan event'ler yok sayılır (öğrenci bağlamı olmadan
+     * anlamlı randevu oluşturamayız).
+     *
+     * @return array{processed:int, updated:int, cancelled:int, errors:int}
+     */
+    public function pullForConnection(GoogleCalendarConnection $conn): array
+    {
+        $stats = ['processed' => 0, 'updated' => 0, 'cancelled' => 0, 'errors' => 0];
+
+        if (! $conn->sync_pull) {
+            return $stats;
+        }
+
+        $token = $this->accessToken($conn);
+        if (! $token) {
+            $stats['errors']++;
+            return $stats;
+        }
+
+        // updatedMin: son sync'ten bu yana değişenler. İlk sync için 30 gün geri git.
+        $updatedMin = $conn->last_synced_at?->copy()->subMinutes(5)
+            ?? now()->subDays(30);
+
+        $nextPageToken = null;
+        $maxIterations = 5; // abuse önlemi — en fazla 5 sayfa (500 event)
+
+        do {
+            $query = [
+                'updatedMin'    => $updatedMin->toRfc3339String(),
+                'showDeleted'   => 'true',
+                'singleEvents'  => 'true',
+                'maxResults'    => 100,
+                'orderBy'       => 'updated',
+            ];
+            if ($nextPageToken) {
+                $query['pageToken'] = $nextPageToken;
+            }
+
+            $res = Http::withToken($token)
+                ->get(self::BASE . "/calendars/{$conn->calendar_id}/events", $query);
+
+            if (! $res->successful()) {
+                $this->markSyncFailed($conn, 'pull', $res->body());
+                $stats['errors']++;
+                return $stats;
+            }
+
+            $body = $res->json();
+            $items = $body['items'] ?? [];
+
+            foreach ($items as $ev) {
+                $stats['processed']++;
+                $this->applyRemoteEvent($conn, $ev, $stats);
+            }
+
+            $nextPageToken = $body['nextPageToken'] ?? null;
+            $maxIterations--;
+        } while ($nextPageToken && $maxIterations > 0);
+
+        $conn->update([
+            'last_sync_status' => 'ok',
+            'last_sync_error'  => null,
+            'last_synced_at'   => now(),
+        ]);
+
+        return $stats;
+    }
+
+    /** Tek bir Google event'ini local'e yansıt (yalnızca mevcut kayıtlar). */
+    private function applyRemoteEvent(GoogleCalendarConnection $conn, array $ev, array &$stats): void
+    {
+        $googleEventId = (string) ($ev['id'] ?? '');
+        if ($googleEventId === '') return;
+
+        // Local'de bu event'i hangi randevu tutuyor? Sadece aynı senior'un randevuları.
+        $seniorEmail = \App\Models\User::where('id', $conn->user_id)->value('email');
+        $apt = StudentAppointment::where('google_event_id', $googleEventId)
+            ->where('senior_email', $seniorEmail)
+            ->first();
+
+        if (! $apt) {
+            // Bizim oluşturmadığımız / eşleşmeyen event — görmezden gel
+            return;
+        }
+
+        // Event silinmiş mi?
+        $status = (string) ($ev['status'] ?? '');
+        if ($status === 'cancelled') {
+            if ($apt->status !== 'cancelled') {
+                $apt->forceFill([
+                    'status'          => 'cancelled',
+                    'cancelled_at'    => now(),
+                    'cancel_category' => 'other',
+                    'cancel_reason'   => 'Google Takvim\'den iptal edildi.',
+                ])->saveQuietly();
+                $stats['cancelled']++;
+            }
+            return;
+        }
+
+        // Event zamanı güncellenmiş mi?
+        $startStr = $ev['start']['dateTime'] ?? ($ev['start']['date'] ?? null);
+        $endStr   = $ev['end']['dateTime']   ?? ($ev['end']['date']   ?? null);
+        if (! $startStr) return;
+
+        $start = \Carbon\Carbon::parse($startStr);
+        $durationMin = $endStr ? $start->diffInMinutes(\Carbon\Carbon::parse($endStr)) : (int) ($apt->duration_minutes ?? 45);
+
+        // Son sync tarihinden sonra Google tarafında değişim var mı?
+        $gUpdated = isset($ev['updated']) ? \Carbon\Carbon::parse($ev['updated']) : null;
+        $localUpdated = $apt->updated_at;
+
+        // Eğer local daha yeni ise Google'ın verisi eskimiş — skip (push ile zaten güncellendi)
+        if ($gUpdated && $localUpdated && $localUpdated->gt($gUpdated)) {
+            return;
+        }
+
+        $changed = false;
+        $newTitle = (string) ($ev['summary'] ?? $apt->title);
+
+        if (! $apt->scheduled_at || ! $apt->scheduled_at->eq($start)) {
+            $apt->scheduled_at = $start;
+            $changed = true;
+        }
+        if ((int) $apt->duration_minutes !== (int) $durationMin && $durationMin > 0) {
+            $apt->duration_minutes = (int) $durationMin;
+            $changed = true;
+        }
+        if ($apt->title !== $newTitle && $newTitle !== '') {
+            $apt->title = $newTitle;
+            $changed = true;
+        }
+
+        if ($changed) {
+            $apt->google_synced_at = now();
+            $apt->saveQuietly(); // observer'ı tetikleme (sonsuz döngüye girmesin)
+            $stats['updated']++;
+        }
+    }
+
     /** Senior email'ine karşılık gelen aktif bağlantı (yoksa null). */
     private function connectionForSenior(?string $email): ?GoogleCalendarConnection
     {

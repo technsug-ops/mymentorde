@@ -161,13 +161,12 @@
                         @endif
                     </div>
                 </div>
-                <div style="display:flex;gap:8px;">
-                    <form method="POST" action="{{ route('integrations.google-calendar.toggle') }}" style="margin:0;">
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <form method="POST" action="{{ route('integrations.google-calendar.sync-now') }}" style="margin:0;">
                         @csrf
-                        <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
-                            <input type="checkbox" name="sync_push" value="1" {{ $googleCalConn->sync_push ? 'checked' : '' }} onchange="this.form.submit()">
-                            Otomatik sync
-                        </label>
+                        <button type="submit" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">
+                            🔄 Şimdi Senkronize Et
+                        </button>
                     </form>
                     <form method="POST" action="{{ route('integrations.google-calendar.disconnect') }}" style="margin:0;" onsubmit="return confirm('Google Calendar bağlantısını kaldır?');">
                         @csrf
@@ -177,6 +176,19 @@
                     </form>
                 </div>
             </div>
+
+            {{-- Sync yönü toggles --}}
+            <form method="POST" action="{{ route('integrations.google-calendar.toggle') }}" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--u-line);display:flex;gap:18px;flex-wrap:wrap;">
+                @csrf
+                <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                    <input type="checkbox" name="sync_push" value="1" {{ $googleCalConn->sync_push ? 'checked' : '' }} onchange="this.form.submit()">
+                    <span><strong>Push</strong> (portal → Google) — yeni randevular otomatik Google Takvim'e gider</span>
+                </label>
+                <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                    <input type="checkbox" name="sync_pull" value="1" {{ $googleCalConn->sync_pull ? 'checked' : '' }} onchange="this.form.submit()">
+                    <span><strong>Pull</strong> (Google → portal) — Google'da yaptığın değişiklikler 15 dk'da bir çekilir</span>
+                </label>
+            </form>
             @if($googleCalConn->last_sync_error)
                 <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--u-line);font-size:11px;color:#dc2626;">
                     Hata: {{ \Illuminate\Support\Str::limit($googleCalConn->last_sync_error, 200) }}
