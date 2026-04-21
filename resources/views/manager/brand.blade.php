@@ -101,10 +101,10 @@
                     <input type="url"
                            name="landing_hero_video_url"
                            value="{{ old('landing_hero_video_url', $landingVideoUrl ?? '') }}"
-                           placeholder="https://www.youtube.com/embed/XXXXX veya Vimeo embed URL"
+                           placeholder="https://www.youtube.com/watch?v=XXXX veya youtu.be/XXXX veya vimeo.com/XXXXX"
                            style="width:100%;padding:9px 12px;border:1.5px solid var(--u-line);border-radius:8px;font-size:13px;font-family:monospace;">
                     <div style="font-size:11px;color:var(--muted);margin-top:4px;">
-                        ⚠️ Watch URL yerine <strong>embed URL</strong> kullan: YouTube'da videoyu aç → Paylaş → Göm → iframe src'i kopyala. Boş bırakılırsa video yerine karşılama metni gösterilir.
+                        ✅ <strong>Her format desteklenir:</strong> YouTube watch URL, youtu.be kısa link veya Vimeo URL. Sistem otomatik embed formatına çevirir. Boş bırakılırsa video yerine karşılama metni gösterilir.
                     </div>
                 </div>
 

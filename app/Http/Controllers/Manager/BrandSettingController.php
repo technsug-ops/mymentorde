@@ -61,7 +61,7 @@ class BrandSettingController extends Controller
             'brand_name'                 => $data['brand_name'],
             'brand_logo_url'             => $data['brand_logo_url'] ?? '',
             'brand_logo_bg'              => $data['brand_logo_bg'] ?? 'light',
-            'landing_hero_video_url'     => $data['landing_hero_video_url'] ?? '',
+            'landing_hero_video_url'     => $this->normalizeVideoUrl($data['landing_hero_video_url'] ?? ''),
             'landing_hero_welcome_title' => $data['landing_hero_welcome_title'] ?? '',
             'landing_hero_welcome_body'  => $data['landing_hero_welcome_body'] ?? '',
         ];
@@ -78,5 +78,43 @@ class BrandSettingController extends Controller
         Cache::forget("landing_cms_{$cid}");
 
         return back()->with('status', 'Marka ve landing ayarları kaydedildi.');
+    }
+
+    /**
+     * YouTube/Vimeo watch URL'lerini iframe-uyumlu embed URL'lere çevir.
+     * Kullanıcı "watch?v=" link'i yapıştırsa da otomatik embed'e dönüştürülür.
+     *
+     * Desteklenen formatlar:
+     *   - youtube.com/watch?v=XXX       → youtube.com/embed/XXX
+     *   - youtu.be/XXX                  → youtube.com/embed/XXX
+     *   - youtube.com/embed/XXX         → aynen korunur
+     *   - vimeo.com/12345               → player.vimeo.com/video/12345
+     *   - player.vimeo.com/video/12345  → aynen korunur
+     *   - Tanınmayan format             → aynen korunur (user'a kalmış)
+     */
+    private function normalizeVideoUrl(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '') {
+            return '';
+        }
+
+        // YouTube watch URL: https://www.youtube.com/watch?v=VIDEO_ID
+        if (preg_match('~^https?://(?:www\.)?youtube\.com/watch\?.*v=([a-zA-Z0-9_-]{6,})~i', $url, $m)) {
+            return 'https://www.youtube.com/embed/' . $m[1];
+        }
+
+        // YouTube short URL: https://youtu.be/VIDEO_ID
+        if (preg_match('~^https?://youtu\.be/([a-zA-Z0-9_-]{6,})~i', $url, $m)) {
+            return 'https://www.youtube.com/embed/' . $m[1];
+        }
+
+        // Vimeo watch URL: https://vimeo.com/12345
+        if (preg_match('~^https?://(?:www\.)?vimeo\.com/(\d+)~i', $url, $m)) {
+            return 'https://player.vimeo.com/video/' . $m[1];
+        }
+
+        // Zaten embed formatında ise dokunma
+        return $url;
     }
 }

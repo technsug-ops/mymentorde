@@ -77,10 +77,27 @@ class BookingLandingController extends Controller
                 ->all();
 
             return [
-                'video_url'     => (string) ($rows['landing_hero_video_url'] ?? ''),
+                'video_url'     => $this->normalizeVideoUrl((string) ($rows['landing_hero_video_url'] ?? '')),
                 'welcome_title' => (string) ($rows['landing_hero_welcome_title'] ?? 'Hoş geldin! 👋'),
                 'welcome_body'  => (string) ($rows['landing_hero_welcome_body'] ?? 'Almanya\'ya üniversite başvurusu yapmayı düşünüyorsan doğru yerdesin. Uzman danışmanlarımızla birebir görüşerek süreç hakkında tüm sorularına yanıt bulabilirsin. Randevu almak tamamen ücretsiz.'),
             ];
         });
+    }
+
+    /** Watch URL'lerini iframe-uyumlu embed formatına çevir (render-time safety net). */
+    private function normalizeVideoUrl(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '') return '';
+        if (preg_match('~^https?://(?:www\.)?youtube\.com/watch\?.*v=([a-zA-Z0-9_-]{6,})~i', $url, $m)) {
+            return 'https://www.youtube.com/embed/' . $m[1];
+        }
+        if (preg_match('~^https?://youtu\.be/([a-zA-Z0-9_-]{6,})~i', $url, $m)) {
+            return 'https://www.youtube.com/embed/' . $m[1];
+        }
+        if (preg_match('~^https?://(?:www\.)?vimeo\.com/(\d+)~i', $url, $m)) {
+            return 'https://player.vimeo.com/video/' . $m[1];
+        }
+        return $url;
     }
 }
