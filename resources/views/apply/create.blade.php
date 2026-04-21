@@ -6,16 +6,19 @@
     <title>{{ config('brand.name', 'MentorDE') }} Başvuru</title>
     <style>
         :root {
-            --bg:      #eef3fb;
+            /* MentorDE kurumsal palet (mor aile) */
+            --bg:      #f7f3ff;
             --panel:   #ffffff;
-            --line:    #d8e2f0;
-            --line-s:  #c6d5ea;
-            --ink:     #11243d;
-            --muted:   #5f7392;
-            --primary: #1f66d1;
-            --primary2:#1149a8;
-            --navy:    #132f59;
-            --shadow:  0 18px 48px rgba(15,30,60,.13);
+            --line:    #e4d9f2;
+            --line-s:  #d3c1ea;
+            --ink:     #12233a;
+            --muted:   #5e7187;
+            --primary: #5b2e91;
+            --primary2:#4a2377;
+            --primary-deep:#3d1c67;
+            --primary-soft:#f1e8fb;
+            --accent:  #e8b931;
+            --shadow:  0 18px 48px rgba(91,46,145,.14);
             --danger-bg:#fff0f0; --danger-line:#efb0b0; --danger-text:#a32323;
         }
         * { box-sizing: border-box; }
@@ -25,9 +28,9 @@
             font-family: "Segoe UI", Tahoma, sans-serif;
             color: var(--ink);
             background:
-                radial-gradient(circle at 8% 12%, #dce9ff 0, transparent 36%),
-                radial-gradient(circle at 92% 18%, #e6f2ff 0, transparent 32%),
-                linear-gradient(160deg, #ecf2fb 0%, #f7faff 100%);
+                radial-gradient(circle at 8% 12%, #ebe0fa 0, transparent 36%),
+                radial-gradient(circle at 92% 18%, #fff3d6 0, transparent 32%),
+                linear-gradient(160deg, #f7f3ff 0%, #f9fafd 42%, #fff8e8 100%);
             padding: 24px;
             display: grid;
             place-items: center;
@@ -46,12 +49,12 @@
             border-radius: 18px;
             box-shadow: var(--shadow);
         }
-        /* ── SOL: MARKA PANELI ───────────────────────────── */
+        /* ── SOL: MARKA PANELI (MentorDE mor gradient) ───── */
         .brand-panel {
             padding: 32px 28px;
             background:
-                linear-gradient(180deg, rgba(19,47,89,.98), rgba(14,32,64,.97)),
-                #0e2040;
+                linear-gradient(180deg, rgba(91,46,145,.97), rgba(61,28,103,.98)),
+                var(--primary-deep);
             color: #fff;
             border-radius: 18px;
             position: relative;
@@ -77,15 +80,15 @@
             font-weight: 800;
             letter-spacing: -.5px;
         }
-        .brand-logo-text span { color: #f59e0b; }
+        .brand-logo-text span { color: rgba(255,255,255,.82); font-style: italic; }
 
         .brand-badge {
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            border: 1px solid rgba(255,255,255,.18);
-            background: rgba(255,255,255,.07);
-            color: #cde0ff;
+            border: 1px solid rgba(255,255,255,.22);
+            background: rgba(255,255,255,.09);
+            color: #efe0ff;
             border-radius: 999px;
             padding: 5px 12px;
             font-size: 12px;
@@ -103,7 +106,7 @@
         }
         .brand-panel p {
             margin: 0 0 24px;
-            color: #d2e4fa;
+            color: #e4d4f8;
             line-height: 1.5;
             font-size: 14px;
             position: relative; z-index: 1;
@@ -129,17 +132,17 @@
             width: 26px;
             height: 26px;
             border-radius: 999px;
-            background: rgba(255,255,255,.12);
-            border: 1px solid rgba(255,255,255,.18);
+            background: var(--accent);
+            border: 1px solid rgba(232,185,49,.6);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 12px;
             font-weight: 700;
-            color: #c8dbfb;
+            color: var(--primary-deep);
         }
-        .step-txt .t { font-size: 13px; font-weight: 600; color: #e8f2ff; margin-bottom: 2px; }
-        .step-txt .s { font-size: 12px; color: #9db8da; }
+        .step-txt .t { font-size: 13px; font-weight: 600; color: #f3e8ff; margin-bottom: 2px; }
+        .step-txt .s { font-size: 12px; color: #c8a9e8; }
 
         /* ── SAĞ: FORM PANELI ───────────────────────────── */
         .form-panel {
@@ -199,9 +202,9 @@
         }
         input:focus, select:focus {
             outline: none;
-            border-color: #7faaf2;
+            border-color: var(--primary);
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(31,102,209,.10);
+            box-shadow: 0 0 0 3px rgba(91,46,145,.14);
         }
         .phone-row { display: flex; gap: 8px; }
         .phone-row select { flex: 0 0 148px; }
@@ -242,7 +245,7 @@
             color: #fff;
             cursor: pointer;
             transition: filter .15s, box-shadow .15s, transform .05s;
-            box-shadow: 0 8px 20px rgba(31,102,209,.22);
+            box-shadow: 0 8px 20px rgba(91,46,145,.24);
             font-family: inherit;
         }
         .submit-btn:hover  { filter: brightness(1.04); }
@@ -320,7 +323,7 @@
 </head>
 <body>
 @if(!empty($partner))
-<div style="position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg, #1e40af, #3b82f6);color:#fff;padding:10px 20px;text-align:center;font-size:13px;font-weight:600;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15);">
+<div style="position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg, var(--primary-deep), var(--primary));color:#fff;padding:10px 20px;text-align:center;font-size:13px;font-weight:600;z-index:100;box-shadow:0 2px 8px rgba(91,46,145,.25);">
     🤝 <strong>{{ $partner->name }}</strong> ile işbirliği başvurusu
     <span style="opacity:.85;margin-left:10px;font-weight:400;">· Bayi Kodu: {{ $partner->code }}</span>
 </div>
