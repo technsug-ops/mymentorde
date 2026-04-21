@@ -5,6 +5,21 @@
 
 @push('head')
 <style>
+/* ══════ Hero (Option B) ══════ */
+.visa-hero { color:#fff; border-radius:14px; margin-bottom:16px; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,.1); position:relative;
+    background:#7f1d1d url('https://images.unsplash.com/photo-1569974498991-d3c12a504f95?w=1400&q=80') center/cover; }
+.visa-hero::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(127,29,29,.93) 0%, rgba(220,38,38,.82) 100%); }
+.visa-hero-body { position:relative; display:flex; align-items:center; gap:20px; padding:22px 26px; }
+.visa-hero-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:7px; }
+.visa-hero-label { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; opacity:.85; }
+.visa-hero-marker { display:inline-block; width:5px; height:14px; background:rgba(255,255,255,.75); border-radius:3px; }
+.visa-hero-title { font-size:24px; font-weight:800; line-height:1.1; margin:0; letter-spacing:-.3px; }
+.visa-hero-sub { font-size:12.5px; opacity:.88; line-height:1.5; max-width:560px; }
+.visa-hero-stats { display:flex; gap:7px; flex-wrap:wrap; margin-top:8px; padding-top:12px; border-top:1px solid rgba(255,255,255,.2); }
+.visa-hero-stat { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:18px; background:rgba(255,255,255,.18); font-size:11.5px; font-weight:600; line-height:1; border:1px solid rgba(255,255,255,.12); }
+.visa-hero-icon { font-size:50px; line-height:1; flex-shrink:0; opacity:.88; filter:drop-shadow(0 4px 12px rgba(0,0,0,.25)); }
+@media (max-width:640px){ .visa-hero-body { gap:14px; padding:18px; align-items:flex-start; } .visa-hero-title { font-size:20px; } .visa-hero-sub { font-size:12px; } .visa-hero-icon { font-size:36px; } }
+
 /* ── visa-* scoped ── */
 .visa-status-card {
     background: var(--u-card); border: 1px solid var(--u-line);
@@ -95,6 +110,38 @@
 @endpush
 
 @section('content')
+
+@php
+    $visaStatusLabel = [
+        'not_started' => 'Başlanmadı',
+        'preparing'   => 'Hazırlıkta',
+        'submitted'   => 'Gönderildi',
+        'in_review'   => 'İncelemede',
+        'approved'    => 'Onaylandı',
+        'rejected'    => 'Reddedildi',
+        'expired'     => 'Süresi Doldu',
+    ];
+    $visaStatusNow = $visaStatusLabel[$visa?->status ?? 'not_started'] ?? 'Belirsiz';
+    $visaApptDate  = $visa?->appointment_date;
+    $visaDaysLeft  = $visaApptDate ? (int) now()->diffInDays($visaApptDate, false) : null;
+@endphp
+
+{{-- ══════ Hero ══════ --}}
+<div class="visa-hero">
+    <div class="visa-hero-body">
+        <div class="visa-hero-main">
+            <div class="visa-hero-label"><span class="visa-hero-marker"></span>Vize Takibi</div>
+            <h1 class="visa-hero-title">Vize Başvurusu</h1>
+            <div class="visa-hero-sub">Konsolosluk süreci, randevu tarihi ve gerekli belgeler. Danışmanın her aşamada yanında.</div>
+            <div class="visa-hero-stats">
+                <span class="visa-hero-stat">🛂 {{ $visaStatusNow }}</span>
+                @if($visaApptDate)<span class="visa-hero-stat">📅 Randevu: {{ $visaApptDate->format('d.m.Y') }}</span>@endif
+                @if($visaDaysLeft !== null && $visaDaysLeft >= 0)<span class="visa-hero-stat">⏳ {{ $visaDaysLeft }} gün kaldı</span>@endif
+            </div>
+        </div>
+        <div class="visa-hero-icon">🛂</div>
+    </div>
+</div>
 
 @php
 $steps = [

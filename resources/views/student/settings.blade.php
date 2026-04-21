@@ -4,15 +4,22 @@
 
 @push('head')
 <style>
+/* ══════ Hero (Option B) ══════ */
+.set-hero { color:#fff; border-radius:14px; margin-bottom:16px; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,.1); position:relative;
+    background:#1e293b url('https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=1400&q=80') center/cover; }
+.set-hero::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(30,41,59,.95) 0%, rgba(71,85,105,.88) 100%); }
+.set-hero-body { position:relative; display:flex; align-items:center; gap:20px; padding:22px 26px; }
+.set-hero-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:7px; }
+.set-hero-label { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; opacity:.85; }
+.set-hero-marker { display:inline-block; width:5px; height:14px; background:rgba(255,255,255,.75); border-radius:3px; }
+.set-hero-title { font-size:24px; font-weight:800; line-height:1.1; margin:0; letter-spacing:-.3px; }
+.set-hero-sub { font-size:12.5px; opacity:.88; line-height:1.5; max-width:560px; }
+.set-hero-stats { display:flex; gap:7px; flex-wrap:wrap; margin-top:8px; padding-top:12px; border-top:1px solid rgba(255,255,255,.2); }
+.set-hero-stat { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:18px; background:rgba(255,255,255,.18); font-size:11.5px; font-weight:600; line-height:1; border:1px solid rgba(255,255,255,.12); }
+.set-hero-icon { font-size:50px; line-height:1; flex-shrink:0; opacity:.88; filter:drop-shadow(0 4px 12px rgba(0,0,0,.25)); }
+@media (max-width:640px){ .set-hero-body { gap:14px; padding:18px; align-items:flex-start; } .set-hero-title { font-size:20px; } .set-hero-sub { font-size:12px; } .set-hero-icon { font-size:36px; } }
+
 /* ── set-* Settings ── */
-.set-header {
-    display: flex; align-items: center; gap: 14px;
-    background: linear-gradient(135deg, #7c3aed, #6d28d9);
-    border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; color: #fff;
-}
-.set-header-icon  { font-size: 24px; }
-.set-header-title { font-size: 16px; font-weight: 800; }
-.set-header-sub   { font-size: 12px; opacity: .75; }
 
 .set-card {
     background: var(--u-card); border: 1px solid var(--u-line);
@@ -136,12 +143,20 @@
     $notifyInapp    = (bool) old('notify_inapp',    $g?->notify_inapp    ?? true);
 @endphp
 
-{{-- Header --}}
-<div class="set-header">
-    <div class="set-header-icon">⚙️</div>
-    <div>
-        <div class="set-header-title">Ayarlar</div>
-        <div class="set-header-sub">Dil, bildirim tercihleri ve hesap güvenliği</div>
+{{-- ══════ Hero ══════ --}}
+<div class="set-hero">
+    <div class="set-hero-body">
+        <div class="set-hero-main">
+            <div class="set-hero-label"><span class="set-hero-marker"></span>Kişiselleştirme</div>
+            <h1 class="set-hero-title">Ayarlar</h1>
+            <div class="set-hero-sub">Dil, saat dilimi, bildirim tercihleri ve hesap güvenliği — hesabını istediğin gibi yapılandır.</div>
+            <div class="set-hero-stats">
+                <span class="set-hero-stat">🌐 {{ strtoupper($locale) }}</span>
+                <span class="set-hero-stat">🕐 {{ $timezone }}</span>
+                <span class="set-hero-stat">{{ $notifEnabled ? '🔔 Bildirimler açık' : '🔕 Bildirimler kapalı' }}</span>
+            </div>
+        </div>
+        <div class="set-hero-icon">⚙️</div>
     </div>
 </div>
 

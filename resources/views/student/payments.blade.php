@@ -4,15 +4,22 @@
 
 @push('head')
 <style>
+/* ══════ Hero (Option B) ══════ */
+.pay-hero { color:#fff; border-radius:14px; margin-bottom:16px; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,.1); position:relative;
+    background:#064e3b url('https://images.unsplash.com/photo-1579621970590-9d624316904b?w=1400&q=80') center/cover; }
+.pay-hero::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(6,78,59,.93) 0%, rgba(5,150,105,.82) 100%); }
+.pay-hero-body { position:relative; display:flex; align-items:center; gap:20px; padding:22px 26px; }
+.pay-hero-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:7px; }
+.pay-hero-label { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; opacity:.85; }
+.pay-hero-marker { display:inline-block; width:5px; height:14px; background:rgba(255,255,255,.75); border-radius:3px; }
+.pay-hero-title { font-size:24px; font-weight:800; line-height:1.1; margin:0; letter-spacing:-.3px; }
+.pay-hero-sub { font-size:12.5px; opacity:.88; line-height:1.5; max-width:560px; }
+.pay-hero-stats { display:flex; gap:7px; flex-wrap:wrap; margin-top:8px; padding-top:12px; border-top:1px solid rgba(255,255,255,.2); }
+.pay-hero-stat { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:18px; background:rgba(255,255,255,.18); font-size:11.5px; font-weight:600; line-height:1; border:1px solid rgba(255,255,255,.12); }
+.pay-hero-icon { font-size:50px; line-height:1; flex-shrink:0; opacity:.88; filter:drop-shadow(0 4px 12px rgba(0,0,0,.25)); }
+@media (max-width:640px){ .pay-hero-body { gap:14px; padding:18px; align-items:flex-start; } .pay-hero-title { font-size:20px; } .pay-hero-sub { font-size:12px; } .pay-hero-icon { font-size:36px; } }
+
 /* ── pay-* Payments ── */
-.pay-header {
-    display: flex; align-items: center; gap: 14px;
-    background: linear-gradient(135deg, #7c3aed, #6d28d9);
-    border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; color: #fff;
-}
-.pay-header-icon  { font-size: 24px; }
-.pay-header-title { font-size: 16px; font-weight: 800; }
-.pay-header-sub   { font-size: 12px; opacity: .75; }
 
 .pay-rate-chip {
     display: inline-flex; align-items: center; gap: 8px;
@@ -115,12 +122,21 @@
     $fmtEur = fn($v) => '€ ' . number_format((float)$v, 2, ',', '.');
 @endphp
 
-{{-- Header --}}
-<div class="pay-header">
-    <div class="pay-header-icon">💶</div>
-    <div>
-        <div class="pay-header-title">Ödeme Durumum</div>
-        <div class="pay-header-sub">Paket ücreti, ödeme takvimi ve taksit bilgileri</div>
+{{-- ══════ Hero ══════ --}}
+<div class="pay-hero">
+    <div class="pay-hero-body">
+        <div class="pay-hero-main">
+            <div class="pay-hero-label"><span class="pay-hero-marker"></span>Finansal Özet</div>
+            <h1 class="pay-hero-title">Ödeme Durumum</h1>
+            <div class="pay-hero-sub">Paket ücreti, ödeme takvimi ve taksit durumunu tek bakışta gör. Taksitleri Stripe üzerinden güvenle öde.</div>
+            <div class="pay-hero-stats">
+                <span class="pay-hero-stat">💰 {{ $fmtEur($total) }} toplam</span>
+                <span class="pay-hero-stat">✅ {{ $fmtEur($earned) }} ödenmiş</span>
+                @if($remain > 0)<span class="pay-hero-stat">⏳ {{ $fmtEur($remain) }} kalan</span>@endif
+                <span class="pay-hero-stat">📊 %{{ $paidPct }}</span>
+            </div>
+        </div>
+        <div class="pay-hero-icon">💶</div>
     </div>
 </div>
 

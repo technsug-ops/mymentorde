@@ -5,6 +5,21 @@
 
 @push('head')
 <style>
+/* ══════ Hero (Option B) ══════ */
+.hsg-hero { color:#fff; border-radius:14px; margin-bottom:16px; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,.1); position:relative;
+    background:#7c2d12 url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1400&q=80') center/cover; }
+.hsg-hero::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(124,45,18,.93) 0%, rgba(234,88,12,.82) 100%); }
+.hsg-hero-body { position:relative; display:flex; align-items:center; gap:20px; padding:22px 26px; }
+.hsg-hero-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:7px; }
+.hsg-hero-label { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; opacity:.85; }
+.hsg-hero-marker { display:inline-block; width:5px; height:14px; background:rgba(255,255,255,.75); border-radius:3px; }
+.hsg-hero-title { font-size:24px; font-weight:800; line-height:1.1; margin:0; letter-spacing:-.3px; }
+.hsg-hero-sub { font-size:12.5px; opacity:.88; line-height:1.5; max-width:560px; }
+.hsg-hero-stats { display:flex; gap:7px; flex-wrap:wrap; margin-top:8px; padding-top:12px; border-top:1px solid rgba(255,255,255,.2); }
+.hsg-hero-stat { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:18px; background:rgba(255,255,255,.18); font-size:11.5px; font-weight:600; line-height:1; border:1px solid rgba(255,255,255,.12); }
+.hsg-hero-icon { font-size:50px; line-height:1; flex-shrink:0; opacity:.88; filter:drop-shadow(0 4px 12px rgba(0,0,0,.25)); }
+@media (max-width:640px){ .hsg-hero-body { gap:14px; padding:18px; align-items:flex-start; } .hsg-hero-title { font-size:20px; } .hsg-hero-sub { font-size:12px; } .hsg-hero-icon { font-size:36px; } }
+
 /* ── hsg-* scoped ── */
 .hsg-status-card {
     background: var(--u-card); border: 1px solid var(--u-line);
@@ -88,6 +103,30 @@
 @endpush
 
 @section('content')
+
+{{-- ══════ Hero ══════ --}}
+@php
+    $hsgStatusLabel = $accommodation
+        ? ($accommodation->booking_status === 'confirmed' ? 'Onaylandı' : ($accommodation->booking_status === 'searching' ? 'Aranıyor' : ucfirst($accommodation->booking_status ?? 'Planlanıyor')))
+        : 'Henüz yok';
+    $hsgCityLabel = $accommodation && $accommodation->city ? $accommodation->city : '—';
+    $hsgTypeLabel = $accommodation && $accommodation->type ? ($typeLabels[$accommodation->type] ?? $accommodation->type) : 'Belirlenmemiş';
+@endphp
+<div class="hsg-hero">
+    <div class="hsg-hero-body">
+        <div class="hsg-hero-main">
+            <div class="hsg-hero-label"><span class="hsg-hero-marker"></span>Barınma Süreci</div>
+            <h1 class="hsg-hero-title">Konut & Barınma</h1>
+            <div class="hsg-hero-sub">Almanya'da yaşayacağın ev için tüm detaylar: kontrat, aylık kira, taşınma tarihi ve barınma seçenekleri.</div>
+            <div class="hsg-hero-stats">
+                <span class="hsg-hero-stat">🏠 {{ $hsgStatusLabel }}</span>
+                <span class="hsg-hero-stat">📍 {{ $hsgCityLabel }}</span>
+                <span class="hsg-hero-stat">🔑 {{ $hsgTypeLabel }}</span>
+            </div>
+        </div>
+        <div class="hsg-hero-icon">🏠</div>
+    </div>
+</div>
 
 @if($accommodation)
 

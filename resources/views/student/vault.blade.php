@@ -5,26 +5,22 @@
 
 @push('head')
 <style>
-/* ── vlt-* Vault scoped ── */
+/* ══════ Hero (Option B) ══════ */
+.vlt-hero { color:#fff; border-radius:14px; margin-bottom:16px; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,.1); position:relative;
+    background:#292524 url('https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=1400&q=80') center/cover; }
+.vlt-hero::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(41,37,36,.95) 0%, rgba(120,53,15,.82) 100%); }
+.vlt-hero-body { position:relative; display:flex; align-items:center; gap:20px; padding:22px 26px; }
+.vlt-hero-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:7px; }
+.vlt-hero-label { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; opacity:.85; }
+.vlt-hero-marker { display:inline-block; width:5px; height:14px; background:rgba(255,255,255,.75); border-radius:3px; }
+.vlt-hero-title { font-size:24px; font-weight:800; line-height:1.1; margin:0; letter-spacing:-.3px; }
+.vlt-hero-sub { font-size:12.5px; opacity:.88; line-height:1.5; max-width:560px; }
+.vlt-hero-stats { display:flex; gap:7px; flex-wrap:wrap; margin-top:8px; padding-top:12px; border-top:1px solid rgba(255,255,255,.2); }
+.vlt-hero-stat { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:18px; background:rgba(255,255,255,.18); font-size:11.5px; font-weight:600; line-height:1; border:1px solid rgba(255,255,255,.12); }
+.vlt-hero-icon { font-size:50px; line-height:1; flex-shrink:0; opacity:.88; filter:drop-shadow(0 4px 12px rgba(0,0,0,.25)); }
+@media (max-width:640px){ .vlt-hero-body { gap:14px; padding:18px; align-items:flex-start; } .vlt-hero-title { font-size:20px; } .vlt-hero-sub { font-size:12px; } .vlt-hero-icon { font-size:36px; } }
 
-/* Header */
-.vlt-header {
-    display: flex; align-items: center; gap: 16px;
-    background: linear-gradient(135deg, #7c3aed, #6d28d9);
-    border-radius: 14px; padding: 18px 22px; margin-bottom: 20px; color: #fff;
-}
-.vlt-header-icon {
-    width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
-    background: rgba(255,255,255,.15); display: flex; align-items: center;
-    justify-content: center; font-size: 24px;
-}
-.vlt-header-title { font-size: 18px; font-weight: 800; margin-bottom: 3px; }
-.vlt-header-sub   { font-size: 12px; opacity: .75; }
-.vlt-count-pill {
-    margin-left: auto; flex-shrink: 0;
-    background: rgba(255,255,255,.2); border-radius: 999px;
-    padding: 5px 14px; font-size: 13px; font-weight: 700;
-}
+/* ── vlt-* Vault scoped ── */
 
 /* Cards grid */
 .vlt-grid {
@@ -142,16 +138,20 @@
     };
 @endphp
 
-{{-- Header --}}
-<div class="vlt-header">
-    <div class="vlt-header-icon">🔐</div>
-    <div>
-        <div class="vlt-header-title">Hesap Kasam</div>
-        <div class="vlt-header-sub">Danışmanınız tarafından paylaşılan portal hesap bilgileri</div>
+{{-- ══════ Hero ══════ --}}
+<div class="vlt-hero">
+    <div class="vlt-hero-body">
+        <div class="vlt-hero-main">
+            <div class="vlt-hero-label"><span class="vlt-hero-marker"></span>Güvenli Depolama</div>
+            <h1 class="vlt-hero-title">Hesap Kasam</h1>
+            <div class="vlt-hero-sub">Danışmanının senin için oluşturduğu portal hesap bilgileri (Uni-Assist, Sperrkonto, konsolosluk randevusu, yurt başvurusu...) — şifreler şifreli saklanır, yalnızca sen görürsün.</div>
+            <div class="vlt-hero-stats">
+                <span class="vlt-hero-stat">🔐 {{ $vaultList->count() }} hesap</span>
+                <span class="vlt-hero-stat">🛡 AES-256 şifreli</span>
+            </div>
+        </div>
+        <div class="vlt-hero-icon">🔐</div>
     </div>
-    @if($vaultList->isNotEmpty())
-    <div class="vlt-count-pill">{{ $vaultList->count() }} hesap</div>
-    @endif
 </div>
 
 {{-- Vault cards --}}

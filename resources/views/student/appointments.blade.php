@@ -5,6 +5,21 @@
 
 @push('head')
 <style>
+/* ══════ Hero (Option B) ══════ */
+.apt-hero { color:#fff; border-radius:14px; margin-bottom:16px; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,.1); position:relative;
+    background:#0c4a6e url('https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=1400&q=80') center/cover; }
+.apt-hero::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(12,74,110,.93) 0%, rgba(14,165,233,.82) 100%); }
+.apt-hero-body { position:relative; display:flex; align-items:center; gap:20px; padding:22px 26px; }
+.apt-hero-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:7px; }
+.apt-hero-label { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; opacity:.85; }
+.apt-hero-marker { display:inline-block; width:5px; height:14px; background:rgba(255,255,255,.75); border-radius:3px; }
+.apt-hero-title { font-size:24px; font-weight:800; line-height:1.1; margin:0; letter-spacing:-.3px; }
+.apt-hero-sub { font-size:12.5px; opacity:.88; line-height:1.5; max-width:560px; }
+.apt-hero-stats { display:flex; gap:7px; flex-wrap:wrap; margin-top:8px; padding-top:12px; border-top:1px solid rgba(255,255,255,.2); }
+.apt-hero-stat { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:18px; background:rgba(255,255,255,.18); font-size:11.5px; font-weight:600; line-height:1; border:1px solid rgba(255,255,255,.12); }
+.apt-hero-icon { font-size:50px; line-height:1; flex-shrink:0; opacity:.88; filter:drop-shadow(0 4px 12px rgba(0,0,0,.25)); }
+@media (max-width:640px){ .apt-hero-body { gap:14px; padding:18px; align-items:flex-start; } .apt-hero-title { font-size:20px; } .apt-hero-sub { font-size:12px; } .apt-hero-icon { font-size:36px; } }
+
 /* ── apt-* Appointments scoped ── */
 .apt-stats {
     display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px;
@@ -134,6 +149,24 @@
     $statusLabel = ['pending' => 'Bekliyor', 'scheduled' => 'Planlandı', 'done' => 'Tamamlandı', 'cancelled' => 'İptal'];
     $channelLabel = ['online' => '🖥 Online', 'phone' => '📞 Telefon', 'office' => '🏢 Ofis'];
 @endphp
+
+{{-- ══════ Hero ══════ --}}
+<div class="apt-hero">
+    <div class="apt-hero-body">
+        <div class="apt-hero-main">
+            <div class="apt-hero-label"><span class="apt-hero-marker"></span>Randevu Planlama</div>
+            <h1 class="apt-hero-title">Randevularım</h1>
+            <div class="apt-hero-sub">Danışmanınla birebir görüşmelerini buradan ayarla. Online, telefon veya ofiste — sana uygun olanı seç.</div>
+            <div class="apt-hero-stats">
+                <span class="apt-hero-stat">⏳ {{ $pending }} bekleyen</span>
+                <span class="apt-hero-stat">🟢 {{ $scheduled }} planlı</span>
+                <span class="apt-hero-stat">✅ {{ $done }} tamamlandı</span>
+                @if($cancelled > 0)<span class="apt-hero-stat">❌ {{ $cancelled }} iptal</span>@endif
+            </div>
+        </div>
+        <div class="apt-hero-icon">📆</div>
+    </div>
+</div>
 
 {{-- Stats --}}
 <div class="apt-stats">
