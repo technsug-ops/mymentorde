@@ -219,13 +219,15 @@
 .sdoc .upload-zone .selected-file { font-size:12px; color:var(--text); font-weight:600; display:none; align-items:center; gap:6px; }
 .sdoc .upload-zone .selected-file.show { display:flex; }
 
-/* ═══ PROGRESS RING ═══ */
-.sdoc .ring-wrap { display:flex; align-items:center; gap:16px; }
-.sdoc .ring { width:64px; height:64px; position:relative; }
-.sdoc .ring svg { width:100%; height:100%; transform:rotate(-90deg); }
-.sdoc .ring-bg { fill:none; stroke:rgba(255,255,255,0.15); stroke-width:5; }
-.sdoc .ring-fill { fill:none; stroke:#fff; stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset 0.8s ease; }
-.sdoc .ring-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; color:#fff; }
+/* ═══ PROGRESS PANEL (ring yerine düzgün gösterge) ═══ */
+.sdoc .prog-panel { display:flex; flex-direction:column; align-items:flex-end; gap:6px; min-width:140px; }
+.sdoc .prog-numbers { display:flex; align-items:baseline; gap:6px; color:#fff; }
+.sdoc .prog-big { font-size:32px; font-weight:800; line-height:1; letter-spacing:-.5px; }
+.sdoc .prog-total { font-size:15px; font-weight:600; opacity:.7; }
+.sdoc .prog-label { font-size:11px; color:rgba(255,255,255,.75); text-transform:uppercase; letter-spacing:.8px; font-weight:600; }
+.sdoc .prog-bar { width:100%; height:6px; background:rgba(255,255,255,.18); border-radius:3px; overflow:hidden; margin-top:4px; }
+.sdoc .prog-bar-fill { height:100%; background:#fff; border-radius:3px; transition:width .8s cubic-bezier(.4,0,.2,1); }
+.sdoc .prog-pct { font-size:11px; color:rgba(255,255,255,.85); font-weight:700; margin-top:2px; }
 
 /* ═══ CELEBRATION ═══ */
 .sdoc .celebration { text-align:center; padding:48px 24px; }
@@ -268,8 +270,8 @@
     .sdoc .hero-task { padding:18px 18px 20px; gap:16px; flex-direction:column; align-items:flex-start; }
     .sdoc .hero-title { font-size:18px; }
     .sdoc .hero-sub { font-size:12.5px; margin-bottom:12px; }
-    .sdoc .ring { width:54px; height:54px; }
-    .sdoc .ring-text { font-size:13px; }
+    .sdoc .prog-panel { align-items:flex-start; width:100%; }
+    .sdoc .prog-big { font-size:26px; }
     .sdoc .section-header { padding:12px 16px; }
     .sdoc .section-header h4 { font-size:13px; }
     .sdoc .filter-pills { padding:10px 16px; gap:6px; }
@@ -406,9 +408,14 @@
                 <div class="hero-title">Zorunlu belgeler tamam!</div>
                 <div class="hero-sub">Tüm zorunlu belgelerin yüklendi. Danışmanın belgeleri kontrol ediyor. Onay sonrası Uni-Assist adımı açılacak.</div>
             </div>
-            <div class="ring-wrap">
-                <div class="ring"><svg viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fill" cx="22" cy="22" r="18" stroke-dasharray="{{ $circumference }}" stroke-dashoffset="{{ $ringOffset }}" style="stroke:var(--ok)"/></svg><div class="ring-text" style="color:var(--ok)">{{ $pct }}%</div></div>
-                <div><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);">{{ $uploadedCount }} / {{ $allCount }}</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">belge yüklendi</div></div>
+            <div class="prog-panel">
+                <div class="prog-label">Belge Yükleme</div>
+                <div class="prog-numbers">
+                    <span class="prog-big">{{ $uploadedCount }}</span>
+                    <span class="prog-total">/ {{ $allCount }}</span>
+                </div>
+                <div class="prog-bar"><div class="prog-bar-fill" style="width:{{ $pct }}%"></div></div>
+                <div class="prog-pct">%{{ $pct }} tamam</div>
             </div>
         </div>
         <div class="grid-4">
@@ -471,9 +478,14 @@
                 <div class="hero-title">{{ $heroTitle }}</div>
                 <div class="hero-sub">{{ $heroSub }}</div>
             </div>
-            <div class="ring-wrap">
-                <div class="ring"><svg viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fill" cx="22" cy="22" r="18" stroke-dasharray="{{ $circumference }}" stroke-dashoffset="{{ $ringOffset }}"/></svg><div class="ring-text">{{ $pct }}%</div></div>
-                <div><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);">{{ $uploadedCount }} / {{ $allCount }}</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">belge yüklendi</div></div>
+            <div class="prog-panel">
+                <div class="prog-label">Belge Yükleme</div>
+                <div class="prog-numbers">
+                    <span class="prog-big">{{ $uploadedCount }}</span>
+                    <span class="prog-total">/ {{ $allCount }}</span>
+                </div>
+                <div class="prog-bar"><div class="prog-bar-fill" style="width:{{ $pct }}%"></div></div>
+                <div class="prog-pct">%{{ $pct }} tamam</div>
             </div>
         </div>
 
