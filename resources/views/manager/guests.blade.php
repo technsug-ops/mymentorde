@@ -29,6 +29,21 @@
 
 @section('content')
 
+@include('partials.manager-hero', [
+    'label' => 'Lead Yönetimi',
+    'title' => 'Aday Öğrenci Yönetimi',
+    'sub'   => 'Tüm başvuru akışı, danışman atamaları ve dönüşüm durumu. Yeni gelen lead\'leri hızlıca önceliklendir.',
+    'icon'  => '👥',
+    'bg'    => 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1400&q=80',
+    'tone'  => 'blue',
+    'stats' => [
+        ['icon' => '📊', 'text' => ($kpis['total'] ?? 0) . ' toplam'],
+        ['icon' => '✅', 'text' => ($kpis['converted'] ?? 0) . ' dönüşen'],
+        ['icon' => '⏳', 'text' => ($kpis['unassigned'] ?? 0) . ' atanmamış'],
+        ['icon' => '📅', 'text' => ($kpis['today'] ?? 0) . ' bugün'],
+    ],
+])
+
 {{-- Action Bar --}}
 <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
     <a href="{{ route('manager.bulk-import.index') }}" class="btn"

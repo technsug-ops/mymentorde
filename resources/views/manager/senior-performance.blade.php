@@ -3,12 +3,21 @@
 @section('page_title', 'Danışman Performans')
 
 @section('content')
-<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-    <div>
-        <h1 style="margin:0;">👤 Danışman Performans Panosu</h1>
-        <div class="u-muted" style="font-size:var(--tx-sm);">Her danışmanın lead dönüşümü, öğrenci memnuniyeti, görev tamamlama ve gelir katkısı</div>
-    </div>
-</div>
+
+@include('partials.manager-hero', [
+    'label' => 'Performans Analitik',
+    'title' => 'Danışman Performans Panosu',
+    'sub'   => 'Her danışmanın lead dönüşümü, öğrenci memnuniyeti, görev tamamlama ve gelir katkısı. Takım performansını tek panelde karşılaştır.',
+    'icon'  => '🏆',
+    'bg'    => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=80',
+    'tone'  => 'teal',
+    'stats' => [
+        ['icon' => '👥', 'text' => ($totalSeniors ?? 0) . ' aktif danışman'],
+        ['icon' => '📈', 'text' => '%' . ($avgConvPct ?? 0) . ' ort. dönüşüm'],
+        ['icon' => '💶', 'text' => '€' . number_format(($totalRevenue ?? 0), 0, ',', '.') . ' toplam gelir'],
+        @if(!empty($topPerformer))['icon' => '🥇', 'text' => 'Top: ' . $topPerformer['name']],@endif
+    ],
+])
 
 <form method="GET" class="card" style="margin-bottom:20px;display:flex;gap:10px;align-items:end;flex-wrap:wrap;padding:14px;">
     <div>

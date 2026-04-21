@@ -32,6 +32,21 @@
 
 @section('content')
 
+@include('partials.manager-hero', [
+    'label' => 'Partner Ağı',
+    'title' => 'Bayi Yönetimi',
+    'sub'   => 'Partner ağı, komisyon durumu ve kazançlar. Her bayinin referans performansını ve ödeme durumunu tek panelden yönet.',
+    'icon'  => '🤝',
+    'bg'    => 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1400&q=80',
+    'tone'  => 'amber',
+    'stats' => [
+        ['icon' => '🏢', 'text' => ($kpis['total'] ?? 0) . ' bayi'],
+        ['icon' => '🟢', 'text' => ($kpis['active'] ?? 0) . ' aktif'],
+        ['icon' => '💶', 'text' => '€' . number_format(($kpis['earned'] ?? 0), 0, ',', '.') . ' kazanç'],
+        ['icon' => '⏳', 'text' => '€' . number_format(($kpis['pending'] ?? 0), 0, ',', '.') . ' bekleyen'],
+    ],
+])
+
 {{-- KPI Strip --}}
 <div class="mgr-kpi-strip">
     <div class="mgr-kpi">

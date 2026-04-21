@@ -3,8 +3,23 @@
 @section('page_title', 'Gelir Analitik')
 
 @section('content')
-<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
-    <h1>Gelir Analitik Dashboard</h1>
+
+@include('partials.manager-hero', [
+    'label' => 'Gelir Analitik',
+    'title' => 'Gelir Dashboard',
+    'sub'   => 'Paket bazlı gelir, danışman performansı ve tahsilat oranları. Hangi paketler en çok döndürüyor, hangi danışman en çok kazandırıyor?',
+    'icon'  => '💶',
+    'bg'    => 'https://images.unsplash.com/photo-1579621970590-9d624316904b?w=1400&q=80',
+    'tone'  => 'green',
+    'stats' => [
+        ['icon' => '💰', 'text' => '€' . number_format(($totalEarned ?? 0), 0, ',', '.') . ' toplam'],
+        ['icon' => '⏳', 'text' => '€' . number_format(($totalPending ?? 0), 0, ',', '.') . ' bekleyen'],
+        ['icon' => '📦', 'text' => '€' . number_format(($totalPackagePrice ?? 0), 0, ',', '.') . ' paket'],
+        ['icon' => '📊', 'text' => '%' . ($collectionRate ?? 0) . ' tahsilat'],
+    ],
+])
+
+<div class="page-header" style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:16px;">
     <form method="GET" style="display:flex;gap:8px;align-items:center;">
         <input type="date" name="start_date" value="{{ $filters['start_date'] }}" style="padding:6px 8px;border:1px solid var(--u-line);border-radius:4px;">
         <input type="date" name="end_date" value="{{ $filters['end_date'] }}" style="padding:6px 8px;border:1px solid var(--u-line);border-radius:4px;">

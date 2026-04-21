@@ -3,12 +3,21 @@
 @section('page_title', 'Dönüşüm Hunisi')
 
 @section('content')
-<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-    <div>
-        <h1 style="margin:0;">🎯 Dönüşüm Hunisi (Lead → Öğrenci → Ödeme)</h1>
-        <div class="u-muted" style="font-size:var(--tx-sm);">Bu aralıkta oluşturulan lead'lerin şu ana kadar ilerlediği aşamalar</div>
-    </div>
-</div>
+
+@include('partials.manager-hero', [
+    'label' => 'Lead → Öğrenci → Ödeme',
+    'title' => 'Dönüşüm Hunisi',
+    'sub'   => 'Bu aralıkta oluşturulan lead\'lerin şu ana kadar ilerlediği aşamalar. Hangi adımda kayıp yaşanıyor, nerede müdahale lazım?',
+    'icon'  => '🎯',
+    'bg'    => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1400&q=80',
+    'tone'  => 'rose',
+    'stats' => [
+        ['icon' => '📥', 'text' => number_format(($totalLeads ?? 0), 0, ',', '.') . ' lead'],
+        ['icon' => '📈', 'text' => '%' . ($overallConv ?? 0) . ' dönüşüm'],
+        ['icon' => '⏱', 'text' => ($avgDaysToConvert ?? 0) . ' gün ort.'],
+        ['icon' => '💶', 'text' => '€' . number_format(($totalRevenue ?? 0), 0, ',', '.') . ' gelir'],
+    ],
+])
 
 <form method="GET" class="card" style="margin-bottom:20px;display:flex;gap:10px;align-items:end;flex-wrap:wrap;padding:14px;">
     <div>

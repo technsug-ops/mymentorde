@@ -23,6 +23,20 @@
 
 @section('content')
 
+@include('partials.manager-hero', [
+    'label' => 'Aktif Öğrenciler',
+    'title' => 'Öğrenci Yönetimi',
+    'sub'   => 'Dönüşen tüm öğrenciler, ödeme durumları ve risk seviyeleri. Proaktif müdahale için öncelikleri belirle.',
+    'icon'  => '🎓',
+    'bg'    => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1400&q=80',
+    'tone'  => 'purple',
+    'stats' => [
+        ['icon' => '🟢', 'text' => ($kpis['active'] ?? 0) . ' aktif'],
+        ['icon' => '📁', 'text' => ($kpis['archived'] ?? 0) . ' arşiv'],
+        ['icon' => '⚠️', 'text' => ($kpis['high_risk'] ?? 0) . ' yüksek risk'],
+    ],
+])
+
 {{-- KPI Strip --}}
 <div class="mgr-kpi-strip">
     <div class="mgr-kpi">

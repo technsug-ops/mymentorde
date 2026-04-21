@@ -115,6 +115,18 @@
 
 @section('content')
 
+@include('partials.manager-hero', [
+    'label' => 'Sözleşme Merkezi',
+    'title' => 'Sözleşme Yönetimi',
+    'sub'   => 'İmzalanmış, bekleyen ve iptal edilen tüm sözleşmeler kategori ağacında. Şablon yönetimi ve yeni kayıt oluşturma da bu merkezden.',
+    'icon'  => '📜',
+    'bg'    => 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1400&q=80',
+    'tone'  => 'slate',
+    'stats' => [
+        ['icon' => '📋', 'text' => ($totalCount ?? 0) . ' toplam kayıt'],
+    ],
+])
+
 <div class="ch-wrap">
 
     {{-- ─── SIDEBAR: kategori ağacı ─── --}}
