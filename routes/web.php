@@ -143,6 +143,18 @@ Route::get('/share/{token}', [\App\Http\Controllers\Shared\DigitalAssetControlle
     ->middleware('throttle:60,1')
     ->name('dam.share.public');
 
+// ── Public Booking Widget (booking modülü) ──────────────────────────────────
+// Auth opsiyonel: senior settings.is_public=true ise herkes erişebilir,
+// aksi halde login student/guest gereklidir (controller kontrol eder).
+Route::middleware(['company.context', 'module:booking'])->group(function (): void {
+    $bc = \App\Http\Controllers\Booking\PublicBookingController::class;
+    Route::get('/book/{slug}',                       [$bc, 'show'])->middleware('throttle:60,1')->name('booking.public.show');
+    Route::post('/book/{slug}/slots',                [$bc, 'slots'])->middleware('throttle:120,1')->name('booking.public.slots');
+    Route::post('/book/{slug}/confirm',              [$bc, 'confirm'])->middleware('throttle:10,1')->name('booking.public.confirm');
+    Route::get('/book/cancel/{token}',               [$bc, 'cancelShow'])->middleware('throttle:60,1')->name('booking.public.cancel.show');
+    Route::post('/book/cancel/{token}',              [$bc, 'cancel'])->middleware('throttle:10,1')->name('booking.public.cancel');
+});
+
 Route::middleware(['company.context'])->group(function () {
     Route::get('/apply', [GuestApplicationController::class, 'create'])->name('apply.create');
     Route::post('/apply', [GuestApplicationController::class, 'store'])
