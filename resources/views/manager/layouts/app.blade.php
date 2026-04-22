@@ -403,6 +403,36 @@
             </div>
             @endmodule
 
+            @module('ai_labs')
+            <div class="nav-section">
+                <div class="nav-section-label">{{ $aiLabsName ?? 'MentorDE AI Asistanı' }}</div>
+                <a href="/manager/ai-assistant"
+                   class="nav-link {{ request()->is('manager/ai-assistant*') ? 'active' : '' }}">
+                    <span class="nav-icon">💬</span> AI Asistan
+                </a>
+                <a href="/manager/ai-labs/content"
+                   class="nav-link {{ request()->is('manager/ai-labs/content*') ? 'active' : '' }}">
+                    <span class="nav-icon">✨</span> İçerik Üretici
+                </a>
+                <a href="/manager/ai-labs/analytics"
+                   class="nav-link {{ request()->is('manager/ai-labs/analytics*') ? 'active' : '' }}">
+                    <span class="nav-icon">📊</span> Analytics
+                </a>
+                <a href="/manager/ai-labs/sources"
+                   class="nav-link {{ request()->is('manager/ai-labs/sources*') ? 'active' : '' }}">
+                    <span class="nav-icon">📚</span> Bilgi Havuzu
+                </a>
+                <a href="/manager/ai-labs/external"
+                   class="nav-link {{ request()->is('manager/ai-labs/external*') ? 'active' : '' }}">
+                    <span class="nav-icon">🌐</span> Dış Kaynaklar
+                </a>
+                <a href="/manager/ai-labs/settings"
+                   class="nav-link {{ request()->is('manager/ai-labs/settings*') ? 'active' : '' }}">
+                    <span class="nav-icon">⚙️</span> AI Labs Ayarları
+                </a>
+            </div>
+            @endmodule
+
             <div class="nav-section">
                 <div class="nav-section-label">Sistem</div>
                 <a href="/manager/system"

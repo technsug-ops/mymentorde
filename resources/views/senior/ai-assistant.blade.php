@@ -273,7 +273,63 @@ async function sendAiMessage() {
 
     const msgs = document.querySelectorAll('#chat-messages .msg-bot');
     const last = msgs[msgs.length - 1];
-    if (last) last.querySelector('div:last-child').textContent = res.answer;
+    if (last) {
+        const bubble = last.querySelector('div:last-child');
+        let html = '';
+        if (res.mode) {
+            const badgeMap = {
+                source:   '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;display:inline-block;margin-bottom:6px;">🟢 KAYNAKTAN</span>',
+                external: '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;display:inline-block;margin-bottom:6px;">🟡 GENEL BİLGİ</span>',
+                refused:  '<span style="background:#f1f5f9;color:#64748b;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;display:inline-block;margin-bottom:6px;">⚪ KAPSAM DIŞI</span>',
+            };
+            html += (badgeMap[res.mode] || '') + '<br>';
+        }
+        html += String(res.answer || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+        if (res.sources_meta && res.sources_meta.length) {
+            const srcs = res.sources_meta.map(s => {
+                const title = String(s.title || ('Kaynak #' + s.id)).replace(/</g,'&lt;');
+                if (s.type === 'url' && s.url) {
+                    return '<a href="' + String(s.url).replace(/"/g,'&quot;') + '" target="_blank" style="color:#5b2e91;text-decoration:none;">📚 #' + s.id + ' ' + title + '</a>';
+                }
+                return '<span>📚 #' + s.id + ' ' + title + '</span>';
+            }).join(' • ');
+            html += '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #e2e8f0;font-size:11px;color:#64748b;">' + srcs + '</div>';
+        }
+        if (res.conversation_id && res.conversation_type) {
+            html += '<div class="sefb" data-ct="' + res.conversation_type + '" data-ci="' + res.conversation_id + '" style="display:flex;gap:6px;margin-top:8px;">' +
+                    '<button type="button" data-r="good" style="background:transparent;border:1px solid #e2e8f0;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px;">👍</button>' +
+                    '<button type="button" data-r="bad" style="background:transparent;border:1px solid #e2e8f0;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px;">👎</button>' +
+                    '</div>';
+        }
+        bubble.innerHTML = html;
+
+        const fb = bubble.querySelector('.sefb');
+        if (fb) {
+            fb.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if (fb.dataset.sent) return;
+                    const fd = new FormData();
+                    fd.append('conversation_type', fb.dataset.ct);
+                    fd.append('conversation_id', fb.dataset.ci);
+                    fd.append('rating', btn.dataset.r);
+                    try {
+                        const r = await fetch('/ai-labs/feedback', {
+                            method: 'POST',
+                            headers: {'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json'},
+                            body: fd,
+                        });
+                        const d = await r.json();
+                        if (d.ok) {
+                            fb.dataset.sent = '1';
+                            btn.style.background = btn.dataset.r === 'good' ? '#dcfce7' : '#fee2e2';
+                            fb.querySelectorAll('button').forEach(b => b.disabled = true);
+                            fb.insertAdjacentHTML('beforeend', '<span style="font-size:11px;color:#64748b;padding:3px 8px;">✓</span>');
+                        }
+                    } catch (e) {}
+                });
+            });
+        }
+    }
 
     btn.disabled    = false;
     btn.textContent = 'Gönder';

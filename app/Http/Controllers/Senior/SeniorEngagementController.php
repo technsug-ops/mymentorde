@@ -42,10 +42,23 @@ class SeniorEngagementController extends Controller
             return response()->json(['ok' => false, 'answer' => 'Lütfen bir soru yazın.'], 422);
         }
 
+        $firstName = explode(' ', trim((string) ($user->name ?? '')))[0] ?? '';
         $context = [
-            'student_id' => trim((string) $request->input('student_id', '')),
+            'first_name'    => $firstName,
+            'full_name'     => (string) ($user->name ?? ''),
+            'email'         => (string) ($user->email ?? ''),
+            'student_id'    => trim((string) $request->input('student_id', '')),
         ];
 
+        // AI Labs modülü açıksa gelişmiş RAG akışına geç
+        $companyId = (int) ($user->company_id ?? 0);
+        if ($companyId > 0 && \App\Support\ModuleAccess::enabled('ai_labs', $companyId)) {
+            $result = app(\App\Services\AiLabs\AiLabsAssistantService::class)
+                ->ask($companyId, 'senior', (int) $user->id, null, $question, $context);
+            return response()->json($result);
+        }
+
+        // Eski akış
         $result = app(SeniorAiAssistantService::class)->ask($user, $question, $context);
 
         return response()->json($result);
@@ -71,9 +84,18 @@ class SeniorEngagementController extends Controller
 
     public function aiAssistantRemaining(Request $request): \Illuminate\Http\JsonResponse
     {
-        $user    = $request->user();
-        $service = app(SeniorAiAssistantService::class);
+        $user = $request->user();
 
+        $companyId = (int) ($user->company_id ?? 0);
+        if ($companyId > 0 && \App\Support\ModuleAccess::enabled('ai_labs', $companyId)) {
+            $labs = app(\App\Services\AiLabs\AiLabsAssistantService::class);
+            return response()->json([
+                'remaining' => $labs->remainingToday($companyId, 'senior', (int) $user->id, null),
+                'limit'     => $labs->dailyLimit($companyId, 'senior'),
+            ]);
+        }
+
+        $service = app(SeniorAiAssistantService::class);
         return response()->json([
             'remaining' => $service->getRemainingToday((int) $user->id),
             'limit'     => $service->getDailyLimit(),

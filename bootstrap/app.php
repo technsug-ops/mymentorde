@@ -36,6 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'manager.role' => \App\Http\Middleware\EnsureManagerRole::class,
             'senior.role' => \App\Http\Middleware\EnsureSeniorRole::class,
+            'ai_labs.access' => \App\Http\Middleware\AiLabsAccess::class,
             'student.role' => \App\Http\Middleware\EnsureStudentRole::class,
              'guest.role' => \App\Http\Middleware\EnsureGuestRole::class,
              'guest.owns.ticket' => \App\Http\Middleware\EnsureGuestOwnsTicket::class,

@@ -15,6 +15,7 @@ class MarketingAdminSetting extends Model
         static::saved(static function (self $model): void {
             if ($model->company_id) {
                 Cache::forget("brand_settings_{$model->company_id}");
+                Cache::forget("ai_labs_brand_{$model->company_id}");
             }
         });
     }

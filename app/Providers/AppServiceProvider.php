@@ -194,7 +194,16 @@ class AppServiceProvider extends ServiceProvider
 
         // Modül toggle direktifi — SaaS tier'lama için.
         // Kullanım: @module('booking') ... @endmodule
-        Blade::if('module', fn (string $module) => \App\Support\ModuleAccess::enabled($module));
+        // Exception-safe: DB/cache sorunu olursa DEFAULT_MODULES fallback'ine güven (sidebar link kaybolmasın)
+        Blade::if('module', function (string $module): bool {
+            try {
+                return \App\Support\ModuleAccess::enabled($module);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('@module directive error', ['module' => $module, 'error' => $e->getMessage()]);
+                // Fail-open: core modüller için true dön (sidebar görünsün)
+                return in_array($module, ['ai_labs', 'booking', 'dam', 'content_hub'], true);
+            }
+        });
 
         View::composer('*', function ($view): void {
             $theme = PortalTheme::resolve();
@@ -205,7 +214,7 @@ class AppServiceProvider extends ServiceProvider
         // Public sayfalar (login, /apply, /randevu) için ortak tema —
         // Manager /manager/brand → "Public sayfa teması" radio ile seçilir,
         // üçünü birden etkiler.
-        View::composer(['auth.login', 'apply.create', 'booking.public.landing'], function ($view): void {
+        View::composer(['auth.login', 'apply.create', 'booking.public.landing', 'ai-labs.public.faq'], function ($view): void {
             $view->with('publicTheme', \App\Support\PublicTheme::resolve());
         });
 
@@ -235,6 +244,24 @@ class AppServiceProvider extends ServiceProvider
             $view->with('brandInitial', strtoupper(mb_substr($brand['name'], 0, 1)));
             $view->with('brandLogoUrl', $brand['logo_url']);
             $view->with('brandLogoBg',  $brand['logo_bg'] ?? 'light');
+        });
+
+        // AI Labs marka adı — tek yerden yönetim
+        // marketing_admin_settings.ai_labs_brand_name değiştiğinde sidebar + system prompt + email
+        // her yerde otomatik güncellenir. Default: "MentorDE AI Labs"
+        View::composer('*', function ($view): void {
+            $cid = (int) (auth()->user()?->company_id ?? 0);
+            $name = Cache::remember("ai_labs_brand_{$cid}", 300, function () use ($cid): string {
+                try {
+                    $val = MarketingAdminSetting::where('company_id', $cid)
+                        ->where('setting_key', 'ai_labs_brand_name')
+                        ->value('setting_value');
+                    return (string) ($val ?: 'MentorDE AI Labs');
+                } catch (\Throwable) {
+                    return 'MentorDE AI Labs';
+                }
+            });
+            $view->with('aiLabsName', $name);
         });
 
         View::composer('manager.layouts.app', function ($view): void {

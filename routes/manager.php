@@ -30,6 +30,7 @@ use App\Http\Controllers\ManagerPortalPreviewController;
 use App\Http\Controllers\ManagerRequestController;
 use App\Http\Controllers\ProjectExportController;
 use App\Http\Controllers\StudentCardController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'require.2fa'])->group(function (): void {
@@ -314,5 +315,68 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::delete('/manager/booking-pricing/tax/{rule}',        [$b, 'destroyTaxRule'])->middleware('throttle:30,1')->name('manager.booking-pricing.tax.destroy');
         Route::post('/manager/booking-pricing/commission',          [$b, 'storeCommissionRule'])->middleware('throttle:30,1')->name('manager.booking-pricing.commission.store');
         Route::delete('/manager/booking-pricing/commission/{rule}', [$b, 'destroyCommissionRule'])->middleware('throttle:30,1')->name('manager.booking-pricing.commission.destroy');
+    });
+
+    // ── AI Labs modülü: Knowledge base + ayarlar ─────────────────────────────
+    // Senior de erişsin — parent middleware'leri ezerek ai_labs.access kullan
+    Route::middleware(['module:ai_labs', 'ai_labs.access'])
+        ->withoutMiddleware(['manager.role', 'manager.or.permission:student.assignment.manage'])
+        ->group(function (): void {
+        $src = \App\Http\Controllers\AiLabs\ManagerAiLabsSourcesController::class;
+        $set = \App\Http\Controllers\AiLabs\ManagerAiLabsSettingsController::class;
+
+        Route::get('/manager/ai-labs/sources',                    [$src, 'index'])->name('manager.ai-labs.sources');
+        Route::post('/manager/ai-labs/sources',                   [$src, 'store'])->middleware('throttle:30,1')->name('manager.ai-labs.sources.store');
+        Route::post('/manager/ai-labs/sources/bulk',              [$src, 'bulkUpdate'])->middleware('throttle:20,1')->name('manager.ai-labs.sources.bulk');
+        Route::put('/manager/ai-labs/sources/{source}',           [$src, 'update'])->middleware('throttle:30,1')->name('manager.ai-labs.sources.update');
+        Route::post('/manager/ai-labs/sources/{source}/toggle',   [$src, 'toggle'])->middleware('throttle:60,1')->name('manager.ai-labs.sources.toggle');
+        Route::post('/manager/ai-labs/sources/{source}/refetch',  [$src, 'refetch'])->middleware('throttle:20,1')->name('manager.ai-labs.sources.refetch');
+        Route::delete('/manager/ai-labs/sources/{source}',        [$src, 'destroy'])->middleware('throttle:30,1')->name('manager.ai-labs.sources.destroy');
+
+        Route::get('/manager/ai-labs/settings',                   [$set, 'show'])->name('manager.ai-labs.settings');
+        Route::put('/manager/ai-labs/settings',                   [$set, 'update'])->middleware('throttle:20,1')->name('manager.ai-labs.settings.update');
+        Route::post('/manager/ai-labs/test-connection',           [$set, 'testConnection'])->middleware('throttle:10,1')->name('manager.ai-labs.test-connection');
+        Route::post('/manager/ai-labs/sync-now',                  [$set, 'syncNow'])->middleware('throttle:5,1')->name('manager.ai-labs.sync-now');
+
+        // Manager kendi AI asistanı (iç kullanım)
+        $int = \App\Http\Controllers\AiLabs\InternalAssistantController::class;
+        Route::get('/manager/ai-assistant',             fn (Request $r) => app($int)->page($r, 'manager'))->name('manager.ai-assistant');
+        Route::post('/manager/ai-assistant/ask',        fn (Request $r) => app($int)->ask($r, 'manager', app(\App\Services\AiLabs\AiLabsAssistantService::class)))->middleware('throttle:15,1')->name('manager.ai-assistant.ask');
+        Route::post('/manager/ai-assistant/ask-stream', fn (Request $r) => app($int)->askStream($r, 'manager'))->middleware('throttle:15,1')->name('manager.ai-assistant.ask-stream');
+        Route::get('/manager/ai-assistant/history',     fn (Request $r) => app($int)->history($r, 'manager'))->name('manager.ai-assistant.history');
+        Route::get('/manager/ai-assistant/remaining',   fn (Request $r) => app($int)->remaining($r, 'manager', app(\App\Services\AiLabs\AiLabsAssistantService::class)))->name('manager.ai-assistant.remaining');
+
+        // Analytics (Phase 5)
+        $analytics = \App\Http\Controllers\AiLabs\ManagerAiLabsAnalyticsController::class;
+        Route::get('/manager/ai-labs/analytics', [$analytics, 'index'])->name('manager.ai-labs.analytics');
+
+        // External Sources (Phase 4.3) — Wikipedia + RSS + Web Search
+        $ext = \App\Http\Controllers\AiLabs\ManagerAiLabsExternalController::class;
+        Route::get('/manager/ai-labs/external',                 [$ext, 'index'])->name('manager.ai-labs.external');
+        Route::post('/manager/ai-labs/external/wikipedia',      [$ext, 'searchWikipedia'])->middleware('throttle:30,1');
+        Route::post('/manager/ai-labs/external/rss',            [$ext, 'parseRss'])->middleware('throttle:30,1');
+        Route::post('/manager/ai-labs/external/web',            [$ext, 'searchWeb'])->middleware('throttle:20,1');
+        Route::post('/manager/ai-labs/external/import',         [$ext, 'import'])->middleware('throttle:30,1')->name('manager.ai-labs.external.import');
+        Route::post('/manager/ai-labs/external/import-bulk',    [$ext, 'importBulk'])->middleware('throttle:10,1')->name('manager.ai-labs.external.import-bulk');
+
+        // Content Generator (Phase 4)
+        $cnt = \App\Http\Controllers\AiLabs\ManagerAiLabsContentController::class;
+        Route::get('/manager/ai-labs/content',                           [$cnt, 'index'])->name('manager.ai-labs.content.index');
+        Route::get('/manager/ai-labs/content/new/{template}',            [$cnt, 'newForm'])->name('manager.ai-labs.content.new');
+        Route::post('/manager/ai-labs/content/generate/{template}',      [$cnt, 'generate'])->middleware('throttle:20,1')->name('manager.ai-labs.content.generate');
+        Route::post('/manager/ai-labs/content/suggest-keywords',         [$cnt, 'suggestKeywords'])->middleware('throttle:20,1')->name('manager.ai-labs.content.suggest-keywords');
+        Route::get('/manager/ai-labs/content/{draft}/edit',              [$cnt, 'edit'])->name('manager.ai-labs.content.edit');
+        Route::put('/manager/ai-labs/content/{draft}',                   [$cnt, 'update'])->middleware('throttle:60,1')->name('manager.ai-labs.content.update');
+        Route::delete('/manager/ai-labs/content/{draft}',                [$cnt, 'destroy'])->middleware('throttle:30,1')->name('manager.ai-labs.content.destroy');
+        Route::get('/manager/ai-labs/content/{draft}/export/pdf',        [$cnt, 'exportPdf'])->name('manager.ai-labs.content.export.pdf');
+        Route::get('/manager/ai-labs/content/{draft}/export/docx',       [$cnt, 'exportDocx'])->name('manager.ai-labs.content.export.docx');
+        Route::get('/manager/ai-labs/content/{draft}/export/md',         [$cnt, 'exportMarkdown'])->name('manager.ai-labs.content.export.md');
+
+        // Admin personel AI asistanı (manager layout altında)
+        Route::get('/admin-staff/ai-assistant',             fn (Request $r) => app($int)->page($r, 'admin_staff'))->name('admin-staff.ai-assistant');
+        Route::post('/admin-staff/ai-assistant/ask',        fn (Request $r) => app($int)->ask($r, 'admin_staff', app(\App\Services\AiLabs\AiLabsAssistantService::class)))->middleware('throttle:15,1')->name('admin-staff.ai-assistant.ask');
+        Route::post('/admin-staff/ai-assistant/ask-stream', fn (Request $r) => app($int)->askStream($r, 'admin_staff'))->middleware('throttle:15,1')->name('admin-staff.ai-assistant.ask-stream');
+        Route::get('/admin-staff/ai-assistant/history',     fn (Request $r) => app($int)->history($r, 'admin_staff'))->name('admin-staff.ai-assistant.history');
+        Route::get('/admin-staff/ai-assistant/remaining',   fn (Request $r) => app($int)->remaining($r, 'admin_staff', app(\App\Services\AiLabs\AiLabsAssistantService::class)))->name('admin-staff.ai-assistant.remaining');
     });
 });

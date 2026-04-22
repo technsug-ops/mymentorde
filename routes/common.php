@@ -63,6 +63,18 @@ Route::middleware(['company.context', 'auth'])->group(function (): void {
     Route::post('/bulletins/{bulletin}/react',         [BulletinController::class, 'react'])->name('bulletins.react');
 });
 
+// ── AI Labs Feedback — tüm authenticated kullanıcılar 👍/👎 verir ──────────────
+Route::middleware(['company.context', 'auth'])->group(function (): void {
+    Route::post('/ai-labs/feedback', [\App\Http\Controllers\AiLabs\AiLabsFeedbackController::class, 'store'])
+        ->middleware('throttle:60,1')->name('ai-labs.feedback');
+});
+
+// Guest'ler için feedback (auth gereksiz, session-bazlı guest resolver kullanır)
+Route::middleware(['company.context'])->group(function (): void {
+    Route::post('/guest/ai-labs/feedback', [\App\Http\Controllers\AiLabs\AiLabsFeedbackController::class, 'store'])
+        ->middleware('throttle:30,1')->name('guest.ai-labs.feedback');
+});
+
 // ── Contracts Hub (Manager) — /my-contracts tek sayfada tüm bitmiş sözleşmeler ─
 // NOT: Eski StaffContractController::index (sadece kendi sözleşmesi) kaldırıldı;
 // manager kendi iş sözleşmesini profil sayfasından görür. Sözleşme detay/upload

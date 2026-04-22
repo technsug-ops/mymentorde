@@ -50,6 +50,21 @@ return [
         'timeout' => (int) env('AI_WRITER_TIMEOUT', 30),
     ],
 
+    // AI Labs — Gemini File API + RAG (Phase 2) + Dış Kaynaklar (Phase 4.3)
+    'ai_labs' => [
+        'gemini' => [
+            'api_key'      => env('GEMINI_API_KEY'),
+            'model'        => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+            'api_base'     => rtrim((string) env('GEMINI_API_BASE', 'https://generativelanguage.googleapis.com/v1beta'), '/'),
+            'upload_base'  => rtrim((string) env('GEMINI_UPLOAD_BASE', 'https://generativelanguage.googleapis.com/upload/v1beta'), '/'),
+            'timeout'      => (int) env('GEMINI_TIMEOUT', 60),
+        ],
+        // Serper.dev — Google Web Search API ($5-50/ay, 2500 sorgu → $50). Boş bırakılırsa web search UI'de disabled.
+        'serper' => [
+            'api_key' => env('SERPER_API_KEY'),
+        ],
+    ],
+
     'giphy' => [
         'key' => env('GIPHY_API_KEY'),
     ],

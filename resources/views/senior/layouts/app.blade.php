@@ -304,6 +304,22 @@
                 </div>
             </div>
 
+            {{-- AI Labs (manager ile paylaşımlı — ai_labs.access middleware) --}}
+            @module('ai_labs')
+            @php $isAiLabs = request()->is('manager/ai-labs*'); @endphp
+            <div class="nav-section" data-acc-key="ailabs">
+                <div class="nav-section-label" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:7px 14px 7px 16px;margin:0 6px;border-radius:8px;user-select:none;">
+                    <span>{{ $aiLabsName ?? 'MentorDE AI Asistanı' }}</span>
+                    <span class="acc-arrow" style="font-size:12px;opacity:.7;display:inline-block;transition:transform .2s;{{ $isAiLabs ? '' : 'transform:rotate(-90deg);' }}">▾</span>
+                </div>
+                <div class="nav-acc-body" style="{{ $isAiLabs ? '' : 'display:none;' }}">
+                    <a href="/manager/ai-labs/sources"  class="nav-link {{ request()->is('manager/ai-labs/sources*') ? 'active' : '' }}"><span class="nav-icon">📚</span> Bilgi Havuzu</a>
+                    <a href="/manager/ai-labs/content"  class="nav-link {{ request()->is('manager/ai-labs/content*') ? 'active' : '' }}"><span class="nav-icon">✨</span> İçerik Üretici</a>
+                    <a href="/manager/ai-labs/external" class="nav-link {{ request()->is('manager/ai-labs/external*') ? 'active' : '' }}"><span class="nav-icon">🌐</span> Dış Kaynaklar</a>
+                </div>
+            </div>
+            @endmodule
+
             {{-- Kişisel --}}
             <div class="nav-section" data-acc-key="kisisel">
                 <div class="nav-section-label" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:7px 14px 7px 16px;margin:0 6px;border-radius:8px;user-select:none;"

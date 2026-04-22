@@ -31,6 +31,7 @@ class ModuleAccess
         'doc_builder_ai',
         'contracts_hub',
         'multi_provider_ai',
+        'ai_labs',
     ];
 
     public static function enabled(string $module, ?int $companyId = null): bool

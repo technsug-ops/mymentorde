@@ -21,7 +21,7 @@ Route::view('/landing/mentorde', 'landing.mentorde')->name('landing.mentorde');
 Route::view('/privacy', 'legal.privacy')->name('legal.privacy');
 Route::view('/terms',   'legal.terms')->name('legal.terms');
 
-Route::middleware(['auth', 'manager.role'])->group(function (): void {
+Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (): void {
     Route::get('/demo', fn() => view('demo.index'));
     Route::get('/demo/checklist', fn() => view('demo.checklist'));
     Route::get('/demo/guest', fn() => view('demo.guest'));
@@ -226,6 +226,12 @@ Route::middleware(['company.context', 'module:booking'])->group(function (): voi
 });
 
 Route::middleware(['company.context'])->group(function () {
+    // Public AI Labs FAQ — Manager'ın yayınladığı SSS'lar
+    Route::get('/sss', [\App\Http\Controllers\AiLabs\PublicFaqController::class, 'index'])
+        ->middleware('throttle:120,1')->name('public.faq');
+    Route::get('/faq', [\App\Http\Controllers\AiLabs\PublicFaqController::class, 'index'])
+        ->middleware('throttle:120,1'); // /faq de aynı sayfa (İngilizce slug)
+
     Route::get('/apply', [GuestApplicationController::class, 'create'])->name('apply.create');
     Route::post('/apply', [GuestApplicationController::class, 'store'])
         ->middleware(['field.rule.validator:student_registration,application_type', 'throttle:30,1'])

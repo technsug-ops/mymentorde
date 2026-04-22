@@ -144,7 +144,7 @@ function sendAiMessage() {
         body: JSON.stringify({question: q}),
     })
     .then(r => r.json())
-    .then(d => { appendMessage('bot', d.answer || 'Bir hata oluştu.'); loadRemaining(); })
+    .then(d => { appendMessage('bot', d.answer || 'Bir hata oluştu.', d.mode, d.sources_meta, d.conversation_id, d.conversation_type); loadRemaining(); })
     .catch(() => appendMessage('bot', 'Bağlantı hatası. Lütfen tekrar deneyin.'))
     .finally(() => document.getElementById('chat-send').disabled = false);
 }
@@ -154,7 +154,7 @@ function setQuestion(q) {
     if (input) { input.value = q; input.focus(); }
 }
 
-function appendMessage(role, text) {
+function appendMessage(role, text, mode, sources, convId, convType) {
     const box = document.getElementById('chat-messages');
     const isBot = role === 'bot';
     const div = document.createElement('div');
@@ -164,11 +164,66 @@ function appendMessage(role, text) {
     avatar.textContent = isBot ? '🤖' : '👤';
     const bubble = document.createElement('div');
     bubble.style.cssText = 'padding:10px 14px;border-radius:' + (isBot ? '0 12px 12px 12px' : '12px 0 12px 12px') + ';max-width:85%;font-size:var(--tx-sm);line-height:1.6;' + (isBot ? 'background:var(--u-bg,#f8fafc);border:1px solid var(--u-line);' : 'background:var(--u-brand);color:#fff;');
-    bubble.innerHTML = text.replace(/\n/g, '<br>');
+
+    let html = '';
+    if (isBot && mode) {
+        const badgeMap = {
+            source:   '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;display:inline-block;margin-bottom:6px;">🟢 KAYNAKTAN</span>',
+            external: '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;display:inline-block;margin-bottom:6px;">🟡 GENEL BİLGİ</span>',
+            refused:  '<span style="background:#f1f5f9;color:#64748b;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;display:inline-block;margin-bottom:6px;">⚪ KAPSAM DIŞI</span>',
+        };
+        html += (badgeMap[mode] || '') + '<br>';
+    }
+    html += String(text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g, '<br>');
+    if (isBot && sources && sources.length) {
+        const srcs = sources.map(s => {
+            const title = escHtml(s.title || ('Kaynak #' + s.id));
+            if (s.type === 'url' && s.url) {
+                return '<a href="' + escHtml(s.url) + '" target="_blank" style="color:var(--u-brand);text-decoration:none;">📚 #' + s.id + ' ' + title + '</a>';
+            }
+            return '<span>📚 #' + s.id + ' ' + title + '</span>';
+        }).join(' • ');
+        html += '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #e2e8f0;font-size:11px;color:#64748b;">' + srcs + '</div>';
+    }
+    if (isBot && convId && convType) {
+        html += '<div class="sfb" data-ct="' + convType + '" data-ci="' + convId + '" style="display:flex;gap:6px;margin-top:8px;">' +
+                '<button type="button" data-r="good" style="background:transparent;border:1px solid #e2e8f0;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px;">👍</button>' +
+                '<button type="button" data-r="bad" style="background:transparent;border:1px solid #e2e8f0;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px;">👎</button>' +
+                '</div>';
+    }
+    bubble.innerHTML = html;
     div.appendChild(avatar);
     div.appendChild(bubble);
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
+
+    // Feedback bind
+    const fb = bubble.querySelector('.sfb');
+    if (fb) {
+        fb.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (fb.dataset.sent) return;
+                const fd = new FormData();
+                fd.append('conversation_type', fb.dataset.ct);
+                fd.append('conversation_id', fb.dataset.ci);
+                fd.append('rating', btn.dataset.r);
+                try {
+                    const res = await fetch('{{ url("/ai-labs/feedback") }}', {
+                        method: 'POST',
+                        headers: {'X-CSRF-TOKEN': __aiRoutes.csrf, 'Accept': 'application/json'},
+                        body: fd,
+                    });
+                    const d = await res.json();
+                    if (d.ok) {
+                        fb.dataset.sent = '1';
+                        btn.style.background = btn.dataset.r === 'good' ? '#dcfce7' : '#fee2e2';
+                        fb.querySelectorAll('button').forEach(b => b.disabled = true);
+                        fb.insertAdjacentHTML('beforeend', '<span style="font-size:11px;color:#64748b;padding:3px 8px;">✓</span>');
+                    }
+                } catch (e) {}
+            });
+        });
+    }
 }
 
 function loadHistory() {

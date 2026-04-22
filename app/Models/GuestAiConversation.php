@@ -15,12 +15,23 @@ class GuestAiConversation extends Model
         'answer',
         'context',
         'tokens_used',
+        'tokens_input',
+        'tokens_output',
+        'response_mode',
+        'cited_sources',
+        'provider',
+        'model',
+        'role',
         'created_at',
     ];
 
     protected $casts = [
-        'context'    => 'array',
-        'created_at' => 'datetime',
+        'context'       => 'array',
+        'cited_sources' => 'array',
+        'tokens_used'   => 'integer',
+        'tokens_input'  => 'integer',
+        'tokens_output' => 'integer',
+        'created_at'    => 'datetime',
     ];
 
     public function guestApplication(): BelongsTo

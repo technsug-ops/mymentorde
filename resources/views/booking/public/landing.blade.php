@@ -679,6 +679,7 @@
                 <a href="#nasil-calisir">Nasıl Çalışır</a>
                 <a href="#danismanlar">Danışmanlar</a>
                 <a href="{{ route('apply.create') }}">Başvur</a>
+                <a href="/sss">Sık Sorulan Sorular</a>
                 <a href="/login">Giriş Yap</a>
             </div>
             <div>

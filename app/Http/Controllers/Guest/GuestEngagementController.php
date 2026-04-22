@@ -47,11 +47,26 @@ class GuestEngagementController extends Controller
 
         $data    = $this->buildViewData($request, $guest);
         $context = [
+            'first_name'       => trim((string) ($guest->first_name ?? '')),
+            'full_name'        => trim(($guest->first_name ?? '') . ' ' . ($guest->last_name ?? '')),
+            'email'            => (string) ($guest->email ?? ''),
+            'application_type' => (string) ($guest->application_type ?? ''),
+            'target_city'      => (string) ($guest->target_city ?? ''),
+            'package_code'     => (string) ($guest->selected_package_code ?? ''),
             'docs_uploaded'    => (int) ($data['docsChecklistStats']['required_uploaded'] ?? 0),
             'docs_required'    => (int) ($data['docsChecklistStats']['required_total']    ?? count($data['requiredDocumentChecklist'] ?? [])),
             'progress_percent' => $this->viewData->calculateProfileCompletionPercent($guest),
         ];
 
+        // AI Labs modülü açıksa gelişmiş RAG akışına geç (3-seviye + citation)
+        $companyId = (int) ($guest->company_id ?? 0);
+        if ($companyId > 0 && \App\Support\ModuleAccess::enabled('ai_labs', $companyId)) {
+            $result = app(\App\Services\AiLabs\AiLabsAssistantService::class)
+                ->ask($companyId, 'guest', 0, (int) $guest->id, $question, $context);
+            return response()->json($result);
+        }
+
+        // Eski akış
         $result = app(AiGuestAssistantService::class)->ask($guest, $question, $context);
 
         return response()->json($result);
@@ -74,7 +89,17 @@ class GuestEngagementController extends Controller
 
     public function aiAssistantRemaining(Request $request): \Illuminate\Http\JsonResponse
     {
-        $guest     = $this->resolveGuest($request);
+        $guest = $this->resolveGuest($request);
+
+        $companyId = (int) ($guest->company_id ?? 0);
+        if ($companyId > 0 && \App\Support\ModuleAccess::enabled('ai_labs', $companyId) && $guest) {
+            $labs = app(\App\Services\AiLabs\AiLabsAssistantService::class);
+            return response()->json([
+                'remaining' => $labs->remainingToday($companyId, 'guest', 0, (int) $guest->id),
+                'limit'     => $labs->dailyLimit($companyId, 'guest'),
+            ]);
+        }
+
         $service   = app(AiGuestAssistantService::class);
         $remaining = $service->getRemainingToday($guest);
         $limit     = $service->getDailyLimit($guest);
