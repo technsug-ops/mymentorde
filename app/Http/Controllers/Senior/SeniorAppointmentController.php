@@ -51,6 +51,11 @@ class SeniorAppointmentController extends Controller
         $bookingSettings = null;
         $availabilityPatterns = collect();
         $availabilityExceptions = collect();
+        $calendarGrid = [];
+        $calendarMonth = null;
+        $calendarPrevUrl = null;
+        $calendarNextUrl = null;
+        $calendarTitle = '';
         if ($bookingModuleEnabled && $user) {
             $bookingSettings = $this->ensureBookingSettings($user);
             $availabilityPatterns = SeniorAvailabilityPattern::query()
@@ -58,11 +63,68 @@ class SeniorAppointmentController extends Controller
                 ->orderBy('weekday')
                 ->orderBy('start_time')
                 ->get();
-            $availabilityExceptions = SeniorAvailabilityException::query()
+            // Tüm exception'ları çek (geçmiş dahil) — takvim görünürlüğü için
+            $allExceptions = SeniorAvailabilityException::query()
                 ->where('senior_user_id', $user->id)
-                ->where('date', '>=', now()->toDateString())
-                ->orderBy('date')
-                ->get();
+                ->get()
+                ->keyBy(fn ($e) => \Carbon\Carbon::parse($e->date)->toDateString());
+            $availabilityExceptions = $allExceptions
+                ->filter(fn ($e) => \Carbon\Carbon::parse($e->date)->toDateString() >= now()->toDateString())
+                ->sortBy('date')
+                ->values();
+
+            // Takvim ayı: ?cal=YYYY-MM query param, varsayılan bu ay
+            $calParam = (string) $request->query('cal', '');
+            try {
+                $calendarMonth = \Carbon\CarbonImmutable::createFromFormat('Y-m', $calParam ?: now()->format('Y-m'))->startOfMonth();
+            } catch (\Throwable) {
+                $calendarMonth = \Carbon\CarbonImmutable::now()->startOfMonth();
+            }
+
+            $calendarTitle = $calendarMonth->translatedFormat('F Y');
+            $tabQuery = ['tab' => 'availability'];
+            $calendarPrevUrl = route('senior.appointments', $tabQuery + ['cal' => $calendarMonth->subMonth()->format('Y-m')]);
+            $calendarNextUrl = route('senior.appointments', $tabQuery + ['cal' => $calendarMonth->addMonth()->format('Y-m')]);
+
+            // Grid: ayın ilk gününün haftasından başla, son gününün haftasına kadar (6 hafta)
+            $gridStart = $calendarMonth->startOfWeek(\Carbon\CarbonInterface::MONDAY);
+            $gridEnd   = $calendarMonth->endOfMonth()->endOfWeek(\Carbon\CarbonInterface::SUNDAY);
+
+            // Patterns → weekday set
+            $patternWeekdays = $availabilityPatterns
+                ->where('is_active', true)
+                ->pluck('weekday')
+                ->map(fn ($w) => (int) $w)
+                ->unique()
+                ->values()
+                ->all();
+
+            // Her günün randevu sayısı (student_appointments, senior_email ile)
+            $dayAppointmentCounts = StudentAppointment::query()
+                ->whereRaw('lower(senior_email) = ?', [$email])
+                ->whereNotIn('status', ['cancelled', 'canceled'])
+                ->whereBetween('scheduled_at', [$gridStart->startOfDay(), $gridEnd->endOfDay()])
+                ->get(['scheduled_at'])
+                ->groupBy(fn ($a) => \Carbon\Carbon::parse($a->scheduled_at)->toDateString())
+                ->map(fn ($rows) => $rows->count())
+                ->all();
+
+            for ($d = $gridStart; $d->lessThanOrEqualTo($gridEnd); $d = $d->addDay()) {
+                $dateStr = $d->toDateString();
+                $weekday = ((int) $d->dayOfWeekIso) - 1; // 1..7 → 0..6
+                $exception = $allExceptions->get($dateStr);
+                $calendarGrid[] = [
+                    'date'            => $dateStr,
+                    'day'             => $d->day,
+                    'weekday'         => $weekday,
+                    'is_current_month'=> $d->month === $calendarMonth->month,
+                    'is_today'        => $d->isSameDay(\Carbon\CarbonImmutable::now()),
+                    'is_past'         => $d->lt(\Carbon\CarbonImmutable::now()->startOfDay()),
+                    'has_pattern'     => in_array($weekday, $patternWeekdays, true),
+                    'exception'       => $exception,  // null | SeniorAvailabilityException
+                    'appointment_count' => (int) ($dayAppointmentCounts[$dateStr] ?? 0),
+                ];
+            }
         }
 
         return view('senior.appointments', [
@@ -85,6 +147,10 @@ class SeniorAppointmentController extends Controller
             'bookingPublicUrl'       => ($bookingSettings && $bookingSettings->is_public && $bookingSettings->public_slug)
                 ? route('booking.public.show', ['slug' => $bookingSettings->public_slug])
                 : null,
+            'calendarGrid'           => $calendarGrid,
+            'calendarTitle'          => $calendarTitle,
+            'calendarPrevUrl'        => $calendarPrevUrl,
+            'calendarNextUrl'        => $calendarNextUrl,
         ]);
     }
 

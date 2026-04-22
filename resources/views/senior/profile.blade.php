@@ -264,36 +264,14 @@
         </div>
     </div>
 
-    {{-- Çalışma Saatleri --}}
-    <div class="sprf-section">
-        <div class="sprf-section-title">Çalışma Saatleri</div>
-        <div class="senior-schedule-wrap">
-            <div class="senior-schedule-head">
-                <div>Gün</div><div>Aktif</div><div>Başlangıç</div><div>Bitiş</div><div>Not</div>
-            </div>
-            @foreach(($weeklySchedule ?? []) as $dayKey => $row)
-                <div class="senior-schedule-row">
-                    <div class="senior-schedule-day">{{ $dayLabels[$dayKey] ?? $dayKey }}</div>
-                    <div class="senior-schedule-cell checkbox">
-                        <input type="checkbox"
-                               name="weekly_schedule[{{ $dayKey }}][enabled]" value="1"
-                               @checked((bool) old("weekly_schedule.$dayKey.enabled", $row['enabled'] ?? false))>
-                    </div>
-                    <div class="senior-schedule-cell">
-                        <input type="time" name="weekly_schedule[{{ $dayKey }}][start]"
-                               value="{{ old("weekly_schedule.$dayKey.start", $row['start'] ?? '09:00') }}">
-                    </div>
-                    <div class="senior-schedule-cell">
-                        <input type="time" name="weekly_schedule[{{ $dayKey }}][end]"
-                               value="{{ old("weekly_schedule.$dayKey.end", $row['end'] ?? '18:00') }}">
-                    </div>
-                    <div class="senior-schedule-cell">
-                        <input type="text" name="weekly_schedule[{{ $dayKey }}][note]"
-                               value="{{ old("weekly_schedule.$dayKey.note", $row['note'] ?? '') }}"
-                               placeholder="ör. sadece online">
-                    </div>
-                </div>
-            @endforeach
+    {{-- Not: Çalışma saatleri artık /senior/appointments?tab=availability altında
+         yönetiliyor (Booking modülü). Profil burada yalnızca kişisel bilgi + yetki. --}}
+    <div class="sprf-section" style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;padding:14px 18px;">
+        <div style="font-size:13px;font-weight:700;color:#3730a3;margin-bottom:4px;">🗓️ Çalışma saatleri taşındı</div>
+        <div style="font-size:12px;color:#4338ca;line-height:1.6;">
+            Haftalık müsaitlik ve randevu ayarları artık
+            <a href="{{ url('/senior/appointments?tab=availability') }}" style="color:#3730a3;text-decoration:underline;font-weight:700;">Randevularım → Müsaitlik</a>
+            sekmesinden yönetiliyor. Takvim üzerinden gün bazlı özel saat da ekleyebilirsin.
         </div>
     </div>
 
@@ -302,47 +280,8 @@
     </div>
 </form>
 
-{{-- ── Müsaitlik Önizlemesi ── --}}
-<div class="sprf-section">
-    <div class="sprf-section-title">Haftalık Müsaitlik Önizlemesi</div>
-    <div style="display:flex;margin-bottom:8px;padding-left:90px;padding-right:140px;">
-        @foreach(range($barStart, $barEnd, 2) as $bh)
-            <div style="flex:1;font-size:var(--tx-xs);color:var(--u-muted);text-align:left;">{{ sprintf('%02d', $bh) }}</div>
-        @endforeach
-    </div>
-    @foreach(($weeklySchedule ?? []) as $dayKey => $row)
-        @php
-            $enabled  = (bool)($row['enabled'] ?? false);
-            $start    = $row['start'] ?? '09:00';
-            $end      = $row['end']   ?? '18:00';
-            $leftPct  = $toPct($start);
-            $widthPct = max(0, $toPct($end) - $leftPct);
-            $note     = trim((string)($row['note'] ?? ''));
-        @endphp
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-            <div style="width:82px;flex-shrink:0;font-size:var(--tx-sm);font-weight:600;color:#7c3aed;">
-                {{ $dayLabels[$dayKey] ?? $dayKey }}
-            </div>
-            <div class="sprf-schedule-bar" style="flex:1;">
-                @if($enabled && $widthPct > 0)
-                    <div class="sprf-schedule-fill" style="left:{{ $leftPct }}%;width:{{ $widthPct }}%;"></div>
-                @endif
-            </div>
-            <div style="width:128px;flex-shrink:0;font-size:var(--tx-xs);color:#4a6a8f;text-align:right;">
-                @if($enabled)
-                    {{ $start }} – {{ $end }}
-                    @if($note)<br><span class="muted" style="font-size:var(--tx-xs);">{{ $note }}</span>@endif
-                @else
-                    <span class="muted">Kapalı</span>
-                @endif
-            </div>
-        </div>
-    @endforeach
-    <div style="margin-top:10px;font-size:var(--tx-xs);color:var(--u-muted);background:#f7faff;border-radius:8px;padding:10px;">
-        Haftada <strong style="color:var(--u-text);">{{ $activeDays }}</strong> gün müsait &nbsp;·&nbsp;
-        Unvan: <strong style="color:var(--u-text);">{{ data_get($portalPrefs ?? [], 'profile.title', '-') ?: '-' }}</strong>
-    </div>
-</div>
+{{-- Not: Haftalık Müsaitlik Önizlemesi kaldırıldı — aynı bilgi Randevularım → Müsaitlik
+     sekmesinde aylık takvim ile daha zengin gösteriliyor. --}}
 
 {{-- ── İş Sözleşmem ── --}}
 <div class="sprf-section" style="margin-top:8px;">

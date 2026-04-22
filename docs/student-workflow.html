@@ -482,12 +482,13 @@
     <span class="meta-pill">Laravel 12 / PHP 8.4</span>
     <span class="meta-pill">Portal: /student/*</span>
     <span class="meta-pill">CSS: portal-unified-v2.css + premium.css</span>
-    <span class="meta-pill">Guncelleme: Mart 2026</span>
-    <span class="meta-pill">17 Sayfa</span>
+    <span class="meta-pill">Guncelleme: 22 Nisan 2026</span>
+    <span class="meta-pill">20+ Sayfa</span>
   </div>
 </header>
 
 <nav>
+  <a href="#guncellemeler">Son Guncellemeler</a>
   <a href="#genel">Genel Bakis</a>
   <a href="#dashboard">Dashboard</a>
   <a href="#kayit">Kayit Formu</a>
@@ -499,6 +500,9 @@
   <a href="#gorevler">Gorevler</a>
   <a href="#servisler">Servisler</a>
   <a href="#randevular">Randevular</a>
+  <a href="#ai-asistan">AI Asistan</a>
+  <a href="#takvim">Takvim</a>
+  <a href="#maliyet">Maliyet</a>
   <a href="#mesajlar">Mesajlar</a>
   <a href="#destek">Destek & Ticket</a>
   <a href="#odeme">Odeme</a>
@@ -527,6 +531,74 @@
     </div>
   </div>
 </div>
+
+<!-- =============================== -->
+<!-- GUNCELLEMELER — 2026 Nisan       -->
+<!-- =============================== -->
+<section id="guncellemeler">
+  <h2>🆕 Son Guncellemeler (Nisan 2026)</h2>
+  <div class="desc" style="background:linear-gradient(135deg,#f5f3ff,#eef2ff);border-color:#c7d2fe;">
+    <p><strong>Bu dokuman son olarak 22 Nisan 2026'da Marketplace + SaaS yol haritasi gelisimlerine gore guncellendi.</strong></p>
+  </div>
+
+  <h3 style="margin-top:20px;"><span class="icon">📅</span>Booking / Randevu Modulu</h3>
+  <ul style="margin:12px 0 20px 22px;line-height:1.8;">
+    <li><strong>Yeni public randevu landing</strong> (<code>/randevu</code>) — MentorDE kurumsal renklerinde
+        marketing-grade sayfa: hero + video karsilamasi (CMS'li) + 6 benefit karti + 3 adim surec +
+        danisman listesi + FAQ + CTA banner.</li>
+    <li><strong>Public booking widget</strong> (<code>/book/{slug}</code>) — is_public=true olan senior'larin
+        kisisel URL'i; ziyaretci burada slot secer, randevu olusturur.</li>
+    <li><strong>Ogrenciye "Yeni Randevu Al" CTA</strong> — <code>/student/appointments</code> hero altinda
+        <code>/randevu</code>'ya yonlendiren buton.</li>
+    <li><strong>Sozlesmeli ogrenci icin UCRETSIZ</strong> — sistem otomatik algilar, odeme sayfasi
+        gorunmez (PricingResolver). Iletisim kanali hep acik.</li>
+    <li><strong>Aylik takvim + haftalik pattern + istisnalar</strong> (senior tarafinda) — ogrencinin
+        gordugu slotlar bu ayarlarin turevi.</li>
+  </ul>
+
+  <h3><span class="icon">🤖</span>AI Asistan (<code>/student/ai-assistant</code>)</h3>
+  <ul style="margin:12px 0 20px 22px;line-height:1.8;">
+    <li>Ogrencinin 7/24 Almanya egitim asistani — uni-assist, Sperrkonto, vize, Anmeldung sorulari.</li>
+    <li>Multi-provider destekli (Claude + GPT + Gemini), context olarak ogrencinin mevcut adim + belge
+        durumu gonderilir.</li>
+    <li>Gunluk kullanim limiti, 20 mesajlik gecmis.</li>
+  </ul>
+
+  <h3><span class="icon">📆</span>Takvim (<code>/student/calendar</code>)</h3>
+  <p>Ogrenciye ozel interaktif takvim — randevular, deadline'lar, gorevler tek yerde. Google Calendar
+     senkronizasyonu ile 2-way sync (push + pull) aktif.</p>
+
+  <h3 style="margin-top:16px;"><span class="icon">💰</span>Maliyet Hesaplama (<code>/student/cost-calculator</code>)</h3>
+  <p>Almanya'da egitim + yasam giderlerinin aylik/yillik tahmini hesaplayici — bloke hesap, saglik
+     sigortasi, konut, dil kursu, ulasim kalemleri dahil.</p>
+
+  <h3 style="margin-top:16px;"><span class="icon">🎨</span>Marka & Tema (Backend-side)</h3>
+  <p>Manager <code>/manager/brand</code> uzerinden: marka adi + logo + <strong>public sayfa temasi</strong>
+     (MentorDE Mor varsayilan, Navy Blue alternatif). Tek secim <code>/login</code>, <code>/apply</code>
+     ve <code>/randevu</code>'yu birden etkiler.</p>
+  <p style="margin-top:10px;">Ek: <strong>Landing video CMS</strong> — hero saginda YouTube/Vimeo
+     tanitim videosu + karsilama metni, manager ayarlarindan yonetilir.</p>
+
+  <h3 style="margin-top:16px;"><span class="icon">📝</span>Form UX Iyilestirmeleri</h3>
+  <ul style="margin:12px 0 20px 22px;line-height:1.8;">
+    <li>Otomatik kayit agresivligi azaltildi — localStorage yalniz "Devam Et" tiklaminda.</li>
+    <li>Toast gostergesi minimalist ✓ rozete donusturuldu.</li>
+    <li>Basvuru formundaki prefilled alanlar (ad/soyad/email/telefon + ulke + tip + cinsiyet + dil)
+        yesil ✓ rozeti ile isaretlendi — ogrenciye "bu alan otomatik dolduruldu" uyarisi.</li>
+  </ul>
+
+  <h3><span class="icon">🛒</span>SaaS Hazirligi (Altyapi)</h3>
+  <ul style="margin:12px 0 20px 22px;line-height:1.8;">
+    <li><strong>Module toggle</strong> — <code>companies.enabled_modules</code> JSON; booking/dam/dealer
+        vb. her modul company basina acilip kapanabilir (<code>@module('booking')</code> Blade
+        direktifi sidebar linklerinde kullanilir).</li>
+    <li><strong>KDV kurallari</strong> — <code>tax_rules</code> tablosu; odeme canliya cikmadan muhasebeci
+        onayli kural-tabanli vergi uygulama altyapisi (default %0 muaf).</li>
+    <li><strong>Komisyon + payout</strong> — senior kazanclari kayit alti (<code>senior_earnings</code>),
+        aylik payout iskelesi kodlu ama <strong>is_payment_enabled=false</strong>, Stripe Checkout
+        devre disi — tum randevular su an ucretsiz.</li>
+  </ul>
+</section>
 
 <!-- =============================== -->
 <!-- 1. GENEL BAKIS -->
@@ -562,7 +634,10 @@
         <tr><td>Vize & Konut</td><td>/student/visa</td></tr>
         <tr><td>Yapilacaklar</td><td>/student/checklist</td></tr>
         <tr><td>Servisler</td><td>/student/services</td></tr>
-        <tr><td>Randevularim</td><td>/student/appointments</td></tr>
+        <tr><td>Randevularim</td><td>/student/appointments <span class="badge info" style="margin-left:6px;">Yeni Randevu Al CTA</span></td></tr>
+        <tr><td>📆 Takvim</td><td>/student/calendar <span class="badge success" style="margin-left:6px;">Yeni</span></td></tr>
+        <tr><td>🤖 AI Asistan</td><td>/student/ai-assistant <span class="badge success" style="margin-left:6px;">Yeni</span></td></tr>
+        <tr><td>💰 Maliyet Hesaplama</td><td>/student/cost-calculator <span class="badge success" style="margin-left:6px;">Yeni</span></td></tr>
         <tr><td>Mesajlar</td><td>/student/messages</td></tr>
         <tr><td>Destek Talepleri</td><td>/student/tickets</td></tr>
         <tr><td>Odeme Durumum</td><td>/student/payments</td></tr>
@@ -1064,7 +1139,7 @@
 <!-- =============================== -->
 <section id="randevular">
   <h2>11. Randevularim (/student/appointments)</h2>
-  <div class="desc">Danismanla gorusme randevularinin listelenip talep edilebildigi ekran.</div>
+  <div class="desc">Danisman ile gorusme randevularinin listelendigi ekran. Yeni randevu almak icin "Yeni Randevu Al" CTA <code>/randevu</code> landing sayfasina yonlendirir — orada senior listesinden secim yapip aylik slot grid'inden uygun saati secersin.</div>
 
   <div class="grid4" style="margin-bottom:14px">
     <div class="kpi-box warn"><div class="lbl">Bekleyen</div><div class="val">1</div><div class="sub">Onay bekleniyor</div></div>
@@ -1073,28 +1148,36 @@
     <div class="kpi-box danger"><div class="lbl">Iptal</div><div class="val">0</div><div class="sub">—</div></div>
   </div>
 
+  <div class="card" style="margin-bottom:14px;background:linear-gradient(135deg,#5b2e91,#4a2377);color:#fff;border:none;">
+    <h3 style="color:#fff;"><span class="icon">🆕</span>Yeni Randevu Al CTA</h3>
+    <p style="color:rgba(255,255,255,.92);margin-bottom:10px;">Hero altindaki buton ogrenciyi <code style="background:rgba(255,255,255,.15);padding:2px 6px;border-radius:4px;">/randevu</code> (public landing) sayfasina yonlendirir. Orada:</p>
+    <ol style="margin-left:22px;color:rgba(255,255,255,.92);line-height:1.8;">
+      <li>Aylik takvim + danisman listesi arasinda secim yap</li>
+      <li>Secilen danismanin musait saatlerini gor (gercek zamanli)</li>
+      <li>Tek tikla slot sec, bilgileri onayla, randevu olustur</li>
+      <li>Mail ile onay gelir + Google Calendar'a otomatik event eklenir</li>
+    </ol>
+    <p style="color:rgba(255,255,255,.8);margin-top:10px;font-size:13px;">
+      <strong>Sozlesmeli ogrenci</strong> icin odeme adimi yok — PricingResolver sistemi algilar,
+      direkt confirm olur.
+    </p>
+  </div>
+
   <div class="grid2">
     <div class="card">
-      <h3><span class="icon">📅</span>Randevu Talep Formu (Sticky Sol)</h3>
-      <div class="form-demo">
-        <div class="form-field"><label>Randevu Turu</label><div class="fbox">Video Gorusme / Telefon / Yuzyuze</div></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div class="form-field"><label>Tarih</label><div class="fbox">GG.AA.YYYY</div></div>
-          <div class="form-field"><label>Saat</label><div class="fbox">SS:DD</div></div>
-        </div>
-        <div class="form-field"><label>Aciklama</label><div class="fbox">Gorusmek istediginiz konu...</div></div>
-        <div style="background:var(--brand);color:#fff;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700">Randevu Talep Et</div>
-      </div>
-    </div>
-    <div class="card">
       <h3><span class="icon">🗓</span>Randevu Listesi</h3>
+      <p class="desc" style="margin-bottom:10px;">Hem <strong>Senior'un manuel olusturdugu</strong> hem <strong>public widget'tan gelen</strong> (student olarak sen ya da Senior tarafindan aldirilmis) randevular ayni listede gorulur.</p>
       <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden">
         <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:flex-start">
           <div style="width:40px;height:40px;background:#dbeafe;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📹</div>
           <div style="flex:1">
             <div style="font-size:13px;font-weight:700">Video Gorusme — Surec Guncelleme</div>
             <div style="font-size:12px;color:var(--muted)">15 Nisan 2026 Sali — 14:00</div>
-            <div style="margin-top:4px"><span class="badge ok">Onaylandi</span> <span style="font-size:12px;color:var(--info);margin-left:6px">Google Meet Linki</span></div>
+            <div style="margin-top:4px">
+              <span class="badge ok">Onaylandi</span>
+              <span class="badge info" style="margin-left:4px;background:#dbeafe;color:#1e40af;">🌐 Public Booking</span>
+              <span style="font-size:12px;color:var(--info);margin-left:6px">Google Meet Linki</span>
+            </div>
           </div>
         </div>
         <div style="padding:12px 16px;display:flex;gap:14px;align-items:flex-start">
@@ -1102,11 +1185,25 @@
           <div style="flex:1">
             <div style="font-size:13px;font-weight:700">Telefon Gorusmesi — Vize Danismanligi</div>
             <div style="font-size:12px;color:var(--muted)">20 Nisan 2026 Pazar — 10:30</div>
-            <div style="margin-top:4px"><span class="badge warn">Onay Bekleniyor</span></div>
+            <div style="margin-top:4px"><span class="badge ok">Onaylandi</span></div>
           </div>
         </div>
       </div>
-      <div class="note" style="margin-top:10px"><strong>Takvim Entegrasyonu:</strong> Senior randevu onaylarsa Google Calendar/Calendly'e otomatik event eklenir. Ogrenci badge ile gorur.</div>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🔄</span>Takvim Entegrasyonu</h3>
+      <ul style="margin-left:18px;line-height:1.8;font-size:14px;">
+        <li><strong>Google Calendar 2-way sync</strong> — Senior'un Google hesabi bagliysa:
+          <ul style="margin-left:18px;margin-top:4px;">
+            <li>Push: Sistemde olusan randevu Google'a gider</li>
+            <li>Pull: Google'da yapilan degisiklik 15 dk icinde sisteme yansir</li>
+          </ul>
+        </li>
+        <li><strong>Otomatik Google Meet link</strong> — online randevular icin meet.google.com linki</li>
+        <li><strong>Cross-cancel mail</strong> — Senior iptal ederse invitee'ye otomatik bilgilendirme</li>
+        <li><strong>24 saat kurali</strong> — Invitee iptal linki ile 24 saat oncesine kadar iptal edebilir</li>
+      </ul>
+      <div class="note" style="margin-top:10px"><strong>Cakisma korumasi:</strong> Senior manuel randevu eklerken saat cakismasi varsa sari uyari cikar, ongoru ile "bilincli olarak ust uste bindir" onay kutusu gosterilir.</div>
     </div>
   </div>
 </section>
@@ -1350,6 +1447,128 @@
   </div>
 
   <div class="note" style="margin-top:12px"><strong>student_material_reads tablosu:</strong> Ogrenci bir materiyal actiginda read kaydedilir. Senior kimin ne kadarini izledigini gorebilir.</div>
+</section>
+
+<!-- =============================== -->
+<!-- AI ASISTAN -->
+<!-- =============================== -->
+<section id="ai-asistan">
+  <h2>🤖 AI Asistan (/student/ai-assistant)</h2>
+  <div class="desc">
+    Ogrencinin 7/24 erisebildigi yapay zeka danismani. Uni-assist, bloke hesap (Sperrkonto), vize
+    basvurusu, Anmeldung ve Almanya egitim sureci hakkinda sorulari aninda yanitlar.
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon">💬</span>Chat Arayuzu</h3>
+      <div style="border:1px solid var(--line);border-radius:10px;padding:12px;background:#f8fafc;">
+        <div style="background:#fff;padding:10px;border-radius:8px;margin-bottom:8px;border-left:3px solid #5b2e91;">
+          <strong style="font-size:12px;color:#5b2e91;">🤖 Asistan</strong>
+          <div style="font-size:13px;margin-top:4px;color:#334155;">Merhaba! Almanya egitim sureciyle ilgili her turlu sorunu yanitlayabilirim. Ornek: "Uni-Assist'te dosyami nasil gonderebilirim?"</div>
+        </div>
+        <div style="background:#eef2ff;padding:10px;border-radius:8px;border-left:3px solid #3730a3;">
+          <strong style="font-size:12px;color:#3730a3;">👤 Ogrenci</strong>
+          <div style="font-size:13px;margin-top:4px;color:#334155;">Sperrkonto ne zaman acmam gerekir?</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🔌</span>Teknik Yapi</h3>
+      <ul style="line-height:1.9;margin-left:18px;font-size:14px;">
+        <li><strong>Multi-provider:</strong> Claude (Anthropic) + GPT (OpenAI) + Gemini (Google)</li>
+        <li><strong>Context:</strong> Ogrencinin mevcut adim durumu (progress_percent, docs_ready, contract_status)
+            her soruya otomatik eklenir — asistan kisisel cevap verir</li>
+        <li><strong>Gunluk limit:</strong> 50 soru/gun (sozlesmeli ogrenciler icin), 20/gun (guest)</li>
+        <li><strong>Gecmis:</strong> Son 20 soru-cevap <code>student_ai_conversations</code> tablosunda saklanir</li>
+        <li><strong>Audit:</strong> Tum AI kullanimlari <code>system_event_logs</code>'a yazilir</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:14px;">
+    <strong>Neden AI Asistan?</strong> Saat 22:00'de "Bloke hesap hangi bankalar destekliyor?" sorusu
+    geldiginde danismani beklemek yerine aninda yanit alir, process devam eder. Danismanlar sabah
+    "ogrenciye acik kalan sorular" dashboard'unda AI'nin cozemedigi karmasik sorulari gorur.
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- TAKVIM -->
+<!-- =============================== -->
+<section id="takvim">
+  <h2>📆 Takvim (/student/calendar)</h2>
+  <div class="desc">
+    Ogrencinin tum randevu, gorev, deadline ve surec takibini tek ekranda goren interaktif takvimi.
+    Google Calendar ile 2-way sync — Google'da yapilan degisiklikler 15 dk icinde otomatik yansitilir.
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon">🎨</span>Takvim Uzerinde Goruntulenenler</h3>
+      <ul style="line-height:1.9;margin-left:18px;">
+        <li><span style="display:inline-block;width:10px;height:10px;background:#5b2e91;border-radius:50%;margin-right:6px;"></span>
+            <strong>Randevular</strong> — Senior ile gorusmeler (saat + Google Meet linki)</li>
+        <li><span style="display:inline-block;width:10px;height:10px;background:#dc2626;border-radius:50%;margin-right:6px;"></span>
+            <strong>Universite deadline'lari</strong> — Uni-assist, direkt basvuru tarihleri</li>
+        <li><span style="display:inline-block;width:10px;height:10px;background:#d97706;border-radius:50%;margin-right:6px;"></span>
+            <strong>Checklist gorevleri</strong> — Due date'li checklist itemlari</li>
+        <li><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:50%;margin-right:6px;"></span>
+            <strong>Milestone</strong> — Sozlesme onayi, vize randevusu, uculus bileti vb.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🔄</span>Google Calendar Sync</h3>
+      <p style="font-size:14px;line-height:1.7;">
+        Senior Google Calendar'ini bagladiysa (<code>/senior/settings</code>), ogrenci otomatik olarak
+        randevulari kendi Google hesabinda da gorebilir — GoogleCalendarService arka planda 2-way
+        sync calistirir.
+      </p>
+      <ul style="line-height:1.8;margin-left:18px;font-size:13px;margin-top:10px;">
+        <li><strong>Push:</strong> Sistemde olusturulan randevu Google'a gider (anlik)</li>
+        <li><strong>Pull:</strong> Google'da yapilan degisiklik 15 dk cron ile alinir</li>
+        <li><strong>.ics download:</strong> Takvime aktar linki ile manual import</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== -->
+<!-- MALIYET HESAPLAMA -->
+<!-- =============================== -->
+<section id="maliyet">
+  <h2>💰 Maliyet Hesaplama (/student/cost-calculator)</h2>
+  <div class="desc">
+    Almanya'da egitim ve yasam giderlerinin aylik/yillik tahmini hesaplayici. Ogrenci finansal
+    planlamasini yaparken kritik arac. Sperrkonto icin gereken minimum miktar da hesaplanir
+    (2026 itibariyla ~12.000 EUR/yil, yasal gereklilik).
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon">📊</span>Hesaplama Kalemleri</h3>
+      <table>
+        <tr><th>Kalem</th><th>Aylik Ortalama</th></tr>
+        <tr><td>Konaklama (yurt)</td><td>250-450 EUR</td></tr>
+        <tr><td>Konaklama (WG/oda)</td><td>400-700 EUR</td></tr>
+        <tr><td>Saglik sigortasi (TK/AOK)</td><td>~120 EUR</td></tr>
+        <tr><td>Yemek</td><td>200-300 EUR</td></tr>
+        <tr><td>Ulasim (semester ticket)</td><td>~60 EUR</td></tr>
+        <tr><td>Dil kursu (varsa)</td><td>200-400 EUR</td></tr>
+        <tr><td>Kitap + malzeme</td><td>~50 EUR</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🎯</span>Ogrenciye Faydalari</h3>
+      <ul style="line-height:1.9;margin-left:18px;">
+        <li><strong>Sperrkonto planlamasi</strong> — yillik minimum gosterilir, banka acarken net bilgi</li>
+        <li><strong>Aile bilgilendirmesi</strong> — sonuc PDF export, aileye gosterilebilir</li>
+        <li><strong>Burs karsilastirmasi</strong> — DAAD, Erasmus+ miktarlari ile karsilastir</li>
+        <li><strong>Sehir karsilastirma</strong> — Berlin vs Munich vs Frankfurt gider farki</li>
+      </ul>
+      <div class="note" style="margin-top:10px;"><strong>Guncelleme:</strong> Yasal Sperrkonto miktari her Aralik'ta Alman Federal Disisleri tarafindan guncellenir, sistem bu rakamla sync tutulur.</div>
+    </div>
+  </div>
 </section>
 
 <!-- =============================== -->

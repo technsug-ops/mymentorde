@@ -82,72 +82,8 @@
 {{-- ══════════════════ TAB 1: RANDEVULAR (default) ══════════════════ --}}
 @if(($activeTab ?? 'appointments') === 'appointments')
 
-{{-- Working Hours + Settings (2 col) --}}
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-
-    {{-- Çalışma Saatleri --}}
-    <div style="background:var(--u-card);border:1px solid var(--u-line);border-radius:10px;overflow:hidden;">
-        <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);">
-            <span style="font-weight:700;font-size:var(--tx-sm);">🕐 Çalışma Saatleri</span>
-        </div>
-        @php
-            $schedule = collect($weeklySchedule ?? []);
-            $openDays = $schedule->filter(fn($r) => $r['enabled'] ?? false);
-            $closedDays = $schedule->filter(fn($r) => !($r['enabled'] ?? false));
-        @endphp
-        <div class="kpi-row" style="display:grid;grid-template-columns:repeat({{ $openDays->count() }},1fr);gap:8px;padding:12px 16px;text-align:center;">
-            @foreach($openDays as $day => $row)
-            <div class="{{ $loop->last && $openDays->count() % 2 !== 0 ? 'kpi-full' : '' }}" style="background:var(--u-bg);border:1px solid var(--u-line);border-radius:8px;padding:8px 4px;">
-                <div style="font-size:12px;font-weight:700;color:var(--u-text);margin-bottom:3px;">{{ mb_substr($dayLabels[$day] ?? $day, 0, 3) }}</div>
-                <div style="font-size:11px;color:var(--u-ok);font-weight:600;">{{ $row['start'] ?? '' }}</div>
-                <div style="font-size:11px;color:var(--u-muted);">{{ $row['end'] ?? '' }}</div>
-            </div>
-            @endforeach
-        </div>
-        @if($closedDays->isNotEmpty())
-        <div style="padding:4px 16px 12px;text-align:center;">
-            <span style="font-size:11px;color:var(--u-muted);">
-                {{ $closedDays->map(fn($r,$k) => mb_substr($dayLabels[$k] ?? $k, 0, 3))->implode(', ') }} — Kapalı
-            </span>
-        </div>
-        @endif
-    </div>
-
-    {{-- Randevu Ayarları --}}
-    <div style="background:var(--u-card);border:1px solid var(--u-line);border-radius:10px;overflow:hidden;">
-        <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);">
-            <span style="font-weight:700;font-size:var(--tx-sm);">⚙ Randevu Ayarları</span>
-        </div>
-        <div style="padding:16px;">
-            @php
-                $autoConfirm = data_get($portalPrefs ?? [], 'settings.appointment_auto_confirm', false);
-                $slotMin     = (int) data_get($portalPrefs ?? [], 'settings.appointment_slot_minutes', 30);
-                $bufferMin   = (int) data_get($portalPrefs ?? [], 'settings.appointment_buffer_minutes', 15);
-                $apptNote    = data_get($portalPrefs ?? [], 'profile.appointment_note', '');
-            @endphp
-            <div style="display:grid;gap:12px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--u-bg);border-radius:8px;border:1px solid var(--u-line);">
-                    <span style="font-size:var(--tx-sm);font-weight:600;color:var(--u-text);">Otomatik Onay</span>
-                    <span class="badge {{ $autoConfirm ? 'ok' : 'warn' }}" style="font-size:var(--tx-xs);">{{ $autoConfirm ? 'Açık' : 'Kapalı' }}</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--u-bg);border-radius:8px;border:1px solid var(--u-line);">
-                    <span style="font-size:var(--tx-sm);font-weight:600;color:var(--u-text);">Slot Süresi</span>
-                    <span style="font-size:var(--tx-sm);font-weight:700;color:var(--u-brand);">{{ $slotMin }} dk</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--u-bg);border-radius:8px;border:1px solid var(--u-line);">
-                    <span style="font-size:var(--tx-sm);font-weight:600;color:var(--u-text);">Buffer</span>
-                    <span style="font-size:var(--tx-sm);font-weight:700;color:var(--u-brand);">{{ $bufferMin }} dk</span>
-                </div>
-                @if($apptNote)
-                <div style="padding:10px 14px;background:var(--u-bg);border-radius:8px;border:1px solid var(--u-line);">
-                    <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);margin-bottom:4px;">Randevu Notu</div>
-                    <div style="font-size:var(--tx-sm);color:var(--u-text);">{{ $apptNote }}</div>
-                </div>
-                @endif
-            </div>
-        </div>
-    </div>
-</div>
+{{-- Not: Eski "Çalışma Saatleri" + "Randevu Ayarları" özet kartları kaldırıldı.
+     Aynı bilgi artık Müsaitlik + Ayarlar tab'larından yönetiliyor. --}}
 
 {{-- Filter Bar --}}
 <div style="background:var(--u-card);border:1px solid var(--u-line);border-radius:10px;padding:14px 18px;margin-bottom:14px;">
@@ -443,6 +379,120 @@
     </div>
 @endif
 
+{{-- ══════ AYLIK TAKVIM ══════ --}}
+<div class="bk-card">
+    <style>
+    .bk-cal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:10px; flex-wrap:wrap; }
+    .bk-cal-title { font-size:18px; font-weight:700; color:var(--u-text); text-transform:capitalize; }
+    .bk-cal-nav { display:flex; gap:6px; }
+    .bk-cal-nav a { padding:6px 12px; background:var(--u-bg); border:1px solid var(--u-line); border-radius:7px; font-size:12px; font-weight:700; color:var(--u-text); text-decoration:none; transition:all .15s; }
+    .bk-cal-nav a:hover { border-color:#7c3aed; color:#7c3aed; }
+    .bk-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+    .bk-cal-wd { text-align:center; font-size:11px; font-weight:700; color:var(--u-muted); text-transform:uppercase; letter-spacing:.04em; padding:6px 0; }
+    .bk-cal-day {
+        position:relative; background:var(--u-bg); border:1px solid var(--u-line);
+        border-radius:8px; padding:6px 4px; min-height:60px;
+        cursor:pointer; transition:all .12s;
+        display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:3px;
+    }
+    .bk-cal-day:hover { border-color:#7c3aed; transform:translateY(-1px); }
+    .bk-cal-day .d-num { font-size:13px; font-weight:700; color:var(--u-text); }
+    .bk-cal-day.out-of-month { opacity:.35; }
+    .bk-cal-day.is-past { opacity:.6; cursor:not-allowed; }
+    .bk-cal-day.is-past:hover { border-color:var(--u-line); transform:none; }
+    .bk-cal-day.is-today { border-color:#7c3aed; border-width:2px; }
+    .bk-cal-day.has-pattern { background:#dcfce7; border-color:#86efac; }
+    .bk-cal-day.blocked { background:#fee2e2; border-color:#fca5a5; }
+    .bk-cal-day.override { background:#fef3c7; border-color:#fcd34d; }
+    .bk-cal-day .d-dots { display:flex; gap:2px; }
+    .bk-cal-day .d-dot { width:5px; height:5px; border-radius:50%; }
+    .bk-cal-day .d-dot.gr { background:#16a34a; }
+    .bk-cal-day .d-dot.rd { background:#dc2626; }
+    .bk-cal-day .d-dot.yl { background:#d97706; }
+    .bk-cal-day .d-appts { font-size:9px; color:#7c3aed; font-weight:700; margin-top:auto; padding-top:2px; }
+    .bk-cal-legend { display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:var(--u-muted); margin-top:10px; padding-top:10px; border-top:1px solid var(--u-line); }
+    .bk-cal-legend-item { display:flex; align-items:center; gap:6px; }
+    .bk-cal-legend-item span.sw { width:12px; height:12px; border-radius:3px; display:inline-block; }
+    </style>
+
+    <div class="bk-cal-head">
+        <div class="bk-cal-title">📅 {{ $calendarTitle ?? '' }}</div>
+        <div class="bk-cal-nav">
+            <a href="{{ $calendarPrevUrl ?? '#' }}">‹ Önceki</a>
+            <a href="{{ url('/senior/appointments?tab=availability') }}">Bu Ay</a>
+            <a href="{{ $calendarNextUrl ?? '#' }}">Sonraki ›</a>
+        </div>
+    </div>
+
+    <p class="hint">
+        <strong>Günlere tıklayarak özel istisna ekleyebilirsin</strong> — tatil, izin veya o güne özel saat aralığı.
+        Yeşil: haftalık müsaitlik geçerli · Kırmızı: kapalı · Sarı: özel saat · Sağ altındaki mor sayı: o günkü randevu adedi.
+    </p>
+
+    <div class="bk-cal-grid">
+        @foreach(['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'] as $wdLabel)
+            <div class="bk-cal-wd">{{ $wdLabel }}</div>
+        @endforeach
+
+        @foreach(($calendarGrid ?? []) as $day)
+            @php
+                $classes = ['bk-cal-day'];
+                if (!$day['is_current_month']) $classes[] = 'out-of-month';
+                if ($day['is_past'])            $classes[] = 'is-past';
+                if ($day['is_today'])           $classes[] = 'is-today';
+                $hasException = $day['exception'] !== null;
+                if ($hasException && $day['exception']->is_blocked) {
+                    $classes[] = 'blocked';
+                } elseif ($hasException && !$day['exception']->is_blocked) {
+                    $classes[] = 'override';
+                } elseif ($day['has_pattern']) {
+                    $classes[] = 'has-pattern';
+                }
+                $title = $day['date'];
+                if ($hasException && $day['exception']->is_blocked) {
+                    $title .= ' — Kapalı' . ($day['exception']->reason ? ' (' . $day['exception']->reason . ')' : '');
+                } elseif ($hasException) {
+                    $title .= ' — Özel: ' . \Carbon\Carbon::parse($day['exception']->override_start_time)->format('H:i') . '-' . \Carbon\Carbon::parse($day['exception']->override_end_time)->format('H:i');
+                } elseif ($day['has_pattern']) {
+                    $title .= ' — Haftalık müsait';
+                } else {
+                    $title .= ' — Müsait değil';
+                }
+                if ($day['appointment_count'] > 0) {
+                    $title .= ' · ' . $day['appointment_count'] . ' randevu';
+                }
+            @endphp
+            <div class="{{ implode(' ', $classes) }}"
+                 title="{{ $title }}"
+                 data-day="{{ $day['date'] }}"
+                 data-has-exception="{{ $hasException ? '1' : '0' }}">
+                <div class="d-num">{{ $day['day'] }}</div>
+                <div class="d-dots">
+                    @if($day['has_pattern'] && !$hasException)
+                        <span class="d-dot gr"></span>
+                    @endif
+                    @if($hasException && $day['exception']->is_blocked)
+                        <span class="d-dot rd"></span>
+                    @endif
+                    @if($hasException && !$day['exception']->is_blocked)
+                        <span class="d-dot yl"></span>
+                    @endif
+                </div>
+                @if($day['appointment_count'] > 0)
+                    <div class="d-appts">{{ $day['appointment_count'] }} rndv</div>
+                @endif
+            </div>
+        @endforeach
+    </div>
+
+    <div class="bk-cal-legend">
+        <div class="bk-cal-legend-item"><span class="sw" style="background:#dcfce7;border:1px solid #86efac;"></span> Haftalık müsait</div>
+        <div class="bk-cal-legend-item"><span class="sw" style="background:#fee2e2;border:1px solid #fca5a5;"></span> Kapalı (tatil/izin)</div>
+        <div class="bk-cal-legend-item"><span class="sw" style="background:#fef3c7;border:1px solid #fcd34d;"></span> Özel saat</div>
+        <div class="bk-cal-legend-item"><span class="sw" style="background:var(--u-bg);border:1px solid var(--u-line);"></span> Müsait değil</div>
+    </div>
+</div>
+
 <div class="bk-card">
     <h3>🗓️ Haftalık Müsaitlik</h3>
     <p class="hint">Haftanın hangi günleri ve saatleri müsaitsin? Birden fazla dilim ekleyebilirsin (örn. Salı 09-12 + Salı 14-17).</p>
@@ -568,6 +618,32 @@
                     setTimeout(function(){ btn.textContent = prev; }, 1500);
                 });
             }
+        });
+    });
+
+    // Calendar gün tıklama → istisna formunun date alanını prefill + scroll
+    document.querySelectorAll('.bk-cal-day').forEach(function(cell){
+        if (cell.classList.contains('is-past')) return;
+        cell.addEventListener('click', function(){
+            var date = cell.getAttribute('data-day');
+            if (!date) return;
+            // İstisna formundaki tarih input'unu bul
+            var excForm = document.querySelector('form[action*="exceptions"][action*="senior.booking-settings.exceptions"]')
+                || document.querySelector('form[action*="/senior/booking-settings/exceptions"]');
+            // Fallback: input[name=date] + datetime içindeki
+            var dateInput = excForm
+                ? excForm.querySelector('input[name="date"]')
+                : document.querySelector('input[name="date"][type="date"]');
+            if (!dateInput) return;
+            dateInput.value = date;
+            dateInput.focus();
+            // Görünür forma scroll
+            var target = excForm || dateInput;
+            target.scrollIntoView({behavior:'smooth', block:'center'});
+            // Flash highlight
+            dateInput.style.transition = 'box-shadow .3s';
+            dateInput.style.boxShadow = '0 0 0 3px rgba(124,58,237,.4)';
+            setTimeout(function(){ dateInput.style.boxShadow = ''; }, 1500);
         });
     });
 })();
