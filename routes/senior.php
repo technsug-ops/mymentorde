@@ -146,7 +146,12 @@ Route::middleware(['company.context', 'auth', 'senior.role'])->group(function ()
     // ── Booking / Randevu Modülü (module:booking gate) ───────────────────────
     Route::middleware('module:booking')->group(function (): void {
         $c = \App\Http\Controllers\Booking\SeniorAvailabilityController::class;
-        Route::get('/senior/booking-settings',                       [$c, 'index'])->name('senior.booking-settings');
+        // Eski /senior/booking-settings URL'i artık /senior/appointments tab'ına yönlendirir
+        // (tek sayfada 3 tab: Randevular / Müsaitlik / Ayarlar). Backward compat için 301.
+        Route::get('/senior/booking-settings', function () {
+            return redirect()->route('senior.appointments', ['tab' => 'availability'], 301);
+        })->name('senior.booking-settings');
+        // POST/DELETE endpoint'leri aynı kalır — form submit'ler için
         Route::post('/senior/booking-settings',                      [$c, 'updateSettings'])->middleware('throttle:30,1')->name('senior.booking-settings.update');
         Route::post('/senior/booking-settings/patterns',             [$c, 'storePattern'])->middleware('throttle:60,1')->name('senior.booking-settings.patterns.store');
         Route::delete('/senior/booking-settings/patterns/{pattern}', [$c, 'destroyPattern'])->middleware('throttle:60,1')->name('senior.booking-settings.patterns.destroy');

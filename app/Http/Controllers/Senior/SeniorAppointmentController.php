@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Senior;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Senior\Concerns\SeniorPortalTrait;
+use App\Models\SeniorAvailabilityException;
+use App\Models\SeniorAvailabilityPattern;
+use App\Models\SeniorBookingSetting;
 use App\Models\StudentAppointment;
 use App\Services\Integrations\IntegrationFactory;
 use Illuminate\Http\Request;
@@ -14,10 +17,17 @@ class SeniorAppointmentController extends Controller
 
     public function appointments(Request $request)
     {
+        $user   = $request->user();
         $email  = $this->seniorEmail($request);
         $prefs  = $this->seniorPortalPreferences($request);
         $q      = trim((string) $request->query('q', ''));
         $status = trim((string) $request->query('status', 'all'));
+
+        // Tab seçimi: appointments (default) / availability / settings
+        $tab = strtolower(trim((string) $request->query('tab', 'appointments')));
+        if (!in_array($tab, ['appointments', 'availability', 'settings'], true)) {
+            $tab = 'appointments';
+        }
 
         $appointments = StudentAppointment::query()
             ->with('publicBooking')
@@ -34,12 +44,71 @@ class SeniorAppointmentController extends Controller
             ->limit(200)
             ->get();
 
+        // Booking ayarları + müsaitlik verisi — availability/settings tab'ları için.
+        // Module toggle kapalıysa null dönecek ve blade'de availability/settings tab'ları
+        // gösterilmeyecek.
+        $bookingModuleEnabled = \App\Support\ModuleAccess::enabled('booking');
+        $bookingSettings = null;
+        $availabilityPatterns = collect();
+        $availabilityExceptions = collect();
+        if ($bookingModuleEnabled && $user) {
+            $bookingSettings = $this->ensureBookingSettings($user);
+            $availabilityPatterns = SeniorAvailabilityPattern::query()
+                ->where('senior_user_id', $user->id)
+                ->orderBy('weekday')
+                ->orderBy('start_time')
+                ->get();
+            $availabilityExceptions = SeniorAvailabilityException::query()
+                ->where('senior_user_id', $user->id)
+                ->where('date', '>=', now()->toDateString())
+                ->orderBy('date')
+                ->get();
+        }
+
         return view('senior.appointments', [
-            'appointments'   => $appointments,
-            'portalPrefs'    => $prefs,
-            'weeklySchedule' => $this->normalizeWeeklySchedule((array) data_get($prefs, 'profile.weekly_schedule', [])),
-            'filters'        => compact('q', 'status'),
-            'sidebarStats'   => $this->sidebarStats($request),
+            'appointments'           => $appointments,
+            'portalPrefs'            => $prefs,
+            'weeklySchedule'         => $this->normalizeWeeklySchedule((array) data_get($prefs, 'profile.weekly_schedule', [])),
+            'filters'                => compact('q', 'status'),
+            'sidebarStats'           => $this->sidebarStats($request),
+            'activeTab'              => $tab,
+            'bookingModuleEnabled'   => $bookingModuleEnabled,
+            'bookingSettings'        => $bookingSettings,
+            'availabilityPatterns'   => $availabilityPatterns,
+            'availabilityExceptions' => $availabilityExceptions,
+            'weekdayLabels'          => SeniorAvailabilityPattern::WEEKDAY_LABELS_TR,
+            'supportedTimezones'     => [
+                'Europe/Berlin', 'Europe/Istanbul', 'Europe/London', 'Europe/Paris',
+                'Europe/Madrid', 'Europe/Amsterdam', 'Europe/Zurich', 'Europe/Vienna',
+                'America/New_York', 'America/Los_Angeles', 'Asia/Dubai', 'Asia/Tokyo',
+            ],
+            'bookingPublicUrl'       => ($bookingSettings && $bookingSettings->is_public && $bookingSettings->public_slug)
+                ? route('booking.public.show', ['slug' => $bookingSettings->public_slug])
+                : null,
+        ]);
+    }
+
+    /**
+     * Senior'ın booking ayarları yoksa varsayılanlarla oluştur (tab açılışında idempotent).
+     */
+    private function ensureBookingSettings(\App\Models\User $user): SeniorBookingSetting
+    {
+        $existing = SeniorBookingSetting::query()
+            ->where('senior_user_id', $user->id)
+            ->first();
+        if ($existing) {
+            return $existing;
+        }
+        return SeniorBookingSetting::create([
+            'senior_user_id'   => $user->id,
+            'slot_duration'    => 30,
+            'buffer_minutes'   => 5,
+            'min_notice_hours' => 6,
+            'max_future_days'  => 90,
+            'timezone'         => 'Europe/Berlin',
+            'is_public'        => false,
+            'display_name'     => trim(($user->name ?? '') . ' — Randevu'),
+            'is_active'        => true,
         ]);
     }
 

@@ -301,7 +301,9 @@
             </div>
             {{-- CTA kartı - apply'dan gelmemiş kullanıcılara --}}
             @unless(request()->query('from_apply'))
-            <a href="/apply" class="cta-card" style="display:block;margin-top:20px;padding:18px 20px;background:linear-gradient(135deg,{{ $pt['primary'] }},{{ $pt['primary_dark'] }});border-radius:14px;text-decoration:none;color:#fff;box-shadow:0 8px 24px rgba({{ $pt['focus_shadow_rgb'] }},.35);transition:transform .15s,box-shadow .15s;">
+            <a href="/apply" class="cta-card" style="display:block;margin-top:20px;padding:18px 20px;background:linear-gradient(135deg,{{ $pt['primary'] }},{{ $pt['primary_dark'] }});border:1.5px solid rgba(255,255,255,.35);border-radius:14px;text-decoration:none;color:#fff;box-shadow:0 8px 24px rgba({{ $pt['focus_shadow_rgb'] }},.35), 0 0 0 1px rgba(255,255,255,.08);transition:transform .15s,box-shadow .15s,border-color .15s;"
+               onmouseover="this.style.borderColor='rgba(255,255,255,.6)';this.style.transform='translateY(-2px)';"
+               onmouseout="this.style.borderColor='rgba(255,255,255,.35)';this.style.transform='';">
                 <div style="display:flex;align-items:center;gap:14px;">
                     <div style="font-size:32px;flex-shrink:0;">🎓</div>
                     <div style="flex:1;">
@@ -315,7 +317,26 @@
         </section>
 
         <section class="panel auth" aria-label="Giriş formu">
-            <h2>{{ config('brand.name', 'MentorDE') }} Login</h2>
+            @php
+                $_authHasBrandTable = \Illuminate\Support\Facades\Schema::hasTable('marketing_admin_settings');
+                $_authBrandName = $_authHasBrandTable
+                    ? \App\Models\MarketingAdminSetting::getValue('brand_name', config('brand.name', 'MentorDE'))
+                    : config('brand.name', 'MentorDE');
+                $_authLogoUrl = $_authHasBrandTable
+                    ? \App\Models\MarketingAdminSetting::getValue('brand_logo_url', config('brand.logo_url', ''))
+                    : config('brand.logo_url', '');
+                $_authLogoHeight = (int) ($_authHasBrandTable
+                    ? \App\Models\MarketingAdminSetting::getValue('brand_logo_height', config('brand.logo_height', 36))
+                    : config('brand.logo_height', 36));
+            @endphp
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+                @if(!empty($_authLogoUrl))
+                    <div style="flex-shrink:0;display:inline-flex;align-items:center;background:{{ $pt['primary_soft'] }};padding:8px 12px;border-radius:10px;border:1px solid {{ $pt['line'] }};">
+                        <img src="{{ $_authLogoUrl }}" alt="{{ $_authBrandName }}" style="height:{{ $_authLogoHeight }}px;width:auto;display:block;">
+                    </div>
+                @endif
+                <h2 style="margin:0;">{{ $_authBrandName }} Login</h2>
+            </div>
             <p class="sub">Hesabınla giriş yap. Sistem seni rolüne göre ilgili panele yönlendirir.</p>
 
             @if (session('status'))

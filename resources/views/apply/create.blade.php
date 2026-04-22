@@ -132,17 +132,16 @@
         }
         .step-num {
             flex-shrink: 0;
-            width: 26px;
-            height: 26px;
-            border-radius: 999px;
-            background: {{ $pt['brand_step_badge'] }};
-            border: 1px solid {{ $pt['preset'] === 'navy' ? 'rgba(255,255,255,.18)' : 'rgba(232,185,49,.6)' }};
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255,255,255,.10);
+            border: 1px solid rgba(255,255,255,.18);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            font-weight: 700;
-            color: {{ $pt['brand_step_badge_t'] }};
+            font-size: 17px;
+            line-height: 1;
         }
         .step-txt .t { font-size: 13px; font-weight: 600; color: {{ $pt['brand_text_step_t'] }}; margin-bottom: 2px; }
         .step-txt .s { font-size: 12px; color: {{ $pt['brand_text_step_s'] }}; }
@@ -348,8 +347,11 @@
     <section class="brand-panel" aria-label="Marka bilgisi">
         <div class="brand-logo">
             @if($resolvedLogoSrc !== '')
-                <img src="{{ $resolvedLogoSrc }}" alt="{{ $brandName }}"
-                     style="height:{{ $logoHeight }}px;width:auto;filter:brightness(0) invert(1);">
+                {{-- Portal sidebar'dakine benzer: beyaz pad + orijinal renkli logo --}}
+                <div style="display:inline-flex;align-items:center;gap:10px;background:#fff;padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.25);">
+                    <img src="{{ $resolvedLogoSrc }}" alt="{{ $brandName }}"
+                         style="height:{{ $logoHeight }}px;width:auto;display:block;">
+                </div>
             @else
                 <div class="brand-logo-text">
                     @if($brandAccent !== '')
@@ -368,28 +370,28 @@
 
         <div class="steps">
             <div class="step">
-                <div class="step-num">1</div>
+                <div class="step-num">📝</div>
                 <div class="step-txt">
                     <div class="t">Başvuruyu Tamamla</div>
                     <div class="s">Formu doldur, danışmanına ulaşalım</div>
                 </div>
             </div>
             <div class="step">
-                <div class="step-num">2</div>
+                <div class="step-num">🎓</div>
                 <div class="step-txt">
                     <div class="t">Üniversite Seçimi</div>
                     <div class="s">Profiline uygun okul ve bölüm planla</div>
                 </div>
             </div>
             <div class="step">
-                <div class="step-num">3</div>
+                <div class="step-num">🛂</div>
                 <div class="step-txt">
                     <div class="t">Başvuru & Vize</div>
                     <div class="s">Belgeler, başvuru ve konsolosluk süreci</div>
                 </div>
             </div>
             <div class="step">
-                <div class="step-num">4</div>
+                <div class="step-num">🏠</div>
                 <div class="step-txt">
                     <div class="t">Yerleşim</div>
                     <div class="s">Konaklama, kayıt ve ilk günler</div>

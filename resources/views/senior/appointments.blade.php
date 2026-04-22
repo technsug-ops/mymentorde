@@ -52,6 +52,36 @@
     </div>
 </div>
 
+{{-- Tab Navigation (booking modülü açıkken) --}}
+@if($bookingModuleEnabled ?? false)
+    @php
+        $tabBase = url('/senior/appointments');
+        $tabs = [
+            ['key'=>'appointments', 'label'=>'📅 Randevular',   'badge'=>$totalCnt],
+            ['key'=>'availability', 'label'=>'🗓️ Müsaitlik',    'badge'=>null],
+            ['key'=>'settings',     'label'=>'⚙️ Ayarlar',      'badge'=>null],
+        ];
+    @endphp
+    <div style="background:var(--u-card);border:1px solid var(--u-line);border-radius:10px;padding:4px;margin-bottom:14px;display:flex;gap:3px;overflow-x:auto;">
+        @foreach($tabs as $t)
+            @php $isActive = ($activeTab ?? 'appointments') === $t['key']; @endphp
+            <a href="{{ $tabBase }}?tab={{ $t['key'] }}"
+               style="flex:1;min-width:120px;text-align:center;padding:9px 12px;border-radius:8px;font-size:var(--tx-sm);font-weight:700;text-decoration:none;white-space:nowrap;
+                      background:{{ $isActive ? '#7c3aed' : 'transparent' }};
+                      color:{{ $isActive ? '#fff' : 'var(--u-text)' }};
+                      transition:all .15s;">
+                {{ $t['label'] }}
+                @if(!is_null($t['badge']))
+                    <span style="margin-left:4px;font-size:11px;opacity:.8;">({{ $t['badge'] }})</span>
+                @endif
+            </a>
+        @endforeach
+    </div>
+@endif
+
+{{-- ══════════════════ TAB 1: RANDEVULAR (default) ══════════════════ --}}
+@if(($activeTab ?? 'appointments') === 'appointments')
+
 {{-- Working Hours + Settings (2 col) --}}
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
 
@@ -373,6 +403,284 @@
     <div style="padding:48px;text-align:center;color:var(--u-muted);font-size:var(--tx-sm);">Randevu bulunamadı.</div>
     @endforelse
 </div>
+
+@endif
+{{-- ══════════════════ /TAB 1 ══════════════════ --}}
+
+
+{{-- ══════════════════ TAB 2: MÜSAİTLİK (haftalık + istisnalar) ══════════════════ --}}
+@if(($activeTab ?? '') === 'availability' && ($bookingModuleEnabled ?? false))
+
+<style>
+.bk-card { background:var(--u-card); border:1px solid var(--u-line); border-radius:10px; padding:18px; margin-bottom:14px; }
+.bk-card h3 { margin:0 0 4px; font-size:15px; color:var(--u-text); }
+.bk-card .hint { margin:0 0 14px; font-size:12px; color:var(--u-muted); line-height:1.6; }
+.bk-row { display:flex; gap:10px; align-items:center; padding:10px 12px; border-bottom:1px solid var(--u-line); font-size:13px; }
+.bk-row:last-child { border-bottom:0; }
+.bk-row .day { font-weight:700; color:var(--u-text); min-width:110px; }
+.bk-row .time { color:var(--u-muted); font-family:monospace; }
+.bk-inline { display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; }
+.bk-inline > * { flex-shrink:0; }
+.bk-field label { display:block; font-size:11px; font-weight:600; color:var(--u-muted); margin-bottom:3px; }
+.bk-field input, .bk-field select {
+    padding:7px 10px; border:1px solid var(--u-line); border-radius:7px;
+    font-size:13px; background:var(--u-bg); color:var(--u-text); box-sizing:border-box;
+}
+.bk-btn { padding:8px 16px; border:none; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; }
+.bk-btn-primary { background:#7c3aed; color:#fff; }
+.bk-btn-danger { background:#dc2626; color:#fff; }
+.bk-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; }
+.bk-badge.green { background:#dcfce7; color:#166534; }
+.bk-badge.red { background:#fee2e2; color:#991b1b; }
+.bk-public-url { background:#eef2ff; border:1px solid #c7d2fe; padding:10px 14px; border-radius:8px; font-family:monospace; font-size:12px; color:#3730a3; display:flex; justify-content:space-between; align-items:center; gap:10px; word-break:break-all; margin-bottom:14px; }
+</style>
+
+{{-- Public URL (varsa) --}}
+@if($bookingPublicUrl)
+    <div class="bk-public-url">
+        <span>🔗 {{ $bookingPublicUrl }}</span>
+        <button type="button" class="bk-btn" data-copy-url="{{ $bookingPublicUrl }}" style="background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe;padding:5px 10px;font-size:11px;">📋 Kopyala</button>
+    </div>
+@endif
+
+<div class="bk-card">
+    <h3>🗓️ Haftalık Müsaitlik</h3>
+    <p class="hint">Haftanın hangi günleri ve saatleri müsaitsin? Birden fazla dilim ekleyebilirsin (örn. Salı 09-12 + Salı 14-17).</p>
+
+    <form method="POST" action="{{ route('senior.booking-settings.patterns.store') }}" class="bk-inline">
+        @csrf
+        <input type="hidden" name="_redirect_tab" value="availability">
+        <div class="bk-field" style="flex:1;min-width:140px;">
+            <label>Gün</label>
+            <select name="weekday">
+                @foreach(($weekdayLabels ?? []) as $idx => $lbl)
+                    <option value="{{ $idx }}">{{ $lbl }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="bk-field" style="min-width:110px;">
+            <label>Başlangıç</label>
+            <input type="time" name="start_time" required value="09:00">
+        </div>
+        <div class="bk-field" style="min-width:110px;">
+            <label>Bitiş</label>
+            <input type="time" name="end_time" required value="17:00">
+        </div>
+        <button type="submit" class="bk-btn bk-btn-primary">➕ Ekle</button>
+    </form>
+
+    <div style="margin-top:14px;">
+        @forelse(($availabilityPatterns ?? collect()) as $p)
+            <div class="bk-row">
+                <span class="day">{{ $weekdayLabels[$p->weekday] ?? ('Gün ' . $p->weekday) }}</span>
+                <span class="time">{{ \Carbon\Carbon::parse($p->start_time)->format('H:i') }} – {{ \Carbon\Carbon::parse($p->end_time)->format('H:i') }}</span>
+                <span style="margin-left:auto;">
+                    <form method="POST" action="{{ route('senior.booking-settings.patterns.destroy', $p) }}" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="bk-btn bk-btn-danger" style="padding:4px 10px;font-size:11px;">Sil</button>
+                    </form>
+                </span>
+            </div>
+        @empty
+            <div style="padding:20px;text-align:center;color:var(--u-muted);font-size:13px;">Henüz müsaitlik tanımı yok. Yukarıdan ekle.</div>
+        @endforelse
+    </div>
+</div>
+
+<div class="bk-card">
+    <h3>🚫 İstisnalar / İzin Günleri</h3>
+    <p class="hint">Belirli bir günü tamamen kapatabilir veya özel saat aralığı tanımlayabilirsin (tatil, izin, ek slot vb.).</p>
+
+    <form method="POST" action="{{ route('senior.booking-settings.exceptions.store') }}" class="bk-inline">
+        @csrf
+        <div class="bk-field" style="min-width:140px;">
+            <label>Tarih</label>
+            <input type="date" name="date" required min="{{ now()->toDateString() }}">
+        </div>
+        <div class="bk-field" style="min-width:140px;">
+            <label>Tür</label>
+            <select name="is_blocked" id="bk-exc-type">
+                <option value="1">Tamamen kapalı</option>
+                <option value="0">Özel saat</option>
+            </select>
+        </div>
+        <div class="bk-field bk-exc-times" style="min-width:100px;display:none;">
+            <label>Başlangıç</label>
+            <input type="time" name="override_start_time">
+        </div>
+        <div class="bk-field bk-exc-times" style="min-width:100px;display:none;">
+            <label>Bitiş</label>
+            <input type="time" name="override_end_time">
+        </div>
+        <div class="bk-field" style="min-width:180px;flex:1;">
+            <label>Açıklama (opsiyonel)</label>
+            <input type="text" name="reason" maxlength="255" placeholder="Örn: Resmi tatil">
+        </div>
+        <button type="submit" class="bk-btn bk-btn-primary">➕ Ekle</button>
+    </form>
+
+    <div style="margin-top:14px;">
+        @forelse(($availabilityExceptions ?? collect()) as $ex)
+            <div class="bk-row">
+                <span class="day">{{ $ex->date->format('d.m.Y') }}</span>
+                @if($ex->is_blocked)
+                    <span class="bk-badge red">Kapalı</span>
+                @else
+                    <span class="bk-badge green">Özel saat</span>
+                    <span class="time">{{ \Carbon\Carbon::parse($ex->override_start_time)->format('H:i') }} – {{ \Carbon\Carbon::parse($ex->override_end_time)->format('H:i') }}</span>
+                @endif
+                @if($ex->reason)
+                    <span style="color:var(--u-muted);font-size:12px;">— {{ $ex->reason }}</span>
+                @endif
+                <span style="margin-left:auto;">
+                    <form method="POST" action="{{ route('senior.booking-settings.exceptions.destroy', $ex) }}" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="bk-btn bk-btn-danger" style="padding:4px 10px;font-size:11px;">Sil</button>
+                    </form>
+                </span>
+            </div>
+        @empty
+            <div style="padding:20px;text-align:center;color:var(--u-muted);font-size:13px;">İstisna tanımı yok.</div>
+        @endforelse
+    </div>
+</div>
+
+<script>
+(function(){
+    var sel = document.getElementById('bk-exc-type');
+    var times = document.querySelectorAll('.bk-exc-times');
+    if (sel) {
+        var toggle = function() {
+            times.forEach(function(t){ t.style.display = sel.value === '0' ? '' : 'none'; });
+        };
+        sel.addEventListener('change', toggle);
+        toggle();
+    }
+    document.querySelectorAll('[data-copy-url]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var url = btn.getAttribute('data-copy-url');
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(function(){
+                    var prev = btn.textContent;
+                    btn.textContent = '✅ Kopyalandı';
+                    setTimeout(function(){ btn.textContent = prev; }, 1500);
+                });
+            }
+        });
+    });
+})();
+</script>
+
+@endif
+{{-- ══════════════════ /TAB 2 ══════════════════ --}}
+
+
+{{-- ══════════════════ TAB 3: AYARLAR ══════════════════ --}}
+@if(($activeTab ?? '') === 'settings' && ($bookingModuleEnabled ?? false) && $bookingSettings)
+
+<div class="bk-card" style="background:var(--u-card);border:1px solid var(--u-line);border-radius:10px;padding:18px;margin-bottom:14px;">
+    <h3 style="margin:0 0 4px;font-size:15px;color:var(--u-text);">⚙️ Genel Ayarlar</h3>
+    <p style="margin:0 0 14px;font-size:12px;color:var(--u-muted);line-height:1.6;">Slot süresi, buffer, minimum bildirim ve public erişim ayarları. Sözleşmeli öğrenciler her zaman ücretsiz randevu alır.</p>
+
+    @if($bookingPublicUrl)
+        <div class="bk-public-url" style="background:#eef2ff;border:1px solid #c7d2fe;padding:10px 14px;border-radius:8px;font-family:monospace;font-size:12px;color:#3730a3;display:flex;justify-content:space-between;align-items:center;gap:10px;word-break:break-all;margin-bottom:14px;">
+            <span>🔗 {{ $bookingPublicUrl }}</span>
+            <button type="button" data-copy-url="{{ $bookingPublicUrl }}" style="background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe;padding:5px 10px;font-size:11px;border-radius:7px;cursor:pointer;">📋 Kopyala</button>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('senior.booking-settings.update') }}">
+        @csrf
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;">
+            <div class="bk-field">
+                <label>Slot süresi (dk)</label>
+                <select name="slot_duration" style="width:100%;">
+                    @foreach ([15, 20, 30, 45, 60, 90, 120] as $m)
+                        <option value="{{ $m }}" @selected((int)$bookingSettings->slot_duration === $m)>{{ $m }} dakika</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="bk-field">
+                <label>Buffer (randevular arası)</label>
+                <select name="buffer_minutes" style="width:100%;">
+                    @foreach ([0, 5, 10, 15, 30] as $m)
+                        <option value="{{ $m }}" @selected((int)$bookingSettings->buffer_minutes === $m)>{{ $m }} dakika</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="bk-field">
+                <label>En az ne kadar önceden</label>
+                <select name="min_notice_hours" style="width:100%;">
+                    @foreach ([0, 2, 4, 6, 12, 24, 48, 72] as $h)
+                        <option value="{{ $h }}" @selected((int)$bookingSettings->min_notice_hours === $h)>{{ $h }} saat</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="bk-field">
+                <label>Max. ne kadar ileri</label>
+                <select name="max_future_days" style="width:100%;">
+                    @foreach ([14, 30, 60, 90, 180, 365] as $d)
+                        <option value="{{ $d }}" @selected((int)$bookingSettings->max_future_days === $d)>{{ $d }} gün</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="bk-field">
+                <label>Zaman dilimi</label>
+                <select name="timezone" style="width:100%;">
+                    @foreach (($supportedTimezones ?? []) as $tz)
+                        <option value="{{ $tz }}" @selected($bookingSettings->timezone === $tz)>{{ $tz }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="bk-field">
+                <label>Görünen ad (başlık)</label>
+                <input type="text" name="display_name" value="{{ old('display_name', $bookingSettings->display_name) }}" placeholder="Örn: Danışmanlık Görüşmesi" maxlength="120" style="width:100%;">
+            </div>
+        </div>
+
+        <div class="bk-field" style="margin-top:12px;">
+            <label>Karşılama mesajı (public sayfa üstü)</label>
+            <textarea name="welcome_message" rows="2" maxlength="2000" placeholder="Opsiyonel. Örn: 'Danışmanlık için aşağıdan size uygun saati seçiniz.'"
+                      style="width:100%;padding:8px 10px;border:1px solid var(--u-line);border-radius:7px;font-size:13px;font-family:inherit;box-sizing:border-box;">{{ old('welcome_message', $bookingSettings->welcome_message) }}</textarea>
+        </div>
+
+        <div style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;padding:10px 14px;background:var(--u-bg);border-radius:8px;border:1px solid var(--u-line);">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                <input type="checkbox" name="is_active" value="1" @checked($bookingSettings->is_active)>
+                <span>Randevu sistemim <strong>aktif</strong></span>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                <input type="checkbox" name="is_public" value="1" @checked($bookingSettings->is_public)>
+                <span>🌐 <strong>Public link açık</strong> (herkes booking yapabilir)</span>
+            </label>
+        </div>
+
+        <div style="margin-top:14px;">
+            <button type="submit" class="bk-btn bk-btn-primary" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;">💾 Ayarları Kaydet</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.querySelectorAll('[data-copy-url]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+        var url = btn.getAttribute('data-copy-url');
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(url).then(function(){
+                var prev = btn.textContent;
+                btn.textContent = '✅ Kopyalandı';
+                setTimeout(function(){ btn.textContent = prev; }, 1500);
+            });
+        }
+    });
+});
+</script>
+
+@endif
+{{-- ══════════════════ /TAB 3 ══════════════════ --}}
+
 
 <script>
 function toggleSec(id) {
