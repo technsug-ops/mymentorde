@@ -263,6 +263,7 @@
                         <th style="width:100px;" title="Bekleyen ödeme sayısı">💰 Ödeme</th>
                         <th style="width:100px;" title="Yaklaşan randevu">📅 Randevu</th>
                         <th style="width:130px;">Son Aktivite</th>
+                        <th style="width:100px;">⚡ Aksiyon</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -302,6 +303,12 @@
                         </td>
                         <td style="font-size:10px; color:#dc2626; font-weight:600;">
                             {{ $s['days_since'] !== null ? $s['days_since'] . ' gün önce' : 'hiç' }}
+                        </td>
+                        <td style="font-size:13px;">
+                            @if ($s['email'])
+                                <a href="mailto:{{ $s['email'] }}" title="Email" style="text-decoration:none; margin-right:4px;">📧</a>
+                            @endif
+                            <a href="{{ route('manager.user-intelligence.student', $s['id']) }}" title="Detay + tüm aksiyonlar" style="text-decoration:none;">⚡</a>
                         </td>
                     </tr>
                 @endforeach
@@ -414,6 +421,7 @@
                         <th style="width:60px;" title="Son {{ $selected_days }} günde sorulan AI soruları">❓ Soru</th>
                         <th style="width:70px;" title="Aktivite skoru">🔥 Akt.</th>
                         <th style="width:130px;">Son Aktivite</th>
+                        <th style="width:90px;">⚡ Aksiyon</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -470,6 +478,12 @@
                         </td>
                         <td style="font-size:11px; color:#64748b;">
                             {{ $u['last_activity_at'] ? \Carbon\Carbon::parse($u['last_activity_at'])->diffForHumans() : '—' }}
+                        </td>
+                        <td style="font-size:13px;">
+                            @if ($u['email'])
+                                <a href="mailto:{{ $u['email'] }}" title="Email" style="text-decoration:none; margin-right:4px;">📧</a>
+                            @endif
+                            <a href="{{ $route }}" title="Detay + aksiyonlar" style="text-decoration:none;">⚡</a>
                         </td>
                     </tr>
                 @endforeach
