@@ -281,6 +281,81 @@ section { padding:70px 0; }
 .cta-contact { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.1); padding:10px 18px; border-radius:10px; }
 .cta-contact a { color:#fff !important; text-decoration:underline; text-decoration-color:rgba(255,255,255,.4); }
 
+/* === CALCULATOR === */
+.calc-wrap { display:grid; grid-template-columns:1fr 1fr; gap:36px; align-items:start; }
+@media(max-width:900px) { .calc-wrap { grid-template-columns:1fr; } }
+.calc-form { background:#fff; border:1px solid var(--line); border-radius:20px; padding:32px; }
+.calc-form h3 { margin:0 0 20px; font-size:20px; color:var(--primary-deep); font-family:"DM Serif Display", serif; }
+.calc-field { margin-bottom:20px; }
+.calc-field label { display:block; font-size:13px; font-weight:700; color:var(--text); margin-bottom:8px; }
+.calc-field .row { display:flex; align-items:center; gap:12px; }
+.calc-field input[type=range] { flex:1; }
+.calc-field input[type=number] { width:80px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; text-align:center; font-weight:700; font-size:15px; color:var(--primary); }
+.calc-toggle { display:flex; gap:8px; background:var(--primary-soft); padding:4px; border-radius:10px; }
+.calc-toggle button { flex:1; padding:10px 14px; border:none; background:transparent; color:var(--muted); font-size:13px; font-weight:700; cursor:pointer; border-radius:8px; transition:all .15s; }
+.calc-toggle button.active { background:#fff; color:var(--primary-deep); box-shadow:0 2px 6px rgba(0,0,0,.06); }
+
+.calc-result {
+    background:linear-gradient(140deg, var(--primary), var(--primary-deep));
+    color:#fff; border-radius:20px; padding:36px; position:relative; overflow:hidden;
+    box-shadow:0 12px 32px rgba(61,28,103,.25);
+}
+.calc-result::after {
+    content:''; position:absolute; top:-40px; right:-40px; width:200px; height:200px;
+    background:radial-gradient(circle, rgba(232,185,49,.25), transparent 70%);
+    border-radius:50%;
+}
+.calc-result-label { font-size:13px; text-transform:uppercase; letter-spacing:.1em; opacity:.85; margin-bottom:6px; }
+.calc-result-amount { font-family:"DM Serif Display", serif; font-size:64px; line-height:1; color:var(--accent); margin:0 0 8px; }
+.calc-result-sub { font-size:14px; opacity:.85; margin-bottom:22px; }
+.calc-breakdown { background:rgba(255,255,255,.08); border-radius:12px; padding:16px; margin-top:14px; font-size:13px; }
+.calc-breakdown-row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,.1); }
+.calc-breakdown-row:last-child { border-bottom:0; font-weight:700; color:var(--accent); padding-top:10px; margin-top:4px; border-top:1px solid rgba(255,255,255,.15); border-bottom:0; }
+.calc-tier-badge { display:inline-flex; align-items:center; gap:6px; background:var(--accent); color:var(--primary-deep); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; margin-top:10px; }
+
+/* === MOCKUP DASHBOARD === */
+.mockup-frame {
+    background:#fff; border:1px solid var(--line); border-radius:20px;
+    box-shadow:0 20px 60px rgba(91,46,145,.18); overflow:hidden;
+    max-width:1000px; margin:0 auto; position:relative;
+}
+.mockup-chrome {
+    background:#f1f5f9; padding:10px 18px; display:flex; align-items:center; gap:10px;
+    border-bottom:1px solid var(--line);
+}
+.mockup-dots { display:flex; gap:6px; }
+.mockup-dots span { width:12px; height:12px; border-radius:50%; background:#cbd5e1; }
+.mockup-dots span:first-child { background:#ef4444; }
+.mockup-dots span:nth-child(2) { background:#f59e0b; }
+.mockup-dots span:nth-child(3) { background:#10b981; }
+.mockup-url { background:#fff; border-radius:6px; padding:4px 12px; font-size:11px; color:var(--muted); font-family:monospace; flex:1; text-align:center; }
+.mockup-body { padding:28px; background:#fafbfc; }
+.mockup-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.mockup-title h4 { margin:0; font-size:18px; color:var(--primary-deep); }
+.mockup-title .tier-chip { background:#fef3c7; color:#92400e; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; }
+.mockup-kpis { display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; margin-bottom:22px; }
+@media(max-width:700px) { .mockup-kpis { grid-template-columns:repeat(2, 1fr); } }
+.mockup-kpi { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; }
+.mockup-kpi-lbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
+.mockup-kpi-val { font-size:22px; font-weight:800; color:var(--primary-deep); line-height:1; }
+.mockup-kpi-val.eur { color:var(--success); }
+.mockup-kpi-sub { font-size:10px; color:var(--muted); margin-top:4px; }
+.mockup-table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; border:1px solid var(--line); font-size:12px; }
+.mockup-table th { background:#f8fafc; padding:10px 12px; text-align:left; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.mockup-table td { padding:12px; border-top:1px solid var(--line); }
+.mockup-status { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; }
+.mockup-status.v { background:#dcfce7; color:#166534; }
+.mockup-status.p { background:#fef3c7; color:#92400e; }
+.mockup-status.o { background:#dbeafe; color:#1e40af; }
+.mockup-overlay {
+    position:absolute; bottom:20px; left:50%; transform:translateX(-50%);
+    background:rgba(91,46,145,.95); color:#fff; padding:16px 28px; border-radius:14px;
+    box-shadow:0 12px 32px rgba(0,0,0,.3); display:flex; gap:14px; align-items:center;
+    font-size:14px; backdrop-filter:blur(6px);
+}
+.mockup-overlay strong { color:var(--accent); }
+.mockup-overlay .btn-primary { padding:8px 18px; font-size:13px; margin:0; }
+
 /* === FOOTER === */
 footer { background:#1a0f2e; color:rgba(255,255,255,.7); padding:36px 0; font-size:13px; text-align:center; }
 footer a { color:var(--accent); }
@@ -739,6 +814,196 @@ footer a { color:var(--accent); }
     </div>
 </section>
 
+{{-- ═══ KAZANÇ HESAPLAYICI ═══ --}}
+<section class="sec-bg-white">
+    <div class="container">
+        <span class="sec-label">Kaç Para Kazanırım?</span>
+        <h2 class="sec-title">Kendi Kazancınızı Hesaplayın</h2>
+        <p class="sec-lead">Yıllık kaç aday yönlendireceğinizi girin — plan ve kademenize göre tahmini yıllık gelirinizi anında görün.</p>
+
+        <div class="calc-wrap">
+            <div class="calc-form">
+                <h3>📊 Hesaplama Formu</h3>
+
+                <div class="calc-field">
+                    <label>Kazanç Modeli</label>
+                    <div class="calc-toggle" id="calc-plan-toggle">
+                        <button type="button" data-plan="lead" class="active">🤝 Lead Generation</button>
+                        <button type="button" data-plan="freelance">🎯 Freelance</button>
+                    </div>
+                </div>
+
+                <div class="calc-field">
+                    <label>Yıllık Üniversite Başvurusu Kayıt</label>
+                    <div class="row">
+                        <input type="range" id="calc-uni" min="1" max="150" value="10" step="1">
+                        <input type="number" id="calc-uni-num" min="1" max="500" value="10">
+                    </div>
+                </div>
+
+                <div class="calc-field">
+                    <label>Yıllık Dil Okulu Kayıt <span style="color:var(--muted); font-weight:normal;">(~€100/kayıt)</span></label>
+                    <div class="row">
+                        <input type="range" id="calc-lang" min="0" max="100" value="5" step="1">
+                        <input type="number" id="calc-lang-num" min="0" max="300" value="5">
+                    </div>
+                </div>
+
+                <div class="calc-field">
+                    <label>Yıllık Vize Danışmanlığı Yönlendirme <span style="color:var(--muted); font-weight:normal;">(~€75/kayıt)</span></label>
+                    <div class="row">
+                        <input type="range" id="calc-visa" min="0" max="100" value="3" step="1">
+                        <input type="number" id="calc-visa-num" min="0" max="300" value="3">
+                    </div>
+                </div>
+            </div>
+
+            <div class="calc-result">
+                <div class="calc-result-label">💰 Yıllık Tahmini Kazanç</div>
+                <div class="calc-result-amount" id="calc-annual">€2.900</div>
+                <div class="calc-result-sub">KDV hariç, ödenen komisyon (vize reddi teselli payı hariç)</div>
+
+                <div class="calc-tier-badge" id="calc-tier">🥉 Bronz Seviye · €200/kayıt</div>
+
+                <div class="calc-breakdown">
+                    <div class="calc-breakdown-row">
+                        <span>🎓 Üniversite (<span id="calc-uni-show">10</span> kayıt × <span id="calc-rate">€200</span>)</span>
+                        <span id="calc-uni-total">€2.000</span>
+                    </div>
+                    <div class="calc-breakdown-row">
+                        <span>🗣️ Dil Okulu (<span id="calc-lang-show">5</span> × €100)</span>
+                        <span id="calc-lang-total">€500</span>
+                    </div>
+                    <div class="calc-breakdown-row">
+                        <span>🛂 Vize (<span id="calc-visa-show">3</span> × €75)</span>
+                        <span id="calc-visa-total">€225</span>
+                    </div>
+                    <div class="calc-breakdown-row">
+                        <span>🎁 Hoş Geldin Bonusu</span>
+                        <span>€100</span>
+                    </div>
+                    <div class="calc-breakdown-row">
+                        <span>TOPLAM YILLIK</span>
+                        <span id="calc-total">€2.825</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:20px; font-size:12px; opacity:.75;">
+                    📌 Aylık ortalama: <strong id="calc-monthly" style="color:var(--accent);">€235</strong> ·
+                    Kademeniz otomatik yükseldikçe oran artar.
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:32px;">
+            <a href="https://panel.mentorde.com/register"
+               class="btn-primary"
+               data-track="cta_clicked"
+               data-ph-cta-name="calc_register"
+               data-ph-location="dealer_landing_calc">
+                🚀 Bu Kazançları Hedeflemek İçin Kaydolun
+            </a>
+        </div>
+    </div>
+</section>
+
+{{-- ═══ PANEL ÖNİZLEME (MOCKUP) ═══ --}}
+<section class="sec-bg-soft">
+    <div class="container">
+        <span class="sec-label">Panel Önizleme</span>
+        <h2 class="sec-title">Kayıt Olmadan İçeriyi Görün</h2>
+        <p class="sec-lead">
+            Dealer paneliniz tam olarak böyle görünür. Yönlendirdiğiniz her aday için anlık süreç takibi, şeffaf komisyon hesabı ve kolay yönetim.
+        </p>
+
+        <div class="mockup-frame">
+            <div class="mockup-chrome">
+                <div class="mockup-dots"><span></span><span></span><span></span></div>
+                <div class="mockup-url">🔒 panel.mentorde.com/dealer/dashboard</div>
+            </div>
+            <div class="mockup-body">
+                <div class="mockup-title">
+                    <h4>👋 Merhaba, Dealer! — Ocak 2026 Özeti</h4>
+                    <span class="tier-chip">🥈 Gümüş Kademe</span>
+                </div>
+
+                <div class="mockup-kpis">
+                    <div class="mockup-kpi">
+                        <div class="mockup-kpi-lbl">Toplam Yönlendirme</div>
+                        <div class="mockup-kpi-val">18</div>
+                        <div class="mockup-kpi-sub">Bu yıl</div>
+                    </div>
+                    <div class="mockup-kpi">
+                        <div class="mockup-kpi-lbl">Aktif Aday</div>
+                        <div class="mockup-kpi-val">7</div>
+                        <div class="mockup-kpi-sub">Süreçte</div>
+                    </div>
+                    <div class="mockup-kpi">
+                        <div class="mockup-kpi-lbl">Onaylanan Komisyon</div>
+                        <div class="mockup-kpi-val eur">€4.350</div>
+                        <div class="mockup-kpi-sub">Ödendi / ödenecek</div>
+                    </div>
+                    <div class="mockup-kpi">
+                        <div class="mockup-kpi-lbl">Bekleyen</div>
+                        <div class="mockup-kpi-val">€1.750</div>
+                        <div class="mockup-kpi-sub">Onay aşamasında</div>
+                    </div>
+                </div>
+
+                <table class="mockup-table">
+                    <thead>
+                        <tr>
+                            <th>Aday</th>
+                            <th>Program</th>
+                            <th>Aşama</th>
+                            <th style="text-align:right;">Komisyon</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Ali K.</strong><br><span style="color:var(--muted); font-size:10px;">ali.k@demo</span></td>
+                            <td>TU München — MSc</td>
+                            <td>🎯 Vize Onaylandı</td>
+                            <td style="text-align:right; font-weight:700; color:var(--success);">€250</td>
+                            <td><span class="mockup-status v">Ödendi</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Zeynep D.</strong><br><span style="color:var(--muted); font-size:10px;">zeynep.d@demo</span></td>
+                            <td>Almanca B2 Kursu</td>
+                            <td>📝 Sözleşme İmzalandı</td>
+                            <td style="text-align:right; font-weight:700; color:var(--muted);">€100</td>
+                            <td><span class="mockup-status p">İşlemde</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mert A.</strong><br><span style="color:var(--muted); font-size:10px;">mert.a@demo</span></td>
+                            <td>RWTH Aachen — BSc</td>
+                            <td>📄 Belgeler İnceleniyor</td>
+                            <td style="text-align:right; font-weight:700; color:var(--muted);">€250</td>
+                            <td><span class="mockup-status o">Devam</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ayşe S.</strong><br><span style="color:var(--muted); font-size:10px;">ayse.s@demo</span></td>
+                            <td>Vize Danışmanlığı</td>
+                            <td>🛂 Randevu Alındı</td>
+                            <td style="text-align:right; font-weight:700; color:var(--muted);">€75</td>
+                            <td><span class="mockup-status o">Devam</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mockup-overlay">
+                <span>Kendi dashboardunu görmek istiyor musun? <strong>100€ bonus</strong> ile başla.</span>
+                <a href="https://panel.mentorde.com/register"
+                   class="btn-primary"
+                   data-track="cta_clicked"
+                   data-ph-cta-name="mockup_register"
+                   data-ph-location="dealer_landing_mockup">Hemen Kaydol →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
 {{-- ═══ CTA ═══ --}}
 <section id="iletisim" class="cta-section">
     <div class="container">
@@ -777,6 +1042,104 @@ footer a { color:var(--accent); }
         <a href="/legal/privacy">Gizlilik</a>
     </div>
 </footer>
+
+{{-- Kazanç Hesaplayıcı JavaScript --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function() {
+    // Komisyon tablosu (PDF'ten)
+    const TIERS_LEAD = [
+        { min: 1,   max: 10,  rate: 200, name: '🥉 Bronz' },
+        { min: 11,  max: 25,  rate: 250, name: '🥈 Gümüş' },
+        { min: 26,  max: 50,  rate: 300, name: '🥇 Altın' },
+        { min: 51,  max: 100, rate: 320, name: '💎 Platin' },
+        { min: 101, max: 9999, rate: 400, name: '👑 Elmas' },
+    ];
+    const TIERS_FREELANCE = [
+        { min: 1,  max: 15,  rate: 500, name: '🚀 Aktif' },
+        { min: 16, max: 30,  rate: 600, name: '⭐ Uzman' },
+        { min: 31, max: 9999, rate: 750, name: '🏆 Elit' },
+    ];
+
+    const LANG_RATE = 100; // Dil okulu sabit tahmin
+    const VISA_RATE = 75;  // Vize danışmanlığı sabit tahmin
+    const WELCOME_BONUS = 100;
+
+    const state = {
+        plan: 'lead',
+        uni: 10,
+        lang: 5,
+        visa: 3,
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function getTier() {
+        const tiers = state.plan === 'lead' ? TIERS_LEAD : TIERS_FREELANCE;
+        return tiers.find(t => state.uni >= t.min && state.uni <= t.max) || tiers[0];
+    }
+
+    function formatEur(n) {
+        return '€' + Math.round(n).toLocaleString('tr-TR');
+    }
+
+    function recalc() {
+        const tier = getTier();
+        const uniTotal = state.uni * tier.rate;
+        const langTotal = state.lang * LANG_RATE;
+        const visaTotal = state.visa * VISA_RATE;
+        const total = uniTotal + langTotal + visaTotal + WELCOME_BONUS;
+
+        $('calc-annual').textContent = formatEur(total);
+        $('calc-total').textContent = formatEur(total);
+        $('calc-tier').innerHTML = tier.name + ' Seviye · €' + tier.rate + '/kayıt';
+        $('calc-rate').textContent = '€' + tier.rate;
+        $('calc-uni-show').textContent = state.uni;
+        $('calc-lang-show').textContent = state.lang;
+        $('calc-visa-show').textContent = state.visa;
+        $('calc-uni-total').textContent = formatEur(uniTotal);
+        $('calc-lang-total').textContent = formatEur(langTotal);
+        $('calc-visa-total').textContent = formatEur(visaTotal);
+        $('calc-monthly').textContent = formatEur(total / 12);
+    }
+
+    function bindSlider(sliderId, numId, key) {
+        const slider = $(sliderId);
+        const num = $(numId);
+        slider.addEventListener('input', (e) => {
+            state[key] = parseInt(e.target.value) || 0;
+            num.value = state[key];
+            recalc();
+        });
+        num.addEventListener('input', (e) => {
+            const val = Math.max(0, Math.min(parseInt(slider.max), parseInt(e.target.value) || 0));
+            state[key] = val;
+            slider.value = val;
+            recalc();
+        });
+    }
+
+    // Plan toggle
+    document.querySelectorAll('#calc-plan-toggle button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#calc-plan-toggle button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.plan = btn.dataset.plan;
+            recalc();
+
+            // PostHog event
+            if (window.posthog) {
+                window.posthog.capture('calc_plan_changed', { plan: state.plan });
+            }
+        });
+    });
+
+    bindSlider('calc-uni',  'calc-uni-num',  'uni');
+    bindSlider('calc-lang', 'calc-lang-num', 'lang');
+    bindSlider('calc-visa', 'calc-visa-num', 'visa');
+
+    recalc();
+})();
+</script>
 
 {{-- Analytics: PostHog snippet (consent varsa) + Consent banner --}}
 <x-analytics.posthog-snippet :portal="'public'" />
