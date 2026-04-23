@@ -206,6 +206,7 @@
                         <th style="width:90px;">Tier</th>
                         <th>Senior</th>
                         <th style="width:120px;">Son Aksiyon</th>
+                        <th style="width:100px;">⚡ Aksiyon</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -222,6 +223,16 @@
                         <td style="font-size:11px; color:#64748b;">{{ $a['assigned_senior'] ?: '⚠️ Atanmamış' }}</td>
                         <td style="font-size:10px; color:#dc2626; font-weight:600;">
                             {{ $a['days_since_action'] !== null ? $a['days_since_action'] . ' gün önce' : 'hiç' }}
+                        </td>
+                        <td style="font-size:11px;">
+                            @php $phClean = $a['phone'] ? preg_replace('/[^0-9+]/', '', $a['phone']) : ''; @endphp
+                            @if ($phClean)
+                                <a href="tel:{{ $phClean }}" title="Ara" style="text-decoration:none; margin-right:4px;">📞</a>
+                                <a href="https://wa.me/{{ ltrim($phClean, '+') }}" target="_blank" rel="noopener" title="WhatsApp" style="text-decoration:none; margin-right:4px;">💬</a>
+                            @endif
+                            @if ($a['email'])
+                                <a href="mailto:{{ $a['email'] }}" title="Email" style="text-decoration:none;">📧</a>
+                            @endif
                         </td>
                     </tr>
                 @endforeach

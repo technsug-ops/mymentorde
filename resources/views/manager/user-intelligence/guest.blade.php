@@ -40,6 +40,9 @@
 <div class="uig-wrap">
     <a href="{{ route('manager.user-intelligence') }}" class="uig-back">← User Intelligence'a dön</a>
 
+    {{-- Aksiyon Bar — hızlı erişim --}}
+    <x-analytics.action-bar :target="$guest" type="guest" />
+
     {{-- Lead başlık --}}
     <div class="uig-card">
         <h2>

@@ -32,6 +32,9 @@
 <div class="uis-wrap">
     <a href="{{ route('manager.user-intelligence') }}" class="uis-back">← User Intelligence'a dön</a>
 
+    {{-- Aksiyon Bar — hızlı erişim --}}
+    <x-analytics.action-bar :target="$student" type="student" />
+
     {{-- Öğrenci header --}}
     <div class="uis-card">
         <h2>👤 {{ $student->name }}</h2>

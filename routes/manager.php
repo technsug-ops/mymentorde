@@ -145,6 +145,14 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/user-intelligence',                  [$userIntel, 'index'])->name('manager.user-intelligence');
     Route::get('/manager/user-intelligence/guest/{guestId}',  [$userIntel, 'guest'])->where('guestId', '[0-9]+')->name('manager.user-intelligence.guest');
     Route::get('/manager/user-intelligence/student/{userId}', [$userIntel, 'student'])->where('userId', '[0-9]+')->name('manager.user-intelligence.student');
+
+    // ── Lead Action Endpoints (Risk → Aksiyon) ──
+    $leadAct = \App\Http\Controllers\Manager\LeadActionController::class;
+    Route::get('/manager/actions/templates',                           [$leadAct, 'templates'])->name('manager.actions.templates');
+    Route::get('/manager/actions/templates/{id}/render',               [$leadAct, 'renderTemplate'])->where('id', '[0-9]+')->name('manager.actions.templates.render');
+    Route::post('/manager/actions/{type}/{id}/assign-senior',          [$leadAct, 'assignSenior'])->where(['type' => 'guest|student', 'id' => '[0-9]+'])->middleware('throttle:30,1')->name('manager.actions.assign-senior');
+    Route::post('/manager/actions/{type}/{id}/update-notes',           [$leadAct, 'updateNotes'])->where(['type' => 'guest|student', 'id' => '[0-9]+'])->middleware('throttle:30,1')->name('manager.actions.update-notes');
+    Route::post('/manager/actions/{type}/{id}/log',                    [$leadAct, 'logMe'])->where(['type' => 'guest|student', 'id' => '[0-9]+'])->middleware('throttle:60,1')->name('manager.actions.log');
     Route::get('/manager/scheduled-reports',                          [ManagerScheduledReportController::class, 'index'])->name('manager.scheduled-reports');
     Route::post('/manager/scheduled-reports',                         [ManagerScheduledReportController::class, 'store'])->name('manager.scheduled-reports.store');
     Route::put('/manager/scheduled-reports/{scheduledReport}',        [ManagerScheduledReportController::class, 'update'])->name('manager.scheduled-reports.update');
