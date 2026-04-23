@@ -72,5 +72,90 @@ document.addEventListener('click', function(e) {
 
     if (window.posthog) window.posthog.capture(eventName, props);
 });
+
+// ── form_started + form_abandoned tracking ──────────────────────────────
+// Form'un ilk input'una focus olunca form_started event'i, submit olmadan
+// sayfa terk edilirse form_abandoned event'i gönderilir.
+// Hedef: hangi formlar doldurulmaya başlanıp bitirilmiyor?
+(function() {
+    var formState = {}; // formId → { name, started, submitted, filled_fields, last_field, started_at }
+
+    function getFormId(form) {
+        return form.id || form.getAttribute('name') || form.getAttribute('action') || 'anonymous_form';
+    }
+    function getFormName(form) {
+        return form.getAttribute('data-form-name')
+            || form.id
+            || form.getAttribute('name')
+            || (form.getAttribute('action') || '').split('/').slice(-2).join('/')
+            || 'unknown';
+    }
+
+    document.addEventListener('focusin', function(e) {
+        var input = e.target;
+        if (!input.matches('input, textarea, select')) return;
+        var form = input.closest('form');
+        if (!form) return;
+        // Consent/arama gibi form'ları skip
+        if (form.hasAttribute('data-track-skip')) return;
+
+        var id = getFormId(form);
+        if (!formState[id]) {
+            formState[id] = {
+                name: getFormName(form),
+                started: true,
+                submitted: false,
+                filled_fields: [],
+                last_field: null,
+                started_at: Date.now(),
+            };
+            if (window.posthog) {
+                window.posthog.capture('form_started', {
+                    form_name: formState[id].name,
+                    form_action: form.getAttribute('action') || null,
+                });
+            }
+        }
+        formState[id].last_field = input.name || input.id || input.type;
+    });
+
+    document.addEventListener('change', function(e) {
+        var input = e.target;
+        if (!input.matches('input, textarea, select')) return;
+        var form = input.closest('form');
+        if (!form) return;
+        var id = getFormId(form);
+        if (!formState[id]) return;
+        var fieldKey = input.name || input.id || input.type;
+        if (fieldKey && formState[id].filled_fields.indexOf(fieldKey) === -1) {
+            formState[id].filled_fields.push(fieldKey);
+        }
+    });
+
+    document.addEventListener('submit', function(e) {
+        var form = e.target;
+        if (!form || form.tagName !== 'FORM') return;
+        var id = getFormId(form);
+        if (formState[id]) {
+            formState[id].submitted = true;
+        }
+    });
+
+    window.addEventListener('beforeunload', function() {
+        for (var id in formState) {
+            var s = formState[id];
+            if (s.started && !s.submitted && s.filled_fields.length > 0) {
+                if (window.posthog) {
+                    window.posthog.capture('form_abandoned', {
+                        form_name: s.name,
+                        filled_fields: s.filled_fields,
+                        abandoned_field: s.last_field,
+                        time_spent_seconds: Math.round((Date.now() - s.started_at) / 1000),
+                    });
+                }
+            }
+        }
+    });
+})();
 </script>
 @endif

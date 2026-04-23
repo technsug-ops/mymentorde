@@ -631,7 +631,10 @@
                 <a href="{{ route('legal.terms') }}" target="_blank" style="color:#2563eb;">Kullanım Koşulları</a>'nı kabul etmiş olursunuz.
             </div>
 
-            <button type="submit" class="submit-btn" id="applySubmitBtn">Başvuruyu Gönder →</button>
+            <button type="submit" class="submit-btn" id="applySubmitBtn"
+                    data-track="cta_clicked"
+                    data-ph-cta-name="apply_form_submit"
+                    data-ph-location="apply_page">Başvuruyu Gönder →</button>
         </form>
 
         <div class="guide-box">

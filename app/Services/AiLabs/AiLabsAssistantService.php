@@ -63,6 +63,32 @@ class AiLabsAssistantService
         // Conversation kaydet ve id'yi al (feedback için)
         $conversation = $this->saveConversation($companyId, $role, $userId, $guestApplicationId, $question, $result, $context);
 
+        // PostHog: ai_query_submitted event — Phase 2 lead intelligence için
+        try {
+            app(\App\Services\Analytics\AnalyticsService::class)->capture(
+                'ai_query_submitted',
+                [
+                    'conversation_id'    => $conversation?->id,
+                    'conversation_type'  => $this->conversationTypeFor($role),
+                    'role'               => $role,
+                    'company_id'         => $companyId,
+                    'guest_application_id' => $guestApplicationId,
+                    'mode'               => $result['mode'] ?? 'external',
+                    'prompt_length'      => mb_strlen($question),
+                    'prompt_tokens'      => (int) ($result['tokens_input'] ?? 0),
+                    'completion_tokens'  => (int) ($result['tokens_output'] ?? 0),
+                    'total_tokens'       => (int) (($result['tokens_input'] ?? 0) + ($result['tokens_output'] ?? 0)),
+                    'source_count'       => is_array($result['sources_meta'] ?? null) ? count($result['sources_meta']) : 0,
+                    'model'              => $result['model'] ?? null,
+                    'response_time_ms'   => (int) ($result['response_time_ms'] ?? 0),
+                    'remaining_daily'    => $limit > 0 ? max(0, $limit - $dailyUsed - 1) : null,
+                ],
+                $guestApplicationId ? 'lead_' . $guestApplicationId : (string) $userId
+            );
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('PostHog ai_query_submitted capture failed', ['error' => $e->getMessage()]);
+        }
+
         return [
             'ok'                 => true,
             'answer'             => $result['content'] ?? '',

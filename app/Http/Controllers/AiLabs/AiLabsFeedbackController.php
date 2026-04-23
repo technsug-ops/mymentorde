@@ -57,6 +57,24 @@ class AiLabsFeedbackController extends Controller
             ]
         );
 
+        // PostHog: ai_feedback_given event
+        try {
+            app(\App\Services\Analytics\AnalyticsService::class)->capture(
+                'ai_feedback_given',
+                [
+                    'conversation_type' => $data['conversation_type'],
+                    'conversation_id'   => $data['conversation_id'],
+                    'rating'            => $data['rating'],
+                    'has_reason'        => !empty($data['reason']),
+                    'role'              => $role ?: null,
+                    'company_id'        => $companyId,
+                ],
+                $guestAppId ? 'lead_' . $guestAppId : (string) ($user?->id ?? 'anonymous')
+            );
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('PostHog ai_feedback_given capture failed', ['error' => $e->getMessage()]);
+        }
+
         return response()->json(['ok' => true, 'message' => 'Geri bildirim kaydedildi.']);
     }
 }

@@ -397,8 +397,14 @@
                 kafandaki soruları net cevaplara dönüştür. Dakikalar içinde müsait saatini bul, tek tıkla randevunu al.
             </p>
             <div class="l-hero-ctas">
-                <a href="#danismanlar" class="l-btn l-btn-primary">📅 Hemen Randevu Al</a>
-                <a href="{{ route('apply.create') }}" class="l-btn l-btn-ghost">Tam Başvuru Başlat →</a>
+                <a href="#danismanlar" class="l-btn l-btn-primary"
+                   data-track="cta_clicked"
+                   data-ph-cta-name="book_appointment_hero"
+                   data-ph-location="booking_landing_hero">📅 Hemen Randevu Al</a>
+                <a href="{{ route('apply.create') }}" class="l-btn l-btn-ghost"
+                   data-track="cta_clicked"
+                   data-ph-cta-name="apply_form_hero"
+                   data-ph-location="booking_landing_hero">Tam Başvuru Başlat →</a>
             </div>
             <div class="l-hero-trust">
                 <div>
@@ -590,7 +596,10 @@
                 <div class="l-empty-icon">🎓</div>
                 <h3>Danışmanlarımız Hazırlanıyor</h3>
                 <p>Şu anda public randevu veren danışman yok. Hemen başvuru formumuzu doldurup kayıtlı öğrenci olarak bekleme listesine katılabilirsin — sıra sana geldiğinde sana özel danışman atanacak.</p>
-                <a href="{{ route('apply.create') }}" class="l-btn l-btn-primary" style="display:inline-flex;">Başvuru Formunu Doldur →</a>
+                <a href="{{ route('apply.create') }}" class="l-btn l-btn-primary" style="display:inline-flex;"
+                   data-track="cta_clicked"
+                   data-ph-cta-name="apply_form_empty_state"
+                   data-ph-location="booking_landing_empty">Başvuru Formunu Doldur →</a>
             </div>
         @endif
     </div>

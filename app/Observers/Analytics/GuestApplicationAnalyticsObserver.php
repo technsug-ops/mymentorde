@@ -51,8 +51,41 @@ class GuestApplicationAnalyticsObserver
             }
         }
 
+        // lead_score_tier_changed — hot/warm/cold tier geçişleri
+        if ($lead->wasChanged('lead_score_tier')) {
+            $this->analytics->capture('lead_qualified', [
+                'lead_id'   => $lead->id,
+                'old_tier'  => $lead->getOriginal('lead_score_tier'),
+                'new_tier'  => $lead->lead_score_tier,
+                'score'     => (int) ($lead->lead_score ?? 0),
+                'company_id'=> $lead->company_id ?? null,
+            ], $this->distinctIdFor($lead));
+        }
+
+        // lead_assigned — bir senior atandı
+        if ($lead->wasChanged('assigned_senior_email') && !empty($lead->assigned_senior_email)) {
+            $this->analytics->capture('lead_assigned', [
+                'lead_id'             => $lead->id,
+                'assigned_senior'     => $lead->assigned_senior_email,
+                'assigned_by'         => $lead->assigned_by ?? null,
+                'company_id'          => $lead->company_id ?? null,
+            ], $this->distinctIdFor($lead));
+        }
+
+        // lead_contacted — senior aksiyon aldı (last_senior_action_at güncellendi)
+        if ($lead->wasChanged('last_senior_action_at') && !empty($lead->last_senior_action_at)) {
+            $this->analytics->capture('lead_contacted', [
+                'lead_id'         => $lead->id,
+                'senior_email'    => $lead->assigned_senior_email ?? null,
+                'tier'            => $lead->lead_score_tier ?? null,
+                'score'           => (int) ($lead->lead_score ?? 0),
+                'days_since_created' => $lead->created_at ? (int) $lead->created_at->diffInDays(now()) : null,
+                'company_id'      => $lead->company_id ?? null,
+            ], $this->distinctIdFor($lead));
+        }
+
         // lead_converted (ilk kez student oldu)
-        if ($lead->wasChanged('converted_to_student') && $lead->converted_to_student === true) {
+        if ($lead->wasChanged('converted_to_student') && (bool) $lead->converted_to_student === true) {
             $this->analytics->capture('lead_converted', [
                 'lead_id'           => $lead->id,
                 'student_id'        => $lead->converted_student_id ?? null,
