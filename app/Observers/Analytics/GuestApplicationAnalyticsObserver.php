@@ -86,6 +86,21 @@ class GuestApplicationAnalyticsObserver
 
         // lead_converted (ilk kez student oldu)
         if ($lead->wasChanged('converted_to_student') && (bool) $lead->converted_to_student === true) {
+            // Guest → Student dönüşümünde phone'u User tablosuna propagate et
+            if (!empty($lead->converted_student_id) && !empty($lead->phone)) {
+                try {
+                    \App\Models\User::where('id', $lead->converted_student_id)
+                        ->whereNull('phone')
+                        ->update(['phone' => $lead->phone]);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('User phone propagation failed', [
+                        'guest_id' => $lead->id,
+                        'student_id' => $lead->converted_student_id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
             $this->analytics->capture('lead_converted', [
                 'lead_id'           => $lead->id,
                 'student_id'        => $lead->converted_student_id ?? null,

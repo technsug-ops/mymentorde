@@ -120,6 +120,23 @@
                     <span class="nav-icon">⬅️</span> Panom
                 </a>
             </div>
+            {{-- Analitik ve İstihbarat — marketing/sales staff + admin rolleri --}}
+            @php
+                $canSeeAnalytics = auth()->user() && in_array(
+                    (string) auth()->user()->role,
+                    array_unique(array_merge(\App\Models\User::ADMIN_PANEL_ROLES, \App\Models\User::MARKETING_ACCESS_ROLES)),
+                    true
+                );
+            @endphp
+            @if($canSeeAnalytics)
+            <div class="nav-section">
+                <div class="nav-section-label">Kullanıcı İstihbarat</div>
+                <a href="/manager/user-intelligence" class="nav-link {{ request()->is('manager/user-intelligence*') ? 'active' : '' }}">
+                    <span class="nav-icon">👥</span> Kullanıcı Aktivitesi
+                </a>
+            </div>
+            @endif
+
             <div class="nav-section">
                 <div class="nav-section-label">İş Araçları</div>
                 <a href="/bulletins" class="nav-link {{ request()->is('bulletins*') ? 'active' : '' }}"

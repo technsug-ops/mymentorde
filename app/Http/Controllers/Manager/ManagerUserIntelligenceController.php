@@ -125,8 +125,12 @@ class ManagerUserIntelligenceController extends Controller
     private function ensureAdmin(Request $request): void
     {
         $user = $request->user();
-        if (!$user || !in_array((string) $user->role, \App\Models\User::ADMIN_PANEL_ROLES, true)) {
-            abort(403, 'User Intelligence sadece yöneticilere açıktır.');
+        $allowed = array_unique(array_merge(
+            \App\Models\User::ADMIN_PANEL_ROLES,
+            \App\Models\User::MARKETING_ACCESS_ROLES
+        ));
+        if (!$user || !in_array((string) $user->role, $allowed, true)) {
+            abort(403, 'User Intelligence erişim yetkiniz yok.');
         }
     }
 

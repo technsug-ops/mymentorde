@@ -56,6 +56,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'marketing.access' => \App\Http\Middleware\EnsureMarketingAccess::class,
             'marketing.admin' => \App\Http\Middleware\EnsureMarketingAdminOnly::class,
             'marketing.team'  => \App\Http\Middleware\EnsureMarketingTeam::class,
+            'analytics.access' => \App\Http\Middleware\EnsureAnalyticsAccess::class,
             'company.context' => \App\Http\Middleware\SetCompanyContext::class,
             'task.access' => \App\Http\Middleware\EnsureTaskAccess::class,
             'require.2fa' => \App\Http\Middleware\Require2FA::class,

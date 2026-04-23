@@ -256,6 +256,15 @@
             </div>
             @endif
 
+            {{-- User Activity Intelligence — aday + öğrenci aktivite takibi (marketing/sales dahil) --}}
+            <div class="nav-section">
+                <div class="nav-section-label">Kullanıcı İstihbarat</div>
+                <a href="/manager/user-intelligence"
+                   class="nav-link {{ request()->is('manager/user-intelligence*') ? 'active' : '' }}">
+                    <span class="nav-icon">👥</span> Kullanıcı Aktivitesi
+                </a>
+            </div>
+
             <div class="nav-section">
                 <div class="nav-section-label">İçerik & Kampanya</div>
                 @if($canSeeCampaigns)

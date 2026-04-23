@@ -140,19 +140,8 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/senior-performance',        [ManagerAnalyticsController::class, 'seniorPerformance'])->name('manager.senior-performance');
     Route::get('/manager/ticket-analytics',          [ManagerAnalyticsController::class, 'ticketAnalytics'])->name('manager.ticket-analytics');
 
-    // ── User Activity Intelligence — guest + student platform aktivitesi ──
-    $userIntel = \App\Http\Controllers\Manager\ManagerUserIntelligenceController::class;
-    Route::get('/manager/user-intelligence',                  [$userIntel, 'index'])->name('manager.user-intelligence');
-    Route::get('/manager/user-intelligence/guest/{guestId}',  [$userIntel, 'guest'])->where('guestId', '[0-9]+')->name('manager.user-intelligence.guest');
-    Route::get('/manager/user-intelligence/student/{userId}', [$userIntel, 'student'])->where('userId', '[0-9]+')->name('manager.user-intelligence.student');
-
-    // ── Lead Action Endpoints (Risk → Aksiyon) ──
-    $leadAct = \App\Http\Controllers\Manager\LeadActionController::class;
-    Route::get('/manager/actions/templates',                           [$leadAct, 'templates'])->name('manager.actions.templates');
-    Route::get('/manager/actions/templates/{id}/render',               [$leadAct, 'renderTemplate'])->where('id', '[0-9]+')->name('manager.actions.templates.render');
-    Route::post('/manager/actions/{type}/{id}/assign-senior',          [$leadAct, 'assignSenior'])->where(['type' => 'guest|student', 'id' => '[0-9]+'])->middleware('throttle:30,1')->name('manager.actions.assign-senior');
-    Route::post('/manager/actions/{type}/{id}/update-notes',           [$leadAct, 'updateNotes'])->where(['type' => 'guest|student', 'id' => '[0-9]+'])->middleware('throttle:30,1')->name('manager.actions.update-notes');
-    Route::post('/manager/actions/{type}/{id}/log',                    [$leadAct, 'logMe'])->where(['type' => 'guest|student', 'id' => '[0-9]+'])->middleware('throttle:60,1')->name('manager.actions.log');
+    // User Intelligence + Lead Actions routes dışarı alındı — alt bloktaki
+    // analytics.access middleware'i kullanıyor (marketing/sales roller dahil).
     Route::get('/manager/scheduled-reports',                          [ManagerScheduledReportController::class, 'index'])->name('manager.scheduled-reports');
     Route::post('/manager/scheduled-reports',                         [ManagerScheduledReportController::class, 'store'])->name('manager.scheduled-reports.store');
     Route::put('/manager/scheduled-reports/{scheduledReport}',        [ManagerScheduledReportController::class, 'update'])->name('manager.scheduled-reports.update');
@@ -397,4 +386,20 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::get('/admin-staff/ai-assistant/history',     fn (Request $r) => app($int)->history($r, 'admin_staff'))->name('admin-staff.ai-assistant.history');
         Route::get('/admin-staff/ai-assistant/remaining',   fn (Request $r) => app($int)->remaining($r, 'admin_staff', app(\App\Services\AiLabs\AiLabsAssistantService::class)))->name('admin-staff.ai-assistant.remaining');
     });
+});
+
+// ─── User Activity Intelligence + Lead Actions ───────────────────────────
+// Geniş erişim: admin panel rolleri + marketing/sales rolleri
+Route::middleware(['company.context', 'auth', 'verified', 'analytics.access'])->group(function (): void {
+    $userIntel = \App\Http\Controllers\Manager\ManagerUserIntelligenceController::class;
+    Route::get('/manager/user-intelligence',                  [$userIntel, 'index'])->name('manager.user-intelligence');
+    Route::get('/manager/user-intelligence/guest/{guestId}',  [$userIntel, 'guest'])->where('guestId', '[0-9]+')->name('manager.user-intelligence.guest');
+    Route::get('/manager/user-intelligence/student/{userId}', [$userIntel, 'student'])->where('userId', '[0-9]+')->name('manager.user-intelligence.student');
+
+    $leadAct = \App\Http\Controllers\Manager\LeadActionController::class;
+    Route::get('/manager/actions/templates',                  [$leadAct, 'templates'])->name('manager.actions.templates');
+    Route::get('/manager/actions/templates/{id}/render',      [$leadAct, 'renderTemplate'])->where('id', '[0-9]+')->name('manager.actions.templates.render');
+    Route::post('/manager/actions/{type}/{id}/assign-senior', [$leadAct, 'assignSenior'])->where(['type' => 'guest|student', 'id' => '[0-9]+'])->middleware('throttle:30,1')->name('manager.actions.assign-senior');
+    Route::post('/manager/actions/{type}/{id}/update-notes',  [$leadAct, 'updateNotes'])->where(['type' => 'guest|student', 'id' => '[0-9]+'])->middleware('throttle:30,1')->name('manager.actions.update-notes');
+    Route::post('/manager/actions/{type}/{id}/log',           [$leadAct, 'logMe'])->where(['type' => 'guest|student', 'id' => '[0-9]+'])->middleware('throttle:60,1')->name('manager.actions.log');
 });
