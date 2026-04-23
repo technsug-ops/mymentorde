@@ -307,6 +307,10 @@
 
             <div class="nav-section">
                 <div class="nav-section-label">Analitik & Raporlar</div>
+                <a href="/manager/user-intelligence"
+                   class="nav-link {{ request()->is('manager/user-intelligence*') ? 'active' : '' }}">
+                    <span class="nav-icon">👥</span> Kullanıcı Aktivitesi
+                </a>
                 <a href="/manager/conversion-funnel"
                    class="nav-link {{ request()->is('manager/conversion-funnel*') ? 'active' : '' }}">
                     <span class="nav-icon">🎯</span> Dönüşüm Hunisi

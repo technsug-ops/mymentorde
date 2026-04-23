@@ -139,6 +139,12 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/conversion-funnel',         [ManagerAnalyticsController::class, 'conversionFunnel'])->name('manager.conversion-funnel');
     Route::get('/manager/senior-performance',        [ManagerAnalyticsController::class, 'seniorPerformance'])->name('manager.senior-performance');
     Route::get('/manager/ticket-analytics',          [ManagerAnalyticsController::class, 'ticketAnalytics'])->name('manager.ticket-analytics');
+
+    // ── User Activity Intelligence — guest + student platform aktivitesi ──
+    $userIntel = \App\Http\Controllers\Manager\ManagerUserIntelligenceController::class;
+    Route::get('/manager/user-intelligence',                  [$userIntel, 'index'])->name('manager.user-intelligence');
+    Route::get('/manager/user-intelligence/guest/{guestId}',  [$userIntel, 'guest'])->where('guestId', '[0-9]+')->name('manager.user-intelligence.guest');
+    Route::get('/manager/user-intelligence/student/{userId}', [$userIntel, 'student'])->where('userId', '[0-9]+')->name('manager.user-intelligence.student');
     Route::get('/manager/scheduled-reports',                          [ManagerScheduledReportController::class, 'index'])->name('manager.scheduled-reports');
     Route::post('/manager/scheduled-reports',                         [ManagerScheduledReportController::class, 'store'])->name('manager.scheduled-reports.store');
     Route::put('/manager/scheduled-reports/{scheduledReport}',        [ManagerScheduledReportController::class, 'update'])->name('manager.scheduled-reports.update');
