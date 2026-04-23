@@ -226,6 +226,12 @@ Route::middleware(['company.context', 'module:booking'])->group(function (): voi
 });
 
 Route::middleware(['company.context'])->group(function () {
+    // Public Satış Ortağı (dealer) landing — MentorDE Satış Ortaklığı Programı tanıtımı
+    Route::get('/satis-ortagi', fn () => view('public.dealer-landing'))
+        ->middleware('throttle:120,1')->name('public.dealer-landing');
+    Route::get('/partner',      fn () => redirect()->route('public.dealer-landing'))
+        ->middleware('throttle:120,1'); // alias
+
     // Public AI Labs FAQ — Manager'ın yayınladığı SSS'lar
     Route::get('/sss', [\App\Http\Controllers\AiLabs\PublicFaqController::class, 'index'])
         ->middleware('throttle:120,1')->name('public.faq');
