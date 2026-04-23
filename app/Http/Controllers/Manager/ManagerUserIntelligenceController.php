@@ -22,13 +22,57 @@ class ManagerUserIntelligenceController extends Controller
         $this->ensureAdmin($request);
         $cid = $this->companyId();
 
+        // Period selector — ?days=7|15|30|90|180|365 veya ?from=&to=
+        $days = $this->resolveDays($request);
+        $customRange = null;
+        if ($request->filled('from') && $request->filled('to')) {
+            try {
+                $from = \Carbon\Carbon::parse($request->input('from'))->startOfDay();
+                $to   = \Carbon\Carbon::parse($request->input('to'))->endOfDay();
+                if ($to->gte($from)) {
+                    $days = max(1, (int) $from->diffInDays($to));
+                    $customRange = ['from' => $from->toDateString(), 'to' => $to->toDateString()];
+                }
+            } catch (\Throwable) {}
+        }
+
+        // Campaign impact — ?event_date=Y-M-D&window=7
+        $campaign = null;
+        if ($request->filled('event_date')) {
+            try {
+                $win = max(1, min(90, (int) $request->input('window', 7)));
+                $campaign = $svc->campaignImpact($cid, $request->input('event_date'), $win);
+            } catch (\Throwable $e) {
+                $campaign = ['error' => 'Geçersiz tarih formatı'];
+            }
+        }
+
+        // Sort — ?sort=activity|lead_score|last_activity|name|questions
+        $sortOptions = ['activity', 'lead_score', 'last_activity', 'name', 'questions'];
+        $sort = $request->input('sort', 'activity');
+        if (!in_array($sort, $sortOptions, true)) $sort = 'activity';
+
         return view('manager.user-intelligence.index', [
-            'overview'        => $svc->overviewStats($cid),
-            'tiers'           => $svc->engagementTiers($cid),
-            'top_users'       => $svc->topActiveUsers($cid, 30, 20),
-            'dormant_alerts'  => $svc->dormantAlerts($cid, 40, 20),
-            'daily_trend'     => $svc->dailyTrend($cid, 30),
+            'overview'              => $svc->overviewStats($cid),
+            'tiers'                 => $svc->engagementTiers($cid),
+            'top_users'             => $svc->topActiveUsers($cid, $days, 20, $sort),
+            'dormant_alerts'        => $svc->dormantAlerts($cid, 40, 14, 20),
+            'student_dormant'       => $svc->studentDormantAlerts($cid, 14, 20),
+            'daily_trend'           => $svc->dailyTrend($cid, $days),
+            'selected_days'         => $days,
+            'custom_range'          => $customRange,
+            'selected_sort'         => $sort,
+            'campaign'              => $campaign,
+            'campaign_event_date'   => $request->input('event_date'),
+            'campaign_window'       => (int) $request->input('window', 7),
         ]);
+    }
+
+    private function resolveDays(Request $request): int
+    {
+        $allowed = [7, 15, 30, 90, 180, 365];
+        $requested = (int) $request->input('days', 30);
+        return in_array($requested, $allowed, true) ? $requested : 30;
     }
 
     public function guest(Request $request, UserActivityService $svc, int $guestId): View

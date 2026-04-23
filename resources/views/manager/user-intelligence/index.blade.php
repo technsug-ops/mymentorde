@@ -45,9 +45,61 @@
 .uix-trend-bar[data-count="0"] { background:#e2e8f0; }
 
 .uix-empty { text-align:center; color:#94a3b8; padding:40px 20px; font-size:13px; }
+
+/* Period selector pills */
+.uix-periods { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:18px; align-items:center; }
+.uix-periods .lbl { font-size:12px; color:#64748b; margin-right:8px; }
+.uix-period { padding:6px 14px; border:1px solid #e2e8f0; border-radius:20px; background:#fff; color:#475569; font-size:12px; font-weight:600; text-decoration:none; cursor:pointer; }
+.uix-period:hover { background:#f8fafc; }
+.uix-period.active { background:#5b2e91; color:#fff; border-color:#5b2e91; }
+.uix-custom-range { display:inline-flex; gap:4px; align-items:center; font-size:11px; }
+.uix-custom-range input { padding:5px 8px; border:1px solid #e2e8f0; border-radius:6px; font-size:11px; }
+.uix-custom-range button { padding:5px 12px; background:#5b2e91; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:11px; }
+
+/* Campaign impact */
+.uix-campaign-form { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; background:#f8fafc; padding:14px; border-radius:8px; margin-bottom:14px; }
+.uix-campaign-form label { display:flex; flex-direction:column; gap:4px; font-size:11px; color:#64748b; }
+.uix-campaign-form input, .uix-campaign-form select { padding:6px 10px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px; }
+.uix-campaign-form button { padding:8px 16px; background:#5b2e91; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; }
+.uix-campaign-metrics { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; }
+@media(max-width:700px) { .uix-campaign-metrics { grid-template-columns:repeat(2, 1fr); } }
+.uix-campaign-metric { background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px; text-align:center; }
+.uix-campaign-metric .lbl { font-size:10px; color:#64748b; text-transform:uppercase; }
+.uix-campaign-metric .vals { display:flex; justify-content:center; gap:8px; align-items:baseline; margin:6px 0; font-size:14px; }
+.uix-campaign-metric .vals .b { color:#64748b; }
+.uix-campaign-metric .vals .arrow { color:#94a3b8; }
+.uix-campaign-metric .vals .a { color:#1e293b; font-weight:700; font-size:18px; }
+.uix-campaign-metric .delta { font-size:12px; font-weight:700; }
+.uix-campaign-metric .delta.up   { color:#16a34a; }
+.uix-campaign-metric .delta.down { color:#dc2626; }
+.uix-campaign-metric .delta.flat { color:#64748b; }
 </style>
 
 <div class="uix-wrap">
+
+    {{-- PERIOD SELECTOR --}}
+    <div class="uix-periods">
+        <span class="lbl">📅 Aralık:</span>
+        @foreach ([7 => '1 Hafta', 15 => '15 Gün', 30 => '1 Ay', 90 => '3 Ay', 180 => '6 Ay', 365 => '1 Yıl'] as $d => $label)
+            <a href="{{ route('manager.user-intelligence', array_filter(['days' => $d, 'event_date' => $campaign_event_date ?? null, 'window' => $campaign_event_date ? $campaign_window : null])) }}"
+               class="uix-period {{ ($selected_days == $d && !$custom_range) ? 'active' : '' }}">{{ $label }}</a>
+        @endforeach
+        <form method="GET" action="{{ route('manager.user-intelligence') }}" class="uix-custom-range" data-track-skip style="margin-left:12px;">
+            <input type="date" name="from" value="{{ $custom_range['from'] ?? '' }}" aria-label="Başlangıç">
+            <span>→</span>
+            <input type="date" name="to" value="{{ $custom_range['to'] ?? '' }}" aria-label="Bitiş">
+            @if ($campaign_event_date)
+                <input type="hidden" name="event_date" value="{{ $campaign_event_date }}">
+                <input type="hidden" name="window" value="{{ $campaign_window }}">
+            @endif
+            <button type="submit">Uygula</button>
+        </form>
+        @if ($custom_range)
+            <span style="font-size:11px; color:#5b2e91; margin-left:8px;">
+                🗓️ {{ $custom_range['from'] }} → {{ $custom_range['to'] }} ({{ $selected_days }} gün)
+            </span>
+        @endif
+    </div>
 
     {{-- Top KPI kartları --}}
     <div class="uix-kpis">
@@ -115,7 +167,7 @@
 
     {{-- Günlük aktivite trendi --}}
     <div class="uix-card">
-        <h2>📈 Son 30 Gün — Aktif Kullanıcı Trendi</h2>
+        <h2>📈 Son {{ $selected_days }} Gün — Aktif Kullanıcı Trendi</h2>
         <p class="hint">Her gün kaç farklı öğrenci/aday aktiviteye katıldı.</p>
         @php $maxDay = max(array_column($daily_trend, 'total')) ?: 1; @endphp
         <div class="uix-trend">
@@ -178,13 +230,165 @@
         @endif
     </div>
 
+    {{-- Student Dormant Alarm --}}
+    <div class="uix-card" style="border-left:4px solid #f59e0b;">
+        <h2>⚠️ Öğrenci Risk Alarmı
+            <span style="font-size:11px; font-weight:normal; color:#64748b; margin-left:8px;">
+                14+ gün inaktif + (bekleyen ödeme VEYA yaklaşan randevu yok)
+            </span>
+        </h2>
+        <p class="hint">
+            Kaybetme riski yüksek öğrenciler — iletişime geç, destek sağla.
+        </p>
+        @if (empty($student_dormant))
+            <div class="uix-empty">✅ Tüm öğrenciler aktif, risk yok.</div>
+        @else
+            <table class="uix-table">
+                <thead>
+                    <tr>
+                        <th>Öğrenci</th>
+                        <th style="width:80px;">Risk</th>
+                        <th style="width:90px;">Durum</th>
+                        <th style="width:100px;" title="Bekleyen ödeme sayısı">💰 Ödeme</th>
+                        <th style="width:100px;" title="Yaklaşan randevu">📅 Randevu</th>
+                        <th style="width:130px;">Son Aktivite</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach ($student_dormant as $s)
+                    <tr>
+                        <td>
+                            <a href="{{ route('manager.user-intelligence.student', $s['id']) }}">{{ $s['name'] }} →</a>
+                            <div style="font-size:10px; color:#64748b;">{{ $s['email'] }}</div>
+                        </td>
+                        <td>
+                            @php
+                                $riskCls = $s['risk_score'] >= 80 ? 'red' : ($s['risk_score'] >= 60 ? 'yellow' : 'gray');
+                            @endphp
+                            <span class="uix-badge {{ $riskCls }}">{{ $s['risk_score'] }}</span>
+                        </td>
+                        <td>
+                            @php
+                                $presCls2 = match($s['presence'] ?? null) {
+                                    'online' => 'green', 'away' => 'yellow', 'busy' => 'red', default => 'gray',
+                                };
+                            @endphp
+                            <span class="uix-badge {{ $presCls2 }}">{{ $s['presence'] ?? 'offline' }}</span>
+                        </td>
+                        <td>
+                            @if ($s['overdue_payments'] > 0)
+                                <span class="uix-badge red" title="Bekleyen ödeme">{{ $s['overdue_payments'] }} adet</span>
+                            @else
+                                <span class="uix-badge gray">yok</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if ($s['has_upcoming_appt'])
+                                <span class="uix-badge green">var</span>
+                            @else
+                                <span class="uix-badge red">yok</span>
+                            @endif
+                        </td>
+                        <td style="font-size:10px; color:#dc2626; font-weight:600;">
+                            {{ $s['days_since'] !== null ? $s['days_since'] . ' gün önce' : 'hiç' }}
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        @endif
+    </div>
+
+    {{-- Kampanya Etki Ölçümü --}}
+    <div class="uix-card" style="border-left:4px solid #06b6d4;">
+        <h2>📣 Kampanya / İçerik Etki Ölçümü
+            <span style="font-size:11px; font-weight:normal; color:#64748b; margin-left:8px;">
+                Belirli bir tarih öncesi vs sonrası aktivite delta'sı
+            </span>
+        </h2>
+        <p class="hint">
+            Yeni bir blog, duyuru, kampanya, reklam çıktı mı? Tarihini seç — öncesi/sonrası karşılaştırmasını gör.
+        </p>
+        <form method="GET" action="{{ route('manager.user-intelligence') }}" class="uix-campaign-form" data-track-skip>
+            <label>
+                <span>Yayın/Etkinlik Tarihi</span>
+                <input type="date" name="event_date" value="{{ $campaign_event_date ?? '' }}" required>
+            </label>
+            <label>
+                <span>Karşılaştırma Penceresi</span>
+                <select name="window">
+                    @foreach ([3 => '± 3 gün', 7 => '± 1 hafta', 14 => '± 2 hafta', 30 => '± 1 ay'] as $w => $wl)
+                        <option value="{{ $w }}" {{ $campaign_window == $w ? 'selected' : '' }}>{{ $wl }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <input type="hidden" name="days" value="{{ $selected_days }}">
+            <button type="submit">Analiz Et</button>
+        </form>
+
+        @if ($campaign && empty($campaign['error']))
+            <div style="font-size:12px; color:#64748b; margin:10px 0;">
+                🗓️ Öncesi: <strong>{{ $campaign['period_before'] }}</strong>
+                &nbsp;·&nbsp; Sonrası: <strong>{{ $campaign['period_after'] }}</strong>
+            </div>
+            <div class="uix-campaign-metrics">
+                @foreach ([
+                    'new_leads'      => ['🙋 Yeni Aday', 'yeni kayıt'],
+                    'ai_queries'     => ['🤖 AI Soruları', 'sorulan'],
+                    'bookings'       => ['📅 Booking', 'randevu'],
+                    'student_active' => ['🎓 Aktif Öğrenci', 'etkileşim'],
+                ] as $key => [$icon, $sub])
+                    @php
+                        $m = $campaign['metrics'][$key];
+                        $delta = $m['delta_pct'];
+                        $deltaCls = $delta > 5 ? 'up' : ($delta < -5 ? 'down' : 'flat');
+                        $deltaArrow = $delta > 0 ? '↑' : ($delta < 0 ? '↓' : '→');
+                    @endphp
+                    <div class="uix-campaign-metric">
+                        <div class="lbl">{{ $icon }}</div>
+                        <div class="vals">
+                            <span class="b">{{ $m['before'] }}</span>
+                            <span class="arrow">→</span>
+                            <span class="a">{{ $m['after'] }}</span>
+                        </div>
+                        <div class="delta {{ $deltaCls }}">
+                            {{ $deltaArrow }} %{{ abs($delta) }}
+                            <span style="font-size:10px; color:#94a3b8; font-weight:normal;">{{ $sub }}</span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @elseif ($campaign && !empty($campaign['error']))
+            <div class="uix-empty" style="color:#dc2626;">⚠️ {{ $campaign['error'] }}</div>
+        @endif
+    </div>
+
     {{-- Top aktif kullanıcılar --}}
     <div class="uix-card">
-        <h2>🔥 En Aktif Kullanıcılar (son 30 gün)</h2>
+        <h2>🔥 En Aktif Kullanıcılar (son {{ $selected_days }} gün)</h2>
         <p class="hint">
-            Platform'da en çok etkileşimde bulunan öğrenci ve adaylar — karma sıralı.
+            Platform'da etkileşimde bulunan öğrenci ve adaylar — karma sıralı.
             Tıklayarak detaylı timeline'ı gör.
         </p>
+        <div class="uix-periods" style="margin-top:6px;">
+            <span class="lbl">🔽 Sırala:</span>
+            @foreach ([
+                'activity'      => '🔥 Aktivite Skoru',
+                'lead_score'    => '⭐ Lead Skoru',
+                'last_activity' => '⏱️ Son Aktivite',
+                'questions'     => '❓ Soru Sayısı',
+                'name'          => '🔤 İsim',
+            ] as $sortKey => $sortLbl)
+                <a href="{{ route('manager.user-intelligence', array_filter([
+                    'days' => $selected_days,
+                    'sort' => $sortKey,
+                    'event_date' => $campaign_event_date ?? null,
+                    'window' => $campaign_event_date ? $campaign_window : null,
+                ])) }}#top-users"
+                   class="uix-period {{ ($selected_sort ?? 'activity') === $sortKey ? 'active' : '' }}">{{ $sortLbl }}</a>
+            @endforeach
+        </div>
+        <div id="top-users"></div>
         @if (empty($top_users))
             <div class="uix-empty">Aktif kullanıcı yok.</div>
         @else
@@ -195,7 +399,9 @@
                         <th style="width:80px;">Tip</th>
                         <th>Ad</th>
                         <th style="width:80px;">Durum</th>
-                        <th style="width:80px;" title="Aktivite skoru">Skor</th>
+                        <th style="width:70px;" title="Lead skoru">⭐ Lead</th>
+                        <th style="width:60px;" title="Son {{ $selected_days }} günde sorulan AI soruları">❓ Soru</th>
+                        <th style="width:70px;" title="Aktivite skoru">🔥 Akt.</th>
                         <th style="width:130px;">Son Aktivite</th>
                     </tr>
                 </thead>
@@ -232,6 +438,20 @@
                                 <span class="uix-badge {{ $presCls }}">{{ $u['presence'] ?? 'offline' }}</span>
                             @else
                                 <span class="uix-badge gray">{{ $u['tier'] ?? 'cold' }}</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if ($u['lead_score'] !== null)
+                                <span class="uix-badge" style="background:#fef3c7; color:#92400e;">{{ $u['lead_score'] }}</span>
+                            @else
+                                <span style="color:#cbd5e1;">—</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if ($u['questions'] > 0)
+                                <span class="uix-badge blue">{{ $u['questions'] }}</span>
+                            @else
+                                <span style="color:#cbd5e1;">—</span>
                             @endif
                         </td>
                         <td>

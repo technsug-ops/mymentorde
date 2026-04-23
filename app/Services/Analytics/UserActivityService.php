@@ -114,9 +114,11 @@ class UserActivityService
 
     /**
      * Top aktif kullanıcılar — son N günde en çok etkileşim yapan.
-     * Hem student hem guest dahil, karma sıralı.
+     * Hem student hem guest dahil, istenen sort ile.
+     *
+     * @param string $sort 'activity' | 'lead_score' | 'last_activity' | 'name' | 'questions'
      */
-    public function topActiveUsers(int $companyId, int $daysBack = 30, int $limit = 20): array
+    public function topActiveUsers(int $companyId, int $daysBack = 30, int $limit = 20, string $sort = 'activity'): array
     {
         $since = now()->subDays($daysBack);
 
@@ -124,7 +126,7 @@ class UserActivityService
             ->where('role', 'student')
             ->where('last_activity_at', '>=', $since)
             ->orderByDesc('last_activity_at')
-            ->limit($limit * 2) // fazla al, aktivite skoruyla filtrele
+            ->limit($limit * 3)
             ->get(['id', 'name', 'email', 'presence_status', 'last_activity_at', 'created_at'])
             ->map(function ($u) use ($since) {
                 return [
@@ -133,47 +135,58 @@ class UserActivityService
                     'name'             => $u->name,
                     'email'            => $u->email,
                     'presence'         => $u->presence_status,
+                    'tier'             => null,
+                    'lead_score'       => null,
                     'last_activity_at' => $u->last_activity_at,
+                    'questions'        => 0,
                     'activity_score'   => $this->userActivityScore($u->id, $since),
                 ];
             });
 
-        // Guest'leri lead_score + ai soru sayısı + audit trail ile skorla
         $guestRows = GuestApplication::where('company_id', $companyId)
             ->where(function ($q) use ($since) {
                 $q->where('last_senior_action_at', '>=', $since)
                   ->orWhereIn('id', GuestAiConversation::where('created_at', '>=', $since)->pluck('guest_application_id')->all());
             })
-            ->limit($limit * 2)
+            ->limit($limit * 3)
             ->get(['id', 'first_name', 'last_name', 'email', 'lead_score', 'lead_score_tier', 'last_senior_action_at'])
             ->map(function ($g) use ($since) {
+                $qCount = GuestAiConversation::where('guest_application_id', $g->id)
+                    ->where('created_at', '>=', $since)
+                    ->count();
                 return [
                     'type'             => 'guest',
                     'id'               => $g->id,
                     'name'             => trim(($g->first_name ?? '') . ' ' . ($g->last_name ?? '')) ?: '—',
                     'email'            => $g->email,
-                    'lead_score'       => $g->lead_score,
+                    'presence'         => null,
                     'tier'             => $g->lead_score_tier,
+                    'lead_score'       => (int) ($g->lead_score ?? 0),
                     'last_activity_at' => $g->last_senior_action_at,
+                    'questions'        => $qCount,
                     'activity_score'   => $this->guestActivityScore($g->id, $since) + (int) ($g->lead_score ?? 0) * 0.3,
                 ];
             });
 
-        $all = $studentRows->concat($guestRows)
-            ->sortByDesc('activity_score')
-            ->values()
-            ->take($limit);
+        $all = $studentRows->concat($guestRows);
 
-        return $all->all();
+        $sorted = match ($sort) {
+            'lead_score'     => $all->sortByDesc(fn ($u) => $u['lead_score'] ?? 0),
+            'last_activity'  => $all->sortByDesc(fn ($u) => $u['last_activity_at']),
+            'name'           => $all->sortBy('name', SORT_REGULAR | SORT_FLAG_CASE | SORT_NATURAL),
+            'questions'      => $all->sortByDesc('questions'),
+            default          => $all->sortByDesc('activity_score'),
+        };
+
+        return $sorted->values()->take($limit)->all();
     }
 
     /**
-     * Alarm: high-value + dormant kullanıcılar.
-     * "Lead skoru yüksek ama kayboldu" — senior'a öncelikle dönülsün.
+     * Alarm: high-value guest dormant.
      */
-    public function dormantAlerts(int $companyId, int $minScore = 40, int $limit = 20): array
+    public function dormantAlerts(int $companyId, int $minScore = 40, int $dormantDays = 14, int $limit = 20): array
     {
-        $dormantCutoff = now()->subDays(14);
+        $dormantCutoff = now()->subDays($dormantDays);
 
         $guests = GuestApplication::where('company_id', $companyId)
             ->where('converted_to_student', false)
@@ -199,6 +212,150 @@ class UserActivityService
             'days_since_action'  => $daysSince($g->last_senior_action_at ?? $g->created_at),
             'last_action_at'     => $g->last_senior_action_at,
         ])->all();
+    }
+
+    /**
+     * Alarm: dormant öğrenciler — son N günde aktivite yok + ödeme bekliyor VEYA
+     * yaklaşan randevu yok. Senior/finans bölümüne öncelikli liste.
+     */
+    public function studentDormantAlerts(int $companyId, int $dormantDays = 14, int $limit = 20): array
+    {
+        $cutoff = now()->subDays($dormantDays);
+
+        $students = User::where('company_id', $companyId)
+            ->where('role', 'student')
+            ->where(function ($q) use ($cutoff) {
+                $q->where('last_activity_at', '<', $cutoff)
+                  ->orWhereNull('last_activity_at');
+            })
+            ->get(['id', 'name', 'email', 'presence_status', 'last_activity_at', 'created_at']);
+
+        $out = [];
+        foreach ($students as $u) {
+            // Ek sinyal: overdue payment veya paid_at boş pending payment
+            $overduePaymentCount = StudentPayment::where('student_id', $u->id)
+                ->whereIn('status', ['overdue', 'pending'])
+                ->count();
+
+            // Yaklaşan randevu var mı?
+            $upcomingAppt = StudentAppointment::where('student_id', $u->id)
+                ->where('scheduled_at', '>=', now())
+                ->where('status', '!=', 'cancelled')
+                ->exists();
+
+            // Son 7 gündeki audit aksiyon sayısı (gerçekten dormant mı?)
+            $recentActions = AuditTrail::where('user_id', $u->id)
+                ->where('created_at', '>=', now()->subDays(7))
+                ->count();
+
+            // Risk skoru: overdue payment + yaklaşan randevu yok + 0 son aksiyon
+            $risk = 0;
+            if ($overduePaymentCount > 0) $risk += 40;
+            if (!$upcomingAppt) $risk += 20;
+            if ($recentActions === 0) $risk += 20;
+            if ($u->last_activity_at === null) $risk += 20;
+
+            if ($risk < 40) continue; // sadece gerçekten risk altında olanlar
+
+            $lastActivity = $u->last_activity_at;
+            $daysSince = $lastActivity ? (int) Carbon::parse($lastActivity)->diffInDays(now()) : null;
+
+            $out[] = [
+                'id'                => $u->id,
+                'name'              => $u->name,
+                'email'             => $u->email,
+                'presence'          => $u->presence_status,
+                'last_activity_at'  => $lastActivity,
+                'days_since'        => $daysSince,
+                'overdue_payments'  => $overduePaymentCount,
+                'has_upcoming_appt' => $upcomingAppt,
+                'risk_score'        => $risk,
+            ];
+        }
+
+        usort($out, fn ($a, $b) => $b['risk_score'] <=> $a['risk_score']);
+        return array_slice($out, 0, $limit);
+    }
+
+    /**
+     * Kampanya etki ölçümü — bir tarihte yayınlanan içerik/duyuru sonrası
+     * platform aktivitesi ne kadar değişti?
+     *
+     * Örnek: "15 Nisan'da blog post yayınlandık, sonraki 7 gün vs önceki 7 gün".
+     *
+     * @param Carbon|string $eventDate Yayın tarihi
+     * @param int $windowDays Karşılaştırma penceresi (örn: 7)
+     */
+    public function campaignImpact(int $companyId, $eventDate, int $windowDays = 7): array
+    {
+        $eventAt = Carbon::parse($eventDate);
+        $beforeStart = $eventAt->copy()->subDays($windowDays);
+        $afterEnd    = $eventAt->copy()->addDays($windowDays);
+
+        // Öncesi: [beforeStart, eventAt)
+        $beforeLeads = GuestApplication::where('company_id', $companyId)
+            ->whereBetween('created_at', [$beforeStart, $eventAt])
+            ->count();
+        $beforeAiQs = GuestAiConversation::join('guest_applications', 'guest_ai_conversations.guest_application_id', '=', 'guest_applications.id')
+            ->where('guest_applications.company_id', $companyId)
+            ->whereBetween('guest_ai_conversations.created_at', [$beforeStart, $eventAt])
+            ->count();
+        $beforeBookings = \DB::table('public_bookings')
+            ->where('company_id', $companyId)
+            ->whereBetween('created_at', [$beforeStart, $eventAt])
+            ->count();
+        $beforeStudentActivity = User::where('company_id', $companyId)
+            ->where('role', 'student')
+            ->whereBetween('last_activity_at', [$beforeStart, $eventAt])
+            ->count();
+
+        // Sonrası: (eventAt, afterEnd]
+        $afterLeads = GuestApplication::where('company_id', $companyId)
+            ->whereBetween('created_at', [$eventAt, $afterEnd])
+            ->count();
+        $afterAiQs = GuestAiConversation::join('guest_applications', 'guest_ai_conversations.guest_application_id', '=', 'guest_applications.id')
+            ->where('guest_applications.company_id', $companyId)
+            ->whereBetween('guest_ai_conversations.created_at', [$eventAt, $afterEnd])
+            ->count();
+        $afterBookings = \DB::table('public_bookings')
+            ->where('company_id', $companyId)
+            ->whereBetween('created_at', [$eventAt, $afterEnd])
+            ->count();
+        $afterStudentActivity = User::where('company_id', $companyId)
+            ->where('role', 'student')
+            ->whereBetween('last_activity_at', [$eventAt, $afterEnd])
+            ->count();
+
+        $deltaPct = fn ($a, $b) => $b > 0 ? round(100 * ($a - $b) / $b, 1) : ($a > 0 ? 100 : 0);
+
+        return [
+            'event_at'       => $eventAt->toIso8601String(),
+            'window_days'    => $windowDays,
+            'period_before'  => $beforeStart->toDateString() . ' → ' . $eventAt->toDateString(),
+            'period_after'   => $eventAt->toDateString() . ' → ' . $afterEnd->toDateString(),
+            'metrics' => [
+                'new_leads' => [
+                    'before' => $beforeLeads,
+                    'after'  => $afterLeads,
+                    'delta_pct' => $deltaPct($afterLeads, $beforeLeads),
+                ],
+                'ai_queries' => [
+                    'before' => $beforeAiQs,
+                    'after'  => $afterAiQs,
+                    'delta_pct' => $deltaPct($afterAiQs, $beforeAiQs),
+                ],
+                'bookings' => [
+                    'before' => $beforeBookings,
+                    'after'  => $afterBookings,
+                    'delta_pct' => $deltaPct($afterBookings, $beforeBookings),
+                ],
+                'student_active' => [
+                    'before' => $beforeStudentActivity,
+                    'after'  => $afterStudentActivity,
+                    'delta_pct' => $deltaPct($afterStudentActivity, $beforeStudentActivity),
+                ],
+            ],
+        ];
     }
 
     /**
