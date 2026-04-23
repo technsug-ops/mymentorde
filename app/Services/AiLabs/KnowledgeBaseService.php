@@ -40,16 +40,26 @@ class KnowledgeBaseService
             ->get();
 
         foreach ($sources as $source) {
-            $result = $this->syncSource($source);
-            if ($result['ok'] ?? false) {
-                if ($result['skipped'] ?? false) {
-                    $stats['skipped']++;
+            try {
+                $result = $this->syncSource($source);
+                if ($result['ok'] ?? false) {
+                    if ($result['skipped'] ?? false) {
+                        $stats['skipped']++;
+                    } else {
+                        $stats['synced']++;
+                    }
                 } else {
-                    $stats['synced']++;
+                    $stats['failed']++;
+                    $stats['errors'][] = "#{$source->id} {$source->title}: " . ($result['error'] ?? 'unknown');
                 }
-            } else {
+            } catch (\Throwable $e) {
+                // Bir kaynak çökse bile diğerlerini işlemeye devam et
                 $stats['failed']++;
-                $stats['errors'][] = "#{$source->id} {$source->title}: " . ($result['error'] ?? 'unknown');
+                $stats['errors'][] = "#{$source->id} {$source->title}: exception - " . \Illuminate\Support\Str::limit($e->getMessage(), 120);
+                \Illuminate\Support\Facades\Log::warning('AiLabs sync source failed', [
+                    'source_id' => $source->id,
+                    'error'     => $e->getMessage(),
+                ]);
             }
         }
 
