@@ -56,6 +56,13 @@ Schedule::command('export:audit-report --type=all')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/audit-export.log'));
 
+// audit_trails 90+ gün eski kayıtlar → jsonl.gz dump + DB'den sil
+// Haftalık çalışır — GDPR 3 yıl retention için yeterli, OLTP tablosu şişmez
+Schedule::command('archive:audit-trails --days=90 --chunk=1000')
+    ->weeklyOn(0, '03:30') // Pazar 03:30
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/audit-archive.log'));
+
 Schedule::command('gdpr:enforce-retention')
     ->dailyAt('03:00')
     ->withoutOverlapping()
