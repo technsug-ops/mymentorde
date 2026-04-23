@@ -281,6 +281,35 @@ section { padding:70px 0; }
 .cta-contact { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.1); padding:10px 18px; border-radius:10px; }
 .cta-contact a { color:#fff !important; text-decoration:underline; text-decoration-color:rgba(255,255,255,.4); }
 
+/* === LIVE COUNTERS === */
+.live-counters {
+    background:linear-gradient(140deg, #fff, var(--primary-soft), #fff);
+    padding:50px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.live-head { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:30px; color:var(--primary); font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; }
+.live-dot { width:8px; height:8px; border-radius:50%; background:#16a34a; box-shadow:0 0 0 0 rgba(22,163,74,.5); animation:pulseDot 1.6s ease-out infinite; }
+@keyframes pulseDot { 0% { box-shadow:0 0 0 0 rgba(22,163,74,.6); } 70% { box-shadow:0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow:0 0 0 0 rgba(22,163,74,0); } }
+.counters-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:20px; }
+@media(max-width:900px) { .counters-grid { grid-template-columns:repeat(2, 1fr); } }
+@media(max-width:540px) { .counters-grid { grid-template-columns:1fr; } }
+.counter {
+    background:#fff; border:1px solid var(--line); border-radius:16px; padding:28px 22px;
+    text-align:center; transition:all .25s; position:relative; overflow:hidden;
+}
+.counter::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--primary), var(--accent));
+}
+.counter:hover { transform:translateY(-3px); box-shadow:0 12px 32px rgba(91,46,145,.12); }
+.counter-icon { font-size:32px; margin-bottom:10px; }
+.counter-value {
+    font-family:"DM Serif Display", serif; font-size:42px; line-height:1;
+    color:var(--primary-deep); margin:0 0 6px; letter-spacing:-.5px;
+    transition:color .3s ease;
+}
+.counter-value.flash { color:var(--success); }
+.counter-label { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; font-weight:700; }
+
 /* === CALCULATOR === */
 .calc-wrap { display:grid; grid-template-columns:1fr 1fr; gap:36px; align-items:start; }
 @media(max-width:900px) { .calc-wrap { grid-template-columns:1fr; } }
@@ -434,6 +463,41 @@ footer a { color:var(--accent); }
                 <li>Dealer Paneli ile şeffaf takip</li>
             </ul>
         </div>
+    </div>
+</section>
+
+{{-- ═══ CANLI SAYAÇLAR ═══ --}}
+<section class="live-counters">
+    <div class="container">
+        <div class="live-head">
+            <span class="live-dot"></span>
+            Canlı Rakamlar — Şu An
+        </div>
+        <div class="counters-grid">
+            <div class="counter">
+                <div class="counter-icon">🤝</div>
+                <div class="counter-value" data-counter="sellers">{{ number_format($counters['sellers'] ?? 0, 0, ',', '.') }}</div>
+                <div class="counter-label">Aktif Satış Ortağı</div>
+            </div>
+            <div class="counter">
+                <div class="counter-icon">👥</div>
+                <div class="counter-value" data-counter="applications">{{ number_format($counters['applications'] ?? 0, 0, ',', '.') }}</div>
+                <div class="counter-label">Yönlendirilen Aday</div>
+            </div>
+            <div class="counter">
+                <div class="counter-icon">🎓</div>
+                <div class="counter-value" data-counter="students">{{ number_format($counters['students'] ?? 0, 0, ',', '.') }}</div>
+                <div class="counter-label">Almanya'da Öğrenci</div>
+            </div>
+            <div class="counter">
+                <div class="counter-icon">💰</div>
+                <div class="counter-value" data-counter="commissions_eur">€{{ number_format($counters['commissions_eur'] ?? 0, 0, ',', '.') }}</div>
+                <div class="counter-label">Ödenen Komisyon</div>
+            </div>
+        </div>
+        <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:24px;">
+            Rakamlar MentorDE platform verisi ve partnerlik geçmişinden gelir — her etkinlik anlık yansır.
+        </p>
     </div>
 </section>
 
@@ -1042,6 +1106,79 @@ footer a { color:var(--accent); }
         <a href="/legal/privacy">Gizlilik</a>
     </div>
 </footer>
+
+{{-- Canlı Sayaç — pseudo-live increment (config'ten) --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function() {
+    const LIVE_CFG = @json($counters['live'] ?? ['interval_ms' => 25000, 'ranges' => []]);
+    const state = {
+        sellers: {{ (int) ($counters['sellers'] ?? 0) }},
+        applications: {{ (int) ($counters['applications'] ?? 0) }},
+        students: {{ (int) ($counters['students'] ?? 0) }},
+        commissions_eur: {{ (int) ($counters['commissions_eur'] ?? 0) }},
+    };
+
+    function formatNumber(n, prefix) {
+        const s = Math.round(n).toLocaleString('tr-TR').replace(/,/g, '.');
+        return (prefix || '') + s;
+    }
+
+    function randInRange(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function flash(el) {
+        el.classList.add('flash');
+        setTimeout(() => el.classList.remove('flash'), 500);
+    }
+
+    function animate(el, from, to, prefix) {
+        const duration = 800;
+        const start = performance.now();
+        function step(now) {
+            const t = Math.min(1, (now - start) / duration);
+            const easedT = 1 - Math.pow(1 - t, 3);
+            const current = from + (to - from) * easedT;
+            el.textContent = formatNumber(current, prefix);
+            if (t < 1) requestAnimationFrame(step);
+            else el.textContent = formatNumber(to, prefix);
+        }
+        requestAnimationFrame(step);
+    }
+
+    function tick() {
+        const ranges = LIVE_CFG.ranges || {};
+        Object.keys(ranges).forEach(key => {
+            const [min, max] = ranges[key] || [0, 0];
+            if (max <= 0) return;
+            const delta = randInRange(min, max);
+            if (delta === 0) return;
+
+            const el = document.querySelector(`[data-counter="${key}"]`);
+            if (!el) return;
+
+            const prefix = key === 'commissions_eur' ? '€' : '';
+            const from = state[key];
+            const to = from + delta;
+            state[key] = to;
+            animate(el, from, to, prefix);
+            flash(el);
+        });
+    }
+
+    // Sekme görünürken çalışsın, arka plandayken durdur (performans)
+    let timer = null;
+    function start() { if (!timer) timer = setInterval(tick, LIVE_CFG.interval_ms || 25000); }
+    function stop()  { if (timer) { clearInterval(timer); timer = null; } }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stop(); else start();
+    });
+
+    // İlk artışı hemen 3-5 sn sonra başlat (sayfa yüklenir yüklenmez artma hissi)
+    setTimeout(() => { tick(); start(); }, 3500);
+})();
+</script>
 
 {{-- Kazanç Hesaplayıcı JavaScript --}}
 <script nonce="{{ $cspNonce ?? '' }}">

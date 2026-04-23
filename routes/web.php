@@ -227,7 +227,29 @@ Route::middleware(['company.context', 'module:booking'])->group(function (): voi
 
 Route::middleware(['company.context'])->group(function () {
     // Public Satış Ortağı (dealer) landing — MentorDE Satış Ortaklığı Programı tanıtımı
-    Route::get('/satis-ortagi', fn () => view('public.dealer-landing'))
+    Route::get('/satis-ortagi', function () {
+        $cfg = config('dealer_landing');
+        $counters = [
+            'sellers' => (int) $cfg['historical_sellers']
+                + \App\Models\User::query()->withoutGlobalScopes()
+                    ->whereIn('role', ['dealer'])
+                    ->where('is_active', true)
+                    ->count(),
+            'applications' => (int) $cfg['historical_applications']
+                + \App\Models\GuestApplication::query()->withoutGlobalScopes()->count(),
+            'students' => (int) $cfg['historical_students']
+                + \App\Models\User::query()->withoutGlobalScopes()
+                    ->where('role', 'student')
+                    ->count(),
+            'commissions_eur' => (int) $cfg['historical_commissions_eur'],
+            // Pseudo-live increment config — frontend JS kullanır
+            'live' => [
+                'interval_ms' => (int) $cfg['increment_interval_ms'],
+                'ranges'      => $cfg['increment_ranges'],
+            ],
+        ];
+        return view('public.dealer-landing', ['counters' => $counters]);
+    })
         ->middleware('throttle:120,1')->name('public.dealer-landing');
     Route::get('/partner',      fn () => redirect()->route('public.dealer-landing'))
         ->middleware('throttle:120,1'); // alias
