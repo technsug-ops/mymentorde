@@ -208,8 +208,8 @@ class UserActivityService
     {
         $since = now()->subDays($daysBack)->startOfDay();
 
-        $studentActivity = AuditTrail::where('company_id', $companyId)
-            ->where('created_at', '>=', $since)
+        $studentActivity = AuditTrail::where('audit_trails.company_id', $companyId)
+            ->where('audit_trails.created_at', '>=', $since)
             ->join('users', 'audit_trails.user_id', '=', 'users.id')
             ->where('users.role', 'student')
             ->selectRaw('DATE(audit_trails.created_at) as d, COUNT(DISTINCT audit_trails.user_id) as cnt')
