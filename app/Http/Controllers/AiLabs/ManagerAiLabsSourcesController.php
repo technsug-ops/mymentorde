@@ -346,6 +346,105 @@ class ManagerAiLabsSourcesController extends Controller
         return redirect()->route('manager.ai-labs.sources')->with('status', $msg);
     }
 
+    /**
+     * Toplu dosya yükleme — N adet PDF/DOCX/XLSX/TXT aynı anda.
+     * Her dosya için ayrı KnowledgeSource oluşturur, paylaşımlı kategori + rol ayarları.
+     */
+    public function storeBulkFiles(Request $request, DocumentExtractor $extractor): RedirectResponse
+    {
+        // 20 dosya × 15 MB × extract süresi
+        set_time_limit(300);
+        @ini_set('max_execution_time', '300');
+
+        $data = $request->validate([
+            'doc_files'           => 'required|array|min:1|max:20',
+            'doc_files.*'         => 'file|mimes:pdf,docx,xlsx,xls,txt,md|max:15360', // 15 MB her dosya
+            'category'            => 'nullable|string|max:80',
+            'visible_to_roles'    => 'required|array|min:1',
+            'visible_to_roles.*'  => 'in:guest,student,senior,manager,admin_staff',
+        ]);
+
+        $cid = $this->companyId();
+        $roles = array_values($data['visible_to_roles']);
+        $hasG = in_array('guest', $roles, true);
+        $hasS = in_array('student', $roles, true);
+        $targetAudience = match (true) {
+            $hasG && $hasS => 'both',
+            $hasG          => 'guest',
+            $hasS          => 'student',
+            default        => 'both',
+        };
+        $category = $data['category'] ?: null;
+
+        $ok = 0;
+        $failed = 0;
+        $errors = [];
+
+        foreach ($request->file('doc_files') as $upload) {
+            try {
+                $ext = strtolower($upload->getClientOriginalExtension());
+                $originalName = $upload->getClientOriginalName();
+                $folder = "ai-labs/{$cid}";
+                $storedName = time() . '_' . Str::random(8) . '_' . Str::slug(pathinfo($originalName, PATHINFO_FILENAME), '-') . '.' . $ext;
+                $filePath = $upload->storeAs($folder, $storedName, 'local');
+
+                $title = pathinfo($originalName, PATHINFO_FILENAME);
+                $title = mb_substr($title, 0, 200, 'UTF-8');
+
+                $storedType = 'pdf';
+                $content = null;
+                $hash = null;
+
+                if ($ext === 'pdf') {
+                    $storedType = 'pdf';
+                    $hash = hash_file('sha256', Storage::disk('local')->path($filePath));
+                } else {
+                    // DOCX / XLSX / TXT → text extract
+                    $storedType = 'document';
+                    $absolute = Storage::disk('local')->path($filePath);
+                    $result = $extractor->extract($absolute, $ext);
+                    if ($result['ok'] ?? false) {
+                        $content = (string) $result['content'];
+                        $hash = hash('sha256', $content);
+                    } else {
+                        Storage::disk('local')->delete($filePath);
+                        $failed++;
+                        $errors[] = "{$originalName}: " . ($result['error'] ?? 'extract_failed');
+                        continue;
+                    }
+                }
+
+                KnowledgeSource::create([
+                    'company_id'         => $cid,
+                    'title'              => $title,
+                    'type'               => $storedType,
+                    'category'           => $category,
+                    'target_audience'    => $targetAudience,
+                    'visible_to_roles'   => $roles,
+                    'file_path'          => $filePath,
+                    'content_markdown'   => $content,
+                    'content_hash'       => $hash,
+                    'is_active'          => true,
+                    'created_by_user_id' => auth()->id(),
+                ]);
+
+                $ok++;
+            } catch (\Throwable $e) {
+                $failed++;
+                $errors[] = $upload->getClientOriginalName() . ': ' . \Illuminate\Support\Str::limit($e->getMessage(), 100);
+            }
+        }
+
+        $msg = "✅ {$ok} dosya eklendi";
+        if ($failed > 0) {
+            $msg .= " · ⚠️ {$failed} başarısız";
+            if (!empty($errors)) $msg .= " — ilk hata: " . ($errors[0] ?? '');
+        }
+        $msg .= ". PDF\'ler için '☁️ Kaynakları Senkronize Et' butonuna basmayı unutma.";
+
+        return redirect()->route('manager.ai-labs.sources')->with('status', $msg);
+    }
+
     public function refetch(Request $request, int $source, KnowledgeBaseService $kb): RedirectResponse
     {
         $cid = $this->companyId();

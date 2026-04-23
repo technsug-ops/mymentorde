@@ -329,6 +329,7 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::post('/manager/ai-labs/sources',                   [$src, 'store'])->middleware('throttle:30,1')->name('manager.ai-labs.sources.store');
         Route::post('/manager/ai-labs/sources/bulk',              [$src, 'bulkUpdate'])->middleware('throttle:20,1')->name('manager.ai-labs.sources.bulk');
         Route::post('/manager/ai-labs/sources/bulk-urls',         [$src, 'storeBulkUrls'])->middleware('throttle:5,1')->name('manager.ai-labs.sources.bulk-urls');
+        Route::post('/manager/ai-labs/sources/bulk-files',        [$src, 'storeBulkFiles'])->middleware('throttle:5,1')->name('manager.ai-labs.sources.bulk-files');
         Route::put('/manager/ai-labs/sources/{source}',           [$src, 'update'])->middleware('throttle:30,1')->name('manager.ai-labs.sources.update');
         Route::post('/manager/ai-labs/sources/{source}/toggle',   [$src, 'toggle'])->middleware('throttle:60,1')->name('manager.ai-labs.sources.toggle');
         Route::post('/manager/ai-labs/sources/{source}/refetch',  [$src, 'refetch'])->middleware('throttle:20,1')->name('manager.ai-labs.sources.refetch');
