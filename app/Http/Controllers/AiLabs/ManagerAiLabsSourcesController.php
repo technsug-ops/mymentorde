@@ -250,6 +250,102 @@ class ManagerAiLabsSourcesController extends Controller
         return back()->with('status', "✅ {$affected} kaynak güncellendi.");
     }
 
+    /**
+     * Toplu URL ekleme — textarea'dan N URL alır, her biri için KnowledgeSource oluşturur
+     * ve hemen fetch eder. Paylaşılan kategori + rol ayarları tüm URL'lere uygulanır.
+     */
+    public function storeBulkUrls(Request $request, KnowledgeBaseService $kb): RedirectResponse
+    {
+        // 50 URL × ~5sn fetch = 250sn, güvenli limit
+        set_time_limit(300);
+        @ini_set('max_execution_time', '300');
+
+        $data = $request->validate([
+            'urls_text'          => 'required|string|max:10000',
+            'category'           => 'nullable|string|max:80',
+            'visible_to_roles'   => 'required|array|min:1',
+            'visible_to_roles.*' => 'in:guest,student,senior,manager,admin_staff',
+        ]);
+
+        $cid = $this->companyId();
+        $roles = array_values($data['visible_to_roles']);
+        $hasG = in_array('guest', $roles, true);
+        $hasS = in_array('student', $roles, true);
+        $targetAudience = match (true) {
+            $hasG && $hasS => 'both',
+            $hasG          => 'guest',
+            $hasS          => 'student',
+            default        => 'both',
+        };
+        $category = $data['category'] ?: null;
+
+        // URL'leri parse et — her satır veya virgül ayırıcı
+        $lines = preg_split('/[\r\n,]+/', $data['urls_text']);
+        $urls = [];
+        foreach ($lines as $line) {
+            $url = trim($line);
+            if ($url === '') continue;
+            if (!filter_var($url, FILTER_VALIDATE_URL)) continue;
+            $urls[] = $url;
+        }
+
+        if (empty($urls)) {
+            return back()->withInput()->with('status', '⚠️ Geçerli URL bulunamadı. Her satıra bir URL yazın.');
+        }
+
+        // Max 50 URL güvenlik
+        $urls = array_slice($urls, 0, 50);
+        $urls = array_values(array_unique($urls));
+
+        $ok = 0;
+        $fail = 0;
+        $skipped = 0;
+
+        foreach ($urls as $url) {
+            // Aynı URL zaten var mı?
+            $exists = KnowledgeSource::query()
+                ->withoutGlobalScopes()
+                ->where('company_id', $cid)
+                ->where('url', $url)
+                ->exists();
+            if ($exists) { $skipped++; continue; }
+
+            // URL'den başlık çıkarmak için: önce basit bir title
+            $hostname = parse_url($url, PHP_URL_HOST) ?: $url;
+            $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
+            $autoTitle = $path !== '' ? ($hostname . '/' . basename($path)) : $hostname;
+            $autoTitle = mb_substr($autoTitle, 0, 150, 'UTF-8');
+
+            $source = KnowledgeSource::create([
+                'company_id'         => $cid,
+                'title'              => $autoTitle,
+                'type'               => 'url',
+                'category'           => $category,
+                'target_audience'    => $targetAudience,
+                'visible_to_roles'   => $roles,
+                'url'                => $url,
+                'is_active'          => true,
+                'created_by_user_id' => auth()->id(),
+            ]);
+
+            // Hemen fetch et
+            $result = $kb->fetchUrlSource($source, force: true);
+            if ($result['ok'] ?? false) {
+                // Eğer fetcher daha iyi başlık bulduysa (HTML title), kullan
+                // UrlContentFetcher'dan title gelmez şu an — skip
+                $ok++;
+            } else {
+                $fail++;
+            }
+        }
+
+        $msg = "✅ {$ok} URL eklendi ve içerik çekildi";
+        if ($skipped > 0) $msg .= " · ⚠️ {$skipped} duplicate atlandı";
+        if ($fail > 0)    $msg .= " · ❌ {$fail} fetch başarısız (URL erişilemedi)";
+
+        return redirect()->route('manager.ai-labs.sources')->with('status', $msg);
+    }
+
     public function refetch(Request $request, int $source, KnowledgeBaseService $kb): RedirectResponse
     {
         $cid = $this->companyId();

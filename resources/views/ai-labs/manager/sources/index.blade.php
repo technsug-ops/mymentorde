@@ -130,6 +130,7 @@
         <div class="als-type-tabs" id="als-tabs">
             <div class="als-type-tab active" data-type="file">📎 Dosya Yükle</div>
             <div class="als-type-tab" data-type="url">🌐 URL Ekle</div>
+            <div class="als-type-tab" data-type="bulk_urls">📋 Toplu URL</div>
             <div class="als-type-tab" data-type="text">✏️ Düz Metin</div>
         </div>
 
@@ -197,10 +198,59 @@
                 </div>
             </div>
 
-            <div style="margin-top:14px;">
+            <div style="margin-top:14px;" id="als-single-submit">
                 <button type="submit" class="als-btn als-btn-primary">Kaynağı Kaydet</button>
             </div>
         </form>
+
+        {{-- Bulk URLs panel — ayrı form (farklı endpoint) --}}
+        <div class="als-type-panel" data-panel="bulk_urls" style="display:none;">
+            <form method="POST" action="{{ url('/manager/ai-labs/sources/bulk-urls') }}" id="bulk-urls-form">
+                @csrf
+
+                <div class="als-grid-2" style="margin-bottom:14px;">
+                    <div class="als-field">
+                        <label>Kategori (hepsine uygulanır)</label>
+                        <input type="text" name="category" maxlength="80" placeholder="örn: eğitim, konaklama, vize">
+                    </div>
+                </div>
+
+                <div class="als-field" style="margin-bottom:14px;">
+                    <label>Görünürlük — Hangi rollere açık olacak? *</label>
+                    <div class="als-role-presets">
+                        <button type="button" class="als-role-preset" data-bulk-url-preset="external">👥 Dış roller</button>
+                        <button type="button" class="als-role-preset" data-bulk-url-preset="internal">🏢 İç roller</button>
+                        <button type="button" class="als-role-preset" data-bulk-url-preset="all">🌐 Hepsi</button>
+                        <button type="button" class="als-role-preset" data-bulk-url-preset="none">Temizle</button>
+                    </div>
+                    <div class="als-role-grid" id="bulk-urls-role-grid">
+                        <label class="als-role-chip"><input type="checkbox" name="visible_to_roles[]" value="guest" checked> <span class="emoji">🙋</span> Aday</label>
+                        <label class="als-role-chip"><input type="checkbox" name="visible_to_roles[]" value="student" checked> <span class="emoji">🎓</span> Öğrenci</label>
+                        <label class="als-role-chip"><input type="checkbox" name="visible_to_roles[]" value="senior"> <span class="emoji">👨‍🏫</span> Senior</label>
+                        <label class="als-role-chip"><input type="checkbox" name="visible_to_roles[]" value="manager"> <span class="emoji">👔</span> Yönetici</label>
+                        <label class="als-role-chip"><input type="checkbox" name="visible_to_roles[]" value="admin_staff"> <span class="emoji">🏢</span> Admin</label>
+                    </div>
+                </div>
+
+                <div class="als-field">
+                    <label>URL'ler — her satıra bir URL (veya virgülle ayırarak)</label>
+                    <textarea name="urls_text" rows="10" required placeholder="https://www.mentorde.com/tr/almanya-universiteleri&#10;https://mentorde.com/tr/almanya-da-erasmus-sureci&#10;https://www.wg-gesucht.de/&#10;..." style="font-family:monospace; font-size:12px;"></textarea>
+                    <small style="font-size:11px; color:#64748b; display:block; margin-top:6px;">
+                        📋 Max 50 URL. Her biri için içerik otomatik fetch edilir (HTML → text).
+                        Duplicate URL'ler (zaten eklenmiş) atlanır. Fetch başarısız olanlar raporlanır.
+                        İşlem 10-60 saniye sürebilir, sayfa yenilenmesini bekle.
+                    </small>
+                </div>
+
+                <div style="background:#fef3c7; border:1px solid #fcd34d; color:#92400e; padding:10px 14px; border-radius:8px; font-size:11.5px; margin:12px 0;">
+                    ⏳ Fetch süreci: ~2-5 saniye/URL. 20 URL için yaklaşık 1-2 dakika.
+                </div>
+
+                <div style="margin-top:14px;">
+                    <button type="submit" class="als-btn als-btn-primary" id="bulk-urls-submit">📋 Toplu URL Ekle</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     {{-- Bulk action toolbar (sticky, sadece seçim olunca görünür) --}}
@@ -411,13 +461,50 @@
     const panels = document.querySelectorAll('.als-type-panel');
     const typeInput = document.getElementById('als-type-input');
 
+    const mainForm = document.getElementById('als-form');
+    const bulkUrlsPanel = document.querySelector('.als-type-panel[data-panel="bulk_urls"]');
+
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const t = tab.dataset.type;
             tabs.forEach(x => x.classList.toggle('active', x === tab));
-            panels.forEach(p => p.classList.toggle('active', p.dataset.panel === t));
-            typeInput.value = t;
+
+            if (t === 'bulk_urls') {
+                // Ana form'u gizle, bulk panel'i göster
+                mainForm.style.display = 'none';
+                if (bulkUrlsPanel) bulkUrlsPanel.style.display = 'block';
+                // Diğer panel'leri kapat
+                panels.forEach(p => p.classList.remove('active'));
+            } else {
+                mainForm.style.display = '';
+                if (bulkUrlsPanel) bulkUrlsPanel.style.display = 'none';
+                panels.forEach(p => p.classList.toggle('active', p.dataset.panel === t));
+                typeInput.value = t;
+            }
         });
+    });
+
+    // Bulk URLs role presets
+    const bulkUrlPresets = {
+        external: ['guest', 'student'],
+        internal: ['senior', 'manager', 'admin_staff'],
+        all:      ['guest', 'student', 'senior', 'manager', 'admin_staff'],
+        none:     [],
+    };
+    document.querySelectorAll('.als-role-preset[data-bulk-url-preset]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const selected = bulkUrlPresets[btn.dataset.bulkUrlPreset] || [];
+            document.querySelectorAll('#bulk-urls-role-grid input[type=checkbox]').forEach(cb => {
+                cb.checked = selected.includes(cb.value);
+            });
+        });
+    });
+
+    // Bulk URLs submit — loading state
+    document.getElementById('bulk-urls-form')?.addEventListener('submit', () => {
+        const btn = document.getElementById('bulk-urls-submit');
+        btn.disabled = true;
+        btn.textContent = '⏳ URL\'ler çekiliyor... (1-2 dk sürebilir)';
     });
 
     // Rol preset butonları (create form)
