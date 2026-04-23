@@ -48,6 +48,9 @@ class AnalyticsService
             'response_modes'       => $this->responseModeDistribution($companyId, $monthStart),
             'top_topics'           => $this->topTopics($companyId, $monthStart, 10),
             'faq_candidates'       => $this->faqCandidates($companyId, 60, 2, 20),
+            'hot_leads'            => $this->hotLeads($companyId, 30, 15),
+            'topic_categories'     => $this->topicCategories($companyId, $monthStart),
+            'conversion_intents'   => $this->conversionVsLostIntents($companyId, 180),
             'unused_sources'       => $this->unusedSources($companyId, 30),
             'top_cited_sources'    => $this->topCitedSources($companyId, 10),
             'content_drafts'       => $this->contentDraftMetrics($companyId, $monthStart),
@@ -55,6 +58,200 @@ class AnalyticsService
             'feedback'             => $this->feedbackMetrics($companyId, $monthStart),
             'problem_answers'      => $this->problemAnswers($companyId, 10),
             'alerts'               => $this->alerts($companyId, $monthStart),
+        ];
+    }
+
+    // ── HOT LEADS — AI kullanan adaylar, öncelik sırasıyla ────────────
+
+    /**
+     * AI kullanan guest_application'lar — soru sayısı, son aktivite, kategoriler.
+     * Manager'a "bu adamla hemen ilgilen" sinyali verir.
+     *
+     * Sıralama: (soru_sayısı × 2 + lead_score × 0.5 + son aktivite bonus)
+     */
+    public function hotLeads(int $companyId, int $daysBack = 30, int $limit = 15): array
+    {
+        $since = now()->subDays($daysBack);
+
+        // guest_application_id → stats
+        $rows = GuestAiConversation::query()
+            ->join('guest_applications', 'guest_ai_conversations.guest_application_id', '=', 'guest_applications.id')
+            ->where('guest_applications.company_id', $companyId)
+            ->where('guest_ai_conversations.created_at', '>=', $since)
+            ->selectRaw('
+                guest_applications.id as lead_id,
+                guest_applications.first_name,
+                guest_applications.last_name,
+                guest_applications.email,
+                guest_applications.phone,
+                guest_applications.lead_score,
+                guest_applications.lead_score_tier,
+                guest_applications.converted_to_student,
+                guest_applications.assigned_senior_email,
+                guest_applications.created_at as lead_created_at,
+                COUNT(guest_ai_conversations.id) as question_count,
+                MAX(guest_ai_conversations.created_at) as last_question_at
+            ')
+            ->groupBy(
+                'guest_applications.id', 'guest_applications.first_name', 'guest_applications.last_name',
+                'guest_applications.email', 'guest_applications.phone', 'guest_applications.lead_score',
+                'guest_applications.lead_score_tier', 'guest_applications.converted_to_student',
+                'guest_applications.assigned_senior_email', 'guest_applications.created_at'
+            )
+            ->get();
+
+        // Her lead için topic dağılımını bul
+        $leadIds = $rows->pluck('lead_id')->all();
+        $questions = $leadIds
+            ? GuestAiConversation::whereIn('guest_application_id', $leadIds)
+                ->where('created_at', '>=', $since)
+                ->get(['guest_application_id', 'question'])
+                ->groupBy('guest_application_id')
+            : collect();
+
+        $out = [];
+        foreach ($rows as $r) {
+            $qs = $questions->get($r->lead_id, collect())->pluck('question')->all();
+            $topics = $this->categorizeQuestions($qs);
+            $hoursSinceLast = $r->last_question_at
+                ? max(1, now()->diffInHours($r->last_question_at, false) * -1)
+                : 9999;
+            $recencyBonus = $hoursSinceLast <= 24 ? 20 : ($hoursSinceLast <= 72 ? 10 : 0);
+            $hotness = (int) (
+                $r->question_count * 2
+                + (int) ($r->lead_score ?? 0) * 0.5
+                + $recencyBonus
+                + ($r->lead_score_tier === 'hot' ? 25 : 0)
+                + ($r->lead_score_tier === 'sales_ready' ? 40 : 0)
+            );
+
+            $out[] = [
+                'lead_id'         => (int) $r->lead_id,
+                'full_name'       => trim(($r->first_name ?? '') . ' ' . ($r->last_name ?? '')) ?: '—',
+                'email'           => $r->email,
+                'phone'           => $r->phone,
+                'lead_score'      => (int) ($r->lead_score ?? 0),
+                'tier'            => $r->lead_score_tier ?? 'cold',
+                'converted'       => (bool) $r->converted_to_student,
+                'assigned_senior' => $r->assigned_senior_email,
+                'question_count'  => (int) $r->question_count,
+                'last_question_at'=> $r->last_question_at,
+                'top_topics'      => array_slice($topics, 0, 3, true),
+                'hotness'         => $hotness,
+            ];
+        }
+
+        usort($out, fn ($a, $b) => $b['hotness'] <=> $a['hotness']);
+        return array_slice($out, 0, $limit);
+    }
+
+    // ── TOPIC CATEGORIZATION — keyword matching ───────────────────────
+
+    /**
+     * Taksonomi — sorudaki kelimelere göre soru tipini sınıflandır.
+     * Basit keyword matching, gerçek NLP değil ama domain-specific iyi çalışır.
+     */
+    private const TOPIC_CATEGORIES = [
+        'vize'        => ['vize', 'visum', 'visa', 'schengen', 'randevu vize', 'vize başvuru', 'konsoloslu'],
+        'üniversite'  => ['üniversite', 'university', 'uni ', 'universität', 'tu ', 'lmu', 'rwth', 'başvuru üniversite', 'kayıt', 'hochschule', 'bewerbung'],
+        'barınma'     => ['ev', 'konut', 'wohnung', 'yurt', 'wohnheim', 'kira', 'oda', 'zimmer', 'studentenwohnheim'],
+        'dil'         => ['almanca', 'dil', 'deutsch', 'b1', 'b2', 'c1', 'c2', 'a1', 'a2', 'sprachkurs', 'kurs', 'testdaf', 'dsh', 'telc'],
+        'maliyet'     => ['fiyat', 'maliyet', 'ücret', 'kosten', 'harç', 'burs', 'stipendium', 'euro', 'maaş', 'para', 'kaç para', 'ne kadar'],
+        'sigorta'     => ['sigorta', 'versicherung', 'sağlık sigorta', 'krankenversicherung', 'tk', 'aok'],
+        'banka'       => ['banka', 'sperrkonto', 'bloke hesap', 'kontoeröffnung', 'deutsche bank'],
+        'iş'          => ['iş', 'çalışma', 'part time', 'minijob', 'werkstudent', 'praktikum', 'staj', 'maaş'],
+        'blokhesap'   => ['sperrkonto', 'blok hesap', 'bloke hesap', 'expatrio', 'fintiba', 'coracle'],
+        'ulaşım'      => ['semester ticket', 'deutschlandticket', 'ticket', 'metro', 's-bahn', 'u-bahn'],
+    ];
+
+    /**
+     * Questions listesini kategorilere göre sayar.
+     *
+     * @return array<string,int>  kategori → adet
+     */
+    public function categorizeQuestions(array $questions): array
+    {
+        $out = [];
+        foreach ($questions as $q) {
+            $q = mb_strtolower((string) $q, 'UTF-8');
+            foreach (self::TOPIC_CATEGORIES as $cat => $keywords) {
+                foreach ($keywords as $kw) {
+                    if (mb_strpos($q, $kw) !== false) {
+                        $out[$cat] = ($out[$cat] ?? 0) + 1;
+                        continue 2; // bir soru = bir kategori
+                    }
+                }
+            }
+        }
+        arsort($out);
+        return $out;
+    }
+
+    /**
+     * Kategori dağılımı — tüm sorular için.
+     */
+    public function topicCategories(int $companyId, Carbon $since): array
+    {
+        $questions = $this->collectAllQuestions($companyId, $since);
+        return $this->categorizeQuestions($questions);
+    }
+
+    // ── CONVERSION vs LOST INTENT ─────────────────────────────────────
+
+    /**
+     * Converted (müşteri olmuş) vs Not-converted lead'lerin soru kategorileri.
+     * Hangi intent conversion'a götürüyor?
+     *
+     * @return array{converted:array, not_converted:array, insight:array}
+     */
+    public function conversionVsLostIntents(int $companyId, int $daysBack = 180): array
+    {
+        $since = now()->subDays($daysBack);
+
+        $convertedIds = \App\Models\GuestApplication::where('company_id', $companyId)
+            ->where('converted_to_student', true)
+            ->where('created_at', '>=', $since)
+            ->pluck('id')->all();
+        $lostIds = \App\Models\GuestApplication::where('company_id', $companyId)
+            ->where('converted_to_student', false)
+            ->where('created_at', '>=', $since)
+            ->whereNotNull('first_name')
+            ->pluck('id')->all();
+
+        $convertedQs = !empty($convertedIds)
+            ? GuestAiConversation::whereIn('guest_application_id', $convertedIds)->pluck('question')->all()
+            : [];
+        $lostQs = !empty($lostIds)
+            ? GuestAiConversation::whereIn('guest_application_id', $lostIds)->pluck('question')->all()
+            : [];
+
+        $convCat = $this->categorizeQuestions($convertedQs);
+        $lostCat = $this->categorizeQuestions($lostQs);
+
+        $convTotal = max(1, array_sum($convCat));
+        $lostTotal = max(1, array_sum($lostCat));
+
+        // Her kategori için "conversion signal strength" — converted'de daha yoğunsa pozitif sinyal
+        $insight = [];
+        $allCats = array_unique(array_merge(array_keys($convCat), array_keys($lostCat)));
+        foreach ($allCats as $cat) {
+            $convPct = 100 * ($convCat[$cat] ?? 0) / $convTotal;
+            $lostPct = 100 * ($lostCat[$cat] ?? 0) / $lostTotal;
+            $insight[$cat] = [
+                'converted_pct'   => round($convPct, 1),
+                'not_converted_pct' => round($lostPct, 1),
+                'signal'          => round($convPct - $lostPct, 1), // pozitifse conversion sinyali
+            ];
+        }
+        uasort($insight, fn ($a, $b) => $b['signal'] <=> $a['signal']);
+
+        return [
+            'period_days'       => $daysBack,
+            'converted_count'   => count($convertedIds),
+            'not_converted_count' => count($lostIds),
+            'converted'         => $convCat,
+            'not_converted'     => $lostCat,
+            'insight'           => $insight,
         ];
     }
 

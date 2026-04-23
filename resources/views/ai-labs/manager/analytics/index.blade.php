@@ -186,6 +186,164 @@
         </div>
     </div>
 
+    {{-- 🔥 HOT LEADS — AI kullanan adaylar, öncelik sırasıyla --}}
+    @if (!empty($hot_leads))
+    <div class="ala-card" style="border-left:4px solid #f59e0b;">
+        <h2>🔥 Hot Leads
+            <span style="font-size:11px; font-weight:normal; color:#64748b; margin-left:8px;">
+                AI kullanan adaylar — hotness skoruna göre sıralı (son 30 gün)
+            </span>
+        </h2>
+        <p class="hint">
+            Soru sayısı + lead skoru + son aktivite + tier kombinasyonu.
+            <strong>Öncelik listesi:</strong> bu adaylara hemen dönün.
+        </p>
+        <table class="ala-table">
+            <thead>
+                <tr>
+                    <th style="width:40px;">#</th>
+                    <th>Aday</th>
+                    <th style="width:60px;" title="Hotness skoru">🔥</th>
+                    <th style="width:80px;">Lead Score</th>
+                    <th style="width:100px;">Tier</th>
+                    <th style="width:60px;" title="Soru sayısı">Soru</th>
+                    <th>Konuştuğu Konular</th>
+                    <th style="width:100px;">Son Soru</th>
+                    <th style="width:60px;">Durum</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach ($hot_leads as $i => $lead)
+                @php
+                    $tierColor = match($lead['tier']) {
+                        'champion'    => '#7c3aed',
+                        'sales_ready' => '#dc2626',
+                        'hot'         => '#f59e0b',
+                        'warm'        => '#eab308',
+                        default       => '#94a3b8',
+                    };
+                    $hotBg = $lead['hotness'] >= 50 ? '#fef3c7' : ($lead['hotness'] >= 30 ? '#fef9c3' : '#f8fafc');
+                @endphp
+                <tr style="background:{{ $hotBg }};" class="hot-lead-row" data-lead-href="{{ route('manager.ai-labs.analytics.lead', $lead['lead_id']) }}">
+                    <td style="font-weight:700; color:#64748b;">{{ $i + 1 }}</td>
+                    <td>
+                        <a href="{{ route('manager.ai-labs.analytics.lead', $lead['lead_id']) }}" style="text-decoration:none;">
+                            <div style="font-weight:600; color:#5b2e91;">{{ $lead['full_name'] }} →</div>
+                            <div style="font-size:10px; color:#64748b;">{{ $lead['email'] }}</div>
+                        </a>
+                    </td>
+                    <td>
+                        <span style="font-size:12px; font-weight:700; color:#f59e0b;">{{ $lead['hotness'] }}</span>
+                    </td>
+                    <td>
+                        <div style="background:#f1f5f9; border-radius:4px; height:14px; width:70px; position:relative; overflow:hidden;">
+                            <div style="background:linear-gradient(90deg,#22c55e,#eab308,#dc2626); height:100%; width:{{ min(100, $lead['lead_score']) }}%;"></div>
+                        </div>
+                        <span style="font-size:10px; color:#64748b;">{{ $lead['lead_score'] }}</span>
+                    </td>
+                    <td>
+                        <span class="ala-badge" style="background:{{ $tierColor }}22; color:{{ $tierColor }}; font-weight:700;">
+                            {{ $lead['tier'] ?? 'cold' }}
+                        </span>
+                    </td>
+                    <td><span class="ala-badge blue">{{ $lead['question_count'] }}</span></td>
+                    <td style="font-size:10px;">
+                        @foreach ($lead['top_topics'] as $cat => $n)
+                            <span class="ala-badge gray" style="font-size:9px; margin-right:2px;">{{ $cat }} {{ $n }}</span>
+                        @endforeach
+                        @if (empty($lead['top_topics']))
+                            <span style="color:#94a3b8; font-size:10px;">—</span>
+                        @endif
+                    </td>
+                    <td class="nowrap" style="color:#64748b; font-size:10px;">
+                        {{ $lead['last_question_at'] ? \Carbon\Carbon::parse($lead['last_question_at'])->diffForHumans() : '—' }}
+                    </td>
+                    <td>
+                        @if ($lead['converted'])
+                            <span class="ala-badge green" title="Müşteri oldu">✅</span>
+                        @elseif ($lead['assigned_senior'])
+                            <span class="ala-badge blue" title="Senior atandı">👥</span>
+                        @else
+                            <span class="ala-badge gray" title="Atanmamış">⚠️</span>
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+
+    {{-- 🏷️ KONU KATEGORİLERİ — kullanıcılar hangi konularda en çok soru soruyor? --}}
+    @if (!empty($topic_categories))
+    <div class="ala-card">
+        <h2>🏷️ Konu Kategorileri
+            <span style="font-size:11px; font-weight:normal; color:#64748b; margin-left:8px;">
+                Keyword eşleme — bu ay AI'ya sorulan konular
+            </span>
+        </h2>
+        <p class="hint">
+            Kategorilere göre soru dağılımı. Yoğun olan konular → daha fazla kaynak veya FAQ gerekebilir.
+        </p>
+        @php $maxCat = max($topic_categories) ?: 1; @endphp
+        <div class="ala-bars">
+            @foreach ($topic_categories as $cat => $count)
+                <div class="ala-bar-row">
+                    <div class="label">{{ ucfirst($cat) }}</div>
+                    <div class="ala-bar-track">
+                        <div class="ala-bar-fill topic" style="width:{{ round($count / $maxCat * 100, 1) }}%;"></div>
+                    </div>
+                    <div class="ala-bar-value">{{ $count }}</div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- 📊 CONVERTED vs LOST — hangi konular müşteriye dönüştürüyor? --}}
+    @if (!empty($conversion_intents['insight']) && ($conversion_intents['converted_count'] > 0 || $conversion_intents['not_converted_count'] > 0))
+    <div class="ala-card">
+        <h2>📊 Converted vs Not-Converted — Konu Analizi
+            <span style="font-size:11px; font-weight:normal; color:#64748b; margin-left:8px;">
+                {{ $conversion_intents['converted_count'] }} müşteri vs {{ $conversion_intents['not_converted_count'] }} adayın soruları (son 180 gün)
+            </span>
+        </h2>
+        <p class="hint">
+            <strong>Pozitif sinyal (yeşil):</strong> bu konuyu soranların müşteri olma oranı daha yüksek.
+            <strong>Negatif (kırmızı):</strong> bu konudaki sorular conversion ile ters korelasyonlu —
+            belki zor/kaçış/objection sinyali.
+        </p>
+        <table class="ala-table">
+            <thead>
+                <tr>
+                    <th>Konu</th>
+                    <th>Müşteri (%)</th>
+                    <th>Aday (%)</th>
+                    <th>Sinyal</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach ($conversion_intents['insight'] as $cat => $stats)
+                @php
+                    $signalColor = $stats['signal'] > 5 ? '#16a34a' : ($stats['signal'] < -5 ? '#dc2626' : '#64748b');
+                    $signalBg = $stats['signal'] > 5 ? '#dcfce7' : ($stats['signal'] < -5 ? '#fee2e2' : '#f1f5f9');
+                @endphp
+                <tr>
+                    <td style="font-weight:600;">{{ ucfirst($cat) }}</td>
+                    <td><span class="ala-badge green">{{ $stats['converted_pct'] }}%</span></td>
+                    <td><span class="ala-badge gray">{{ $stats['not_converted_pct'] }}%</span></td>
+                    <td>
+                        <span class="ala-badge" style="background:{{ $signalBg }}; color:{{ $signalColor }}; font-weight:700;">
+                            {{ $stats['signal'] > 0 ? '+' : '' }}{{ $stats['signal'] }}
+                        </span>
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+
     {{-- FAQ Adayları — 2+ kez sorulmuş sorular, cümle-seviyesi gruplandırma --}}
     @if (!empty($faq_candidates))
     <div class="ala-card">

@@ -24,6 +24,48 @@ class ManagerAiLabsAnalyticsController extends Controller
     }
 
     /**
+     * Tek bir aday (guest_application) için AI Intelligence detayı:
+     * timeline + konu dağılımı + insight.
+     */
+    public function lead(Request $request, AnalyticsService $analytics, int $leadId): \Illuminate\View\View
+    {
+        $this->ensureAdmin($request);
+
+        $cid = $this->companyId();
+        $lead = \App\Models\GuestApplication::where('id', $leadId)
+            ->where('company_id', $cid)
+            ->firstOrFail();
+
+        $conversations = \App\Models\GuestAiConversation::where('guest_application_id', $leadId)
+            ->orderByDesc('created_at')
+            ->get();
+
+        $questions = $conversations->pluck('question')->all();
+        $topics = $analytics->categorizeQuestions($questions);
+
+        // Feedback'leri join et
+        $feedbacks = \App\Models\AiLabsFeedback::withoutGlobalScopes()
+            ->where('guest_application_id', $leadId)
+            ->where('conversation_type', 'guest')
+            ->get()
+            ->keyBy('conversation_id');
+
+        $conversations = $conversations->map(function ($c) use ($feedbacks) {
+            $fb = $feedbacks->get($c->id);
+            $c->feedback_rating = $fb?->rating;
+            $c->feedback_reason = $fb?->reason;
+            return $c;
+        });
+
+        return view('ai-labs.manager.analytics.lead', [
+            'lead'          => $lead,
+            'conversations' => $conversations,
+            'topics'        => $topics,
+            'total_tokens'  => $conversations->sum(fn ($c) => (int) $c->tokens_input + (int) $c->tokens_output),
+        ]);
+    }
+
+    /**
      * FAQ adaylarını CSV olarak indir — kaynak olarak içerik üretmek için.
      * Columns: count, sample_question, roles, last_asked, intent_key
      */
