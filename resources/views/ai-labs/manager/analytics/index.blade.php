@@ -186,6 +186,52 @@
         </div>
     </div>
 
+    {{-- FAQ Adayları — 2+ kez sorulmuş sorular, cümle-seviyesi gruplandırma --}}
+    @if (!empty($faq_candidates))
+    <div class="ala-card">
+        <h2>💡 FAQ Adayları
+            <span style="font-size:11px; font-weight:normal; color:#64748b; margin-left:8px;">
+                ({{ count($faq_candidates) }} aday — son 60 günde 2+ kez sorulmuş)
+            </span>
+        </h2>
+        <p class="hint">
+            Benzer sorular — ilk 6 kelimelik normalize ile gruplandı.
+            Yüksek frekanslı olanları <a href="{{ route('manager.ai-labs.sources') }}" style="color:#5b2e91;">kaynaklara ekle</a> ya da
+            <a href="{{ route('manager.ai-labs.analytics.faq-csv') }}" style="color:#5b2e91;">CSV indir</a>.
+        </p>
+        <table class="ala-table">
+            <thead>
+                <tr>
+                    <th style="width:40px;">Sayı</th>
+                    <th>Örnek Soru</th>
+                    <th style="width:140px;">Kim Sordu</th>
+                    <th class="nowrap">Son</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach ($faq_candidates as $c)
+                <tr>
+                    <td><span class="ala-badge blue" style="font-size:11px;">× {{ $c['count'] }}</span></td>
+                    <td style="font-size:12px; color:#1e293b;">
+                        {{ \Illuminate\Support\Str::limit($c['sample_question'], 120) }}
+                    </td>
+                    <td style="font-size:10px; color:#64748b;">
+                        @foreach ($c['roles'] as $role => $n)
+                            <span class="ala-badge gray" style="font-size:9px; margin-right:3px;">
+                                {{ $roleLabels[$role] ?? $role }} {{ $n }}
+                            </span>
+                        @endforeach
+                    </td>
+                    <td class="nowrap" style="color:#94a3b8; font-size:10px;">
+                        {{ $c['last_asked'] ? \Carbon\Carbon::parse($c['last_asked'])->diffForHumans() : '—' }}
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+
     {{-- Kaynaklar: en çok citation alan + kullanılmayan --}}
     <div class="ala-grid-2">
         <div class="ala-card">

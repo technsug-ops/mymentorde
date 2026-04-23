@@ -350,7 +350,8 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
 
         // Analytics (Phase 5)
         $analytics = \App\Http\Controllers\AiLabs\ManagerAiLabsAnalyticsController::class;
-        Route::get('/manager/ai-labs/analytics', [$analytics, 'index'])->name('manager.ai-labs.analytics');
+        Route::get('/manager/ai-labs/analytics',          [$analytics, 'index'])->name('manager.ai-labs.analytics');
+        Route::get('/manager/ai-labs/analytics/faq.csv',  [$analytics, 'faqCsv'])->middleware('throttle:20,1')->name('manager.ai-labs.analytics.faq-csv');
 
         // External Sources (Phase 4.3) — Wikipedia + RSS + Web Search
         $ext = \App\Http\Controllers\AiLabs\ManagerAiLabsExternalController::class;

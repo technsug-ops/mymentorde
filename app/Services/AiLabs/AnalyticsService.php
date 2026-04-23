@@ -47,6 +47,7 @@ class AnalyticsService
             'conversations'        => $this->conversationMetrics($companyId, $monthStart),
             'response_modes'       => $this->responseModeDistribution($companyId, $monthStart),
             'top_topics'           => $this->topTopics($companyId, $monthStart, 10),
+            'faq_candidates'       => $this->faqCandidates($companyId, 60, 2, 20),
             'unused_sources'       => $this->unusedSources($companyId, 30),
             'top_cited_sources'    => $this->topCitedSources($companyId, 10),
             'content_drafts'       => $this->contentDraftMetrics($companyId, $monthStart),
@@ -55,6 +56,94 @@ class AnalyticsService
             'problem_answers'      => $this->problemAnswers($companyId, 10),
             'alerts'               => $this->alerts($companyId, $monthStart),
         ];
+    }
+
+    /**
+     * FAQ adayları — benzer sorular (ilk 6 kelime ile gruplandırılmış),
+     * minimum N kez sorulmuş. En yüksek değerli harvest output.
+     *
+     * Top topics kelime-frekansı verir, bu CÜMLE-seviyesi benzerlik verir.
+     *
+     * @return array<int, array{intent_key:string, sample_question:string, count:int, last_asked:\DateTimeInterface|string|null, roles:array<string,int>}>
+     */
+    public function faqCandidates(int $companyId, int $daysBack = 60, int $minOccurrence = 2, int $limit = 20): array
+    {
+        $since = now()->subDays($daysBack);
+
+        // Her soruyu intent_key ile etiketle + role'ü bilelim ki role dağılımı gösterelim
+        $rows = [];
+
+        $guestRows = GuestAiConversation::query()
+            ->join('guest_applications', 'guest_ai_conversations.guest_application_id', '=', 'guest_applications.id')
+            ->where('guest_applications.company_id', $companyId)
+            ->where('guest_ai_conversations.created_at', '>=', $since)
+            ->select('guest_ai_conversations.question', 'guest_ai_conversations.role', 'guest_ai_conversations.created_at')
+            ->get();
+        $seniorRows = SeniorAiConversation::query()
+            ->join('users', 'senior_ai_conversations.user_id', '=', 'users.id')
+            ->where('users.company_id', $companyId)
+            ->where('senior_ai_conversations.created_at', '>=', $since)
+            ->select('senior_ai_conversations.question', DB::raw("'senior' as role"), 'senior_ai_conversations.created_at')
+            ->get();
+        $staffRows = StaffAiConversation::withoutGlobalScopes()
+            ->where('company_id', $companyId)
+            ->where('created_at', '>=', $since)
+            ->select('question', 'role', 'created_at')
+            ->get();
+
+        foreach ([$guestRows, $seniorRows, $staffRows] as $set) {
+            foreach ($set as $r) {
+                if (empty($r->question)) continue;
+                $rows[] = [
+                    'key'        => $this->faqIntentKey($r->question),
+                    'question'   => $r->question,
+                    'role'       => $r->role ?? 'unknown',
+                    'created_at' => $r->created_at,
+                ];
+            }
+        }
+
+        // Grupla
+        $grouped = [];
+        foreach ($rows as $row) {
+            $k = $row['key'];
+            if ($k === '') continue;
+            if (!isset($grouped[$k])) {
+                $grouped[$k] = [
+                    'intent_key'      => $k,
+                    'sample_question' => $row['question'],
+                    'count'           => 0,
+                    'last_asked'      => null,
+                    'roles'           => [],
+                ];
+            }
+            $grouped[$k]['count']++;
+            $grouped[$k]['roles'][$row['role']] = ($grouped[$k]['roles'][$row['role']] ?? 0) + 1;
+            if (!$grouped[$k]['last_asked'] || $row['created_at'] > $grouped[$k]['last_asked']) {
+                $grouped[$k]['last_asked'] = $row['created_at'];
+            }
+        }
+
+        $candidates = array_filter($grouped, fn ($g) => $g['count'] >= $minOccurrence);
+        usort($candidates, fn ($a, $b) => $b['count'] <=> $a['count']);
+
+        return array_slice($candidates, 0, $limit);
+    }
+
+    /**
+     * FAQ için intent key — faqCandidates'in gruplamasında kullanılır.
+     * topTopics'in kelime-frekansından ayrılır: cümle-benzerliği için
+     * ilk 6 kelimelik normalize edilmiş string döner.
+     */
+    private function faqIntentKey(string $question): string
+    {
+        $q = mb_strtolower(trim((string) $question), 'UTF-8');
+        $q = preg_replace('/[^\p{L}\p{N}\s]+/u', ' ', $q);
+        $q = preg_replace('/\s+/u', ' ', $q);
+        $q = trim($q);
+        if ($q === '') return '';
+        $words = array_slice(explode(' ', $q), 0, 6);
+        return implode(' ', $words);
     }
 
     // ── Conversation metrikleri ─────────────────────────────────────
