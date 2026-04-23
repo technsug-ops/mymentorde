@@ -86,6 +86,16 @@ def main() -> int:
         f.write("\n".join(EXCLUDE_PATTERNS) + "\n")
     print(f"=== Wrote {len(EXCLUDE_PATTERNS)} exclude patterns to {exclude_path} ===")
 
+    # ── Skip flag — Vite build çalışmadıysa public/build upload'ını atla ──
+    skip_build = os.environ.get("SKIP_BUILD_UPLOAD", "false").lower() == "true"
+    changed_composer = os.environ.get("CHANGED_COMPOSER", "unknown")
+    changed_frontend = os.environ.get("CHANGED_FRONTEND", "unknown")
+
+    print(f"=== Deploy config ===")
+    print(f"  CHANGED_COMPOSER: {changed_composer}")
+    print(f"  CHANGED_FRONTEND: {changed_frontend}")
+    print(f"  SKIP_BUILD_UPLOAD: {skip_build}")
+
     # ── Build lftp commands ───────────────────────────────────────
     # Normalize server_dir — avoid double slashes when concatenating build path
     build_dir = server_dir.rstrip("/") + "/public/build/"
@@ -102,23 +112,27 @@ def main() -> int:
         "set mirror:parallel-transfer-count 3",
         "set cmd:fail-exit no",
         # Main mirror — ana repo (vendor, app, routes, etc.).
-        # --only-newer kaldırıldı: bazı lftp sürümleri yeni hash'li asset
-        # dosyalarını algılayamıyordu (B2 JS bundle prod'a inmedi).
         # Default davranış: size+time karşılaştır, farklı olanları upload et.
         (
             "mirror -R --parallel=3 --verbose --no-perms "
             f"--exclude-rx-from={exclude_path} "
             f'./ "{server_dir}"'
         ),
-        # Build assets için ayrıca explicit force mirror — cache/hash sorunlarını
-        # bypass eder, public/build her zaman source ile eşleşsin. --delete
-        # eski hash'li Vite chunk'ları temizler.
-        (
+    ]
+
+    # public/build --delete mirror sadece Vite build çalıştıysa gerekli
+    # (yeni hash'li chunk'lar var → eski hash'liler silinmeli).
+    # Build skip edildiyse sunucudaki mevcut build zaten çalışıyor, dokunma.
+    if not skip_build:
+        lftp_commands.append(
             "mirror -R --parallel=3 --verbose --no-perms --delete "
             f'./public/build/ "{build_dir}"'
-        ),
-        "bye",
-    ]
+        )
+        print("=== public/build --delete mirror DAHİL ===")
+    else:
+        print("=== public/build --delete mirror SKIP (frontend değişmedi) ===")
+
+    lftp_commands.append("bye")
     script_content = "\n".join(lftp_commands) + "\n"
 
     print("=== lftp script ===")

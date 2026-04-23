@@ -6,6 +6,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Tüm adımları zorla çalıştır (composer + npm + Vite)'
+        required: false
+        default: 'false'
 
 jobs:
   deploy:
@@ -15,6 +20,27 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # paths-filter önceki commit'le diff yapar — fetch-depth: 2 gerekli
+          fetch-depth: 2
+
+      # Hangi path'lerde değişiklik oldu? Conditional step'ler buna göre çalışır.
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            composer:
+              - 'composer.json'
+              - 'composer.lock'
+            frontend:
+              - 'resources/js/**'
+              - 'resources/css/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'vite.config.js'
+              - 'postcss.config.js'
+              - 'tailwind.config.js'
 
       - name: Setup PHP 8.4
         uses: shivammathur/setup-php@v2
@@ -25,6 +51,7 @@ jobs:
           tools: composer:v2
 
       - name: Cache Composer dependencies
+        id: composer-cache
         uses: actions/cache@v4
         with:
           path: vendor
@@ -32,18 +59,24 @@ jobs:
           restore-keys: ${{ runner.os }}-php8.4-composer-
 
       - name: Install Composer dependencies (production)
+        # Sadece composer.lock değişti VEYA cache miss olunca çalıştır
+        if: steps.composer-cache.outputs.cache-hit != 'true' || steps.changes.outputs.composer == 'true' || inputs.force_rebuild == 'true'
         run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
 
       - name: Setup Node 20
+        # Sadece frontend değişti veya manual force
+        if: steps.changes.outputs.frontend == 'true' || inputs.force_rebuild == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Install NPM dependencies
+        if: steps.changes.outputs.frontend == 'true' || inputs.force_rebuild == 'true'
         run: npm ci
 
       - name: Build Vite assets
+        if: steps.changes.outputs.frontend == 'true' || inputs.force_rebuild == 'true'
         run: npm run build
 
       - name: Install lftp
@@ -55,4 +88,20 @@ jobs:
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
+          # Vite build çalışmadıysa public/build upload adımını atla
+          SKIP_BUILD_UPLOAD: ${{ (steps.changes.outputs.frontend != 'true' && inputs.force_rebuild != 'true') && 'true' || 'false' }}
+          # Telemetri: hangi step'ler skip edildi log'da görünsün
+          CHANGED_COMPOSER: ${{ steps.changes.outputs.composer }}
+          CHANGED_FRONTEND: ${{ steps.changes.outputs.frontend }}
         run: python3 scripts/lftp-deploy.py
+
+      - name: Deploy summary
+        if: always()
+        run: |
+          echo "### 🚀 Deploy özeti" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Adım | Durum |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| Composer install | ${{ (steps.composer-cache.outputs.cache-hit != 'true' || steps.changes.outputs.composer == 'true') && '✅ Çalıştı' || '⏭️ Skip (değişiklik yok)' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| npm + Vite build | ${{ steps.changes.outputs.frontend == 'true' && '✅ Çalıştı' || '⏭️ Skip (frontend değişmedi)' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| FTP deploy | ✅ Çalıştı |" >> $GITHUB_STEP_SUMMARY
