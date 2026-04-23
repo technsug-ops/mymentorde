@@ -126,14 +126,64 @@ class PaymentCheckoutController extends Controller
             $paymentId = $session->metadata->payment_id ?? null;
 
             if ($paymentId) {
-                StudentPayment::where('id', $paymentId)
+                $payment = StudentPayment::where('id', $paymentId)
                     ->whereIn('status', ['pending', 'overdue'])
-                    ->update([
+                    ->first();
+
+                if ($payment) {
+                    $payment->update([
                         'status'                    => 'paid',
                         'paid_at'                   => now(),
                         'payment_method'            => 'stripe',
                         'stripe_payment_intent_id'  => $session->payment_intent,
                     ]);
+
+                    // PostHog: payment_succeeded
+                    try {
+                        app(\App\Services\Analytics\AnalyticsService::class)->capture(
+                            'payment_succeeded',
+                            [
+                                'payment_id'   => $payment->id,
+                                'amount_eur'   => (float) $payment->amount_eur,
+                                'currency'     => $payment->currency ?? 'EUR',
+                                'payment_method' => 'stripe',
+                                'invoice_number' => $payment->invoice_number,
+                                'company_id'   => $payment->company_id,
+                            ],
+                            (string) $payment->student_id
+                        );
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::warning('PostHog payment_succeeded capture failed', ['error' => $e->getMessage()]);
+                    }
+                }
+            }
+        }
+
+        // Stripe webhook: payment failure
+        if ($event->type === 'checkout.session.async_payment_failed' || $event->type === 'payment_intent.payment_failed') {
+            $object = $event->data->object;
+            $paymentId = $object->metadata->payment_id ?? null;
+
+            if ($paymentId) {
+                $payment = StudentPayment::find($paymentId);
+                if ($payment) {
+                    try {
+                        app(\App\Services\Analytics\AnalyticsService::class)->capture(
+                            'payment_failed',
+                            [
+                                'payment_id'       => $payment->id,
+                                'amount_eur'       => (float) $payment->amount_eur,
+                                'currency'         => $payment->currency ?? 'EUR',
+                                'failure_code'     => $object->last_payment_error->code ?? null,
+                                'failure_message'  => $object->last_payment_error->message ?? null,
+                                'company_id'       => $payment->company_id,
+                            ],
+                            (string) $payment->student_id
+                        );
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::warning('PostHog payment_failed capture failed', ['error' => $e->getMessage()]);
+                    }
+                }
             }
         }
 

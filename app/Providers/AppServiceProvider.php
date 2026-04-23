@@ -79,6 +79,10 @@ class AppServiceProvider extends ServiceProvider
         // ── Google Calendar sync: StudentAppointment saved/deleted → push
         \App\Models\StudentAppointment::observe(\App\Observers\StudentAppointmentObserver::class);
 
+        // ── PostHog analytics observers — lead + booking lifecycle eventleri
+        \App\Models\GuestApplication::observe(\App\Observers\Analytics\GuestApplicationAnalyticsObserver::class);
+        \App\Models\PublicBooking::observe(\App\Observers\Analytics\PublicBookingAnalyticsObserver::class);
+
         // ── DAM route macro ────────────────────────────────────────────────
         // Tek yerden tanımlı, tüm portallar tek satırla çağırır:
         //   Route::dam('manager/digital-assets', 'manager.dam.');

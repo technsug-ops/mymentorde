@@ -698,5 +698,9 @@ document.addEventListener('alpine:init',function(){
 {{-- Giphy API key — GIF picker tarafından okunur (messaging-hub.js + emoji-gif-picker.js) --}}
 <script nonce="{{ $cspNonce ?? '' }}">window.__giphyKey={{ Js::from(config('services.giphy.key','')) }};</script>
 @stack('scripts')
+
+{{-- Analytics: PostHog snippet (consent varsa) + Consent banner --}}
+<x-analytics.posthog-snippet :portal="'marketing_admin'" />
+<x-analytics.consent-banner />
 </body>
 </html>

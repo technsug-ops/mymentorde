@@ -709,5 +709,9 @@ if('serviceWorker' in navigator){
     }
 </script>
 @include('partials.promo-popup')
+
+{{-- Analytics: PostHog snippet (consent varsa) + Consent banner --}}
+<x-analytics.posthog-snippet :portal="'guest'" />
+<x-analytics.consent-banner />
 </body>
 </html>

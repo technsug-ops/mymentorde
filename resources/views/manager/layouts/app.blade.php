@@ -704,5 +704,9 @@ document.getElementById('sozlesme-btn')?.addEventListener('click', function() {
 @stack('scripts')
 @include('partials.push-init')
 @include('partials.promo-popup')
+
+{{-- Analytics: PostHog snippet (consent varsa) + Consent banner --}}
+<x-analytics.posthog-snippet :portal="'manager'" />
+<x-analytics.consent-banner />
 </body>
 </html>

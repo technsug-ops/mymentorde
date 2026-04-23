@@ -642,5 +642,9 @@ document.addEventListener('alpine:init',function(){
 
 @stack('scripts')
 @include('partials.promo-popup')
+
+{{-- Analytics: PostHog snippet (consent varsa) + Consent banner --}}
+<x-analytics.posthog-snippet :portal="'senior'" />
+<x-analytics.consent-banner />
 </body>
 </html>

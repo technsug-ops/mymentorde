@@ -74,15 +74,20 @@ class SecurityHeaders
             $viteConnect = ' ' . $viteHosts . ' ' . $wsHosts;
         }
 
+        // PostHog analytics + session replay domain'leri
+        $posthogScript  = ' https://eu-assets.i.posthog.com https://eu.i.posthog.com https://eu.posthog.com https://*.posthog.com';
+        $posthogConnect = ' https://eu-assets.i.posthog.com https://eu.i.posthog.com https://eu.posthog.com https://*.posthog.com wss://*.posthog.com';
+
         $csp = implode('; ', [
             "default-src 'self'",
             // Production: nonce kaldırıldı — unsafe-inline aktif. Tüm view'lar nonce'a geçirildiğinde geri eklenecek.
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.qrserver.com" . $viteScript,
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.qrserver.com" . $posthogScript . $viteScript,
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net" . $viteStyle,
             "font-src 'self' https://fonts.gstatic.com data:",
             "img-src 'self' data: https: blob:",
-            "connect-src 'self' https:" . $viteConnect,
+            "connect-src 'self' https:" . $posthogConnect . $viteConnect,
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://docs.google.com https://www.canva.com",
+            "worker-src 'self' blob:",
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",

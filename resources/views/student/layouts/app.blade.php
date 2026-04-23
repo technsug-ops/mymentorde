@@ -553,5 +553,9 @@ if('serviceWorker' in navigator){
 @stack('scripts')
 
 @include('partials.promo-popup')
+
+{{-- Analytics: PostHog snippet (consent varsa) + Consent banner --}}
+<x-analytics.posthog-snippet :portal="'student'" />
+<x-analytics.consent-banner />
 </body>
 </html>

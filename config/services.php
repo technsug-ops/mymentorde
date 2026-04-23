@@ -82,4 +82,11 @@ return [
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
+    'posthog' => [
+        'api_key'    => env('POSTHOG_API_KEY'),
+        'host'       => env('POSTHOG_HOST', 'https://eu.posthog.com'),
+        'project_id' => env('POSTHOG_PROJECT_ID'),
+        'enabled'    => (bool) env('POSTHOG_ENABLED', true),
+    ],
+
 ];

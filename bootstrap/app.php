@@ -21,6 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // all-inkl / paylaşımlı hosting: HTTPS proxy arkasında çalışıyoruz
         $middleware->trustProxies(at: '*');
 
+        // Analytics consent cookie'sini şifreleme dışında bırak (JS'ten set ediliyor)
+        $middleware->encryptCookies(except: [
+            'analytics_consent',
+        ]);
+
         // Giriş yapmış kullanıcılar guest route'larına erişirse /config'e yönlendir
         $middleware->redirectUsersTo('/auth/redirect');
 
