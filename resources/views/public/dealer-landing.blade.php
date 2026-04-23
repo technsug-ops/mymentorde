@@ -4,10 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>Satış Ortaklığı Programı — {{ $brandName ?? 'MentorDE' }} · Birlikte Kazanalım</title>
-<meta name="description" content="MentorDE Satış Ortaklığı Programı 2026. Almanya eğitim sürecine yönlendirdiğiniz her başarılı kayıt için €200-€750 komisyon kazanın. 100€ hoş geldin bonusu + vize reddi güvencesi.">
+@php
+    $hdrBrand = $brandName ?? config('brand.name', 'MentorDE');
+@endphp
+<title>Satış Ortaklığı Programı — {{ $hdrBrand }} · Birlikte Kazanalım</title>
+<meta name="description" content="{{ $hdrBrand }} Satış Ortaklığı Programı 2026. Almanya eğitim sürecine yönlendirdiğiniz her başarılı kayıt için €200-€750 komisyon kazanın. 100€ hoş geldin bonusu + vize reddi güvencesi.">
 <meta name="robots" content="index, follow">
-<meta property="og:title" content="MentorDE Satış Ortaklığı Programı — Birlikte Kazanalım">
+<meta property="og:title" content="{{ $hdrBrand }} Satış Ortaklığı Programı — Birlikte Kazanalım">
 <meta property="og:description" content="Sıfır yatırım, Euro bazlı yüksek komisyon, operasyonel destek. Öğrenci başına €200-€750 kazanç.">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,6 +56,9 @@ a:hover { text-decoration:underline; }
 .d-nav-inner { max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:14px 22px; gap:16px; }
 .d-logo { font-family:"DM Serif Display", serif; font-size:28px; color:var(--primary); letter-spacing:-.5px; line-height:1; display:inline-flex; align-items:center; gap:2px; }
 .d-logo span { color:var(--primary-dark); font-style:italic; }
+.d-logo img { max-height:40px; width:auto; display:block; }
+.d-logo-wrap-light { background:transparent; border-radius:8px; padding:4px 8px; }
+.d-logo-wrap-dark  { background:linear-gradient(140deg, var(--primary), var(--primary-deep)); border-radius:8px; padding:4px 10px; }
 .d-nav-links { display:flex; gap:24px; font-size:14px; font-weight:600; }
 .d-nav-links a { color:var(--muted); }
 .d-nav-links a:hover { color:var(--primary); text-decoration:none; }
@@ -283,10 +289,21 @@ footer a { color:var(--accent); }
 <body>
 
 {{-- ═══ NAV ═══ --}}
+@php
+    $dlBrandName = $brandName ?? config('brand.name', 'MentorDE');
+    $dlBrandLogo = $brandLogoUrl ?? (config('brand.logo_url') ?: config('brand.logo_path') ?: null);
+    $dlLogoBg    = $brandLogoBg ?? 'light';
+@endphp
 <nav class="d-nav">
     <div class="d-nav-inner">
-        <a href="/" class="d-logo">
-            mentor<span>de</span>
+        <a href="/" class="d-logo" aria-label="{{ $dlBrandName }}">
+            @if ($dlBrandLogo)
+                <span class="d-logo-wrap-{{ $dlLogoBg === 'dark' ? 'dark' : 'light' }}">
+                    <img src="{{ $dlBrandLogo }}" alt="{{ $dlBrandName }}">
+                </span>
+            @else
+                mentor<span>de</span>
+            @endif
         </a>
         <div class="d-nav-links">
             <a href="#nasil-calisir">Nasıl Çalışır</a>
@@ -349,7 +366,7 @@ footer a { color:var(--accent); }
 <section class="sec-bg-white">
     <div class="container">
         <span class="sec-label">Kimiz</span>
-        <h2 class="sec-title">MentorDE — Almanya Eğitim Danışmanlığında Uzman Platform</h2>
+        <h2 class="sec-title">{{ $dlBrandName }} — Almanya Eğitim Danışmanlığında Uzman Platform</h2>
         <p class="sec-lead">
             Türk öğrencilerin Almanya eğitim yolculuğunda uzman rehberlik sağlıyoruz.
             Başvuru, vize, konaklama ve yerleşim süreçlerinin tamamını profesyonel ekibimizle
@@ -465,7 +482,7 @@ footer a { color:var(--accent); }
                 <h4>Nasıl Çalışır?</h4>
                 <ul>
                     <li>Öğrenci iletişim bilgilerini panele girersiniz</li>
-                    <li>MentorDE adayı arar, teknik bilgi verir ve satışı kapatır</li>
+                    <li>{{ $dlBrandName }} adayı arar, teknik bilgi verir ve satışı kapatır</li>
                     <li>Operasyonel hiçbir sürece karışmadan hak edişinizi alırsınız</li>
                 </ul>
 
@@ -488,7 +505,7 @@ footer a { color:var(--accent); }
                 <h4>Nasıl Çalışır?</h4>
                 <ul>
                     <li>Adaya okul sunumları + maliyet analizini siz yaparsınız</li>
-                    <li>Karar aşamasında MentorDE ile ortak toplantı düzenlersiniz</li>
+                    <li>Karar aşamasında {{ $dlBrandName }} ile ortak toplantı düzenlersiniz</li>
                     <li>Resmi kayıt sonrası vize/okul başvuru süreçlerini biz devralırız</li>
                 </ul>
 
@@ -647,7 +664,7 @@ footer a { color:var(--accent); }
         <span class="sec-label">Dealer Paneli</span>
         <h2 class="sec-title">Tüm Süreç ve Kazancınız Tek Ekranda</h2>
         <p class="sec-lead">
-            Yönlendirdiğiniz her aday için anlık süreç takibi, şeffaf kazanç ekranı ve ücretsiz pazarlama materyalleri — MentorDE Dealer Paneli.
+            Yönlendirdiğiniz her aday için anlık süreç takibi, şeffaf kazanç ekranı ve ücretsiz pazarlama materyalleri — {{ $dlBrandName }} Dealer Paneli.
         </p>
         <div class="features">
             <ul class="feature-list">
@@ -755,7 +772,7 @@ footer a { color:var(--accent); }
 
 <footer>
     <div class="container">
-        © {{ date('Y') }} {{ $brandName ?? 'MentorDE' }} · Almanya eğitim danışmanlığında uzman platform ·
+        © {{ date('Y') }} {{ $dlBrandName }} · Almanya eğitim danışmanlığında uzman platform ·
         <a href="/legal/terms">Kullanım Koşulları</a> ·
         <a href="/legal/privacy">Gizlilik</a>
     </div>
