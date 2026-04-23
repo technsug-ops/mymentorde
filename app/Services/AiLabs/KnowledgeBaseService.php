@@ -32,11 +32,11 @@ class KnowledgeBaseService
     {
         $stats = ['synced' => 0, 'skipped' => 0, 'failed' => 0, 'errors' => []];
 
-        // PDF ve URL kaynakları aynı anda senkronize et
+        // PDF + görsel + URL kaynakları senkronize et
         $sources = KnowledgeSource::withoutGlobalScopes()
             ->where('company_id', $companyId)
             ->where('is_active', true)
-            ->whereIn('type', ['pdf', 'url'])
+            ->whereIn('type', ['pdf', 'image', 'url'])
             ->get();
 
         foreach ($sources as $source) {
@@ -98,9 +98,9 @@ class KnowledgeBaseService
 
     /**
      * Tek kaynağı senkronize eder:
-     *   - PDF → Gemini File API'ye yükler
+     *   - PDF / Image → Gemini File API'ye yükler
      *   - URL → içeriği fetch eder, content_markdown'a yazar (inline context'e girer)
-     *   - text → hiçbir şey yapmaz (zaten inline)
+     *   - text / document → hiçbir şey yapmaz (zaten inline)
      *
      * @return array{ok:bool, skipped?:bool, file_id?:string, bytes?:int, error?:string}
      */
@@ -109,10 +109,10 @@ class KnowledgeBaseService
         if ($source->type === 'url') {
             return $this->fetchUrlSource($source);
         }
-        if ($source->type === 'text') {
+        if (in_array($source->type, ['text', 'document'], true)) {
             return ['ok' => true, 'skipped' => true];
         }
-        // type === 'pdf' — aşağıdan devam
+        // type === 'pdf' veya 'image' — aşağıdan devam
 
         if (!$source->file_path) {
             return ['ok' => false, 'error' => 'no_file_path'];
@@ -134,12 +134,23 @@ class KnowledgeBaseService
             return ['ok' => false, 'error' => 'file_missing_on_disk: ' . $source->file_path];
         }
 
+        // MIME type dosya uzantısına göre
+        $ext = strtolower(pathinfo($source->file_path, PATHINFO_EXTENSION));
+        $mimeType = match ($ext) {
+            'pdf'  => 'application/pdf',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png'  => 'image/png',
+            'gif'  => 'image/gif',
+            'webp' => 'image/webp',
+            default => 'application/octet-stream',
+        };
+
         // display_name: Gemini ASCII bekler, UTF-8 güvenli kesim + fancy karakter temizliği
         $cleanTitle = preg_replace('/[^\x20-\x7E]/', '_', $source->title ?? '');
         $cleanTitle = mb_substr((string) $cleanTitle, 0, 40, 'UTF-8');
         $result = $this->gemini->uploadFile(
             $absolutePath,
-            'application/pdf',
+            $mimeType,
             "kb_{$source->id}_" . $cleanTitle,
             $source->company_id
         );
@@ -205,15 +216,23 @@ class KnowledgeBaseService
         foreach ($sources as $s) {
             $sourceIds[] = $s->id;
 
-            if ($s->type === 'pdf' && $s->gemini_file_uri) {
+            if (in_array($s->type, ['pdf', 'image'], true) && $s->gemini_file_uri) {
+                $ext = strtolower(pathinfo($s->file_path ?? '', PATHINFO_EXTENSION));
+                $mimeType = match ($ext) {
+                    'pdf'  => 'application/pdf',
+                    'jpg', 'jpeg' => 'image/jpeg',
+                    'png'  => 'image/png',
+                    'gif'  => 'image/gif',
+                    'webp' => 'image/webp',
+                    default => $s->type === 'image' ? 'image/jpeg' : 'application/pdf',
+                };
                 $fileRefs[] = [
                     'file_uri'  => $s->gemini_file_uri,
-                    'mime_type' => 'application/pdf',
+                    'mime_type' => $mimeType,
                 ];
-            } elseif ($s->type === 'text' && $s->content_markdown) {
+            } elseif (in_array($s->type, ['text', 'document'], true) && $s->content_markdown) {
                 $textBlocks[] = "### Kaynak #{$s->id} — {$s->title}\n" . $s->content_markdown;
             } elseif ($s->type === 'url' && $s->url) {
-                // URL kaynakları için şimdilik başlık+URL bildirilir (Phase 2.5'te fetch+cache)
                 $textBlocks[] = "### Kaynak #{$s->id} — {$s->title}\nReferans: {$s->url}"
                     . ($s->content_markdown ? "\n" . $s->content_markdown : '');
             }
@@ -238,6 +257,8 @@ class KnowledgeBaseService
      */
     public function sourcesFingerprint(int $companyId, string $role): string
     {
+        // Image ve document tipleri de dahil — tüm aktif kaynaklar
+        // (zaten aşağıdaki query filtrelemez, content_hash + gemini_file_id + updated_at fingerprint)
         $rows = KnowledgeSource::query()
             ->withoutGlobalScopes()
             ->where('company_id', $companyId)

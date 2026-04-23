@@ -110,11 +110,12 @@
 
     <div class="als-header-row">
         <div class="als-stat-pills">
-            <div class="als-stat-pill"><strong>{{ $sources->count() }}</strong>Toplam kaynak</div>
+            <div class="als-stat-pill"><strong>{{ $sources->count() }}</strong>Toplam</div>
             <div class="als-stat-pill"><strong>{{ $sources->where('is_active', true)->count() }}</strong>Aktif</div>
-            <div class="als-stat-pill"><strong>{{ $sources->where('type', 'pdf')->count() }}</strong>PDF</div>
-            <div class="als-stat-pill"><strong>{{ $sources->where('type', 'url')->count() }}</strong>URL</div>
-            <div class="als-stat-pill"><strong>{{ $sources->where('type', 'text')->count() }}</strong>Metin</div>
+            <div class="als-stat-pill"><strong>{{ $sources->whereIn('type', ['pdf', 'document'])->count() }}</strong>📄 Doküman</div>
+            <div class="als-stat-pill"><strong>{{ $sources->where('type', 'image')->count() }}</strong>🖼 Görsel</div>
+            <div class="als-stat-pill"><strong>{{ $sources->where('type', 'url')->count() }}</strong>🌐 URL</div>
+            <div class="als-stat-pill"><strong>{{ $sources->where('type', 'text')->count() }}</strong>✏️ Metin</div>
         </div>
         <a href="{{ url('/manager/ai-labs/settings') }}">⚙️ Ayarlar →</a>
     </div>
@@ -174,11 +175,12 @@
             {{-- Dosya panel (PDF / Word / Excel / TXT) --}}
             <div class="als-type-panel active" data-panel="file">
                 <div class="als-field">
-                    <label>Dosya (max 15 MB) — Desteklenen: PDF, DOCX, XLSX, XLS, TXT, MD</label>
-                    <input type="file" name="doc_file" accept=".pdf,.docx,.xlsx,.xls,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/plain,text/markdown">
+                    <label>Dosya (max 15 MB) — Desteklenen: PDF, DOCX, XLSX, XLS, TXT, MD, JPG, PNG, GIF, WEBP</label>
+                    <input type="file" name="doc_file" accept=".pdf,.docx,.xlsx,.xls,.txt,.md,.jpg,.jpeg,.png,.gif,.webp,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/plain,text/markdown,image/jpeg,image/png,image/gif,image/webp">
                     <small style="font-size:11px; color:#64748b; display:block; margin-top:6px;">
                         📄 <strong>PDF:</strong> Gemini File API'ye yüklenir (görsel + tablo içerik dahil).<br>
-                        📝 <strong>Word/Excel/TXT:</strong> Metin içeriği otomatik çıkartılır, AI'a inline gönderilir.
+                        📝 <strong>Word/Excel/TXT:</strong> Metin içeriği otomatik çıkartılır, AI'a inline gönderilir.<br>
+                        🖼 <strong>Görsel (JPG/PNG/GIF/WEBP):</strong> Gemini File API'ye yüklenir — AI görseli analiz eder (grafik, tablo, fotoğraf, vs.).
                     </small>
                 </div>
             </div>
@@ -234,9 +236,9 @@
                 </div>
 
                 <div class="als-field">
-                    <label>Dosyalar (max 20 adet · her biri max 15 MB) — PDF / DOCX / XLSX / XLS / TXT / MD</label>
+                    <label>Dosyalar (max 20 adet · her biri max 15 MB) — PDF / DOCX / XLSX / TXT / JPG / PNG / GIF / WEBP</label>
                     <input type="file" name="doc_files[]" multiple required
-                           accept=".pdf,.docx,.xlsx,.xls,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/plain,text/markdown">
+                           accept=".pdf,.docx,.xlsx,.xls,.txt,.md,.jpg,.jpeg,.png,.gif,.webp,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/plain,text/markdown,image/jpeg,image/png,image/gif,image/webp">
                     <small style="font-size:11px; color:#64748b; display:block; margin-top:6px;">
                         💡 <strong>Ctrl+Click</strong> (veya Mac'te Cmd+Click) ile birden fazla dosya seç.<br>
                         📄 <strong>PDF:</strong> Gemini'ye yükleme için "Kaynakları Senkronize Et" butonuna sonra basman gerek.<br>
@@ -381,6 +383,9 @@
                         </td>
                         <td>
                             @if ($s->type === 'pdf')         <span class="als-badge blue">📄 PDF</span>
+                            @elseif ($s->type === 'image')
+                                @php $ext = strtolower(pathinfo($s->file_path ?? '', PATHINFO_EXTENSION)); @endphp
+                                <span class="als-badge" style="background:#fef3c7; color:#92400e;">🖼 {{ strtoupper($ext ?: 'Görsel') }}</span>
                             @elseif ($s->type === 'document')
                                 @php $ext = strtolower(pathinfo($s->file_path ?? '', PATHINFO_EXTENSION)); @endphp
                                 @if (in_array($ext, ['docx','doc']))  <span class="als-badge blue" style="background:#dbeafe; color:#1e40af;">📝 Word</span>
@@ -418,7 +423,7 @@
                             @endif
                         </td>
                         <td style="font-size:11px;">
-                            @if ($s->type === 'pdf')
+                            @if (in_array($s->type, ['pdf', 'image']))
                                 @if ($s->gemini_file_id)
                                     <span class="als-badge green" title="Gemini'ye yüklendi: {{ $s->gemini_uploaded_at?->format('d.m.Y H:i') }}">☁️ Synced</span>
                                 @else

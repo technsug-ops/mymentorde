@@ -48,7 +48,7 @@ class ManagerAiLabsSourcesController extends Controller
             'url'                => 'nullable|url|max:500|required_if:type,url',
             'content_text'       => 'nullable|string|max:60000|required_if:type,text',
             // Kabul edilen dosyalar: PDF, Word, Excel, Metin
-            'doc_file'           => 'nullable|file|mimes:pdf,docx,xlsx,xls,txt,md|max:15360|required_if:type,file',
+            'doc_file'           => 'nullable|file|mimes:pdf,docx,xlsx,xls,txt,md,jpg,jpeg,png,gif,webp|max:15360|required_if:type,file',
         ]);
 
         // Geriye uyumluluk için target_audience değerini roles'tan türet
@@ -76,8 +76,12 @@ class ManagerAiLabsSourcesController extends Controller
             $filePath = $upload->storeAs($folder, $storedName, 'local');
 
             if ($ext === 'pdf') {
-                // PDF → Gemini File API'ye yüklenir (hash dosyadan)
+                // PDF → Gemini File API'ye yüklenir
                 $storedType = 'pdf';
+                $hash = hash_file('sha256', Storage::disk('local')->path($filePath));
+            } elseif (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
+                // Görsel → Gemini File API'ye yüklenir (vision model analiz eder)
+                $storedType = 'image';
                 $hash = hash_file('sha256', Storage::disk('local')->path($filePath));
             } else {
                 // DOCX / XLSX / XLS / TXT / MD → text extract, inline context
@@ -89,7 +93,6 @@ class ManagerAiLabsSourcesController extends Controller
                     $content = (string) $result['content'];
                     $hash = hash('sha256', $content);
                 } else {
-                    // Extraction başarısız — dosyayı sil, hata dön
                     Storage::disk('local')->delete($filePath);
                     return back()->withInput()->with('status', '⚠️ Dosya içeriği çıkartılamadı: ' . ($result['error'] ?? 'unknown'));
                 }
@@ -358,7 +361,7 @@ class ManagerAiLabsSourcesController extends Controller
 
         $data = $request->validate([
             'doc_files'           => 'required|array|min:1|max:20',
-            'doc_files.*'         => 'file|mimes:pdf,docx,xlsx,xls,txt,md|max:15360', // 15 MB her dosya
+            'doc_files.*'         => 'file|mimes:pdf,docx,xlsx,xls,txt,md,jpg,jpeg,png,gif,webp|max:15360', // 15 MB her dosya
             'category'            => 'nullable|string|max:80',
             'visible_to_roles'    => 'required|array|min:1',
             'visible_to_roles.*'  => 'in:guest,student,senior,manager,admin_staff',
@@ -397,6 +400,9 @@ class ManagerAiLabsSourcesController extends Controller
 
                 if ($ext === 'pdf') {
                     $storedType = 'pdf';
+                    $hash = hash_file('sha256', Storage::disk('local')->path($filePath));
+                } elseif (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
+                    $storedType = 'image';
                     $hash = hash_file('sha256', Storage::disk('local')->path($filePath));
                 } else {
                     // DOCX / XLSX / TXT → text extract
