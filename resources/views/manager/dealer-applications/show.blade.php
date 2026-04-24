@@ -1,6 +1,6 @@
 @extends('manager.layouts.app')
 @section('title', 'Dealer Başvurusu #' . $app->id)
-@section('page_title', '🤝 Başvuru #' . str_pad((string) $app->id, 6, '0', STR_PAD_LEFT) . ' — ' . $app->full_name)
+@section('page_title', '🤝 Başvuru ' . $app->reference_code . ' — ' . $app->full_name)
 
 @section('content')
 <style>

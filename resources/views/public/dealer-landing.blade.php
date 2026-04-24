@@ -343,16 +343,22 @@ section { padding:70px 0; }
 .calc-tier-badge { display:inline-flex; align-items:center; gap:6px; background:var(--accent); color:var(--primary-deep); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; margin-top:10px; }
 
 /* === SLIDER / MOCKUP CAROUSEL === */
+/* Slider uses Manager portal's accent color (dynamic) — --mgr-accent */
+:root { --mgr-accent: {{ $managerAccent ?? '#1e40af' }}; }
+
 .slider-tabs { display:flex; gap:8px; justify-content:center; margin-bottom:18px; flex-wrap:wrap; }
 .slider-tab {
     padding:8px 16px; background:#fff; border:1.5px solid var(--line); border-radius:20px;
     font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; transition:all .15s;
 }
-.slider-tab:hover { border-color:var(--primary); color:var(--primary); }
-.slider-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+.slider-tab:hover { border-color:var(--mgr-accent); color:var(--mgr-accent); }
+.slider-tab.active { background:var(--mgr-accent); color:#fff; border-color:var(--mgr-accent); }
 
 .slider-wrap { position:relative; max-width:1000px; margin:0 auto; }
-.slides { position:relative; overflow:hidden; border-radius:20px; }
+.slides {
+    position:relative; overflow:hidden; border-radius:20px;
+    min-height:640px; /* tüm slides aynı yükseklik */
+}
 .slide { display:none; }
 .slide.active { display:block; animation:slideIn .5s ease; }
 @keyframes slideIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
@@ -360,27 +366,30 @@ section { padding:70px 0; }
 .slider-arrows { position:absolute; top:50%; transform:translateY(-50%); width:100%; display:flex; justify-content:space-between; pointer-events:none; padding:0 12px; }
 .slider-arrow {
     pointer-events:auto; width:44px; height:44px; border-radius:50%;
-    background:rgba(91,46,145,.85); color:#fff; border:none; cursor:pointer;
+    background:color-mix(in srgb, var(--mgr-accent) 85%, transparent); color:#fff; border:none; cursor:pointer;
     font-size:18px; font-weight:800; box-shadow:0 4px 12px rgba(0,0,0,.25);
     display:flex; align-items:center; justify-content:center; transition:all .15s;
 }
-.slider-arrow:hover { background:var(--primary); transform:scale(1.08); }
+.slider-arrow:hover { background:var(--mgr-accent); transform:scale(1.08); }
 
 .slider-dots { display:flex; gap:8px; justify-content:center; margin-top:18px; }
 .slider-dots button {
     width:10px; height:10px; border-radius:50%; background:var(--line); border:none; cursor:pointer; transition:all .15s;
 }
-.slider-dots button.active { background:var(--primary); width:30px; border-radius:10px; }
+.slider-dots button.active { background:var(--mgr-accent); width:30px; border-radius:10px; }
 
 /* === MOCKUP DASHBOARD === */
 .mockup-frame {
     background:#fff; border:1px solid var(--line); border-radius:20px;
-    box-shadow:0 20px 60px rgba(91,46,145,.18); overflow:hidden;
+    box-shadow:0 20px 60px color-mix(in srgb, var(--mgr-accent, #1e40af) 18%, transparent);
+    overflow:hidden;
     max-width:1000px; margin:0 auto; position:relative;
+    display:flex; flex-direction:column;
+    min-height:640px; /* tüm 4 mockup aynı yükseklik */
 }
 .mockup-chrome {
     background:#f1f5f9; padding:10px 18px; display:flex; align-items:center; gap:10px;
-    border-bottom:1px solid var(--line);
+    border-bottom:1px solid var(--line); flex-shrink:0;
 }
 .mockup-dots { display:flex; gap:6px; }
 .mockup-dots span { width:12px; height:12px; border-radius:50%; background:#cbd5e1; }
@@ -388,7 +397,10 @@ section { padding:70px 0; }
 .mockup-dots span:nth-child(2) { background:#f59e0b; }
 .mockup-dots span:nth-child(3) { background:#10b981; }
 .mockup-url { background:#fff; border-radius:6px; padding:4px 12px; font-size:11px; color:var(--muted); font-family:monospace; flex:1; text-align:center; }
-.mockup-body { padding:28px; background:#fafbfc; }
+.mockup-body {
+    padding:28px; background:#fafbfc;
+    flex:1; display:flex; flex-direction:column; gap:16px;
+}
 .mockup-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
 .mockup-title h4 { margin:0; font-size:18px; color:var(--primary-deep); }
 .mockup-title .tier-chip { background:#fef3c7; color:#92400e; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; }

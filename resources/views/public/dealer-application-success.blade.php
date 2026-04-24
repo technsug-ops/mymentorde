@@ -53,7 +53,7 @@ ul.steps strong { color:var(--primary-deep); }
         @if ($app)
             <div class="ref-box">
                 <div class="lbl">Başvuru Referans No</div>
-                <div class="num">#{{ str_pad((string) $app->id, 6, '0', STR_PAD_LEFT) }}</div>
+                <div class="num">{{ $app->reference_code }}</div>
             </div>
         @endif
 
@@ -72,7 +72,7 @@ ul.steps strong { color:var(--primary-deep); }
         </ul>
 
         <div class="cta-row">
-            <a href="https://wa.me/4915203253691?text=Merhaba%2C%20sat%C4%B1%C5%9F%20orta%C4%9Fl%C4%B1%C4%9F%C4%B1%20ba%C5%9Fvurumla%20ilgili%20bilgi%20almak%20istiyorum.@if($app)%20Referans%3A%20%23{{ str_pad((string) $app->id, 6, '0', STR_PAD_LEFT) }}@endif"
+            <a href="https://wa.me/4915203253691?text=Merhaba%2C%20sat%C4%B1%C5%9F%20orta%C4%9Fl%C4%B1%C4%9F%C4%B1%20ba%C5%9Fvurumla%20ilgili%20bilgi%20almak%20istiyorum.@if($app)%20Referans%3A%20{{ $app->reference_code }}@endif"
                target="_blank" rel="noopener" class="btn-primary">
                 💬 WhatsApp'tan Hızlı Destek
             </a>

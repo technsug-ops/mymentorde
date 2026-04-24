@@ -67,7 +67,7 @@
             <tbody>
             @foreach ($applications as $app)
                 <tr>
-                    <td style="font-family:monospace; color:#64748b;">#{{ str_pad((string) $app->id, 6, '0', STR_PAD_LEFT) }}</td>
+                    <td style="font-family:monospace; color:#64748b;">{{ $app->reference_code }}</td>
                     <td>
                         <div style="font-weight:700;">{{ $app->full_name }}</div>
                         <div style="font-size:11px; color:#64748b;">

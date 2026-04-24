@@ -238,6 +238,8 @@ Route::middleware(['company.context'])->group(function () {
     // Public Satış Ortağı (dealer) landing — MentorDE Satış Ortaklığı Programı tanıtımı
     Route::get('/satis-ortagi', function () {
         $cfg = config('dealer_landing');
+        $theme = \App\Support\PortalTheme::resolve();
+        $managerAccent = $theme['accent_manager'] ?? '#1e40af';
 
         // Günlük deterministic artış — bugüne kadar her günün artışını topla
         $growthStart = \Carbon\Carbon::parse($cfg['growth_start_date'])->startOfDay();
@@ -295,7 +297,10 @@ Route::middleware(['company.context'])->group(function () {
             'commissions_eur' => (int) $cfg['historical_commissions_eur'] + $growth['commissions_eur'],
         ];
 
-        return view('public.dealer-landing', ['counters' => $counters]);
+        return view('public.dealer-landing', [
+            'counters' => $counters,
+            'managerAccent' => $managerAccent,
+        ]);
     })
         ->middleware('throttle:120,1')->name('public.dealer-landing');
     Route::get('/partner',      fn () => redirect()->route('public.dealer-landing'))

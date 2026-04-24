@@ -40,6 +40,31 @@ class DealerApplication extends Model
         return trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''));
     }
 
+    /**
+     * Başvuru referans kodu — partner'a gösterilen public kimlik.
+     * Format: MD-{YYMM}-{4-char-hash}
+     * Sıralı ID yerine hash kullanılır — sıra numarası (1. başvuran) sızdırılmaz.
+     *
+     * Deterministic: aynı application her çağrıldığında aynı kodu üretir.
+     * Örnek: MD-2604-K7P3 (2026 Nisan, crc32 hash suffix)
+     */
+    public function getReferenceCodeAttribute(): string
+    {
+        $createdAt = $this->created_at ?: now();
+        $yymm = $createdAt->format('ym');
+        $seed = crc32($this->id . ':' . ($this->email ?? '') . ':' . $createdAt->toDateString());
+        // Base36 (0-9a-z), ambigu karakterler çıkarıldı
+        $alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no I, L, O, 0, 1
+        $len = strlen($alphabet);
+        $suffix = '';
+        $num = abs($seed);
+        for ($i = 0; $i < 4; $i++) {
+            $suffix = $alphabet[$num % $len] . $suffix;
+            $num = intdiv($num, $len);
+        }
+        return 'MD-' . $yymm . '-' . $suffix;
+    }
+
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
