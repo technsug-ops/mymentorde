@@ -309,7 +309,26 @@
                         try {
                             const parsed = JSON.parse(line.slice(6));
                             if (parsed.error) {
-                                textEl.innerHTML = '<em style="color:#991b1b;">⚠️ ' + (parsed.error || 'Hata') + '</em>';
+                                const err = String(parsed.error || '');
+                                let nice = '⚠️ ' + err;
+                                if (err.includes('429') || err.includes('http_429')) {
+                                    nice = '⏳ <strong>Günlük limit aşıldı.</strong><br><span style="font-size:12px; color:#64748b;">Gemini ücretsiz kotası hit edildi. UTC 00:00\'da (TR 03:00) resetlenir veya yönetici ücretli plana geçebilir.</span>';
+                                } else if (err.includes('no_api_key')) {
+                                    nice = '🔑 <strong>API key tanımlı değil.</strong><br><span style="font-size:12px; color:#64748b;">Manager → AI Labs → Ayarlar sayfasından Gemini key ekleyin.</span>';
+                                } else if (err.includes('curl:') || err.includes('timeout')) {
+                                    nice = '⌛ <strong>Bağlantı zaman aşımı.</strong><br><span style="font-size:12px; color:#64748b;">Bir kez daha deneyin — uzun cevaplarda 30sn aşılabilir.</span>';
+                                } else if (err.includes('http_401') || err.includes('http_403')) {
+                                    nice = '🔐 <strong>API key geçersiz.</strong><br><span style="font-size:12px; color:#64748b;">Yönetici ayarlarından key\'i kontrol edin.</span>';
+                                }
+                                textEl.innerHTML = '<div style="color:#991b1b; background:#fee2e2; padding:12px 14px; border-radius:8px; border-left:3px solid #dc2626;">' + nice + '</div>';
+                                streamDiv.classList.remove('streaming');
+                                return;
+                            }
+
+                            // Empty content guard — stream bittiğinde content hala boşsa kullanıcıya söyle
+                            if (parsed.done && !fullText.trim() && !(parsed.clean_content || '').trim()) {
+                                textEl.innerHTML = '<div style="color:#92400e; background:#fef3c7; padding:12px 14px; border-radius:8px; border-left:3px solid #f59e0b;">⚠️ <strong>AI\'dan boş cevap geldi.</strong><br><span style="font-size:12px; color:#64748b;">Sistem ayarlarını kontrol edin veya soruyu tekrar sormayı deneyin. (muhtemelen quota veya safety filter)</span></div>';
+                                streamDiv.classList.remove('streaming');
                                 return;
                             }
                             if (parsed.chunk) {
