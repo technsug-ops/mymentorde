@@ -279,6 +279,21 @@
                    class="nav-link {{ request()->is('manager/hr/salary*') ? 'active' : '' }}">
                     <span class="nav-icon">💳</span> Bordro Profilleri
                 </a>
+                @php
+                    $pendingDealerApps = \Illuminate\Support\Facades\Cache::remember('pending_dealer_apps_count', 120, function () {
+                        try {
+                            return \App\Models\DealerApplication::whereIn('status', ['pending', 'in_review'])->count();
+                        } catch (\Throwable) { return 0; }
+                    });
+                @endphp
+                <a href="/manager/dealer-applications"
+                   class="nav-link {{ request()->is('manager/dealer-applications*') ? 'active' : '' }}"
+                   style="justify-content:space-between;">
+                    <span><span class="nav-icon">🤝</span> Dealer Başvuruları</span>
+                    @if ($pendingDealerApps > 0)
+                        <span style="background:#dc2626;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:1px 7px;min-width:18px;text-align:center;line-height:16px;">{{ $pendingDealerApps }}</span>
+                    @endif
+                </a>
             </div>
 
             <div class="nav-section">
@@ -310,10 +325,6 @@
                 <a href="/manager/user-intelligence"
                    class="nav-link {{ request()->is('manager/user-intelligence*') ? 'active' : '' }}">
                     <span class="nav-icon">👥</span> Kullanıcı Aktivitesi
-                </a>
-                <a href="/manager/dealer-applications"
-                   class="nav-link {{ request()->is('manager/dealer-applications*') ? 'active' : '' }}">
-                    <span class="nav-icon">🤝</span> Dealer Başvuruları
                 </a>
                 <a href="/manager/conversion-funnel"
                    class="nav-link {{ request()->is('manager/conversion-funnel*') ? 'active' : '' }}">
