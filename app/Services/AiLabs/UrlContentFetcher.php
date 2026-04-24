@@ -131,15 +131,43 @@ class UrlContentFetcher
      */
     private function htmlToText(string $html): string
     {
-        // Gürültü etiketleri tamamen sil (içerik dahil)
-        $noisyTags = ['script', 'style', 'noscript', 'iframe', 'nav', 'header', 'footer', 'aside', 'form', 'svg'];
-        foreach ($noisyTags as $tag) {
+        // 1. Aşama: sadece GÜVENLİ gürültü etiketlerini sil (asla içerik barındırmayan)
+        // nav/header/footer/aside/form gibi tag'ler bazı sitelerde (DAAD, vb.) ana
+        // içeriği host ettiği için bu aşamada SİLİNMEZ — ana alan seçildikten sonra
+        // o alan içinde temizlik yapılır.
+        $safeNoise = ['script', 'style', 'noscript', 'iframe', 'svg'];
+        foreach ($safeNoise as $tag) {
             $html = preg_replace("#<{$tag}\b[^>]*>.*?</{$tag}>#is", '', $html);
         }
 
-        // Main content area varsa onu kullan (article, main tag'leri öncelikli)
-        if (preg_match('/<(article|main)[^>]*>(.*?)<\/\1>/is', $html, $m)) {
-            $html = $m[2];
+        // 2. Aşama: Ana içerik alanı tespit
+        $bodyHtml = $html;
+        if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $bm)) {
+            $bodyHtml = $bm[1];
+        }
+
+        // article/main'in en uzununu candidate olarak seç
+        $candidate = null;
+        if (preg_match_all('/<(article|main)[^>]*>(.*?)<\/\1>/is', $bodyHtml, $mm)) {
+            foreach ($mm[2] as $inner) {
+                if ($candidate === null || mb_strlen(strip_tags($inner)) > mb_strlen(strip_tags($candidate))) {
+                    $candidate = $inner;
+                }
+            }
+        }
+
+        // Candidate yeterince büyükse (500+ char) kullan, değilse body fallback
+        if ($candidate !== null && mb_strlen(strip_tags($candidate)) >= 500) {
+            $html = $candidate;
+        } else {
+            $html = $bodyHtml;
+            // Body fallback'te ek olarak navigation noise'ı temizle (ama tüm sayfa değil, sadece body içinden)
+            // DAAD gibi içeriği <header> içine koyan siteler için dikkatli: sadece role/class tabanlı
+            $html = preg_replace('#<nav\b[^>]*>.*?</nav>#is', '', $html);
+            $html = preg_replace('#<footer\b[^>]*>.*?</footer>#is', '', $html);
+            $html = preg_replace('#<form\b[^>]*>.*?</form>#is', '', $html);
+            // Cookie banner / consent modal — aria-label veya role attribute bazlı
+            $html = preg_replace('#<[^>]+role=["\']banner["\'][^>]*>.*?</[^>]+>#is', '', $html);
         }
 
         // Block elementleri newline'la değiştir
