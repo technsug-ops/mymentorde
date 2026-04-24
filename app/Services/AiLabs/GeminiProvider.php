@@ -213,6 +213,10 @@ class GeminiProvider
         $genConfig = [
             'temperature'     => (float) ($options['temperature'] ?? 0.3),
             'maxOutputTokens' => (int) ($options['max_output_tokens'] ?? 2048),
+            // Gemini 2.5 thinking mode'u kapat — thinking tokens tüm output budget'ını yiyor
+            // Açık bırakılırsa maxOutputTokens=2048 → ~1800 thinking + ~200 candidates kalır
+            // ve cevap boş/kesik döner.
+            'thinkingConfig' => ['thinkingBudget' => (int) ($options['thinking_budget'] ?? 0)],
         ];
         // Gemini 2.5 structured output — JSON zorunluluğu
         if (!empty($options['response_mime_type'])) {
@@ -322,6 +326,8 @@ class GeminiProvider
             'generationConfig' => [
                 'temperature'     => (float) ($options['temperature'] ?? 0.3),
                 'maxOutputTokens' => (int) ($options['max_output_tokens'] ?? 2048),
+                // Thinking mode kapat — output budget'ını candidates'a ayır
+                'thinkingConfig'  => ['thinkingBudget' => (int) ($options['thinking_budget'] ?? 0)],
             ],
         ];
 
