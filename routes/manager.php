@@ -388,9 +388,14 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
     });
 });
 
-// ─── User Activity Intelligence + Lead Actions ───────────────────────────
+// ─── User Activity Intelligence + Lead Actions + Dealer Applications ────
 // Geniş erişim: admin panel rolleri + marketing/sales rolleri
 Route::middleware(['company.context', 'auth', 'verified', 'analytics.access'])->group(function (): void {
+    $dealerApps = \App\Http\Controllers\Manager\DealerApplicationController::class;
+    Route::get('/manager/dealer-applications',                [$dealerApps, 'index'])->name('manager.dealer-applications');
+    Route::get('/manager/dealer-applications/{id}',          [$dealerApps, 'show'])->where('id', '[0-9]+')->name('manager.dealer-applications.show');
+    Route::post('/manager/dealer-applications/{id}/status',  [$dealerApps, 'updateStatus'])->where('id', '[0-9]+')->middleware('throttle:30,1')->name('manager.dealer-applications.status');
+
     $userIntel = \App\Http\Controllers\Manager\ManagerUserIntelligenceController::class;
     Route::get('/manager/user-intelligence',                  [$userIntel, 'index'])->name('manager.user-intelligence');
     Route::get('/manager/user-intelligence/guest/{guestId}',  [$userIntel, 'guest'])->where('guestId', '[0-9]+')->name('manager.user-intelligence.guest');

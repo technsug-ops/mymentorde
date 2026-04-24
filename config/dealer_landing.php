@@ -1,43 +1,61 @@
 <?php
 
 /**
- * Dealer Landing Page — canlı sayaç baseline değerleri.
+ * Dealer Landing Page — canlı sayaç konfigürasyonu.
  *
- * Her sayaç: historical_baseline + real_db_count olarak hesaplanır.
- * Baseline = sistem öncesi manuel yönetilmiş business'ın gerçek rakamları.
+ * Mekanik:
+ *   - Her sayaç historical baseline + real DB count + "günlük büyüme" olarak hesaplanır
+ *   - Günlük büyüme deterministic (date+key hash'inden seed alır)
+ *   - Dağılım: ~%35 gün 0 artış (boş) · ~%50 gün 1 artış · ~%15 gün 2 artış
+ *   - Her ziyaretçiye aynı değer görünür — gerçekçi ve tutarlı
  *
- * .env'den özelleştirilebilir:
+ * .env override:
  *   DEALER_LANDING_HIST_SELLERS=12
  *   DEALER_LANDING_HIST_APPLICATIONS=120
  *   DEALER_LANDING_HIST_STUDENTS=48
  *   DEALER_LANDING_HIST_COMMISSIONS_EUR=18400
- *
- * Varsayılan: sadece MentorDE'nin 1 yıllık manuel partnerlik döneminden
- * gerçek rakamlar (technsug'un paylaştığına göre ayarlanabilir).
+ *   DEALER_LANDING_GROWTH_START=2026-04-24 (büyüme hesabı başlangıç tarihi)
  */
 
 return [
-    // Aktif satış ortağı (historical + live user_count where role='dealer')
+    // Historical baseline (sistem öncesi manuel business'tan gerçek rakamlar)
     'historical_sellers' => (int) env('DEALER_LANDING_HIST_SELLERS', 12),
-
-    // Toplam yönlendirilen aday (historical + live guest_applications)
     'historical_applications' => (int) env('DEALER_LANDING_HIST_APPLICATIONS', 120),
-
-    // Almanya'da eğitim gören öğrenci (historical + live student users)
     'historical_students' => (int) env('DEALER_LANDING_HIST_STUDENTS', 48),
-
-    // Ödenen toplam komisyon EUR (historical + optional dealer payout sum)
     'historical_commissions_eur' => (int) env('DEALER_LANDING_HIST_COMMISSIONS_EUR', 18400),
 
+    // Büyüme hesabı başlangıç tarihi — bu tarihten bugüne kadar her gün için
+    // deterministic artış uygulanır
+    'growth_start_date' => env('DEALER_LANDING_GROWTH_START', '2026-04-24'),
+
     /**
-     * Pseudo-live increment settings — sayaçların "canlı" hissini verir.
-     * Her N saniyede küçük random artış.
+     * Günlük artış dağılımı:
+     *   skip_pct: yüzde kaç gün 0 artış (boş geçer)
+     *   single_pct: yüzde kaç gün 1 artış
+     *   kalan: 2 artış
+     *
+     * Sellers için: %95 skip (yeni dealer nadir gelir)
+     * Applications: %35 skip, %50 single, %15 double
+     * Students: %70 skip, %25 single, %5 double
+     * Commissions: applications'a bağlı (application sayısına × multiplier)
      */
-    'increment_interval_ms' => 25000, // 25 sn
-    'increment_ranges' => [
-        'sellers'         => [0, 0], // nadiren artar, 0 bırakıyoruz (gerçekçi)
-        'applications'    => [1, 3], // 25 sn'de 1-3 aday
-        'students'        => [0, 1], // yavaş
-        'commissions_eur' => [50, 350], // 25 sn'de €50-350 artar (aday başına ~€200)
+    'daily_growth' => [
+        'sellers' => [
+            'skip_pct'   => 90,  // %90 gün 0
+            'single_pct' => 9,   // %9 gün 1
+            'double_pct' => 1,   // %1 gün 2 (nadir — büyük event)
+        ],
+        'applications' => [
+            'skip_pct'   => 35,  // %35 gün 0
+            'single_pct' => 50,  // %50 gün 1
+            'double_pct' => 15,  // %15 gün 2
+        ],
+        'students' => [
+            'skip_pct'   => 75,  // %75 gün 0 (students daha yavaş)
+            'single_pct' => 22,  // %22 gün 1
+            'double_pct' => 3,   // %3 gün 2
+        ],
+        // Commissions, applications'a bağlı — her yeni application 180-380€ arası random
+        'commissions_eur_per_application' => [180, 380],
     ],
 ];

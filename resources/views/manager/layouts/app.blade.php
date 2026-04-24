@@ -311,6 +311,10 @@
                    class="nav-link {{ request()->is('manager/user-intelligence*') ? 'active' : '' }}">
                     <span class="nav-icon">👥</span> Kullanıcı Aktivitesi
                 </a>
+                <a href="/manager/dealer-applications"
+                   class="nav-link {{ request()->is('manager/dealer-applications*') ? 'active' : '' }}">
+                    <span class="nav-icon">🤝</span> Dealer Başvuruları
+                </a>
                 <a href="/manager/conversion-funnel"
                    class="nav-link {{ request()->is('manager/conversion-funnel*') ? 'active' : '' }}">
                     <span class="nav-icon">🎯</span> Dönüşüm Hunisi

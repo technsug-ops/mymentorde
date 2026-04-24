@@ -20,6 +20,9 @@ Route::view('/landing/mentorde', 'landing.mentorde')->name('landing.mentorde');
 // SaaS gerekliliği: Google OAuth consent screen + KVKK/GDPR uyumu için public erişim
 Route::view('/privacy', 'legal.privacy')->name('legal.privacy');
 Route::view('/terms',   'legal.terms')->name('legal.terms');
+// SEO/UX friendly aliases
+Route::view('/legal/privacy', 'legal.privacy');
+Route::view('/legal/terms',   'legal.terms');
 
 Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (): void {
     Route::get('/demo', fn() => view('demo.index'));
@@ -226,28 +229,72 @@ Route::middleware(['company.context', 'module:booking'])->group(function (): voi
 });
 
 Route::middleware(['company.context'])->group(function () {
+    // Public Dealer Başvuru Formu — landing CTA'ları buraya yönlendirir
+    $dealerApp = \App\Http\Controllers\Dealer\DealerApplicationController::class;
+    Route::get('/satis-ortagi/basvuru',         [$dealerApp, 'create'])->middleware('throttle:30,1')->name('public.dealer-application.create');
+    Route::post('/satis-ortagi/basvuru',        [$dealerApp, 'store'])->middleware('throttle:5,1')->name('public.dealer-application.store');
+    Route::get('/satis-ortagi/basvuru/tamamlandi', [$dealerApp, 'success'])->middleware('throttle:60,1')->name('public.dealer-application.success');
+
     // Public Satış Ortağı (dealer) landing — MentorDE Satış Ortaklığı Programı tanıtımı
     Route::get('/satis-ortagi', function () {
         $cfg = config('dealer_landing');
+
+        // Günlük deterministic artış — bugüne kadar her günün artışını topla
+        $growthStart = \Carbon\Carbon::parse($cfg['growth_start_date'])->startOfDay();
+        $today = \Carbon\Carbon::today();
+        $daysElapsed = max(0, (int) $growthStart->diffInDays($today));
+
+        $dailyGrowth = $cfg['daily_growth'];
+
+        // Tek günün artışını deterministic hesapla (date + key hash bazlı)
+        $computeDailyIncrement = function (string $dateStr, string $key, array $dist): int {
+            $seed = crc32($dateStr . ':' . $key);
+            $roll = $seed % 100; // 0-99
+            if ($roll < $dist['skip_pct']) return 0;
+            if ($roll < $dist['skip_pct'] + $dist['single_pct']) return 1;
+            return 2;
+        };
+
+        // Tüm günleri iteratif topla (cache'li olsa daha iyi — şimdilik 30 gün'den az olduğu için OK)
+        $growth = ['sellers' => 0, 'applications' => 0, 'students' => 0, 'commissions_eur' => 0];
+        $commissionRange = $dailyGrowth['commissions_eur_per_application'] ?? [180, 380];
+
+        for ($i = 0; $i <= $daysElapsed; $i++) {
+            $dateStr = $growthStart->copy()->addDays($i)->toDateString();
+
+            $appInc = $computeDailyIncrement($dateStr, 'applications', $dailyGrowth['applications']);
+            $growth['applications'] += $appInc;
+
+            $growth['sellers'] += $computeDailyIncrement($dateStr, 'sellers', $dailyGrowth['sellers']);
+            $growth['students'] += $computeDailyIncrement($dateStr, 'students', $dailyGrowth['students']);
+
+            // Commissions: her yeni application için random €180-380 (deterministic)
+            if ($appInc > 0) {
+                for ($j = 0; $j < $appInc; $j++) {
+                    $commSeed = crc32($dateStr . ':comm:' . $j);
+                    $growth['commissions_eur'] += $commissionRange[0] + ($commSeed % ($commissionRange[1] - $commissionRange[0]));
+                }
+            }
+        }
+
         $counters = [
             'sellers' => (int) $cfg['historical_sellers']
+                + $growth['sellers']
                 + \App\Models\User::query()->withoutGlobalScopes()
                     ->whereIn('role', ['dealer'])
                     ->where('is_active', true)
                     ->count(),
             'applications' => (int) $cfg['historical_applications']
+                + $growth['applications']
                 + \App\Models\GuestApplication::query()->withoutGlobalScopes()->count(),
             'students' => (int) $cfg['historical_students']
+                + $growth['students']
                 + \App\Models\User::query()->withoutGlobalScopes()
                     ->where('role', 'student')
                     ->count(),
-            'commissions_eur' => (int) $cfg['historical_commissions_eur'],
-            // Pseudo-live increment config — frontend JS kullanır
-            'live' => [
-                'interval_ms' => (int) $cfg['increment_interval_ms'],
-                'ranges'      => $cfg['increment_ranges'],
-            ],
+            'commissions_eur' => (int) $cfg['historical_commissions_eur'] + $growth['commissions_eur'],
         ];
+
         return view('public.dealer-landing', ['counters' => $counters]);
     })
         ->middleware('throttle:120,1')->name('public.dealer-landing');
