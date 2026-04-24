@@ -43,6 +43,11 @@ class InternalAssistantController extends Controller
         $companyId = (int) ($user?->company_id ?? app('current_company_id') ?? 0);
 
         return response()->stream(function () use ($user, $role, $question, $companyId) {
+            // PHP max_execution_time (default 30s) Gemini streaming için yetersiz —
+            // uzun yanıtlarda 30s içinde bitmiyor ve curl WRITEFUNCTION timeout alıyor.
+            @set_time_limit(120); // 2 dk — streaming response için yeterli
+            @ignore_user_abort(true);
+
             $send = function (array $event) {
                 echo "data: " . json_encode($event, JSON_UNESCAPED_UNICODE) . "\n\n";
                 if (ob_get_level() > 0) @ob_flush();
