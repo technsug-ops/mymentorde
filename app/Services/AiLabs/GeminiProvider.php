@@ -383,6 +383,33 @@ class GeminiProvider
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
+        // Kalan buffer'ı da işle — Gemini bazen tek chunk'ta cevap döner
+        // ve response \n\n ile bitmez. Bu durumda buffer dolu kalır ve text kaybolur.
+        if (!empty($buffer)) {
+            foreach (explode("\n", $buffer) as $line) {
+                $line = trim($line);
+                if (!str_starts_with($line, 'data: ')) continue;
+                $json = substr($line, 6);
+                if ($json === '[DONE]') { $queue[] = ['done' => true]; continue; }
+
+                $parsed = json_decode($json, true);
+                if (!is_array($parsed)) continue;
+
+                $text = '';
+                foreach (($parsed['candidates'][0]['content']['parts'] ?? []) as $part) {
+                    if (isset($part['text'])) $text .= $part['text'];
+                }
+                if ($text !== '') $queue[] = ['text' => $text];
+
+                if (isset($parsed['candidates'][0]['finishReason'])) {
+                    $finishReason = $parsed['candidates'][0]['finishReason'];
+                }
+                if (isset($parsed['usageMetadata'])) {
+                    $totalUsage = $parsed['usageMetadata'];
+                }
+            }
+        }
+
         foreach ($queue as $q) yield $q;
 
         if ($err) {
