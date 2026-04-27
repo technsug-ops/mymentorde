@@ -726,7 +726,7 @@
             'display:inline-flex',
             'align-items:center',
             'gap:10px',
-            'padding:10px 18px',
+            'padding:10px 16px',
             'border-radius:10px',
             'border:2px solid ' + theme.border,
             'background:' + theme.bg,
@@ -734,17 +734,19 @@
             'font-size:13px',
             'font-weight:700',
             'cursor:pointer',
-            'line-height:1.4',
+            'line-height:1.35',
             'font-family:inherit',
-            'width:fit-content',
+            'max-width:100%',
+            'text-align:left',
             'animation:mn-pulse-' + (opts.severity || 'info') + ' 2.5s ease-in-out infinite',
             'transition:transform .15s'
         ].join(';');
         c.onmouseover = function(){ this.style.transform='translateY(-1px)'; };
         c.onmouseout = function(){ this.style.transform=''; };
-        c.innerHTML = '<span style="font-size:18px;">' + theme.icon + '</span>'
-            + '<span>' + (opts.label || 'Bilgi') + '</span>'
-            + '<span style="background:' + theme.cta + ';color:#fff;padding:3px 10px;border-radius:14px;font-size:11px;font-weight:800;">Detay →</span>';
+        // Icon ve badge sabit boyut, text uzunsa 2+ satıra wrap olur
+        c.innerHTML = '<span style="font-size:18px;flex-shrink:0;line-height:1;">' + theme.icon + '</span>'
+            + '<span style="flex:1;min-width:0;white-space:normal;word-wrap:break-word;">' + (opts.label || 'Bilgi') + '</span>'
+            + '<span style="background:' + theme.cta + ';color:#fff;padding:3px 10px;border-radius:14px;font-size:11px;font-weight:800;flex-shrink:0;white-space:nowrap;">Detay →</span>';
         return c;
     }
 
