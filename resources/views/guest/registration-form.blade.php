@@ -462,6 +462,7 @@
                                                     'primary_start_date', 'primary_end_date',
                                                     'middle_start_date', 'middle_end_date',
                                                     'high_start_date', 'high_end_date',
+                                                    'passport_issue_date',
                                                 ], true)) {
                                                     $dateMax = now()->format('Y-m-d');
                                                     $maxMessage = 'Tarih gelecekte olamaz.';
@@ -662,6 +663,90 @@
     statusEl.addEventListener('change', apply);
     statusEl.addEventListener('input', apply);
     apply();
+})();
+
+// Conditional: has_passport='yes' → pasaport detay alanları + tipi badge'i (S=Yeşil/Sondernpass, Diğer=Reisepass)
+(function(){
+    var hasEl = document.querySelector('select[name="has_passport"]');
+    if (!hasEl) return;
+
+    var passportKeys = ['passport_number', 'passport_issue_date', 'passport_expiry_date', 'passport_issue_place'];
+    var passportGroups = passportKeys.map(function(k){
+        return document.querySelector('.form-group[data-field-key="' + k + '"]');
+    }).filter(Boolean);
+
+    var numberEl = document.querySelector('input[name="passport_number"]');
+    var numberGroup = document.querySelector('.form-group[data-field-key="passport_number"]');
+
+    // Badge container — passport_number group altına eklenir
+    var badgeId = 'passport-type-badge';
+    var badge = document.getElementById(badgeId);
+    if (!badge && numberGroup) {
+        badge = document.createElement('div');
+        badge.id = badgeId;
+        badge.style.cssText = 'margin-top:6px;display:none;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;line-height:1.4;';
+        numberGroup.appendChild(badge);
+    }
+
+    function applyPassportVisibility(){
+        var show = (hasEl.value || '').toLowerCase() === 'yes';
+        passportGroups.forEach(function(g){
+            g.style.display = show ? '' : 'none';
+            var input = g.querySelector('input, select, textarea');
+            if (input && !show) input.removeAttribute('required');
+        });
+        if (!show && badge) { badge.style.display = 'none'; }
+        if (show) applyPassportTypeBadge();
+    }
+
+    function applyPassportTypeBadge(){
+        if (!badge || !numberEl) return;
+        var v = (numberEl.value || '').trim();
+        if (v === '') { badge.style.display = 'none'; return; }
+
+        var firstChar = v.charAt(0).toUpperCase();
+        var isGreen = (firstChar === 'S');
+
+        if (isGreen) {
+            badge.style.background = '#dcfce7';
+            badge.style.color = '#166534';
+            badge.style.border = '1.5px solid #86efac';
+            badge.innerHTML = '<span style="font-size:18px;">🟢</span>'
+                + '<span style="flex:1;">Yeşil Pasaport (hizmet pasaportu)</span>'
+                + '<button type="button" class="passport-info-btn" data-info="green" title="Almanca karşılığı"'
+                + ' style="background:none;border:1px solid #166534;color:#166534;border-radius:50%;width:22px;height:22px;cursor:pointer;font-weight:700;font-size:12px;padding:0;line-height:1;">i</button>';
+        } else {
+            badge.style.background = '#dbeafe';
+            badge.style.color = '#1e40af';
+            badge.style.border = '1.5px solid #93c5fd';
+            badge.innerHTML = '<span style="font-size:18px;">🔵</span>'
+                + '<span style="flex:1;">Diğer Pasaport (umuma mahsus)</span>'
+                + '<button type="button" class="passport-info-btn" data-info="other" title="Almanca karşılığı"'
+                + ' style="background:none;border:1px solid #1e40af;color:#1e40af;border-radius:50%;width:22px;height:22px;cursor:pointer;font-weight:700;font-size:12px;padding:0;line-height:1;">i</button>';
+        }
+        badge.style.display = 'flex';
+
+        // i butonu → Almanca karşılığı popup (basit alert/tooltip)
+        var btn = badge.querySelector('.passport-info-btn');
+        if (btn) {
+            btn.addEventListener('click', function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                var msg = btn.dataset.info === 'green'
+                    ? 'SONDERNPASS\n\nAlmanya\'daki başvurularda yeşil pasaport için bu terim kullanılır. Hizmet/diplomatik pasaportlar bu kategoride.'
+                    : 'REISEPASS\n\nUmuma mahsus pasaport. Standart Türk vatandaş pasaportları bu kategoride.';
+                alert(msg);
+            });
+        }
+    }
+
+    hasEl.addEventListener('change', applyPassportVisibility);
+    hasEl.addEventListener('input', applyPassportVisibility);
+    if (numberEl) {
+        numberEl.addEventListener('input', applyPassportTypeBadge);
+        numberEl.addEventListener('change', applyPassportTypeBadge);
+    }
+    applyPassportVisibility();
 })();
 </script>
 

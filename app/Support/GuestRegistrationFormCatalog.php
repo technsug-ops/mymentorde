@@ -260,11 +260,16 @@ class GuestRegistrationFormCatalog
                     // Level 1 yeni — konaklama tanıdığı
                     self::f('accommodation_contact_status', 'Almanya\'da konaklama için size destek olabilecek bir tanıdığınız var mı?', 'select', false, 20, options: self::accommodationContactOptions(), level: 1),
                     self::f('accommodation_contact_city', 'Tanıdığınızın bulunduğu şehir', 'text', false, 100, placeholder: 'Örn: München', help_text: 'Sadece tanıdığınız varsa doldurun.', level: 1),
+                    // Level 1 — Pasaport bloğu (has_passport='yes' ise diğer 4 alan görünür)
+                    // S ile başlayan no → Yeşil Pasaport / SONDERNPASS, diğerleri → REISEPASS
+                    self::f('has_passport', 'Pasaportunuz var mı? *', 'select', true, 10, options: self::yesNoOptions(), level: 1),
+                    self::f('passport_number', 'Pasaport seri numarası', 'text', false, 64, placeholder: 'Örn: SDCF123444', level: 1),
+                    self::f('passport_issue_date', 'Pasaport veriliş tarihi', 'date', false, 20, level: 1),
+                    self::f('passport_expiry_date', 'Pasaport bitiş tarihi', 'date', false, 20, level: 1),
+                    self::f('passport_issue_place', 'Pasaportun verildiği yer', 'text', false, 120, placeholder: 'Örn: İstanbul Emniyeti', level: 1),
                     // Sadece Level 2
                     self::f('estimated_monthly_budget_eur', 'Aylık bütçe planı (EUR)', 'text', false, 32),
                     self::f('knows_blocked_account', 'Bloke hesap gerekliliği hakkında bilginiz var mı? *', 'select', true, 10, options: self::yesNoOptions()),
-                    self::f('has_passport', 'Pasaportunuz var mı? *', 'select', true, 10, options: self::yesNoOptions()),
-                    self::f('passport_number', 'Pasaport seri numarası (pasaport varsa) *', 'text', false, 64),
                     self::f('has_visa_history', 'Daha önce Almanya/başka ülkeye vize başvurusu yaptınız mı? *', 'select', true, 10, options: self::yesNoOptions()),
                     self::f('has_abroad_experience', 'Daha önce yurt dışında eğitim/iş deneyiminiz oldu mu? *', 'select', true, 10, options: self::yesNoOptions()),
                     self::f('has_health_condition', 'Özel bir sağlık durumu/gereksiniminiz var mı? *', 'select', true, 10, options: self::yesNoOptions()),
@@ -412,6 +417,7 @@ class GuestRegistrationFormCatalog
                     'primary_start_date', 'primary_end_date',
                     'middle_start_date', 'middle_end_date',
                     'high_start_date', 'high_end_date',
+                    'passport_issue_date', // veriliş tarihi gelecekte olamaz
                 ], true)) {
                     // Geçmiş tarih field'ları — gelecek olamaz
                     if ($txt > $today) {

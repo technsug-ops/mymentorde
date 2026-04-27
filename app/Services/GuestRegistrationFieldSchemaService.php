@@ -168,6 +168,11 @@ class GuestRegistrationFieldSchemaService
                 'english_certificate_held',
                 'english_certificate_type',
                 'english_certificate_score',
+                // Pasaport — has_passport='no' iken bunlar gizli
+                'passport_number',
+                'passport_issue_date',
+                'passport_expiry_date',
+                'passport_issue_place',
             ]);
         }
 
