@@ -665,63 +665,107 @@
     apply();
 })();
 
-// Conditional: Açık Lise + lise diploma notu ≤ 50 → kritik tavsiye uyarısı
+// Conditional: Açık Lise + lise diploma notu ≤ 50 → küçük chip + tıklayınca modal
 (function(){
     var typeEl = document.querySelector('select[name="high_school_type"]');
     var gradeEl = document.querySelector('input[name="high_school_grade"]');
     if (!typeEl || !gradeEl) return;
 
-    var warnId = 'acik-lise-low-grade-warn';
+    var chipId = 'acik-lise-low-grade-chip';
+    var modalId = 'acik-lise-low-grade-modal';
     var gradeGroup = document.querySelector('.form-group[data-field-key="high_school_grade"]');
+    var autoOpened = false; // İlk tetiklemede modal otomatik açılır, sonradan sadece chip
 
-    function ensureWarn(){
-        var w = document.getElementById(warnId);
-        if (w) return w;
+    function buildModal(){
+        if (document.getElementById(modalId)) return;
+        var modal = document.createElement('div');
+        modal.id = modalId;
+        modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);align-items:center;justify-content:center;padding:20px;';
+        modal.innerHTML = [
+            '<div style="background:#fff;border-radius:14px;max-width:520px;width:100%;padding:24px 26px;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative;">',
+            '  <button type="button" data-close-modal style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8;line-height:1;padding:4px;">×</button>',
+            '  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">',
+            '    <div style="font-size:28px;">⚠️</div>',
+            '    <div style="font-weight:800;font-size:17px;color:#991b1b;">Lütfen Danışmanınla Görüş</div>',
+            '  </div>',
+            '  <div style="font-size:13px;line-height:1.65;color:#1f2937;margin-bottom:14px;">',
+            '    Açık lise + 50 ve altı not ortalaması ile Almanya\'ya <strong>lise mezunu öğrenci olarak gelmen oldukça zor</strong>. Alman üniversiteleri bu profilde ek koşullar arar (Studienkolleg, denklik, ek sınavlar vb.).',
+            '  </div>',
+            '  <div style="padding:12px 14px;background:#f0fdf4;border-left:3px solid #16a34a;border-radius:0 8px 8px 0;font-size:13px;line-height:1.6;color:#166534;margin-bottom:14px;">',
+            '    <strong>💡 Tavsiyemiz:</strong> Türkiye\'de bir üniversitede <strong>en az 1 yıl</strong> öğrenim gördükten sonra Almanya\'ya gelmen — başvuru şansını ciddi şekilde artırır.',
+            '  </div>',
+            '  <div style="font-size:12px;color:#64748b;margin-bottom:16px;">Kayıt sürecine devam edebilirsin, danışmanın seninle iletişime geçecek.</div>',
+            '  <button type="button" data-close-modal style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">Anladım, devam et</button>',
+            '</div>'
+        ].join('');
+        document.body.appendChild(modal);
+
+        modal.addEventListener('click', function(e){
+            if (e.target === modal || e.target.dataset.closeModal !== undefined || (e.target.closest && e.target.closest('[data-close-modal]'))) {
+                modal.style.display = 'none';
+            }
+        });
+    }
+
+    function openModal(){
+        buildModal();
+        var m = document.getElementById(modalId);
+        if (m) m.style.display = 'flex';
+    }
+
+    function ensureChip(){
+        var c = document.getElementById(chipId);
+        if (c) return c;
         if (!gradeGroup) return null;
-        w = document.createElement('div');
-        w.id = warnId;
-        w.style.cssText = [
-            'margin-top:10px',
-            'padding:14px 16px',
-            'border-radius:10px',
-            'border:1.5px solid #dc2626',
-            'background:linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%)',
-            'font-size:13px',
-            'color:#7f1d1d',
-            'line-height:1.65'
+        c = document.createElement('button');
+        c.id = chipId;
+        c.type = 'button';
+        c.style.cssText = [
+            'margin-top:6px',
+            'display:inline-flex',
+            'align-items:center',
+            'gap:6px',
+            'padding:5px 12px',
+            'border-radius:14px',
+            'border:1px solid #fca5a5',
+            'background:#fef2f2',
+            'color:#991b1b',
+            'font-size:11px',
+            'font-weight:600',
+            'cursor:pointer',
+            'line-height:1.4',
+            'font-family:inherit',
+            'width:fit-content'
         ].join(';');
-        gradeGroup.appendChild(w);
-        return w;
+        c.innerHTML = '<span style="font-size:13px;">⚠️</span><span>Tavsiye var — </span><span style="text-decoration:underline;">Detay</span>';
+        c.addEventListener('click', openModal);
+        gradeGroup.appendChild(c);
+        return c;
     }
 
     function applyAcikLiseLowGradeWarn(){
         var type = (typeEl.value || '').toLowerCase();
         var raw = (gradeEl.value || '').toString().replace(',', '.').trim();
         var grade = parseFloat(raw);
-        var existing = document.getElementById(warnId);
+        var existing = document.getElementById(chipId);
 
         var trigger = (type === 'acik_lise' && !isNaN(grade) && grade > 0 && grade <= 50);
 
         if (!trigger) {
             if (existing) existing.remove();
+            autoOpened = false;
             return;
         }
 
-        var w = ensureWarn();
-        if (!w) return;
-        w.innerHTML = [
-            '<div style="display:flex;align-items:flex-start;gap:12px;">',
-            '  <div style="font-size:24px;line-height:1;flex-shrink:0;">⚠️</div>',
-            '  <div style="flex:1;">',
-            '    <div style="font-weight:800;font-size:14px;margin-bottom:6px;color:#991b1b;">Önemli — Lütfen Danışmanınla Görüş</div>',
-            '    <div style="margin-bottom:8px;">Açık lise + 50 ve altı not ortalaması ile Almanya\'ya <strong>lise mezunu öğrenci olarak gelmen oldukça zor</strong>. Alman üniversiteleri bu profilde ek koşullar arar (Studienkolleg, denklik, ek sınavlar vb.).</div>',
-            '    <div style="padding:10px 12px;background:rgba(255,255,255,0.7);border-left:3px solid #16a34a;border-radius:0 6px 6px 0;">',
-            '      <strong style="color:#166534;">💡 Tavsiyemiz:</strong> Türkiye\'de bir üniversitede <strong>en az 1 yıl</strong> öğrenim gördükten sonra Almanya\'ya gelmen — başvuru şansını ciddi şekilde artırır.',
-            '    </div>',
-            '    <div style="margin-top:8px;font-size:12px;color:#7f1d1d;">Kayıt sürecine devam edebilirsin, danışmanın seninle iletişime geçecek.</div>',
-            '  </div>',
-            '</div>'
-        ].join('');
+        if (!existing) {
+            ensureChip();
+        }
+
+        // İlk tetiklenmede modal'ı otomatik aç (kullanıcı dikkatini çek)
+        if (!autoOpened) {
+            autoOpened = true;
+            openModal();
+        }
     }
 
     typeEl.addEventListener('change', applyAcikLiseLowGradeWarn);
