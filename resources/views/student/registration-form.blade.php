@@ -484,13 +484,15 @@
 
     var trLocale = (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.tr) ? flatpickr.l10ns.tr : 'default';
 
+    // Tüm flatpickr instance'larını name'e göre sakla — cascade için gerekli
+    window.__srfPickers = {};
+
     // type=date — gün/ay/yıl picker
     document.querySelectorAll('input[type="date"]').forEach(function(el){
         var minAttr = el.getAttribute('min');
         var maxAttr = el.getAttribute('max');
         var isBirth = el.name === 'birth_date';
-
-        flatpickr(el, {
+        var fp = flatpickr(el, {
             locale: trLocale,
             dateFormat: 'Y-m-d',
             altInput: true,
@@ -502,12 +504,13 @@
             disableMobile: false,
             monthSelectorType: 'dropdown',
         });
+        if (el.name) window.__srfPickers[el.name] = fp;
     });
 
     // type=month — sadece ay/yıl picker (Flatpickr monthSelect plugin)
     document.querySelectorAll('input[type="month"]').forEach(function(el){
         if (typeof window.monthSelectPlugin === 'undefined') return;
-        flatpickr(el, {
+        var fp = flatpickr(el, {
             locale: trLocale,
             dateFormat: 'Y-m',
             altInput: true,
@@ -521,7 +524,87 @@
                 altFormat: 'F Y',
             })],
         });
+        if (el.name) window.__srfPickers[el.name] = fp;
     });
+
+    // ── Cascade kuralları ──────────────────────────────────────────────────
+    // Field değişikliğinde bağımlı field'ların min/max'i otomatik güncellenir.
+    // Tarih kuralları öğrencinin verdiği bilgilere göre dinamik kalır.
+
+    function _yearsAfter(dateStr, years){
+        if (!dateStr) return null;
+        var d = new Date(dateStr.length === 7 ? dateStr + '-01' : dateStr);
+        if (isNaN(d.getTime())) return null;
+        d.setFullYear(d.getFullYear() + years);
+        return d;
+    }
+    function _yearsBefore(dateStr, years){
+        if (!dateStr) return null;
+        var d = new Date(dateStr.length === 7 ? dateStr + '-01' : dateStr);
+        if (isNaN(d.getTime())) return null;
+        d.setFullYear(d.getFullYear() - years);
+        return d;
+    }
+
+    function _setMin(name, dateOrStr){
+        var fp = window.__srfPickers[name];
+        if (fp && dateOrStr) fp.set('minDate', dateOrStr);
+    }
+    function _setMax(name, dateOrStr){
+        var fp = window.__srfPickers[name];
+        if (fp && dateOrStr) fp.set('maxDate', dateOrStr);
+    }
+
+    // Kural 1: Anne/baba doğum tarihi → öğrencinin doğumundan en az 15 yıl önce
+    function _applyParentBirthMax(){
+        var birthEl = document.querySelector('[name="birth_date"]');
+        if (!birthEl || !birthEl.value) return;
+        var maxParent = _yearsBefore(birthEl.value, 15);
+        if (!maxParent) return;
+        ['father_birth_date', 'mother_birth_date', 'spouse_birth_date'].forEach(function(name){
+            _setMax(name, maxParent);
+        });
+    }
+
+    // Kural 2: Okul tarihleri cascade — Türkiye sistemi (4+4+4) baz alınır
+    // Min süre olarak 3 yıl kullanılır (erken mezun toleransı)
+    var _schoolCascade = [
+        // primary_start → primary_end (en az 3 yıl sonra)
+        { trigger: 'primary_start_date', target: 'primary_end_date', offsetYears: 3, mode: 'min' },
+        // primary_end → middle_start (sonrası)
+        { trigger: 'primary_end_date',   target: 'middle_start_date', offsetYears: 0, mode: 'min' },
+        // middle_start → middle_end (en az 3 yıl sonra)
+        { trigger: 'middle_start_date',  target: 'middle_end_date',   offsetYears: 3, mode: 'min' },
+        // middle_end → high_start
+        { trigger: 'middle_end_date',    target: 'high_start_date',   offsetYears: 0, mode: 'min' },
+        // high_start → high_end (en az 3 yıl sonra)
+        { trigger: 'high_start_date',    target: 'high_end_date',     offsetYears: 3, mode: 'min' },
+        // germany_stay_from → germany_stay_to (en az 1 ay sonra)
+        { trigger: 'germany_stay_from',  target: 'germany_stay_to',   offsetYears: 0, mode: 'min' },
+    ];
+
+    function _applySchoolCascade(){
+        _schoolCascade.forEach(function(rule){
+            var srcEl = document.querySelector('[name="' + rule.trigger + '"]');
+            if (!srcEl || !srcEl.value) return;
+            var minD = _yearsAfter(srcEl.value, rule.offsetYears);
+            if (!minD) return;
+            _setMin(rule.target, minD);
+        });
+    }
+
+    // Tüm tarih input'larındaki değişikliklerde kural setini yeniden uygula
+    document.querySelectorAll('input[type="date"], input[type="month"]').forEach(function(el){
+        el.addEventListener('change', function(){
+            _applyParentBirthMax();
+            _applySchoolCascade();
+        });
+    });
+    // Sayfa yüklendiğinde başlangıç durumunu uygula
+    setTimeout(function(){
+        _applyParentBirthMax();
+        _applySchoolCascade();
+    }, 200);
 })();
 </script>
 
