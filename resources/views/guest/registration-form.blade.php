@@ -665,6 +665,72 @@
     apply();
 })();
 
+// Conditional: Açık Lise + lise diploma notu ≤ 50 → kritik tavsiye uyarısı
+(function(){
+    var typeEl = document.querySelector('select[name="high_school_type"]');
+    var gradeEl = document.querySelector('input[name="high_school_grade"]');
+    if (!typeEl || !gradeEl) return;
+
+    var warnId = 'acik-lise-low-grade-warn';
+    var gradeGroup = document.querySelector('.form-group[data-field-key="high_school_grade"]');
+
+    function ensureWarn(){
+        var w = document.getElementById(warnId);
+        if (w) return w;
+        if (!gradeGroup) return null;
+        w = document.createElement('div');
+        w.id = warnId;
+        w.style.cssText = [
+            'margin-top:10px',
+            'padding:14px 16px',
+            'border-radius:10px',
+            'border:1.5px solid #dc2626',
+            'background:linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%)',
+            'font-size:13px',
+            'color:#7f1d1d',
+            'line-height:1.65'
+        ].join(';');
+        gradeGroup.appendChild(w);
+        return w;
+    }
+
+    function applyAcikLiseLowGradeWarn(){
+        var type = (typeEl.value || '').toLowerCase();
+        var raw = (gradeEl.value || '').toString().replace(',', '.').trim();
+        var grade = parseFloat(raw);
+        var existing = document.getElementById(warnId);
+
+        var trigger = (type === 'acik_lise' && !isNaN(grade) && grade > 0 && grade <= 50);
+
+        if (!trigger) {
+            if (existing) existing.remove();
+            return;
+        }
+
+        var w = ensureWarn();
+        if (!w) return;
+        w.innerHTML = [
+            '<div style="display:flex;align-items:flex-start;gap:12px;">',
+            '  <div style="font-size:24px;line-height:1;flex-shrink:0;">⚠️</div>',
+            '  <div style="flex:1;">',
+            '    <div style="font-weight:800;font-size:14px;margin-bottom:6px;color:#991b1b;">Önemli — Lütfen Danışmanınla Görüş</div>',
+            '    <div style="margin-bottom:8px;">Açık lise + 50 ve altı not ortalaması ile Almanya\'ya <strong>lise mezunu öğrenci olarak gelmen oldukça zor</strong>. Alman üniversiteleri bu profilde ek koşullar arar (Studienkolleg, denklik, ek sınavlar vb.).</div>',
+            '    <div style="padding:10px 12px;background:rgba(255,255,255,0.7);border-left:3px solid #16a34a;border-radius:0 6px 6px 0;">',
+            '      <strong style="color:#166534;">💡 Tavsiyemiz:</strong> Türkiye\'de bir üniversitede <strong>en az 1 yıl</strong> öğrenim gördükten sonra Almanya\'ya gelmen — başvuru şansını ciddi şekilde artırır.',
+            '    </div>',
+            '    <div style="margin-top:8px;font-size:12px;color:#7f1d1d;">Kayıt sürecine devam edebilirsin, danışmanın seninle iletişime geçecek.</div>',
+            '  </div>',
+            '</div>'
+        ].join('');
+    }
+
+    typeEl.addEventListener('change', applyAcikLiseLowGradeWarn);
+    typeEl.addEventListener('input', applyAcikLiseLowGradeWarn);
+    gradeEl.addEventListener('input', applyAcikLiseLowGradeWarn);
+    gradeEl.addEventListener('change', applyAcikLiseLowGradeWarn);
+    applyAcikLiseLowGradeWarn();
+})();
+
 // Conditional: has_passport='yes' → pasaport detay alanları + tipi badge'i (S=Yeşil/Sondernpass, Diğer=Reisepass)
 (function(){
     var hasEl = document.querySelector('select[name="has_passport"]');
