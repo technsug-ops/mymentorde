@@ -487,6 +487,13 @@
     // Tüm flatpickr instance'larını name'e göre sakla — cascade için gerekli
     window.__srfPickers = {};
 
+    // Cascade tetikleyici — Flatpickr onChange'den çağrılır.
+    // Tanımlar aşağıda; closure capture eder.
+    function _srfTriggerCascade(){
+        if (typeof _applyParentBirthMax === 'function') _applyParentBirthMax();
+        if (typeof _applySchoolCascade === 'function') _applySchoolCascade();
+    }
+
     // type=date — gün/ay/yıl picker
     document.querySelectorAll('input[type="date"]').forEach(function(el){
         var minAttr = el.getAttribute('min');
@@ -503,6 +510,7 @@
             defaultDate: el.value || (isBirth ? new Date(new Date().getFullYear() - 25, 0, 1) : null),
             disableMobile: false,
             monthSelectorType: 'dropdown',
+            onChange: function(){ _srfTriggerCascade(); },
         });
         if (el.name) window.__srfPickers[el.name] = fp;
     });
@@ -523,6 +531,7 @@
                 dateFormat: 'Y-m',
                 altFormat: 'F Y',
             })],
+            onChange: function(){ _srfTriggerCascade(); },
         });
         if (el.name) window.__srfPickers[el.name] = fp;
     });
@@ -603,13 +612,7 @@
         });
     }
 
-    // Tüm tarih input'larındaki değişikliklerde kural setini yeniden uygula
-    document.querySelectorAll('input[type="date"], input[type="month"]').forEach(function(el){
-        el.addEventListener('change', function(){
-            _applyParentBirthMax();
-            _applySchoolCascade();
-        });
-    });
+    // Cascade Flatpickr'ın onChange callback'inden tetikleniyor (yukarıda)
     // Sayfa yüklendiğinde başlangıç durumunu uygula
     setTimeout(function(){
         _applyParentBirthMax();

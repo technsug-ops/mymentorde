@@ -988,6 +988,12 @@
     // Tüm flatpickr instance'larını name'e göre sakla — cascade için gerekli
     window.__grfPickers = window.__grfPickers || {};
 
+    // Cascade tetikleyici — Flatpickr onChange'den çağrılır
+    function _grfTriggerCascade(){
+        if (typeof _applyParentBirthMax === 'function') _applyParentBirthMax();
+        if (typeof _applySchoolCascade === 'function') _applySchoolCascade();
+    }
+
     // type=date — gün/ay/yıl picker
     document.querySelectorAll('input[type="date"]').forEach(function(el){
         var minAttr = el.getAttribute('min');
@@ -1005,6 +1011,7 @@
             defaultDate: el.value || (isBirth ? new Date(new Date().getFullYear() - 25, 0, 1) : null),
             disableMobile: false,
             monthSelectorType: 'dropdown',
+            onChange: function(){ _grfTriggerCascade(); },
         });
         if (el.name) window.__grfPickers[el.name] = fp;
     });
@@ -1025,6 +1032,7 @@
                 dateFormat: 'Y-m',
                 altFormat: 'F Y',
             })],
+            onChange: function(){ _grfTriggerCascade(); },
         });
         if (el.name) window.__grfPickers[el.name] = fp;
     });
@@ -1082,12 +1090,7 @@
         });
     }
 
-    document.querySelectorAll('input[type="date"], input[type="month"]').forEach(function(el){
-        el.addEventListener('change', function(){
-            _applyParentBirthMax();
-            _applySchoolCascade();
-        });
-    });
+    // Cascade Flatpickr'ın onChange callback'inden tetikleniyor (yukarıda)
     setTimeout(function(){ _applyParentBirthMax(); _applySchoolCascade(); }, 200);
 })();
 </script>
