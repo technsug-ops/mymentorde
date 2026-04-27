@@ -442,12 +442,33 @@ section { padding:90px 0; position:relative; }
 .addon-features li { padding:5px 0 5px 20px; position:relative; font-size:12px; color:var(--text); line-height:1.5; }
 .addon-features li::before { content:'→'; position:absolute; left:0; color:var(--primary); font-weight:800; }
 
-/* Price summary */
+/* Price summary — pricing section sonunda inline (sticky kaldırıldı) */
 .price-summary {
     background:#fff; border:2px solid var(--primary); border-radius:24px;
     padding:32px 36px; box-shadow:0 16px 40px rgba(91,46,145,.15);
-    position:sticky; bottom:20px; backdrop-filter:blur(10px);
+    margin-top:8px;
 }
+
+/* Floating mini-pill: scroll'da küçük gösterim — featurelara hiç dokunmaz */
+.price-pill {
+    position:fixed; bottom:24px; right:24px; z-index:40;
+    background:var(--primary); color:#fff;
+    border-radius:50px; padding:14px 22px;
+    box-shadow:0 12px 32px rgba(91,46,145,.4);
+    font-weight:800; font-size:15px;
+    display:none; align-items:center; gap:10px;
+    cursor:pointer; transition:all .2s;
+    border:none; font-family:inherit;
+}
+.price-pill:hover { background:var(--primary-dark); transform:translateY(-2px); }
+.price-pill.visible { display:inline-flex; }
+.price-pill .pill-count {
+    background:var(--accent); color:var(--primary-deep);
+    width:24px; height:24px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:900;
+}
+.price-pill .arrow { font-size:18px; }
 .ps-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--line); font-size:15px; }
 .ps-row:last-child { border-bottom:0; }
 .ps-row.total { padding-top:14px; margin-top:6px; border-top:2px solid var(--primary); border-bottom:0; font-size:18px; }
@@ -1325,6 +1346,13 @@ footer a:hover { color:var(--accent); }
             </div>
         </div>
 
+        {{-- Floating mini-pill: scroll'da küçük gösterim, full summary'e zıplama --}}
+        <button type="button" class="price-pill" id="price-pill" aria-label="Toplam fiyatı gör">
+            <span class="pill-count" id="pill-count">0</span>
+            <span>Toplam: <strong id="pill-total">€199/ay</strong></span>
+            <span class="arrow">↓</span>
+        </button>
+
         {{-- Enterprise/White-label callout --}}
         <div class="enterprise-callout">
             <div>
@@ -1562,6 +1590,11 @@ document.querySelectorAll('.faq-q').forEach(btn => {
         return '€' + Math.round(n).toLocaleString('tr-TR').replace(/,/g, '.');
     }
 
+    const pricePill = document.getElementById('price-pill');
+    const pillCountEl = document.getElementById('pill-count');
+    const pillTotalEl = document.getElementById('pill-total');
+    const priceSummaryEl = document.querySelector('.price-summary');
+
     function recalc() {
         const cards = document.querySelectorAll('.addon-card');
         let addonsTotal = 0;
@@ -1589,9 +1622,13 @@ document.querySelectorAll('.faq-q').forEach(btn => {
         const grandTotal = CORE_PRICE + addonsTotal - discount;
         const yearlyTotal = grandTotal * 12 * (1 - YEARLY_DISCOUNT_PCT);
 
-        // Update DOM
+        // Update DOM — main summary
         totalEl.innerHTML = formatEur(grandTotal) + '<small>/ay</small>';
         yearlyEl.textContent = formatEur(yearlyTotal) + '/yıl';
+
+        // Pill
+        if (pillCountEl) pillCountEl.textContent = activeCount;
+        if (pillTotalEl) pillTotalEl.textContent = formatEur(grandTotal) + '/ay';
 
         if (activeCount > 0) {
             addonsRow.style.display = 'flex';
@@ -1612,6 +1649,34 @@ document.querySelectorAll('.faq-q').forEach(btn => {
         if (selectAllToggle) {
             selectAllToggle.checked = (activeCount === totalAddons);
         }
+    }
+
+    // Pill: yalnızca pricing section'dayken VE summary görünür değilken görünür
+    if (pricePill && priceSummaryEl) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.target === priceSummaryEl) {
+                    // Summary görünüyorsa pill gizlen
+                    pricePill.classList.toggle('visible', !entry.isIntersecting);
+                }
+            });
+        }, { threshold: 0.1 });
+        observer.observe(priceSummaryEl);
+
+        // Pricing section sona erdiğinde de gizle
+        const pricingSection = document.getElementById('fiyat');
+        if (pricingSection) {
+            const sectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) pricePill.classList.remove('visible');
+                });
+            }, { threshold: 0 });
+            sectionObserver.observe(pricingSection);
+        }
+
+        pricePill.addEventListener('click', () => {
+            priceSummaryEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
     }
 
     // Card click → toggle (anywhere on card except switch itself, which has its own handler)
