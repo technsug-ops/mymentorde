@@ -201,7 +201,6 @@ class GuestRegistrationFormCatalog
                         true,
                         20,
                         options: self::higherEducationStatusOptions(),
-                        help_text: 'Lise mezuniyetinden sonraki durumunuz.',
                         level: 1
                     ),
                     // Level 1 (mevcut field — devam ederse zorunlu, opsiyonel kalır client-side)

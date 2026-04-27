@@ -725,23 +725,35 @@
         c.id = chipId;
         c.type = 'button';
         c.style.cssText = [
-            'margin-top:6px',
+            'margin-top:10px',
             'display:inline-flex',
             'align-items:center',
-            'gap:6px',
-            'padding:5px 12px',
-            'border-radius:14px',
-            'border:1px solid #93c5fd',
-            'background:#eff6ff',
-            'color:#1e40af',
-            'font-size:11px',
-            'font-weight:600',
+            'gap:10px',
+            'padding:10px 18px',
+            'border-radius:10px',
+            'border:2px solid #1e40af',
+            'background:#dbeafe',
+            'color:#1e3a8a',
+            'font-size:13px',
+            'font-weight:700',
             'cursor:pointer',
             'line-height:1.4',
             'font-family:inherit',
-            'width:fit-content'
+            'width:fit-content',
+            'box-shadow:0 4px 12px rgba(30,64,175,0.18)',
+            'animation:acikLiseInfoPulse 2.5s ease-in-out infinite',
+            'transition:transform .15s'
         ].join(';');
-        c.innerHTML = '<span style="font-size:13px;">ℹ️</span><span>Açık lise için bilgi — </span><span style="text-decoration:underline;">Detay</span>';
+        c.onmouseover = function(){ this.style.transform='translateY(-1px)'; };
+        c.onmouseout = function(){ this.style.transform=''; };
+        c.innerHTML = '<span style="font-size:18px;">ℹ️</span><span>Açık lise için önemli bilgi</span><span style="background:#1e40af;color:#fff;padding:3px 10px;border-radius:14px;font-size:11px;font-weight:800;">Detay →</span>';
+        // Pulse keyframes (idempotent)
+        if (!document.getElementById('acik-lise-pulse-keyframes')) {
+            var kf = document.createElement('style');
+            kf.id = 'acik-lise-pulse-keyframes';
+            kf.textContent = '@keyframes acikLiseInfoPulse { 0%,100% { box-shadow:0 4px 12px rgba(30,64,175,0.18); } 50% { box-shadow:0 4px 18px rgba(30,64,175,0.36); } } @keyframes acikLiseWarnPulse { 0%,100% { box-shadow:0 4px 12px rgba(220,38,38,0.18); } 50% { box-shadow:0 4px 18px rgba(220,38,38,0.40); } }';
+            document.head.appendChild(kf);
+        }
         c.addEventListener('click', openInfoModal);
         typeGroup.appendChild(c);
         return c;
