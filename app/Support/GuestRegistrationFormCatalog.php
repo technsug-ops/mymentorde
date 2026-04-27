@@ -47,8 +47,15 @@ class GuestRegistrationFormCatalog
     /**
      * Level filtreli grup listesi.
      *
-     * @param int $level 1 = sadece level=1 işaretli field'lar (Level 1 form'u için),
-     *                   2 = tüm field'lar (Level 2 form'u — mevcut davranış)
+     * Level 2 = mevcut 8 wizard yapısı (kişisel/eş/adres/eğitim/dil/finans/aile/ek/motivasyon)
+     * Level 1 = User'ın istediği 6 wizard yapısı:
+     *           1) KİŞİSEL BİLGİLER
+     *           2) AKADEMİK PROFİL
+     *           3) HEDEF VE PLANLAR
+     *           4) DİL YETERLİLİĞİ
+     *           5) MALİ DURUM VE LOJİSTİK
+     *           6) MOTİVASYON VE HAZIRLIK
+     *
      * @return array<int,array<string,mixed>>
      */
     public static function groupsByLevel(int $level = 2): array
@@ -58,20 +65,44 @@ class GuestRegistrationFormCatalog
             return $allGroups;
         }
 
-        // Level 1 için filtrele: sadece level=1 işaretli field'ları içeren grupları döndür.
-        // Tamamen boşalan grupları çıkar.
-        return collect($allGroups)
-            ->map(function (array $group) use ($level): array {
-                $filtered = collect($group['fields'] ?? [])
-                    ->filter(fn (array $f) => (int) ($f['level'] ?? 2) <= $level)
-                    ->values()
-                    ->all();
-                $group['fields'] = $filtered;
-                return $group;
-            })
-            ->filter(fn (array $g) => !empty($g['fields']))
-            ->values()
-            ->all();
+        // Level 1: 6 wizard mapping'i — mevcut grup section_key'leriyle yeni başlıkları
+        // eşleştirir. Field'lar mevcut allGroups'tan level=1 işaretli olanlarla doldurulur.
+        $level1Wizards = [
+            ['key' => 'personal_info',         'title' => 'Kişisel Bilgiler'],
+            ['key' => 'education_history',     'title' => 'Akademik Profil'],
+            ['key' => 'address_application',   'title' => 'Hedef ve Planlar'],
+            ['key' => 'language_skills',       'title' => 'Dil Yeterliliği'],
+            ['key' => 'finance_visa',          'title' => 'Mali Durum ve Lojistik'],
+            ['key' => 'motivation_preparation','title' => 'Motivasyon ve Hazırlık'],
+        ];
+
+        $output = [];
+        $order = 10;
+        foreach ($level1Wizards as $wizard) {
+            $sourceGroup = collect($allGroups)->firstWhere('section_key', $wizard['key']);
+            if (!$sourceGroup) {
+                continue;
+            }
+
+            $level1Fields = collect($sourceGroup['fields'] ?? [])
+                ->filter(fn (array $f) => (int) ($f['level'] ?? 2) <= $level)
+                ->values()
+                ->all();
+
+            if (empty($level1Fields)) {
+                continue;
+            }
+
+            $output[] = [
+                'section_key'   => $wizard['key'],
+                'section_order' => $order,
+                'title'         => $wizard['title'],
+                'fields'        => $level1Fields,
+            ];
+            $order += 10;
+        }
+
+        return $output;
     }
 
     /**
@@ -95,14 +126,17 @@ class GuestRegistrationFormCatalog
                 'section_order' => 10,
                 'title' => 'Kişisel Bilgiler',
                 'fields' => [
-                    self::f('first_name', 'İsim *', 'text', true, 120),
-                    self::f('last_name', 'Soyisim *', 'text', true, 120),
-                    self::f('gender', 'Cinsiyetiniz *', 'select', true, 40, options: self::yesNoGenderOptions()),
+                    // Level 0 (apply'dan) — Level 1+2'de readonly görünür
+                    self::f('first_name', 'İsim *', 'text', true, 120, level: 1),
+                    self::f('last_name', 'Soyisim *', 'text', true, 120, level: 1),
+                    self::f('gender', 'Cinsiyetiniz *', 'select', true, 40, options: self::yesNoGenderOptions(), level: 1),
+                    self::f('email', 'E-Mail *', 'email', true, 180, level: 1),
+                    self::f('phone', 'Telefon *', 'text', true, 64, level: 1),
+                    // Level 1 yeni
+                    self::f('birth_date', 'Doğum Tarihiniz *', 'date', true, 20, level: 1),
+                    // Sadece Level 2
                     self::f('marital_status', 'Medeni Hali *', 'select', true, 40, options: self::maritalOptions()),
-                    self::f('email', 'E-Mail *', 'email', true, 180),
-                    self::f('phone', 'Telefon *', 'text', true, 64),
                     self::f('reference_text', 'Referans', 'text', false, 180),
-                    self::f('birth_date', 'Doğum Tarihiniz *', 'date', true, 20),
                     self::f('birth_place', 'Doğum yeriniz *', 'text', true, 120),
                 ],
             ],
@@ -111,14 +145,20 @@ class GuestRegistrationFormCatalog
                 'section_order' => 20,
                 'title' => 'Adres ve Başvuru',
                 'fields' => [
+                    // Sadece Level 2 (adres detayı)
                     self::f('application_city', 'Başvuru şehri *', 'text', true, 120),
-                    self::f('application_country', 'Başvuru ülkesi *', 'select', true, 120, options: self::applicationCountryOptions()),
+                    // Level 0 (apply'dan)
+                    self::f('application_country', 'Başvuru ülkesi *', 'select', true, 120, options: self::applicationCountryOptions(), level: 1),
+                    // Sadece Level 2
                     self::f('address_line', 'Açık Adresiniz *', 'text', true, 255),
                     self::f('postal_code', 'Posta kodu *', 'text', true, 32),
                     self::f('district', 'İlçe *', 'text', true, 120),
                     self::f('province', 'İl *', 'text', true, 120),
-                    self::f('application_type', 'Başvuru Tipi *', 'select', true, 40, options: self::applicationTypeOptions()),
-                    self::f('target_program', 'Okumayı hedeflediğiniz bölüm/program *', 'text', true, 255),
+                    // Level 0 (apply'dan)
+                    self::f('application_type', 'Başvuru Tipi *', 'select', true, 40, options: self::applicationTypeOptions(), level: 1),
+                    // Level 1 (User listesinde "Hedef bölüm")
+                    self::f('target_program', 'Okumayı hedeflediğiniz bölüm/program *', 'text', true, 255, level: 1),
+                    // Sadece Level 2
                     self::f('university_start_target_date', 'Üniversite başlangıç tarihi hedefiniz *', 'date', true, 20),
                 ],
             ],
@@ -127,6 +167,7 @@ class GuestRegistrationFormCatalog
                 'section_order' => 30,
                 'title' => 'Eğitim Geçmişi',
                 'fields' => [
+                    // Sadece Level 2 (en yüksek eğitim seviyesi — tüm ilk-orta-lise tarihleri)
                     self::f('education_level', 'Eğitim seviyeniz *', 'select', true, 60, options: self::educationLevelOptions()),
                     self::f('primary_start_date', 'İlkokul başlama tarihi *', 'date', true, 20),
                     self::f('primary_end_date', 'İlkokul bitirme tarihi *', 'date', true, 20),
@@ -138,6 +179,7 @@ class GuestRegistrationFormCatalog
                     self::f('high_start_date', 'Lise başlama tarihi *', 'date', true, 20),
                     self::f('high_end_date', 'Lise mezuniyet tarihi *', 'date', true, 20),
                     self::f('high_school_name', 'Mezun olduğunuz lise *', 'text', true, 180),
+                    // Level 1 (User: Lise türü + diploma notu)
                     self::f(
                         'high_school_type',
                         'Lise türünüz *',
@@ -145,11 +187,37 @@ class GuestRegistrationFormCatalog
                         true,
                         32,
                         options: self::highSchoolTypeOptions(),
-                        help_text: '● Anadolu ve Fen Liseleri: Anadolu Lisesi, Fen Lisesi, Sosyal Bilimler Lisesi. ● Meslek Lisesi: Mesleki ve Teknik Anadolu Lisesi (MTAL), Mesleki Eğitim Merkezi (MESEM), Anadolu Teknik Programı (ATP), İmam Hatip Lisesi, Anadolu İmam Hatip Lisesi, Güzel Sanatlar ve Spor Lisesi, Çok Programlı Anadolu Lisesi, Sağlık Meslek Lisesi, Ticaret/Adalet/Turizm/Spor Meslek Lisesi. ● Açık Lise: Mesleki Açık Öğretim Lisesi (MAÖL), Açık Öğretim İmam Hatip Lisesi (AÖİHL), Açık Öğretim Lisesi (AOL).'
+                        help_text: '● Anadolu ve Fen Liseleri: Anadolu Lisesi, Fen Lisesi, Sosyal Bilimler Lisesi. ● Meslek Lisesi: Mesleki ve Teknik Anadolu Lisesi (MTAL), Mesleki Eğitim Merkezi (MESEM), Anadolu Teknik Programı (ATP), İmam Hatip Lisesi, Anadolu İmam Hatip Lisesi, Güzel Sanatlar ve Spor Lisesi, Çok Programlı Anadolu Lisesi, Sağlık Meslek Lisesi, Ticaret/Adalet/Turizm/Spor Meslek Lisesi. ● Açık Lise: Mesleki Açık Öğretim Lisesi (MAÖL), Açık Öğretim İmam Hatip Lisesi (AÖİHL), Açık Öğretim Lisesi (AOL).',
+                        level: 1
                     ),
-                    self::f('high_school_grade', 'Lise mezuniyet ortalamanız *', 'text', true, 32),
-                    self::f('university_name', 'Üniversite adı (eğer öğrenciyseniz)', 'text', false, 180),
-                    self::f('university_department', 'Bölüm adı (eğer öğrenciyseniz)', 'text', false, 180),
+                    self::f('high_school_grade', 'Lise mezuniyet ortalamanız (100 üzerinden) *', 'text', true, 32, level: 1),
+                    // Level 1 yeni — sadece yıl bilgisi (Level 2'de high_end_date tam tarih ile birlikte yaşar)
+                    self::f('high_school_grad_year', 'Lise mezuniyet yılınız *', 'text', true, 4, placeholder: 'Örn: 2024', level: 1),
+                    // Level 1 yeni — yükseköğretim DURUMU (mevcut education_level "en yüksek seviye"den farklı concept)
+                    self::f(
+                        'higher_education_status',
+                        'Yükseköğretim durumunuz *',
+                        'select',
+                        true,
+                        20,
+                        options: self::higherEducationStatusOptions(),
+                        help_text: 'Lise mezuniyetinden sonraki durumunuz.',
+                        level: 1
+                    ),
+                    // Level 1 (mevcut field — devam ederse zorunlu, opsiyonel kalır client-side)
+                    self::f('university_name', 'Üniversite adı (devam ediyorsanız)', 'text', false, 180, level: 1),
+                    self::f('university_department', 'Bölüm adı (devam ediyorsanız)', 'text', false, 180, level: 1),
+                    // Level 1 yeni — sınıf
+                    self::f(
+                        'university_year',
+                        'Şu an hangi sınıftasınız?',
+                        'select',
+                        false,
+                        20,
+                        options: self::universityYearOptions(),
+                        help_text: 'Yükseköğretime devam ediyorsanız.',
+                        level: 1
+                    ),
                 ],
             ],
             [
@@ -157,11 +225,22 @@ class GuestRegistrationFormCatalog
                 'section_order' => 40,
                 'title' => 'Dil Bilgisi',
                 'fields' => [
+                    // Sadece Level 2
                     self::f('is_enrolled_german_course', 'Herhangi bir Almanca kursuna kayıtlı mısınız? *', 'select', true, 10, options: self::yesNoOptions()),
                     self::f('german_course_name', 'Almanca kursuna gidiyorsanız ismini yazın *', 'text', false, 180),
-                    self::f('german_level', 'Almanca seviyeniz *', 'select', true, 20, options: self::languageLevelOptions()),
+                    // Level 1
+                    self::f('german_level', 'Almanca seviyeniz *', 'select', true, 20, options: self::languageLevelOptions(includeNone: true), level: 1),
+                    // Level 1 yeni — sertifika
+                    self::f('german_certificate_held', 'Almanca dil sertifikanız var mı?', 'select', false, 10, options: self::yesNoOptions(), level: 1),
+                    self::f('german_certificate_type', 'Sertifika türü', 'select', false, 40, options: self::germanCertificateTypeOptions(), help_text: 'Sertifikanız varsa.', level: 1),
+                    self::f('german_certificate_score', 'Sertifika puanı / sonucu', 'text', false, 20, placeholder: 'Örn: TDN 4 / B2', level: 1),
+                    // Sadece Level 2
                     self::f('is_enrolled_english_course', 'İngilizce kursuna gidiyor musunuz? *', 'select', true, 10, options: self::yesNoOptions()),
-                    self::f('english_level', 'İngilizce dil seviyeniz *', 'select', true, 20, options: self::languageLevelOptions()),
+                    // Level 1
+                    self::f('english_level', 'İngilizce dil seviyeniz *', 'select', true, 20, options: self::languageLevelOptions(includeNone: true), level: 1),
+                    // Level 1 yeni — opsiyonel IELTS/TOEFL
+                    self::f('english_certificate_score', 'İngilizce sertifika puanı (varsa)', 'text', false, 40, placeholder: 'Örn: IELTS 7.0 / TOEFL 95', level: 1),
+                    // Sadece Level 2
                     self::f('other_language', 'Bildiğiniz diğer dil (varsa)', 'text', false, 120, placeholder: 'Örn: Fransızca, Rusça, Arapça'),
                     self::f('other_language_level', 'Bu dilin seviyesi', 'select', false, 20, options: self::languageLevelOptions(includeNone: true), help_text: 'Yukarıda bir dil yazdıysanız seviyesini seçiniz.'),
                 ],
@@ -171,7 +250,12 @@ class GuestRegistrationFormCatalog
                 'section_order' => 50,
                 'title' => 'Finans / Vize / Geçmiş',
                 'fields' => [
-                    self::f('finance_method', 'Üniversite başvurusunda hangi finansal yöntemi seçeceksiniz? *', 'select', true, 60, options: self::financeMethodOptions()),
+                    // Level 1
+                    self::f('finance_method', 'Almanya\'da yaşam masraflarınızı kanıtlamak için hangi yöntemi düşünüyorsunuz? *', 'select', true, 60, options: self::financeMethodOptions(), level: 1),
+                    // Level 1 yeni — konaklama tanıdığı
+                    self::f('accommodation_contact_status', 'Almanya\'da konaklama için size destek olabilecek bir tanıdığınız var mı?', 'select', false, 20, options: self::accommodationContactOptions(), level: 1),
+                    self::f('accommodation_contact_city', 'Tanıdığınızın bulunduğu şehir', 'text', false, 100, placeholder: 'Örn: München', help_text: 'Sadece tanıdığınız varsa doldurun.', level: 1),
+                    // Sadece Level 2
                     self::f('estimated_monthly_budget_eur', 'Aylık bütçe planı (EUR)', 'text', false, 32),
                     self::f('knows_blocked_account', 'Bloke hesap gerekliliği hakkında bilginiz var mı? *', 'select', true, 10, options: self::yesNoOptions()),
                     self::f('has_passport', 'Pasaportunuz var mı? *', 'select', true, 10, options: self::yesNoOptions()),
@@ -247,6 +331,34 @@ class GuestRegistrationFormCatalog
                     self::f('has_teacher_reference', 'Referans olabilecek öğretmeniniz var mı?', 'select', false, 10, options: self::yesNoOptions()),
                     self::f('teacher_reference_contact', 'Referans isim-soyisim ve iletişim', 'text', false, 255),
                     self::f('additional_note', 'Eklemek istediğiniz açıklama var mı?', 'textarea', false, 2500),
+                ],
+            ],
+            [
+                // Level 1 yeni section — User'ın 6. wizard'ı (Motivasyon ve Hazırlık).
+                // Mevcut Level 2 form'da yok; Level 1'den geldiği için Level 2'de de prefill görünür.
+                'section_key' => 'motivation_preparation',
+                'section_order' => 80,
+                'title' => 'Motivasyon ve Hazırlık',
+                'fields' => [
+                    self::f(
+                        'motivation_thinking_duration',
+                        'Almanya\'da eğitim fikri sizde ne kadar süredir var? *',
+                        'select',
+                        true,
+                        20,
+                        options: self::motivationDurationOptions(),
+                        level: 1
+                    ),
+                    self::f(
+                        'biggest_concerns',
+                        'Bu süreçteki en büyük endişeniz nedir? (birden fazla seçebilirsiniz)',
+                        'checkbox_group',
+                        false,
+                        500,
+                        options: self::biggestConcernOptions(),
+                        help_text: 'Sizi en çok zorladığını düşündüğünüz konuları seçin. Diğer durumunda lütfen ek not bölümünde belirtin.',
+                        level: 1
+                    ),
                 ],
             ],
         ];
@@ -462,10 +574,78 @@ class GuestRegistrationFormCatalog
     private static function financeMethodOptions(): array
     {
         return [
-            ['value' => 'blocked_account', 'label' => 'Bloke Hesap'],
-            ['value' => 'sponsor', 'label' => 'Sponsorluk'],
+            ['value' => 'blocked_account', 'label' => 'Bloke Hesap (Sperrkonto)'],
+            ['value' => 'sponsor', 'label' => 'Garantör (Verpflichtungserklärung)'],
             ['value' => 'self_funded', 'label' => 'Kendi Birikimi'],
             ['value' => 'scholarship', 'label' => 'Burs'],
+            ['value' => 'undecided', 'label' => 'Henüz Karar Vermedim'],
+        ];
+    }
+
+    // ─── Level 1 yeni opsiyon listeleri ──────────────────────────────────────
+
+    private static function higherEducationStatusOptions(): array
+    {
+        return [
+            ['value' => 'not_started', 'label' => 'Lise mezunuyum, henüz üniversiteye başlamadım'],
+            ['value' => 'enrolled', 'label' => 'Üniversiteye devam ediyorum'],
+            ['value' => 'dropped', 'label' => 'Üniversiteyi bıraktım / ayrıldım'],
+            ['value' => 'graduated', 'label' => 'Üniversite mezunuyum'],
+        ];
+    }
+
+    private static function universityYearOptions(): array
+    {
+        return [
+            ['value' => 'prep', 'label' => 'Hazırlık'],
+            ['value' => '1', 'label' => '1. sınıf'],
+            ['value' => '2', 'label' => '2. sınıf'],
+            ['value' => '3', 'label' => '3. sınıf'],
+            ['value' => '4', 'label' => '4. sınıf'],
+            ['value' => '5plus', 'label' => '5. sınıf ve üzeri'],
+        ];
+    }
+
+    private static function germanCertificateTypeOptions(): array
+    {
+        return [
+            ['value' => 'testdaf', 'label' => 'TestDaF'],
+            ['value' => 'dsh', 'label' => 'DSH'],
+            ['value' => 'goethe', 'label' => 'Goethe (B1/B2/C1/C2)'],
+            ['value' => 'telc', 'label' => 'telc'],
+            ['value' => 'oesd', 'label' => 'ÖSD'],
+            ['value' => 'other', 'label' => 'Diğer'],
+        ];
+    }
+
+    private static function accommodationContactOptions(): array
+    {
+        return [
+            ['value' => 'yes', 'label' => 'Evet, var'],
+            ['value' => 'no', 'label' => 'Hayır, yok'],
+            ['value' => 'maybe', 'label' => 'Emin değilim / belki'],
+        ];
+    }
+
+    private static function motivationDurationOptions(): array
+    {
+        return [
+            ['value' => 'under_1y', 'label' => '1 yıldan az'],
+            ['value' => '1_2y', 'label' => '1-2 yıl'],
+            ['value' => 'over_2y', 'label' => '2 yıldan fazla'],
+        ];
+    }
+
+    private static function biggestConcernOptions(): array
+    {
+        return [
+            ['value' => 'language', 'label' => 'Almanca dil yeterliliği'],
+            ['value' => 'cost', 'label' => 'Maliyet / mali yük'],
+            ['value' => 'loneliness', 'label' => 'Yalnızlık / uyum'],
+            ['value' => 'academic', 'label' => 'Akademik zorluk'],
+            ['value' => 'visa', 'label' => 'Vize süreci'],
+            ['value' => 'housing', 'label' => 'Konaklama / barınma'],
+            ['value' => 'other', 'label' => 'Diğer'],
         ];
     }
 }
