@@ -1111,7 +1111,7 @@ footer a:hover { color:var(--accent); }
         <span class="sec-label">Modüler Fiyatlandırma</span>
         <h2 class="sec-title">İhtiyacın olanı seç, ödediğin kadar al.</h2>
         <p class="sec-lead">
-            Core plan zorunlu — sonrasında 7 add-on modülden ihtiyacın olanları aktif et.
+            Core plan zorunlu — sonrasında 11 add-on modülden ihtiyacın olanları aktif et.
             Anlık fiyat hesabı, esnek ölçekleme, 14 gün ücretsiz deneme.
         </p>
 
@@ -1122,7 +1122,7 @@ footer a:hover { color:var(--accent); }
                     <div>
                         <span class="core-badge">⚡ ZORUNLU</span>
                         <h3 class="core-name">Core Platform</h3>
-                        <p class="core-desc">3 portal · CRM · Booking · Belge · Sözleşme · Temel Analytics</p>
+                        <p class="core-desc">3 portal · Lead pipeline · Belge yönetimi · Bildirim · Temel raporlar</p>
                     </div>
                     <div class="core-price-block">
                         <div class="core-price-row">
@@ -1134,21 +1134,21 @@ footer a:hover { color:var(--accent); }
                 </div>
                 <div class="core-features">
                     <div class="core-feat">✓ Aday + Öğrenci + Senior portal</div>
-                    <div class="core-feat">✓ Lead scoring + pipeline</div>
-                    <div class="core-feat">✓ Booking (Google Calendar 2-way)</div>
+                    <div class="core-feat">✓ Lead pipeline + temel skoring</div>
                     <div class="core-feat">✓ Belge yönetimi (yükleme + kategori)</div>
-                    <div class="core-feat">✓ Sözleşme + dijital imza</div>
-                    <div class="core-feat">✓ 5 dashboard + temel raporlar</div>
+                    <div class="core-feat">✓ Bildirim sistemi (in-app + email)</div>
+                    <div class="core-feat">✓ Temel dashboard + raporlar</div>
                     <div class="core-feat">✓ 50 aktif öğrenci · 5 senior · 1 manager</div>
                     <div class="core-feat">✓ Email destek (24h SLA)</div>
                     <div class="core-feat">✓ GDPR + audit trail</div>
+                    <div class="core-feat">✓ 2FA + Google OAuth giriş</div>
                 </div>
             </div>
 
-            {{-- ──── 7 ADD-ON MODULES ──── --}}
+            {{-- ──── 11 ADD-ON MODULES ──── --}}
             <div class="addons-header">
                 <div>
-                    <h3 style="margin:0 0 6px; font-size:22px; color:var(--primary-deep);">📦 İsteğe Bağlı Add-on Modüller</h3>
+                    <h3 style="margin:0 0 6px; font-size:22px; color:var(--primary-deep);">📦 İsteğe Bağlı Add-on Modüller (11)</h3>
                     <p style="margin:0; color:var(--muted); font-size:14px;">Açıp kapatabilirsin — değişiklik anında geçerli olur. <strong>Tümünü açarsan %15 paket indirimi.</strong></p>
                 </div>
                 <div class="addons-toggle-all">
@@ -1304,6 +1304,90 @@ footer a:hover { color:var(--accent); }
                         <li>Belge gereklilikleri haritası</li>
                         <li>Vize randevu rehberi</li>
                         <li>DAAD + resmi kaynak sync</li>
+                    </ul>
+                </div>
+
+                {{-- BOOKING --}}
+                <div class="addon-card" data-addon="booking" data-price="49">
+                    <div class="addon-header">
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #0ea5e9, #075985);">📅</div>
+                        <label class="addon-switch">
+                            <input type="checkbox" data-addon-toggle="booking">
+                            <span class="addon-slider"></span>
+                        </label>
+                    </div>
+                    <h4>Booking & Takvim</h4>
+                    <div class="addon-price">€49<span>/ay</span></div>
+                    <p>Danışman müsaitlik takvimi, public booking sayfası, Google Calendar senkronu. Aday self-service randevu alır.</p>
+                    <ul class="addon-features">
+                        <li>Danışman pattern + exception</li>
+                        <li>Public booking landing</li>
+                        <li>Google Calendar 2-way sync</li>
+                        <li>Multi-timezone slot generator</li>
+                        <li>Otomatik onay + hatırlatma</li>
+                    </ul>
+                </div>
+
+                {{-- CONTRACTS HUB --}}
+                <div class="addon-card" data-addon="contracts" data-price="79">
+                    <div class="addon-header">
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #7c3aed, #4c1d95);">📄</div>
+                        <label class="addon-switch">
+                            <input type="checkbox" data-addon-toggle="contracts">
+                            <span class="addon-slider"></span>
+                        </label>
+                    </div>
+                    <h4>Contracts Hub — Sözleşme Yönetimi</h4>
+                    <div class="addon-price">€79<span>/ay</span></div>
+                    <p>Şablon tabanlı sözleşme üretimi, workflow state machine, e-imza, audit log. PDF tek tıkla.</p>
+                    <ul class="addon-features">
+                        <li>Dinamik şablon (değişken alan)</li>
+                        <li>Workflow: draft → review → signed</li>
+                        <li>E-imza entegrasyonu</li>
+                        <li>Versiyon geçmişi + audit log</li>
+                        <li>Toplu PDF export</li>
+                    </ul>
+                </div>
+
+                {{-- ANALYTICS HUB --}}
+                <div class="addon-card" data-addon="analytics" data-price="99">
+                    <div class="addon-header">
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #10b981, #064e3b);">📊</div>
+                        <label class="addon-switch">
+                            <input type="checkbox" data-addon-toggle="analytics">
+                            <span class="addon-slider"></span>
+                        </label>
+                    </div>
+                    <h4>Analytics Hub</h4>
+                    <div class="addon-price">€99<span>/ay</span></div>
+                    <p>PostHog event tracking + KPI dashboard + dönüşüm hunisi + zamanlanmış raporlar. Veri ile karar ver.</p>
+                    <ul class="addon-features">
+                        <li>PostHog 25+ event hazır</li>
+                        <li>Rol bazlı KPI dashboard</li>
+                        <li>Conversion funnel + cohort</li>
+                        <li>Scheduled reports (PDF/email)</li>
+                        <li>User Activity Intelligence</li>
+                    </ul>
+                </div>
+
+                {{-- DOCUMENT BUILDER AI --}}
+                <div class="addon-card" data-addon="docbuilder" data-price="49">
+                    <div class="addon-header">
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #f43f5e, #881337);">✍️</div>
+                        <label class="addon-switch">
+                            <input type="checkbox" data-addon-toggle="docbuilder">
+                            <span class="addon-slider"></span>
+                        </label>
+                    </div>
+                    <h4>Doküman Üretici (AI)</h4>
+                    <div class="addon-price">€49<span>/ay</span></div>
+                    <p>Öğrenci motivasyon mektubu + CV + niyet beyanı şablonları AI ile. Senior onayı ile final.</p>
+                    <ul class="addon-features">
+                        <li>Motivasyon mektubu generator</li>
+                        <li>CV + Lebenslauf şablonları</li>
+                        <li>AI taslak → senior düzenleme</li>
+                        <li>Çoklu dil (TR/DE/EN)</li>
+                        <li>PDF + DOCX export</li>
                     </ul>
                 </div>
             </div>
