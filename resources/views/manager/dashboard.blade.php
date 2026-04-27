@@ -240,6 +240,58 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
     </div>
 </div>
 
+{{-- ── Müdahale Gerekli Widget (Lead Pipeline Oversight'a kısayollar) ── --}}
+@php
+    $iv = $interventions ?? ['unassigned'=>0,'hot_no_contact'=>0,'overdue'=>0,'total_active'=>0];
+    $hasAlerts = $iv['unassigned'] > 0 || $iv['hot_no_contact'] > 0 || $iv['overdue'] > 0;
+@endphp
+@if($iv['total_active'] > 0)
+<div style="margin-bottom:18px;padding:14px 16px;background:{{ $hasAlerts ? '#fef2f2' : '#f0fdf4' }};border:1px solid {{ $hasAlerts ? '#fecaca' : '#bbf7d0' }};border-radius:10px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:{{ $hasAlerts ? '12px' : '0' }};">
+        <div>
+            <div style="font-size:13px;font-weight:800;color:{{ $hasAlerts ? '#991b1b' : '#166534' }};display:flex;align-items:center;gap:8px;">
+                <span style="font-size:18px;">{{ $hasAlerts ? '⚠' : '✓' }}</span>
+                {{ $hasAlerts ? 'Müdahale Gerekli — Ekibinin Pipeline\'ında Risk Var' : 'Pipeline Sağlıklı — Müdahale Gerektiren Vaka Yok' }}
+            </div>
+            <div style="font-size:11px;color:{{ $hasAlerts ? '#7f1d1d' : '#15803d' }};margin-top:3px;">
+                {{ $iv['total_active'] }} aktif lead · Senior'lar bağımsız çalışır, sen sadece sorunlu vakalara müdahale et
+            </div>
+        </div>
+        <a href="/manager/pipeline/oversight" style="font-size:11px;font-weight:700;padding:7px 14px;border-radius:6px;background:{{ $hasAlerts ? '#dc2626' : '#16a34a' }};color:#fff;text-decoration:none;">
+            🛰 Oversight Paneline Git →
+        </a>
+    </div>
+
+    @if($hasAlerts)
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+        @if($iv['unassigned'] > 0)
+        <a href="/manager/pipeline/oversight?risk=unassigned" style="display:block;padding:11px 14px;background:#fff;border:1px solid #fecaca;border-radius:8px;text-decoration:none;color:inherit;transition:transform .1s,box-shadow .1s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(220,38,38,.12)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div style="font-size:10px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Atanmamış</div>
+            <div style="font-size:24px;font-weight:800;color:#dc2626;line-height:1;">{{ $iv['unassigned'] }}</div>
+            <div style="font-size:10px;color:#7f1d1d;margin-top:4px;">Senior atanmasını bekliyor →</div>
+        </a>
+        @endif
+
+        @if($iv['hot_no_contact'] > 0)
+        <a href="/manager/pipeline/oversight?risk=hot_no_contact" style="display:block;padding:11px 14px;background:#fff;border:1px solid #fecaca;border-radius:8px;text-decoration:none;color:inherit;transition:transform .1s,box-shadow .1s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(220,38,38,.12)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div style="font-size:10px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">🔥 Hot — Kontak Yok</div>
+            <div style="font-size:24px;font-weight:800;color:#dc2626;line-height:1;">{{ $iv['hot_no_contact'] }}</div>
+            <div style="font-size:10px;color:#7f1d1d;margin-top:4px;">Acil senior aksiyon gerekli →</div>
+        </a>
+        @endif
+
+        @if($iv['overdue'] > 0)
+        <a href="/manager/pipeline/oversight?risk=overdue" style="display:block;padding:11px 14px;background:#fff;border:1px solid #fde68a;border-radius:8px;text-decoration:none;color:inherit;transition:transform .1s,box-shadow .1s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(217,119,6,.12)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div style="font-size:10px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">⏰ Geciken (5+ gün)</div>
+            <div style="font-size:24px;font-weight:800;color:#d97706;line-height:1;">{{ $iv['overdue'] }}</div>
+            <div style="font-size:10px;color:#92400e;margin-top:4px;">5+ gün hareketsiz lead →</div>
+        </a>
+        @endif
+    </div>
+    @endif
+</div>
+@endif
+
 {{-- ── Tab Bar ── --}}
 <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--u-line,#e2e8f0);padding-bottom:0;">
     <button id="tab-main" onclick="switchMgrTab('main',this)"
