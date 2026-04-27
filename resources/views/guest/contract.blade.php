@@ -281,8 +281,26 @@
     @endforeach
 </div>
 
-{{-- Üst 'eksik adım' chip kutusu kaldırıldı — eksikler hero altındaki
-     'Eksik ön koşullar' listesinde tek yerde gösterilir (tekrar önlendi). --}}
+{{-- ── Üst chip kutusu — eksik prereq'ler tek bakışta görünür ── --}}
+@if(!$allPrereqsDone)
+@php $missingCount = collect($prereqs)->where('done', false)->count(); @endphp
+<div style="background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:16px;color:var(--u-brand,#2563eb);">ℹ</span>
+        <strong style="font-size:13px;color:var(--u-brand,#2563eb);">{{ $missingCount }} eksik adım var</strong>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:6px;">
+        @foreach($prereqs as $p)
+            @if(!$p['done'])
+            <a href="{{ $p['link'] }}" style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 12px;border-radius:8px;background:var(--u-card,#fff);border:1px solid rgba(37,99,235,.25);font-size:11px;font-weight:700;text-decoration:none;color:var(--u-brand,#2563eb);transition:all .15s;">
+                <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $p['label'] }}</span>
+                <span style="flex-shrink:0;">→</span>
+            </a>
+            @endif
+        @endforeach
+    </div>
+</div>
+@endif
 
 {{-- ── Rejected / Cancelled / Reopen uyarilari ── --}}
 @if($status === 'rejected')
@@ -368,26 +386,12 @@
             <div><h5>Sonraki adımlar ne olacak?</h5><p>Talep ettikten sonra danışmanın sözleşmeyi hazırlayacak. Hazır olunca okuyup dijital imza veya fiziksel imzalı dosya yükleyerek göndereceksin.</p></div>
         </div>
     @else
-        {{-- Eksik ön koşul var — sade hero + tek liste --}}
-        @php $missingList = collect($prereqs)->where('done', false); @endphp
+        {{-- Eksik ön koşul var — sade hero (eksik liste üstte chip kutusunda zaten var) --}}
         <div class="gc-hero" style="background:linear-gradient(135deg,#f1f5f9 0%,#e2e8f0 100%);color:#334155;">
             <div class="gc-hero-badge" style="background:rgba(100,116,139,.12);color:#475569;"><span>🔒</span> Henüz hazır değil</div>
             <div class="gc-hero-title" style="color:#0f172a;">Önce paket seçimini yap</div>
             <div class="gc-hero-sub" style="color:#475569;">
-                Sözleşmen burada hazırlanacak. Aşağıdaki {{ $missingList->count() }} adımı tamamla, butonu otomatik açacağız.
-            </div>
-        </div>
-
-        <div style="background:#fff7ed;border:1px solid #fdba74;border-radius:12px;padding:16px 18px;margin-bottom:16px;">
-            <div style="font-weight:700;color:#9a3412;font-size:14px;margin-bottom:10px;">📋 Tamamlanması gereken adımlar:</div>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-                @foreach($prereqs as $p)
-                    @php $done = !empty($p['done']); @endphp
-                    <a href="{{ $p['link'] }}" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#fff;border:1px solid {{ $done ? '#bbf7d0' : '#fed7aa' }};border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;color:{{ $done ? '#166534' : '#9a3412' }};transition:background .15s;">
-                        <span>{{ $done ? '✓' : '○' }} {{ $p['label'] }}</span>
-                        <span style="color:{{ $done ? '#16a34a' : '#ea580c' }};">{{ $done ? 'Tamamlandı' : 'Tamamla →' }}</span>
-                    </a>
-                @endforeach
+                Sözleşmen burada hazırlanacak. Yukarıdaki adımları tamamla, butonu otomatik açacağız.
             </div>
         </div>
     @endif
