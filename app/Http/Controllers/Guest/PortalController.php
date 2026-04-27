@@ -398,6 +398,16 @@ class PortalController extends Controller
             $uploadedCodes
         );
 
+        // Conditional belgeler — Level 1 form cevaplarına göre dinamik ekleme:
+        // - higher_education_status='enrolled' → TR üniversite öğrenci belgesi
+        // - german_certificate_held='yes' → Almanca dil sertifikası
+        // - english_certificate_held='yes' → İngilizce dil sertifikası
+        $draft = is_array($guest?->registration_form_draft) ? $guest->registration_form_draft : [];
+        $conditionalDocs = $this->buildConditionalDocuments($draft, $uploadedCodes);
+        if (!empty($conditionalDocs)) {
+            $data['requiredDocumentChecklist'] = array_merge($data['requiredDocumentChecklist'], $conditionalDocs);
+        }
+
         $labels = DocumentCategory::topCategoryOptions();
         $data['documentTopCategoryLabels'] = $labels;
         $data['requiredDocumentChecklist'] = collect($data['requiredDocumentChecklist'])
@@ -433,6 +443,78 @@ class PortalController extends Controller
         })->values()->all();
 
         return view('guest.registration-documents', $data);
+    }
+
+    /**
+     * Level 1 form cevaplarına göre eklenecek koşullu belge listesi.
+     *
+     * @param  array<string,mixed>  $draft  registration_form_draft JSON
+     * @param  array<int,string>    $uploadedCategoryCodes
+     * @return array<int,array<string,mixed>>
+     */
+    private function buildConditionalDocuments(array $draft, array $uploadedCategoryCodes): array
+    {
+        $conditional = [];
+
+        // Türkiye'de üniversite öğrencisiyse → öğrenci belgesi iste
+        $heStatus = strtolower(trim((string) ($draft['higher_education_status'] ?? '')));
+        if ($heStatus === 'enrolled') {
+            $conditional[] = [
+                'document_code'     => 'tr_uni_student_cert',
+                'category_code'     => 'tr_uni_student_cert',
+                'top_category_code' => 'egitim_belgeleri',
+                'name'              => 'Türk Üniversitesi Öğrenci Belgesi',
+                'description'       => 'Şu an devam ettiğin Türk üniversitesinden alacağın aktif öğrenci belgesi.',
+                'is_required'       => true,
+                'accepted'          => 'pdf,jpg,png',
+                'max_mb'            => 10,
+                'uploaded'          => in_array('tr_uni_student_cert', $uploadedCategoryCodes, true),
+            ];
+        }
+
+        // Almanca sertifikası varsa → yükletme
+        $hasGermanCert = strtolower(trim((string) ($draft['german_certificate_held'] ?? ''))) === 'yes';
+        if ($hasGermanCert) {
+            $certType = trim((string) ($draft['german_certificate_type'] ?? ''));
+            $certScore = trim((string) ($draft['german_certificate_score'] ?? ''));
+            $detail = $certType !== ''
+                ? strtoupper($certType) . ($certScore !== '' ? " ({$certScore})" : '')
+                : 'TestDaF / DSH / Goethe / telc / ÖSD';
+            $conditional[] = [
+                'document_code'     => 'dil_belgesi_de',
+                'category_code'     => 'dil_belgesi_de',
+                'top_category_code' => 'dil_belgeleri',
+                'name'              => 'Almanca Dil Sertifikası',
+                'description'       => "Sertifikan: {$detail}",
+                'is_required'       => true,
+                'accepted'          => 'pdf,jpg,png',
+                'max_mb'            => 10,
+                'uploaded'          => in_array('dil_belgesi_de', $uploadedCategoryCodes, true),
+            ];
+        }
+
+        // İngilizce sertifikası varsa → yükletme
+        $hasEnglishCert = strtolower(trim((string) ($draft['english_certificate_held'] ?? ''))) === 'yes';
+        if ($hasEnglishCert) {
+            $certType = trim((string) ($draft['english_certificate_type'] ?? ''));
+            $certScore = trim((string) ($draft['english_certificate_score'] ?? ''));
+            $detail = $certType !== ''
+                ? strtoupper($certType) . ($certScore !== '' ? " ({$certScore})" : '')
+                : 'IELTS / TOEFL / Cambridge / PTE';
+            $conditional[] = [
+                'document_code'     => 'dil_belgesi_en',
+                'category_code'     => 'dil_belgesi_en',
+                'top_category_code' => 'dil_belgeleri',
+                'name'              => 'İngilizce Dil Sertifikası',
+                'description'       => "Sertifikan: {$detail}",
+                'is_required'       => true,
+                'accepted'          => 'pdf,jpg,png',
+                'max_mb'            => 10,
+                'uploaded'          => in_array('dil_belgesi_en', $uploadedCategoryCodes, true),
+            ];
+        }
+
+        return $conditional;
     }
 
     // ── Servisler ────────────────────────────────────────────────────────────
