@@ -146,7 +146,7 @@ class GuestRegistrationFormCatalog
                 'title' => 'Adres ve Başvuru',
                 'fields' => [
                     // Sadece Level 2 (adres detayı)
-                    self::f('application_city', 'Başvuru şehri *', 'text', true, 120),
+                    self::f('application_city', 'Üniversite için başvurmak istediğin şehir *', 'text', true, 120, placeholder: 'Örn: München, Berlin, Hamburg', help_text: 'Almanya\'da hangi şehirdeki üniversiteye başvurmak istediğini belirt.'),
                     // Level 0 (apply'dan)
                     self::f('application_country', 'Başvuru ülkesi *', 'select', true, 120, options: self::applicationCountryOptions(), level: 1),
                     // Sadece Level 2
