@@ -48,9 +48,17 @@ class GuestViewDataService
         $formDraftComplete = false;
         $formRequiredTotal = 0;
         $formRequiredFilled = 0;
+        $formAllTotal = 0;
+        $formAllFilled = 0;
         if ($guest) {
             $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
-            $groups = $this->registrationFieldSchema->groups($companyId);
+
+            // 3-Level: aday seviyesinde Level 1 catalog (27 field, 17 zorunlu),
+            // öğrenci seviyesinde Level 2 (88 field, 56 zorunlu).
+            $formLevelStatus = (string) ($guest->registration_form_level ?? 'level_1_pending');
+            $formLevel = in_array($formLevelStatus, ['level_2_pending', 'level_2_done'], true) ? 2 : 1;
+
+            $groups = $this->registrationFieldSchema->groupsByLevel($formLevel, $companyId);
             $draft  = is_array($guest->registration_form_draft) ? $guest->registration_form_draft : [];
             $allFields = collect($groups)->flatMap(fn ($g) => $g['fields'] ?? []);
             $required  = $allFields->filter(fn ($f) => !empty($f['required']));
@@ -61,6 +69,9 @@ class GuestViewDataService
                     return false;
                 }
                 $v = $draft[$k] ?? ($guest?->{$k} ?? null);
+                if (is_array($v)) {
+                    return !empty($v);
+                }
                 return trim((string) $v) !== '';
             };
             $formRequiredFilled = (int) $required->filter($fieldChecker)->count();
@@ -72,7 +83,7 @@ class GuestViewDataService
         }
 
         // Form tamamlandı sayılması için: gönderilmiş + zorunlu alanlar dolu + genel doluluk >= %80
-        $formAllPct    = ($formAllTotal ?? 0) > 0 ? (int) round(($formAllFilled ?? 0) / $formAllTotal * 100) : 0;
+        $formAllPct    = $formAllTotal > 0 ? (int) round($formAllFilled / $formAllTotal * 100) : 0;
         $formCompleted = $formSubmitted && $formDraftComplete && $formAllPct >= 80;
 
         $docsCompleted   = (bool) ($guest?->docs_ready ?? false);

@@ -126,13 +126,18 @@ class GuestTimelineService
     {
         $progress = [];
 
-        // ── form_complete: 8 kayıt formu adımı ──
+        // ── form_complete: 3-Level form'un mevcut seviyesindeki adımlar ──
+        // Level 1 (aday) → 6 wizard, Level 2 (öğrenci) → 8+ wizard.
+        // Guest henüz Level 1'deyse Level 2 alanlarını boş diye saymayız.
         $draft = is_array($guest->registration_form_draft) ? $guest->registration_form_draft : [];
         $companyId = (int) ($guest->company_id ?: 0);
+        $formLevelStatus = (string) ($guest->registration_form_level ?? 'level_1_pending');
+        $formLevel = in_array($formLevelStatus, ['level_2_pending', 'level_2_done'], true) ? 2 : 1;
+
         try {
-            $groups = app(\App\Services\GuestRegistrationFieldSchemaService::class)->groups($companyId);
+            $groups = app(\App\Services\GuestRegistrationFieldSchemaService::class)->groupsByLevel($formLevel, $companyId);
         } catch (\Throwable $e) {
-            $groups = \App\Support\GuestRegistrationFormCatalog::groups();
+            $groups = \App\Support\GuestRegistrationFormCatalog::groupsByLevel($formLevel);
         }
         $totalSteps = count($groups);
         $filledSteps = 0;
@@ -146,7 +151,13 @@ class GuestTimelineService
             $allFilled = true;
             foreach ($requiredFields as $f) {
                 $key = $f['key'] ?? '';
-                if ($key === '' || empty(trim((string) ($draft[$key] ?? '')))) {
+                if ($key === '') {
+                    $allFilled = false;
+                    break;
+                }
+                $val = $draft[$key] ?? null;
+                $isEmpty = is_array($val) ? empty($val) : empty(trim((string) $val));
+                if ($isEmpty) {
                     $allFilled = false;
                     break;
                 }
