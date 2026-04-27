@@ -228,18 +228,20 @@ class GuestRegistrationFormCatalog
                     // Sadece Level 2
                     self::f('is_enrolled_german_course', 'Herhangi bir Almanca kursuna kayıtlı mısınız? *', 'select', true, 10, options: self::yesNoOptions()),
                     self::f('german_course_name', 'Almanca kursuna gidiyorsanız ismini yazın *', 'text', false, 180),
-                    // Level 1
+                    // Level 1 — Almanca
                     self::f('german_level', 'Almanca seviyeniz *', 'select', true, 20, options: self::languageLevelOptions(includeNone: true), level: 1),
-                    // Level 1 yeni — sertifika
                     self::f('german_certificate_held', 'Almanca dil sertifikanız var mı?', 'select', false, 10, options: self::yesNoOptions(), level: 1),
-                    self::f('german_certificate_type', 'Sertifika türü', 'select', false, 40, options: self::germanCertificateTypeOptions(), help_text: 'Sertifikanız varsa.', level: 1),
-                    self::f('german_certificate_score', 'Sertifika puanı / sonucu', 'text', false, 20, placeholder: 'Örn: TDN 4 / B2', level: 1),
+                    // Sertifika türü ↔ puan: yan yana 2-col grid'de görünür
+                    self::f('german_certificate_type', 'Almanca sertifika türü', 'select', false, 40, options: self::germanCertificateTypeOptions(), level: 1),
+                    self::f('german_certificate_score', 'Almanca sertifika puanı / sonucu', 'text', false, 20, placeholder: 'Örn: TDN 4 / B2', level: 1),
                     // Sadece Level 2
                     self::f('is_enrolled_english_course', 'İngilizce kursuna gidiyor musunuz? *', 'select', true, 10, options: self::yesNoOptions()),
-                    // Level 1
+                    // Level 1 — İngilizce
                     self::f('english_level', 'İngilizce dil seviyeniz *', 'select', true, 20, options: self::languageLevelOptions(includeNone: true), level: 1),
-                    // Level 1 yeni — opsiyonel IELTS/TOEFL
-                    self::f('english_certificate_score', 'İngilizce sertifika puanı (varsa)', 'text', false, 40, placeholder: 'Örn: IELTS 7.0 / TOEFL 95', level: 1),
+                    self::f('english_certificate_held', 'İngilizce dil sertifikanız var mı?', 'select', false, 10, options: self::yesNoOptions(), level: 1),
+                    // Sertifika türü ↔ puan: yan yana
+                    self::f('english_certificate_type', 'İngilizce sertifika türü', 'select', false, 40, options: self::englishCertificateTypeOptions(), level: 1),
+                    self::f('english_certificate_score', 'İngilizce sertifika puanı / sonucu', 'text', false, 40, placeholder: 'Örn: IELTS 7.0 / TOEFL 95', level: 1),
                     // Sadece Level 2
                     self::f('other_language', 'Bildiğiniz diğer dil (varsa)', 'text', false, 120, placeholder: 'Örn: Fransızca, Rusça, Arapça'),
                     self::f('other_language_level', 'Bu dilin seviyesi', 'select', false, 20, options: self::languageLevelOptions(includeNone: true), help_text: 'Yukarıda bir dil yazdıysanız seviyesini seçiniz.'),
@@ -662,6 +664,19 @@ class GuestRegistrationFormCatalog
             ['value' => 'goethe', 'label' => 'Goethe (B1/B2/C1/C2)'],
             ['value' => 'telc', 'label' => 'telc'],
             ['value' => 'oesd', 'label' => 'ÖSD'],
+            ['value' => 'other', 'label' => 'Diğer'],
+        ];
+    }
+
+    private static function englishCertificateTypeOptions(): array
+    {
+        return [
+            ['value' => 'ielts', 'label' => 'IELTS'],
+            ['value' => 'toefl', 'label' => 'TOEFL (iBT / Paper)'],
+            ['value' => 'cambridge', 'label' => 'Cambridge (FCE / CAE / CPE)'],
+            ['value' => 'pte', 'label' => 'PTE Academic'],
+            ['value' => 'duolingo', 'label' => 'Duolingo English Test'],
+            ['value' => 'oxford', 'label' => 'Oxford Test of English'],
             ['value' => 'other', 'label' => 'Diğer'],
         ];
     }

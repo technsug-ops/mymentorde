@@ -343,8 +343,11 @@
                                             $value = \App\Support\GuestRegistrationFormCatalog::normalizeCountryValue($value);
                                         }
                                         $isFilled    = trim((string)$value) !== '';
-                                        $isWide      = $type === 'textarea' || $type === 'email'
-                                            || !empty($field['help_text']) || !empty($field['full_width'])
+                                        // help_text varsa otomatik wide YAPMA — kısa help'ler 2-col'da kalır.
+                                        // Sadece açıkça uzun help_text (200+ char) ve textarea/email/address/motivation wide.
+                                        $hasLongHelp = !empty($field['help_text']) && mb_strlen((string) $field['help_text']) > 200;
+                                        $isWide      = $type === 'textarea' || $type === 'email' || $type === 'checkbox_group'
+                                            || $hasLongHelp || !empty($field['full_width'])
                                             || str_contains($key, 'address') || str_contains($key, 'motivation');
                                     @endphp
                                     @if($key === '') @continue @endif
