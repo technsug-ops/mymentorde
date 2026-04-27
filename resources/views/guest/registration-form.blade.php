@@ -151,7 +151,30 @@
     padding: 8px 12px;
 }
 .help-panel.open { display: block; }
-.field-error { color: var(--u-danger); font-size: 13px; }
+.field-error {
+    color: var(--u-danger,#dc2626); font-size: 12px; font-weight:600;
+    margin-top:6px;
+    padding:6px 10px;
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    border-radius:6px;
+    display:flex; align-items:center; gap:6px;
+    line-height:1.4;
+}
+.field-error::before { content:'⚠'; font-size:14px; flex-shrink:0; }
+
+/* Eksik/hatalı alan highlight — kırmızı kalın border + hafif arka plan */
+.form-group.has-error input,
+.form-group.has-error select,
+.form-group.has-error textarea {
+    border-color: var(--u-danger,#dc2626) !important;
+    background: #fff5f5 !important;
+    box-shadow: 0 0 0 3px rgba(220,38,38,.08) !important;
+}
+.form-group.has-error label {
+    color: var(--u-danger,#dc2626);
+}
+.form-group.has-error { scroll-margin-top: 80px; }
 .field-hint { font-size: 11px; color: var(--u-muted); margin-bottom: 4px; }
 
 /* Inputs */
@@ -404,7 +427,8 @@
                                             || str_contains($key, 'address') || str_contains($key, 'motivation');
                                     @endphp
                                     @if($key === '') @continue @endif
-                                    <div class="form-group{{ $isFilled ? ' is-filled' : '' }}{{ $isWide ? ' grf-full' : '' }}" data-field-key="{{ $key }}">
+                                    @php $hasError = $errors->has($key); @endphp
+                                    <div class="form-group{{ $isFilled ? ' is-filled' : '' }}{{ $isWide ? ' grf-full' : '' }}{{ $hasError ? ' has-error' : '' }}" data-field-key="{{ $key }}">
                                         <div class="label-row">
                                             <label>{{ $label }} @if($required)<span class="required-star">*</span>@endif</label>
                                             @if($isFilled && in_array($key, ['first_name','last_name','email','phone','gender','communication_language','application_country','application_type']))
@@ -663,6 +687,21 @@
     statusEl.addEventListener('change', apply);
     statusEl.addEventListener('input', apply);
     apply();
+})();
+
+// Auto-scroll: sayfa yüklendiğinde ilk hatalı alana smooth scroll + focus
+(function(){
+    var firstError = document.querySelector('.form-group.has-error');
+    if (!firstError) return;
+
+    // Mevcut JS step switch'i tetikledikten sonra bu çalışsın
+    setTimeout(function(){
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        var input = firstError.querySelector('input, select, textarea');
+        if (input) {
+            try { input.focus({ preventScroll: true }); } catch(e) { input.focus(); }
+        }
+    }, 350);
 })();
 
 // =============================================================

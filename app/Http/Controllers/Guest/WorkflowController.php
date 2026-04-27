@@ -162,14 +162,30 @@ class WorkflowController extends Controller
             }
         }
 
+        // Field-specific hata mesajı için catalog'dan label + tip lookup
+        $allFields = $this->registrationFieldSchemaService->flatFieldsByLevel($formLevel, $companyId);
+        $fieldByKey = [];
+        foreach ($allFields as $f) {
+            $fieldByKey[$f['key'] ?? ''] = $f;
+        }
+
         $missingErrors = [];
         foreach ($this->registrationFieldSchemaService->requiredKeysByLevel($formLevel, $companyId) as $key) {
             if (in_array($key, $skipKeys, true)) {
                 continue;
             }
             $val = $payload[$key] ?? null;
-            if ($val === null || trim((string) $val) === '') {
-                $missingErrors[$key] = 'Bu alan zorunludur.';
+            $isEmpty = is_array($val) ? empty($val) : ($val === null || trim((string) $val) === '');
+            if ($isEmpty) {
+                $field = $fieldByKey[$key] ?? null;
+                $label = $field
+                    ? trim(rtrim((string) ($field['label'] ?? $key), ' *'))
+                    : $key;
+                $verb = match ($field['type'] ?? '') {
+                    'select', 'checkbox_group' => 'seçilmedi',
+                    default                     => 'doldurulmadı',
+                };
+                $missingErrors[$key] = $label . ' ' . $verb;
             }
         }
         // B13: eğitim tarihleri mantıklı sırada mı + B15 parent dob kontrolü
