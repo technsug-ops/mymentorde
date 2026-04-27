@@ -406,6 +406,117 @@
     </div>
 </div>
 
+{{-- ══════════════════════════════════════════════════════════
+     C7: Aday Form Cevapları (Level 1 + Level 2 ayrı section'larda)
+══════════════════════════════════════════════════════════ --}}
+@php
+    $draft = is_array($guest->registration_form_draft) ? $guest->registration_form_draft : [];
+    $formLevelStatus = (string) ($guest->registration_form_level ?? 'level_1_pending');
+
+    // Catalog'dan level grupları
+    $level1Groups = \App\Support\GuestRegistrationFormCatalog::groupsByLevel(1);
+    $level2AllGroups = \App\Support\GuestRegistrationFormCatalog::groupsByLevel(2);
+    $level1Keys = collect(\App\Support\GuestRegistrationFormCatalog::flatFieldsByLevel(1))->pluck('key')->all();
+
+    // Level 2'ye özgü grupları filtrele (Level 1'de olmayan field'ları içeren bölümler)
+    $level2OnlyGroups = collect($level2AllGroups)->map(function ($g) use ($level1Keys) {
+        $g['fields'] = collect($g['fields'] ?? [])
+            ->reject(fn ($f) => in_array($f['key'] ?? '', $level1Keys, true))
+            ->values()
+            ->all();
+        return $g;
+    })->filter(fn ($g) => !empty($g['fields']))->values()->all();
+
+    $hasLevel1Data = collect($level1Keys)->some(fn ($k) => !empty($draft[$k] ?? null) || !empty($guest?->{$k} ?? null));
+    $hasLevel2Data = in_array($formLevelStatus, ['level_2_pending', 'level_2_done'], true);
+
+    // Helper: field value formatla
+    $formatVal = function ($field, $val) {
+        if ($val === null || (is_string($val) && trim($val) === '') || (is_array($val) && empty($val))) {
+            return '<em style="color:var(--u-muted,#94a3b8);">—</em>';
+        }
+        if (is_array($val)) {
+            // checkbox_group / multi-select → label'lar
+            $opts = collect($field['options'] ?? [])->keyBy('value');
+            return collect($val)->map(fn ($v) => e($opts[$v]['label'] ?? $v))->join(', ');
+        }
+        // select → label döndür (varsa)
+        if (($field['type'] ?? '') === 'select' && !empty($field['options'])) {
+            $opts = collect($field['options'])->keyBy('value');
+            $hit = $opts[$val] ?? null;
+            if ($hit) return e($hit['label']);
+        }
+        return e((string) $val);
+    };
+@endphp
+
+@if($hasLevel1Data || $hasLevel2Data)
+<div style="margin-top:16px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <h2 style="font-size:14px;font-weight:800;color:var(--u-text,#0f172a);margin:0;">📋 Form Cevapları</h2>
+        @php
+            $levelBadge = match($formLevelStatus) {
+                'level_2_done'    => ['Tam Form (Level 2) — Tamamlandı', '#16a34a', '#dcfce7'],
+                'level_2_pending' => ['Tam Form (Level 2) — Devam Ediyor', '#d97706', '#fef3c7'],
+                'level_1_done'    => ['Aday Form (Level 1) — Tamamlandı', '#16a34a', '#dcfce7'],
+                default           => ['Aday Form (Level 1) — Devam Ediyor', '#d97706', '#fef3c7'],
+            };
+        @endphp
+        <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;color:{{ $levelBadge[1] }};background:{{ $levelBadge[2] }};">{{ $levelBadge[0] }}</span>
+    </div>
+
+    {{-- Level 1 cevapları (her zaman görünür eğer veri varsa) --}}
+    <details class="panel gd-panel" style="margin-bottom:10px;" open>
+        <summary style="cursor:pointer;font-weight:700;font-size:13px;padding:6px 0;color:var(--u-text,#0f172a);">
+            🎓 Aday Öğrenci Formu (Level 1)
+            <span style="font-size:11px;font-weight:500;color:var(--u-muted,#64748b);margin-left:6px;">{{ collect($level1Groups)->sum(fn($g) => count($g['fields'] ?? [])) }} alan</span>
+        </summary>
+        <div style="padding-top:10px;">
+            @foreach($level1Groups as $group)
+                <div style="margin-bottom:14px;">
+                    <h3 style="font-size:11px;font-weight:700;color:var(--u-brand,#2563eb);text-transform:uppercase;letter-spacing:.04em;margin:0 0 6px;border-bottom:1px solid var(--u-line,#e5e9f0);padding-bottom:4px;">{{ $group['title'] ?? '' }}</h3>
+                    <table class="gd-table" style="font-size:12px;">
+                        @foreach(($group['fields'] ?? []) as $f)
+                            @php $v = $draft[$f['key']] ?? ($guest?->{$f['key']} ?? null); @endphp
+                            <tr>
+                                <td class="lbl" style="width:200px;">{{ trim(rtrim($f['label'] ?? $f['key'], ' *')) }}</td>
+                                <td>{!! $formatVal($f, $v) !!}</td>
+                            </tr>
+                        @endforeach
+                    </table>
+                </div>
+            @endforeach
+        </div>
+    </details>
+
+    {{-- Level 2 ek cevaplar — sadece Level 2'ye özgü field'lar --}}
+    @if($hasLevel2Data && !empty($level2OnlyGroups))
+    <details class="panel gd-panel" style="margin-bottom:10px;" {{ $formLevelStatus === 'level_2_done' ? 'open' : '' }}>
+        <summary style="cursor:pointer;font-weight:700;font-size:13px;padding:6px 0;color:var(--u-text,#0f172a);">
+            📚 Tam Başvuru Formu — Ek Bilgiler (Level 2)
+            <span style="font-size:11px;font-weight:500;color:var(--u-muted,#64748b);margin-left:6px;">{{ collect($level2OnlyGroups)->sum(fn($g) => count($g['fields'] ?? [])) }} alan</span>
+        </summary>
+        <div style="padding-top:10px;">
+            @foreach($level2OnlyGroups as $group)
+                <div style="margin-bottom:14px;">
+                    <h3 style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.04em;margin:0 0 6px;border-bottom:1px solid var(--u-line,#e5e9f0);padding-bottom:4px;">{{ $group['title'] ?? '' }}</h3>
+                    <table class="gd-table" style="font-size:12px;">
+                        @foreach(($group['fields'] ?? []) as $f)
+                            @php $v = $draft[$f['key']] ?? ($guest?->{$f['key']} ?? null); @endphp
+                            <tr>
+                                <td class="lbl" style="width:200px;">{{ trim(rtrim($f['label'] ?? $f['key'], ' *')) }}</td>
+                                <td>{!! $formatVal($f, $v) !!}</td>
+                            </tr>
+                        @endforeach
+                    </table>
+                </div>
+            @endforeach
+        </div>
+    </details>
+    @endif
+</div>
+@endif
+
 {{-- ── Belge Önizleme Modal ── --}}
 <div id="doc-preview-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);align-items:center;justify-content:center;">
     <div style="position:relative;background:var(--u-card,#fff);border-radius:12px;width:90vw;max-width:900px;height:85vh;display:flex;flex-direction:column;overflow:hidden;">
