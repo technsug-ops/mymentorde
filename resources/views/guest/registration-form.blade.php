@@ -534,6 +534,52 @@
 
 <script defer src="{{ Vite::asset('resources/js/guest-registration-form.js') }}"></script>
 
+{{-- Conditional: higher_education_status değerine göre üniversite alanlarını göster/gizle --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    var statusEl = document.querySelector('select[name="higher_education_status"]');
+    if (!statusEl) return;
+
+    // Üniversite alanları (data-field-key üstünden form-group bul)
+    var uniFieldKeys = ['university_name', 'university_department', 'university_year'];
+    var uniGroups = uniFieldKeys.map(function(k){
+        return document.querySelector('.form-group[data-field-key="' + k + '"]');
+    }).filter(Boolean);
+
+    // Sadece enrolled durumunda anlamlı olan field'lar (sınıf vb.)
+    var enrolledOnlyKeys = ['university_year'];
+
+    // 'not_started' = lise mezunu, henüz üni yok → hepsini gizle
+    // 'enrolled' / 'dropped' / 'graduated' → üni adı + bölüm göster, sınıf sadece enrolled'de
+    function applyVisibility(){
+        var v = (statusEl.value || '').toLowerCase();
+        var showUni = (v === 'enrolled' || v === 'dropped' || v === 'graduated');
+        var showYear = (v === 'enrolled');
+
+        uniGroups.forEach(function(g){
+            var key = g.getAttribute('data-field-key');
+            var enrolledOnly = enrolledOnlyKeys.indexOf(key) !== -1;
+            var visible = enrolledOnly ? showYear : showUni;
+            g.style.display = visible ? '' : 'none';
+
+            // Hidden iken required attribute'ünü temizle (form submit hatası önle)
+            var input = g.querySelector('input, select, textarea');
+            if (input) {
+                if (!visible) {
+                    input.removeAttribute('required');
+                } else if (input.classList.contains('final-required')) {
+                    input.setAttribute('required', 'required');
+                }
+            }
+        });
+    }
+
+    statusEl.addEventListener('change', applyVisibility);
+    statusEl.addEventListener('input', applyVisibility);
+    applyVisibility(); // Sayfa yüklenince başlangıç durumu
+})();
+</script>
+
 {{-- Flatpickr init — tüm date input'lara yıl/ay dropdown'lı picker bağla --}}
 <script nonce="{{ $cspNonce ?? '' }}">
 (function initFlatpickrWhenReady(){
