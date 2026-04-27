@@ -4,6 +4,22 @@
 @section('page_title', 'Kayıt Süreci - Form')
 
 @push('head')
+
+{{-- Flatpickr — kullanıcı dostu tarih seçici (yıl/ay dropdown'lı, TR locale) --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/tr.js" defer></script>
+<style>
+/* Flatpickr — proje teması ile uyum */
+.flatpickr-input { background:#fff !important; }
+.flatpickr-calendar { font-family:inherit; box-shadow:0 12px 32px rgba(0,0,0,.18); border-radius:10px; }
+.flatpickr-calendar.open { z-index:10000; }
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year { font-size:14px; font-weight:600; }
+.flatpickr-day.selected { background:var(--u-brand,#7c3aed); border-color:var(--u-brand,#7c3aed); }
+.flatpickr-day.today { border-color:var(--u-brand,#7c3aed); }
+</style>
+
 <style>
 /* ── srf-* Student Registration Form — Step Pills Redesign ── */
 
@@ -339,17 +355,37 @@
                                               data-required="{{ $required ? '1' : '0' }}" {{ $formLocked ? 'disabled' : '' }}>{{ (string)$value }}</textarea>
                                 @elseif($type === 'date')
                                     @php
+                                        // 1) Geçmişte olamaz (gelecek hedef tarihler)
                                         $futureOnly = in_array($key, [
                                             'university_start_target_date',
                                             'planned_start_date',
                                             'target_start_date',
                                         ], true);
                                         $dateMin = $futureOnly ? now()->format('Y-m-d') : null;
+
+                                        // 2) Gelecekte olamaz (geçmiş tarihler) — guest formundaki kurallarla aynı
+                                        $dateMax = null;
+                                        $maxMessage = '';
+                                        if ($key === 'birth_date') {
+                                            $dateMax = now()->subYears(15)->format('Y-m-d');
+                                            $maxMessage = 'En az 15 yaşında olmalısınız.';
+                                        } elseif (in_array($key, [
+                                            'father_birth_date', 'mother_birth_date', 'spouse_birth_date', 'marriage_date',
+                                            'primary_start_date', 'primary_end_date',
+                                            'middle_start_date', 'middle_end_date',
+                                            'high_start_date', 'high_end_date',
+                                            'passport_issue_date',
+                                        ], true)) {
+                                            $dateMax = now()->format('Y-m-d');
+                                            $maxMessage = 'Tarih gelecekte olamaz.';
+                                        }
                                     @endphp
                                     <input type="date" name="{{ $key }}" value="{{ $value }}"
                                            @if($dateMin) min="{{ $dateMin }}" @endif
+                                           @if($dateMax) max="{{ $dateMax }}" @endif
                                            data-required="{{ $required ? '1' : '0' }}" {{ $formLocked ? 'disabled' : '' }}
-                                           @if($futureOnly) oninvalid="this.setCustomValidity('Bu tarih bugünden eski olamaz.')" oninput="this.setCustomValidity('')" @endif>
+                                           @if($futureOnly) oninvalid="this.setCustomValidity('Bu tarih bugünden eski olamaz.')" oninput="this.setCustomValidity('')" @endif
+                                           @if($dateMax) data-past-only="1" oninvalid="this.setCustomValidity(@js($maxMessage))" oninput="this.setCustomValidity('')" @endif>
                                 @else
                                     @php
                                         // B11: harf-only alanlar (şehir, ilçe, il, doğum yeri)
@@ -429,6 +465,39 @@
 <div class="srf-toast" id="srfToast"><span style="width:8px;height:8px;border-radius:50%;background:var(--u-ok);"></span> Otomatik kaydedildi</div>
 
 <script defer src="{{ Vite::asset('resources/js/student-registration-form.js') }}"></script>
+
+{{-- Flatpickr init — tüm date input'lara yıl/ay dropdown'lı picker bağla (guest formundaki ile aynı) --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function initFlatpickrWhenReady(){
+    if (typeof flatpickr === 'undefined') {
+        if (window.__srfFpRetries === undefined) window.__srfFpRetries = 0;
+        if (window.__srfFpRetries++ < 30) {
+            setTimeout(initFlatpickrWhenReady, 100);
+        }
+        return;
+    }
+
+    document.querySelectorAll('input[type="date"]').forEach(function(el){
+        var minAttr = el.getAttribute('min');
+        var maxAttr = el.getAttribute('max');
+        var isBirth = el.name === 'birth_date';
+
+        flatpickr(el, {
+            locale: (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.tr) ? flatpickr.l10ns.tr : 'default',
+            dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: 'd.m.Y',
+            allowInput: true,
+            minDate: minAttr || null,
+            maxDate: maxAttr || null,
+            defaultDate: el.value || (isBirth ? new Date(new Date().getFullYear() - 25, 0, 1) : null),
+            disableMobile: false,
+            monthSelectorType: 'dropdown',
+        });
+    });
+})();
+</script>
+
 <script nonce="{{ $cspNonce ?? '' }}">
 (function(){
     // Pill sync
