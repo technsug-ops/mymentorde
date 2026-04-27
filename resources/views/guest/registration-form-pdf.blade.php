@@ -17,11 +17,15 @@
     </style>
 </head>
 <body>
-    <h1>Kayit Formu</h1>
+    @php $level = $formLevel ?? 2; @endphp
+    <h1>{{ $level === 1 ? 'Aday Öğrenci Ön Kayıt Formu (Seviye 1)' : 'Tam Kayıt Formu (Seviye 2)' }}</h1>
     <div class="meta">
         {{ $guest->first_name }} {{ $guest->last_name }} &middot;
         #{{ $guest->id }} &middot;
         {{ now()->format('d.m.Y H:i') }}
+        @if($level === 1)
+            &middot; <span style="color:#1e40af;">Sözleşme öncesi ön değerlendirme bilgileri</span>
+        @endif
     </div>
 
     @foreach($groups as $group)

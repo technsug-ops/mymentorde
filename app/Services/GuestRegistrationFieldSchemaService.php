@@ -91,7 +91,16 @@ class GuestRegistrationFieldSchemaService
      */
     public function flatFields(int $companyId = 0): array
     {
-        return collect($this->groups($companyId))
+        return $this->flatFieldsByLevel(2, $companyId);
+    }
+
+    /**
+     * Level filtreli düz field listesi.
+     * @return array<int,array<string,mixed>>
+     */
+    public function flatFieldsByLevel(int $level, int $companyId = 0): array
+    {
+        return collect($this->groupsByLevel($level, $companyId))
             ->flatMap(fn (array $g) => (array) ($g['fields'] ?? []))
             ->values()
             ->all();
@@ -102,7 +111,16 @@ class GuestRegistrationFieldSchemaService
      */
     public function sanitizePayload(array $input, int $companyId = 0): array
     {
-        return GuestRegistrationFormCatalog::sanitizePayloadByFields($input, $this->flatFields($companyId));
+        return $this->sanitizePayloadByLevel($input, 2, $companyId);
+    }
+
+    /**
+     * Level filtreli sanitize. Level 1'de sadece Level 1 field'ları kabul edilir.
+     * @return array<string,mixed>
+     */
+    public function sanitizePayloadByLevel(array $input, int $level, int $companyId = 0): array
+    {
+        return GuestRegistrationFormCatalog::sanitizePayloadByFields($input, $this->flatFieldsByLevel($level, $companyId));
     }
 
     /**
@@ -110,7 +128,22 @@ class GuestRegistrationFieldSchemaService
      */
     public function requiredKeys(int $companyId = 0): array
     {
-        $keys = GuestRegistrationFormCatalog::requiredKeysByFields($this->flatFields($companyId));
+        return $this->requiredKeysByLevel(2, $companyId);
+    }
+
+    /**
+     * Level filtreli zorunlu key listesi.
+     * Conditional field'lar (passport_number, german_course_name vb.) çıkarılır —
+     * bunlar başka koşullu kontrollerde tetiklenir.
+     * Level 1 için ek koşullu çıkarımlar: university_*, guarantor_*,
+     * accommodation_contact_city, german_certificate_*.
+     * @return array<int,string>
+     */
+    public function requiredKeysByLevel(int $level, int $companyId = 0): array
+    {
+        $keys = GuestRegistrationFormCatalog::requiredKeysByFields($this->flatFieldsByLevel($level, $companyId));
+
+        // Tüm seviyelerde koşullu olduğu için her zaman çıkarılan field'lar
         $conditional = [
             'passport_number',
             'german_course_name',
@@ -119,6 +152,25 @@ class GuestRegistrationFieldSchemaService
             'germany_last_residences',
             'other_language_level',
         ];
+
+        // Level 1'e özel koşullu (UI'da JS ile gizlenebiliyor — required kontrolünde çıkar)
+        if ($level === 1) {
+            $conditional = array_merge($conditional, [
+                'university_name',
+                'university_department',
+                'university_year',
+                'guarantor_relation',
+                'guarantor_name',
+                'accommodation_contact_city',
+                'german_certificate_type',
+                'german_certificate_score',
+                'german_certificate_held',
+                'english_certificate_held',
+                'english_certificate_type',
+                'english_certificate_score',
+            ]);
+        }
+
         return array_values(array_filter($keys, static fn (string $k) => !in_array($k, $conditional, true)));
     }
 

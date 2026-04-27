@@ -49,6 +49,17 @@ class WorkflowController extends Controller
     ) {
     }
 
+    /**
+     * 3-Level form yönlendirme: guest'in registration_form_level kolonu Level 1
+     * ya da Level 2 olduğunu belirler. Aday seviyesinde Level 1 catalog (27 field)
+     * kullanılır; öğrenciye geçtiyse Level 2 (88 field) tam form.
+     */
+    private function resolveFormLevel(\App\Models\GuestApplication $guest): int
+    {
+        $status = (string) ($guest->registration_form_level ?? 'level_1_pending');
+        return in_array($status, ['level_2_pending', 'level_2_done'], true) ? 2 : 1;
+    }
+
     public function autoSaveRegistration(Request $request)
     {
         $guest = $this->resolveGuest($request);
@@ -60,7 +71,8 @@ class WorkflowController extends Controller
                 ->withInput();
         }
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
-        $draftMap = $this->registrationFieldSchemaService->sanitizePayload($request->all(), $companyId);
+        $formLevel = $this->resolveFormLevel($guest);
+        $draftMap = $this->registrationFieldSchemaService->sanitizePayloadByLevel($request->all(), $formLevel, $companyId);
 
         // Kullanıcı girdisi → fill() ile $fillable koruması altında yazar.
         $guest->fill([
@@ -91,7 +103,8 @@ class WorkflowController extends Controller
             return response()->json(['ok' => false, 'error' => 'Guest bulunamadi'], 404);
         }
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
-        $draftMap = $this->registrationFieldSchemaService->sanitizePayload($request->all(), $companyId);
+        $formLevel = $this->resolveFormLevel($guest);
+        $draftMap = $this->registrationFieldSchemaService->sanitizePayloadByLevel($request->all(), $formLevel, $companyId);
 
         // Kullanıcı girdisi → fill() ile $fillable koruması altında yazar.
         $guest->fill([
@@ -130,13 +143,27 @@ class WorkflowController extends Controller
                 ->withInput();
         }
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
-        $payload = $this->registrationFieldSchemaService->sanitizePayload($request->all(), $companyId);
-        $skipKeys = array_merge(
-            $this->registrationFieldSchemaService->educationSkippedKeys($payload),
-            $this->registrationFieldSchemaService->spouseSkippedKeys($payload),
-        );
+        $formLevel = $this->resolveFormLevel($guest);
+        $payload = $this->registrationFieldSchemaService->sanitizePayloadByLevel($request->all(), $formLevel, $companyId);
+
+        // skipKeys yalnızca Level 2'de anlamlı — Level 1'de education_level sorulmuyor
+        $skipKeys = $formLevel === 2
+            ? array_merge(
+                $this->registrationFieldSchemaService->educationSkippedKeys($payload),
+                $this->registrationFieldSchemaService->spouseSkippedKeys($payload),
+            )
+            : [];
+
+        // Level 1'de higher_education_status='not_started' iken üniversite alanları gizli
+        if ($formLevel === 1) {
+            $heStatus = strtolower(trim((string) ($payload['higher_education_status'] ?? '')));
+            if ($heStatus !== 'enrolled') {
+                $skipKeys = array_merge($skipKeys, ['university_year']);
+            }
+        }
+
         $missingErrors = [];
-        foreach ($this->registrationFieldSchemaService->requiredKeys($companyId) as $key) {
+        foreach ($this->registrationFieldSchemaService->requiredKeysByLevel($formLevel, $companyId) as $key) {
             if (in_array($key, $skipKeys, true)) {
                 continue;
             }
@@ -226,11 +253,19 @@ class WorkflowController extends Controller
         abort_if(!$guest, 404, 'Guest kaydi bulunamadi.');
 
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
-        $groups = $this->registrationFieldSchemaService->groups($companyId);
+
+        // 3-Level form yönlendirme: aday seviyesindeyken (level_1_*) Level 1
+        // groupları gösterilir; student'a geçtiyse (level_2_*) tam Level 2.
+        // PortalController::registrationForm ile aynı mantık.
+        $formLevelStatus = (string) ($guest->registration_form_level ?? 'level_1_pending');
+        $isLevel2 = in_array($formLevelStatus, ['level_2_pending', 'level_2_done'], true);
+        $formLevel = $isLevel2 ? 2 : 1;
+
+        $groups = $this->registrationFieldSchemaService->groupsByLevel($formLevel, $companyId);
         $draft = is_array($guest->registration_form_draft) ? $guest->registration_form_draft : [];
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('guest.registration-form-pdf', compact('guest', 'groups', 'draft'));
-        $fileName = 'Kayit_Formu_' . ($guest->first_name ?? '') . '_' . ($guest->last_name ?? '') . '_' . now()->format('Ymd') . '.pdf';
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('guest.registration-form-pdf', compact('guest', 'groups', 'draft', 'formLevel'));
+        $fileName = 'Kayit_Formu_L' . $formLevel . '_' . ($guest->first_name ?? '') . '_' . ($guest->last_name ?? '') . '_' . now()->format('Ymd') . '.pdf';
 
         if ($request->query('download')) {
             return $pdf->download($fileName);
