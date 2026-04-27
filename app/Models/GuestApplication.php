@@ -56,6 +56,14 @@ class GuestApplication extends Model
         'lead_score', 'lead_score_tier', 'last_senior_action_at',
         'qualification_status', 'lost_reason', 'lost_note', 'follow_up_date',
 
+        // NOT: Level 1 field'ları (high_school_grad_year, higher_education_status,
+        // university_year, german_certificate_*, english_certificate_score,
+        // accommodation_contact_*, biggest_concerns, motivation_thinking_duration)
+        // mevcut Level 2 ile aynı pattern'de `registration_form_draft` JSON içinde
+        // saklanır. Ayrı kolon yok, fillable gerekmez.
+        //
+        // 'registration_form_level' kasıtlı olarak DIŞARIDA — sistem forceFill ile günceller.
+
         // ─────────────────────────────────────────────────────────────────────
         // KASITLI OLARAK DIŞARIDA BIRAKILANLAR — yalnızca forceFill() ile yazılır:
         //
@@ -107,6 +115,8 @@ class GuestApplication extends Model
         'registration_form_draft' => 'array',
         'registration_form_draft_saved_at' => 'datetime',
         'registration_form_submitted_at' => 'datetime',
+
+        // Level 1 field'ları registration_form_draft JSON içinde — ayrı cast gerekmez
         'package_selected_at' => 'datetime',
         'selected_extra_services' => 'array',
         'contract_requested_at' => 'datetime',
