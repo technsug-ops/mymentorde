@@ -204,14 +204,14 @@
     $formRequiredTotal  = (int) ($formRequiredTotal  ?? 0);
 
     $statusLabel = match($status) {
-        'pending_manager'  => 'Danışman Hazirliyor',
-        'requested'        => 'Imza Bekleniyor',
-        'signed_uploaded'  => 'Firma Onayı Bekleniyor',
-        'approved'         => 'Onaylandı',
-        'rejected'         => 'Reddedildi',
+        'pending_manager'  => 'Hazırlanıyor',
+        'requested'        => 'İmza Bekleniyor',
+        'signed_uploaded'  => 'Onay Bekleniyor',
+        'approved'         => 'Aktif',
+        'rejected'         => 'Düzeltme Gerekli',
         'cancelled'        => 'İptal Edildi',
-        'reopen_requested' => 'Yeniden Degerlendirme',
-        default            => 'Talep Edilmedi',
+        'reopen_requested' => 'Yeniden Değerlendirme',
+        default            => 'Henüz Başlamadı',
     };
 
     $statusPill = match($status) {
@@ -238,9 +238,9 @@
         default                => 0,
     };
     $funnelSteps = [
-        ['name' => 'Talep Et',      'sub' => match(true) { $stepActive > 0 => 'Tamamlandı', default => 'Şimdi başlat' }],
-        ['name' => 'Hazırlanma',     'sub' => match(true) { $stepActive > 1 => 'Tamamlandı', $stepActive === 1 => 'Hazırlanıyor...', default => 'Talep sonrasi' }],
-        ['name' => 'Oku & İmzala',   'sub' => match(true) { $status === 'rejected' => 'Reddedildi - tekrar imzala', $stepActive > 2 => 'İmzalandi', $stepActive === 2 => 'İmzanı bekliyor', default => 'Imza sonrasi' }],
+        ['name' => 'Hazırla',        'sub' => match(true) { $stepActive > 0 => 'Tamamlandı', default => 'Şimdi başlat' }],
+        ['name' => 'Hazırlanma',     'sub' => match(true) { $stepActive > 1 => 'Tamamlandı', $stepActive === 1 => 'Hazırlanıyor...', default => 'Hazırlama sonrası' }],
+        ['name' => 'Oku & İmzala',   'sub' => match(true) { $status === 'rejected' => 'Düzeltme gerekli', $stepActive > 2 => 'İmzalandı', $stepActive === 2 => 'İmzanı bekliyor', default => 'İmza sonrası' }],
         ['name' => 'Firma Onayı',    'sub' => match(true) { $stepActive > 3 => 'Onaylandı', $stepActive === 3 => 'Onay bekleniyor', default => '—' }],
     ];
 
@@ -281,26 +281,8 @@
     @endforeach
 </div>
 
-{{-- ── Prereq eksik uyarisi ── --}}
-@if(!$allPrereqsDone)
-@php $missingCount = collect($prereqs)->where('done', false)->count(); @endphp
-<div style="background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-        <span style="font-size:16px;color:var(--u-brand,#2563eb);">ℹ</span>
-        <strong style="font-size:13px;color:var(--u-brand,#2563eb);">{{ $missingCount }} eksik adım var</strong>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:6px;">
-        @foreach($prereqs as $p)
-            @if(!$p['done'])
-            <a href="{{ $p['link'] }}" style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 12px;border-radius:8px;background:var(--u-card,#fff);border:1px solid rgba(37,99,235,.25);font-size:11px;font-weight:700;text-decoration:none;color:var(--u-brand,#2563eb);transition:all .15s;">
-                <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $p['label'] }}</span>
-                <span style="flex-shrink:0;">→</span>
-            </a>
-            @endif
-        @endforeach
-    </div>
-</div>
-@endif
+{{-- Üst 'eksik adım' chip kutusu kaldırıldı — eksikler hero altındaki
+     'Eksik ön koşullar' listesinde tek yerde gösterilir (tekrar önlendi). --}}
 
 {{-- ── Rejected / Cancelled / Reopen uyarilari ── --}}
 @if($status === 'rejected')
@@ -386,42 +368,27 @@
             <div><h5>Sonraki adımlar ne olacak?</h5><p>Talep ettikten sonra danışmanın sözleşmeyi hazırlayacak. Hazır olunca okuyup dijital imza veya fiziksel imzalı dosya yükleyerek göndereceksin.</p></div>
         </div>
     @else
-        {{-- Eksik ön koşul var — gri hero, disabled + açıklayıcı buton --}}
+        {{-- Eksik ön koşul var — sade hero + tek liste --}}
         @php $missingList = collect($prereqs)->where('done', false); @endphp
         <div class="gc-hero" style="background:linear-gradient(135deg,#f1f5f9 0%,#e2e8f0 100%);color:#334155;">
             <div class="gc-hero-badge" style="background:rgba(100,116,139,.12);color:#475569;"><span>🔒</span> Henüz hazır değil</div>
-            <div class="gc-hero-title" style="color:#0f172a;">Önce aşağıdaki {{ $missingList->count() }} adımı tamamla</div>
+            <div class="gc-hero-title" style="color:#0f172a;">Önce paket seçimini yap</div>
             <div class="gc-hero-sub" style="color:#475569;">
-                Önce paket seçimini yap, ardından sözleşmen burada hazırlanacak. Eksikleri bitirince butonu otomatik açacağız.
-            </div>
-            <button type="button"
-                    class="gc-hero-btn"
-                    disabled
-                    style="opacity:.5;cursor:not-allowed;background:#94a3b8;"
-                    title="Eksik adımlar tamamlanmadan başlatılamaz">
-                🔒 Sözleşmemi Hazırla ({{ $missingList->count() }} eksik)
-            </button>
-            <div class="gc-hero-meta" style="color:#64748b;">
-                <span>📋 Eksik adım sayısı: {{ $missingList->count() }}</span>
-                <span>👇 Aşağıdan devam et</span>
+                Sözleşmen burada hazırlanacak. Aşağıdaki {{ $missingList->count() }} adımı tamamla, butonu otomatik açacağız.
             </div>
         </div>
 
         <div style="background:#fff7ed;border:1px solid #fdba74;border-radius:12px;padding:16px 18px;margin-bottom:16px;">
-            <div style="font-weight:700;color:#9a3412;font-size:14px;margin-bottom:10px;">Eksik ön koşullar:</div>
+            <div style="font-weight:700;color:#9a3412;font-size:14px;margin-bottom:10px;">📋 Tamamlanması gereken adımlar:</div>
             <div style="display:flex;flex-direction:column;gap:8px;">
-                @foreach($missingList as $p)
-                    <a href="{{ $p['link'] }}" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#fff;border:1px solid #fed7aa;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;color:#9a3412;transition:background .15s;">
-                        <span>⬜ {{ $p['label'] }}</span>
-                        <span style="color:#ea580c;">Tamamla →</span>
+                @foreach($prereqs as $p)
+                    @php $done = !empty($p['done']); @endphp
+                    <a href="{{ $p['link'] }}" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#fff;border:1px solid {{ $done ? '#bbf7d0' : '#fed7aa' }};border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;color:{{ $done ? '#166534' : '#9a3412' }};transition:background .15s;">
+                        <span>{{ $done ? '✓' : '○' }} {{ $p['label'] }}</span>
+                        <span style="color:{{ $done ? '#16a34a' : '#ea580c' }};">{{ $done ? 'Tamamlandı' : 'Tamamla →' }}</span>
                     </a>
                 @endforeach
             </div>
-        </div>
-
-        <div class="gc-tip">
-            <div class="gc-tip-icon">💡</div>
-            <div><h5>Neden bu adımlar gerekli?</h5><p>Sözleşme hazırlanmadan önce kayıt formu, belgeler ve paket seçimi tamamlanmış olmalı — bunlar sözleşmenin içeriğini belirleyen kritik bilgiler.</p></div>
         </div>
     @endif
 @endif
