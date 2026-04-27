@@ -385,16 +385,38 @@
                                             <textarea class="{{ $required ? 'final-required' : '' }}" name="{{ $key }}" rows="4" maxlength="{{ $max }}" placeholder="{{ $placeholder }}" data-required="{{ $required ? '1' : '0' }}">{{ $value }}</textarea>
                                         @elseif($type === 'date')
                                             @php
-                                                // Gelecek tarih zorunlu alanlar — hedef/planlanan tarihler geçmişte olamaz
+                                                // Tarih validasyonu — alan tipine göre min/max kısıtları
+                                                // 1) Geçmişte olamaz (gelecek hedef tarihler)
                                                 $futureOnly = in_array($key, [
                                                     'university_start_target_date',
                                                     'planned_start_date',
                                                     'target_start_date',
                                                 ], true);
                                                 $dateMin = $futureOnly ? now()->format('Y-m-d') : null;
+
+                                                // 2) Gelecekte olamaz (geçmiş tarihler)
+                                                // birth_date için ek kısıt: en az 15 yaşında olunmalı
+                                                $dateMax = null;
+                                                $maxMessage = '';
+                                                if ($key === 'birth_date') {
+                                                    $dateMax = now()->subYears(15)->format('Y-m-d');
+                                                    $maxMessage = 'En az 15 yaşında olmalısınız (doğum tarihi gelecekte olamaz).';
+                                                } elseif (in_array($key, [
+                                                    'father_birth_date', 'mother_birth_date', 'spouse_birth_date', 'marriage_date',
+                                                    'primary_start_date', 'primary_end_date',
+                                                    'middle_start_date', 'middle_end_date',
+                                                    'high_start_date', 'high_end_date',
+                                                ], true)) {
+                                                    $dateMax = now()->format('Y-m-d');
+                                                    $maxMessage = 'Tarih gelecekte olamaz.';
+                                                }
                                             @endphp
-                                            <input class="{{ $required ? 'final-required' : '' }}" type="date" name="{{ $key }}" value="{{ $value }}" @if($dateMin) min="{{ $dateMin }}" @endif data-required="{{ $required ? '1' : '0' }}"
-                                                @if($futureOnly) data-future-only="1" oninvalid="this.setCustomValidity('Bu tarih bugünden eski olamaz.')" oninput="this.setCustomValidity('')" @endif>
+                                            <input class="{{ $required ? 'final-required' : '' }}" type="date" name="{{ $key }}" value="{{ $value }}"
+                                                @if($dateMin) min="{{ $dateMin }}" @endif
+                                                @if($dateMax) max="{{ $dateMax }}" @endif
+                                                data-required="{{ $required ? '1' : '0' }}"
+                                                @if($futureOnly) data-future-only="1" oninvalid="this.setCustomValidity('Bu tarih bugünden eski olamaz.')" oninput="this.setCustomValidity('')" @endif
+                                                @if($dateMax) data-past-only="1" oninvalid="this.setCustomValidity(@js($maxMessage))" oninput="this.setCustomValidity('')" @endif>
                                         @else
                                             @php
                                                 // B11: harf-only alanlar (şehir, ilçe, il, doğum yeri) — sayı/sembol kabul etmesin

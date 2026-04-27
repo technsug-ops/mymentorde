@@ -387,7 +387,43 @@ class GuestRegistrationFormCatalog
 
             if ($type === 'date') {
                 $txt = trim((string) $val);
-                $out[$key] = preg_match('/^\d{4}-\d{2}-\d{2}$/', $txt) ? $txt : null;
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $txt)) {
+                    $out[$key] = null;
+                    continue;
+                }
+
+                // Per-field tarih kısıtı (server-side koruma — HTML5 max/min bypass için)
+                $today = now()->format('Y-m-d');
+
+                if ($key === 'birth_date') {
+                    // En az 15 yaşında olmalı — gelecek tarih + son 15 yıl reddedilir
+                    $maxBirth = now()->subYears(15)->format('Y-m-d');
+                    if ($txt > $maxBirth) {
+                        $out[$key] = null;
+                        continue;
+                    }
+                } elseif (in_array($key, [
+                    'father_birth_date', 'mother_birth_date', 'spouse_birth_date', 'marriage_date',
+                    'primary_start_date', 'primary_end_date',
+                    'middle_start_date', 'middle_end_date',
+                    'high_start_date', 'high_end_date',
+                ], true)) {
+                    // Geçmiş tarih field'ları — gelecek olamaz
+                    if ($txt > $today) {
+                        $out[$key] = null;
+                        continue;
+                    }
+                } elseif (in_array($key, [
+                    'university_start_target_date', 'planned_start_date', 'target_start_date',
+                ], true)) {
+                    // Hedef tarih field'ları — geçmişte olamaz
+                    if ($txt < $today) {
+                        $out[$key] = null;
+                        continue;
+                    }
+                }
+
+                $out[$key] = $txt;
                 continue;
             }
 
