@@ -665,7 +665,104 @@
     apply();
 })();
 
-// Conditional: Açık Lise + lise diploma notu ≤ 50 → küçük chip + tıklayınca modal
+// Eski büyük 'Açık Lise Bilgi' bannerını gizle (minified JS'in ürettiği) — yerine chip+modal var
+(function(){
+    var styleId = 'acik-lise-suppress-style';
+    if (document.getElementById(styleId)) return;
+    var s = document.createElement('style');
+    s.id = styleId;
+    s.textContent = '#acik-lise-warn { display:none !important; }';
+    document.head.appendChild(s);
+})();
+
+// Conditional 1: Açık Lise (her durumda) → mavi 'Bilgi' chip + Studienkolleg modal
+(function(){
+    var typeEl = document.querySelector('select[name="high_school_type"]');
+    if (!typeEl) return;
+
+    var chipId = 'acik-lise-info-chip';
+    var modalId = 'acik-lise-info-modal';
+    var typeGroup = document.querySelector('.form-group[data-field-key="high_school_type"]');
+
+    function buildInfoModal(){
+        if (document.getElementById(modalId)) return;
+        var modal = document.createElement('div');
+        modal.id = modalId;
+        modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:99998;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);align-items:center;justify-content:center;padding:20px;';
+        modal.innerHTML = [
+            '<div style="background:#fff;border-radius:14px;max-width:520px;width:100%;padding:22px 26px;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative;">',
+            '  <button type="button" data-close-modal style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8;line-height:1;padding:4px;">×</button>',
+            '  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">',
+            '    <div style="font-size:24px;">ℹ️</div>',
+            '    <div style="font-weight:800;font-size:16px;color:#1e40af;">Açık Lise Mezunları İçin Bilgi</div>',
+            '  </div>',
+            '  <div style="font-size:13px;line-height:1.65;color:#1f2937;margin-bottom:14px;">',
+            '    Açık lise diploması ile Almanya\'da lisans başvurusu yapabilmek için ek koşullar gerekebilir. Üniversiteler genellikle <strong>Studienkolleg</strong> (hazırlık okulu) tamamlanmasını ya da ek denklik belgesi isteyebilir.',
+            '  </div>',
+            '  <div style="font-size:12px;color:#64748b;margin-bottom:14px;">Danışmanın durumunu değerlendirip sana özel yol haritası sunacaktır. Bu formu doldurmaya devam edebilirsin.</div>',
+            '  <button type="button" data-close-modal style="background:#1e40af;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">Anladım</button>',
+            '</div>'
+        ].join('');
+        document.body.appendChild(modal);
+        modal.addEventListener('click', function(e){
+            if (e.target === modal || e.target.dataset.closeModal !== undefined || (e.target.closest && e.target.closest('[data-close-modal]'))) {
+                modal.style.display = 'none';
+            }
+        });
+    }
+
+    function openInfoModal(){
+        buildInfoModal();
+        var m = document.getElementById(modalId);
+        if (m) m.style.display = 'flex';
+    }
+
+    function ensureInfoChip(){
+        var c = document.getElementById(chipId);
+        if (c) return c;
+        if (!typeGroup) return null;
+        c = document.createElement('button');
+        c.id = chipId;
+        c.type = 'button';
+        c.style.cssText = [
+            'margin-top:6px',
+            'display:inline-flex',
+            'align-items:center',
+            'gap:6px',
+            'padding:5px 12px',
+            'border-radius:14px',
+            'border:1px solid #93c5fd',
+            'background:#eff6ff',
+            'color:#1e40af',
+            'font-size:11px',
+            'font-weight:600',
+            'cursor:pointer',
+            'line-height:1.4',
+            'font-family:inherit',
+            'width:fit-content'
+        ].join(';');
+        c.innerHTML = '<span style="font-size:13px;">ℹ️</span><span>Açık lise için bilgi — </span><span style="text-decoration:underline;">Detay</span>';
+        c.addEventListener('click', openInfoModal);
+        typeGroup.appendChild(c);
+        return c;
+    }
+
+    function applyInfo(){
+        var v = (typeEl.value || '').toLowerCase();
+        var existing = document.getElementById(chipId);
+        if (v === 'acik_lise') {
+            if (!existing) ensureInfoChip();
+        } else {
+            if (existing) existing.remove();
+        }
+    }
+
+    typeEl.addEventListener('change', applyInfo);
+    typeEl.addEventListener('input', applyInfo);
+    applyInfo();
+})();
+
+// Conditional 2: Açık Lise + lise diploma notu ≤ 50 → kırmızı 'Tavsiye var' chip + kritik modal
 (function(){
     var typeEl = document.querySelector('select[name="high_school_type"]');
     var gradeEl = document.querySelector('input[name="high_school_grade"]');
