@@ -193,6 +193,42 @@
     border-radius: 4px; padding: 2px 6px; font-size: 10px; font-family: inherit;
 }
 
+/* Checkbox group — Multi-select kartlı grid (biggest_concerns) */
+.cbx-grid {
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:10px;
+    padding:10px;
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    border-radius:8px;
+}
+.cbx-grid .cbx-item {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 14px; background:#fff;
+    border:1.5px solid #e2e8f0; border-radius:7px;
+    cursor:pointer; font-size:13px; line-height:1.35;
+    min-height:46px;
+    transition:border-color .15s, background .15s, box-shadow .15s;
+}
+.cbx-grid .cbx-item:hover { border-color:var(--u-brand,#2563eb); background:#fbfdff; }
+.cbx-grid .cbx-item input[type=checkbox] { flex-shrink:0; width:16px; height:16px; margin:0; cursor:pointer; }
+.cbx-grid .cbx-item:has(input[type=checkbox]:checked) {
+    border-color:var(--u-brand,#2563eb);
+    background:rgba(37,99,235,.05);
+    box-shadow:0 0 0 2px rgba(37,99,235,.06);
+}
+.cbx-grid .cbx-item:has(input[type=checkbox]:checked) .cbx-label {
+    color:var(--u-brand,#2563eb);
+    font-weight:600;
+}
+.cbx-grid .cbx-label {
+    flex:1; text-align:left; color:var(--u-text,#0f172a); font-weight:500;
+    word-break:break-word;
+}
+@media (max-width:720px) { .cbx-grid { grid-template-columns:repeat(2, 1fr); } }
+@media (max-width:420px) { .cbx-grid { grid-template-columns:1fr; } }
+
 /* Panels (JS compat) */
 .grf-panel { display: none; }
 .grf-panel.active { display: block; animation: grfFadeUp .4s ease; }
@@ -392,11 +428,11 @@
                                                 $rawValues = is_array($value) ? $value : (is_string($value) && $value !== '' ? (json_decode($value, true) ?? []) : []);
                                                 $checkedSet = collect($rawValues)->map(fn ($v) => (string) $v)->all();
                                             @endphp
-                                            <div class="checkbox-group" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;padding:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;">
+                                            <div class="cbx-grid">
                                                 @foreach(($field['options'] ?? []) as $opt)
-                                                    <label style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#fff;border:1px solid #e2e8f0;border-radius:5px;cursor:pointer;font-size:12px;">
+                                                    <label class="cbx-item">
                                                         <input type="checkbox" name="{{ $key }}[]" value="{{ $opt['value'] }}" @checked(in_array((string)$opt['value'], $checkedSet, true))>
-                                                        <span>{{ $opt['label'] }}</span>
+                                                        <span class="cbx-label">{{ $opt['label'] }}</span>
                                                     </label>
                                                 @endforeach
                                             </div>
