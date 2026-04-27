@@ -45,9 +45,49 @@ class GuestRegistrationFormCatalog
     }
 
     /**
+     * Level filtreli grup listesi.
+     *
+     * @param int $level 1 = sadece level=1 işaretli field'lar (Level 1 form'u için),
+     *                   2 = tüm field'lar (Level 2 form'u — mevcut davranış)
+     * @return array<int,array<string,mixed>>
+     */
+    public static function groupsByLevel(int $level = 2): array
+    {
+        $allGroups = self::allGroups();
+        if ($level >= 2) {
+            return $allGroups;
+        }
+
+        // Level 1 için filtrele: sadece level=1 işaretli field'ları içeren grupları döndür.
+        // Tamamen boşalan grupları çıkar.
+        return collect($allGroups)
+            ->map(function (array $group) use ($level): array {
+                $filtered = collect($group['fields'] ?? [])
+                    ->filter(fn (array $f) => (int) ($f['level'] ?? 2) <= $level)
+                    ->values()
+                    ->all();
+                $group['fields'] = $filtered;
+                return $group;
+            })
+            ->filter(fn (array $g) => !empty($g['fields']))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Geriye dönük uyumluluk — mevcut Level 2 davranışı.
      * @return array<int,array<string,mixed>>
      */
     public static function groups(): array
+    {
+        return self::groupsByLevel(2);
+    }
+
+    /**
+     * Tüm groups (filtre uygulanmamış ham hali).
+     * @return array<int,array<string,mixed>>
+     */
+    private static function allGroups(): array
     {
         return [
             [
@@ -283,12 +323,45 @@ class GuestRegistrationFormCatalog
      */
     public static function flatFields(): array
     {
-        return collect(self::groups())
+        return self::flatFieldsByLevel(2);
+    }
+
+    /**
+     * Level filtreli düz field listesi.
+     * @return array<int,array<string,mixed>>
+     */
+    public static function flatFieldsByLevel(int $level = 2): array
+    {
+        return collect(self::groupsByLevel($level))
             ->flatMap(fn (array $g) => (array) ($g['fields'] ?? []))
             ->values()
             ->all();
     }
 
+    /**
+     * @return array<int,string>
+     */
+    public static function requiredKeysByLevel(int $level = 2): array
+    {
+        return self::requiredKeysByFields(self::flatFieldsByLevel($level));
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    public static function sanitizePayloadByLevel(array $input, int $level = 2): array
+    {
+        return self::sanitizePayloadByFields($input, self::flatFieldsByLevel($level));
+    }
+
+    /**
+     * Field tanımı.
+     *
+     * @param int $level 1 = Level 1+2'de görünür (cumulative subset),
+     *                   2 = sadece Level 2'de görünür (default — mevcut field'lar).
+     *                   Apply'dan gelen field'lar (first_name, gender, vs.) level=1
+     *                   işaretlenir; view tarafında readonly badge ile gösterilir.
+     */
     private static function f(
         string $key,
         string $label,
@@ -297,7 +370,8 @@ class GuestRegistrationFormCatalog
         int $max = 255,
         string $placeholder = '',
         array $options = [],
-        string $help_text = ''
+        string $help_text = '',
+        int $level = 2
     ): array {
         return [
             'key' => $key,
@@ -308,6 +382,7 @@ class GuestRegistrationFormCatalog
             'placeholder' => $placeholder,
             'options' => $options,
             'help_text' => $help_text,
+            'level' => $level,
         ];
     }
 
