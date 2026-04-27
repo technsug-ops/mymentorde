@@ -67,11 +67,12 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::patch('/manager/guests/{guest}/status',          [ManagerPortalController::class, 'guestUpdateStatus'])->name('manager.guests.status');
     Route::patch('/manager/guests/{guest}/assign',          [ManagerPortalController::class, 'guestAssignSenior'])->name('manager.guests.assign');
 
-    // ─── Lead Pipeline Kanban (Marketing Admin'den bağımsız) ─────────────────
+    // ─── Lead Pipeline Oversight (gözetim — operasyonel iş Senior'da) ────────
     $leadPipeline = \App\Http\Controllers\Manager\LeadPipelineController::class;
-    Route::get('/manager/pipeline/kanban',                  [$leadPipeline, 'kanban'])->name('manager.pipeline.kanban');
-    Route::get('/manager/pipeline/kanban/poll',             [$leadPipeline, 'kanbanPoll'])->name('manager.pipeline.kanban.poll');
-    Route::post('/manager/pipeline/kanban/{guest}/move',    [$leadPipeline, 'kanbanMove'])->name('manager.pipeline.kanban.move');
+    Route::get('/manager/pipeline/oversight',               [$leadPipeline, 'oversight'])->name('manager.pipeline.oversight');
+    Route::get('/manager/pipeline/oversight/poll',          [$leadPipeline, 'poll'])->name('manager.pipeline.oversight.poll');
+    // Eski /kanban URL'i oversight'a yönlendir (sidebar/bookmark uyumluluğu)
+    Route::redirect('/manager/pipeline/kanban', '/manager/pipeline/oversight', 301);
     Route::get('/manager/students',                         [ManagerPortalController::class, 'students'])->name('manager.students');
     Route::get('/manager/students/export-csv',              [ManagerPortalController::class, 'studentsExportCsv'])->name('manager.students.export-csv');
     Route::get('/manager/students/{studentId}',             [ManagerPortalController::class, 'studentShow'])->name('manager.students.show');

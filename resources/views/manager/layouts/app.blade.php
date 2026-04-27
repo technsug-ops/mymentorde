@@ -223,9 +223,9 @@
                    class="nav-link {{ request()->is('manager/guests*') ? 'active' : '' }}">
                     <span class="nav-icon">👤</span> Aday Öğrenci Yönetimi
                 </a>
-                <a href="/manager/pipeline/kanban"
+                <a href="/manager/pipeline/oversight"
                    class="nav-link {{ request()->is('manager/pipeline*') ? 'active' : '' }}">
-                    <span class="nav-icon">🗂</span> Lead Pipeline (Kanban)
+                    <span class="nav-icon">🛰</span> Lead Pipeline Oversight
                 </a>
                 <a href="/manager/students"
                    class="nav-link {{ request()->is('manager/students*') ? 'active' : '' }}">
