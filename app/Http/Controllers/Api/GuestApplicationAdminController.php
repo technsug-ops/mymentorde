@@ -140,12 +140,15 @@ class GuestApplicationAdminController extends Controller
         $this->createInitialInternalNote($assignment->student_id, $guestApplication, $request);
         $welcomeInfo = $this->queueWelcomeNotifications($assignment->student_id, (string) ($assignment->senior_email ?? ''), $guestApplication, $request);
 
-        $guestApplication->update([
+        // converted_to_student + registration_form_level $fillable dışında — forceFill gerekli
+        $guestApplication->forceFill([
             'converted_to_student' => true,
             'converted_student_id' => $assignment->student_id,
             'lead_status' => 'contract_signed',
+            // 3-Level state transition: student'a dönüşünce Level 2 form bekler
+            'registration_form_level' => 'level_2_pending',
             'status_message' => 'Student kaydi acildi: '.$assignment->student_id.($welcomeInfo ? " | {$welcomeInfo}" : ''),
-        ]);
+        ])->save();
 
         // Portal kullanicisi varsa rolunu 'student' yap ve student_id ata
         if ((int) ($guestApplication->guest_user_id ?? 0) > 0) {

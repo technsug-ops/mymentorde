@@ -250,6 +250,12 @@ class WorkflowController extends Controller
         $guest->status_message = $warnings->isNotEmpty()
             ? 'Form gonderildi (uyari ile). Danisman incelemesi bekleniyor.'
             : 'On kayit formu gonderildi. Danisman incelemesi bekleniyor.';
+
+        // 3-Level state transition: Level 1 submit → 'level_1_done', sözleşme akışı tetiklenebilir
+        if ($formLevel === 1) {
+            $guest->registration_form_level = 'level_1_done';
+        }
+
         $guest->save();
         $this->createRegistrationSnapshot($guest, $request, $mergedDraft, $warnings->count());
         $this->taskAutomationService->ensureGuestRegistrationReviewTask($guest);
