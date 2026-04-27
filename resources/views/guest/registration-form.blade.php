@@ -665,42 +665,46 @@
     apply();
 })();
 
-// Eski büyük 'Açık Lise Bilgi' bannerını gizle (minified JS'in ürettiği) — yerine chip+modal var
+// =============================================================
+// Unified Notice System — TÜM uyarılar aynı görsel dilde.
+// Kullanım: window.MentorNotice.attach({ key, parent, severity, label, modalTitle, modalBody, modalCta })
+// Severity: 'info' (mavi), 'warning' (sarı), 'danger' (kırmızı)
+// Tüm chip'ler: aynı boyut/animasyon/hover; sadece renk değişir.
+// =============================================================
 (function(){
-    var styleId = 'acik-lise-suppress-style';
-    if (document.getElementById(styleId)) return;
-    var s = document.createElement('style');
-    s.id = styleId;
-    s.textContent = '#acik-lise-warn { display:none !important; }';
-    document.head.appendChild(s);
-})();
+    if (window.MentorNotice) return;
 
-// Conditional 1: Açık Lise (her durumda) → mavi 'Bilgi' chip + Studienkolleg modal
-(function(){
-    var typeEl = document.querySelector('select[name="high_school_type"]');
-    if (!typeEl) return;
+    // Global keyframes (idempotent) + eski açık lise sarı banner gizle
+    var st = document.createElement('style');
+    st.textContent = '@keyframes mn-pulse-info { 0%,100% { box-shadow:0 4px 12px rgba(30,64,175,.18); } 50% { box-shadow:0 4px 18px rgba(30,64,175,.36); } } '
+        + '@keyframes mn-pulse-warning { 0%,100% { box-shadow:0 4px 12px rgba(217,119,6,.18); } 50% { box-shadow:0 4px 18px rgba(217,119,6,.36); } } '
+        + '@keyframes mn-pulse-danger { 0%,100% { box-shadow:0 4px 12px rgba(220,38,38,.18); } 50% { box-shadow:0 4px 18px rgba(220,38,38,.40); } } '
+        + '#acik-lise-warn { display:none !important; }';
+    document.head.appendChild(st);
 
-    var chipId = 'acik-lise-info-chip';
-    var modalId = 'acik-lise-info-modal';
-    var typeGroup = document.querySelector('.form-group[data-field-key="high_school_type"]');
+    var SEVERITY = {
+        info:    { border:'#1e40af', bg:'#dbeafe', fg:'#1e3a8a', cta:'#1e40af', icon:'ℹ️' },
+        warning: { border:'#d97706', bg:'#fef3c7', fg:'#92400e', cta:'#d97706', icon:'⚠️' },
+        danger:  { border:'#dc2626', bg:'#fee2e2', fg:'#991b1b', cta:'#dc2626', icon:'⚠️' }
+    };
 
-    function buildInfoModal(){
-        if (document.getElementById(modalId)) return;
+    function buildModal(opts, theme){
+        var modalId = 'mn-modal-' + opts.key;
+        if (document.getElementById(modalId)) return modalId;
+
         var modal = document.createElement('div');
         modal.id = modalId;
         modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:99998;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);align-items:center;justify-content:center;padding:20px;';
         modal.innerHTML = [
-            '<div style="background:#fff;border-radius:14px;max-width:520px;width:100%;padding:22px 26px;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative;">',
+            '<div style="background:#fff;border-radius:14px;max-width:520px;width:100%;padding:24px 26px;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative;">',
             '  <button type="button" data-close-modal style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8;line-height:1;padding:4px;">×</button>',
-            '  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">',
-            '    <div style="font-size:24px;">ℹ️</div>',
-            '    <div style="font-weight:800;font-size:16px;color:#1e40af;">Açık Lise Mezunları İçin Bilgi</div>',
+            '  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">',
+            '    <div style="font-size:28px;">' + theme.icon + '</div>',
+            '    <div style="font-weight:800;font-size:17px;color:' + theme.fg + ';">' + (opts.modalTitle || 'Bilgilendirme') + '</div>',
             '  </div>',
-            '  <div style="font-size:13px;line-height:1.65;color:#1f2937;margin-bottom:14px;">',
-            '    Açık lise diploması ile Almanya\'da lisans başvurusu yapabilmek için ek koşullar gerekebilir. Üniversiteler genellikle <strong>Studienkolleg</strong> (hazırlık okulu) tamamlanmasını ya da ek denklik belgesi isteyebilir.',
-            '  </div>',
-            '  <div style="font-size:12px;color:#64748b;margin-bottom:14px;">Danışmanın durumunu değerlendirip sana özel yol haritası sunacaktır. Bu formu doldurmaya devam edebilirsin.</div>',
-            '  <button type="button" data-close-modal style="background:#1e40af;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">Anladım</button>',
+            '  <div style="font-size:13px;line-height:1.65;color:#1f2937;margin-bottom:14px;">' + (opts.modalBody || '') + '</div>',
+            opts.modalNote ? '<div style="font-size:12px;color:#64748b;margin-bottom:16px;">' + opts.modalNote + '</div>' : '',
+            '  <button type="button" data-close-modal style="background:' + theme.cta + ';color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">' + (opts.modalCta || 'Anladım') + '</button>',
             '</div>'
         ].join('');
         document.body.appendChild(modal);
@@ -709,19 +713,12 @@
                 modal.style.display = 'none';
             }
         });
+        return modalId;
     }
 
-    function openInfoModal(){
-        buildInfoModal();
-        var m = document.getElementById(modalId);
-        if (m) m.style.display = 'flex';
-    }
-
-    function ensureInfoChip(){
-        var c = document.getElementById(chipId);
-        if (c) return c;
-        if (!typeGroup) return null;
-        c = document.createElement('button');
+    function buildChip(opts, theme){
+        var chipId = 'mn-chip-' + opts.key;
+        var c = document.createElement('button');
         c.id = chipId;
         c.type = 'button';
         c.style.cssText = [
@@ -731,157 +728,119 @@
             'gap:10px',
             'padding:10px 18px',
             'border-radius:10px',
-            'border:2px solid #1e40af',
-            'background:#dbeafe',
-            'color:#1e3a8a',
+            'border:2px solid ' + theme.border,
+            'background:' + theme.bg,
+            'color:' + theme.fg,
             'font-size:13px',
             'font-weight:700',
             'cursor:pointer',
             'line-height:1.4',
             'font-family:inherit',
             'width:fit-content',
-            'box-shadow:0 4px 12px rgba(30,64,175,0.18)',
-            'animation:acikLiseInfoPulse 2.5s ease-in-out infinite',
+            'animation:mn-pulse-' + (opts.severity || 'info') + ' 2.5s ease-in-out infinite',
             'transition:transform .15s'
         ].join(';');
         c.onmouseover = function(){ this.style.transform='translateY(-1px)'; };
         c.onmouseout = function(){ this.style.transform=''; };
-        c.innerHTML = '<span style="font-size:18px;">ℹ️</span><span>Açık lise için önemli bilgi</span><span style="background:#1e40af;color:#fff;padding:3px 10px;border-radius:14px;font-size:11px;font-weight:800;">Detay →</span>';
-        // Pulse keyframes (idempotent)
-        if (!document.getElementById('acik-lise-pulse-keyframes')) {
-            var kf = document.createElement('style');
-            kf.id = 'acik-lise-pulse-keyframes';
-            kf.textContent = '@keyframes acikLiseInfoPulse { 0%,100% { box-shadow:0 4px 12px rgba(30,64,175,0.18); } 50% { box-shadow:0 4px 18px rgba(30,64,175,0.36); } } @keyframes acikLiseWarnPulse { 0%,100% { box-shadow:0 4px 12px rgba(220,38,38,0.18); } 50% { box-shadow:0 4px 18px rgba(220,38,38,0.40); } }';
-            document.head.appendChild(kf);
-        }
-        c.addEventListener('click', openInfoModal);
-        typeGroup.appendChild(c);
+        c.innerHTML = '<span style="font-size:18px;">' + theme.icon + '</span>'
+            + '<span>' + (opts.label || 'Bilgi') + '</span>'
+            + '<span style="background:' + theme.cta + ';color:#fff;padding:3px 10px;border-radius:14px;font-size:11px;font-weight:800;">Detay →</span>';
         return c;
     }
 
-    function applyInfo(){
-        var v = (typeEl.value || '').toLowerCase();
-        var existing = document.getElementById(chipId);
-        if (v === 'acik_lise') {
-            if (!existing) ensureInfoChip();
-        } else {
-            if (existing) existing.remove();
-        }
-    }
+    window.MentorNotice = {
+        // Bir chip'i parent içine inject et / kaldır.
+        attach: function(opts){
+            // opts: { key, parent (DOM), severity, label, modalTitle, modalBody, modalNote, modalCta, autoOpen }
+            var theme = SEVERITY[opts.severity] || SEVERITY.info;
+            var chipId = 'mn-chip-' + opts.key;
+            if (document.getElementById(chipId)) return; // zaten var
 
-    typeEl.addEventListener('change', applyInfo);
-    typeEl.addEventListener('input', applyInfo);
-    applyInfo();
+            var modalId = buildModal(opts, theme);
+            var chip = buildChip(opts, theme);
+            chip.addEventListener('click', function(){
+                var m = document.getElementById(modalId);
+                if (m) m.style.display = 'flex';
+            });
+            opts.parent.appendChild(chip);
+
+            if (opts.autoOpen) {
+                var m = document.getElementById(modalId);
+                if (m) m.style.display = 'flex';
+            }
+        },
+        detach: function(key){
+            var c = document.getElementById('mn-chip-' + key);
+            if (c) c.remove();
+        }
+    };
 })();
 
-// Conditional 2: Açık Lise + lise diploma notu ≤ 50 → kırmızı 'Tavsiye var' chip + kritik modal
+// Açık Lise — info chip (her durumda, type seçilirse)
+(function(){
+    var typeEl = document.querySelector('select[name="high_school_type"]');
+    if (!typeEl) return;
+    var typeGroup = document.querySelector('.form-group[data-field-key="high_school_type"]');
+
+    function apply(){
+        var v = (typeEl.value || '').toLowerCase();
+        if (v === 'acik_lise') {
+            window.MentorNotice.attach({
+                key: 'acik-lise-info',
+                parent: typeGroup,
+                severity: 'info',
+                label: 'Açık lise için önemli bilgi',
+                modalTitle: 'Açık Lise Mezunları İçin Bilgi',
+                modalBody: 'Açık lise diploması ile Almanya\'da lisans başvurusu yapabilmek için ek koşullar gerekebilir. Üniversiteler genellikle <strong>Studienkolleg</strong> (hazırlık okulu) tamamlanmasını ya da ek denklik belgesi isteyebilir.',
+                modalNote: 'Danışmanın durumunu değerlendirip sana özel yol haritası sunacaktır.'
+            });
+        } else {
+            window.MentorNotice.detach('acik-lise-info');
+        }
+    }
+    typeEl.addEventListener('change', apply);
+    typeEl.addEventListener('input', apply);
+    apply();
+})();
+
+// Açık Lise + diploma notu ≤ 50 — danger chip + auto-open ilk tetiklemede
 (function(){
     var typeEl = document.querySelector('select[name="high_school_type"]');
     var gradeEl = document.querySelector('input[name="high_school_grade"]');
     if (!typeEl || !gradeEl) return;
-
-    var chipId = 'acik-lise-low-grade-chip';
-    var modalId = 'acik-lise-low-grade-modal';
     var gradeGroup = document.querySelector('.form-group[data-field-key="high_school_grade"]');
-    var autoOpened = false; // İlk tetiklemede modal otomatik açılır, sonradan sadece chip
+    var autoOpened = false;
 
-    function buildModal(){
-        if (document.getElementById(modalId)) return;
-        var modal = document.createElement('div');
-        modal.id = modalId;
-        modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);align-items:center;justify-content:center;padding:20px;';
-        modal.innerHTML = [
-            '<div style="background:#fff;border-radius:14px;max-width:520px;width:100%;padding:24px 26px;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative;">',
-            '  <button type="button" data-close-modal style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8;line-height:1;padding:4px;">×</button>',
-            '  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">',
-            '    <div style="font-size:28px;">⚠️</div>',
-            '    <div style="font-weight:800;font-size:17px;color:#991b1b;">Lütfen Danışmanınla Görüş</div>',
-            '  </div>',
-            '  <div style="font-size:13px;line-height:1.65;color:#1f2937;margin-bottom:14px;">',
-            '    Açık lise + 50 ve altı not ortalaması ile Almanya\'ya <strong>lise mezunu öğrenci olarak gelmen oldukça zor</strong>. Alman üniversiteleri bu profilde ek koşullar arar (Studienkolleg, denklik, ek sınavlar vb.).',
-            '  </div>',
-            '  <div style="padding:12px 14px;background:#f0fdf4;border-left:3px solid #16a34a;border-radius:0 8px 8px 0;font-size:13px;line-height:1.6;color:#166534;margin-bottom:14px;">',
-            '    <strong>💡 Tavsiyemiz:</strong> Türkiye\'de bir üniversitede <strong>en az 1 yıl</strong> öğrenim gördükten sonra Almanya\'ya gelmen — başvuru şansını ciddi şekilde artırır.',
-            '  </div>',
-            '  <div style="font-size:12px;color:#64748b;margin-bottom:16px;">Kayıt sürecine devam edebilirsin, danışmanın seninle iletişime geçecek.</div>',
-            '  <button type="button" data-close-modal style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">Anladım, devam et</button>',
-            '</div>'
-        ].join('');
-        document.body.appendChild(modal);
-
-        modal.addEventListener('click', function(e){
-            if (e.target === modal || e.target.dataset.closeModal !== undefined || (e.target.closest && e.target.closest('[data-close-modal]'))) {
-                modal.style.display = 'none';
-            }
-        });
-    }
-
-    function openModal(){
-        buildModal();
-        var m = document.getElementById(modalId);
-        if (m) m.style.display = 'flex';
-    }
-
-    function ensureChip(){
-        var c = document.getElementById(chipId);
-        if (c) return c;
-        if (!gradeGroup) return null;
-        c = document.createElement('button');
-        c.id = chipId;
-        c.type = 'button';
-        c.style.cssText = [
-            'margin-top:6px',
-            'display:inline-flex',
-            'align-items:center',
-            'gap:6px',
-            'padding:5px 12px',
-            'border-radius:14px',
-            'border:1px solid #fca5a5',
-            'background:#fef2f2',
-            'color:#991b1b',
-            'font-size:11px',
-            'font-weight:600',
-            'cursor:pointer',
-            'line-height:1.4',
-            'font-family:inherit',
-            'width:fit-content'
-        ].join(';');
-        c.innerHTML = '<span style="font-size:13px;">⚠️</span><span>Tavsiye var — </span><span style="text-decoration:underline;">Detay</span>';
-        c.addEventListener('click', openModal);
-        gradeGroup.appendChild(c);
-        return c;
-    }
-
-    function applyAcikLiseLowGradeWarn(){
+    function apply(){
         var type = (typeEl.value || '').toLowerCase();
         var raw = (gradeEl.value || '').toString().replace(',', '.').trim();
         var grade = parseFloat(raw);
-        var existing = document.getElementById(chipId);
-
         var trigger = (type === 'acik_lise' && !isNaN(grade) && grade > 0 && grade <= 50);
 
         if (!trigger) {
-            if (existing) existing.remove();
+            window.MentorNotice.detach('acik-lise-low-grade');
             autoOpened = false;
             return;
         }
 
-        if (!existing) {
-            ensureChip();
-        }
-
-        // İlk tetiklenmede modal'ı otomatik aç (kullanıcı dikkatini çek)
-        if (!autoOpened) {
-            autoOpened = true;
-            openModal();
-        }
+        window.MentorNotice.attach({
+            key: 'acik-lise-low-grade',
+            parent: gradeGroup,
+            severity: 'danger',
+            label: 'Lütfen danışmanınla görüş',
+            modalTitle: 'Lütfen Danışmanınla Görüş',
+            modalBody: 'Açık lise + 50 ve altı not ortalaması ile Almanya\'ya <strong>lise mezunu öğrenci olarak gelmen oldukça zor</strong>. Alman üniversiteleri bu profilde ek koşullar arar (Studienkolleg, denklik, ek sınavlar vb.).<br><br><strong style="color:#166534;">💡 Tavsiyemiz:</strong> Türkiye\'de bir üniversitede <strong>en az 1 yıl</strong> öğrenim gördükten sonra Almanya\'ya gelmen — başvuru şansını ciddi şekilde artırır.',
+            modalNote: 'Kayıt sürecine devam edebilirsin, danışmanın seninle iletişime geçecek.',
+            autoOpen: !autoOpened
+        });
+        autoOpened = true;
     }
 
-    typeEl.addEventListener('change', applyAcikLiseLowGradeWarn);
-    typeEl.addEventListener('input', applyAcikLiseLowGradeWarn);
-    gradeEl.addEventListener('input', applyAcikLiseLowGradeWarn);
-    gradeEl.addEventListener('change', applyAcikLiseLowGradeWarn);
-    applyAcikLiseLowGradeWarn();
+    typeEl.addEventListener('change', apply);
+    typeEl.addEventListener('input', apply);
+    gradeEl.addEventListener('input', apply);
+    gradeEl.addEventListener('change', apply);
+    apply();
 })();
 
 // Conditional: has_passport='yes' → pasaport detay alanları + tipi badge'i (S=Yeşil/Sondernpass, Diğer=Reisepass)
