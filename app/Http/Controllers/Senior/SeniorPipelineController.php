@@ -26,8 +26,11 @@ class SeniorPipelineController extends Controller
         $seniorEmail = $this->seniorEmail($request);
         $companyId   = $request->user()?->company_id;
 
+        // SECURITY: Senior yalnızca kendisine atanmış guest'leri görür.
+        // Manager/Marketing tüm pipeline'a erişebilir; bu controller senior'a özel.
         $guests = GuestApplication::query()
             ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->where('assigned_senior_email', $seniorEmail)
             ->whereNull('deleted_at')
             ->orderByDesc('updated_at')
             ->limit(1000)
@@ -57,14 +60,17 @@ class SeniorPipelineController extends Controller
 
     public function guestPipelinePoll(Request $request)
     {
-        $companyId = $request->user()?->company_id;
-        $since     = $request->query('since');
+        $companyId   = $request->user()?->company_id;
+        $seniorEmail = $this->seniorEmail($request);
+        $since       = $request->query('since');
 
-        $cacheKey = 'pipeline_poll_' . (int) $companyId;
+        // SECURITY: Cache key senior'a özel — başka senior'un cache'ini görmesin.
+        $cacheKey = 'pipeline_poll_' . (int) $companyId . '_' . md5($seniorEmail);
 
-        $rows = \Illuminate\Support\Facades\Cache::remember($cacheKey, 10, function () use ($companyId) {
+        $rows = \Illuminate\Support\Facades\Cache::remember($cacheKey, 10, function () use ($companyId, $seniorEmail) {
             return GuestApplication::query()
                 ->when($companyId, fn($q) => $q->where('company_id', $companyId))
+                ->where('assigned_senior_email', $seniorEmail)
                 ->whereNull('deleted_at')
                 ->limit(1000)
                 ->get(['id', 'lead_status', 'pipeline_moved_by', 'updated_at']);
@@ -93,6 +99,16 @@ class SeniorPipelineController extends Controller
             ->whereNull('deleted_at')
             ->first();
         abort_if(!$guestModel, 404);
+
+        // SECURITY: Senior yalnızca kendisine atanmış guest'i taşıyabilir.
+        // Cross-tenant ve cross-senior data manipulation engelle.
+        $seniorEmail = $this->seniorEmail($request);
+        abort_if(
+            (string) ($guestModel->assigned_senior_email ?? '') !== $seniorEmail,
+            403,
+            'Bu aday size atanmamış — pipeline aşaması değiştiremezsiniz.'
+        );
+
         $guest = $guestModel;
 
         $oldStage = $guest->lead_status;
