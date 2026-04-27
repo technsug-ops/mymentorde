@@ -356,15 +356,15 @@
     @if($allPrereqsDone)
         {{-- Tüm ön koşullar tamam — yeşil hero, aktif buton --}}
         <div class="gc-hero teal">
-            <div class="gc-hero-badge"><span class="pulse"></span> Siradaki adim</div>
-            <div class="gc-hero-title">Sözleşme talebini oluştur</div>
-            <div class="gc-hero-sub">Ön koşulların tamamlandı. Talep butonuna tıkladığında danışmanın sözleşmeni hazırlayacak ve sana iletecek.</div>
+            <div class="gc-hero-badge"><span class="pulse"></span> Sıra sende</div>
+            <div class="gc-hero-title">Sözleşmen için her şey hazır</div>
+            <div class="gc-hero-sub">Aşağıdaki butona basınca danışmanın sözleşmeni hazırlayacak ve sana iletecek. Birkaç dakika sürebilir.</div>
             <form method="POST" action="{{ route('guest.contract.request') }}" id="contractRequestForm" style="display:inline;">
                 @csrf
-                <button type="submit" class="gc-hero-btn" id="contractRequestButton">📄 Sözleşme Talep Et</button>
+                <button type="submit" class="gc-hero-btn" id="contractRequestButton">📄 Sözleşmemi Hazırla</button>
             </form>
             <div class="gc-hero-meta">
-                <span>⏱️ Hazırlanma suresi: ~1 iş günü</span>
+                <span>⏱️ Hazırlanma süresi: ~1 iş günü</span>
                 <span>📧 E-posta ile bilgilendirileceksin</span>
             </div>
         </div>
@@ -389,17 +389,17 @@
         {{-- Eksik ön koşul var — gri hero, disabled + açıklayıcı buton --}}
         @php $missingList = collect($prereqs)->where('done', false); @endphp
         <div class="gc-hero" style="background:linear-gradient(135deg,#f1f5f9 0%,#e2e8f0 100%);color:#334155;">
-            <div class="gc-hero-badge" style="background:rgba(100,116,139,.12);color:#475569;"><span>🔒</span> Henüz talep edilemez</div>
-            <div class="gc-hero-title" style="color:#0f172a;">Sözleşme talebi için {{ $missingList->count() }} adım eksik</div>
+            <div class="gc-hero-badge" style="background:rgba(100,116,139,.12);color:#475569;"><span>🔒</span> Henüz hazır değil</div>
+            <div class="gc-hero-title" style="color:#0f172a;">Önce aşağıdaki {{ $missingList->count() }} adımı tamamla</div>
             <div class="gc-hero-sub" style="color:#475569;">
-                Sözleşme talep edebilmen için aşağıdaki adımları tamamlamalısın. Eksikleri bitirince buton otomatik olarak aktif olacak.
+                Önce paket seçimini yap, ardından sözleşmen burada hazırlanacak. Eksikleri bitirince butonu otomatik açacağız.
             </div>
             <button type="button"
                     class="gc-hero-btn"
                     disabled
                     style="opacity:.5;cursor:not-allowed;background:#94a3b8;"
-                    title="Ön koşullar tamamlanmadan talep edilemez">
-                🔒 Sözleşme Talep Et ({{ $missingList->count() }} eksik)
+                    title="Eksik adımlar tamamlanmadan başlatılamaz">
+                🔒 Sözleşmemi Hazırla ({{ $missingList->count() }} eksik)
             </button>
             <div class="gc-hero-meta" style="color:#64748b;">
                 <span>📋 Eksik adım sayısı: {{ $missingList->count() }}</span>
@@ -431,12 +431,12 @@
 ══════════════════════════════════════════ --}}
 @if($status === 'pending_manager')
     <div class="gc-hero blue">
-        <div class="gc-hero-badge"><span class="pulse"></span> Danışman calisiyor</div>
+        <div class="gc-hero-badge"><span class="pulse"></span> Hazırlanıyor</div>
         <div class="gc-hero-title">Sözleşmen hazırlanıyor</div>
-        <div class="gc-hero-sub">Talebini aldik. Danışmanin sözleşmeni hazırlayıp sisteme yükleyecek. Hazir oldugunda e-posta ile bilgilendirileceksin.</div>
+        <div class="gc-hero-sub">Birkaç dakika sürebilir. Hazır olduğunda e-posta ile haber vereceğiz; bu sayfaya geri dönüp imzalayabilirsin.</div>
         <div class="gc-hero-meta">
             <span>⏱️ Tahmini: 1 iş günü</span>
-            <span>📧 E-posta bildirimi alacaksin</span>
+            <span>📧 E-posta bildirimi alacaksın</span>
         </div>
     </div>
 
@@ -454,15 +454,15 @@
     @endif
 
     <div style="display:flex;gap:8px;margin-bottom:20px;">
-        <form method="POST" action="{{ route('guest.contract.withdraw') }}" onsubmit="return confirm('Sözleşme talebinizi geri çekmek istediğinize emin misiniz?');">
+        <form method="POST" action="{{ route('guest.contract.withdraw') }}" onsubmit="return confirm('Sözleşme hazırlığını geri çekmek istediğinize emin misiniz?');">
             @csrf
-            <button type="submit" class="btn warn" style="font-size:var(--tx-xs);">Talebi Geri Cek</button>
+            <button type="submit" class="btn warn" style="font-size:var(--tx-xs);">Hazırlığı Geri Çek</button>
         </form>
     </div>
 
     <div class="gc-tip">
         <div class="gc-tip-icon">☕</div>
-        <div><h5>Şu an yapman gereken bir sey yok</h5><p>Danışmanin sözleşmeyi hazirlarken sen rahatlıkla bekleyebilirsin.</p></div>
+        <div><h5>Şu an yapman gereken bir şey yok</h5><p>Sözleşmen hazırlanırken sen rahatça bekleyebilirsin.</p></div>
     </div>
 @endif
 
@@ -471,9 +471,9 @@
 ══════════════════════════════════════════ --}}
 @if(in_array($status, ['requested', 'rejected'], true))
     <div class="gc-hero {{ $status === 'rejected' ? 'purple' : 'purple' }}">
-        <div class="gc-hero-badge"><span class="pulse"></span> {{ $status === 'rejected' ? 'Düzeltme gerekli' : 'Senin siran' }}</div>
-        <div class="gc-hero-title">{{ $status === 'rejected' ? 'Sözleşmeni düzelt ve tekrar imzala' : 'Sözleşmeni oku ve imzala' }}</div>
-        <div class="gc-hero-sub">{{ $status === 'rejected' ? 'Sözleşmen reddedildi. Aşağıdaki imza seçeneklerini kullanarak düzeltilmis sözleşmeyi tekrar gönderebilirsin.' : 'Danışmanin sözleşmeyi hazırladı. Aşağıda okuyup imzalayabilir veya imzalı dosyayi yükleyebilirsin.' }}</div>
+        <div class="gc-hero-badge"><span class="pulse"></span> {{ $status === 'rejected' ? 'Düzeltme gerekli' : 'Sıra sende' }}</div>
+        <div class="gc-hero-title">{{ $status === 'rejected' ? 'Sözleşmende düzeltme gerekiyor' : 'Sözleşmen hazır. İncele ve imzala' }}</div>
+        <div class="gc-hero-sub">{{ $status === 'rejected' ? 'Danışmanın seninle iletişime geçecek. Düzeltilmiş sözleşmeyi aşağıdan inceleyip tekrar imzalayabilirsin.' : 'Aşağıda sözleşme metnini okuyabilirsin. Okuduktan sonra dijital imza atabilir ya da imzalı PDF yükleyebilirsin.' }}</div>
     </div>
 
     {{-- Contract viewer --}}
@@ -614,12 +614,12 @@
 ══════════════════════════════════════════ --}}
 @if($status === 'signed_uploaded')
     <div class="gc-hero amber">
-        <div class="gc-hero-badge"><span class="pulse"></span> Firma inceliyor</div>
-        <div class="gc-hero-title">İmzalı sözleşmen gonderildi</div>
-        <div class="gc-hero-sub">Danışmanin imzalı sözleşmeni inceliyor. Onaylandıginda resmi {{ config('brand.name', 'MentorDE') }} ogrencisi olacaksin!</div>
+        <div class="gc-hero-badge"><span class="pulse"></span> Onay bekleniyor</div>
+        <div class="gc-hero-title">İmzaladın!</div>
+        <div class="gc-hero-sub">Sözleşmen danışmanının onayını bekliyor (1-2 iş günü). Onaylandığında resmi {{ config('brand.name', 'MentorDE') }} öğrencisi olacaksın!</div>
         <div class="gc-hero-meta">
             <span>⏱️ Tahmini: 1-2 iş günü</span>
-            <span>📧 Sonuc e-posta ile bildirilecek</span>
+            <span>📧 Sonuç e-posta ile bildirilecek</span>
         </div>
     </div>
 
@@ -648,8 +648,8 @@
 @if($status === 'approved')
     <div class="gc-celebrate">
         <div class="emoji">🎓</div>
-        <h2>Tebrikler!</h2>
-        <p>Sözleşmen onaylandi. Artik resmi {{ config('brand.name', 'MentorDE') }} ogrencisisin! Almanya yolculugun resmen basladi.</p>
+        <h2>Tebrikler! 🎉</h2>
+        <p>Sözleşmen aktif. Resmen {{ config('brand.name', 'MentorDE') }} öğrencisisin! Almanya yolculuğun resmen başladı.</p>
     </div>
 
     <div class="gc-info-grid">

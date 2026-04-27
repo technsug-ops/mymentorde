@@ -215,7 +215,7 @@
                 </a>
                 <a href="{{ route('guest.contract') }}"
                    class="nav-link {{ request()->routeIs('guest.contract') ? 'active' : '' }}">
-                    <span class="nav-icon">📜</span> Sözleşmem
+                    <span class="nav-icon">📜</span> Sözleşme Sürecim
                 </a>
                 <a href="{{ route('guest.timeline') }}"
                    class="nav-link {{ request()->routeIs('guest.timeline') ? 'active' : '' }}">
