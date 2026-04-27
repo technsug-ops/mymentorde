@@ -618,6 +618,10 @@
 
     // Cascade Flatpickr'ın onChange callback'inden tetikleniyor (yukarıda)
     // Sayfa yüklendiğinde başlangıç durumunu uygula
+    // Sync çağrı — Flatpickr init synchronous, instance'lar hazır
+    _applyParentBirthMax();
+    _applySchoolCascade();
+    // Yedek timeout — bazı tarayıcılarda DOM ready timing'i için
     setTimeout(function(){
         _applyParentBirthMax();
         _applySchoolCascade();
