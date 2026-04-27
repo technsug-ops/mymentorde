@@ -149,8 +149,16 @@ class GuestRegistrationFieldSchemaService
             'german_course_name',
             'teacher_reference_contact',
             'germany_stay_date_range',
+            'germany_stay_from',
+            'germany_stay_to',
             'germany_last_residences',
+            'germany_references',
             'other_language_level',
+            // Level 2 conditional detail field'ları (yes/no sorularına bağlı)
+            'visa_history_details',
+            'abroad_experience_details',
+            'health_condition_details',
+            'other_country_details',
         ];
 
         // Level 1'e özel koşullu (UI'da JS ile gizlenebiliyor — required kontrolünde çıkar)

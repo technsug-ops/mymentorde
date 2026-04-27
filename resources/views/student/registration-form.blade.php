@@ -7,7 +7,9 @@
 
 {{-- Flatpickr — kullanıcı dostu tarih seçici (yıl/ay dropdown'lı, TR locale) --}}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/plugins/monthSelect/style.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/plugins/monthSelect/index.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/tr.js" defer></script>
 <style>
 /* Flatpickr — proje teması ile uyum */
@@ -480,13 +482,16 @@
         return;
     }
 
+    var trLocale = (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.tr) ? flatpickr.l10ns.tr : 'default';
+
+    // type=date — gün/ay/yıl picker
     document.querySelectorAll('input[type="date"]').forEach(function(el){
         var minAttr = el.getAttribute('min');
         var maxAttr = el.getAttribute('max');
         var isBirth = el.name === 'birth_date';
 
         flatpickr(el, {
-            locale: (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.tr) ? flatpickr.l10ns.tr : 'default',
+            locale: trLocale,
             dateFormat: 'Y-m-d',
             altInput: true,
             altFormat: 'd.m.Y',
@@ -496,6 +501,25 @@
             defaultDate: el.value || (isBirth ? new Date(new Date().getFullYear() - 25, 0, 1) : null),
             disableMobile: false,
             monthSelectorType: 'dropdown',
+        });
+    });
+
+    // type=month — sadece ay/yıl picker (Flatpickr monthSelect plugin)
+    document.querySelectorAll('input[type="month"]').forEach(function(el){
+        if (typeof window.monthSelectPlugin === 'undefined') return;
+        flatpickr(el, {
+            locale: trLocale,
+            dateFormat: 'Y-m',
+            altInput: true,
+            altFormat: 'F Y',
+            allowInput: true,
+            defaultDate: el.value || null,
+            disableMobile: false,
+            plugins: [new monthSelectPlugin({
+                shorthand: false,
+                dateFormat: 'Y-m',
+                altFormat: 'F Y',
+            })],
         });
     });
 })();
