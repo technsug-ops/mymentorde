@@ -168,16 +168,18 @@ class GuestRegistrationFormCatalog
                 'title' => 'Eğitim Geçmişi',
                 'fields' => [
                     // Sadece Level 2 (en yüksek eğitim seviyesi — tüm ilk-orta-lise tarihleri)
+                    // Tüm okul tarihleri ay+yıl formatında (YYYY-MM) — gün bilgisi alınmaz
                     self::f('education_level', 'Eğitim seviyeniz *', 'select', true, 60, options: self::educationLevelOptions()),
-                    self::f('primary_start_date', 'İlkokul başlama tarihi *', 'date', true, 20),
-                    self::f('primary_end_date', 'İlkokul bitirme tarihi *', 'date', true, 20),
+                    self::f('primary_start_date', 'İlkokul başlama (ay/yıl) *', 'month', true, 7, placeholder: 'YYYY-MM'),
+                    self::f('primary_end_date', 'İlkokul bitirme (ay/yıl) *', 'month', true, 7, placeholder: 'YYYY-MM'),
                     self::f('primary_grade', 'İlkokul mezuniyet ortalaması', 'text', false, 32),
-                    self::f('middle_start_date', 'Ortaokul başlama tarihi *', 'date', true, 20),
-                    self::f('middle_end_date', 'Ortaokul bitirme tarihi *', 'date', true, 20),
+                    self::f('middle_start_date', 'Ortaokul başlama (ay/yıl) *', 'month', true, 7, placeholder: 'YYYY-MM'),
+                    self::f('middle_end_date', 'Ortaokul bitirme (ay/yıl) *', 'month', true, 7, placeholder: 'YYYY-MM'),
                     self::f('middle_grade', 'Ortaokul mezuniyet ortalaması', 'text', false, 32),
                     self::f('middle_school_name', 'Mezun olduğunuz ortaokul *', 'text', true, 180),
-                    self::f('high_start_date', 'Lise başlama tarihi *', 'date', true, 20),
-                    self::f('high_end_date', 'Lise mezuniyet tarihi *', 'date', true, 20),
+                    // Lise tarih alanları — Level 1+2 ortak (mezuniyet tarihi Level 1'de de sorulur)
+                    self::f('high_start_date', 'Lise başlama (ay/yıl) *', 'month', true, 7, placeholder: 'YYYY-MM', level: 1),
+                    self::f('high_end_date', 'Lise mezuniyet tarihi (ay/yıl) *', 'month', true, 7, placeholder: 'YYYY-MM', level: 1),
                     self::f('high_school_name', 'Mezun olduğunuz lise *', 'text', true, 180),
                     // Level 1 (User: Lise türü + diploma notu)
                     self::f(
@@ -191,8 +193,6 @@ class GuestRegistrationFormCatalog
                         level: 1
                     ),
                     self::f('high_school_grade', 'Lise mezuniyet ortalamanız (100 üzerinden) *', 'text', true, 32, level: 1),
-                    // Level 1 yeni — sadece yıl bilgisi (Level 2'de high_end_date tam tarih ile birlikte yaşar)
-                    self::f('high_school_grad_year', 'Lise mezuniyet yılınız *', 'text', true, 4, placeholder: 'Örn: 2024', level: 1),
                     // Level 1 yeni — yükseköğretim DURUMU (mevcut education_level "en yüksek seviye"den farklı concept)
                     self::f(
                         'higher_education_status',
@@ -434,6 +434,27 @@ class GuestRegistrationFormCatalog
                     }
                 }
 
+                $out[$key] = $txt;
+                continue;
+            }
+
+            if ($type === 'month') {
+                // YYYY-MM formatı — okul başlama/bitirme tarihleri
+                $txt = trim((string) $val);
+                if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $txt)) {
+                    $out[$key] = null;
+                    continue;
+                }
+                // Geçmiş tarih kontrolü — okul başlama/bitirme gelecekte olamaz
+                $todayMonth = now()->format('Y-m');
+                if (in_array($key, [
+                    'primary_start_date', 'primary_end_date',
+                    'middle_start_date', 'middle_end_date',
+                    'high_start_date', 'high_end_date',
+                ], true) && $txt > $todayMonth) {
+                    $out[$key] = null;
+                    continue;
+                }
                 $out[$key] = $txt;
                 continue;
             }
