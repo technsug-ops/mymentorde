@@ -394,7 +394,8 @@
                                         if ($key === 'application_country') {
                                             $value = \App\Support\GuestRegistrationFormCatalog::normalizeCountryValue($value);
                                         }
-                                        $isFilled    = trim((string)$value) !== '';
+                                        // checkbox_group gibi multi-select field'larda $value array olabilir.
+                                        $isFilled    = is_array($value) ? !empty($value) : trim((string)$value) !== '';
                                         // help_text varsa otomatik wide YAPMA — kısa help'ler 2-col'da kalır.
                                         // Sadece açıkça uzun help_text (200+ char) ve textarea/email/address/motivation wide.
                                         $hasLongHelp = !empty($field['help_text']) && mb_strlen((string) $field['help_text']) > 200;
