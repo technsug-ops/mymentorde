@@ -240,53 +240,99 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
     </div>
 </div>
 
-{{-- ── Müdahale Gerekli Widget (Lead Pipeline Oversight'a kısayollar) ── --}}
+{{-- ── Müdahale Gerekli Widget (Lead Pipeline + Ops alerts birleşik) ── --}}
 @php
     $iv = $interventions ?? ['unassigned'=>0,'hot_no_contact'=>0,'overdue'=>0,'total_active'=>0];
-    $hasAlerts = $iv['unassigned'] > 0 || $iv['hot_no_contact'] > 0 || $iv['overdue'] > 0;
+
+    // Tüm alarm kartları — her biri ayrı tipte ama aynı widget içinde grid'leniyor.
+    // Sadece >0 olanlar gösterilir, auto-fit grid 3-4'lü dağılım yapar.
+    $alertCards = [];
+    if ($iv['unassigned'] > 0) $alertCards[] = [
+        'cnt'=>$iv['unassigned'], 'icon'=>'👤',
+        'title'=>'Atanmamış Lead',
+        'hint'=>'Senior atanmasını bekliyor',
+        'href'=>'/manager/pipeline/oversight?risk=unassigned',
+        'tone'=>'danger',
+    ];
+    if ($iv['hot_no_contact'] > 0) $alertCards[] = [
+        'cnt'=>$iv['hot_no_contact'], 'icon'=>'🔥',
+        'title'=>'Hot — Kontak Yok',
+        'hint'=>'Acil senior aksiyon gerekli',
+        'href'=>'/manager/pipeline/oversight?risk=hot_no_contact',
+        'tone'=>'danger',
+    ];
+    if ($iv['overdue'] > 0) $alertCards[] = [
+        'cnt'=>$iv['overdue'], 'icon'=>'⏰',
+        'title'=>'Geciken Lead (5+ gün)',
+        'hint'=>'5+ gün hareketsiz',
+        'href'=>'/manager/pipeline/oversight?risk=overdue',
+        'tone'=>'warn',
+    ];
+    if (($stats['overdue_outcomes'] ?? 0) > 0) $alertCards[] = [
+        'cnt'=>$stats['overdue_outcomes'], 'icon'=>'📋',
+        'title'=>'Geciken Outcome',
+        'hint'=>'Deadline geçmiş süreç adımı',
+        'href'=>'/manager/requests',
+        'tone'=>'danger',
+    ];
+    if (($stats['pending_approvals'] ?? 0) > 0) $alertCards[] = [
+        'cnt'=>$stats['pending_approvals'], 'icon'=>'✅',
+        'title'=>'Bekleyen Onay',
+        'hint'=>'Onayın için sırada',
+        'href'=>'/manager/requests',
+        'tone'=>'warn',
+    ];
+    if (($stats['upcoming_outcomes'] ?? 0) > 0) $alertCards[] = [
+        'cnt'=>$stats['upcoming_outcomes'], 'icon'=>'📅',
+        'title'=>'7 Gün İçinde Deadline',
+        'hint'=>'Önceliklendirilecek',
+        'href'=>'/manager/requests',
+        'tone'=>'warn',
+    ];
+    if (($stats['notification_failed'] ?? 0) > 0) $alertCards[] = [
+        'cnt'=>$stats['notification_failed'], 'icon'=>'🔔',
+        'title'=>'Bildirim Hatası',
+        'hint'=>'Email/push gönderilemedi',
+        'href'=>'/manager/notification-stats',
+        'tone'=>'danger',
+    ];
+
+    $hasAlerts = !empty($alertCards);
 @endphp
-@if($iv['total_active'] > 0)
+@if($iv['total_active'] > 0 || $hasAlerts)
 <div style="margin-bottom:18px;padding:14px 16px;background:{{ $hasAlerts ? '#fef2f2' : '#f0fdf4' }};border:1px solid {{ $hasAlerts ? '#fecaca' : '#bbf7d0' }};border-radius:10px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:{{ $hasAlerts ? '12px' : '0' }};">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:{{ $hasAlerts ? '12px' : '0' }};gap:12px;flex-wrap:wrap;">
         <div>
             <div style="font-size:13px;font-weight:800;color:{{ $hasAlerts ? '#991b1b' : '#166534' }};display:flex;align-items:center;gap:8px;">
                 <span style="font-size:18px;">{{ $hasAlerts ? '⚠' : '✓' }}</span>
-                {{ $hasAlerts ? 'Müdahale Gerekli — Ekibinin Pipeline\'ında Risk Var' : 'Pipeline Sağlıklı — Müdahale Gerektiren Vaka Yok' }}
+                {{ $hasAlerts ? 'Müdahale Gerekli — Sana Bekleyen Aksiyonlar' : 'Pipeline Sağlıklı — Müdahale Gerektiren Vaka Yok' }}
             </div>
             <div style="font-size:11px;color:{{ $hasAlerts ? '#7f1d1d' : '#15803d' }};margin-top:3px;">
-                {{ $iv['total_active'] }} aktif lead · Senior'lar bağımsız çalışır, sen sadece sorunlu vakalara müdahale et
+                @if($iv['total_active'] > 0){{ $iv['total_active'] }} aktif lead · @endif
+                Senior'lar bağımsız çalışır, sen sadece sorunlu vakalara müdahale et
             </div>
         </div>
-        <a href="/manager/pipeline/oversight" style="font-size:11px;font-weight:700;padding:7px 14px;border-radius:6px;background:{{ $hasAlerts ? '#dc2626' : '#16a34a' }};color:#fff;text-decoration:none;">
+        <a href="/manager/pipeline/oversight" style="font-size:11px;font-weight:700;padding:7px 14px;border-radius:6px;background:{{ $hasAlerts ? '#dc2626' : '#16a34a' }};color:#fff;text-decoration:none;flex-shrink:0;">
             🛰 Oversight Paneline Git →
         </a>
     </div>
 
     @if($hasAlerts)
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
-        @if($iv['unassigned'] > 0)
-        <a href="/manager/pipeline/oversight?risk=unassigned" style="display:block;padding:11px 14px;background:#fff;border:1px solid #fecaca;border-radius:8px;text-decoration:none;color:inherit;transition:transform .1s,box-shadow .1s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(220,38,38,.12)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
-            <div style="font-size:10px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Atanmamış</div>
-            <div style="font-size:24px;font-weight:800;color:#dc2626;line-height:1;">{{ $iv['unassigned'] }}</div>
-            <div style="font-size:10px;color:#7f1d1d;margin-top:4px;">Senior atanmasını bekliyor →</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
+        @foreach($alertCards as $card)
+        @php
+            $borderColor = $card['tone'] === 'danger' ? '#fecaca' : '#fde68a';
+            $valueColor  = $card['tone'] === 'danger' ? '#dc2626' : '#d97706';
+            $titleColor  = $card['tone'] === 'danger' ? '#991b1b' : '#92400e';
+            $hintColor   = $card['tone'] === 'danger' ? '#7f1d1d' : '#92400e';
+            $shadowRgb   = $card['tone'] === 'danger' ? '220,38,38' : '217,119,6';
+        @endphp
+        <a href="{{ $card['href'] }}" style="display:block;padding:11px 14px;background:#fff;border:1px solid {{ $borderColor }};border-radius:8px;text-decoration:none;color:inherit;transition:transform .1s,box-shadow .1s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba({{ $shadowRgb }},.12)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div style="font-size:10px;font-weight:700;color:{{ $titleColor }};text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">{{ $card['icon'] }} {{ $card['title'] }}</div>
+            <div style="font-size:24px;font-weight:800;color:{{ $valueColor }};line-height:1;">{{ $card['cnt'] }}</div>
+            <div style="font-size:10px;color:{{ $hintColor }};margin-top:4px;">{{ $card['hint'] }} →</div>
         </a>
-        @endif
-
-        @if($iv['hot_no_contact'] > 0)
-        <a href="/manager/pipeline/oversight?risk=hot_no_contact" style="display:block;padding:11px 14px;background:#fff;border:1px solid #fecaca;border-radius:8px;text-decoration:none;color:inherit;transition:transform .1s,box-shadow .1s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(220,38,38,.12)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
-            <div style="font-size:10px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">🔥 Hot — Kontak Yok</div>
-            <div style="font-size:24px;font-weight:800;color:#dc2626;line-height:1;">{{ $iv['hot_no_contact'] }}</div>
-            <div style="font-size:10px;color:#7f1d1d;margin-top:4px;">Acil senior aksiyon gerekli →</div>
-        </a>
-        @endif
-
-        @if($iv['overdue'] > 0)
-        <a href="/manager/pipeline/oversight?risk=overdue" style="display:block;padding:11px 14px;background:#fff;border:1px solid #fde68a;border-radius:8px;text-decoration:none;color:inherit;transition:transform .1s,box-shadow .1s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(217,119,6,.12)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
-            <div style="font-size:10px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">⏰ Geciken (5+ gün)</div>
-            <div style="font-size:24px;font-weight:800;color:#d97706;line-height:1;">{{ $iv['overdue'] }}</div>
-            <div style="font-size:10px;color:#92400e;margin-top:4px;">5+ gün hareketsiz lead →</div>
-        </a>
-        @endif
+        @endforeach
     </div>
     @endif
 </div>
@@ -504,28 +550,7 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
 
 </div>
 
-{{-- ── Bugün Aksiyon Merkezi (sadece sıfırdan farklı uyarılar) ── --}}
-@php
-    $actionItems = array_filter([
-        $stats['overdue_outcomes'] > 0 ? ['cnt' => $stats['overdue_outcomes'], 'label' => 'Geciken outcome', 'href' => '/manager/requests', 'cls' => 'danger', 'icon' => '⏰'] : null,
-        $stats['pending_approvals'] > 0 ? ['cnt' => $stats['pending_approvals'], 'label' => 'Bekleyen onay', 'href' => '/manager/requests', 'cls' => 'warn', 'icon' => '📋'] : null,
-        $stats['upcoming_outcomes'] > 0 ? ['cnt' => $stats['upcoming_outcomes'], 'label' => '7 gün içinde deadline', 'href' => '/manager/requests', 'cls' => 'warn', 'icon' => '📅'] : null,
-        $stats['notification_failed'] > 0 ? ['cnt' => $stats['notification_failed'], 'label' => 'Bildirim hatası', 'href' => '/manager/notification-stats', 'cls' => 'danger', 'icon' => '🔔'] : null,
-    ]);
-@endphp
-@if(!empty($actionItems))
-<div style="background:linear-gradient(135deg,#fef2f2 0%,#fff 100%);border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-    <span style="font-size:11px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0;">⚡ Aksiyon Bekliyor</span>
-    @foreach($actionItems as $item)
-    <a href="{{ $item['href'] }}" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#fff;border:1px solid {{ $item['cls'] === 'danger' ? '#fecaca' : '#fde68a' }};border-radius:20px;text-decoration:none;color:var(--u-text,#0f172a);font-size:12px;transition:all .12s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
-        <span>{{ $item['icon'] }}</span>
-        <strong style="color:{{ $item['cls'] === 'danger' ? '#dc2626' : '#d97706' }};font-weight:800;">{{ $item['cnt'] }}</strong>
-        <span>{{ $item['label'] }}</span>
-        <span style="color:var(--u-muted,#64748b);font-size:10px;">→</span>
-    </a>
-    @endforeach
-</div>
-@endif
+{{-- 'Aksiyon Bekliyor' bandı yukarıdaki birleşik 'Müdahale Gerekli' widget'ına taşındı. --}}
 
 {{-- Risk widget kaldırıldı — KPI tile'daki "N riskli" badge'ine tıklayarak popover açılıyor --}}
 
