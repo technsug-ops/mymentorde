@@ -240,27 +240,51 @@
     $completionPct = $requiredTotal > 0 ? (int)round(($requiredFilled / $requiredTotal) * 100) : 0;
     $groupCount = count($registrationFieldGroups ?? []);
 
-    // spouse_info section catalog'da section_order=15 (personal_info hemen sonrası).
-    // Evli değilse client-side JS bu adımı gizler. Etiket dizileri 8 girişli,
-    // index 1'de spouse_info'ya karşılık gelen entry var.
-    $stepIcons = ['👤', '💍', '📍', '🎓', '🗣️', '💰', '👨‍👩‍👧', '📂'];
-    $stepShortNames = ['Kişisel', 'Eş', 'Adres', 'Eğitim', 'Dil', 'Finans', 'Aile', 'Ek Bilgi'];
-    $stepWhys = [
-        'Üniversite başvurularında kimlik bilgilerin gerekli. Bu bilgiler sadece senin dosyanda kalır ve üçüncü kişilerle paylaşılmaz.',
-        'Evli iseniz eşinize ait kimlik ve iletişim bilgileri eş ikametgah / vize başvurusu için gerekli olabilir. Evli değilseniz bu adım atlanır.',
-        'Adres bilgilerin üniversite kabul mektuplarının gönderimi ve vize başvurun için kullanılacak.',
-        'Sana en uygun üniversite ve programı bulmamız için eğitim bilgilerin çok önemli.',
-        'Dil seviyen, hazırlık programı ihtiyacını ve başvurabileceğin üniversiteleri belirler.',
-        'Almanya vizesi için bloke hesap ve finansal yeterlilik gerekiyor. Bu bilgiler sana uygun burs ve finansman seçeneklerini bulmamızı sağlar.',
-        'Bazı üniversiteler ve burs programları veli bilgisi istiyor. Ayrıca acil durumda ulaşabileceğimiz bir kişi olması önemli.',
-        'Bu alan tamamen opsiyonel. Eklemek istediğin bilgi varsa buraya yazabilirsin.',
-    ];
+    // 3-Level form: $formLevel 1 ya da 2. Default 2 (geriye uyum).
+    $formLevel = $formLevel ?? 2;
+
+    if ($formLevel === 1) {
+        // Level 1 — 6 wizard yapısı (User'ın istediği)
+        $stepIcons = ['👤', '🎓', '🎯', '🗣️', '💰', '💭'];
+        $stepShortNames = ['Kişisel', 'Akademik', 'Hedef', 'Dil', 'Mali', 'Motivasyon'];
+        $stepWhys = [
+            'Apply formundan gelen kimlik bilgileri otomatik dolduruldu. Sadece doğum tarihini eklemen yeterli.',
+            'Lise türü ve mezuniyet bilgilerin akademik profil değerlendirmesi için gerekli. Üniversiteye devam ediyorsan kısaca onu da yaz.',
+            'Hangi bölümü/programı hedeflediğini bilmem, sana uygun üniversiteleri bulmam için kritik.',
+            'Almanca ve İngilizce seviyeni biliyorsam, dil hazırlık ihtiyacın olup olmadığını ve hangi üniversitelere başvurabileceğini netleştirebiliriz.',
+            'Vize için mali kanıt yöntemini erkenden planlamak süreci hızlandırır. Almanya\'da tanıdığın varsa not edelim.',
+            'En çok hangi konuda destek beklediğini bilirsem, görüşmemizi o yöne kurabiliriz.',
+        ];
+    } else {
+        // Level 2 — Mevcut 8 wizard (spouse_info section_order=15 ile evli ise araya girer)
+        $stepIcons = ['👤', '💍', '📍', '🎓', '🗣️', '💰', '👨‍👩‍👧', '📂', '💭'];
+        $stepShortNames = ['Kişisel', 'Eş', 'Adres', 'Eğitim', 'Dil', 'Finans', 'Aile', 'Ek Bilgi', 'Motivasyon'];
+        $stepWhys = [
+            'Üniversite başvurularında kimlik bilgilerin gerekli. Bu bilgiler sadece senin dosyanda kalır ve üçüncü kişilerle paylaşılmaz.',
+            'Evli iseniz eşinize ait kimlik ve iletişim bilgileri eş ikametgah / vize başvurusu için gerekli olabilir. Evli değilseniz bu adım atlanır.',
+            'Adres bilgilerin üniversite kabul mektuplarının gönderimi ve vize başvurun için kullanılacak.',
+            'Sana en uygun üniversite ve programı bulmamız için eğitim bilgilerin çok önemli.',
+            'Dil seviyen, hazırlık programı ihtiyacını ve başvurabileceğin üniversiteleri belirler.',
+            'Almanya vizesi için bloke hesap ve finansal yeterlilik gerekiyor. Bu bilgiler sana uygun burs ve finansman seçeneklerini bulmamızı sağlar.',
+            'Bazı üniversiteler ve burs programları veli bilgisi istiyor. Ayrıca acil durumda ulaşabileceğimiz bir kişi olması önemli.',
+            'Bu alan tamamen opsiyonel. Eklemek istediğin bilgi varsa buraya yazabilirsin.',
+            'Almanya\'da eğitim sürecindeki motivasyon ve hazırlık durumunu anlamamız sana özel rehberlik için faydalı olur.',
+        ];
+    }
 @endphp
 
 {{-- ── Topbar with Step Pills ── --}}
 <div class="grf-topbar">
     <div class="grf-topbar-left">
-        <div class="grf-topbar-title">Başvuru Formu</div>
+        <div class="grf-topbar-title">
+            @if($formLevel === 1)
+                Aday Öğrenci Başvuru Formu
+                <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:10px;background:#dbeafe;color:#1e40af;margin-left:8px;">Seviye 1 / 2</span>
+            @else
+                Başvuru Formu
+                <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:10px;background:#f3e8ff;color:#6b21a8;margin-left:8px;">Seviye 2 / 2 — Tam Form</span>
+            @endif
+        </div>
         <div class="grf-topbar-div"></div>
         <div class="grf-pills" id="grfPillNav">
             @foreach(($registrationFieldGroups ?? []) as $group)
@@ -343,6 +367,20 @@
                                                     <option value="{{ $opt['value'] }}" @selected((string)$value === (string)$opt['value'])>{{ $opt['label'] }}</option>
                                                 @endforeach
                                             </select>
+                                        @elseif($type === 'checkbox_group')
+                                            @php
+                                                // biggest_concerns gibi multi-select — JSON dizi olarak saklanır
+                                                $rawValues = is_array($value) ? $value : (is_string($value) && $value !== '' ? (json_decode($value, true) ?? []) : []);
+                                                $checkedSet = collect($rawValues)->map(fn ($v) => (string) $v)->all();
+                                            @endphp
+                                            <div class="checkbox-group" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;padding:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;">
+                                                @foreach(($field['options'] ?? []) as $opt)
+                                                    <label style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#fff;border:1px solid #e2e8f0;border-radius:5px;cursor:pointer;font-size:12px;">
+                                                        <input type="checkbox" name="{{ $key }}[]" value="{{ $opt['value'] }}" @checked(in_array((string)$opt['value'], $checkedSet, true))>
+                                                        <span>{{ $opt['label'] }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
                                         @elseif($type === 'textarea')
                                             <textarea class="{{ $required ? 'final-required' : '' }}" name="{{ $key }}" rows="4" maxlength="{{ $max }}" placeholder="{{ $placeholder }}" data-required="{{ $required ? '1' : '0' }}">{{ $value }}</textarea>
                                         @elseif($type === 'date')

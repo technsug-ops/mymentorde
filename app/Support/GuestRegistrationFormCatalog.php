@@ -402,6 +402,18 @@ class GuestRegistrationFormCatalog
                 continue;
             }
 
+            if ($type === 'checkbox_group') {
+                // Multi-select — array kabul, valid option'lara filtre
+                $arr = is_array($val) ? $val : [];
+                $options = array_column((array) ($field['options'] ?? []), 'value');
+                $out[$key] = collect($arr)
+                    ->map(fn ($v) => trim((string) $v))
+                    ->filter(fn ($v) => in_array($v, $options, true))
+                    ->values()
+                    ->all();
+                continue;
+            }
+
             $txt = trim((string) $val);
             $out[$key] = $txt === '' ? null : mb_substr($txt, 0, $max);
         }

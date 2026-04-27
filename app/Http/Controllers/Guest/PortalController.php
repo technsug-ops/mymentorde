@@ -345,7 +345,18 @@ class PortalController extends Controller
         $guest     = $this->resolveGuest($request);
         $data      = $this->viewData->build($request, $guest);
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
-        $data['registrationFieldGroups'] = app(GuestRegistrationFieldSchemaService::class)->groups($companyId);
+
+        // 3-Level form yönlendirme:
+        // - level_2_pending / level_2_done → Level 2 (mevcut tam form, ileri-uyumlu)
+        // - level_1_pending / level_1_done / null → Level 1 (yeni 6 wizard)
+        $formLevelStatus = (string) ($guest?->registration_form_level ?? 'level_1_pending');
+        $isLevel2 = in_array($formLevelStatus, ['level_2_pending', 'level_2_done'], true);
+        $formLevel = $isLevel2 ? 2 : 1;
+
+        $data['registrationFieldGroups'] = app(GuestRegistrationFieldSchemaService::class)
+            ->groupsByLevel($formLevel, $companyId);
+        $data['formLevel'] = $formLevel;
+        $data['formLevelStatus'] = $formLevelStatus;
 
         return view('guest.registration-form', $data);
     }

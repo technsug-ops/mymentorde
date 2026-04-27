@@ -12,6 +12,23 @@ use Illuminate\Support\Facades\Schema;
 class GuestRegistrationFieldSchemaService
 {
     /**
+     * Level filtreli grup listesi.
+     *
+     * Level 1 form'u sadece Catalog'tan gelir — guest_registration_fields DB
+     * tablosunda level metadatası yok, custom field'lar Level 2 için.
+     * Level 2 davranışı değişmez (DB → fallback Catalog).
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    public function groupsByLevel(int $level, int $companyId = 0): array
+    {
+        if ($level <= 1) {
+            return GuestRegistrationFormCatalog::groupsByLevel(1);
+        }
+        return $this->groups($companyId);
+    }
+
+    /**
      * @return array<int,array<string,mixed>>
      */
     public function groups(int $companyId = 0): array
