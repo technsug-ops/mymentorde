@@ -172,6 +172,9 @@
 /* Panels (JS compat) */
 .form-section { display: none; width: 100%; max-width: 680px; }
 .form-section.active { display: block; animation: srfFadeUp .4s ease; }
+/* Spouse section bekar/boşanmış/dul iken kesin gizli — .active class'ını override eder */
+.form-section.srf-section-skip,
+.form-section.srf-section-skip.active { display: none !important; animation: none !important; }
 @keyframes srfFadeUp {
     from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
@@ -776,6 +779,8 @@
             });
             if(!hasSpouseField) return;
             sec.dataset.spouseSection = '1';
+            // CSS class ile gizle (.active'i override eder)
+            sec.classList.toggle('srf-section-skip', !show);
             sec.style.display = show ? '' : 'none';
             var idx = sec.getAttribute('data-sec-index');
             if(idx !== null){
@@ -789,20 +794,29 @@
     var _srfLastDir = 1;
     document.getElementById('nextSectionBtn')?.addEventListener('click', function(){ _srfLastDir = 1; }, true);
     document.getElementById('prevSectionBtn')?.addEventListener('click', function(){ _srfLastDir = -1; }, true);
+    function _srfMaybeSkipSpouse(){
+        var active = document.querySelector('.form-section.active[data-spouse-section="1"]');
+        if(!active) return;
+        var sel = document.querySelector('[name="marital_status"]');
+        var married = sel && String(sel.value || '') === 'married';
+        if(married) return;
+        // Bekar/boşanmış/dul → spouse section atla
+        var btn = _srfLastDir === -1
+            ? document.getElementById('prevSectionBtn')
+            : document.getElementById('nextSectionBtn');
+        if(btn && !btn.disabled) {
+            // pillId'yi sıfır geçiş (pill tıklayışıyla aynı animasyon süresi olduğu için)
+            // 0ms setTimeout ile bir tick sonra tetikle
+            setTimeout(function(){ btn.click(); }, 0);
+        }
+    }
     (function(){
-        var obs = new MutationObserver(function(){
-            var active = document.querySelector('.form-section.active[data-spouse-section="1"]');
-            if(!active) return;
-            if(active.style.display === 'none'){
-                var btn = _srfLastDir === -1
-                    ? document.getElementById('prevSectionBtn')
-                    : document.getElementById('nextSectionBtn');
-                if(btn && !btn.disabled) setTimeout(function(){ btn.click(); }, 0);
-            }
-        });
+        var obs = new MutationObserver(function(){ _srfMaybeSkipSpouse(); });
         document.querySelectorAll('.form-section[data-sec-index]').forEach(function(s){
-            obs.observe(s, {attributes: true, attributeFilter: ['class']});
+            obs.observe(s, {attributes: true, attributeFilter: ['class', 'style']});
         });
+        // Sayfa açılışında da kontrol — eğer evli değilken spouse section active olarak başladıysa
+        setTimeout(_srfMaybeSkipSpouse, 100);
     })();
     // children_count: has_children === 'yes' ise görünür + number pattern
     function _applyChildrenCountVisibilityStudent(){
