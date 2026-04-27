@@ -1049,9 +1049,20 @@
 
     function _applyParentBirthMax(){
         var birthEl = document.querySelector('[name="birth_date"]');
-        if (!birthEl || !birthEl.value) return;
-        var maxParent = _yearsBefore(birthEl.value, 15);
-        ['father_birth_date', 'mother_birth_date', 'spouse_birth_date'].forEach(function(n){ _setMax(n, maxParent); });
+        if (birthEl && birthEl.value) {
+            var maxParent = _yearsBefore(birthEl.value, 15);
+            if (maxParent) {
+                _setMax('father_birth_date', maxParent);
+                _setMax('mother_birth_date', maxParent);
+            }
+            // İlkokul başlama: öğrenci 6 yaşında ve sonrası
+            var primaryMin = _yearsAfter(birthEl.value, 6);
+            if (primaryMin) _setMin('primary_start_date', primaryMin);
+        }
+        // Eşin doğum tarihi: bugünden en az 16 yıl önce (öğrenciden bağımsız)
+        var today = new Date();
+        var spouseMax = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
+        _setMax('spouse_birth_date', spouseMax);
     }
 
     var _grfCascade = [

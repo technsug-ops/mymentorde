@@ -556,14 +556,24 @@
     }
 
     // Kural 1: Anne/baba doğum tarihi → öğrencinin doğumundan en az 15 yıl önce
+    //          Eşin doğum tarihi → günümüzden en az 16 yıl önce (yaş kontrolü)
+    //          İlkokul başlama → öğrenci doğumundan en az 6 yıl sonra (okul yaşı)
     function _applyParentBirthMax(){
         var birthEl = document.querySelector('[name="birth_date"]');
-        if (!birthEl || !birthEl.value) return;
-        var maxParent = _yearsBefore(birthEl.value, 15);
-        if (!maxParent) return;
-        ['father_birth_date', 'mother_birth_date', 'spouse_birth_date'].forEach(function(name){
-            _setMax(name, maxParent);
-        });
+        if (birthEl && birthEl.value) {
+            var maxParent = _yearsBefore(birthEl.value, 15);
+            if (maxParent) {
+                _setMax('father_birth_date', maxParent);
+                _setMax('mother_birth_date', maxParent);
+            }
+            // İlkokul başlama: öğrenci 6 yaşında ve sonrası
+            var primaryMin = _yearsAfter(birthEl.value, 6);
+            if (primaryMin) _setMin('primary_start_date', primaryMin);
+        }
+        // Eşin doğum tarihi: bugünden en az 16 yıl önce (öğrenci doğumundan bağımsız)
+        var today = new Date();
+        var spouseMax = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
+        _setMax('spouse_birth_date', spouseMax);
     }
 
     // Kural 2: Okul tarihleri cascade — Türkiye sistemi (4+4+4) baz alınır
