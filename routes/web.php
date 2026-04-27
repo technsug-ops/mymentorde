@@ -229,6 +229,12 @@ Route::middleware(['company.context', 'module:booking'])->group(function (): voi
 });
 
 Route::middleware(['company.context'])->group(function () {
+    // Public Platform/SaaS tanıtım sayfası — modüller, kabiliyetler, partner + SaaS pricing
+    Route::get('/platform', fn () => view('public.platform-landing'))
+        ->middleware('throttle:120,1')->name('public.platform-landing');
+    Route::get('/saas',     fn () => redirect()->route('public.platform-landing'))->middleware('throttle:120,1');
+    Route::get('/urun',     fn () => redirect()->route('public.platform-landing'))->middleware('throttle:120,1');
+
     // Public Dealer Başvuru Formu — landing CTA'ları buraya yönlendirir
     $dealerApp = \App\Http\Controllers\Dealer\DealerApplicationController::class;
     Route::get('/satis-ortagi/basvuru',         [$dealerApp, 'create'])->middleware('throttle:30,1')->name('public.dealer-application.create');
