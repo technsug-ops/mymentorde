@@ -80,6 +80,16 @@ class GuestViewDataService
             // Tüm alanların (zorunlu + isteğe bağlı) doluluk oranı
             $formAllTotal  = (int) $allFields->count();
             $formAllFilled = (int) $allFields->filter($fieldChecker)->count();
+
+            // Eksik form alanlarının kullanıcı dostu label listesi (prereq chip'inde göstermek için)
+            $formMissingItems = $required
+                ->reject($fieldChecker)
+                ->map(fn ($f) => trim(rtrim((string) ($f['label'] ?? $f['key'] ?? ''), ' *')))
+                ->filter()
+                ->values()
+                ->all();
+        } else {
+            $formMissingItems = [];
         }
 
         // Form tamamlandı sayılması için: gönderilmiş + zorunlu alanlar dolu + genel doluluk >= %80
@@ -185,6 +195,7 @@ class GuestViewDataService
             'contractStatus'           => $contractStatus,
             'guestDmUnread'            => $guest ? $this->resolveGuestDmUnreadCount($guest) : 0,
             'missingRequiredDocuments' => $missingRequiredDocuments,
+            'formMissingItems'         => $formMissingItems,
             'socialProof'              => $this->resolveSocialProof(),
         ];
     }

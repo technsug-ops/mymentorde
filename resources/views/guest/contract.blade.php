@@ -222,10 +222,32 @@
         default                           => 'warn',
     };
 
+    // Her prereq için spesifik eksik liste — chip kutusu içinde tek bakışta görünür
+    $formMissingItems = collect($formMissingItems ?? []);
+    $docsMissingItems = collect($missingRequiredDocuments ?? [])->map(fn ($d) => (string) ($d['name'] ?? ''))->filter();
+
     $prereqs = [
-        ['label' => 'Kayıt Formu', 'done' => !empty($formCompleted), 'value' => !empty($formCompleted) ? 'Tamam' : 'Eksik', 'link' => route('guest.registration.form')],
-        ['label' => 'Belgeler',    'done' => !empty($docsCompleted), 'value' => !empty($docsCompleted) ? 'Tamam' : 'Eksik', 'link' => route('guest.registration.documents')],
-        ['label' => 'Paket',       'done' => !empty($packageSelected), 'value' => !empty($packageSelected) ? ($guest?->selected_package_title ?: 'Seçildi') : 'Yapılmadı', 'link' => route('guest.services')],
+        [
+            'label'         => 'Kayıt Formu',
+            'done'          => !empty($formCompleted),
+            'value'         => !empty($formCompleted) ? 'Tamam' : 'Eksik',
+            'link'          => route('guest.registration.form'),
+            'missing_items' => $formMissingItems->values()->all(),
+        ],
+        [
+            'label'         => 'Belgeler',
+            'done'          => !empty($docsCompleted),
+            'value'         => !empty($docsCompleted) ? 'Tamam' : 'Eksik',
+            'link'          => route('guest.registration.documents'),
+            'missing_items' => $docsMissingItems->values()->all(),
+        ],
+        [
+            'label'         => 'Paket',
+            'done'          => !empty($packageSelected),
+            'value'         => !empty($packageSelected) ? ($guest?->selected_package_title ?: 'Seçildi') : 'Yapılmadı',
+            'link'          => route('guest.services'),
+            'missing_items' => !empty($packageSelected) ? [] : ['Henüz paket seçimi yapılmadı'],
+        ],
     ];
     $allPrereqsDone = collect($prereqs)->every(fn($p) => $p['done']);
 
@@ -281,20 +303,42 @@
     @endforeach
 </div>
 
-{{-- ── Üst chip kutusu — eksik prereq'ler tek bakışta görünür ── --}}
+{{-- ── Üst chip kutusu — her eksik prereq spesifik eksiklerle birlikte ── --}}
 @if(!$allPrereqsDone)
 @php $missingCount = collect($prereqs)->where('done', false)->count(); @endphp
-<div style="background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+<div style="background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
         <span style="font-size:16px;color:var(--u-brand,#2563eb);">ℹ</span>
         <strong style="font-size:13px;color:var(--u-brand,#2563eb);">{{ $missingCount }} eksik adım var</strong>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:6px;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
         @foreach($prereqs as $p)
             @if(!$p['done'])
-            <a href="{{ $p['link'] }}" style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 12px;border-radius:8px;background:var(--u-card,#fff);border:1px solid rgba(37,99,235,.25);font-size:11px;font-weight:700;text-decoration:none;color:var(--u-brand,#2563eb);transition:all .15s;">
-                <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $p['label'] }}</span>
-                <span style="flex-shrink:0;">→</span>
+            @php
+                $items = collect($p['missing_items'] ?? []);
+                $shown = $items->take(3);
+                $remaining = max(0, $items->count() - 3);
+            @endphp
+            <a href="{{ $p['link'] }}" style="display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:10px;background:var(--u-card,#fff);border:1px solid rgba(37,99,235,.25);text-decoration:none;color:var(--u-brand,#2563eb);transition:all .15s;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+                    <strong style="font-size:13px;font-weight:800;">{{ $p['label'] }}</strong>
+                    <span style="font-size:11px;font-weight:700;">Tamamla →</span>
+                </div>
+                @if($shown->isNotEmpty())
+                <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:3px;">
+                    @foreach($shown as $item)
+                    <li style="font-size:11px;color:#475569;font-weight:500;display:flex;gap:5px;align-items:flex-start;line-height:1.45;">
+                        <span style="color:#dc2626;flex-shrink:0;">•</span>
+                        <span>{{ $item }}</span>
+                    </li>
+                    @endforeach
+                    @if($remaining > 0)
+                    <li style="font-size:10px;color:#94a3b8;font-weight:600;font-style:italic;margin-top:2px;">
+                        + {{ $remaining }} daha — {{ $remaining > 1 ? 'bunları' : 'bunu' }} doldurduğunda görünecek
+                    </li>
+                    @endif
+                </ul>
+                @endif
             </a>
             @endif
         @endforeach
