@@ -223,6 +223,10 @@
                    class="nav-link {{ request()->is('manager/guests*') ? 'active' : '' }}">
                     <span class="nav-icon">👤</span> Aday Öğrenci Yönetimi
                 </a>
+                <a href="/manager/pipeline/kanban"
+                   class="nav-link {{ request()->is('manager/pipeline*') ? 'active' : '' }}">
+                    <span class="nav-icon">🗂</span> Lead Pipeline (Kanban)
+                </a>
                 <a href="/manager/students"
                    class="nav-link {{ request()->is('manager/students*') ? 'active' : '' }}">
                     <span class="nav-icon">👨‍🎓</span> Öğrenciler

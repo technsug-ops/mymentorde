@@ -66,6 +66,12 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/guests/{guest}/documents/zip', [ManagerPortalController::class, 'guestDocumentsZip'])->name('manager.guest.documents.zip');
     Route::patch('/manager/guests/{guest}/status',          [ManagerPortalController::class, 'guestUpdateStatus'])->name('manager.guests.status');
     Route::patch('/manager/guests/{guest}/assign',          [ManagerPortalController::class, 'guestAssignSenior'])->name('manager.guests.assign');
+
+    // ─── Lead Pipeline Kanban (Marketing Admin'den bağımsız) ─────────────────
+    $leadPipeline = \App\Http\Controllers\Manager\LeadPipelineController::class;
+    Route::get('/manager/pipeline/kanban',                  [$leadPipeline, 'kanban'])->name('manager.pipeline.kanban');
+    Route::get('/manager/pipeline/kanban/poll',             [$leadPipeline, 'kanbanPoll'])->name('manager.pipeline.kanban.poll');
+    Route::post('/manager/pipeline/kanban/{guest}/move',    [$leadPipeline, 'kanbanMove'])->name('manager.pipeline.kanban.move');
     Route::get('/manager/students',                         [ManagerPortalController::class, 'students'])->name('manager.students');
     Route::get('/manager/students/export-csv',              [ManagerPortalController::class, 'studentsExportCsv'])->name('manager.students.export-csv');
     Route::get('/manager/students/{studentId}',             [ManagerPortalController::class, 'studentShow'])->name('manager.students.show');
