@@ -10,7 +10,7 @@ use App\Http\Controllers\Dealer\DealerProfileController;
 use App\Http\Controllers\DealerPortalController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['company.context', 'auth', 'dealer.role'])->group(function (): void {
+Route::middleware(['company.context', 'auth', 'dealer.role', 'module:dealer'])->group(function (): void {
     Route::get('/dealer/dashboard', [DealerPortalController::class, 'dashboard'])->name('dealer.dashboard');
 
     // ── Leads ─────────────────────────────────────────────────────────────────

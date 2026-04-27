@@ -17,6 +17,11 @@ use Illuminate\Support\Facades\DB;
 /**
  * Birleştirilmiş Lead Score servisi (v4.1).
  *
+ * **CORE servisi** — `marketing_admin` modülü kapalı şirketlerde dahi çalışır.
+ * Guest pipeline (form submit → senior assignment → conversion) bu servise
+ * bağımlıdır; modül gate'lenmez. Marketing Admin paneli yalnızca scoring
+ * KURALLARINI yönetir; skoring HESABI Core'da yaşar.
+ *
  * - recalculate() / recalculateForStudent() — senior aksiyon bazlı sabit faktörler
  * - addScore() / applyDecay() / getScoreBreakdown() — kural bazlı artımlı puanlama
  * - onTierChanged() — tier değişiminde otomatik görev + bildirim

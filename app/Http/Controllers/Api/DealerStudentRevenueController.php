@@ -35,6 +35,10 @@ class DealerStudentRevenueController extends Controller
             $data['dealer_type']
         );
 
+        if ($result === null) {
+            return response()->json(['error' => 'dealer_module_disabled'], Response::HTTP_FORBIDDEN);
+        }
+
         return response()->json($result, Response::HTTP_CREATED);
     }
 }

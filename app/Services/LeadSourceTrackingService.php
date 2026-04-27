@@ -7,6 +7,15 @@ use App\Models\LeadSourceDatum;
 use App\Models\MarketingCampaign;
 use App\Models\MarketingTrackingLink;
 
+/**
+ * Lead source / UTM / dealer attribution tracking servisi.
+ *
+ * **CORE servisi** — `marketing_admin` modülü kapalı şirketlerde dahi çalışır.
+ * Guest application capture + conversion akışı bu servise bağımlıdır; modül
+ * gate'lenmez. Marketing Admin paneli kapatılsa bile UTM/source veriler
+ * `lead_source_data` tablosuna düşmeye devam eder — manager portal sonradan
+ * modül açıldığında geriye dönük raporları görür.
+ */
 class LeadSourceTrackingService
 {
     public function captureFromGuestApplication(GuestApplication $guestApplication): LeadSourceDatum

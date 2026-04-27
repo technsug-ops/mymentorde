@@ -36,7 +36,7 @@ use App\Http\Controllers\MarketingAdmin\AnalyticsController;
 use App\Http\Controllers\MarketingAdmin\EmailDripController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['company.context', 'auth', 'marketing.access'])
+Route::middleware(['company.context', 'auth', 'marketing.access', 'module:marketing_admin'])
     ->prefix('mktg-admin')
     ->name('mktg-admin.')
     ->group(function (): void {
@@ -325,7 +325,7 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->prefix('mktg-adm
     Route::get('/manager-view/pipeline', [SalesPipelineController::class, 'managerView']);
 });
 
-Route::middleware(['company.context', 'auth', 'marketing.access'])->prefix('mktg-admin')->group(function (): void {
+Route::middleware(['company.context', 'auth', 'marketing.access', 'module:marketing_admin'])->prefix('mktg-admin')->group(function (): void {
     Route::get('/help', [HandbookController::class, 'marketing'])->name('marketing.handbook');
     Route::get('/help/download', [HandbookController::class, 'download'])->defaults('role', 'marketing')->name('marketing.handbook.download');
 

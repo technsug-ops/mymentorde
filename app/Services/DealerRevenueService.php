@@ -6,9 +6,19 @@ use App\Models\Dealer;
 use App\Models\DealerPayoutRequest;
 use App\Models\DealerRevenueMilestone;
 use App\Models\DealerStudentRevenue;
+use App\Support\ModuleAccess;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Dealer revenue tracking servisi.
+ *
+ * Modül guard: `dealer` modülü kapalı şirketlerde initialize/trigger/sync
+ * entry method'ları no-op döner. Caller'ın `if (ModuleAccess::enabled('dealer'))`
+ * ile sarmasına gerek yok — service kendisi self-aware. Stripe webhook,
+ * guest→student conversion ve milestone akışları modül kapalı bile olsa
+ * exception fırlatmadan devam eder.
+ */
 class DealerRevenueService
 {
     public function getActiveMilestones(): Collection
@@ -19,8 +29,12 @@ class DealerRevenueService
             ->get();
     }
 
-    public function initializeDealerStudentRevenue(string $dealerId, string $studentId, string $dealerType): DealerStudentRevenue
+    public function initializeDealerStudentRevenue(string $dealerId, string $studentId, string $dealerType): ?DealerStudentRevenue
     {
+        if (!ModuleAccess::enabled('dealer')) {
+            return null;
+        }
+
         $milestones = $this->getActiveMilestones()->filter(function (DealerRevenueMilestone $m) use ($dealerType) {
             $types = $m->applicable_dealer_types ?? [];
             return empty($types) || in_array($dealerType, $types, true);
@@ -52,6 +66,10 @@ class DealerRevenueService
      */
     public function triggerMilestonesForStudent(string $studentId, string $eventType): void
     {
+        if (!ModuleAccess::enabled('dealer')) {
+            return;
+        }
+
         $dsRevs = DealerStudentRevenue::query()->where('student_id', $studentId)->get();
         if ($dsRevs->isEmpty()) {
             return;
@@ -95,6 +113,10 @@ class DealerRevenueService
         string $milestoneExternalId,
         float $packageTotal
     ): void {
+        if (!ModuleAccess::enabled('dealer')) {
+            return;
+        }
+
         $dsRevs = DealerStudentRevenue::query()->where('student_id', $studentId)->get();
         if ($dsRevs->isEmpty()) {
             return;
