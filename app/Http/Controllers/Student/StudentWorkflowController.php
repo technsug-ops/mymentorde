@@ -134,6 +134,12 @@ class StudentWorkflowController extends Controller
             $schemaService->spouseSkippedKeys($payload),
         );
 
+        // Level 1'de zaten doldurulmuş olan field'ları Student form sorunu doğurmasın
+        // diye required check'ten muaf tut (Student form'unda gösterilmiyorlar).
+        $level1Keys = collect(\App\Support\GuestRegistrationFormCatalog::flatFieldsByLevel(1))
+            ->pluck('key')->filter()->all();
+        $skipKeys = array_merge($skipKeys, $level1Keys);
+
         // Field-specific hata mesajı için catalog'dan label + tip lookup
         $allFields = $schemaService->flatFieldsByLevel(2, $companyId);
         $fieldByKey = [];

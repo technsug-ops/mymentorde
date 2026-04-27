@@ -26,12 +26,27 @@ class StudentPortalController extends Controller
 
     public function registration(Request $request)
     {
-        $base      = $this->baseData($request, 'registration', 'Tam Kayıt Formu', 'Aday öğrenci formundaki bilgilerin otomatik dolduruldu. Eksik alanları tamamla.');
+        $base      = $this->baseData($request, 'registration', 'Tam Kayıt Formu', 'Aday formuna ek olarak detaylı başvuru bilgileri.');
         $guest     = $this->resolveStudentGuest($request);
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
 
-        // Student tarafı her zaman Level 2 (88 field tam form)
-        $fieldGroups = app(GuestRegistrationFieldSchemaService::class)->groupsByLevel(2, $companyId);
+        // Student tarafı SADECE Level 2'ye özel field'ları sorar.
+        // Level 1'de (Aday Öğrenci formunda) doldurulan alanlar burada tekrar
+        // sorulmaz — manager/senior gerekirse düzenler.
+        // Schema service Level 2 için DB'den çekebileceğinden field'lar level
+        // metadata'sız gelebilir. Bu yüzden Catalog'taki level=1 key listesini
+        // referans alıp key match ile çıkarıyoruz.
+        $level1Keys = collect(\App\Support\GuestRegistrationFormCatalog::flatFieldsByLevel(1))
+            ->pluck('key')->filter()->values()->all();
+
+        $allLevel2Groups = app(GuestRegistrationFieldSchemaService::class)->groupsByLevel(2, $companyId);
+        $fieldGroups = collect($allLevel2Groups)->map(function (array $group) use ($level1Keys): array {
+            $group['fields'] = collect($group['fields'] ?? [])
+                ->reject(fn (array $f) => in_array($f['key'] ?? '', $level1Keys, true))
+                ->values()
+                ->all();
+            return $group;
+        })->filter(fn (array $g) => !empty($g['fields']))->values()->all();
 
         if ($guest) {
             $guest->registration_form_draft = $this->ensureRegistrationDraftHydrated($guest, $companyId);
