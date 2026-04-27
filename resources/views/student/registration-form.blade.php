@@ -567,7 +567,9 @@
     // Kural 1: Anne/baba doğum tarihi → öğrencinin doğumundan en az 15 yıl önce
     //          Eşin doğum tarihi → günümüzden en az 16 yıl önce (yaş kontrolü)
     //          İlkokul başlama → öğrenci doğumundan en az 6 yıl sonra (okul yaşı)
+    //                          + bugünden en az 14 yıl gerisi (yaş üst sınırı)
     function _applyParentBirthMax(){
+        var today = new Date();
         var birthEl = document.querySelector('[name="birth_date"]');
         if (birthEl && birthEl.value) {
             var maxParent = _yearsBefore(birthEl.value, 15);
@@ -579,8 +581,10 @@
             var primaryMin = _yearsAfter(birthEl.value, 6);
             if (primaryMin) _setMin('primary_start_date', primaryMin);
         }
+        // İlkokul başlama: bugünden en az 14 yıl önce (öğrenci en az 14 yaşında olmalı)
+        var primaryMax = new Date(today.getFullYear() - 14, today.getMonth(), today.getDate());
+        _setMax('primary_start_date', primaryMax);
         // Eşin doğum tarihi: bugünden en az 16 yıl önce (öğrenci doğumundan bağımsız)
-        var today = new Date();
         var spouseMax = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
         _setMax('spouse_birth_date', spouseMax);
     }

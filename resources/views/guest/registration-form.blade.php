@@ -1056,6 +1056,7 @@
     function _setMax(name, v){ var fp = window.__grfPickers[name]; if(fp && v) fp.set('maxDate', v); }
 
     function _applyParentBirthMax(){
+        var today = new Date();
         var birthEl = document.querySelector('[name="birth_date"]');
         if (birthEl && birthEl.value) {
             var maxParent = _yearsBefore(birthEl.value, 15);
@@ -1067,8 +1068,10 @@
             var primaryMin = _yearsAfter(birthEl.value, 6);
             if (primaryMin) _setMin('primary_start_date', primaryMin);
         }
+        // İlkokul başlama: bugünden en az 14 yıl önce (öğrenci en az 14 yaşında)
+        var primaryMax = new Date(today.getFullYear() - 14, today.getMonth(), today.getDate());
+        _setMax('primary_start_date', primaryMax);
         // Eşin doğum tarihi: bugünden en az 16 yıl önce (öğrenciden bağımsız)
-        var today = new Date();
         var spouseMax = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
         _setMax('spouse_birth_date', spouseMax);
     }
