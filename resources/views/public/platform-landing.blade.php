@@ -354,6 +354,119 @@ section { padding:90px 0; position:relative; }
 .pricing-features li.disabled { color:var(--muted); opacity:.6; }
 .pricing-features li.disabled::before { content:'—'; color:var(--muted); }
 
+/* === MODULAR PRICING === */
+.modular-pricing-wrap { max-width:1200px; margin:0 auto; }
+
+/* Core plan */
+.core-plan {
+    background:linear-gradient(140deg, var(--primary-deep), var(--primary));
+    color:#fff; border-radius:24px; padding:36px;
+    box-shadow:0 24px 50px rgba(61,28,103,.25);
+    margin-bottom:36px; position:relative; overflow:hidden;
+}
+.core-plan::before {
+    content:''; position:absolute; top:-80px; right:-80px; width:300px; height:300px;
+    background:radial-gradient(circle, rgba(232,185,49,.25), transparent 70%);
+    border-radius:50%;
+}
+.core-plan-header { display:flex; justify-content:space-between; align-items:flex-start; gap:24px; flex-wrap:wrap; margin-bottom:24px; position:relative; z-index:1; }
+.core-badge {
+    display:inline-block; background:var(--accent); color:var(--primary-deep);
+    padding:5px 12px; border-radius:14px; font-size:11px; font-weight:800;
+    text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px;
+}
+.core-name { margin:0 0 8px; font-family:"DM Serif Display", serif; font-style:italic; font-size:32px; color:#fff; }
+.core-desc { margin:0; color:rgba(255,255,255,.85); font-size:14px; }
+.core-price-block { text-align:right; }
+.core-price-row { display:flex; align-items:baseline; gap:6px; justify-content:flex-end; }
+.core-price { font-family:"DM Serif Display", serif; font-size:56px; line-height:1; color:var(--accent); }
+.core-period { color:rgba(255,255,255,.7); font-size:14px; }
+.core-price-yearly { font-size:12px; color:rgba(255,255,255,.7); margin-top:4px; }
+.core-features { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; position:relative; z-index:1; }
+@media(max-width:720px) { .core-features { grid-template-columns:repeat(2, 1fr); } }
+@media(max-width:480px) { .core-features { grid-template-columns:1fr; } }
+.core-feat { font-size:13px; color:rgba(255,255,255,.92); padding:6px 0; }
+
+/* Add-ons header */
+.addons-header { display:flex; justify-content:space-between; align-items:flex-end; gap:20px; flex-wrap:wrap; margin-bottom:18px; padding-top:8px; }
+.addons-toggle-all { display:flex; align-items:center; gap:10px; }
+.addon-switch { display:inline-flex; align-items:center; gap:10px; cursor:pointer; }
+.addon-switch-label { font-size:13px; color:var(--primary); font-weight:700; }
+
+/* Add-ons grid */
+.addons-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; margin-bottom:36px; }
+@media(max-width:980px) { .addons-grid { grid-template-columns:repeat(2, 1fr); } }
+@media(max-width:600px) { .addons-grid { grid-template-columns:1fr; } }
+
+.addon-card {
+    background:#fff; border:2px solid var(--line); border-radius:18px;
+    padding:24px; transition:all .25s; position:relative; cursor:pointer;
+    display:flex; flex-direction:column;
+}
+.addon-card:hover { border-color:var(--primary); transform:translateY(-3px); box-shadow:0 16px 36px rgba(91,46,145,.12); }
+.addon-card.active { border-color:var(--primary); background:linear-gradient(180deg, var(--primary-soft), #fff); box-shadow:0 12px 32px rgba(91,46,145,.18); }
+.addon-card.active::before {
+    content:'✓'; position:absolute; top:-10px; right:20px;
+    background:var(--success); color:#fff; width:28px; height:28px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-weight:900; font-size:14px;
+    box-shadow:0 4px 10px rgba(22,163,74,.4);
+}
+.addon-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.addon-icon {
+    width:54px; height:54px; border-radius:14px; color:#fff; font-size:28px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    box-shadow:0 6px 18px rgba(0,0,0,.1);
+}
+
+/* Switch */
+.addon-switch input[type=checkbox] { display:none; }
+.addon-slider {
+    width:48px; height:26px; background:#e2e8f0; border-radius:13px;
+    position:relative; transition:all .2s; cursor:pointer;
+    flex-shrink:0;
+}
+.addon-slider::after {
+    content:''; position:absolute; top:3px; left:3px; width:20px; height:20px;
+    background:#fff; border-radius:50%; transition:all .2s;
+    box-shadow:0 2px 4px rgba(0,0,0,.2);
+}
+.addon-switch input:checked + .addon-slider { background:var(--primary); }
+.addon-switch input:checked + .addon-slider::after { transform:translateX(22px); }
+
+.addon-card h4 { margin:0 0 6px; font-size:17px; color:var(--primary-deep); font-weight:800; }
+.addon-price { font-family:"DM Serif Display", serif; font-size:28px; color:var(--primary); margin-bottom:10px; }
+.addon-price span { font-size:13px; color:var(--muted); font-family:"Plus Jakarta Sans", sans-serif; }
+.addon-card > p { color:var(--muted); font-size:13px; line-height:1.55; margin:0 0 14px; }
+.addon-features { list-style:none; padding:0; margin:0; flex:1; }
+.addon-features li { padding:5px 0 5px 20px; position:relative; font-size:12px; color:var(--text); line-height:1.5; }
+.addon-features li::before { content:'→'; position:absolute; left:0; color:var(--primary); font-weight:800; }
+
+/* Price summary */
+.price-summary {
+    background:#fff; border:2px solid var(--primary); border-radius:24px;
+    padding:32px 36px; box-shadow:0 16px 40px rgba(91,46,145,.15);
+    position:sticky; bottom:20px; backdrop-filter:blur(10px);
+}
+.ps-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--line); font-size:15px; }
+.ps-row:last-child { border-bottom:0; }
+.ps-row.total { padding-top:14px; margin-top:6px; border-top:2px solid var(--primary); border-bottom:0; font-size:18px; }
+.ps-lbl { color:var(--text); }
+.ps-val { color:var(--primary-deep); font-weight:700; font-family:"DM Serif Display", serif; font-size:20px; }
+.ps-val small { font-size:11px; color:var(--muted); font-family:"Plus Jakarta Sans", sans-serif; font-weight:normal; }
+.total-amount { color:var(--primary); font-size:36px !important; }
+.ps-yearly { background:var(--primary-soft); border-radius:10px; padding:12px 16px; margin-top:14px; font-size:13px; color:var(--primary-deep); }
+.ps-yearly small { color:var(--muted); }
+.ps-cta { display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+
+/* Enterprise callout */
+.enterprise-callout {
+    background:linear-gradient(140deg, var(--primary-deep), #1a0f2e);
+    border-radius:20px; padding:32px 36px; margin-top:36px;
+    display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap;
+    box-shadow:0 12px 30px rgba(0,0,0,.2);
+}
+
 /* === PARTNER === */
 .partner-card {
     background:linear-gradient(140deg, #fff, var(--primary-soft));
@@ -971,90 +1084,265 @@ footer a:hover { color:var(--accent); }
     </div>
 </section>
 
-{{-- ═══ PRICING === --}}
+{{-- ═══ PRICING — MODULAR === --}}
 <section id="fiyat" class="sec-bg-soft">
     <div class="container">
-        <span class="sec-label">SaaS Fiyatlandırma</span>
-        <h2 class="sec-title">Şeffaf, ölçekli, danışmanlık firmaları için tasarlanmış.</h2>
-        <p class="sec-lead">Sıfır kurulum maliyeti — 14 gün ücretsiz deneme. Aktif öğrenci başına fiyatlama.</p>
+        <span class="sec-label">Modüler Fiyatlandırma</span>
+        <h2 class="sec-title">İhtiyacın olanı seç, ödediğin kadar al.</h2>
+        <p class="sec-lead">
+            Core plan zorunlu — sonrasında 7 add-on modülden ihtiyacın olanları aktif et.
+            Anlık fiyat hesabı, esnek ölçekleme, 14 gün ücretsiz deneme.
+        </p>
 
-        <div class="pricing-grid">
-            <div class="pricing-card">
-                <div class="pricing-tier">Starter</div>
-                <h3 class="pricing-name">Basic</h3>
-                <div class="pricing-price">
-                    <span class="num">€199</span><span class="period">/ay</span>
+        <div class="modular-pricing-wrap">
+            {{-- ──── CORE PLAN ──── --}}
+            <div class="core-plan">
+                <div class="core-plan-header">
+                    <div>
+                        <span class="core-badge">⚡ ZORUNLU</span>
+                        <h3 class="core-name">Core Platform</h3>
+                        <p class="core-desc">3 portal · CRM · Booking · Belge · Sözleşme · Temel Analytics</p>
+                    </div>
+                    <div class="core-price-block">
+                        <div class="core-price-row">
+                            <span class="core-price">€199</span>
+                            <span class="core-period">/ay</span>
+                        </div>
+                        <div class="core-price-yearly">veya €1.910/yıl <small>(%20 indirim)</small></div>
+                    </div>
                 </div>
-                <p class="pricing-desc">Yeni başlayan firmalar için temel modüller — küçük ekip, sınırlı modül.</p>
-                <ul class="pricing-features">
-                    <li>3 portal (Aday + Öğrenci + Senior)</li>
-                    <li>Gen kapasiteye kadar 50 aktif öğrenci</li>
-                    <li>5 senior + 1 manager kullanıcı</li>
-                    <li>CRM + Booking + Belge</li>
-                    <li>Temel analytics (5 dashboard)</li>
-                    <li>Email destek (24h SLA)</li>
-                    <li class="disabled">AI Labs</li>
-                    <li class="disabled">Marketing Admin portal</li>
-                    <li class="disabled">Custom modül</li>
-                </ul>
-                <a href="#cta" class="btn-ghost" style="justify-content:center;"
-                   data-track="cta_clicked" data-ph-cta-name="pricing_basic">
-                    Basic'i Seç
-                </a>
+                <div class="core-features">
+                    <div class="core-feat">✓ Aday + Öğrenci + Senior portal</div>
+                    <div class="core-feat">✓ Lead scoring + pipeline</div>
+                    <div class="core-feat">✓ Booking (Google Calendar 2-way)</div>
+                    <div class="core-feat">✓ Belge yönetimi (yükleme + kategori)</div>
+                    <div class="core-feat">✓ Sözleşme + dijital imza</div>
+                    <div class="core-feat">✓ 5 dashboard + temel raporlar</div>
+                    <div class="core-feat">✓ 50 aktif öğrenci · 5 senior · 1 manager</div>
+                    <div class="core-feat">✓ Email destek (24h SLA)</div>
+                    <div class="core-feat">✓ GDPR + audit trail</div>
+                </div>
             </div>
 
-            <div class="pricing-card featured">
-                <span class="pricing-badge">★ En Popüler</span>
-                <div class="pricing-tier">Profesyonel</div>
-                <h3 class="pricing-name">Gold</h3>
-                <div class="pricing-price">
-                    <span class="num">€499</span><span class="period">/ay</span>
+            {{-- ──── 7 ADD-ON MODULES ──── --}}
+            <div class="addons-header">
+                <div>
+                    <h3 style="margin:0 0 6px; font-size:22px; color:var(--primary-deep);">📦 İsteğe Bağlı Add-on Modüller</h3>
+                    <p style="margin:0; color:var(--muted); font-size:14px;">Açıp kapatabilirsin — değişiklik anında geçerli olur. <strong>Tümünü açarsan %15 paket indirimi.</strong></p>
                 </div>
-                <p class="pricing-desc">Büyüyen danışmanlık firmaları için tam paket — AI dahil, multi-portal.</p>
-                <ul class="pricing-features">
-                    <li><strong>Tüm 6 portal</strong></li>
-                    <li>500 aktif öğrenciye kadar</li>
-                    <li>30 senior + 5 admin kullanıcı</li>
-                    <li>Tüm core modüller (24+)</li>
-                    <li><strong>AI Labs (Gemini)</strong></li>
-                    <li>Marketing + Dealer portal</li>
-                    <li>16+ dashboard + custom report</li>
-                    <li>WhatsApp + Stripe entegre</li>
-                    <li>Öncelikli destek (4h SLA)</li>
-                </ul>
-                <a href="#cta" class="btn-primary" style="justify-content:center;"
-                   data-track="cta_clicked" data-ph-cta-name="pricing_gold">
-                    Gold'u Seç →
-                </a>
+                <div class="addons-toggle-all">
+                    <label class="addon-switch">
+                        <input type="checkbox" id="select-all-addons">
+                        <span class="addon-switch-label">Tümünü Seç</span>
+                    </label>
+                </div>
             </div>
 
-            <div class="pricing-card">
-                <div class="pricing-tier">Enterprise</div>
-                <h3 class="pricing-name">Premium</h3>
-                <div class="pricing-price">
-                    <span class="num">Özel</span>
+            <div class="addons-grid">
+                {{-- AI ENTEGRASYON --}}
+                <div class="addon-card" data-addon="ai" data-price="149">
+                    <div class="addon-header">
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #8b5cf6, #5b21b6);">🤖</div>
+                        <label class="addon-switch">
+                            <input type="checkbox" data-addon-toggle="ai">
+                            <span class="addon-slider"></span>
+                        </label>
+                    </div>
+                    <h4>AI Entegrasyon</h4>
+                    <div class="addon-price">€149<span>/ay</span></div>
+                    <p>Gemini AI asistan + knowledge base RAG + intent analiz + FAQ generator. Adayların sorduğu soruları otomatik öğren.</p>
+                    <ul class="addon-features">
+                        <li>Multi-source (PDF/URL/metin)</li>
+                        <li>Streaming yanıt (SSE)</li>
+                        <li>Intent + FAQ aday analizi</li>
+                        <li>Token cost tracking</li>
+                        <li>Daily limit + safety filter</li>
+                    </ul>
                 </div>
-                <p class="pricing-desc">Çok şubeli, white-label ihtiyaçlı, özel entegrasyonlar gereken firmalar için.</p>
-                <ul class="pricing-features">
-                    <li>Sınırsız öğrenci + kullanıcı</li>
-                    <li>Multi-tenant (çoklu şirket/şube)</li>
-                    <li><strong>White-label</strong> (logo + domain + tema)</li>
-                    <li>Custom modül geliştirme</li>
-                    <li>Custom entegrasyon (CRM/ERP)</li>
-                    <li>Özel SLA + dedicated CSM</li>
-                    <li>On-premise opsiyonu</li>
-                    <li>Eğitim + onboarding workshop</li>
-                    <li>VIP 1h destek SLA</li>
-                </ul>
-                <a href="#cta" class="btn-ghost" style="justify-content:center;"
-                   data-track="cta_clicked" data-ph-cta-name="pricing_premium">
-                    İletişime Geç
-                </a>
+
+                {{-- DAM --}}
+                <div class="addon-card" data-addon="dam" data-price="99">
+                    <div class="addon-header">
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #06b6d4, #0e7490);">📦</div>
+                        <label class="addon-switch">
+                            <input type="checkbox" data-addon-toggle="dam">
+                            <span class="addon-slider"></span>
+                        </label>
+                    </div>
+                    <h4>DAM — Dijital Varlık Yönetimi</h4>
+                    <div class="addon-price">€99<span>/ay</span></div>
+                    <p>Belge, görsel, video kütüphanesi. Versiyon kontrolü, kategori, paylaşım izinleri, full-text arama.</p>
+                    <ul class="addon-features">
+                        <li>500 GB storage (genişlenebilir)</li>
+                        <li>Versiyon geçmişi + restore</li>
+                        <li>Klasör yapısı + etiket</li>
+                        <li>Aktivite logu (kim indirdi/açtı)</li>
+                        <li>Public/private paylaşım linki</li>
+                    </ul>
+                </div>
+
+                {{-- MARKETING ADMIN --}}
+                <div class="addon-card" data-addon="marketing" data-price="199">
+                    <div class="addon-header">
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #e8b931, #c99c26);">📣</div>
+                        <label class="addon-switch">
+                            <input type="checkbox" data-addon-toggle="marketing">
+                            <span class="addon-slider"></span>
+                        </label>
+                    </div>
+                    <h4>Marketing Admin Modülü</h4>
+                    <div class="addon-price">€199<span>/ay</span></div>
+                    <p>Marketing portal — kampanya yönetimi, lead pipeline kanban, multi-touch attribution, email/SMS drip.</p>
+                    <ul class="addon-features">
+                        <li>Kampanya CRUD + bütçe</li>
+                        <li>Pipeline kanban (drag-drop)</li>
+                        <li>UTM tracking + attribution</li>
+                        <li>Email/SMS otomasyon</li>
+                        <li>Loss + re-engagement raporları</li>
+                    </ul>
+                </div>
+
+                {{-- DEALER --}}
+                <div class="addon-card" data-addon="dealer" data-price="149">
+                    <div class="addon-header">
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #16a34a, #14532d);">🤝</div>
+                        <label class="addon-switch">
+                            <input type="checkbox" data-addon-toggle="dealer">
+                            <span class="addon-slider"></span>
+                        </label>
+                    </div>
+                    <h4>Dealer Network Modülü</h4>
+                    <div class="addon-price">€149<span>/ay</span></div>
+                    <p>Bayi/satış ortağı yönetimi — onboarding, kademeli komisyon, materyal kütüphanesi, otomatik payout.</p>
+                    <ul class="addon-features">
+                        <li>Bayi başvuru + onay akışı</li>
+                        <li>5 kademe komisyon sistemi</li>
+                        <li>Pazarlama materyali kütüphanesi</li>
+                        <li>UTM link generator</li>
+                        <li>Stripe payout entegre</li>
+                    </ul>
+                </div>
+
+                {{-- HR --}}
+                <div class="addon-card" data-addon="hr" data-price="99">
+                    <div class="addon-header">
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #db2777, #831843);">👔</div>
+                        <label class="addon-switch">
+                            <input type="checkbox" data-addon-toggle="hr">
+                            <span class="addon-slider"></span>
+                        </label>
+                    </div>
+                    <h4>HR — İnsan Kaynakları</h4>
+                    <div class="addon-price">€99<span>/ay</span></div>
+                    <p>Personel yönetimi — özlük dosyası, izin yönetimi, devam takibi, sertifika, bordro profilleri.</p>
+                    <ul class="addon-features">
+                        <li>Personel veritabanı + özlük</li>
+                        <li>İzin onay akışı</li>
+                        <li>Devam/giriş-çıkış takibi</li>
+                        <li>Sertifika + eğitim kaydı</li>
+                        <li>Bordro profili + KPI</li>
+                    </ul>
+                </div>
+
+                {{-- FINANS --}}
+                <div class="addon-card" data-addon="finance" data-price="149">
+                    <div class="addon-header">
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #f59e0b, #b45309);">💰</div>
+                        <label class="addon-switch">
+                            <input type="checkbox" data-addon-toggle="finance">
+                            <span class="addon-slider"></span>
+                        </label>
+                    </div>
+                    <h4>Finans Modülü</h4>
+                    <div class="addon-price">€149<span>/ay</span></div>
+                    <p>Stripe ödeme + faturalama + taksitli ödeme + multi-currency. Vadesi geçen takibi + dealer payout.</p>
+                    <ul class="addon-features">
+                        <li>Stripe checkout + webhook</li>
+                        <li>Taksitli ödeme planı</li>
+                        <li>Multi-currency (EUR/TRY/USD)</li>
+                        <li>Overdue + reminder otomasyon</li>
+                        <li>Aylık MRR + churn raporu</li>
+                    </ul>
+                </div>
+
+                {{-- KEŞFET --}}
+                <div class="addon-card" data-addon="discover" data-price="79">
+                    <div class="addon-header">
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #2563eb, #1e3a8a);">🔍</div>
+                        <label class="addon-switch">
+                            <input type="checkbox" data-addon-toggle="discover">
+                            <span class="addon-slider"></span>
+                        </label>
+                    </div>
+                    <h4>Keşfet — Üniversite & Vize</h4>
+                    <div class="addon-price">€79<span>/ay</span></div>
+                    <p>500+ Almanya üniversitesi belge haritası + program kataloğu + vize gereklilikleri rehberi. Hep güncel.</p>
+                    <ul class="addon-features">
+                        <li>500+ üniversite veritabanı</li>
+                        <li>Program filtreleri (BSc/MSc/PhD)</li>
+                        <li>Belge gereklilikleri haritası</li>
+                        <li>Vize randevu rehberi</li>
+                        <li>DAAD + resmi kaynak sync</li>
+                    </ul>
+                </div>
+            </div>
+
+            {{-- ──── PRICE SUMMARY ──── --}}
+            <div class="price-summary">
+                <div class="ps-row">
+                    <span class="ps-lbl">Core Platform</span>
+                    <span class="ps-val">€199<small>/ay</small></span>
+                </div>
+                <div class="ps-row" id="ps-addons-row" style="display:none;">
+                    <span class="ps-lbl">Seçilen add-on'lar (<span id="ps-addon-count">0</span>)</span>
+                    <span class="ps-val" id="ps-addons-total">€0<small>/ay</small></span>
+                </div>
+                <div class="ps-row" id="ps-discount-row" style="display:none; color:var(--success);">
+                    <span class="ps-lbl">🎉 Tümünü seç paket indirimi (%15)</span>
+                    <span class="ps-val" id="ps-discount-amount">−€0<small>/ay</small></span>
+                </div>
+                <div class="ps-row total">
+                    <span class="ps-lbl"><strong>TOPLAM AYLIK</strong></span>
+                    <span class="ps-val total-amount" id="ps-total">€199<small>/ay</small></span>
+                </div>
+                <div class="ps-yearly">
+                    💡 Yıllık ödeme: <strong id="ps-yearly">€1.910/yıl</strong> <small>(2 ay bedava — %17 ek tasarruf)</small>
+                </div>
+
+                <div class="ps-cta">
+                    <a href="#cta" class="btn-primary"
+                       data-track="cta_clicked"
+                       data-ph-cta-name="modular_demo"
+                       data-ph-location="platform_pricing">
+                        🎯 Bu Paketle Demo İste
+                    </a>
+                    <a href="#cta" class="btn-ghost"
+                       data-track="cta_clicked"
+                       data-ph-cta-name="modular_consult">
+                        Danışmana Sor
+                    </a>
+                </div>
             </div>
         </div>
 
+        {{-- Enterprise/White-label callout --}}
+        <div class="enterprise-callout">
+            <div>
+                <span class="sec-label" style="background:var(--primary-deep); color:var(--accent);">Enterprise / White-label</span>
+                <h3 style="margin:10px 0 8px; font-size:24px; color:#fff;">Çok şubeli, marka olarak satmak isteyen firmalar için</h3>
+                <p style="margin:0; color:rgba(255,255,255,.85); font-size:14px;">
+                    Sınırsız kullanıcı · Multi-tenant (çok şirket/şube) · White-label (kendi domain + logo + tema) · Custom modül geliştirme · Dedicated CSM · On-premise opsiyonu
+                </p>
+            </div>
+            <a href="#cta" class="btn-gold"
+               data-track="cta_clicked"
+               data-ph-cta-name="enterprise_contact">
+                İletişime Geç →
+            </a>
+        </div>
+
         <p style="text-align:center; margin-top:32px; font-size:13px; color:var(--muted);">
-            🎁 Tüm planlar <strong>14 gün ücretsiz deneme</strong> · Kredi kartı gerekmez · İstediğin zaman iptal
+            🎁 14 gün ücretsiz deneme · Kredi kartı gerekmez · Add-on'ları istediğin zaman aç/kapat · İstediğin zaman iptal
         </p>
     </div>
 </section>
@@ -1254,6 +1542,127 @@ document.querySelectorAll('.faq-q').forEach(btn => {
         if (!wasOpen) item.classList.add('open');
     });
 });
+
+// Modular Pricing Calculator
+(function() {
+    const CORE_PRICE = 199;
+    const BUNDLE_DISCOUNT_PCT = 0.15; // tümü açıkken %15 indirim
+    const YEARLY_DISCOUNT_PCT = 0.17; // yıllık ödeme ek tasarrufu
+
+    const totalEl = document.getElementById('ps-total');
+    const yearlyEl = document.getElementById('ps-yearly');
+    const addonsRow = document.getElementById('ps-addons-row');
+    const addonsTotalEl = document.getElementById('ps-addons-total');
+    const addonCountEl = document.getElementById('ps-addon-count');
+    const discountRow = document.getElementById('ps-discount-row');
+    const discountAmountEl = document.getElementById('ps-discount-amount');
+    const selectAllToggle = document.getElementById('select-all-addons');
+
+    function formatEur(n) {
+        return '€' + Math.round(n).toLocaleString('tr-TR').replace(/,/g, '.');
+    }
+
+    function recalc() {
+        const cards = document.querySelectorAll('.addon-card');
+        let addonsTotal = 0;
+        let activeCount = 0;
+        const totalAddons = cards.length;
+
+        cards.forEach(card => {
+            const toggle = card.querySelector('input[type=checkbox]');
+            const price = parseInt(card.dataset.price, 10) || 0;
+            if (toggle && toggle.checked) {
+                card.classList.add('active');
+                addonsTotal += price;
+                activeCount++;
+            } else {
+                card.classList.remove('active');
+            }
+        });
+
+        // Bundle discount: tümü açıksa %15
+        let discount = 0;
+        if (activeCount === totalAddons) {
+            discount = addonsTotal * BUNDLE_DISCOUNT_PCT;
+        }
+
+        const grandTotal = CORE_PRICE + addonsTotal - discount;
+        const yearlyTotal = grandTotal * 12 * (1 - YEARLY_DISCOUNT_PCT);
+
+        // Update DOM
+        totalEl.innerHTML = formatEur(grandTotal) + '<small>/ay</small>';
+        yearlyEl.textContent = formatEur(yearlyTotal) + '/yıl';
+
+        if (activeCount > 0) {
+            addonsRow.style.display = 'flex';
+            addonsTotalEl.innerHTML = formatEur(addonsTotal) + '<small>/ay</small>';
+            addonCountEl.textContent = activeCount;
+        } else {
+            addonsRow.style.display = 'none';
+        }
+
+        if (discount > 0) {
+            discountRow.style.display = 'flex';
+            discountAmountEl.innerHTML = '−' + formatEur(discount) + '<small>/ay</small>';
+        } else {
+            discountRow.style.display = 'none';
+        }
+
+        // Sync "select all" state
+        if (selectAllToggle) {
+            selectAllToggle.checked = (activeCount === totalAddons);
+        }
+    }
+
+    // Card click → toggle (anywhere on card except switch itself, which has its own handler)
+    document.querySelectorAll('.addon-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.addon-switch')) return; // switch already handles
+            const toggle = card.querySelector('input[type=checkbox]');
+            if (toggle) {
+                toggle.checked = !toggle.checked;
+                recalc();
+
+                if (window.posthog) {
+                    window.posthog.capture('addon_toggled', {
+                        addon: card.dataset.addon,
+                        active: toggle.checked,
+                    });
+                }
+            }
+        });
+    });
+
+    // Direct switch toggle
+    document.querySelectorAll('.addon-card input[type=checkbox]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            recalc();
+            if (window.posthog) {
+                const card = cb.closest('.addon-card');
+                window.posthog.capture('addon_toggled', {
+                    addon: card?.dataset.addon,
+                    active: cb.checked,
+                });
+            }
+        });
+    });
+
+    // Select all
+    if (selectAllToggle) {
+        selectAllToggle.addEventListener('change', () => {
+            document.querySelectorAll('.addon-card input[type=checkbox]').forEach(cb => {
+                cb.checked = selectAllToggle.checked;
+            });
+            recalc();
+
+            if (window.posthog) {
+                window.posthog.capture('select_all_addons', { selected: selectAllToggle.checked });
+            }
+        });
+    }
+
+    recalc();
+})();
 </script>
 
 <x-analytics.posthog-snippet :portal="'public'" />
