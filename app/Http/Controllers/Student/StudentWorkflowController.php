@@ -98,7 +98,8 @@ class StudentWorkflowController extends Controller
         abort_if(! $guest, 404, 'Student icin bagli basvuru kaydi bulunamadi.');
 
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
-        $draftMap  = app(GuestRegistrationFieldSchemaService::class)->sanitizePayload($request->all(), $companyId);
+        // Student tarafı her zaman Level 2 (88 field tam form)
+        $draftMap  = app(GuestRegistrationFieldSchemaService::class)->sanitizePayloadByLevel($request->all(), 2, $companyId);
 
         $guest->forceFill([
             'first_name'                       => trim((string) ($draftMap['first_name'] ?? '')) ?: $guest->first_name,
@@ -126,19 +127,35 @@ class StudentWorkflowController extends Controller
 
         $companyId     = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
         $schemaService = app(GuestRegistrationFieldSchemaService::class);
-        $payload       = $schemaService->sanitizePayload($request->all(), $companyId);
+        // Student tarafı her zaman Level 2
+        $payload       = $schemaService->sanitizePayloadByLevel($request->all(), 2, $companyId);
         $skipKeys = array_merge(
             $schemaService->educationSkippedKeys($payload),
             $schemaService->spouseSkippedKeys($payload),
         );
+
+        // Field-specific hata mesajı için catalog'dan label + tip lookup
+        $allFields = $schemaService->flatFieldsByLevel(2, $companyId);
+        $fieldByKey = [];
+        foreach ($allFields as $f) { $fieldByKey[$f['key'] ?? ''] = $f; }
+
         $missingErrors = [];
-        foreach ($schemaService->requiredKeys($companyId) as $key) {
+        foreach ($schemaService->requiredKeysByLevel(2, $companyId) as $key) {
             if (in_array($key, $skipKeys, true)) {
                 continue;
             }
             $val = $payload[$key] ?? null;
-            if ($val === null || trim((string) $val) === '') {
-                $missingErrors[$key] = 'Bu alan zorunludur.';
+            $isEmpty = is_array($val) ? empty($val) : ($val === null || trim((string) $val) === '');
+            if ($isEmpty) {
+                $field = $fieldByKey[$key] ?? null;
+                $label = $field
+                    ? trim(rtrim((string) ($field['label'] ?? $key), ' *'))
+                    : $key;
+                $verb = match ($field['type'] ?? '') {
+                    'select', 'checkbox_group' => 'seçilmedi',
+                    default                     => 'doldurulmadı',
+                };
+                $missingErrors[$key] = $label . ' ' . $verb;
             }
         }
         // B13/B15: eğitim tarih sırası + parent dob kontrolü
@@ -169,7 +186,8 @@ class StudentWorkflowController extends Controller
             'notes'                              => trim((string) ($payload['additional_note'] ?? '')) ?: $guest->notes,
             'registration_form_draft'            => $mergedDraft,
             'registration_form_submitted_at'     => now(),
-            'status_message'                     => 'Student kayit formu gonderildi.',
+            'registration_form_level'            => 'level_2_done',
+            'status_message'                     => 'Tam kayıt formu gönderildi.',
         ])->save();
 
         $next = (int) GuestRegistrationSnapshot::query()
@@ -191,7 +209,9 @@ class StudentWorkflowController extends Controller
             } catch (\Throwable) {}
         }
 
-        return redirect('/student/registration')->with('status', 'Form gonderildi.');
+        // C5: submit sonrası belge sayfasına yönlendir (user tercihi)
+        return redirect('/student/registration-documents')
+            ->with('status', 'Tam kayıt formun gönderildi. Şimdi belgelerini yükleyebilirsin.');
     }
 
     public function registrationFormPdf(Request $request)
@@ -201,11 +221,12 @@ class StudentWorkflowController extends Controller
 
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
         $schema = app(GuestRegistrationFieldSchemaService::class);
-        $groups = $schema->groups($companyId);
+        $groups = $schema->groupsByLevel(2, $companyId);
         $draft = is_array($guest->registration_form_draft) ? $guest->registration_form_draft : [];
+        $formLevel = 2;
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('guest.registration-form-pdf', compact('guest', 'groups', 'draft'));
-        $fileName = 'Kayit_Formu_' . ($guest->first_name ?? '') . '_' . ($guest->last_name ?? '') . '_' . now()->format('Ymd') . '.pdf';
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('guest.registration-form-pdf', compact('guest', 'groups', 'draft', 'formLevel'));
+        $fileName = 'Kayit_Formu_L2_' . ($guest->first_name ?? '') . '_' . ($guest->last_name ?? '') . '_' . now()->format('Ymd') . '.pdf';
 
         if ($request->query('download')) {
             return $pdf->download($fileName);

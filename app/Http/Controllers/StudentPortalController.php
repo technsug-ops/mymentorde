@@ -26,10 +26,13 @@ class StudentPortalController extends Controller
 
     public function registration(Request $request)
     {
-        $base      = $this->baseData($request, 'registration', 'Kayit Sureci', 'Formu tamamlayin ve zorunlu alanlari bitirin.');
+        $base      = $this->baseData($request, 'registration', 'Tam Kayıt Formu', 'Aday öğrenci formundaki bilgilerin otomatik dolduruldu. Eksik alanları tamamla.');
         $guest     = $this->resolveStudentGuest($request);
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
-        $fieldGroups = app(GuestRegistrationFieldSchemaService::class)->groups($companyId);
+
+        // Student tarafı her zaman Level 2 (88 field tam form)
+        $fieldGroups = app(GuestRegistrationFieldSchemaService::class)->groupsByLevel(2, $companyId);
+
         if ($guest) {
             $guest->registration_form_draft = $this->ensureRegistrationDraftHydrated($guest, $companyId);
         }
@@ -37,6 +40,8 @@ class StudentPortalController extends Controller
         return view('student.registration-form', array_merge($base, [
             'guestApplication'         => $guest,
             'registrationFieldGroups'  => $fieldGroups,
+            'formLevel'                => 2,
+            'formLevelStatus'          => (string) ($guest?->registration_form_level ?? 'level_2_pending'),
         ]));
     }
 

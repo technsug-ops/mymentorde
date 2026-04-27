@@ -225,12 +225,20 @@
         'Bu alan tamamen opsiyonel. Eklemek istediğin bilgi varsa buraya yazabilirsin.',
     ];
     $formLocked = (bool) ($guestApplication?->registration_form_submitted_at ?? false);
+
+    // Level 1 field key listesi — Aday Öğrenci formunda doldurulan field'lar Level 2'de
+    // 'Aday formundan dolduruldu' badge'i ile gösterilir. Editable kalır.
+    $level1FieldKeys = collect(\App\Support\GuestRegistrationFormCatalog::flatFieldsByLevel(1))
+        ->pluck('key')->filter()->values()->all();
 @endphp
 
 {{-- ── Topbar with Step Pills ── --}}
 <div class="srf-topbar">
     <div class="srf-topbar-left">
-        <div class="srf-topbar-title">Kayıt Formu</div>
+        <div class="srf-topbar-title">
+            Tam Kayıt Formu
+            <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:10px;background:#f3e8ff;color:#6b21a8;margin-left:8px;">Seviye 2 / 2</span>
+        </div>
         <div class="srf-topbar-div"></div>
         <div class="srf-pills" id="srfPillNav">
             @foreach(($registrationFieldGroups ?? []) as $i => $group)
@@ -311,8 +319,8 @@
                             <div class="srf-form-group{{ $isFilled ? ' is-filled' : '' }}{{ $isWide ? ' srf-full' : '' }}" data-field-key="{{ $key }}">
                                 <div class="srf-label-row">
                                     <label>{{ $label }} @if($required)<span class="required-star">*</span>@endif</label>
-                                    @if($isFilled && in_array($key, ['first_name','last_name','email','phone']))
-                                        <span class="srf-prefilled" title="Kayıttan otomatik dolduruldu">✓</span>
+                                    @if($isFilled && in_array($key, $level1FieldKeys, true))
+                                        <span class="srf-prefilled" title="Aday öğrenci formundan otomatik dolduruldu — düzenleyebilirsin">✓</span>
                                     @endif
                                 </div>
                                 @if($type === 'select')
