@@ -614,6 +614,54 @@
     statusEl.addEventListener('input', applyVisibility);
     applyVisibility(); // Sayfa yüklenince başlangıç durumu
 })();
+
+// Conditional: finance_method='sponsor' (Garantör) seçilirse garantör detay alanları
+(function(){
+    var financeEl = document.querySelector('select[name="finance_method"]');
+    if (!financeEl) return;
+
+    var guarantorKeys = ['guarantor_relation', 'guarantor_name'];
+    var guarantorGroups = guarantorKeys.map(function(k){
+        return document.querySelector('.form-group[data-field-key="' + k + '"]');
+    }).filter(Boolean);
+
+    function applyGuarantorVisibility(){
+        var v = (financeEl.value || '').toLowerCase();
+        var show = (v === 'sponsor');
+        guarantorGroups.forEach(function(g){
+            g.style.display = show ? '' : 'none';
+            var input = g.querySelector('input, select, textarea');
+            if (input) {
+                if (!show) {
+                    input.removeAttribute('required');
+                } else if (input.classList.contains('final-required')) {
+                    input.setAttribute('required', 'required');
+                }
+            }
+        });
+    }
+
+    financeEl.addEventListener('change', applyGuarantorVisibility);
+    financeEl.addEventListener('input', applyGuarantorVisibility);
+    applyGuarantorVisibility();
+})();
+
+// Conditional: accommodation_contact_status='yes' seçilirse şehir alanı görünür
+(function(){
+    var statusEl = document.querySelector('select[name="accommodation_contact_status"]');
+    if (!statusEl) return;
+    var cityGroup = document.querySelector('.form-group[data-field-key="accommodation_contact_city"]');
+    if (!cityGroup) return;
+
+    function apply(){
+        var v = (statusEl.value || '').toLowerCase();
+        var show = (v === 'yes');
+        cityGroup.style.display = show ? '' : 'none';
+    }
+    statusEl.addEventListener('change', apply);
+    statusEl.addEventListener('input', apply);
+    apply();
+})();
 </script>
 
 {{-- Flatpickr init — tüm date input'lara yıl/ay dropdown'lı picker bağla --}}

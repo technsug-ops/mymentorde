@@ -254,6 +254,9 @@ class GuestRegistrationFormCatalog
                 'fields' => [
                     // Level 1
                     self::f('finance_method', 'Almanya\'da yaşam masraflarınızı kanıtlamak için hangi yöntemi düşünüyorsunuz? *', 'select', true, 60, options: self::financeMethodOptions(), level: 1),
+                    // Level 1 yeni — Garantör seçilirse conditional sorulur
+                    self::f('guarantor_relation', 'Garantörünüzün size yakınlığı', 'select', false, 30, options: self::guarantorRelationOptions(), level: 1),
+                    self::f('guarantor_name', 'Garantörünüzün adı (opsiyonel)', 'text', false, 180, placeholder: 'Ad Soyad', level: 1),
                     // Level 1 yeni — konaklama tanıdığı
                     self::f('accommodation_contact_status', 'Almanya\'da konaklama için size destek olabilecek bir tanıdığınız var mı?', 'select', false, 20, options: self::accommodationContactOptions(), level: 1),
                     self::f('accommodation_contact_city', 'Tanıdığınızın bulunduğu şehir', 'text', false, 100, placeholder: 'Örn: München', help_text: 'Sadece tanıdığınız varsa doldurun.', level: 1),
@@ -687,6 +690,16 @@ class GuestRegistrationFormCatalog
             ['value' => 'yes', 'label' => 'Evet, var'],
             ['value' => 'no', 'label' => 'Hayır, yok'],
             ['value' => 'maybe', 'label' => 'Emin değilim / belki'],
+        ];
+    }
+
+    private static function guarantorRelationOptions(): array
+    {
+        return [
+            ['value' => 'relative', 'label' => 'Akraba'],
+            ['value' => 'acquaintance', 'label' => 'Tanıdık (akraba değil)'],
+            ['value' => 'employer', 'label' => 'İş veren / sponsor kurum'],
+            ['value' => 'other', 'label' => 'Diğer'],
         ];
     }
 
