@@ -5,6 +5,22 @@
 
 @push('head')
 <script>if(localStorage.getItem('mentorde_design')==='minimalist'){document.documentElement.classList.add('jm-minimalist');}</script>
+
+{{-- Flatpickr — kullanıcı dostu tarih seçici (yıl/ay dropdown'lı, TR locale) --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/tr.js" defer></script>
+<style>
+/* Flatpickr — proje teması ile uyum */
+.flatpickr-input { background:#fff !important; }
+.flatpickr-calendar { font-family:inherit; box-shadow:0 12px 32px rgba(0,0,0,.18); border-radius:10px; }
+.flatpickr-calendar.open { z-index:10000; }
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year { font-size:14px; font-weight:600; }
+.flatpickr-day.selected { background:var(--u-brand,#2563eb); border-color:var(--u-brand,#2563eb); }
+.flatpickr-day.today { border-color:var(--u-brand,#2563eb); }
+</style>
+
 <style>
 /* ── grf-* Aday Öğrenci Kayıtistration Form — Step Pills Redesign ── */
 
@@ -517,6 +533,43 @@
 <div class="grf-toast" id="grfToast" role="status" aria-label="Kaydedildi">✓</div>
 
 <script defer src="{{ Vite::asset('resources/js/guest-registration-form.js') }}"></script>
+
+{{-- Flatpickr init — tüm date input'lara yıl/ay dropdown'lı picker bağla --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function initFlatpickrWhenReady(){
+    if (typeof flatpickr === 'undefined') {
+        // CDN henüz yüklenmediyse 100ms sonra tekrar dene (max 30 deneme = 3sn)
+        if (window.__fpRetries === undefined) window.__fpRetries = 0;
+        if (window.__fpRetries++ < 30) {
+            setTimeout(initFlatpickrWhenReady, 100);
+        }
+        return;
+    }
+
+    document.querySelectorAll('input[type="date"]').forEach(function(el){
+        // type="text"e çevirip flatpickr eklenir, native picker kapanır
+        var minAttr = el.getAttribute('min');
+        var maxAttr = el.getAttribute('max');
+        var isBirth = el.name === 'birth_date';
+
+        flatpickr(el, {
+            locale: (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.tr) ? flatpickr.l10ns.tr : 'default',
+            dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: 'd.m.Y',
+            allowInput: true,
+            minDate: minAttr || null,
+            maxDate: maxAttr || null,
+            // Doğum tarihi için yıl 100 yıl geriye kadar açılır default
+            defaultDate: el.value || (isBirth ? new Date(new Date().getFullYear() - 25, 0, 1) : null),
+            disableMobile: false,
+            // Yıl ve ay açılır menüsü her zaman görünür (varsayılan tema)
+            monthSelectorType: 'dropdown',
+        });
+    });
+})();
+</script>
+
 <script nonce="{{ $cspNonce ?? '' }}">
 (function(){
     // Pill sync — observe panel active changes
