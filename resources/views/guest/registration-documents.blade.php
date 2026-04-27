@@ -184,6 +184,12 @@
     $packageDone = !empty($packageSelected ?? false);
     $contractDoneFlag = ($contractStatus ?? '') === 'approved';
 
+    // Almanya Yolculuğun overall progress — 5 step'in kaçı tamamlandı
+    // (1: Kayıt Formu, 2: Belgeler, 3: Paket, 4: Sözleşme, 5: Tamamlandı)
+    $journeyDoneCount = (int)$formDone + (int)$docsDone + (int)$packageDone + (int)$contractDoneFlag;
+    if ($contractDoneFlag && $formDone) { $journeyDoneCount++; }
+    $journeyPct = (int) round($journeyDoneCount / 5 * 100);
+
     $missingRequiredItems = $check->filter(fn($x) => !empty($x['is_required']) && empty($x['uploaded']))->values();
     $uploadedItems = $check->filter(fn($x) => !empty($x['uploaded']))->values();
     $otherItems = $check->filter(fn($x) => empty($x['is_required']) && empty($x['uploaded']))->values();
@@ -195,8 +201,8 @@
 
 <div class="sdoc">
     <div class="journey">
-        <div class="journey-top"><div class="journey-title"><h3>🎓 Almanya Yolculuğun <span class="journey-tag {{ $docsDone ? 'done' : 'progress' }}">Belgeler</span></h3></div><div class="journey-pct">{{ $pct }}%</div></div>
-        <div class="journey-bar-wrap"><div class="journey-bar"><div class="journey-bar-fill" style="width:{{ $pct }}%"></div></div></div>
+        <div class="journey-top"><div class="journey-title"><h3>🎓 Almanya Yolculuğun <span class="journey-tag {{ $docsDone ? 'done' : 'progress' }}">Belgeler</span></h3></div><div class="journey-pct">{{ $journeyPct }}%</div></div>
+        <div class="journey-bar-wrap"><div class="journey-bar"><div class="journey-bar-fill" style="width:{{ $journeyPct }}%"></div></div></div>
         <div class="journey-steps">
             <div class="j-step {{ $formDone ? 'done' : 'active' }}"><div class="j-step-num">{{ $formDone ? '✓' : '1' }}</div><div class="j-step-name">Kayıt Formu</div></div>
             <div class="j-step {{ $docsDone ? 'done' : ($formDone ? 'active' : 'locked') }}"><div class="j-step-num">{{ $docsDone ? '✓' : '2' }}</div><div class="j-step-name">Belgeler</div></div>
