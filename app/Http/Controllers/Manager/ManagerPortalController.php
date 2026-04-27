@@ -23,6 +23,7 @@ use App\Models\User;
 use Illuminate\Validation\Rule;
 use App\Services\EventLogService;
 use App\Services\GuestListService;
+use App\Services\LeadScoreService;
 use App\Services\SeniorPerformanceService;
 use App\Services\StudentListService;
 use Illuminate\Http\JsonResponse;
@@ -171,7 +172,13 @@ class ManagerPortalController extends Controller
             ? StudentAssignment::where('student_id', $guest->converted_student_id)->first()
             : null;
 
-        return view('manager.guest-detail', compact('guest', 'seniorOptions', 'student'));
+        // Lead Score breakdown — Marketing Admin'den bağımsız, Core servisi
+        $scoreBreakdown = app(LeadScoreService::class)->getScoreBreakdown($guest->id);
+        $scoreTotal = (int) ($scoreBreakdown['behavioral'] ?? 0)
+                    + (int) ($scoreBreakdown['demographic'] ?? 0)
+                    + (int) ($scoreBreakdown['decay'] ?? 0);
+
+        return view('manager.guest-detail', compact('guest', 'seniorOptions', 'student', 'scoreBreakdown', 'scoreTotal'));
     }
 
     public function guestUpdateStatus(Request $request, GuestApplication $guest): RedirectResponse

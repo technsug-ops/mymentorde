@@ -156,6 +156,52 @@
     {{-- SAĞ: Aksiyonlar --}}
     <div>
 
+        {{-- Lead Score (Core servisi — Marketing Admin'den bağımsız) --}}
+        <section class="panel gd-panel">
+            <h2>Lead Score</h2>
+            @php
+                $tier = $guest->lead_score_tier ?? 'cold';
+                $tierColors = [
+                    'champion'    => ['#7c3aed', '#faf5ff', 'Şampiyon'],
+                    'sales_ready' => ['#16a34a', '#f0fdf4', 'Satışa Hazır'],
+                    'hot'         => ['#dc2626', '#fef2f2', 'Sıcak'],
+                    'warm'        => ['#d97706', '#fffbeb', 'Ilık'],
+                    'cold'        => ['#2563eb', '#eff6ff', 'Soğuk'],
+                ];
+                [$tFg, $tBg, $tLabel] = $tierColors[$tier] ?? $tierColors['cold'];
+                $score = (int) ($guest->lead_score ?? $scoreTotal ?? 0);
+                $behavioral = (int) ($scoreBreakdown['behavioral'] ?? 0);
+                $demographic = (int) ($scoreBreakdown['demographic'] ?? 0);
+                $decay = (int) ($scoreBreakdown['decay'] ?? 0);
+            @endphp
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 12px;background:{{ $tBg }};border-radius:8px;border:1px solid {{ $tFg }}33;margin-bottom:10px;">
+                <div style="font-size:32px;font-weight:800;color:{{ $tFg }};line-height:1;">{{ $score }}</div>
+                <div style="flex:1;">
+                    <div style="font-size:11px;font-weight:700;color:{{ $tFg }};text-transform:uppercase;letter-spacing:.05em;">{{ $tLabel }}</div>
+                    <div style="font-size:10px;color:var(--u-muted,#64748b);margin-top:2px;">Lead tier · puan toplamı</div>
+                </div>
+            </div>
+            <table class="gd-table" style="font-size:11px;">
+                <tr>
+                    <td class="lbl">Davranışsal</td>
+                    <td><strong style="color:{{ $behavioral >= 0 ? '#16a34a' : '#dc2626' }};">{{ $behavioral > 0 ? '+' : '' }}{{ $behavioral }}</strong> <span style="color:var(--u-muted,#64748b);">puan</span></td>
+                </tr>
+                <tr>
+                    <td class="lbl">Demografik</td>
+                    <td><strong style="color:{{ $demographic >= 0 ? '#16a34a' : '#dc2626' }};">{{ $demographic > 0 ? '+' : '' }}{{ $demographic }}</strong> <span style="color:var(--u-muted,#64748b);">puan</span></td>
+                </tr>
+                @if($decay !== 0)
+                <tr>
+                    <td class="lbl">Inaktivite Düşüşü</td>
+                    <td><strong style="color:#dc2626;">{{ $decay }}</strong> <span style="color:var(--u-muted,#64748b);">puan</span></td>
+                </tr>
+                @endif
+            </table>
+            @if($score === 0 && $behavioral === 0 && $demographic === 0)
+                <div style="font-size:10px;color:var(--u-muted,#64748b);margin-top:6px;">Henüz aktivite yok — form gönderildiğinde puan başlar.</div>
+            @endif
+        </section>
+
         {{-- Durum & Lead Bilgisi --}}
         <section class="panel gd-panel">
             <h2>Lead Durumu</h2>
