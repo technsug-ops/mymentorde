@@ -73,14 +73,19 @@
     display:flex; align-items:center; justify-content:space-between; gap:32px;
 }
 .sdoc .hero-content { flex:1; min-width:0; }
-.sdoc .hero-task.blue { background:linear-gradient(135deg,#1e3a8a,var(--blue)); }
+.sdoc .hero-task.blue { background:linear-gradient(135deg,#1e3a8a,#1d4ed8); }
 .sdoc .hero-task.purple { background:linear-gradient(135deg,var(--brand-dark),var(--brand)); }
-.sdoc .hero-task.green { background:linear-gradient(135deg,#065f46,var(--ok)); }
-.sdoc .hero-badge { display:inline-flex; align-items:center; gap:6px; font-size:11px; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,0.6); margin-bottom:8px; }
-.sdoc .hero-badge .pulse { width:8px; height:8px; border-radius:50%; background:#34d399; box-shadow:0 0 6px rgba(52,211,153,0.6); animation:sdoc-pulse-dot 1.5s infinite; }
+.sdoc .hero-task.green { background:linear-gradient(135deg,#064e3b,#15803d); }
+.sdoc .hero-badge { display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:1.4px; color:#fff; opacity:.92; margin-bottom:10px; padding:4px 10px 4px 8px; background:rgba(255,255,255,.16); border-radius:999px; }
+.sdoc .hero-badge .pulse { width:8px; height:8px; border-radius:50%; background:#fff; box-shadow:0 0 8px rgba(255,255,255,.85); animation:sdoc-pulse-dot 1.5s infinite; }
 @keyframes sdoc-pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
-.sdoc .hero-title { font-size:22px; font-weight:700; margin-bottom:6px; line-height:1.3; }
-.sdoc .hero-sub { font-size:14px; color:rgba(255,255,255,0.75); line-height:1.5; margin-bottom:16px; }
+.sdoc .hero-title { font-size:24px; font-weight:800; margin-bottom:8px; line-height:1.25; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.08); }
+.sdoc .hero-sub { font-size:14.5px; color:rgba(255,255,255,.92); line-height:1.55; margin-bottom:16px; }
+.sdoc .hero-task .ring-fill { stroke:#fff !important; }
+.sdoc .hero-task .ring-text { color:#fff !important; }
+.sdoc .hero-task .ring-bg { stroke:rgba(255,255,255,.28) !important; }
+.sdoc .hero-task .ring-meta-num { font-size:14px; font-weight:800; color:#fff; }
+.sdoc .hero-task .ring-meta-lbl { font-size:11.5px; color:rgba(255,255,255,.85); }
 
 /* ═══ GRID ═══ */
 .sdoc .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }

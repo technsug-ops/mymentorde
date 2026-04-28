@@ -72,20 +72,21 @@
 .sdoc .j-step.active::after { content:''; position:absolute; top:-1px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-top:5px solid var(--brand); }
 .sdoc .hero-task { border-radius:var(--radius); padding:28px 32px; margin-bottom:24px; color:#fff; box-shadow:var(--shadow-lg); overflow:hidden; position:relative; display:flex; align-items:center; justify-content:space-between; gap:32px; }
 .sdoc .hero-content { flex:1; min-width:0; }
-.sdoc .hero-task.blue { background:linear-gradient(135deg,#065f46,#16a34a); }
-.sdoc .hero-task.teal { background:linear-gradient(135deg,#064e3b,#059669); }
-.sdoc .hero-task.green { background:linear-gradient(135deg,#065f46,var(--ok)); }
-.sdoc .hero-badge { display:inline-flex; align-items:center; gap:6px; font-size:11px; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,0.6); margin-bottom:8px; }
-.sdoc .hero-badge .pulse { width:8px; height:8px; border-radius:50%; background:#34d399; box-shadow:0 0 6px rgba(52,211,153,0.6); animation:sdoc-pulse-dot 1.5s infinite; }
+/* Daha koyu gradient = beyaz/açık metinlerle daha güçlü kontrast (WCAG AA) */
+.sdoc .hero-task.blue { background:linear-gradient(135deg,#0c4a6e,#0e7490); }
+.sdoc .hero-task.teal { background:linear-gradient(135deg,#064e3b,#047857); }
+.sdoc .hero-task.green { background:linear-gradient(135deg,#064e3b,#15803d); }
+.sdoc .hero-badge { display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:1.4px; color:#fff; opacity:.92; margin-bottom:10px; padding:4px 10px 4px 8px; background:rgba(255,255,255,.16); border-radius:999px; }
+.sdoc .hero-badge .pulse { width:8px; height:8px; border-radius:50%; background:#fff; box-shadow:0 0 8px rgba(255,255,255,.85); animation:sdoc-pulse-dot 1.5s infinite; }
 @keyframes sdoc-pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
-.sdoc .hero-title { font-size:22px; font-weight:700; margin-bottom:6px; line-height:1.3; }
-.sdoc .hero-sub { font-size:14px; color:rgba(255,255,255,0.75); line-height:1.5; margin-bottom:16px; }
+.sdoc .hero-title { font-size:24px; font-weight:800; margin-bottom:8px; line-height:1.25; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.08); }
+.sdoc .hero-sub { font-size:14.5px; color:rgba(255,255,255,.92); line-height:1.55; margin-bottom:16px; }
 .sdoc .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
 .sdoc .stat-card { background:var(--card); border-radius:var(--radius-sm); padding:18px 20px; box-shadow:var(--shadow); border:1px solid var(--line-light); display:flex; align-items:center; gap:14px; }
 .sdoc .stat-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
 .sdoc .stat-icon.green { background:var(--ok-light); } .sdoc .stat-icon.amber { background:var(--warn-light); } .sdoc .stat-icon.red { background:var(--danger-light); } .sdoc .stat-icon.blue { background:var(--blue-light); }
-.sdoc .stat-label { font-size:11px; color:var(--muted); margin-bottom:2px; }
-.sdoc .stat-value { font-size:20px; font-weight:700; line-height:1.2; }
+.sdoc .stat-label { font-size:11.5px; font-weight:600; color:var(--text-muted,#475569); margin-bottom:3px; letter-spacing:.2px; }
+.sdoc .stat-value { font-size:22px; font-weight:800; line-height:1.15; color:var(--text,#0f172a); }
 .sdoc .alert-bar { display:flex; align-items:center; gap:12px; padding:12px 18px; border-radius:var(--radius-xs); margin-bottom:20px; font-size:13px; }
 .sdoc .alert-bar.danger { background:var(--danger-light); border:1px solid rgba(220,38,38,0.15); color:#991b1b; }
 .sdoc .alert-bar.warn { background:var(--warn-light); border:1px solid rgba(217,119,6,0.15); color:#78350f; }
@@ -137,10 +138,17 @@
 .sdoc .upload-zone-inner { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
 .sdoc .upload-zone .uz-icon { font-size:28px; opacity:0.3; } .sdoc .upload-zone .uz-text { font-size:12px; color:var(--muted); } .sdoc .upload-zone .uz-text strong { color:var(--brand); cursor:pointer; }
 .sdoc .upload-zone .selected-file { font-size:12px; color:var(--text); font-weight:600; display:none; align-items:center; gap:6px; } .sdoc .upload-zone .selected-file.show { display:flex; }
-.sdoc .ring-wrap { display:flex; align-items:center; gap:16px; } .sdoc .ring { width:64px; height:64px; position:relative; }
+.sdoc .ring-wrap { display:flex; align-items:center; gap:16px; }
+.sdoc .ring { width:76px; height:76px; position:relative; filter:drop-shadow(0 2px 6px rgba(0,0,0,.18)); }
 .sdoc .ring svg { width:100%; height:100%; transform:rotate(-90deg); }
-.sdoc .ring-bg { fill:none; stroke:rgba(255,255,255,0.15); stroke-width:5; } .sdoc .ring-fill { fill:none; stroke:#fff; stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset 0.8s ease; }
-.sdoc .ring-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; color:#fff; }
+.sdoc .ring-bg { fill:none; stroke:rgba(255,255,255,.28); stroke-width:5; }
+/* Hero-task içinde ring her zaman beyaz olur — inline override'ları (var(--ok)) bilerek ezeriz */
+.sdoc .hero-task .ring-fill { fill:none; stroke:#fff !important; stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset .8s ease; }
+.sdoc .hero-task .ring-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; color:#fff !important; letter-spacing:-.2px; }
+.sdoc .ring-fill { fill:none; stroke:var(--brand,#0d9488); stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset .8s ease; }
+.sdoc .ring-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; color:var(--text); }
+.sdoc .hero-task .ring-meta-num { font-size:14px !important; font-weight:800 !important; color:#fff !important; opacity:1 !important; }
+.sdoc .hero-task .ring-meta-lbl { font-size:11.5px !important; color:rgba(255,255,255,.85) !important; }
 .sdoc .celebration { text-align:center; padding:48px 24px; }
 .sdoc .celebration .cel-icon { font-size:56px; margin-bottom:16px; animation:sdoc-bounce-cel 1s infinite; }
 @keyframes sdoc-bounce-cel { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
@@ -236,7 +244,7 @@
     @endif
 
     @if($scenario === 'waiting')
-        <div class="hero-task teal"><div class="hero-content"><div class="hero-badge"><span class="pulse"></span> Adım 2/5</div><div class="hero-title">Zorunlu belgeler tamam!</div><div class="hero-sub">Tüm zorunlu belgelerin yüklendi. Danışmanın belgeleri kontrol ediyor. Onay sonrası paket seçimi açılacak.</div></div><div class="ring-wrap"><div class="ring"><svg viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fill" cx="22" cy="22" r="18" stroke-dasharray="{{ $circumference }}" stroke-dashoffset="{{ $ringOffset }}" style="stroke:var(--ok)"/></svg><div class="ring-text" style="color:var(--ok)">{{ $pct }}%</div></div><div><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);">{{ $uploadedCount }} / {{ $allCount }}</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">belge yüklendi</div></div></div></div>
+        <div class="hero-task teal"><div class="hero-content"><div class="hero-badge"><span class="pulse"></span> Adım 2/5</div><div class="hero-title">Zorunlu belgeler tamam!</div><div class="hero-sub">Tüm zorunlu belgelerin yüklendi. Danışmanın belgeleri kontrol ediyor. Onay sonrası paket seçimi açılacak.</div></div><div class="ring-wrap"><div class="ring"><svg viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fill" cx="22" cy="22" r="18" stroke-dasharray="{{ $circumference }}" stroke-dashoffset="{{ $ringOffset }}"/></svg><div class="ring-text">{{ $pct }}%</div></div><div><div class="ring-meta-num">{{ $uploadedCount }} / {{ $allCount }}</div><div class="ring-meta-lbl">belge yüklendi</div></div></div></div>
         <div class="grid-4">
             <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-label">Onaylı</div><div class="stat-value">{{ $approvedCount }}</div></div></div>
             <div class="stat-card"><div class="stat-icon amber">⏳</div><div><div class="stat-label">İnceleniyor</div><div class="stat-value">{{ $pendingCount }}</div></div></div>
@@ -261,7 +269,7 @@
             $heroTitle = $scenario === 'start' ? 'Belgelerini yükle' : 'Harika gidiyorsun!';
             $heroSub = $scenario === 'start' ? 'Gerekli belgelerini yükleyerek kayıt sürecini ilerlet. Önce zorunlu belgelere odaklan.' : "Belgelerin büyük kısmı tamam. Kalan {$missingRequired} zorunlu belgeyi yükleyince sonraki adıma geçebilirsin.";
         @endphp
-        <div class="hero-task {{ $heroClass }}"><div class="hero-content"><div class="hero-badge"><span class="pulse"></span> Adım 2/5</div><div class="hero-title">{{ $heroTitle }}</div><div class="hero-sub">{{ $heroSub }}</div></div><div class="ring-wrap"><div class="ring"><svg viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fill" cx="22" cy="22" r="18" stroke-dasharray="{{ $circumference }}" stroke-dashoffset="{{ $ringOffset }}"/></svg><div class="ring-text">{{ $pct }}%</div></div><div><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);">{{ $uploadedCount }} / {{ $allCount }}</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">belge yüklendi</div></div></div></div>
+        <div class="hero-task {{ $heroClass }}"><div class="hero-content"><div class="hero-badge"><span class="pulse"></span> Adım 2/5</div><div class="hero-title">{{ $heroTitle }}</div><div class="hero-sub">{{ $heroSub }}</div></div><div class="ring-wrap"><div class="ring"><svg viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fill" cx="22" cy="22" r="18" stroke-dasharray="{{ $circumference }}" stroke-dashoffset="{{ $ringOffset }}"/></svg><div class="ring-text">{{ $pct }}%</div></div><div><div class="ring-meta-num">{{ $uploadedCount }} / {{ $allCount }}</div><div class="ring-meta-lbl">belge yüklendi</div></div></div></div>
 
         <div class="grid-4">
             <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-label">Onaylı</div><div class="stat-value">{{ $approvedCount }}</div></div></div>
