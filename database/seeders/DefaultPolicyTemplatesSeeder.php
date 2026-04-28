@@ -34,6 +34,11 @@ class DefaultPolicyTemplatesSeeder extends Seeder
             'en' => 'Cookie Policy',
             'tr' => 'Çerez Politikası',
         ],
+        'terms' => [
+            'de' => 'Allgemeine Geschäftsbedingungen (AGB)',
+            'en' => 'Terms and Conditions',
+            'tr' => 'Kullanım Koşulları',
+        ],
     ];
 
     public function run(): void

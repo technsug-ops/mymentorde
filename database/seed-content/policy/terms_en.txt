@@ -1,0 +1,107 @@
+Terms and Conditions — mentorde.com
+
+[DRAFT: These Terms apply to users in Germany and the EU. The legally authoritative version for German supervisory authorities is the German "Allgemeine Geschäftsbedingungen". Before publication, this draft must be reviewed by a qualified data protection / IT lawyer in Germany. Status: April 2026.]
+
+Last updated: 20 April 2026
+
+By using the MentorDE platform, you agree to the following terms. If you do not agree to these terms, please do not use the platform.
+
+Summary: The service provides consulting in the application process for studying in Germany. Acceptance to a university or issuance of a visa is not guaranteed. Fees are specified in the consulting agreement. Misuse of the platform is prohibited.
+
+1. Parties and Definitions
+
+These Terms govern the contractual relationship between:
+
+Horizon STS GmbH (hereinafter "MentorDE", the "Platform" or "we")
+Herwigstraße 24, 35683 Dillenburg, Germany
+Managing Director: Halil Aktas
+Email: info@mentorde.com / support@mentorde.com
+Commercial Register: [Local Court (Amtsgericht), HRB number]
+VAT ID: [VAT identification number]
+
+and the natural or legal person using the Platform (hereinafter the "User" or "you").
+
+2. Scope of Services
+
+We provide consulting services related to the application and visa process for studies, language schools, or vocational training (Ausbildung) in Germany:
+- Advice on the selection of universities, language schools, and vocational programs
+- Support with document preparation, translation referrals, and case file management
+- Guidance through the visa process, accommodation referrals, and travel organization
+- Platform-based communication with consultants, appointment booking, and document upload
+
+Not guaranteed: University admission, visa issuance, application platform fees, consulate fees, and foreign health insurance premiums are outside our control and are the user's responsibility.
+
+3. Account Creation and Security
+
+- The minimum age for registration is 16 years. Minors between 16 and 18 require parental/guardian consent.
+- You are responsible for the accuracy and currency of the information you provide.
+- You are responsible for the confidentiality of your password and the security of your account. In case of suspected unauthorized access, please notify us immediately.
+- Each person may only register one personal account.
+
+4. Fees and Payment
+
+- The specific consulting fee is set out in writing in a separate consulting agreement.
+- Payments are processed via Stripe (credit card, SEPA) or by bank transfer. For digital payments, 3D Secure authentication is mandatory.
+- In case of payment default, services may be paused. If the contract remains in suspension for more than 30 days, we are entitled to extraordinary termination.
+- Third-party costs (university application fees, visa fees, translation, notary, APS procedure, etc.) are borne by the user and are not included in the consulting fee.
+
+5. Right of Withdrawal and Refunds
+
+Consumers (within the meaning of § 13 BGB) have a statutory right of withdrawal under § 312g BGB:
+
+- 14-day right of withdrawal: You have the right to withdraw from this contract within 14 days without giving any reason. The withdrawal period begins on the day the contract is concluded.
+- To exercise your right of withdrawal, you must inform us by an unequivocal statement (e.g., an email to support@mentorde.com) of your decision.
+- If you withdraw after the service has begun with your express consent, you owe us a reasonable amount corresponding to the proportion of services already provided up to the time of withdrawal.
+- Third-party costs (visa fees, translation costs, etc.) are excluded from the refund.
+- We will refund the remaining amount without undue delay, and at the latest within 14 days of receiving your withdrawal notice, using the same payment method you used.
+
+6. User Obligations
+
+- Upload truthful and authentic documents. Uploading falsified or altered documents entitles us to terminate the contract without notice and may result in criminal prosecution.
+- Treat our consultants with respect. Harassment, insults, or racist/sexist behavior are prohibited.
+- Actions that endanger the security of the Platform (intrusion attempts, DDoS, automated scraping) are strictly prohibited.
+- Attempting to access data of other users on the Platform is prohibited.
+
+7. Intellectual Property
+
+Texts, logos, content guides, templates, videos, and designs on the Platform are the property of MentorDE / Horizon STS GmbH. They may not be copied, distributed, or used commercially without written permission. Documents uploaded by the user remain the property of the user; the Platform processes them solely for the purpose of providing the agreed service.
+
+8. Modification or Discontinuation of the Service
+
+The Platform may modify prices, features, or policies subject to prior notice. For material changes, notice will be given at least 30 days in advance by email. Users who do not agree with the changes are entitled to terminate the contract.
+
+9. Limitation of Liability
+
+- University admission, visa issuance, accommodation arrangement, and similar third-party decisions are outside our control.
+- We are not liable for indirect, incidental, special, or consequential damages.
+- The total liability of the Platform is limited to the consulting fees paid in the last 12 months.
+- These limitations do not apply to damages arising from the breach of life, body, or health based on intentional or negligent breach of duty by us, nor to other damages based on intentional or grossly negligent breach of duty by us. Consumer rights are not limited by these clauses.
+
+10. Privacy and Data Protection
+
+The processing of personal data is described in detail in our Privacy Policy (mentorde.com/privacy). By using the Platform, the Privacy Policy is deemed to have been acknowledged.
+
+11. Governing Law and Dispute Resolution
+
+- This contractual relationship is governed by German law, excluding the UN Convention on Contracts for the International Sale of Goods (CISG). Mandatory consumer protection provisions of the country in which the consumer has their habitual residence remain unaffected.
+- EU Online Dispute Resolution (ODR): The European Commission provides an online dispute resolution platform, available at https://ec.europa.eu/consumers/odr. We are neither obliged nor willing to participate in dispute resolution proceedings before a consumer arbitration board.
+- Place of jurisdiction for disputes with non-consumers (merchants, public-law entities): the registered seat of Horizon STS GmbH (Dillenburg / Amtsgericht Wetzlar, Landgericht Limburg as appropriate).
+- Consumers may also bring legal action against us at their place of residence.
+- We encourage you to attempt to resolve disputes in good faith first by contacting: support@mentorde.com.
+
+12. Account Closure
+
+You may close your account at any time by emailing support@mentorde.com. If a consulting agreement is in progress, its provisions continue to apply. Unless statutory retention obligations apply, your personal data will be deleted or anonymized within 30 days.
+
+13. Final Provisions
+
+- If individual provisions of these Terms are invalid, the validity of the remaining provisions remains unaffected. The invalid provision shall be replaced by the corresponding statutory provision.
+- Amendments and additions to these Terms must be in text form.
+
+14. Contact
+
+For questions about these terms: support@mentorde.com
+
+Horizon STS GmbH
+Herwigstraße 24, 35683 Dillenburg, Germany
+Managing Director: Halil Aktas

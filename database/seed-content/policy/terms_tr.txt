@@ -1,0 +1,82 @@
+Kullanım Koşulları — mentorde.com
+
+Son güncelleme: 20 Nisan 2026
+
+MentorDE platformunu kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız. Koşulları kabul etmiyorsanız lütfen platformu kullanmayınız.
+
+Özet: Hizmet, Almanya'da eğitim başvurusu sürecinde danışmanlık sağlar. Başvurunun kabul edilmesi veya vize alınması garanti değildir. Ücretler sözleşmede belirtilir. Platformu kötüye kullanmak yasaktır.
+
+1. Taraflar ve Tanımlar
+
+Bu koşullar; MentorDE (bundan sonra "Platform") ile platformu kullanan gerçek veya tüzel kişi (bundan sonra "Kullanıcı") arasındaki ilişkiyi düzenler.
+
+2. Hizmetin Kapsamı
+
+- Almanya'da üniversite / dil okulu / Ausbildung başvuruları için danışmanlık
+- Belge hazırlama, çeviri yönlendirmesi, başvuru dosyası yönetimi
+- Vize süreci rehberliği, konut ve seyahat organizasyonu yönlendirmesi
+- Platform üzerinden danışmanla iletişim, randevu, belge yükleme
+
+Garanti edilmeyen hususlar: Üniversite kabulü, vize onayı, başvuru portal ücretleri, konsolosluk harçları, yurt dışı sigorta primleri — bunlar kullanıcı sorumluluğundadır ve danışmanlık ücretinin dışındadır.
+
+3. Hesap Oluşturma ve Güvenliği
+
+- Hesap açmak için 16 yaş ve üzerinde olmalısınız.
+- Verdiğiniz bilgilerin doğru ve güncel olmasından sorumlusunuz.
+- Şifrenizin gizliliği ve hesabınızın güvenliği size aittir. Yetkisiz erişim şüphesinde hemen bildirin.
+- Bir kullanıcı yalnızca tek bir kişisel hesap açabilir.
+
+4. Ücretler ve Ödeme
+
+- Danışmanlık ücretleri ayrı bir sözleşmede yazılı olarak belirlenir.
+- Ödemeler Stripe üzerinden veya havale ile alınır. Dijital ödemelerde 3D Secure zorunludur.
+- Ödemesi yapılmayan süreçlerde hizmet duraklatılabilir; sözleşmenin 30 günden fazla askıda kalması durumunda fesih işletilebilir.
+- Üçüncü taraf ücretleri (üniversite başvuru ücreti, vize harcı, çeviri, noter, APS vb.) kullanıcı tarafından karşılanır.
+
+5. İptal ve İade
+
+- 14 günlük cayma hakkı: Mesafeli sözleşmeler kanununa göre dijital hizmet başlamadan önce 14 gün içinde cayma hakkınız vardır.
+- Hizmet başladıktan sonra yapılan iptallerde, o tarihe kadar sunulan hizmetin bedeli kesilir; kalan tutar iade edilir.
+- Üçüncü taraf ücretleri (vize harcı, çeviri ücreti vs.) iade kapsamına girmez.
+- İade talepleri 14 iş günü içinde ödeme yapılan kanala geri yansıtılır.
+
+6. Kullanıcı Yükümlülükleri
+
+- Doğru ve gerçek belgeler yüklemek. Sahte belge yüklemek başvurunuzu ve sözleşmeyi tek taraflı feshetme sebebidir ve yasal takibe konu olabilir.
+- Danışmanla iletişimde saygı kurallarına uymak; taciz, hakaret, ırkçı/cinsiyetçi davranış yasaktır.
+- Platformun güvenliğini tehdit eden eylemler (sızma, DDoS, otomatik veri çekme) kesinlikle yasaktır.
+- Platform içindeki başka kullanıcıların verisine erişmeye çalışmamak.
+
+7. Fikri Mülkiyet
+
+Platformdaki metin, logo, içerik rehberleri, şablonlar, video ve tasarımlar MentorDE'ye aittir. Yazılı izin olmadan kopyalanamaz, dağıtılamaz veya ticari amaçla kullanılamaz. Kullanıcının yüklediği belgeler kullanıcıya aittir; Platform, yalnızca hizmeti sunmak amacıyla bu belgeleri işler.
+
+8. Hizmetin Değiştirilmesi veya Durdurulması
+
+Platform, önceden bildirim yaparak ücretleri, özellikleri veya politikaları değiştirebilir. Kritik değişikliklerde 30 gün önceden e-posta ile bildirim yapılır; kabul etmeyen kullanıcılar iptal hakkını kullanabilir.
+
+9. Sorumluluk Sınırlandırması
+
+- Üniversite kabulü, vize onayı, konaklama bulma ve buna benzer üçüncü taraf kararları Platformun kontrolü dışındadır.
+- Platform, dolaylı, arızi, özel veya sonuç olarak ortaya çıkan zararlardan sorumlu tutulamaz.
+- Toplam sorumluluk, son 12 ay içinde ödenen danışmanlık ücretini aşamaz.
+- Bu sınırlandırmalar kullanıcının tüketici haklarını engellemez.
+
+10. Gizlilik ve Veri Koruma
+
+Kişisel verilerin işlenmesi Gizlilik Politikası'nda ayrıntılı açıklanmıştır (mentorde.com/kvkk). Platformu kullanarak Gizlilik Politikasını da kabul etmiş sayılırsınız.
+
+11. Uygulanacak Hukuk ve Uyuşmazlıklar
+
+- Bu koşullar Türkiye Cumhuriyeti hukukuna tabidir.
+- Tüketici uyuşmazlıklarında Tüketici Hakem Heyetleri ve Tüketici Mahkemeleri yetkilidir.
+- Ticari uyuşmazlıklarda İstanbul Anadolu Mahkemeleri ve İcra Daireleri yetkilidir.
+- Uyuşmazlıkları öncelikli olarak iyi niyetle çözmeyi teşvik ederiz: support@mentorde.com
+
+12. Hesabın Kapatılması
+
+Hesabınızı dilediğiniz zaman support@mentorde.com adresine yazarak kapatabilirsiniz. Devam eden bir danışmanlık sözleşmeniz varsa, sözleşme hükümleri uygulanmaya devam eder. Yasal zorunluluk dışında tüm kişisel verileriniz 30 gün içinde silinir veya anonimleştirilir.
+
+13. İletişim
+
+Koşullar hakkında sorularınız için: support@mentorde.com

@@ -1,0 +1,107 @@
+Allgemeine Geschäftsbedingungen (AGB) — mentorde.com
+
+[ENTWURF: Diese AGB richten sich an Nutzer in Deutschland und der EU. Vor Veröffentlichung durch einen in Deutschland zugelassenen Rechtsanwalt für IT-/Vertragsrecht prüfen lassen. Stand: April 2026.]
+
+Letzte Aktualisierung: 20. April 2026
+
+Mit der Nutzung der MentorDE-Plattform akzeptieren Sie die nachfolgenden Bedingungen. Wenn Sie diesen Bedingungen nicht zustimmen, bitten wir Sie, die Plattform nicht zu nutzen.
+
+Zusammenfassung: Der Dienst bietet Beratung im Bewerbungsprozess für ein Studium in Deutschland. Eine Studienplatzzusage oder Visumserteilung wird nicht garantiert. Die Vergütung wird im Beratungsvertrag festgelegt. Missbrauch der Plattform ist untersagt.
+
+1. Vertragsparteien und Begriffsbestimmungen
+
+Diese Allgemeinen Geschäftsbedingungen regeln das Vertragsverhältnis zwischen:
+
+Horizon STS GmbH (im Folgenden „MentorDE", „Plattform" oder „wir")
+Herwigstraße 24, 35683 Dillenburg, Deutschland
+Geschäftsführer: Halil Aktas
+E-Mail: info@mentorde.com / support@mentorde.com
+Handelsregister: [Amtsgericht ..., HRB ...]
+USt-IdNr.: [USt-IdNr.]
+
+und der natürlichen oder juristischen Person, die die Plattform nutzt (im Folgenden „Nutzer" oder „Sie").
+
+2. Leistungsumfang
+
+Wir bieten Beratungsdienstleistungen rund um das Bewerbungs- und Visumsverfahren für ein Studium, eine Sprachschule oder eine Ausbildung in Deutschland:
+- Beratung bei der Auswahl von Hochschulen, Sprachschulen und Ausbildungsplätzen
+- Unterstützung bei der Dokumentenvorbereitung, Übersetzungsvermittlung und Aktenführung
+- Begleitung im Visumsverfahren sowie Hinweise zur Wohnungs- und Reiseorganisation
+- Plattform-basierte Kommunikation mit Beratern, Terminbuchung und Dokumenten-Upload
+
+Nicht garantiert: Die Hochschulzulassung, Visumserteilung, Bewerbungsplattform-Gebühren, Konsulatsgebühren und Auslandskrankenversicherungsprämien liegen außerhalb unseres Einflussbereichs und sind vom Nutzer selbst zu tragen.
+
+3. Registrierung und Kontosicherheit
+
+- Die Registrierung setzt ein Mindestalter von 16 Jahren voraus. Minderjährige zwischen 16 und 18 Jahren benötigen die Einwilligung des/der Erziehungsberechtigten.
+- Sie sind für die Richtigkeit und Aktualität der angegebenen Daten verantwortlich.
+- Sie sind für die Geheimhaltung Ihres Passworts und die Sicherheit Ihres Kontos verantwortlich. Bei Verdacht auf unbefugten Zugriff informieren Sie uns bitte unverzüglich.
+- Pro Person darf nur ein einzelnes persönliches Konto angelegt werden.
+
+4. Vergütung und Zahlung
+
+- Die konkrete Höhe der Beratungsvergütung wird in einem separaten Beratungsvertrag schriftlich festgelegt.
+- Zahlungen werden über Stripe (Kreditkarte, SEPA) oder per Banküberweisung abgewickelt. Bei digitalen Zahlungen ist 3D-Secure obligatorisch.
+- Bei Zahlungsverzug kann die Leistungserbringung pausiert werden. Bleibt der Vertrag länger als 30 Tage in Suspension, sind wir zur außerordentlichen Kündigung berechtigt.
+- Drittkosten (Hochschul-Bewerbungsgebühren, Visumgebühr, Übersetzung, Notar, APS-Verfahren etc.) trägt der Nutzer selbst und sind nicht im Beratungshonorar enthalten.
+
+5. Widerrufsrecht und Erstattung
+
+Verbrauchern (§ 13 BGB) steht ein gesetzliches Widerrufsrecht nach § 312g BGB zu:
+
+- 14-tägiges Widerrufsrecht: Sie haben das Recht, binnen 14 Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen. Die Widerrufsfrist beginnt am Tag des Vertragsabschlusses.
+- Um Ihr Widerrufsrecht auszuüben, müssen Sie uns mittels einer eindeutigen Erklärung (z. B. E-Mail an support@mentorde.com) über Ihren Entschluss informieren.
+- Bei Widerruf nach Beginn der Dienstleistung mit Ihrer ausdrücklichen Zustimmung schulden Sie uns einen angemessenen Betrag, der dem Anteil der bis zum Widerruf bereits erbrachten Dienstleistungen entspricht.
+- Drittkosten (Visumgebühr, Übersetzungskosten etc.) sind von der Erstattung ausgeschlossen.
+- Wir erstatten den verbleibenden Betrag unverzüglich, spätestens binnen 14 Tagen nach Eingang Ihrer Widerrufserklärung, über denselben Zahlungsweg, den Sie bei der Zahlung verwendet haben.
+
+6. Pflichten des Nutzers
+
+- Wahrheitsgetreue und echte Dokumente hochladen. Das Hochladen gefälschter oder verfälschter Dokumente berechtigt uns zur fristlosen Kündigung des Vertrags und kann strafrechtlich verfolgt werden.
+- Achtung gegenüber unseren Beratern. Belästigung, Beleidigung sowie rassistisches oder sexistisches Verhalten sind untersagt.
+- Handlungen, die die Sicherheit der Plattform gefährden (Eindringversuche, DDoS, automatisiertes Scraping), sind strikt untersagt.
+- Der Versuch, auf Daten anderer Nutzer der Plattform zuzugreifen, ist untersagt.
+
+7. Geistiges Eigentum
+
+Texte, Logos, Inhaltsleitfäden, Vorlagen, Videos und Designs auf der Plattform sind Eigentum von MentorDE bzw. der Horizon STS GmbH. Eine Vervielfältigung, Verbreitung oder kommerzielle Nutzung ohne schriftliche Genehmigung ist nicht gestattet. Vom Nutzer hochgeladene Dokumente verbleiben im Eigentum des Nutzers; die Plattform verarbeitet diese ausschließlich zur Erbringung der vereinbarten Dienstleistung.
+
+8. Änderung oder Einstellung des Dienstes
+
+Die Plattform kann nach vorheriger Ankündigung Preise, Funktionen oder Richtlinien ändern. Bei wesentlichen Änderungen erfolgt die Mitteilung mindestens 30 Tage im Voraus per E-Mail. Nutzer, die mit den Änderungen nicht einverstanden sind, sind berechtigt, den Vertrag zu kündigen.
+
+9. Haftungsbeschränkung
+
+- Hochschulzulassung, Visumserteilung, Wohnraumvermittlung und vergleichbare Entscheidungen Dritter liegen außerhalb unseres Einflussbereichs.
+- Wir haften nicht für mittelbare, zufällige, besondere oder Folgeschäden.
+- Die Gesamthaftung der Plattform ist auf die in den letzten 12 Monaten gezahlten Beratungshonorare begrenzt.
+- Diese Haftungsbeschränkungen gelten nicht für Schäden aus der Verletzung von Leben, Körper oder Gesundheit, die auf einer vorsätzlichen oder fahrlässigen Pflichtverletzung von uns beruhen, sowie für sonstige Schäden, die auf einer vorsätzlichen oder grob fahrlässigen Pflichtverletzung von uns beruhen. Verbraucherrechte werden durch diese Klauseln nicht eingeschränkt.
+
+10. Datenschutz
+
+Die Verarbeitung personenbezogener Daten ist in unserer Datenschutzerklärung detailliert beschrieben (mentorde.com/datenschutz). Mit der Nutzung der Plattform gilt die Datenschutzerklärung als zur Kenntnis genommen.
+
+11. Anwendbares Recht und Streitbeilegung
+
+- Dieses Vertragsverhältnis unterliegt deutschem Recht unter Ausschluss des UN-Kaufrechts (CISG). Zwingende verbraucherschutzrechtliche Vorschriften des Staates, in dem der Verbraucher seinen gewöhnlichen Aufenthalt hat, bleiben unberührt.
+- Online-Streitbeilegung (OS) der EU-Kommission: Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit, die Sie unter https://ec.europa.eu/consumers/odr finden. Wir sind weder verpflichtet noch bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+- Gerichtsstand für Streitigkeiten mit Nicht-Verbrauchern (Kaufleute, juristische Personen des öffentlichen Rechts): Sitz der Horizon STS GmbH (Dillenburg / Amtsgericht Wetzlar bzw. Landgericht Limburg).
+- Verbraucher können uns auch an ihrem Wohnsitz verklagen.
+- Wir empfehlen, Streitigkeiten zunächst in gutem Glauben durch Kontaktaufnahme zu lösen: support@mentorde.com.
+
+12. Kündigung des Kontos
+
+Sie können Ihr Konto jederzeit per E-Mail an support@mentorde.com kündigen. Bei laufendem Beratungsvertrag gelten dessen Bestimmungen weiter. Soweit keine gesetzlichen Aufbewahrungspflichten entgegenstehen, werden Ihre personenbezogenen Daten innerhalb von 30 Tagen gelöscht oder anonymisiert.
+
+13. Schlussbestimmungen
+
+- Sollten einzelne Bestimmungen dieser AGB unwirksam sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt. Anstelle der unwirksamen Bestimmung gilt die gesetzliche Regelung.
+- Änderungen und Ergänzungen dieser AGB bedürfen der Textform.
+
+14. Kontakt
+
+Bei Fragen zu diesen Bedingungen wenden Sie sich an: support@mentorde.com
+
+Horizon STS GmbH
+Herwigstraße 24, 35683 Dillenburg, Deutschland
+Geschäftsführer: Halil Aktas
