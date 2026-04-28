@@ -141,6 +141,13 @@
 .svc-chip input { display:none; }
 .svc-chip.active { background:#eaf3ff; border-color:#9ec2f3; color:#124682; }
 
+/* Eksik prereq item — tıklanabilir link, hover'da vurgu */
+.missing-item-link { display:flex; gap:6px; align-items:flex-start; line-height:1.45; font-size:11.5px; color:#475569; font-weight:500; text-decoration:none; padding:4px 6px; border-radius:5px; transition:background .12s, color .12s; }
+.missing-item-link:hover { background:#f1f5f9; color:#1e40af; text-decoration:none; }
+.missing-item-link .bullet { color:#dc2626; flex-shrink:0; }
+.missing-item-link .arrow { color:#cbd5e1; font-size:10px; margin-left:auto; transition:transform .12s; }
+.missing-item-link:hover .arrow { color:#1e40af; transform:translateX(2px); }
+
 @media(max-width:860px){
     .gc-funnel { flex-direction:column; }
     .gc-fs { border-right:none; border-bottom:1px solid var(--u-line); }
@@ -316,30 +323,38 @@
             @if(!$p['done'])
             @php
                 $items = collect($p['missing_items'] ?? []);
-                $shown = $items->take(3);
-                $remaining = max(0, $items->count() - 3);
+                $shown = $items->take(5);
+                $remaining = max(0, $items->count() - 5);
             @endphp
-            <a href="{{ $p['link'] }}" style="display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:10px;background:var(--u-card,#fff);border:1px solid rgba(37,99,235,.25);text-decoration:none;color:var(--u-brand,#2563eb);transition:all .15s;">
+            <div style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:10px;background:var(--u-card,#fff);border:1px solid rgba(37,99,235,.25);">
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
-                    <strong style="font-size:13px;font-weight:800;">{{ $p['label'] }}</strong>
-                    <span style="font-size:11px;font-weight:700;">Tamamla →</span>
+                    <strong style="font-size:13px;font-weight:800;color:var(--u-brand,#2563eb);">{{ $p['label'] }}</strong>
+                    <a href="{{ $p['link'] }}" style="font-size:11px;font-weight:700;text-decoration:none;color:var(--u-brand,#2563eb);">Tamamla →</a>
                 </div>
                 @if($shown->isNotEmpty())
-                <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:3px;">
+                <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px;">
                     @foreach($shown as $item)
-                    <li style="font-size:11px;color:#475569;font-weight:500;display:flex;gap:5px;align-items:flex-start;line-height:1.45;">
-                        <span style="color:#dc2626;flex-shrink:0;">•</span>
-                        <span>{{ $item }}</span>
-                    </li>
+                        @php
+                            $itemLabel = is_array($item) ? ($item['label'] ?? '') : (string) $item;
+                            $itemKey   = is_array($item) ? (string) ($item['key'] ?? '') : '';
+                            $itemHref  = $itemKey !== '' ? ($p['link'] . '?focus=' . urlencode($itemKey)) : $p['link'];
+                        @endphp
+                        <li>
+                            <a href="{{ $itemHref }}" class="missing-item-link">
+                                <span class="bullet">•</span>
+                                <span>{{ $itemLabel }}</span>
+                                @if($itemKey !== '')<span class="arrow">→</span>@endif
+                            </a>
+                        </li>
                     @endforeach
                     @if($remaining > 0)
-                    <li style="font-size:10px;color:#94a3b8;font-weight:600;font-style:italic;margin-top:2px;">
+                    <li style="font-size:10px;color:#94a3b8;font-weight:600;font-style:italic;margin-top:2px;padding-left:14px;">
                         + {{ $remaining }} daha — {{ $remaining > 1 ? 'bunları' : 'bunu' }} doldurduğunda görünecek
                     </li>
                     @endif
                 </ul>
                 @endif
-            </a>
+            </div>
             @endif
         @endforeach
     </div>

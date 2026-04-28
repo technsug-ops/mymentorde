@@ -81,11 +81,15 @@ class GuestViewDataService
             $formAllTotal  = (int) $allFields->count();
             $formAllFilled = (int) $allFields->filter($fieldChecker)->count();
 
-            // Eksik form alanlarının kullanıcı dostu label listesi (prereq chip'inde göstermek için)
+            // Eksik form alanlarının [key, label] çifti — view'da tıklanabilir chip
+            // ile form sayfasına ?focus=key parametresiyle yönlendirilir
             $formMissingItems = $required
                 ->reject($fieldChecker)
-                ->map(fn ($f) => trim(rtrim((string) ($f['label'] ?? $f['key'] ?? ''), ' *')))
-                ->filter()
+                ->map(fn ($f) => [
+                    'key'   => (string) ($f['key'] ?? ''),
+                    'label' => trim(rtrim((string) ($f['label'] ?? $f['key'] ?? ''), ' *')),
+                ])
+                ->filter(fn ($x) => $x['key'] !== '' && $x['label'] !== '')
                 ->values()
                 ->all();
         } else {

@@ -300,6 +300,27 @@
 /* ── Minimalist overrides ── */
 .jm-minimalist .grf-card { box-shadow: none; border: 1px solid var(--u-line); }
 .jm-minimalist .grf-step-why { border-left-color: var(--u-text); }
+
+/* ── Eksik alanlar özet barı + scroll-to-field highlight ── */
+.grf-missing-bar { background:linear-gradient(135deg,#fef2f2,#fff7ed); border:1px solid #fed7aa; border-left:4px solid #f97316; border-radius:10px; padding:12px 16px; margin:14px auto; max-width:1080px; }
+.grf-missing-bar-head { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+.grf-missing-bar-icon { font-size:18px; }
+.grf-missing-bar-title { font-size:13px; font-weight:800; color:#9a3412; flex:1; }
+.grf-missing-bar-count { font-size:11px; font-weight:700; color:#fff; background:#f97316; padding:2px 8px; border-radius:999px; }
+.grf-missing-chips { display:flex; flex-wrap:wrap; gap:6px; }
+.grf-missing-chip { display:inline-flex; align-items:center; gap:5px; padding:5px 10px 5px 8px; border-radius:999px; background:#fff; border:1px solid #fed7aa; color:#9a3412; font-size:11.5px; font-weight:600; cursor:pointer; transition:all .15s; text-decoration:none; }
+.grf-missing-chip:hover { background:#fff7ed; border-color:#f97316; color:#7c2d12; transform:translateY(-1px); }
+.grf-missing-chip .dot { width:6px; height:6px; border-radius:50%; background:#f97316; flex-shrink:0; }
+.grf-missing-collapse { background:none; border:none; font-size:11px; color:#9a3412; cursor:pointer; font-weight:600; margin-left:8px; }
+
+/* Sarı pulse — focus edilen field için 3 saniye vurgu */
+@keyframes grfFieldFlash {
+    0%   { box-shadow:0 0 0 0 rgba(251,146,60,.7); background:#fff7ed; }
+    50%  { box-shadow:0 0 0 8px rgba(251,146,60,0); background:#ffedd5; }
+    100% { box-shadow:0 0 0 0 rgba(251,146,60,0); background:transparent; }
+}
+.form-group.flash-focus { animation:grfFieldFlash 1.6s ease-out 2; border-radius:10px; }
+.form-group.flash-focus .label-row label { color:#c2410c; font-weight:800; }
 </style>
 @endpush
 
@@ -381,6 +402,33 @@
         <a class="grf-topbar-btn" href="{{ route('guest.dashboard') }}">🏠 Dashboard</a>
     </div>
 </div>
+
+{{-- ── Eksik Alanlar Özet Barı ── --}}
+@php $formMissing = collect($formMissingItems ?? []); @endphp
+@if($formMissing->isNotEmpty())
+<div class="grf-missing-bar" id="grfMissingBar">
+    <div class="grf-missing-bar-head">
+        <span class="grf-missing-bar-icon">⚠</span>
+        <span class="grf-missing-bar-title">Sözleşmeye geçmek için bu zorunlu alanları tamamla</span>
+        <span class="grf-missing-bar-count">{{ $formMissing->count() }}</span>
+        <button type="button" class="grf-missing-collapse" data-collapse-toggle>Gizle</button>
+    </div>
+    <div class="grf-missing-chips" data-collapse-target>
+        @foreach($formMissing as $miss)
+            @php
+                $missKey   = is_array($miss) ? (string) ($miss['key'] ?? '')   : '';
+                $missLabel = is_array($miss) ? (string) ($miss['label'] ?? '') : (string) $miss;
+            @endphp
+            @if($missKey !== '' && $missLabel !== '')
+                <a href="?focus={{ urlencode($missKey) }}" class="grf-missing-chip" data-focus-key="{{ $missKey }}">
+                    <span class="dot"></span>
+                    <span>{{ $missLabel }}</span>
+                </a>
+            @endif
+        @endforeach
+    </div>
+</div>
+@endif
 
 {{-- ── Form Body ── --}}
 <div class="grf-body">
@@ -1550,6 +1598,76 @@
     // Design toggle compat
     var _orig = window.__designToggle;
     window.__designToggle = function(d){ if(_orig) _orig(d); setTimeout(function(){ document.documentElement.classList.toggle('jm-minimalist', d==='minimalist'); }, 50); };
+
+    // ── Eksik alan focus + scroll-to-field + 3 sn pulse ──────────────
+    function flashFocusField(key){
+        if(!key) return false;
+        var fg = document.querySelector('.form-group[data-field-key="' + (window.CSS && CSS.escape ? CSS.escape(key) : key.replace(/"/g,'')) + '"]');
+        if(!fg) return false;
+        // Önce step panel'ini aktif yap (form wizard'larda field gizli olabilir).
+        // Mevcut pill click handler'ı zaten panel'i aktive ediyor.
+        var panel = fg.closest('.grf-panel');
+        if(panel && !panel.classList.contains('active')){
+            var stepIdx = panel.getAttribute('data-step');
+            if(stepIdx !== null){
+                var pill = document.querySelector('[data-step-pill="' + stepIdx + '"]');
+                if(pill) {
+                    try { pill.click(); } catch(e){}
+                } else {
+                    // Pill yoksa direkt class değiştir
+                    document.querySelectorAll('.grf-panel.active').forEach(function(p){ p.classList.remove('active'); });
+                    panel.classList.add('active');
+                }
+            }
+        }
+        // Animasyon retrigger için class temizle, sonra ekle
+        fg.classList.remove('flash-focus');
+        // İçerideki input'a focus, scroll smooth
+        setTimeout(function(){
+            fg.scrollIntoView({ behavior:'smooth', block:'center' });
+            fg.classList.add('flash-focus');
+            var input = fg.querySelector('input,select,textarea');
+            if(input && !input.disabled) {
+                try { input.focus({ preventScroll:true }); } catch(e){ input.focus(); }
+            }
+            // 3.2 sn sonra class'ı temizle (animasyon 1.6sn × 2 iteration)
+            setTimeout(function(){ fg.classList.remove('flash-focus'); }, 3300);
+        }, 60);
+        return true;
+    }
+
+    // 1) URL ?focus=key parametresi — sayfa yüklendiğinde scroll
+    try {
+        var urlParams = new URLSearchParams(window.location.search);
+        var focusKey = urlParams.get('focus');
+        if(focusKey){
+            // Form panel'leri layout sonrası hazır olsun diye ufak bir gecikme
+            setTimeout(function(){ flashFocusField(focusKey); }, 250);
+        }
+    } catch(e) {}
+
+    // 2) Üst eksik bar chip'leri tıklanırsa (URL'i değiştirmeden inline geç)
+    document.querySelectorAll('.grf-missing-chip[data-focus-key]').forEach(function(chip){
+        chip.addEventListener('click', function(e){
+            var k = this.getAttribute('data-focus-key');
+            if(flashFocusField(k)){
+                e.preventDefault();
+                // URL'i güncelle ki refresh'te yine focus'a dönsün
+                try { history.replaceState(null, '', '?focus=' + encodeURIComponent(k)); } catch(err){}
+            }
+        });
+    });
+
+    // 3) Eksik özet barı gizle/göster
+    var collapseBtn = document.querySelector('[data-collapse-toggle]');
+    var collapseTarget = document.querySelector('[data-collapse-target]');
+    if(collapseBtn && collapseTarget){
+        collapseBtn.addEventListener('click', function(){
+            var hidden = collapseTarget.style.display === 'none';
+            collapseTarget.style.display = hidden ? 'flex' : 'none';
+            this.textContent = hidden ? 'Gizle' : 'Göster';
+        });
+    }
 })();
 </script>
 @endsection
