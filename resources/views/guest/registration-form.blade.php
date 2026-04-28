@@ -1017,25 +1017,34 @@
     });
 
     // type=month — sadece ay/yıl picker (Flatpickr monthSelect plugin)
-    document.querySelectorAll('input[type="month"]').forEach(function(el){
-        if (typeof window.monthSelectPlugin === 'undefined') return;
-        var fp = flatpickr(el, {
-            locale: trLocale,
-            dateFormat: 'Y-m',
-            altInput: true,
-            altFormat: 'F Y',
-            allowInput: true,
-            defaultDate: el.value || null,
-            disableMobile: false,
-            plugins: [new monthSelectPlugin({
-                shorthand: false,
+    // Plugin defer ile yüklenir, yüklenene kadar retry et.
+    function _grfInitMonthPickers(retry){
+        if (typeof window.monthSelectPlugin === 'undefined') {
+            if (retry < 30) setTimeout(function(){ _grfInitMonthPickers(retry + 1); }, 100);
+            return;
+        }
+        document.querySelectorAll('input[type="month"]').forEach(function(el){
+            if (el._grfMonthBound) return;
+            el._grfMonthBound = true;
+            var fp = flatpickr(el, {
+                locale: trLocale,
                 dateFormat: 'Y-m',
+                altInput: true,
                 altFormat: 'F Y',
-            })],
-            onChange: function(){ _grfTriggerCascade(); },
+                allowInput: true,
+                defaultDate: el.value || null,
+                disableMobile: false,
+                plugins: [new monthSelectPlugin({
+                    shorthand: false,
+                    dateFormat: 'Y-m',
+                    altFormat: 'F Y',
+                })],
+                onChange: function(){ _grfTriggerCascade(); },
+            });
+            if (el.name) window.__grfPickers[el.name] = fp;
         });
-        if (el.name) window.__grfPickers[el.name] = fp;
-    });
+    }
+    _grfInitMonthPickers(0);
 
     // ── Cascade kuralları (anne/baba doğum tarihi + okul tarihleri) ──
     function _yearsAfter(s, y){
@@ -1052,8 +1061,21 @@
         d.setFullYear(d.getFullYear() - y);
         return d;
     }
+    // Verilen tarihin yılının 1 Eylülünü döndürür (ortaokul/lise başlangıcı için)
+    function _septemberOfYear(s){
+        if (!s) return null;
+        var d = new Date(s.length === 7 ? s + '-01' : s);
+        if (isNaN(d.getTime())) return null;
+        return new Date(d.getFullYear(), 8, 1);
+    }
     function _setMin(name, v){ var fp = window.__grfPickers[name]; if(fp && v) fp.set('minDate', v); }
     function _setMax(name, v){ var fp = window.__grfPickers[name]; if(fp && v) fp.set('maxDate', v); }
+    function _jumpIfEmpty(name, v){
+        var fp = window.__grfPickers[name];
+        if (!fp || !v) return;
+        var inputVal = (fp.input && fp.input.value) ? fp.input.value : '';
+        if (!inputVal) { try { fp.jumpToDate(v); } catch(_){} }
+    }
 
     function _applyParentBirthMax(){
         var today = new Date();
@@ -1063,6 +1085,8 @@
             if (maxParent) {
                 _setMax('father_birth_date', maxParent);
                 _setMax('mother_birth_date', maxParent);
+                _jumpIfEmpty('father_birth_date', maxParent);
+                _jumpIfEmpty('mother_birth_date', maxParent);
             }
             // İlkokul başlama: öğrenci 6 yaşında ve sonrası
             var primaryMin = _yearsAfter(birthEl.value, 6);
@@ -1074,13 +1098,14 @@
         // Eşin doğum tarihi: bugünden en az 16 yıl önce (öğrenciden bağımsız)
         var spouseMax = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
         _setMax('spouse_birth_date', spouseMax);
+        _jumpIfEmpty('spouse_birth_date', spouseMax);
     }
 
     var _grfCascade = [
         { trigger: 'primary_start_date', target: 'primary_end_date', offsetYears: 3 },
-        { trigger: 'primary_end_date',   target: 'middle_start_date', offsetYears: 0 },
+        { trigger: 'primary_end_date',   target: 'middle_start_date', mode: 'september' },
         { trigger: 'middle_start_date',  target: 'middle_end_date',   offsetYears: 3 },
-        { trigger: 'middle_end_date',    target: 'high_start_date',   offsetYears: 0 },
+        { trigger: 'middle_end_date',    target: 'high_start_date',   mode: 'september' },
         { trigger: 'high_start_date',    target: 'high_end_date',     offsetYears: 3 },
         { trigger: 'germany_stay_from',  target: 'germany_stay_to',   offsetYears: 0 },
     ];
@@ -1089,7 +1114,10 @@
         _grfCascade.forEach(function(r){
             var el = document.querySelector('[name="' + r.trigger + '"]');
             if (!el || !el.value) return;
-            _setMin(r.target, _yearsAfter(el.value, r.offsetYears));
+            var minD = (r.mode === 'september')
+                ? _septemberOfYear(el.value)
+                : _yearsAfter(el.value, r.offsetYears);
+            _setMin(r.target, minD);
         });
     }
 

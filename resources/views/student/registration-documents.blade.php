@@ -238,6 +238,155 @@
 .sdoc .cel-btn { display:inline-flex; align-items:center; gap:8px; padding:12px 28px; border-radius:var(--radius-xs); background:linear-gradient(135deg,var(--brand),#a78bfa); color:#fff; font-size:15px; font-weight:700; text-decoration:none; border:none; cursor:pointer; font-family:inherit; box-shadow:0 4px 14px rgba(124,58,237,0.3); }
 .sdoc .cel-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(124,58,237,0.35); color:#fff; text-decoration:none; }
 
+/* ═══ INFO ICON (DE name + uni-assist kategori popup) ═══ */
+.sdoc .doc-info-btn {
+    width:18px; height:18px; border-radius:50%; flex-shrink:0;
+    border:1px solid var(--line); background:var(--card); color:var(--muted);
+    font-size:10px; font-weight:700; line-height:1; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:0; margin-left:2px; opacity:.55; transition:all .15s;
+}
+.sdoc .doc-info-btn:hover { opacity:1; border-color:var(--brand); color:var(--brand); background:var(--brand-light); }
+.sdoc .doc-name { gap:6px; }
+
+/* ═══ DOC INFO POPUP (centered modal) ═══ */
+.sdoc-info-modal {
+    display:none; position:fixed; inset:0; z-index:9998;
+    background:rgba(15,23,42,.55); backdrop-filter:blur(2px);
+    align-items:center; justify-content:center; padding:16px;
+}
+.sdoc-info-modal.open { display:flex; }
+.sdoc-info-modal .di-card {
+    background:#fff; border-radius:14px; max-width:480px; width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+    padding:22px 24px 20px; position:relative;
+    animation:sdoc-info-pop .18s ease-out;
+}
+@keyframes sdoc-info-pop { 0%{transform:scale(.94);opacity:0} 100%{transform:scale(1);opacity:1} }
+.sdoc-info-modal .di-close {
+    position:absolute; top:10px; right:10px;
+    width:28px; height:28px; border-radius:50%;
+    border:none; background:#f1f5f9; color:#64748b;
+    font-size:16px; cursor:pointer;
+}
+.sdoc-info-modal .di-close:hover { background:#e2e8f0; color:#0f172a; }
+.sdoc-info-modal .di-tag {
+    display:inline-block; font-size:10px; font-weight:700;
+    letter-spacing:.8px; text-transform:uppercase;
+    color:#7c3aed; background:#ede9fe; padding:3px 10px; border-radius:10px;
+    margin-bottom:10px;
+}
+.sdoc-info-modal h3 { font-size:18px; font-weight:800; margin:0 0 4px; color:#0f172a; line-height:1.3; }
+.sdoc-info-modal .di-tr-label { font-size:11px; color:#64748b; margin-bottom:14px; }
+.sdoc-info-modal .di-row {
+    display:flex; flex-direction:column; gap:4px;
+    padding:10px 12px; border:1px solid #e2e8f0; border-radius:10px;
+    margin-bottom:8px;
+}
+.sdoc-info-modal .di-row-label {
+    font-size:10px; font-weight:700; letter-spacing:.5px;
+    color:#94a3b8; text-transform:uppercase;
+}
+.sdoc-info-modal .di-row-value { font-size:14px; font-weight:600; color:#0f172a; }
+.sdoc-info-modal .di-row-value em { font-style:normal; color:#64748b; font-weight:500; }
+.sdoc-info-modal .di-help { font-size:12px; color:#475569; line-height:1.5; margin-top:8px; padding:10px 12px; background:#f8fafc; border-radius:8px; border-left:3px solid #7c3aed; }
+
+/* ═══ HOW-TO GUIDE (Belgelerin Hazırlanması) ═══ */
+.sdoc .doc-guide {
+    background:linear-gradient(135deg, #eff6ff 0%, #ede9fe 100%);
+    border:1px solid #c7d2fe; border-radius:var(--radius-sm);
+    padding:18px 20px; margin-bottom:20px;
+}
+.sdoc .doc-guide-head {
+    display:flex; align-items:center; justify-content:space-between;
+    cursor:pointer; user-select:none;
+}
+.sdoc .doc-guide-head h4 {
+    font-size:14px; font-weight:700; margin:0;
+    display:flex; align-items:center; gap:8px; color:#3730a3;
+}
+.sdoc .doc-guide-head h4 .dg-emoji { font-size:18px; }
+.sdoc .doc-guide-toggle {
+    background:#fff; border:1px solid #c7d2fe; color:#4338ca;
+    font-size:11px; font-weight:600; padding:4px 12px; border-radius:99px;
+    cursor:pointer; transition:all .15s;
+}
+.sdoc .doc-guide-toggle:hover { background:#eef2ff; }
+.sdoc .doc-guide-body { display:none; margin-top:14px; }
+.sdoc .doc-guide-body.open { display:block; }
+.sdoc .dg-steps {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px;
+}
+.sdoc .dg-step {
+    background:#fff; border-radius:10px; padding:14px 12px;
+    text-align:center; border:1px solid #e0e7ff;
+}
+.sdoc .dg-step-num {
+    width:28px; height:28px; border-radius:50%;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff;
+    font-size:13px; font-weight:800; margin:0 auto 8px;
+    display:flex; align-items:center; justify-content:center;
+}
+.sdoc .dg-step-icon { font-size:22px; margin-bottom:6px; }
+.sdoc .dg-step-title { font-size:12px; font-weight:700; color:#3730a3; margin-bottom:2px; line-height:1.3; }
+.sdoc .dg-step-desc { font-size:10.5px; color:#6366f1; line-height:1.4; }
+.sdoc .dg-tips {
+    background:#fff; border-radius:10px; padding:12px 14px; border:1px solid #e0e7ff;
+    font-size:12.5px; color:#1e293b; line-height:1.6;
+}
+.sdoc .dg-tips strong { color:#3730a3; }
+.sdoc .dg-tips ul { margin:6px 0 0; padding-left:18px; }
+.sdoc .dg-tips li { margin-bottom:4px; }
+
+/* Accordion sub-sections */
+.sdoc .dg-acc { margin-top:10px; display:flex; flex-direction:column; gap:6px; }
+.sdoc .dg-item { background:#fff; border:1px solid #e0e7ff; border-radius:10px; overflow:hidden; }
+.sdoc .dg-item-head {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:11px 14px; cursor:pointer; user-select:none;
+    font-size:13px; font-weight:600; color:#1e1b4b;
+    background:linear-gradient(90deg, #fff 0%, #fafaff 100%);
+    transition:background .15s;
+}
+.sdoc .dg-item-head:hover { background:#f5f3ff; }
+.sdoc .dg-item-head .dg-arrow { color:#7c3aed; font-size:14px; transition:transform .2s; }
+.sdoc .dg-item.open .dg-arrow { transform:rotate(90deg); }
+.sdoc .dg-item-body { display:none; padding:0 14px 14px; font-size:12.5px; color:#334155; line-height:1.65; }
+.sdoc .dg-item.open .dg-item-body { display:block; }
+.sdoc .dg-item-body p { margin:0 0 8px; }
+.sdoc .dg-item-body p:last-child { margin-bottom:0; }
+.sdoc .dg-item-body ul,
+.sdoc .dg-item-body ol { margin:6px 0 8px; padding-left:20px; }
+.sdoc .dg-item-body li { margin-bottom:4px; }
+.sdoc .dg-item-body strong { color:#3730a3; }
+.sdoc .dg-item-body code {
+    background:#ede9fe; color:#5b21b6; padding:1px 6px; border-radius:4px;
+    font-size:11.5px; font-family:ui-monospace, monospace;
+}
+.sdoc .dg-status-grid {
+    display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:8px 0;
+}
+.sdoc .dg-status-card {
+    padding:10px 12px; border-radius:8px; border:1px solid;
+    font-size:12px; line-height:1.5;
+}
+.sdoc .dg-status-card.s-missing { background:#fef2f2; border-color:#fecaca; color:#991b1b; }
+.sdoc .dg-status-card.s-pending { background:#fffbeb; border-color:#fde68a; color:#92400e; }
+.sdoc .dg-status-card.s-approved { background:#f0fdf4; border-color:#bbf7d0; color:#166534; }
+.sdoc .dg-status-card.s-rejected { background:#fef2f2; border-color:#fecaca; color:#7f1d1d; }
+.sdoc .dg-status-card strong { display:block; font-size:13px; margin-bottom:2px; }
+.sdoc .dg-example {
+    background:#eff6ff; border-left:3px solid #3b82f6; padding:10px 12px;
+    border-radius:6px; margin:8px 0; font-size:12px; color:#1e40af;
+}
+.sdoc .dg-example strong { color:#1e3a8a; }
+
+@media (max-width:740px) {
+    .sdoc .dg-steps { grid-template-columns:repeat(2,1fr); }
+    .sdoc .doc-guide { padding:14px; }
+    .sdoc .dg-status-grid { grid-template-columns:1fr; }
+}
+
 /* ═══ HIDDEN ═══ */
 .sdoc .sdoc-hidden { display:none !important; }
 .sdoc .sdoc-collapsed { display:none !important; }
@@ -298,7 +447,22 @@
 @section('content')
 @php
     // ── Checklist stats ──
-    $check = collect($requiredDocumentChecklist ?? []);
+    // Bir belge birden fazla kategoride etiketli olabilir (örn. Pasaport →
+    // uni_assist + vize + yurt). DOM'da unique-by-code render edip her satıra
+    // tüm top_category tag'lerini boşlukla ayırarak veriyoruz; sekme filtresi
+    // o data-cat içinde geziyor.
+    $checkRaw = collect($requiredDocumentChecklist ?? []);
+    $uniqueByCode = $checkRaw
+        ->groupBy('category_code')
+        ->map(function ($group) {
+            $first = $group->first();
+            $first['top_category_codes'] = $group->pluck('top_category_code')->filter()->unique()->values()->all();
+            $first['top_category_code']  = $first['top_category_codes'][0] ?? ($first['top_category_code'] ?? '');
+            return $first;
+        })
+        ->values();
+    // Geriye uyum için $check ismi: artık unique-by-code listesi
+    $check = $uniqueByCode;
     $allCount = $check->count();
     $uploadedCount = $check->where('uploaded', true)->count();
     $requiredTotal = $check->where('is_required', true)->count();
@@ -339,10 +503,20 @@
     $otherItems = $check->filter(fn($x) => empty($x['is_required']) && empty($x['uploaded']))->values();
 
     // ── Category counts for tabs ──
-    $categoryMissing = $check->filter(fn($x) => !empty($x['is_required']) && empty($x['uploaded']))
-        ->groupBy(fn($x) => (string) ($x['top_category_code'] ?? 'diger'))
+    // Multi-tag: bir belge birden fazla kategoride etiketliyse her tag için sayılır.
+    $expandedTags = [];
+    foreach ($check as $item) {
+        $tags = !empty($item['top_category_codes']) ? $item['top_category_codes'] : [(string)($item['top_category_code'] ?? 'diger')];
+        foreach ($tags as $tag) {
+            $expandedTags[] = ['tag' => $tag, 'is_required' => !empty($item['is_required']), 'uploaded' => !empty($item['uploaded'])];
+        }
+    }
+    $categoryMissing = collect($expandedTags)
+        ->filter(fn($x) => $x['is_required'] && !$x['uploaded'])
+        ->groupBy('tag')
         ->map->count();
-    $topCats = $check->pluck('top_category_code')->filter()->unique()->values();
+    // Sekme listesi: her zaman tüm 5 kategori (boş olsa bile görünsün)
+    $topCats = collect(\App\Models\DocumentCategory::TOP_CATEGORIES)->keys()->values();
 
     // ── Progress ring: circumference = 2*π*18 ≈ 113.1 ──
     $circumference = 113.1;
@@ -504,6 +678,235 @@
             <div class="alert-bar danger"><span class="alert-icon">🔴</span><div><strong>{{ $missingRequired }} zorunlu belge eksik.</strong> Uni-Assist adımına geçmek için tüm zorunlu belgeleri yüklemen gerekiyor.</div></div>
         @endif
 
+        {{-- Belgelerin Hazırlanması Rehberi --}}
+        <div class="doc-guide">
+            <div class="doc-guide-head" id="dgToggleHead">
+                <h4><span class="dg-emoji">📚</span> Belgeler Nasıl Hazırlanır?</h4>
+                <button type="button" class="doc-guide-toggle" id="dgToggleBtn">Rehberi Göster</button>
+            </div>
+            <div class="doc-guide-body" id="dgBody">
+                <div class="dg-steps">
+                    <div class="dg-step">
+                        <div class="dg-step-num">1</div>
+                        <div class="dg-step-icon">📄</div>
+                        <div class="dg-step-title">Belgeyi Topla</div>
+                        <div class="dg-step-desc">Orijinal belgeyi okul/kurumdan al. Tercüme gerekiyorsa yeminli tercüman.</div>
+                    </div>
+                    <div class="dg-step">
+                        <div class="dg-step-num">2</div>
+                        <div class="dg-step-icon">📷</div>
+                        <div class="dg-step-title">Net Tara</div>
+                        <div class="dg-step-desc">Tarayıcı veya CamScanner ile renkli ve düz tara. Telefonla net çekim de olur.</div>
+                    </div>
+                    <div class="dg-step">
+                        <div class="dg-step-num">3</div>
+                        <div class="dg-step-icon">📑</div>
+                        <div class="dg-step-title">PDF Yap</div>
+                        <div class="dg-step-desc">Birden fazla sayfa varsa tek PDF birleştir. Maksimum 10MB.</div>
+                    </div>
+                    <div class="dg-step">
+                        <div class="dg-step-num">4</div>
+                        <div class="dg-step-icon">⬆️</div>
+                        <div class="dg-step-title">Yükle</div>
+                        <div class="dg-step-desc">İlgili belgenin "📤 Yükle" butonuna tıkla. Danışman 1-3 gün içinde inceler.</div>
+                    </div>
+                </div>
+                <div class="dg-tips">
+                    <strong>💡 Hızlı İpuçları:</strong>
+                    <ul>
+                        <li>Her belgenin yanındaki <strong>i</strong> butonuna tıklayarak Almanca karşılığını ve uni-assist kategorisini görebilirsin.</li>
+                        <li>Tüm belgeler <strong>okunabilir, renkli ve tam sayfa</strong> olmalı. Köşesi kesik veya bulanık görüntü reddedilir.</li>
+                        <li>Tercüme gereken belgelerde <strong>orijinal + Almanca tercüme</strong> aynı PDF'te bir arada olabilir.</li>
+                        <li>YKS, Lise Diploması ve Üniversite Transkripti için <strong>yeminli tercüme</strong> şarttır.</li>
+                        <li>Belgeyi yanlış kategoriye yüklersen sorun yok — danışman taşır. Önemli olan yüklemen.</li>
+                    </ul>
+                </div>
+
+                {{-- Detaylı Kullanım Kılavuzu — Genişletilebilir Bölümler --}}
+                <div class="dg-acc">
+
+                    <div class="dg-item" data-dg-acc>
+                        <div class="dg-item-head" data-dg-toggle>
+                            <span>📂 Sayfanın Bölümleri Nedir, Nasıl Çalışır?</span>
+                            <span class="dg-arrow">▶</span>
+                        </div>
+                        <div class="dg-item-body">
+                            <p>Belge yükleme sayfası 4 ana bölümden oluşur:</p>
+                            <ol>
+                                <li><strong>Yolculuk çubuğu (üstte):</strong> Almanya başvurun 6 adımda görselleşir — Başvuru → Sözleşme → <em>Belgeler (buradasın)</em> → Uni-Assist → Vize → Almanya. Tamamlanan adımlar yeşil ✓ ile işaretlenir.</li>
+                                <li><strong>İstatistik kartları:</strong> Onaylı / Bekliyor / Eksik Zorunlu / Toplam — anlık ilerleme.</li>
+                                <li><strong>Filtreler ve sekmeler:</strong> Belge listesini hızlı süzmek için.</li>
+                                <li><strong>Belgelerim listesi:</strong> Her belgenin durumunu, kategorisini ve aksiyonunu (yükle / önizle / güncelle) görürsün.</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="dg-item" data-dg-acc>
+                        <div class="dg-item-head" data-dg-toggle>
+                            <span>🏷️ 5 Ana Kategori — Hangisi Ne İçindir?</span>
+                            <span class="dg-arrow">▶</span>
+                        </div>
+                        <div class="dg-item-body">
+                            <p>Belgeler 5 ana sekme altında gruplanır. Her sekme farklı bir başvuru süreci içindir:</p>
+                            <ul>
+                                <li><strong>Uni Asist</strong> — Almanya'daki üniversitelere uni-assist üzerinden başvuru için gereken belgeler (CV, Motivasyon, Pasaport, YKS, Diploma, Transkript vb.).</li>
+                                <li><strong>Vize</strong> — Almanya öğrenci vizesi başvurusu için Almanya konsolosluğunun istediği belgeler (Bloke hesap, Sağlık sigortası, Niyet mektubu vb.).</li>
+                                <li><strong>Dil Okulu</strong> — Almanya'da dil kursu kayıt belgeleri.</li>
+                                <li><strong>Yurt Başvurusu</strong> — Studentenwerk veya özel yurtlara başvuru için (Pasaport, Zulassung, ev sahibi onayı vb.).</li>
+                                <li><strong>Diğer</strong> — Yukarıdaki gruplara girmeyen yardımcı belgeler.</li>
+                            </ul>
+                            <p>Yukarıdaki <strong>Tümü</strong> sekmesi tüm benzersiz belgeleri tek listede gösterir.</p>
+                        </div>
+                    </div>
+
+                    <div class="dg-item" data-dg-acc>
+                        <div class="dg-item-head" data-dg-toggle>
+                            <span>♻️ Aynı Belge Birden Fazla Yerde — Nasıl?</span>
+                            <span class="dg-arrow">▶</span>
+                        </div>
+                        <div class="dg-item-body">
+                            <p>Bazı belgeler birden fazla başvuru sürecinde gerekir. Sistem bunu otomatik halleder: <strong>tek dosya yüklersin, ilgili tüm sekmelerde aynı anda ✓ olur</strong>.</p>
+                            <div class="dg-example">
+                                <strong>Örnek:</strong> Pasaportu bir kez yüklediğinde Uni Asist, Vize ve Yurt Başvurusu sekmelerinde aynı anda yeşil onayı görürsün. Aynı dosyayı 3 kez yüklemen gerekmez.
+                            </div>
+                            <p>Çoklu kategori paylaşan belgeler:</p>
+                            <ul>
+                                <li><strong>Pasaport</strong> → Uni Asist + Vize + Yurt</li>
+                                <li><strong>Lise Diploması (Almanca tercümeli)</strong> → Uni Asist + Vize</li>
+                                <li><strong>Özgeçmiş (CV)</strong> → Uni Asist + Vize</li>
+                                <li><strong>Üniversite Kabul Mektubu (Zulassung)</strong> → Vize + Yurt</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="dg-item" data-dg-acc>
+                        <div class="dg-item-head" data-dg-toggle>
+                            <span>ℹ️ Belge Bilgi Butonu (i) — Almanca Karşılığı</span>
+                            <span class="dg-arrow">▶</span>
+                        </div>
+                        <div class="dg-item-body">
+                            <p>Her belgenin yanında küçük gri <code>i</code> butonu vardır. Tıkladığında bir popup açılır ve şu bilgileri gösterir:</p>
+                            <ul>
+                                <li><strong>🇩🇪 Almanca karşılığı</strong> — Uni-assist veya konsoloslukta bu belge bu adla geçer (örn. "Reisepass", "Lebenslauf").</li>
+                                <li><strong>📂 Uni-Assist kategorisi</strong> — Uni-assist'e yüklerken bu kategori altına yüklemen gerekir (örn. "Schulzeugnis", "Studienzeugnis").</li>
+                                <li><strong>Açıklama</strong> — Belgenin nasıl hazırlanması gerektiği, dikkat edilecek noktalar.</li>
+                            </ul>
+                            <p>Almanca isimleri öğrenmek başvuru sırasında çok faydalı — belge ararken veya kuruma sorarken bu adı kullan.</p>
+                        </div>
+                    </div>
+
+                    <div class="dg-item" data-dg-acc>
+                        <div class="dg-item-head" data-dg-toggle>
+                            <span>📊 Belge Durumları — Anlamları Ne?</span>
+                            <span class="dg-arrow">▶</span>
+                        </div>
+                        <div class="dg-item-body">
+                            <p>Bir belge yaşam döngüsü boyunca 4 farklı durumda olabilir:</p>
+                            <div class="dg-status-grid">
+                                <div class="dg-status-card s-missing">
+                                    <strong>📋 Eksik</strong>
+                                    Henüz yüklenmemiş. <code>📤 Yükle</code> butonuna tıklayıp dosyayı seç.
+                                </div>
+                                <div class="dg-status-card s-pending">
+                                    <strong>⏳ İnceleniyor</strong>
+                                    Yüklendi, danışman kontrol ediyor. 1-3 iş günü sürer.
+                                </div>
+                                <div class="dg-status-card s-approved">
+                                    <strong>✅ Onaylandı</strong>
+                                    Kabul edildi. Bir şey yapmana gerek yok, ileri adıma geçebilirsin.
+                                </div>
+                                <div class="dg-status-card s-rejected">
+                                    <strong>❌ Reddedildi</strong>
+                                    Bir sorun var. Sebep belgenin altında yazılı, düzeltip yeniden yükle.
+                                </div>
+                            </div>
+                            <p><strong>Önemli:</strong> Tüm zorunlu belgelerin <em>onaylı</em> olması Uni-Assist adımına geçmen için şarttır. <em>İnceleniyor</em> durumu yeterli değildir.</p>
+                        </div>
+                    </div>
+
+                    <div class="dg-item" data-dg-acc>
+                        <div class="dg-item-head" data-dg-toggle>
+                            <span>🔍 Filtreler — Listeyi Nasıl Süzerim?</span>
+                            <span class="dg-arrow">▶</span>
+                        </div>
+                        <div class="dg-item-body">
+                            <p>Belgelerim listesinin üstünde 4 filtre seçeneği var:</p>
+                            <ul>
+                                <li><strong>Önce Zorunlu</strong> — Sadece henüz yüklemediğin zorunlu belgeleri gösterir. Varsayılan filtre, "şimdi neyi yapmalıyım?" sorusunun cevabı.</li>
+                                <li><strong>Tümü</strong> — Tüm belgeleri gösterir.</li>
+                                <li><strong>Yüklenen</strong> — Yüklediğin belgeleri (inceleniyor + onaylı + reddedilenler).</li>
+                                <li><strong>Eksik</strong> — Henüz yüklemediğin belgeler (zorunlu + isteğe bağlı).</li>
+                            </ul>
+                            <p>Filtre + sekme birlikte çalışır. Örn. "Vize" sekmesi + "Eksik" filtresi → Vize için henüz yüklemediğin belgeler.</p>
+                        </div>
+                    </div>
+
+                    <div class="dg-item" data-dg-acc>
+                        <div class="dg-item-head" data-dg-toggle>
+                            <span>🔄 Reddedilen Belge — Ne Yapmalıyım?</span>
+                            <span class="dg-arrow">▶</span>
+                        </div>
+                        <div class="dg-item-body">
+                            <p>Bir belge reddedildiğinde sayfanın üstünde kırmızı bir kutuda görünür ve <strong>red sebebi</strong> belgenin altında yazılı olur (örn. "Pasaport süresi dolmuş", "Tercüme yeminli değil").</p>
+                            <ol>
+                                <li>Red sebebini oku, sorunu anla.</li>
+                                <li>Yeni/düzeltilmiş belgeyi hazırla.</li>
+                                <li><code>🔄 Yeniden Yükle</code> butonuna tıkla, yeni dosyayı seç.</li>
+                                <li>Belge tekrar <em>İnceleniyor</em> durumuna döner. Danışman 1-3 iş günü içinde tekrar bakar.</li>
+                            </ol>
+                            <p>Sebep net değilse danışmanla <strong>Mesajlar</strong> menüsünden iletişime geçebilirsin.</p>
+                        </div>
+                    </div>
+
+                    <div class="dg-item" data-dg-acc>
+                        <div class="dg-item-head" data-dg-toggle>
+                            <span>📁 Dosya Formatı ve Boyut</span>
+                            <span class="dg-arrow">▶</span>
+                        </div>
+                        <div class="dg-item-body">
+                            <ul>
+                                <li><strong>Kabul edilen formatlar:</strong> PDF, JPG, PNG (her belgenin yanında yazılı).</li>
+                                <li><strong>Maksimum boyut:</strong> Genelde 10MB (bazı belgeler için 5MB — yine yanında yazar).</li>
+                                <li><strong>Tercih edilen:</strong> PDF — birden fazla sayfa varsa tek dosyada birleştir.</li>
+                                <li><strong>Çözünürlük:</strong> En az 200 DPI; metin net okunabilmeli.</li>
+                                <li><strong>Renk:</strong> Renkli tarama tercih edilir; siyah-beyaz olabilir ama mühür/imza renkli görünmeli.</li>
+                            </ul>
+                            <div class="dg-example">
+                                <strong>Boyut sorunu yaşarsan:</strong> ilovepdf.com veya smallpdf.com sitelerinde ücretsiz PDF sıkıştırabilirsin. Telefon görüntüleri için CamScanner uygulaması otomatik PDF üretir.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dg-item" data-dg-acc>
+                        <div class="dg-item-head" data-dg-toggle>
+                            <span>❓ Sık Sorulan Sorular</span>
+                            <span class="dg-arrow">▶</span>
+                        </div>
+                        <div class="dg-item-body">
+                            <p><strong>Bir belge eksik ama bende yok, ne yaparım?</strong><br>
+                            Mesajlar menüsünden danışmanına yaz, durumunu açıkla. Bazı belgeler (örn. Zulassung) sürecin sonunda gelir, hemen yükleyemeyebilirsin.</p>
+
+                            <p><strong>Yanlış belgeyi yanlış yere yükledim, geri alabilir miyim?</strong><br>
+                            Evet — <code>🔄 Güncelle</code> butonuyla doğru dosyayı yükleyince eskisi otomatik değişir. Onaylanmış belgeleri güncellemek danışman onayı gerektirebilir.</p>
+
+                            <p><strong>Tercümem yeminli mi olmalı?</strong><br>
+                            Uni-assist'e gönderilen Lise Diploması, YKS ve Üniversite Transkripti yeminli tercümeli olmalı. CV ve Motivasyon mektubu Almanca/İngilizce kendi yazılır, tercüme gerekmez.</p>
+
+                            <p><strong>Pasaportumu 3 farklı yere yüklemeli miyim?</strong><br>
+                            Hayır. Bir kere yükle — Uni Asist, Vize ve Yurt sekmelerinde aynı anda ✓ olur.</p>
+
+                            <p><strong>Belge inceleme ne kadar sürer?</strong><br>
+                            Genellikle 1-3 iş günü. Yoğun dönemlerde (yaz/eylül başvuru sezonu) 5 güne kadar uzayabilir.</p>
+
+                            <p><strong>Onaylı belgemde sonradan değişiklik olursa?</strong><br>
+                            Pasaport yenileme, dil belgesi yükseltme gibi durumlarda <code>🔄 Güncelle</code> ile yeni dosyayı yükle. Danışman tekrar inceler.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
         {{-- Rejected docs --}}
         @if($rejectedCount > 0)
         <div class="section-card">
@@ -564,12 +967,31 @@
                 @if($missingRequiredItems->count() > 0)
                 <div class="doc-group-title" data-grp="missing-required"><span>🔴 Zorunlu — Eksik ({{ $missingRequiredItems->count() }})</span><span class="grp-stats">Hemen yükle</span></div>
                 @foreach($missingRequiredItems as $mi)
-                    @php $miFid = 'mi-' . preg_replace('/[^a-z0-9]/', '-', strtolower((string)($mi['category_code'] ?? 'x'))); @endphp
-                    <div class="doc-card urgent" data-cat="{{ $mi['top_category_code'] ?? '' }}" data-req="1" data-up="0">
+                    @php
+                        $miFid = 'mi-' . preg_replace('/[^a-z0-9]/', '-', strtolower((string)($mi['category_code'] ?? 'x')));
+                        $miCats = !empty($mi['top_category_codes']) ? implode(' ', $mi['top_category_codes']) : ((string) ($mi['top_category_code'] ?? ''));
+                    @endphp
+                    <div class="doc-card urgent" data-cat="{{ $miCats }}" data-req="1" data-up="0">
                         <div class="doc-icon-wrap missing">📋</div>
                         <div class="doc-info">
-                            <div class="doc-name"><span class="required-dot"></span>{{ $mi['name'] ?: '-' }}</div>
-                            <div class="doc-meta"><span class="chip danger">Zorunlu</span><span>{{ $documentTopCategoryLabels[$mi['top_category_code'] ?? ''] ?? '' }}</span><span>{{ $mi['accepted'] ?? 'pdf,jpg,png' }} — max {{ (int)($mi['max_mb'] ?? 10) }}MB</span></div>
+                            <div class="doc-name">
+                                <span class="required-dot"></span>{{ $mi['name'] ?: '-' }}
+                                @if(!empty($mi['name_de']) || !empty($mi['uni_assist_category']))
+                                    <button type="button" class="doc-info-btn" data-doc-info
+                                        data-tr="{{ $mi['name'] ?? '' }}"
+                                        data-de="{{ $mi['name_de'] ?? '' }}"
+                                        data-cat="{{ $mi['uni_assist_category'] ?? '' }}"
+                                        data-help="{{ $mi['description'] ?? '' }}"
+                                        title="Almanca karşılığı / Uni-Assist kategorisi">i</button>
+                                @endif
+                            </div>
+                            <div class="doc-meta">
+                                <span class="chip danger">Zorunlu</span>
+                                @if(!empty($mi['uni_assist_category']))
+                                    <span class="chip" style="background:#ede9fe;color:#6d28d9;">{{ $mi['uni_assist_category'] }}</span>
+                                @endif
+                                <span>{{ $mi['accepted'] ?? 'pdf,jpg,png' }} — max {{ (int)($mi['max_mb'] ?? 10) }}MB</span>
+                            </div>
                         </div>
                         <div class="doc-actions"><button class="doc-btn primary" type="button" data-upload="{{ $miFid }}">📤 Yükle</button></div>
                         <div class="upload-zone" id="uz-{{ $miFid }}">
@@ -599,12 +1021,31 @@
                         $uiChipClass = match($uiStatus) { 'approved' => 'approved', 'rejected' => 'rejected', 'generated' => 'generated', default => 'wait' };
                         $uiChipLabel = match($uiStatus) { 'approved' => 'Onaylandı', 'rejected' => 'Reddedildi', 'generated' => 'Oluşturuldu', default => 'İnceleniyor' };
                         $uiFid = 'ui-' . preg_replace('/[^a-z0-9]/', '-', strtolower($uiCode));
+                        $uiCats = !empty($ui['top_category_codes']) ? implode(' ', $ui['top_category_codes']) : ((string) ($ui['top_category_code'] ?? ''));
                     @endphp
-                    <div class="doc-card" data-cat="{{ $ui['top_category_code'] ?? '' }}" data-req="{{ !empty($ui['is_required']) ? '1' : '0' }}" data-up="1">
+                    <div class="doc-card" data-cat="{{ $uiCats }}" data-req="{{ !empty($ui['is_required']) ? '1' : '0' }}" data-up="1">
                         <div class="doc-icon-wrap {{ $uiIconClass }}">{{ $uiIcon }}</div>
                         <div class="doc-info">
-                            <div class="doc-name">{{ $ui['name'] ?: '-' }}</div>
-                            <div class="doc-meta"><span class="chip {{ $uiChipClass }}">{{ $uiChipLabel }}</span><span>{{ $documentTopCategoryLabels[$ui['top_category_code'] ?? ''] ?? '' }}</span>@if($uiDoc)<span>{{ $uiDoc->updated_at?->format('d M Y') ?? $uiDoc->updated_at }}</span>@endif</div>
+                            <div class="doc-name">
+                                {{ $ui['name'] ?: '-' }}
+                                @if(!empty($ui['name_de']) || !empty($ui['uni_assist_category']))
+                                    <button type="button" class="doc-info-btn" data-doc-info
+                                        data-tr="{{ $ui['name'] ?? '' }}"
+                                        data-de="{{ $ui['name_de'] ?? '' }}"
+                                        data-cat="{{ $ui['uni_assist_category'] ?? '' }}"
+                                        data-help="{{ $ui['description'] ?? '' }}"
+                                        title="Almanca karşılığı / Uni-Assist kategorisi">i</button>
+                                @endif
+                            </div>
+                            <div class="doc-meta">
+                                <span class="chip {{ $uiChipClass }}">{{ $uiChipLabel }}</span>
+                                @if(!empty($ui['uni_assist_category']))
+                                    <span class="chip" style="background:#ede9fe;color:#6d28d9;">{{ $ui['uni_assist_category'] }}</span>
+                                @endif
+                                @if($uiDoc)
+                                    <span>{{ $uiDoc->updated_at?->format('d M Y') ?? $uiDoc->updated_at }}</span>
+                                @endif
+                            </div>
                         </div>
                         <div class="doc-actions">
                             @if($uiDoc)
@@ -635,12 +1076,30 @@
                 @php $showInitial = 2; @endphp
                 <div class="doc-group-title" data-grp="other" style="margin-top:8px;"><span>📝 Diğer Belgeler ({{ $otherItems->count() }})</span><span class="grp-stats">İsteğe bağlı</span></div>
                 @foreach($otherItems as $idx => $oi)
-                    @php $oiFid = 'oi-' . preg_replace('/[^a-z0-9]/', '-', strtolower((string)($oi['category_code'] ?? 'x'))); @endphp
-                    <div class="doc-card {{ $idx >= $showInitial ? 'extra-doc sdoc-collapsed' : '' }}" data-cat="{{ $oi['top_category_code'] ?? '' }}" data-req="0" data-up="0">
+                    @php
+                        $oiFid = 'oi-' . preg_replace('/[^a-z0-9]/', '-', strtolower((string)($oi['category_code'] ?? 'x')));
+                        $oiCats = !empty($oi['top_category_codes']) ? implode(' ', $oi['top_category_codes']) : ((string) ($oi['top_category_code'] ?? ''));
+                    @endphp
+                    <div class="doc-card {{ $idx >= $showInitial ? 'extra-doc sdoc-collapsed' : '' }}" data-cat="{{ $oiCats }}" data-req="0" data-up="0">
                         <div class="doc-icon-wrap waiting">📄</div>
                         <div class="doc-info">
-                            <div class="doc-name">{{ $oi['name'] ?: '-' }}</div>
-                            <div class="doc-meta"><span>{{ $documentTopCategoryLabels[$oi['top_category_code'] ?? ''] ?? '' }}</span><span>{{ $oi['accepted'] ?? 'pdf,jpg,png' }} — max {{ (int)($oi['max_mb'] ?? 10) }}MB</span></div>
+                            <div class="doc-name">
+                                {{ $oi['name'] ?: '-' }}
+                                @if(!empty($oi['name_de']) || !empty($oi['uni_assist_category']))
+                                    <button type="button" class="doc-info-btn" data-doc-info
+                                        data-tr="{{ $oi['name'] ?? '' }}"
+                                        data-de="{{ $oi['name_de'] ?? '' }}"
+                                        data-cat="{{ $oi['uni_assist_category'] ?? '' }}"
+                                        data-help="{{ $oi['description'] ?? '' }}"
+                                        title="Almanca karşılığı / Uni-Assist kategorisi">i</button>
+                                @endif
+                            </div>
+                            <div class="doc-meta">
+                                @if(!empty($oi['uni_assist_category']))
+                                    <span class="chip" style="background:#ede9fe;color:#6d28d9;">{{ $oi['uni_assist_category'] }}</span>
+                                @endif
+                                <span>{{ $oi['accepted'] ?? 'pdf,jpg,png' }} — max {{ (int)($oi['max_mb'] ?? 10) }}MB</span>
+                            </div>
                         </div>
                         <div class="doc-actions"><button class="doc-btn" type="button" data-upload="{{ $oiFid }}">📤 Yükle</button></div>
                         <div class="upload-zone" id="uz-{{ $oiFid }}">
@@ -699,6 +1158,25 @@
 
 </div>{{-- /sdoc --}}
 
+{{-- ═══ DOC INFO MODAL (Almanca karşılığı + Uni-Assist kategorisi) ═══ --}}
+<div id="docInfoModal" class="sdoc-info-modal" role="dialog" aria-modal="true" aria-labelledby="docInfoTitle">
+    <div class="di-card">
+        <button type="button" class="di-close" id="docInfoClose" aria-label="Kapat">✕</button>
+        <span class="di-tag">Belge Bilgisi</span>
+        <h3 id="docInfoTitle"></h3>
+        <div class="di-tr-label" id="docInfoTrLabel"></div>
+        <div class="di-row" id="docInfoDeRow">
+            <div class="di-row-label">🇩🇪 Almanca Karşılığı (Uni-Assist'te bu adla geçer)</div>
+            <div class="di-row-value" id="docInfoDeName"></div>
+        </div>
+        <div class="di-row" id="docInfoCatRow">
+            <div class="di-row-label">📂 Uni-Assist Kategorisi</div>
+            <div class="di-row-value" id="docInfoCat"></div>
+        </div>
+        <div class="di-help" id="docInfoHelp" style="display:none;"></div>
+    </div>
+</div>
+
 {{-- ═══ PREVIEW MODAL ═══ --}}
 <div id="preview-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;padding:16px;">
     <div style="background:var(--surface,#fff);border-radius:16px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.15);">
@@ -729,6 +1207,58 @@
 {{-- ═══ JAVASCRIPT ═══ --}}
 <script nonce="{{ $cspNonce ?? '' }}">
 (function(){
+    // ── Doc info popup (DE name + uni-assist kategori) ─────────────────────
+    var infoModal   = document.getElementById('docInfoModal');
+    var infoTitle   = document.getElementById('docInfoTitle');
+    var infoTrLabel = document.getElementById('docInfoTrLabel');
+    var infoDeName  = document.getElementById('docInfoDeName');
+    var infoDeRow   = document.getElementById('docInfoDeRow');
+    var infoCat     = document.getElementById('docInfoCat');
+    var infoCatRow  = document.getElementById('docInfoCatRow');
+    var infoHelp    = document.getElementById('docInfoHelp');
+    var infoClose   = document.getElementById('docInfoClose');
+    function openInfo(btn){
+        var tr = btn.dataset.tr || '';
+        var de = btn.dataset.de || '';
+        var cat = btn.dataset.cat || '';
+        var help = btn.dataset.help || '';
+        infoTitle.textContent = tr || de;
+        infoTrLabel.textContent = tr ? 'Türkçe portalda gösterim' : '';
+        if (de) { infoDeName.textContent = de; infoDeRow.style.display=''; }
+        else    { infoDeRow.style.display='none'; }
+        if (cat) { infoCat.textContent = cat; infoCatRow.style.display=''; }
+        else     { infoCatRow.style.display='none'; }
+        if (help) { infoHelp.textContent = help; infoHelp.style.display=''; }
+        else      { infoHelp.style.display='none'; }
+        infoModal.classList.add('open');
+    }
+    function closeInfo(){ infoModal.classList.remove('open'); }
+    document.querySelectorAll('[data-doc-info]').forEach(function(btn){
+        btn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); openInfo(btn); });
+    });
+    if (infoClose) infoClose.addEventListener('click', closeInfo);
+    if (infoModal) infoModal.addEventListener('click', function(e){ if (e.target === infoModal) closeInfo(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && infoModal.classList.contains('open')) closeInfo(); });
+
+    // ── Belgeler Nasıl Hazırlanır rehberi (toggle) ──────────────────────────
+    var dgBody = document.getElementById('dgBody');
+    var dgHead = document.getElementById('dgToggleHead');
+    var dgBtn  = document.getElementById('dgToggleBtn');
+    function toggleGuide(){
+        if (!dgBody || !dgBtn) return;
+        var isOpen = dgBody.classList.toggle('open');
+        dgBtn.textContent = isOpen ? 'Rehberi Gizle' : 'Rehberi Göster';
+    }
+    if (dgHead) dgHead.addEventListener('click', toggleGuide);
+
+    // ── Accordion: detaylı kullanım kılavuzu bölümleri ─────────────────────
+    document.querySelectorAll('[data-dg-toggle]').forEach(function(head){
+        head.addEventListener('click', function(){
+            var item = head.closest('[data-dg-acc]');
+            if (item) item.classList.toggle('open');
+        });
+    });
+
     // File inputs → show filename
     document.querySelectorAll('input[type="file"][data-fname-target]').forEach(function(inp){
         inp.addEventListener('change', function(){
@@ -788,7 +1318,9 @@
             if(curFilter==='urgent'){
                 var wouldShow=false;
                 document.querySelectorAll('#docList .doc-card').forEach(function(c){
-                    if(c.dataset.req==='1'&&c.dataset.up==='0'&&(curCat==='all'||(c.dataset.cat||'')===curCat)) wouldShow=true;
+                    var tags=(c.dataset.cat||'').split(/\s+/).filter(Boolean);
+                    var catMatch = curCat==='all' || tags.indexOf(curCat) !== -1;
+                    if(c.dataset.req==='1'&&c.dataset.up==='0'&&catMatch) wouldShow=true;
                 });
                 if(!wouldShow){
                     curFilter='all';
@@ -804,12 +1336,15 @@
         var cards=document.querySelectorAll('#docList .doc-card');
         var grp={'missing-required':0,'uploaded':0,'other':0};
         cards.forEach(function(c){
-            var req=c.dataset.req==='1', up=c.dataset.up==='1', cat=c.dataset.cat||'', show=true;
+            var req=c.dataset.req==='1', up=c.dataset.up==='1';
+            // data-cat artık boşluk-ayrı multi-tag listesi (Pasaport: "uni_assist vize yurt")
+            var tags=(c.dataset.cat||'').split(/\s+/).filter(Boolean);
+            var show=true;
             if(curFilter==='urgent') show=req&&!up;
             else if(curFilter==='uploaded') show=up;
             else if(curFilter==='missing') show=!up;
-            // Kategori filtresi
-            if(show&&curCat!=='all') show=cat===curCat;
+            // Kategori filtresi: tags listesinde aktif sekme var mı
+            if(show&&curCat!=='all') show=tags.indexOf(curCat) !== -1;
             c.classList.toggle('sdoc-hidden',!show);
             if(show){ if(req&&!up) grp['missing-required']++; else if(up) grp['uploaded']++; else grp['other']++; }
         });

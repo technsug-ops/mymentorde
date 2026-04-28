@@ -331,6 +331,16 @@ class GuestRegistrationFieldSchemaService
         if ($row->field_key === 'application_country') {
             return 'select';
         }
+        // Eski DB kayıtlarında 'month' tipi 'text'e çevrilmişti; katalog 'month' diyorsa onu kullan.
+        $monthFields = [
+            'primary_start_date', 'primary_end_date',
+            'middle_start_date', 'middle_end_date',
+            'high_start_date', 'high_end_date',
+            'germany_stay_from', 'germany_stay_to',
+        ];
+        if (in_array($row->field_key, $monthFields, true)) {
+            return 'month';
+        }
         return (string) $row->type;
     }
 
@@ -371,7 +381,7 @@ class GuestRegistrationFieldSchemaService
                 $fieldKey = $this->safeCode($field['key'] ?? null, 'field_'.($fieldIndex + 1));
                 $label = $this->safeText($field['label'] ?? null, $fieldKey);
                 $type = $this->safeText($field['type'] ?? 'text', 'text');
-                if (!in_array($type, ['text', 'email', 'date', 'select', 'textarea'], true)) {
+                if (!in_array($type, ['text', 'email', 'date', 'month', 'select', 'textarea', 'phone'], true)) {
                     $type = 'text';
                 }
                 $placeholder = $this->safeNullableText($field['placeholder'] ?? null, 255);

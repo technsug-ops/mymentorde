@@ -403,6 +403,7 @@
                                         $inputType = match(true) {
                                             $type === 'email' => 'email',
                                             $type === 'phone' => 'tel',
+                                            $type === 'month' => 'month',
                                             $isGrade           => 'number',
                                             default            => 'text',
                                         };
@@ -516,25 +517,35 @@
     });
 
     // type=month — sadece ay/yıl picker (Flatpickr monthSelect plugin)
-    document.querySelectorAll('input[type="month"]').forEach(function(el){
-        if (typeof window.monthSelectPlugin === 'undefined') return;
-        var fp = flatpickr(el, {
-            locale: trLocale,
-            dateFormat: 'Y-m',
-            altInput: true,
-            altFormat: 'F Y',
-            allowInput: true,
-            defaultDate: el.value || null,
-            disableMobile: false,
-            plugins: [new monthSelectPlugin({
-                shorthand: false,
+    // Plugin defer ile yüklendiği için yüklenene kadar retry et — aksi halde
+    // input plain text olarak kalır ve "YYYY-MM" placeholder görünür.
+    function _initMonthPickers(retry){
+        if (typeof window.monthSelectPlugin === 'undefined') {
+            if (retry < 30) setTimeout(function(){ _initMonthPickers(retry + 1); }, 100);
+            return;
+        }
+        document.querySelectorAll('input[type="month"]').forEach(function(el){
+            if (el._srfMonthBound) return;
+            el._srfMonthBound = true;
+            var fp = flatpickr(el, {
+                locale: trLocale,
                 dateFormat: 'Y-m',
+                altInput: true,
                 altFormat: 'F Y',
-            })],
-            onChange: function(){ _srfTriggerCascade(); },
+                allowInput: true,
+                defaultDate: el.value || null,
+                disableMobile: false,
+                plugins: [new monthSelectPlugin({
+                    shorthand: false,
+                    dateFormat: 'Y-m',
+                    altFormat: 'F Y',
+                })],
+                onChange: function(){ _srfTriggerCascade(); },
+            });
+            if (el.name) window.__srfPickers[el.name] = fp;
         });
-        if (el.name) window.__srfPickers[el.name] = fp;
-    });
+    }
+    _initMonthPickers(0);
 
     // ── Cascade kuralları ──────────────────────────────────────────────────
     // Field değişikliğinde bağımlı field'ların min/max'i otomatik güncellenir.
@@ -554,6 +565,14 @@
         d.setFullYear(d.getFullYear() - years);
         return d;
     }
+    // Verilen tarihin yılı baz alınarak o yılın 1 Eylül tarihini döndürür
+    // (Türkiye okul yılı eylülde başlar — ortaokul/lise başlangıcı için)
+    function _septemberOfYear(dateStr){
+        if (!dateStr) return null;
+        var d = new Date(dateStr.length === 7 ? dateStr + '-01' : dateStr);
+        if (isNaN(d.getTime())) return null;
+        return new Date(d.getFullYear(), 8, 1); // Ay 8 = Eylül (0-indexed)
+    }
 
     function _setMin(name, dateOrStr){
         var fp = window.__srfPickers[name];
@@ -562,6 +581,15 @@
     function _setMax(name, dateOrStr){
         var fp = window.__srfPickers[name];
         if (fp && dateOrStr) fp.set('maxDate', dateOrStr);
+    }
+    // Picker boşsa görüntüyü verilen tarihe atla (ay/yıl manuel gezme zahmeti olmasın)
+    function _jumpIfEmpty(name, dateOrStr){
+        var fp = window.__srfPickers[name];
+        if (!fp || !dateOrStr) return;
+        var inputVal = (fp.input && fp.input.value) ? fp.input.value : '';
+        if (!inputVal) {
+            try { fp.jumpToDate(dateOrStr); } catch(_){}
+        }
     }
 
     // Kural 1: Anne/baba doğum tarihi → öğrencinin doğumundan en az 15 yıl önce
@@ -576,6 +604,9 @@
             if (maxParent) {
                 _setMax('father_birth_date', maxParent);
                 _setMax('mother_birth_date', maxParent);
+                // Boş picker'lar açıldığında doğrudan bu tarihe atlasın
+                _jumpIfEmpty('father_birth_date', maxParent);
+                _jumpIfEmpty('mother_birth_date', maxParent);
             }
             // İlkokul başlama: öğrenci 6 yaşında ve sonrası
             var primaryMin = _yearsAfter(birthEl.value, 6);
@@ -587,6 +618,7 @@
         // Eşin doğum tarihi: bugünden en az 16 yıl önce (öğrenci doğumundan bağımsız)
         var spouseMax = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
         _setMax('spouse_birth_date', spouseMax);
+        _jumpIfEmpty('spouse_birth_date', spouseMax);
     }
 
     // Kural 2: Okul tarihleri cascade — Türkiye sistemi (4+4+4) baz alınır
@@ -594,12 +626,12 @@
     var _schoolCascade = [
         // primary_start → primary_end (en az 3 yıl sonra)
         { trigger: 'primary_start_date', target: 'primary_end_date', offsetYears: 3, mode: 'min' },
-        // primary_end → middle_start (sonrası)
-        { trigger: 'primary_end_date',   target: 'middle_start_date', offsetYears: 0, mode: 'min' },
+        // primary_end → middle_start (bitiş yılının eylülünden başlasın)
+        { trigger: 'primary_end_date',   target: 'middle_start_date', mode: 'september' },
         // middle_start → middle_end (en az 3 yıl sonra)
         { trigger: 'middle_start_date',  target: 'middle_end_date',   offsetYears: 3, mode: 'min' },
-        // middle_end → high_start
-        { trigger: 'middle_end_date',    target: 'high_start_date',   offsetYears: 0, mode: 'min' },
+        // middle_end → high_start (bitiş yılının eylülünden başlasın)
+        { trigger: 'middle_end_date',    target: 'high_start_date',   mode: 'september' },
         // high_start → high_end (en az 3 yıl sonra)
         { trigger: 'high_start_date',    target: 'high_end_date',     offsetYears: 3, mode: 'min' },
         // germany_stay_from → germany_stay_to (en az 1 ay sonra)
@@ -610,7 +642,12 @@
         _schoolCascade.forEach(function(rule){
             var srcEl = document.querySelector('[name="' + rule.trigger + '"]');
             if (!srcEl || !srcEl.value) return;
-            var minD = _yearsAfter(srcEl.value, rule.offsetYears);
+            var minD;
+            if (rule.mode === 'september') {
+                minD = _septemberOfYear(srcEl.value);
+            } else {
+                minD = _yearsAfter(srcEl.value, rule.offsetYears);
+            }
             if (!minD) return;
             _setMin(rule.target, minD);
         });

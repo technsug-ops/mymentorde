@@ -6,15 +6,38 @@ use Illuminate\Database\Eloquent\Model;
 
 class DocumentCategory extends Model
 {
+    /**
+     * 5 ana kategori — bir belge birden fazla kategoride etiketlenebilir
+     * (örn. Pasaport: uni_assist + vize + yurt). Her etiket ayrı bir
+     * guest_required_documents satırı olarak saklanır, kendi sort_order'ı ile.
+     */
     public const TOP_CATEGORIES = [
-        'kisisel_dokumanlar' => 'Kişisel Dokümanlar',
-        'uni_assist_dokumanlari' => 'Uni Assist Dokümanları',
-        'vize_dokumanlari' => 'Vize Dokümanları',
-        'dil_okulu_dokumanlari' => 'Dil Okulu Dokümanları',
-        'ikamet_kaydi_dokumanlari' => 'İkamet Kaydı Dokümanları',
-        'almanya_burokrasi_dokumanlari' => 'Almanya Bürokrasi Dokümanları',
-        'diger_dokumanlar' => 'Diğer Dokümanlar',
-        'partner_dokumanlari' => 'Partner Dokümanları',
+        'uni_assist' => 'Uni Asist',
+        'vize'       => 'Vize',
+        'dil_okulu'  => 'Dil Okulu',
+        'uni_kayit'  => 'Üniversite Kayıt',
+        'yurt'       => 'İkamet',
+        'diger'      => 'Diğer',
+    ];
+
+    /**
+     * Eski top_category_code → yeni 5'li harita (geriye uyum için).
+     */
+    public const LEGACY_TOP_CATEGORY_MAP = [
+        'uni_assist_dokumanlari'         => 'uni_assist',
+        'kisisel_dokumanlar'             => 'uni_assist',
+        'vize_dokumanlari'               => 'vize',
+        'dil_okulu_dokumanlari'          => 'dil_okulu',
+        'ikamet_kaydi_dokumanlari'       => 'yurt',
+        'almanya_burokrasi_dokumanlari'  => 'diger',
+        'partner_dokumanlari'            => 'diger',
+        'diger_dokumanlar'               => 'diger',
+        'egitim_belgeleri'               => 'uni_assist',
+        'dil_belgeleri'                  => 'dil_okulu',
+        'mali_belgeler'                  => 'vize',
+        'basvuru_dosyasi'                => 'uni_assist',
+        'tercumeler'                     => 'uni_assist',
+        'kimlik'                         => 'uni_assist',
     ];
 
     protected $fillable = [
@@ -38,6 +61,17 @@ class DocumentCategory extends Model
 
     public static function defaultTopCategoryCode(): string
     {
-        return 'diger_dokumanlar';
+        return 'diger';
+    }
+
+    /**
+     * Eski top_category_code'u yeni 5'li sisteme normalize et.
+     */
+    public static function normalizeTopCategoryCode(?string $code): string
+    {
+        $code = (string) ($code ?? '');
+        if ($code === '') return self::defaultTopCategoryCode();
+        if (isset(self::TOP_CATEGORIES[$code])) return $code;
+        return self::LEGACY_TOP_CATEGORY_MAP[$code] ?? self::defaultTopCategoryCode();
     }
 }

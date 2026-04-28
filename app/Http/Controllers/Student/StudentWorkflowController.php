@@ -216,7 +216,7 @@ class StudentWorkflowController extends Controller
         }
 
         // C5: submit sonrası belge sayfasına yönlendir (user tercihi)
-        return redirect('/student/registration-documents')
+        return redirect('/student/registration/documents')
             ->with('status', 'Tam kayıt formun gönderildi. Şimdi belgelerini yükleyebilirsin.');
     }
 

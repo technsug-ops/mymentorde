@@ -56,18 +56,32 @@ trait UsesRequiredDocuments
                 ->pluck('top_category_code', 'code');
         }
 
-        return $rows->map(function (GuestRequiredDocument $row) use ($uploadedCategoryCodes, $topByCategory): array {
+        $hasNameDe = SchemaCache::hasColumn('guest_required_documents', 'name_de');
+        $hasUniCat = SchemaCache::hasColumn('guest_required_documents', 'uni_assist_category');
+        $hasTopCat = SchemaCache::hasColumn('guest_required_documents', 'top_category_code');
+
+        return $rows->map(function (GuestRequiredDocument $row) use ($uploadedCategoryCodes, $topByCategory, $hasNameDe, $hasUniCat, $hasTopCat): array {
             $categoryCode = (string) ($row->category_code ?? '');
+            // Row'un kendi top_category_code override'i öncelikli — aynı belge farklı
+            // sekmelerde farklı sıralarda görünebilsin (Pasaport: uni_assist+vize+yurt).
+            // Yoksa kategori lookup'tan al, son çare default.
+            $rowTop = $hasTopCat ? (string) ($row->top_category_code ?? '') : '';
+            $catTop = (string) ($topByCategory[$categoryCode] ?? '');
+            $topCategory = DocumentCategory::normalizeTopCategoryCode(
+                $rowTop !== '' ? $rowTop : $catTop
+            );
             return [
-                'document_code'     => (string) ($row->document_code ?? ''),
-                'category_code'     => $categoryCode,
-                'top_category_code' => (string) ($topByCategory[$categoryCode] ?? DocumentCategory::defaultTopCategoryCode()),
-                'name'              => (string) ($row->name ?? ''),
-                'description'       => (string) ($row->description ?? ''),
-                'is_required'       => (bool) $row->is_required,
-                'accepted'          => (string) ($row->accepted ?? 'pdf,jpg,png'),
-                'max_mb'            => (int) ($row->max_mb ?? 10),
-                'uploaded'          => in_array($categoryCode, $uploadedCategoryCodes, true),
+                'document_code'       => (string) ($row->document_code ?? ''),
+                'category_code'       => $categoryCode,
+                'top_category_code'   => $topCategory,
+                'name'                => (string) ($row->name ?? ''),
+                'name_de'             => $hasNameDe ? (string) ($row->name_de ?? '') : '',
+                'uni_assist_category' => $hasUniCat ? (string) ($row->uni_assist_category ?? '') : '',
+                'description'         => (string) ($row->description ?? ''),
+                'is_required'         => (bool) $row->is_required,
+                'accepted'            => (string) ($row->accepted ?? 'pdf,jpg,png'),
+                'max_mb'              => (int) ($row->max_mb ?? 10),
+                'uploaded'            => in_array($categoryCode, $uploadedCategoryCodes, true),
             ];
         })->values()->all();
     }
