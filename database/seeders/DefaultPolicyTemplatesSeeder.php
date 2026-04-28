@@ -49,6 +49,11 @@ class DefaultPolicyTemplatesSeeder extends Seeder
             'en' => 'Data Breach Incident Response Plan',
             'tr' => 'Veri İhlali Acil Eylem Planı',
         ],
+        'imprint' => [
+            'de' => 'Impressum',
+            'en' => 'Legal Notice',
+            'tr' => 'Yasal Bildirim',
+        ],
     ];
 
     public function run(): void
