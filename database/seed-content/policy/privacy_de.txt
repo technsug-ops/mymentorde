@@ -1,14 +1,14 @@
 Datenschutzerklärung — mentorde.com
 
-[ENTWURF: Dies ist ein DSGVO/BDSG-konformer Vorab-Entwurf für mentorde.com. Markierte Stellen müssen vor Veröffentlichung durch einen Anwalt / Datenschutzbeauftragten überprüft und mit konkreten Angaben gefüllt werden. Stand: April 2026.]
+[ENTWURF: Diese Datenschutzerklärung wurde auf Basis des tatsächlich eingesetzten Technik-Stacks von mentorde.com erstellt. Vor Veröffentlichung müssen die mit eckigen Klammern markierten Stellen (Handelsregister, USt-IdNr., Geschäftsführer) mit den tatsächlichen Daten gefüllt und das gesamte Dokument durch einen in Deutschland zugelassenen Rechtsanwalt für IT-/Datenschutzrecht oder einen zertifizierten Datenschutzbeauftragten überprüft werden. Stand: April 2026.]
 
 1. Name und Anschrift des Verantwortlichen
 
 Verantwortlicher im Sinne der Datenschutz-Grundverordnung (DSGVO) und sonstiger nationaler Datenschutzgesetze der Mitgliedsstaaten sowie weiterer datenschutzrechtlicher Bestimmungen ist:
 
-[Vollständiger Firmenname der UG/GmbH einfügen] (im Folgenden „mentorde.com" oder „wir")
-Eifeler Str. 10
-40227 Düsseldorf
+Horizon STS GmbH (im Folgenden „mentorde.com" oder „wir")
+Herwigstraße 24
+35683 Dillenburg
 Deutschland
 
 Telefon: +49 157 84218282
@@ -16,7 +16,7 @@ E-Mail: info@mentorde.com
 Website: www.mentorde.com
 
 Geschäftsführer: [Name des/der Geschäftsführer einfügen]
-Handelsregister: [Amtsgericht Düsseldorf, HRB-Nummer]
+Handelsregister: [Amtsgericht ..., HRB ...]
 USt-IdNr.: [USt-IdNr. einfügen]
 
 2. Datenschutzbeauftragter
@@ -45,14 +45,15 @@ Für die Verarbeitung besonderer Kategorien personenbezogener Daten (z. B. Gesun
 
 3.3 Datenlöschung und Speicherdauer
 
-Die personenbezogenen Daten der betroffenen Person werden gelöscht oder gesperrt, sobald der Zweck der Speicherung entfällt. Eine Speicherung kann darüber hinaus erfolgen, wenn dies durch den europäischen oder nationalen Gesetzgeber in unionsrechtlichen Verordnungen, Gesetzen oder sonstigen Vorschriften, denen der Verantwortliche unterliegt, vorgesehen wurde. Eine Sperrung oder Löschung der Daten erfolgt auch dann, wenn eine durch die genannten Normen vorgeschriebene Speicherfrist abläuft, es sei denn, dass eine Erforderlichkeit zur weiteren Speicherung der Daten für einen Vertragsabschluss oder eine Vertragserfüllung besteht.
+Die personenbezogenen Daten der betroffenen Person werden gelöscht oder gesperrt, sobald der Zweck der Speicherung entfällt. Eine Speicherung kann darüber hinaus erfolgen, wenn dies durch den europäischen oder nationalen Gesetzgeber in unionsrechtlichen Verordnungen, Gesetzen oder sonstigen Vorschriften, denen der Verantwortliche unterliegt, vorgesehen wurde.
 
 Insbesondere gelten folgende Speicherfristen:
 - Geschäftsbriefe (einschl. E-Mails): 6 Jahre (§ 257 Abs. 4 HGB, § 147 Abs. 3 AO)
 - Buchungsbelege, Rechnungen, steuerlich relevante Unterlagen: 10 Jahre (§ 147 Abs. 3 AO)
 - Bewerbungsunterlagen abgelehnter Bewerber: bis zu 6 Monate nach Abschluss des Bewerbungsverfahrens
 - Server-Logfiles: maximal 7 Tage nach Erhebung
-- Newsletter-Daten: bis zum Widerruf der Einwilligung
+- Bewerber- und Mandantendaten im Rahmen der Studienbewerbung: bis zu 5 Jahre nach Abschluss der Beratung (Nachweispflicht)
+- Newsletter-Daten (sofern aktiviert): bis zum Widerruf der Einwilligung
 
 4. Bereitstellung der Website und Erstellung von Logfiles
 
@@ -68,11 +69,11 @@ Bei jedem Aufruf unserer Website erfasst unser System automatisiert Daten und In
 - Informationen über Browsertyp und verwendete Version
 - Betriebssystem des Nutzers
 
-Die Daten werden ebenfalls in den Logfiles unseres Systems gespeichert. Eine Speicherung dieser Daten zusammen mit anderen personenbezogenen Daten des Nutzers findet nicht statt.
+Die Daten werden in den Logfiles unseres Hosting-Anbieters gespeichert. Eine Speicherung dieser Daten zusammen mit anderen personenbezogenen Daten des Nutzers findet nicht statt.
 
 4.2 Rechtsgrundlage und Zweck der Datenverarbeitung
 
-Rechtsgrundlage für die vorübergehende Speicherung der Daten und der Logfiles ist Art. 6 Abs. 1 lit. f DSGVO. Die vorübergehende Speicherung der IP-Adresse durch das System ist notwendig, um eine Auslieferung der Website an den Rechner des Nutzers zu ermöglichen. Die Speicherung in Logfiles erfolgt, um die Funktionsfähigkeit der Website sicherzustellen, der Auswertung zur Systemsicherheit und -stabilität sowie zur administrativen Zwecken. In diesen Zwecken liegt auch unser berechtigtes Interesse.
+Rechtsgrundlage für die vorübergehende Speicherung der Daten und der Logfiles ist Art. 6 Abs. 1 lit. f DSGVO. Die vorübergehende Speicherung der IP-Adresse durch das System ist notwendig, um eine Auslieferung der Website an den Rechner des Nutzers zu ermöglichen. Die Speicherung in Logfiles erfolgt, um die Funktionsfähigkeit der Website sicherzustellen, der Auswertung zur Systemsicherheit und -stabilität sowie zu administrativen Zwecken. In diesen Zwecken liegt auch unser berechtigtes Interesse.
 
 4.3 Dauer der Speicherung
 
@@ -80,25 +81,32 @@ Die Daten werden gelöscht, sobald sie für die Erreichung des Zweckes ihrer Erh
 
 5. Hosting
 
-Unsere Website wird bei einem externen Dienstleister gehostet (Hoster). Personenbezogene Daten, die auf dieser Website erfasst werden, werden auf den Servern des Hosters gespeichert.
+Unsere Website wird bei einem externen Dienstleister mit Servern in Deutschland gehostet. Personenbezogene Daten, die auf dieser Website erfasst werden, werden auf den Servern dieses Hosters gespeichert.
 
-Unser Hoster ist: [Name, vollständige Anschrift und Land des Hosters einfügen]
+Unser Hoster ist:
 
-Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer sicheren, schnellen und effizienten Bereitstellung unseres Online-Angebots). Mit unserem Hoster haben wir einen Vertrag über Auftragsverarbeitung gemäß Art. 28 DSGVO abgeschlossen.
+ALL-INKL.COM — Neue Medien Münnich
+Inh. René Münnich
+Hauptstraße 68
+02742 Friedersdorf
+Deutschland
+Website: www.all-inkl.com
+
+Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer sicheren, schnellen und effizienten Bereitstellung unseres Online-Angebots). Mit unserem Hoster haben wir einen Vertrag über Auftragsverarbeitung gemäß Art. 28 DSGVO abgeschlossen. Die Server befinden sich in Deutschland, eine Datenübermittlung in Drittländer findet im Rahmen des Hostings nicht statt.
 
 6. Cookies und ähnliche Technologien
 
 6.1 Allgemeines
 
-Unsere Website verwendet Cookies. Bei Cookies handelt es sich um kleine Textdateien, die im Internetbrowser bzw. vom Internetbrowser auf dem Computersystem des Nutzers gespeichert werden. Ruft ein Nutzer eine Website auf, so kann ein Cookie auf dem Betriebssystem des Nutzers gespeichert werden.
+Unsere Website verwendet Cookies. Bei Cookies handelt es sich um kleine Textdateien, die im Internetbrowser bzw. vom Internetbrowser auf dem Computersystem des Nutzers gespeichert werden.
 
 6.2 Arten von Cookies
 
-Technisch notwendige Cookies: Diese Cookies sind erforderlich, um die grundlegenden Funktionen unserer Website nutzen zu können. Rechtsgrundlage ist § 25 Abs. 2 Nr. 2 TDDDG i. V. m. Art. 6 Abs. 1 lit. f DSGVO.
+Technisch notwendige Cookies: Diese Cookies sind erforderlich, um die grundlegenden Funktionen unserer Website nutzen zu können (z. B. Anmeldesitzung, CSRF-Schutz, Sprachpräferenz). Rechtsgrundlage ist § 25 Abs. 2 Nr. 2 TDDDG i. V. m. Art. 6 Abs. 1 lit. f DSGVO.
 
-Funktionale Cookies: Diese Cookies ermöglichen erweiterte Funktionen und Personalisierung. Rechtsgrundlage ist Ihre Einwilligung gemäß § 25 Abs. 1 TDDDG i. V. m. Art. 6 Abs. 1 lit. a DSGVO.
+Funktionale Cookies: Diese Cookies ermöglichen erweiterte Funktionen und Personalisierung (z. B. Designauswahl, Dark-Mode-Präferenz). Rechtsgrundlage ist Ihre Einwilligung gemäß § 25 Abs. 1 TDDDG i. V. m. Art. 6 Abs. 1 lit. a DSGVO.
 
-Analyse- und Marketing-Cookies: Diese Cookies dienen Analyse- und Marketingzwecken. Rechtsgrundlage ist Ihre Einwilligung gemäß § 25 Abs. 1 TDDDG i. V. m. Art. 6 Abs. 1 lit. a DSGVO.
+Analyse-Cookies: Diese Cookies dienen der Produktverbesserung und werden ausschließlich nach Ihrer Einwilligung gesetzt. Rechtsgrundlage ist Ihre Einwilligung gemäß § 25 Abs. 1 TDDDG i. V. m. Art. 6 Abs. 1 lit. a DSGVO. Wir setzen aktuell keine Marketing- oder Werbe-Cookies Dritter ein.
 
 6.3 Einwilligung und Widerruf (Cookie-Banner)
 
@@ -115,7 +123,7 @@ Auf unserer Website ist ein Kontaktformular vorhanden, welches für die elektron
 - Nachricht / Anliegen
 - IP-Adresse und Zeitstempel zum Zeitpunkt der Übermittlung
 
-Alternativ ist eine Kontaktaufnahme über die bereitgestellte E-Mail-Adresse oder per WhatsApp möglich. In diesem Fall werden die mit der Nachricht übermittelten personenbezogenen Daten gespeichert.
+Alternativ ist eine Kontaktaufnahme über die bereitgestellte E-Mail-Adresse oder per WhatsApp möglich.
 
 7.2 Rechtsgrundlage
 
@@ -128,175 +136,202 @@ Bei der Kommunikation über WhatsApp kann eine Übermittlung personenbezogener D
 8. Mentoring- und Beratungsleistungen
 
 Im Rahmen unserer Mentoring- und Beratungsleistungen verarbeiten wir folgende Kategorien personenbezogener Daten unserer Mandanten/Klienten:
-- Identitätsdaten: Name, Vorname, Geburtsdatum, ggf. Staatsangehörigkeit
+- Identitätsdaten: Name, Vorname, Geburtsdatum, ggf. Staatsangehörigkeit, Pass- bzw. Personalausweisdaten
 - Kontaktdaten: Anschrift, E-Mail, Telefonnummer
 - Vertragsdaten: Vertragsinhalt, Laufzeit, Kommunikationsverlauf
-- Zahlungsdaten: Bankverbindung, Rechnungsdaten
-- Berufliche Daten: Lebenslauf, Zeugnisse, Qualifikationen, beruflicher Werdegang (sofern für die Beratung relevant)
-- Im Einzelfall besondere Kategorien (Art. 9 DSGVO): Gesundheitsdaten, sofern Sie diese freiwillig im Rahmen der Beratung mitteilen
+- Zahlungsdaten: Bankverbindung, Rechnungsdaten, Stripe-Transaktions-IDs
+- Berufliche und akademische Daten: Lebenslauf, Zeugnisse, Abiturnoten, Sprachzertifikate (TestDaF, DSH, IELTS, TOEFL), Motivationsschreiben
+- Im Einzelfall besondere Kategorien (Art. 9 DSGVO): Gesundheitsdaten (für Krankenversicherungs- und Visumsverfahren), sofern Sie diese freiwillig im Rahmen der Beratung mitteilen
 
 Rechtsgrundlage für die Verarbeitung dieser Daten ist Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung). Die Verarbeitung besonderer Kategorien personenbezogener Daten erfolgt ausschließlich auf Grundlage Ihrer ausdrücklichen Einwilligung gemäß Art. 9 Abs. 2 lit. a DSGVO.
 
+Empfänger dieser Daten können sein: deutsche Hochschulen und Bildungseinrichtungen, Uni-Assist e. V., deutsche Auslandsvertretungen (Konsulate), Ausländerbehörden, Krankenkassen, Anbieter von Sperrkonten (z. B. Expatrio, Coracle, Fintiba), Studentenwerke und Wohnungsanbieter sowie unsere Kooperationspartner in der Türkei (siehe Abschnitt 13.1).
+
 9. Newsletter
 
-9.1 Beschreibung und Umfang der Datenverarbeitung
+Aktuell betreiben wir keinen automatisierten Newsletter-Versand. Sollten wir in Zukunft einen Newsletter einrichten, werden wir diese Datenschutzerklärung entsprechend aktualisieren und ein Double-Opt-In-Verfahren einsetzen. Rechtsgrundlage wäre Ihre Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO.
 
-Auf unserer Website besteht die Möglichkeit, einen kostenfreien Newsletter zu abonnieren. Bei der Anmeldung zum Newsletter werden die Daten aus der Eingabemaske an uns übermittelt:
-- E-Mail-Adresse (Pflichtangabe)
-- Name (optional)
-- IP-Adresse, Datum und Uhrzeit der Anmeldung
+10. Webanalyse — PostHog
 
-9.2 Double-Opt-In-Verfahren
+Wir nutzen PostHog zur Analyse des Nutzerverhaltens auf unserer Website mit dem Ziel, unser Angebot zu verbessern. Anbieter ist PostHog Inc., 2261 Market Street #4008, San Francisco, CA 94114, USA. Wir verwenden PostHog mit der EU-Cloud-Region (Server-Standort: Frankfurt am Main, Deutschland), sodass eine Verarbeitung Ihrer Daten innerhalb der Europäischen Union erfolgt.
 
-Für den Newsletter-Versand verwenden wir das sogenannte Double-Opt-In-Verfahren. Das heißt, dass wir Ihnen nach Ihrer Anmeldung eine E-Mail an die angegebene E-Mail-Adresse senden, in welcher wir Sie um Bestätigung bitten, dass Sie den Versand des Newsletters wünschen. Wenn Sie Ihre Anmeldung nicht innerhalb von 24 Stunden bestätigen, werden Ihre Informationen automatisch gelöscht.
+Erfasste Daten:
+- Anonyme Nutzer-ID (zufällig generiert, kein Personenbezug ohne Login)
+- Aufgerufene Seiten und Klickpfade
+- Verweildauer und Interaktionen
+- Browser- und Geräteinformationen
+- Anonymisierte IP-Adresse (letztes Oktett wird entfernt)
 
-9.3 Rechtsgrundlage
+Rechtsgrundlage: Die Nutzung dieses Analyse-Tools erfolgt ausschließlich nach Ihrer ausdrücklichen Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG. Die Einwilligung ist über den Cookie-Banner jederzeit widerrufbar.
 
-Rechtsgrundlage für die Verarbeitung der Daten ist bei Vorliegen einer Einwilligung des Nutzers Art. 6 Abs. 1 lit. a DSGVO.
+Drittlandtransfer: Auch wenn die Verarbeitung in der EU erfolgt, kann es im Rahmen von Support- und Wartungsanfragen zu einem Zugriff durch das US-amerikanische Mutterunternehmen kommen. Mit PostHog Inc. wurden EU-Standardvertragsklauseln (SCC) gemäß Art. 46 Abs. 2 lit. c DSGVO abgeschlossen.
 
-9.4 Widerruf
+Speicherdauer: Maximal 14 Monate. Anschließend werden die Daten automatisch gelöscht.
 
-Das Abonnement des Newsletters kann durch den betroffenen Nutzer jederzeit gekündigt werden. Zu diesem Zweck findet sich in jedem Newsletter ein entsprechender Link. Hierdurch wird ebenfalls ein Widerruf der Einwilligung der Speicherung der während des Anmeldevorgangs erhobenen personenbezogenen Daten ermöglicht.
+Wir setzen aktuell weder Google Analytics, Google Ads, noch Meta-Pixel (Facebook-Pixel) ein.
 
-9.5 Newsletter-Versanddienstleister
+11. Zahlungsabwicklung — Stripe
 
-Wir versenden unseren Newsletter über: [Name des Dienstleisters einfügen]
+Für die Online-Zahlungsabwicklung (Beratungsgebühren, Service-Pakete) setzen wir den Zahlungsdienstleister Stripe ein. Anbieter für Nutzer in der EU ist Stripe Payments Europe Limited, 1 Grand Canal Street Lower, Grand Canal Dock, Dublin, Irland.
 
-10. Webanalyse und Tracking
+Bei der Zahlung werden die hierfür erforderlichen Daten (Name, Rechnungsadresse, Zahlungsart, Kartendaten oder Bankverbindung) direkt an Stripe übermittelt und von Stripe in eigener datenschutzrechtlicher Verantwortung verarbeitet. Wir erhalten lediglich eine Transaktions-ID und einen Zahlungsstatus, jedoch keine vollständigen Kartendaten.
 
-10.1 Google Analytics 4
+Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung). Die Datenschutzerklärung von Stripe finden Sie unter: https://stripe.com/de/privacy.
 
-Diese Website nutzt Funktionen des Webanalysedienstes Google Analytics 4. Anbieter ist die Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland („Google").
+Drittlandtransfer: Stripe kann Daten zur Betrugsprävention und Compliance an seine US-Konzerngesellschaft Stripe, Inc. übermitteln. Die Übermittlung erfolgt auf Grundlage des EU-U.S. Data Privacy Framework und der EU-Standardvertragsklauseln gemäß Art. 46 Abs. 2 DSGVO.
 
-Google Analytics ermöglicht es dem Websitebetreiber, das Verhalten der Websitebesucher zu analysieren. Hierbei erhält der Websitebetreiber verschiedene Nutzungsdaten, wie z. B. Seitenaufrufe, Verweildauer, verwendete Betriebssysteme und Herkunft des Nutzers.
+12. E-Mail-Versand — Resend
 
-Google Analytics verwendet Technologien, die die Wiedererkennung des Nutzers zum Zwecke der Analyse des Nutzerverhaltens ermöglichen (z. B. Cookies oder Device-Fingerprinting). Die von Google erfassten Informationen über die Benutzung dieser Website werden in der Regel an einen Server von Google in den USA übertragen und dort gespeichert.
+Für den Versand von Transaktions-E-Mails (z. B. Bestätigungen, Passwort-Zurücksetzung, Sitzungserinnerungen, Rechnungen) nutzen wir den Dienst Resend. Anbieter ist Resend, Inc., 2261 Market Street, San Francisco, CA 94114, USA.
 
-Rechtsgrundlage: Die Nutzung dieses Analyse-Tools erfolgt auf Grundlage Ihrer Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG. Die Einwilligung ist jederzeit widerrufbar.
+Übermittelte Daten: E-Mail-Adresse, Empfängername, Betreff und Inhalt der Nachricht.
 
-Drittlandübermittlung (USA): Die Datenübermittlung in die USA wird auf den EU-U.S. Data Privacy Framework gestützt. Google ist nach dem EU-U.S. Data Privacy Framework zertifiziert. Zusätzlich verwenden wir die EU-Standardvertragsklauseln (SCC) als Garantien gemäß Art. 46 Abs. 2 DSGVO.
+Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (zur Vertragserfüllung gehörende Mitteilungen) bzw. Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an zuverlässiger E-Mail-Zustellung).
 
-IP-Anonymisierung: Wir haben auf dieser Website die Funktion IP-Anonymisierung aktiviert. Dadurch wird Ihre IP-Adresse von Google innerhalb von Mitgliedstaaten der Europäischen Union oder in anderen Vertragsstaaten des Abkommens über den Europäischen Wirtschaftsraum vor der Übermittlung in die USA gekürzt.
+Drittlandtransfer (USA): Die Übermittlung in die USA erfolgt auf Grundlage des EU-U.S. Data Privacy Framework und der EU-Standardvertragsklauseln gemäß Art. 46 Abs. 2 DSGVO. Mit Resend wurde ein Auftragsverarbeitungsvertrag (AVV) gemäß Art. 28 DSGVO abgeschlossen. Datenschutzerklärung des Anbieters: https://resend.com/legal/privacy-policy.
 
-10.2 Google Ads / Conversion-Tracking
+13. KI-gestützte Dienste (AI Labs)
 
-Wir nutzen Google Ads (vormals Google AdWords), um mit Hilfe von Werbemitteln auf externen Webseiten auf unsere attraktiven Angebote aufmerksam zu machen. Anbieter ist die Google Ireland Limited. Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG (Einwilligung).
+Im Rahmen unseres internen AI-Assistenten („MentorDE AI Labs") sowie öffentlicher KI-Funktionen (z. B. FAQ-Assistent unter /sss) verarbeiten wir Texteingaben und Anfragen mithilfe großer Sprachmodelle. Die Anbieter sind:
 
-10.3 Meta-Pixel (Facebook-Pixel)
+- OpenAI Ireland Ltd., 1st Floor, The Liffey Trust Centre, 117-126 Sheriff Street Upper, Dublin 1, Irland (Mutterkonzern: OpenAI L.L.C., USA)
+- Anthropic PBC, 548 Market St, PMB 90375, San Francisco, CA 94104, USA
+- Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland (Gemini API; Mutterkonzern: Google LLC, USA)
 
-Diese Website nutzt zur Konversionsmessung den Besucheraktions-Pixel der Meta Platforms Ireland Ltd., 4 Grand Canal Square, Dublin 2, Irland („Meta"). Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG (Einwilligung).
+Übermittelte Daten: Inhalt der Anfrage (Prompt), gegebenenfalls bereitgestellte Dokumente oder Texte, sowie eine pseudonymisierte Sitzungs-ID.
 
-11. Social-Media-Präsenzen
+Rechtsgrundlage:
+- Bei Mitarbeiter-Nutzung (interner Assistent): Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an Effizienz und Qualität der internen Beratungstätigkeit).
+- Bei öffentlichen KI-Funktionen für Endnutzer (z. B. /sss): Ihre Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO.
 
-Wir unterhalten Profile bzw. Seiten auf folgenden sozialen Netzwerken:
-- Facebook (Meta Platforms Ireland Ltd., Irland)
-- Instagram (Meta Platforms Ireland Ltd., Irland)
-- LinkedIn (LinkedIn Ireland Unlimited Company, Irland)
-- YouTube (Google Ireland Limited, Irland)
-- TikTok (TikTok Technology Limited, Irland)
+Drittlandtransfer (USA): Anfragen werden über die jeweiligen API-Schnittstellen verarbeitet. Die Übermittlung in die USA erfolgt auf Grundlage des EU-U.S. Data Privacy Framework und der EU-Standardvertragsklauseln gemäß Art. 46 Abs. 2 DSGVO. Mit allen Anbietern wurden Datenverarbeitungsvereinbarungen (DPA) gemäß Art. 28 DSGVO abgeschlossen.
 
-Wenn Sie eines dieser sozialen Netzwerke besuchen oder mit unseren Inhalten interagieren, werden personenbezogene Daten von Ihnen an den jeweiligen Anbieter übermittelt und dort verarbeitet. Wir und der jeweilige Anbieter sind dabei gemeinsam Verantwortliche im Sinne des Art. 26 DSGVO und haben hierzu eine Vereinbarung geschlossen.
+Wichtig: Die Anbieter haben uns vertraglich zugesichert, dass eingegebene Inhalte nicht zum Training ihrer Modelle verwendet werden (Zero-Retention-/Opt-out-Regelungen). Wir empfehlen dennoch, in KI-Anfragen keine besonders schutzwürdigen personenbezogenen Daten Dritter einzugeben.
 
-Rechtsgrundlage für die Verarbeitung Ihrer personenbezogenen Daten ist unser berechtigtes Interesse an einer effektiven Außendarstellung und Kommunikation mit potenziellen Kunden gemäß Art. 6 Abs. 1 lit. f DSGVO. Sofern Sie gegenüber den jeweiligen Anbietern eine Einwilligung in die Datenverarbeitung erklärt haben, ist Rechtsgrundlage Art. 6 Abs. 1 lit. a DSGVO.
+14. Termin- und Kalenderintegration — Google Calendar
 
-11.1 Social-Media-Plugins
+Für die Verwaltung von Beratungsterminen können Termine optional mit Google Calendar synchronisiert werden. Anbieter ist Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland.
 
-Auf unserer Website setzen wir Social-Media-Plugins nach dem sogenannten „Shariff"-Verfahren ein. Hierbei werden personenbezogene Daten erst dann an den jeweiligen Anbieter übertragen, wenn Sie aktiv das entsprechende Symbol anklicken.
+Übermittelte Daten: Titel des Termins, Datum/Uhrzeit, Teilnehmer-E-Mail-Adressen, optionale Notizen.
 
-12. Plugins und Tools
+Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung — Terminorganisation).
 
-12.1 Google Fonts (lokales Hosting)
+Diese Funktion ist optional; eine Beratung ist auch ohne Kalender-Synchronisation möglich.
 
-Diese Seite nutzt zur einheitlichen Darstellung von Schriftarten sogenannte Google Fonts, die lokal eingebunden sind. Eine Verbindung zu Servern von Google findet dabei nicht statt.
+15. Eingebettete Inhalte und Tools
 
-12.2 Google Maps
+15.1 Google Fonts
 
-Diese Seite nutzt den Kartendienst Google Maps. Anbieter ist die Google Ireland Limited. Zur Nutzung der Funktionen von Google Maps ist es notwendig, Ihre IP-Adresse zu speichern. Diese Informationen werden in der Regel an einen Server von Google in den USA übertragen und dort gespeichert. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung).
+Unsere Website verwendet zur einheitlichen Darstellung von Schriftarten Google Fonts (Plus Jakarta Sans, DM Serif Display). [HINWEIS: Aktuell werden die Schriften über die Google-CDN (fonts.googleapis.com) geladen, wobei eine Verbindung mit Google-Servern in den USA aufgebaut und die IP-Adresse übertragen wird. Eine Umstellung auf lokales Hosting ist geplant, um den Anforderungen des LG München I (Urteil vom 20.01.2022, Az. 3 O 17493/20) vollständig zu entsprechen.]
 
-12.3 YouTube (erweiterter Datenschutzmodus)
+Anbieter: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland.
 
-Diese Website bindet Videos der Plattform YouTube ein. Anbieter ist die Google Ireland Limited. Wir nutzen YouTube im erweiterten Datenschutzmodus. Dieser Modus bewirkt laut YouTube, dass YouTube keine Informationen über die Besucher auf dieser Website speichert, bevor diese sich das Video ansehen.
+Rechtsgrundlage bis zur Umstellung: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer einheitlichen Schriftdarstellung). Die Datenübermittlung in die USA erfolgt auf Grundlage des EU-U.S. Data Privacy Framework.
 
-13. Datenübermittlung in Drittländer
+15.2 YouTube (erweiterter Datenschutzmodus)
 
-Eine Datenübermittlung in Länder außerhalb der Europäischen Union (EU) bzw. des Europäischen Wirtschaftsraums (EWR) – sogenannte Drittländer – findet nur statt, wenn dies zur Durchführung eines Vertragsverhältnisses erforderlich ist, gesetzlich vorgeschrieben ist, Sie uns Ihre Einwilligung erteilt haben oder im Rahmen einer Auftragsverarbeitung erfolgt.
+Auf einzelnen Unterseiten unserer Website (insbesondere bei Stadtportraits zu deutschen Universitätsstädten) binden wir Videos der Plattform YouTube ein. Anbieter ist Google Ireland Limited. Wir nutzen YouTube im erweiterten Datenschutzmodus (youtube-nocookie). Dieser Modus bewirkt laut YouTube, dass YouTube keine Informationen über die Besucher auf dieser Website speichert, bevor diese sich das Video aktiv ansehen.
 
-In Drittländern erfolgt eine Datenverarbeitung nur unter Beachtung besonderer Voraussetzungen der Art. 44 ff. DSGVO. Das heißt, die Verarbeitung erfolgt z. B. aufgrund besonderer Garantien wie:
-- Angemessenheitsbeschluss der EU-Kommission (z. B. EU-U.S. Data Privacy Framework für die USA)
+Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung über Cookie-Banner) bzw. Art. 6 Abs. 1 lit. f DSGVO bei Nutzung des erweiterten Datenschutzmodus.
+
+16. Social-Media-Präsenzen
+
+Wir unterhalten — soweit aktiv — Profile bzw. Seiten auf folgenden sozialen Netzwerken: [Aktive Plattformen einfügen, z. B. Instagram, LinkedIn, YouTube — nicht aktive Plattformen löschen.]
+
+Wenn Sie eines dieser sozialen Netzwerke besuchen oder mit unseren Inhalten interagieren, werden personenbezogene Daten von Ihnen an den jeweiligen Anbieter übermittelt und dort verarbeitet. Wir und der jeweilige Anbieter sind dabei gemeinsam Verantwortliche im Sinne des Art. 26 DSGVO.
+
+Rechtsgrundlage für die Verarbeitung Ihrer personenbezogenen Daten ist unser berechtigtes Interesse an einer effektiven Außendarstellung und Kommunikation mit potenziellen Mandanten gemäß Art. 6 Abs. 1 lit. f DSGVO. Sofern Sie gegenüber den jeweiligen Anbietern eine Einwilligung in die Datenverarbeitung erklärt haben, ist Rechtsgrundlage Art. 6 Abs. 1 lit. a DSGVO.
+
+Auf unserer Website sind keine Social-Media-Plugins eingebunden, die automatisch Verbindungen zu Drittservern aufbauen. Verlinkungen zu sozialen Netzwerken erfolgen ausschließlich als statische Hyperlinks.
+
+17. Datenübermittlung in Drittländer
+
+Eine Datenübermittlung in Länder außerhalb der Europäischen Union (EU) bzw. des Europäischen Wirtschaftsraums (EWR) – sogenannte Drittländer – findet im Rahmen der oben beschriebenen Dienste statt (insbesondere USA für Resend, AI-Anbieter, Stripe-Konzerntransfers; Türkei für Mentoring-Kooperationen).
+
+Die Verarbeitung erfolgt nur unter Beachtung der Voraussetzungen der Art. 44 ff. DSGVO auf Grundlage von:
+- Angemessenheitsbeschluss der EU-Kommission (EU-U.S. Data Privacy Framework für die USA bei zertifizierten Unternehmen)
 - Standardvertragsklauseln gemäß Art. 46 Abs. 2 lit. c DSGVO
-- Zertifizierungen oder verbindliche interne Datenschutzvorschriften
+- Ausdrückliche Einwilligung gemäß Art. 49 Abs. 1 lit. a DSGVO (insbesondere für die Türkei)
 
-13.1 Datenübermittlung in die Türkei
+17.1 Datenübermittlung in die Türkei
 
-Soweit personenbezogene Daten im Rahmen unserer Beratungsleistungen oder Mentoring-Programme in die Türkei übermittelt werden (z. B. an Kooperationspartner, Anwälte oder Beratungseinrichtungen), erfolgt dies auf Grundlage von:
+Im Rahmen unserer Beratungsleistungen arbeiten wir mit Kooperationspartnern (Beratungsstellen, Anwaltskanzleien) in der Türkei zusammen. Soweit hierzu personenbezogene Daten in die Türkei übermittelt werden, erfolgt dies auf Grundlage von:
 - Ihrer ausdrücklichen Einwilligung gemäß Art. 49 Abs. 1 lit. a DSGVO oder
 - Standardvertragsklauseln (SCC) gemäß Art. 46 Abs. 2 lit. c DSGVO
 
 Die Türkei verfügt nicht über einen Angemessenheitsbeschluss der Europäischen Kommission. Wir weisen darauf hin, dass das türkische Datenschutzrecht (KVKK) zwar grundsätzlich an europäische Standards angelehnt ist, sich aber im Schutzniveau unterscheiden kann.
 
-14. Rechte der betroffenen Person
+18. Rechte der betroffenen Person
 
 Werden personenbezogene Daten von Ihnen verarbeitet, sind Sie Betroffener im Sinne der DSGVO und es stehen Ihnen folgende Rechte gegenüber dem Verantwortlichen zu:
 
-14.1 Auskunftsrecht (Art. 15 DSGVO)
+18.1 Auskunftsrecht (Art. 15 DSGVO)
 
-Sie können vom Verantwortlichen eine Bestätigung darüber verlangen, ob personenbezogene Daten, die Sie betreffen, von uns verarbeitet werden. Liegt eine solche Verarbeitung vor, können Sie vom Verantwortlichen Auskunft über die Verarbeitungszwecke, die Kategorien der verarbeiteten Daten, die Empfänger, die geplante Speicherdauer u. a. verlangen.
+Sie können vom Verantwortlichen eine Bestätigung darüber verlangen, ob personenbezogene Daten, die Sie betreffen, von uns verarbeitet werden. Liegt eine solche Verarbeitung vor, können Sie vom Verantwortlichen Auskunft über die Verarbeitungszwecke, die Kategorien der verarbeiteten Daten, die Empfänger, die geplante Speicherdauer und weitere Informationen verlangen.
 
-14.2 Recht auf Berichtigung (Art. 16 DSGVO)
+18.2 Recht auf Berichtigung (Art. 16 DSGVO)
 
 Sie haben ein Recht auf Berichtigung und/oder Vervollständigung gegenüber dem Verantwortlichen, sofern die verarbeiteten personenbezogenen Daten, die Sie betreffen, unrichtig oder unvollständig sind.
 
-14.3 Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO)
+18.3 Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO)
 
 Unter bestimmten Voraussetzungen können Sie die Einschränkung der Verarbeitung der Sie betreffenden personenbezogenen Daten verlangen.
 
-14.4 Recht auf Löschung (Art. 17 DSGVO)
+18.4 Recht auf Löschung (Art. 17 DSGVO)
 
-Sie können vom Verantwortlichen verlangen, dass die Sie betreffenden personenbezogenen Daten unverzüglich gelöscht werden, sofern einer der in Art. 17 Abs. 1 DSGVO genannten Gründe zutrifft und soweit die Verarbeitung nicht erforderlich ist.
+Sie können vom Verantwortlichen verlangen, dass die Sie betreffenden personenbezogenen Daten unverzüglich gelöscht werden, sofern einer der in Art. 17 Abs. 1 DSGVO genannten Gründe zutrifft und soweit die Verarbeitung nicht erforderlich ist (z. B. zur Erfüllung handels- und steuerrechtlicher Aufbewahrungspflichten).
 
-14.5 Recht auf Unterrichtung (Art. 19 DSGVO)
+18.5 Recht auf Unterrichtung (Art. 19 DSGVO)
 
 Haben Sie das Recht auf Berichtigung, Löschung oder Einschränkung der Verarbeitung gegenüber dem Verantwortlichen geltend gemacht, ist dieser verpflichtet, allen Empfängern, denen die Sie betreffenden personenbezogenen Daten offengelegt wurden, diese Berichtigung oder Löschung der Daten oder Einschränkung der Verarbeitung mitzuteilen.
 
-14.6 Recht auf Datenübertragbarkeit (Art. 20 DSGVO)
+18.6 Recht auf Datenübertragbarkeit (Art. 20 DSGVO)
 
 Sie haben das Recht, die Sie betreffenden personenbezogenen Daten, die Sie dem Verantwortlichen bereitgestellt haben, in einem strukturierten, gängigen und maschinenlesbaren Format zu erhalten.
 
-14.7 Widerspruchsrecht (Art. 21 DSGVO)
+18.7 Widerspruchsrecht (Art. 21 DSGVO)
 
 Sie haben das Recht, aus Gründen, die sich aus Ihrer besonderen Situation ergeben, jederzeit gegen die Verarbeitung der Sie betreffenden personenbezogenen Daten, die aufgrund von Art. 6 Abs. 1 lit. e oder f DSGVO erfolgt, Widerspruch einzulegen.
 
-Werden die Sie betreffenden personenbezogenen Daten verarbeitet, um Direktwerbung zu betreiben, haben Sie das Recht, jederzeit Widerspruch gegen die Verarbeitung der Sie betreffenden personenbezogenen Daten zum Zwecke derartiger Werbung einzulegen.
-
-14.8 Recht auf Widerruf der Einwilligung (Art. 7 Abs. 3 DSGVO)
+18.8 Recht auf Widerruf der Einwilligung (Art. 7 Abs. 3 DSGVO)
 
 Sie haben das Recht, Ihre datenschutzrechtliche Einwilligungserklärung jederzeit zu widerrufen. Durch den Widerruf der Einwilligung wird die Rechtmäßigkeit der aufgrund der Einwilligung bis zum Widerruf erfolgten Verarbeitung nicht berührt.
 
-14.9 Automatisierte Entscheidung im Einzelfall (Art. 22 DSGVO)
+18.9 Automatisierte Entscheidung im Einzelfall (Art. 22 DSGVO)
 
 Sie haben das Recht, nicht einer ausschließlich auf einer automatisierten Verarbeitung – einschließlich Profiling – beruhenden Entscheidung unterworfen zu werden, die Ihnen gegenüber rechtliche Wirkung entfaltet oder Sie in ähnlicher Weise erheblich beeinträchtigt. Eine solche automatisierte Entscheidungsfindung findet auf unserer Website nicht statt.
 
-14.10 Beschwerderecht bei einer Aufsichtsbehörde (Art. 77 DSGVO)
+18.10 Beschwerderecht bei einer Aufsichtsbehörde (Art. 77 DSGVO)
 
 Unbeschadet eines anderweitigen verwaltungsrechtlichen oder gerichtlichen Rechtsbehelfs steht Ihnen das Recht auf Beschwerde bei einer Aufsichtsbehörde zu, wenn Sie der Ansicht sind, dass die Verarbeitung der Sie betreffenden personenbezogenen Daten gegen die DSGVO verstößt.
 
-Die für uns zuständige Aufsichtsbehörde ist:
+Die für uns zuständige Aufsichtsbehörde — basierend auf dem Sitz in Hessen — ist:
 
-Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen
-Kavalleriestraße 2-4
-40213 Düsseldorf
-Telefon: +49 211 38424-0
-E-Mail: poststelle@ldi.nrw.de
-Website: www.ldi.nrw.de
+Der Hessische Beauftragte für Datenschutz und Informationsfreiheit
+Postfach 3163
+65021 Wiesbaden
+Telefon: +49 611 1408-0
+E-Mail: poststelle@datenschutz.hessen.de
+Website: www.datenschutz.hessen.de
 
-15. Datensicherheit (Art. 32 DSGVO)
+19. Datensicherheit (Art. 32 DSGVO)
 
-Wir verwenden innerhalb des Website-Besuchs das verbreitete SSL-/TLS-Verfahren in Verbindung mit der jeweils höchsten Verschlüsselungsstufe, die von Ihrem Browser unterstützt wird. Eine verschlüsselte Verbindung erkennen Sie daran, dass die Adresszeile des Browsers von „http://" auf „https://" wechselt und an dem Schloss-Symbol in Ihrer Browserzeile.
+Wir verwenden innerhalb des Website-Besuchs das verbreitete SSL-/TLS-Verfahren in Verbindung mit der jeweils höchsten Verschlüsselungsstufe, die von Ihrem Browser unterstützt wird. Eine verschlüsselte Verbindung erkennen Sie daran, dass die Adresszeile des Browsers von „http://" auf „https://" wechselt und am Schloss-Symbol in Ihrer Browserzeile.
 
-Wir bedienen uns im Übrigen geeigneter technischer und organisatorischer Sicherheitsmaßnahmen, um Ihre Daten gegen zufällige oder vorsätzliche Manipulationen, teilweisen oder vollständigen Verlust, Zerstörung oder gegen den unbefugten Zugriff Dritter zu schützen. Unsere Sicherheitsmaßnahmen werden entsprechend der technologischen Entwicklung fortlaufend verbessert.
+Darüber hinaus setzen wir folgende technische und organisatorische Maßnahmen (TOM) ein:
+- Verschlüsselte Datenbankzugriffe (TLS 1.3)
+- Pseudonymisierung sensibler Felder
+- Zugriffskontrollen mit rollenbasierter Berechtigung (Manager, Senior, Dealer, Mandant)
+- Mehrstufige Authentifizierung (2FA) für administrative Konten
+- Tägliche verschlüsselte Backups
+- IP-basierte Zugangsbeschränkungen für administrative Bereiche
+- Audit-Logging für sicherheitsrelevante Aktionen
+- Regelmäßige Security-Updates und Dependency-Scans
 
-16. Aktualität und Änderung dieser Datenschutzerklärung
+Die ausführlichen technisch-organisatorischen Maßnahmen (TOM-Dokument gemäß Art. 32 DSGVO) liegen intern vor und können auf begründete Anfrage durch Aufsichtsbehörden eingesehen werden.
 
-Diese Datenschutzerklärung ist aktuell gültig und hat den Stand: [TT.MM.JJJJ]
+20. Aktualität und Änderung dieser Datenschutzerklärung
 
-Durch die Weiterentwicklung unserer Website und Angebote darüber oder aufgrund geänderter gesetzlicher beziehungsweise behördlicher Vorgaben kann es notwendig werden, diese Datenschutzerklärung zu ändern. Die jeweils aktuelle Datenschutzerklärung kann jederzeit auf der Website unter www.mentorde.com/datenschutz von Ihnen abgerufen und ausgedruckt werden.
+Diese Datenschutzerklärung ist aktuell gültig und hat den Stand: April 2026.
+
+Durch die Weiterentwicklung unserer Website und Angebote oder aufgrund geänderter gesetzlicher beziehungsweise behördlicher Vorgaben kann es notwendig werden, diese Datenschutzerklärung zu ändern. Die jeweils aktuelle Datenschutzerklärung kann jederzeit auf der Website unter www.mentorde.com/datenschutz von Ihnen abgerufen und ausgedruckt werden.

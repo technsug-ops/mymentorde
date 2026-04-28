@@ -1,14 +1,14 @@
 Privacy Policy — mentorde.com
 
-[DRAFT: This is a GDPR-compliant draft Privacy Policy for mentorde.com. Items in brackets must be reviewed by a qualified data protection lawyer or DPO and completed with concrete information before publication. The legally authoritative version for German authorities is the German Datenschutzerklärung. Status: April 2026.]
+[DRAFT: This Privacy Policy was prepared on the basis of the technology stack actually used by mentorde.com. Before publication, items in brackets (commercial register, VAT ID, managing director name) must be filled in with actual data and the entire document must be reviewed by a qualified data protection lawyer or DPO. The legally authoritative version for German supervisory authorities is the German Datenschutzerklärung. Status: April 2026.]
 
 1. Name and Contact Details of the Controller
 
-The controller responsible for the processing of personal data within the meaning of the General Data Protection Regulation (GDPR), other national data protection laws of EU member states, and other data protection provisions is:
+The controller responsible for the processing of personal data within the meaning of the General Data Protection Regulation (GDPR) is:
 
-[Insert full company name of the UG/GmbH] (hereinafter referred to as "mentorde.com" or "we")
-Eifeler Str. 10
-40227 Düsseldorf
+Horizon STS GmbH (hereinafter "mentorde.com" or "we")
+Herwigstraße 24
+35683 Dillenburg
 Germany
 
 Phone: +49 157 84218282
@@ -16,7 +16,7 @@ Email: info@mentorde.com
 Website: www.mentorde.com
 
 Managing Director: [Insert name of managing director(s)]
-Commercial Register: [Local Court (Amtsgericht) Düsseldorf, HRB number]
+Commercial Register: [Local Court (Amtsgericht), HRB number]
 VAT ID: [Insert VAT identification number]
 
 2. Data Protection Officer
@@ -35,7 +35,7 @@ We process the personal data of our users only to the extent necessary to provid
 
 Where we obtain consent from the data subject for the processing of personal data, Art. 6(1)(a) GDPR serves as the legal basis.
 
-In the case of processing personal data necessary for the performance of a contract to which the data subject is a party, Art. 6(1)(b) GDPR serves as the legal basis. This also applies to processing operations necessary for the performance of pre-contractual measures.
+In the case of processing personal data necessary for the performance of a contract to which the data subject is a party, Art. 6(1)(b) GDPR serves as the legal basis. This also applies to processing operations necessary for pre-contractual measures.
 
 Where processing of personal data is necessary for compliance with a legal obligation to which our company is subject, Art. 6(1)(c) GDPR serves as the legal basis.
 
@@ -45,14 +45,15 @@ For the processing of special categories of personal data (e.g., health data), A
 
 3.3 Data Erasure and Storage Duration
 
-The personal data of the data subject will be erased or restricted as soon as the purpose of storage no longer applies. Storage may continue if provided for by European or national legislation in EU regulations, laws, or other provisions to which the controller is subject. Restriction or erasure of data also takes place when a storage period prescribed by the aforementioned norms expires, unless there is a need for further storage of the data for the conclusion or performance of a contract.
+The personal data of the data subject will be erased or restricted as soon as the purpose of storage no longer applies. Storage may continue if provided for by European or national legislation in EU regulations, laws, or other provisions to which the controller is subject.
 
 In particular, the following retention periods apply:
 - Business correspondence (including emails): 6 years (Section 257(4) HGB, Section 147(3) AO)
 - Accounting records, invoices, tax-relevant documents: 10 years (Section 147(3) AO)
 - Application documents of rejected applicants: up to 6 months after the end of the application process
 - Server log files: a maximum of 7 days after collection
-- Newsletter data: until consent is withdrawn
+- Applicant and client data in the context of university applications: up to 5 years after completion of the consultation (proof obligation)
+- Newsletter data (if activated): until consent is withdrawn
 
 4. Provision of the Website and Creation of Log Files
 
@@ -68,7 +69,7 @@ Each time our website is accessed, our system automatically collects data and in
 - Information about the browser type and version used
 - Operating system of the user
 
-This data is also stored in the log files of our system. This data is not stored together with other personal data of the user.
+This data is stored in the log files of our hosting provider. This data is not stored together with other personal data of the user.
 
 4.2 Legal Basis and Purpose of Processing
 
@@ -76,29 +77,36 @@ The legal basis for the temporary storage of the data and log files is Art. 6(1)
 
 4.3 Duration of Storage
 
-The data is erased as soon as it is no longer required for the purpose for which it was collected. In the case of data collected to provide the website, this is the case when the respective session has ended. In the case of data stored in log files, this is the case after seven days at the latest.
+The data is erased as soon as it is no longer required for the purpose for which it was collected. In the case of data collected to provide the website, this is when the respective session ends. In the case of data stored in log files, this is after seven days at the latest.
 
 5. Hosting
 
-Our website is hosted by an external service provider (hoster). Personal data collected on this website is stored on the servers of the hoster.
+Our website is hosted by an external service provider with servers located in Germany. Personal data collected on this website is stored on the servers of this hoster.
 
-Our hoster is: [Insert name, full address, and country of hoster]
+Our hoster is:
 
-Processing is carried out on the basis of Art. 6(1)(f) GDPR (legitimate interest in the secure, fast, and efficient provision of our online offering). We have entered into a data processing agreement with our hoster pursuant to Art. 28 GDPR.
+ALL-INKL.COM — Neue Medien Münnich
+Inh. René Münnich
+Hauptstraße 68
+02742 Friedersdorf
+Germany
+Website: www.all-inkl.com
+
+Processing is carried out on the basis of Art. 6(1)(f) GDPR (legitimate interest in the secure, fast, and efficient provision of our online offering). We have entered into a data processing agreement with our hoster pursuant to Art. 28 GDPR. The servers are located in Germany; no data transfer to third countries takes place in the context of hosting.
 
 6. Cookies and Similar Technologies
 
 6.1 General Information
 
-Our website uses cookies. Cookies are small text files that are stored in the internet browser or by the internet browser on the user's computer system. When a user accesses a website, a cookie may be stored on the user's operating system.
+Our website uses cookies. Cookies are small text files that are stored in the internet browser or by the internet browser on the user's computer system.
 
 6.2 Types of Cookies
 
-Strictly necessary cookies: These cookies are required to use the basic functions of our website. The legal basis is Section 25(2)(2) of the German Telecommunications Digital Services Data Protection Act (TDDDG) in conjunction with Art. 6(1)(f) GDPR.
+Strictly necessary cookies: These cookies are required to use the basic functions of our website (e.g., login session, CSRF protection, language preference). The legal basis is Section 25(2)(2) TDDDG in conjunction with Art. 6(1)(f) GDPR.
 
-Functional cookies: These cookies enable extended functionality and personalization. The legal basis is your consent under Section 25(1) TDDDG in conjunction with Art. 6(1)(a) GDPR.
+Functional cookies: These cookies enable extended functionality and personalization (e.g., design selection, dark mode preference). The legal basis is your consent under Section 25(1) TDDDG in conjunction with Art. 6(1)(a) GDPR.
 
-Analytics and marketing cookies: These cookies are used for analysis and marketing purposes. The legal basis is your consent under Section 25(1) TDDDG in conjunction with Art. 6(1)(a) GDPR.
+Analytics cookies: These cookies are used to improve our product and are set exclusively after your consent. The legal basis is your consent under Section 25(1) TDDDG in conjunction with Art. 6(1)(a) GDPR. We currently do not use any third-party marketing or advertising cookies.
 
 6.3 Consent and Withdrawal (Cookie Banner)
 
@@ -115,7 +123,7 @@ Our website provides a contact form that can be used for electronic communicatio
 - Message / inquiry
 - IP address and timestamp at the time of submission
 
-Alternatively, you may contact us via the email address provided or via WhatsApp. In this case, the personal data transmitted with the message is stored.
+Alternatively, you may contact us via the email address provided or via WhatsApp.
 
 7.2 Legal Basis
 
@@ -128,182 +136,207 @@ When communicating via WhatsApp, personal data may be transmitted to Meta Platfo
 8. Mentoring and Consulting Services
 
 In the context of our mentoring and consulting services, we process the following categories of personal data of our clients:
-- Identity data: name, first name, date of birth, nationality if applicable
+- Identity data: name, first name, date of birth, nationality if applicable, passport or ID card data
 - Contact data: address, email, phone number
 - Contract data: contract content, term, communication history
-- Payment data: bank details, invoice data
-- Professional data: CV, certificates, qualifications, professional career (where relevant to the consulting service)
-- In individual cases, special categories (Art. 9 GDPR): health data, where you voluntarily share such information in the context of the consultation
+- Payment data: bank details, invoice data, Stripe transaction IDs
+- Professional and academic data: CV, certificates, Abitur grades, language certificates (TestDaF, DSH, IELTS, TOEFL), motivation letters
+- In individual cases, special categories (Art. 9 GDPR): health data (for health insurance and visa procedures), where you voluntarily share such information
 
 The legal basis for processing this data is Art. 6(1)(b) GDPR (performance of contract). The processing of special categories of personal data is carried out exclusively on the basis of your explicit consent under Art. 9(2)(a) GDPR.
 
+Recipients of this data may include: German universities and educational institutions, Uni-Assist e. V., German diplomatic missions abroad (consulates), immigration offices (Ausländerbehörden), health insurance companies, providers of blocked accounts (e.g., Expatrio, Coracle, Fintiba), student housing providers, and our cooperation partners in Türkiye (see Section 13.1).
+
 9. Newsletter
 
-9.1 Description and Scope of Data Processing
+We currently do not operate an automated newsletter. Should we set up a newsletter in the future, we will update this Privacy Policy accordingly and use a double opt-in procedure. The legal basis would be your consent under Art. 6(1)(a) GDPR.
 
-Our website offers the option to subscribe to a free newsletter. When subscribing to the newsletter, the data entered in the input mask is transmitted to us:
-- Email address (mandatory)
-- Name (optional)
-- IP address, date, and time of subscription
+10. Web Analytics — PostHog
 
-9.2 Double Opt-In Procedure
+We use PostHog to analyze user behavior on our website with the aim of improving our offering. The provider is PostHog Inc., 2261 Market Street #4008, San Francisco, CA 94114, USA. We use PostHog with the EU Cloud region (server location: Frankfurt am Main, Germany), so that processing of your data takes place within the European Union.
 
-For the dispatch of the newsletter, we use the so-called double opt-in procedure. This means that after your registration, we will send you an email to the email address you have provided, asking you to confirm that you wish to receive the newsletter. If you do not confirm your registration within 24 hours, your information will be automatically deleted.
+Data collected:
+- Anonymous user ID (randomly generated, no personal reference without login)
+- Pages visited and click paths
+- Time on page and interactions
+- Browser and device information
+- Anonymized IP address (last octet is removed)
 
-9.3 Legal Basis
+Legal Basis: The use of this analytics tool is based exclusively on your express consent under Art. 6(1)(a) GDPR and Section 25(1) TDDDG. Consent can be revoked at any time via the cookie banner.
 
-The legal basis for processing the data is your consent under Art. 6(1)(a) GDPR.
+Third-Country Transfer: Even though processing takes place in the EU, support and maintenance requests may involve access by the US parent company. EU Standard Contractual Clauses (SCCs) under Art. 46(2)(c) GDPR have been concluded with PostHog Inc.
 
-9.4 Withdrawal
+Storage Duration: Maximum 14 months. Data is then automatically deleted.
 
-The newsletter subscription can be cancelled by the data subject at any time. For this purpose, an unsubscribe link is included in every newsletter. This also enables the withdrawal of consent for the storage of the personal data collected during the registration process.
+We currently do not use Google Analytics, Google Ads, or Meta Pixel (Facebook Pixel).
 
-9.5 Newsletter Service Provider
+11. Payment Processing — Stripe
 
-We send our newsletter via: [Insert name of service provider]
+For online payment processing (consulting fees, service packages), we use the payment service provider Stripe. The provider for users in the EU is Stripe Payments Europe Limited, 1 Grand Canal Street Lower, Grand Canal Dock, Dublin, Ireland.
 
-10. Web Analytics and Tracking
+When making a payment, the necessary data (name, billing address, payment method, card data or bank details) is transmitted directly to Stripe and processed by Stripe under its own data protection responsibility. We only receive a transaction ID and payment status, but no full card data.
 
-10.1 Google Analytics 4
+Legal Basis: Art. 6(1)(b) GDPR (performance of contract). Stripe's privacy policy is available at: https://stripe.com/privacy.
 
-This website uses functions of the web analytics service Google Analytics 4. The provider is Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland ("Google").
+Third-Country Transfer: Stripe may transfer data to its US affiliate Stripe, Inc. for fraud prevention and compliance purposes. The transfer is based on the EU-U.S. Data Privacy Framework and EU Standard Contractual Clauses under Art. 46(2) GDPR.
 
-Google Analytics enables the website operator to analyze the behavior of website visitors. The website operator receives various usage data, such as page views, time spent on the page, operating systems used, and origin of the user.
+12. Email Sending — Resend
 
-Google Analytics uses technologies that enable the recognition of the user for the purpose of analyzing user behavior (e.g., cookies or device fingerprinting). The information collected by Google about the use of this website is generally transferred to a Google server in the USA and stored there.
+For the sending of transactional emails (e.g., confirmations, password resets, session reminders, invoices), we use the service Resend. The provider is Resend, Inc., 2261 Market Street, San Francisco, CA 94114, USA.
 
-Legal Basis: The use of this analytics tool is based on your consent in accordance with Art. 6(1)(a) GDPR and Section 25(1) TDDDG. Consent can be revoked at any time.
+Data transmitted: email address, recipient name, subject, and content of the message.
 
-Third-Country Transfer (USA): The data transfer to the USA is based on the EU-U.S. Data Privacy Framework. Google is certified under the EU-U.S. Data Privacy Framework. In addition, we use the EU Standard Contractual Clauses (SCCs) as safeguards under Art. 46(2) GDPR.
+Legal Basis: Art. 6(1)(b) GDPR (notifications related to performance of contract) or Art. 6(1)(f) GDPR (legitimate interest in reliable email delivery).
 
-IP Anonymization: On this website, we have activated the IP anonymization function. This means that your IP address is shortened by Google within member states of the European Union or in other contracting states of the Agreement on the European Economic Area before being transferred to the USA.
+Third-Country Transfer (USA): The transfer to the USA is based on the EU-U.S. Data Privacy Framework and EU Standard Contractual Clauses under Art. 46(2) GDPR. A Data Processing Agreement (DPA) under Art. 28 GDPR has been concluded with Resend. The provider's privacy policy is available at: https://resend.com/legal/privacy-policy.
 
-10.2 Google Ads / Conversion Tracking
+13. AI-Powered Services (AI Labs)
 
-We use Google Ads (formerly Google AdWords) to draw attention to our offerings with the help of advertising on external websites. The provider is Google Ireland Limited. The legal basis is Art. 6(1)(a) GDPR and Section 25(1) TDDDG (consent).
+In the context of our internal AI assistant ("MentorDE AI Labs") as well as public AI features (e.g., the FAQ assistant at /sss), we process text inputs and queries using large language models. The providers are:
 
-10.3 Meta Pixel (Facebook Pixel)
+- OpenAI Ireland Ltd., 1st Floor, The Liffey Trust Centre, 117-126 Sheriff Street Upper, Dublin 1, Ireland (parent company: OpenAI L.L.C., USA)
+- Anthropic PBC, 548 Market St, PMB 90375, San Francisco, CA 94104, USA
+- Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland (Gemini API; parent company: Google LLC, USA)
 
-This website uses the visitor action pixel of Meta Platforms Ireland Ltd., 4 Grand Canal Square, Dublin 2, Ireland ("Meta") for conversion measurement. The legal basis is Art. 6(1)(a) GDPR and Section 25(1) TDDDG (consent).
+Data transmitted: content of the request (prompt), any documents or texts provided, and a pseudonymized session ID.
 
-11. Social Media Presence
+Legal Basis:
+- For employee use (internal assistant): Art. 6(1)(f) GDPR (legitimate interest in efficiency and quality of internal consulting activities).
+- For public AI features for end users (e.g., /sss): your consent under Art. 6(1)(a) GDPR.
 
-We maintain profiles or pages on the following social networks:
-- Facebook (Meta Platforms Ireland Ltd., Ireland)
-- Instagram (Meta Platforms Ireland Ltd., Ireland)
-- LinkedIn (LinkedIn Ireland Unlimited Company, Ireland)
-- YouTube (Google Ireland Limited, Ireland)
-- TikTok (TikTok Technology Limited, Ireland)
+Third-Country Transfer (USA): Requests are processed via the respective API interfaces. The transfer to the USA is based on the EU-U.S. Data Privacy Framework and EU Standard Contractual Clauses under Art. 46(2) GDPR. Data Processing Agreements (DPAs) under Art. 28 GDPR have been concluded with all providers.
 
-When you visit one of these social networks or interact with our content, personal data is transmitted to the respective provider and processed there. The respective provider and we are joint controllers within the meaning of Art. 26 GDPR and have concluded an agreement to that effect.
+Important: The providers have contractually assured us that submitted content will not be used to train their models (zero-retention/opt-out arrangements). We nevertheless recommend not entering particularly sensitive personal data of third parties in AI requests.
 
-The legal basis for the processing of your personal data is our legitimate interest in effective external presentation and communication with potential customers under Art. 6(1)(f) GDPR. If you have given the respective providers consent to data processing, the legal basis is Art. 6(1)(a) GDPR.
+14. Appointment and Calendar Integration — Google Calendar
 
-11.1 Social Media Plugins
+For the management of consultation appointments, appointments may optionally be synchronized with Google Calendar. The provider is Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland.
 
-On our website, we use social media plugins based on the so-called "Shariff" procedure. With this procedure, personal data is only transmitted to the respective provider when you actively click on the corresponding icon.
+Data transmitted: appointment title, date/time, participant email addresses, optional notes.
 
-12. Plugins and Tools
+Legal Basis: Art. 6(1)(b) GDPR (performance of contract — appointment organization).
 
-12.1 Google Fonts (Local Hosting)
+This feature is optional; consultation is also possible without calendar synchronization.
 
-This site uses so-called Google Fonts for the consistent display of fonts, which are integrated locally. No connection is made to Google servers.
+15. Embedded Content and Tools
 
-12.2 Google Maps
+15.1 Google Fonts
 
-This site uses the Google Maps mapping service. The provider is Google Ireland Limited. To use the functions of Google Maps, it is necessary to store your IP address. This information is generally transferred to a Google server in the USA and stored there. Legal basis: Art. 6(1)(a) GDPR (consent).
+Our website uses Google Fonts (Plus Jakarta Sans, DM Serif Display) for the consistent display of fonts. [NOTE: Currently the fonts are loaded via the Google CDN (fonts.googleapis.com), whereby a connection is established with Google servers in the USA and the IP address is transmitted. A migration to local hosting is planned in order to fully comply with the requirements of the Munich Regional Court (judgment of 20.01.2022, case no. 3 O 17493/20).]
 
-12.3 YouTube (Extended Privacy Mode)
+Provider: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland.
 
-This website embeds videos from the YouTube platform. The provider is Google Ireland Limited. We use YouTube in extended privacy mode. According to YouTube, this mode means that YouTube does not store any information about visitors to this website before they watch the video.
+Legal Basis until migration: Art. 6(1)(f) GDPR (legitimate interest in consistent font display). The data transfer to the USA is based on the EU-U.S. Data Privacy Framework.
 
-13. International Data Transfers
+15.2 YouTube (Extended Privacy Mode)
 
-A transfer of data to countries outside the European Union (EU) or the European Economic Area (EEA) – so-called third countries – only takes place if it is necessary for the performance of a contractual relationship, is required by law, you have given us your consent, or it takes place in the context of commissioned data processing.
+On individual sub-pages of our website (in particular for city portraits of German university cities), we embed videos from the YouTube platform. The provider is Google Ireland Limited. We use YouTube in extended privacy mode (youtube-nocookie). According to YouTube, this mode means that YouTube does not store any information about visitors to this website before they actively watch the video.
 
-In third countries, data processing only takes place in compliance with the special requirements of Art. 44 et seq. GDPR. This means that processing is carried out, for example, on the basis of special safeguards such as:
-- Adequacy decisions of the European Commission (e.g., the EU-U.S. Data Privacy Framework for the USA)
+Legal Basis: Art. 6(1)(a) GDPR (consent via cookie banner) or Art. 6(1)(f) GDPR when using extended privacy mode.
+
+16. Social Media Presence
+
+Where active, we maintain profiles or pages on the following social networks: [Insert active platforms, e.g., Instagram, LinkedIn, YouTube — delete inactive platforms.]
+
+When you visit one of these social networks or interact with our content, personal data is transmitted to the respective provider and processed there. The respective provider and we are joint controllers within the meaning of Art. 26 GDPR.
+
+The legal basis for the processing of your personal data is our legitimate interest in effective external presentation and communication with potential clients under Art. 6(1)(f) GDPR. If you have given the respective providers consent to data processing, the legal basis is Art. 6(1)(a) GDPR.
+
+No social media plugins are embedded on our website that automatically establish connections to third-party servers. Links to social networks are provided exclusively as static hyperlinks.
+
+17. International Data Transfers
+
+A transfer of data to countries outside the European Union (EU) or the European Economic Area (EEA) – so-called third countries – takes place in the context of the services described above (in particular USA for Resend, AI providers, Stripe corporate transfers; Türkiye for mentoring cooperation).
+
+Processing only takes place in compliance with the requirements of Art. 44 et seq. GDPR on the basis of:
+- Adequacy decisions of the European Commission (EU-U.S. Data Privacy Framework for the USA, for certified companies)
 - Standard Contractual Clauses (SCCs) under Art. 46(2)(c) GDPR
-- Certifications or binding corporate rules
+- Explicit consent under Art. 49(1)(a) GDPR (in particular for Türkiye)
 
-13.1 Data Transfers to Türkiye
+17.1 Data Transfers to Türkiye
 
-Where personal data is transferred to Türkiye in the context of our consulting services or mentoring programs (e.g., to cooperation partners, lawyers, or consulting institutions), this is carried out on the basis of:
+In the context of our consulting services, we work with cooperation partners (consulting offices, law firms) in Türkiye. Where personal data is transferred to Türkiye for this purpose, this is carried out on the basis of:
 - Your explicit consent under Art. 49(1)(a) GDPR, or
 - Standard Contractual Clauses (SCCs) under Art. 46(2)(c) GDPR
 
 Türkiye does not have an adequacy decision from the European Commission. We point out that Turkish data protection law (KVKK) is generally aligned with European standards but may differ in the level of protection.
 
-14. Rights of the Data Subject
+18. Rights of the Data Subject
 
 If your personal data is processed, you are a data subject within the meaning of the GDPR and you have the following rights vis-à-vis the controller:
 
-14.1 Right of Access (Art. 15 GDPR)
+18.1 Right of Access (Art. 15 GDPR)
 
-You may request confirmation from the controller as to whether personal data concerning you is processed by us. If such processing has taken place, you may request information from the controller about the processing purposes, the categories of data processed, the recipients, the planned storage period, and other details.
+You may request confirmation from the controller as to whether personal data concerning you is processed by us, and information about the processing purposes, categories of data, recipients, and planned storage period.
 
-14.2 Right to Rectification (Art. 16 GDPR)
+18.2 Right to Rectification (Art. 16 GDPR)
 
-You have a right to rectification and/or completion vis-à-vis the controller if the processed personal data concerning you is inaccurate or incomplete.
+You have a right to rectification and/or completion if the processed personal data concerning you is inaccurate or incomplete.
 
-14.3 Right to Restriction of Processing (Art. 18 GDPR)
+18.3 Right to Restriction of Processing (Art. 18 GDPR)
 
 Under certain conditions, you may request the restriction of the processing of personal data concerning you.
 
-14.4 Right to Erasure (Art. 17 GDPR)
+18.4 Right to Erasure (Art. 17 GDPR)
 
-You may request the controller to erase the personal data concerning you without undue delay if one of the reasons listed in Art. 17(1) GDPR applies and processing is not necessary.
+You may request the controller to erase the personal data concerning you without undue delay if one of the reasons listed in Art. 17(1) GDPR applies and processing is not necessary (e.g., to fulfill commercial and tax retention obligations).
 
-14.5 Right to Notification (Art. 19 GDPR)
+18.5 Right to Notification (Art. 19 GDPR)
 
-If you have asserted the right to rectification, erasure, or restriction of processing vis-à-vis the controller, the controller is obliged to notify all recipients to whom the personal data concerning you has been disclosed of this rectification or erasure of data or restriction of processing.
+If you have asserted the right to rectification, erasure, or restriction of processing, the controller is obliged to notify all recipients to whom the personal data has been disclosed.
 
-14.6 Right to Data Portability (Art. 20 GDPR)
+18.6 Right to Data Portability (Art. 20 GDPR)
 
 You have the right to receive the personal data concerning you, which you have provided to the controller, in a structured, commonly used, and machine-readable format.
 
-14.7 Right to Object (Art. 21 GDPR)
+18.7 Right to Object (Art. 21 GDPR)
 
 You have the right, on grounds relating to your particular situation, to object at any time to the processing of personal data concerning you which is based on Art. 6(1)(e) or (f) GDPR.
 
-If the personal data concerning you is processed for direct marketing purposes, you have the right to object at any time to the processing of personal data concerning you for the purpose of such marketing.
-
-14.8 Right to Withdraw Consent (Art. 7(3) GDPR)
+18.8 Right to Withdraw Consent (Art. 7(3) GDPR)
 
 You have the right to withdraw your consent under data protection law at any time. The withdrawal of consent does not affect the lawfulness of processing carried out on the basis of consent before its withdrawal.
 
-14.9 Automated Decision-Making in Individual Cases (Art. 22 GDPR)
+18.9 Automated Decision-Making in Individual Cases (Art. 22 GDPR)
 
-You have the right not to be subject to a decision based solely on automated processing – including profiling – which produces legal effects concerning you or similarly significantly affects you. No such automated decision-making takes place on our website.
+You have the right not to be subject to a decision based solely on automated processing — including profiling — which produces legal effects concerning you or similarly significantly affects you. No such automated decision-making takes place on our website.
 
-14.10 Right to Lodge a Complaint with a Supervisory Authority (Art. 77 GDPR)
+18.10 Right to Lodge a Complaint with a Supervisory Authority (Art. 77 GDPR)
 
-Without prejudice to any other administrative or judicial remedy, you have the right to lodge a complaint with a supervisory authority if you believe that the processing of personal data concerning you infringes the GDPR.
+You have the right to lodge a complaint with a supervisory authority if you believe that the processing of personal data concerning you infringes the GDPR.
 
-The supervisory authority responsible for us is:
+The supervisory authority responsible for us — based on the company seat in Hesse — is:
 
-State Commissioner for Data Protection and Freedom of Information of North Rhine-Westphalia
-(Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen)
-Kavalleriestraße 2-4
-40213 Düsseldorf, Germany
-Phone: +49 211 38424-0
-Email: poststelle@ldi.nrw.de
-Website: www.ldi.nrw.de
+The Hessian Commissioner for Data Protection and Freedom of Information
+(Der Hessische Beauftragte für Datenschutz und Informationsfreiheit)
+Postfach 3163
+65021 Wiesbaden, Germany
+Phone: +49 611 1408-0
+Email: poststelle@datenschutz.hessen.de
+Website: www.datenschutz.hessen.de
 
-As a data subject, you may also lodge a complaint with the supervisory authority of your habitual residence, place of work, or the place of the alleged infringement.
-
-15. Data Security (Art. 32 GDPR)
+19. Data Security (Art. 32 GDPR)
 
 Within the website visit, we use the widely used SSL/TLS procedure in conjunction with the highest level of encryption supported by your browser. You can recognize an encrypted connection by the fact that the address bar of the browser changes from "http://" to "https://" and by the lock symbol in your browser bar.
 
-Furthermore, we use appropriate technical and organizational security measures to protect your data against accidental or intentional manipulation, partial or complete loss, destruction, or unauthorized access by third parties. Our security measures are continuously improved in line with technological developments.
+In addition, we implement the following technical and organizational measures (TOMs):
+- Encrypted database connections (TLS 1.3)
+- Pseudonymization of sensitive fields
+- Access controls with role-based permissions (Manager, Senior, Dealer, Client)
+- Multi-factor authentication (2FA) for administrative accounts
+- Daily encrypted backups
+- IP-based access restrictions for administrative areas
+- Audit logging for security-relevant actions
+- Regular security updates and dependency scans
 
-16. Status and Amendment of this Privacy Policy
+The detailed technical and organizational measures (TOM document under Art. 32 GDPR) are kept internally and can be reviewed by supervisory authorities upon justified request.
 
-This Privacy Policy is currently valid and was last updated on: [DD.MM.YYYY]
+20. Status and Amendment of this Privacy Policy
+
+This Privacy Policy is currently valid and was last updated: April 2026.
 
 As our website and services evolve, or due to changes in legal or regulatory requirements, it may become necessary to amend this Privacy Policy. The current Privacy Policy can be accessed and printed at any time on the website at www.mentorde.com/privacy.
 
-17. Governing Language
+21. Governing Language
 
 This Privacy Policy is provided in English for the convenience of international visitors. The legally authoritative version for German supervisory authorities is the German version (Datenschutzerklärung), available at www.mentorde.com/datenschutz. In the event of any discrepancy between the English and German versions, the German version shall prevail.

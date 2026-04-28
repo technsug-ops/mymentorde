@@ -1,14 +1,25 @@
 KİŞİSEL VERİLERİN İŞLENMESİNE İLİŞKİN AYDINLATMA METNİ VE AÇIK RIZA BEYANI
 
+[BU METİN İKİ KULLANIM SENARYOSU İÇİN YAZILMIŞTIR. mentorde.com kendi öğrenci ilişkisinde Veri Sorumlusu, Türkiye'deki partner acentelerin müşterileriyle ilişkisinde ise Veri İşleyen sıfatıyla hareket etmektedir. Yayınlamadan önce bir avukat / DPO incelemesi tavsiye edilir.]
+
 1. Veri Sorumlusu ve Veri İşleyen
 
 İşbu Aydınlatma Metni, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") ve Avrupa Birliği Genel Veri Koruma Tüzüğü ("GDPR") uyarınca kişisel verilerinizin işlenmesine ilişkin usul ve esaslar hakkında bilgilendirilmeniz amacıyla hazırlanmıştır.
 
-Bu kapsamda;
+mentorde.com ile doğrudan kayıt olan öğrenciler bakımından:
+
+Veri Sorumlusu (Data Controller): Horizon STS GmbH (mentorde.com markası altında faaliyet göstermektedir)
+Adres: Herwigstraße 24, 35683 Dillenburg / Almanya
+Telefon: +49 157 84218282
+E-posta: info@mentorde.com
+Yöneticiler: [Yönetici adı/adları]
+Ticaret Sicili: [Amtsgericht ..., HRB ...]
+Vergi No (USt-IdNr.): [USt-IdNr.]
+
+Türkiye'de partner acente üzerinden başvuran öğrenciler bakımından:
 
 Veri Sorumlusu (Data Controller): [Partner Acente / Kurum Adı – Açık Adres – E-posta]
-
-Veri İşleyen (Data Processor): Horizon STS GmbH (Mentorde) – Herwigstraße 24, 35683 Dillenburg / Almanya.
+Veri İşleyen (Data Processor): Horizon STS GmbH (mentorde.com), Herwigstraße 24, 35683 Dillenburg / Almanya.
 
 Veri işleyen, veri sorumlusu adına ve onun talimatları doğrultusunda kişisel verileri işlemektedir. Veri sorumlusu ile veri işleyen arasında, GDPR Madde 28 kapsamında veri işleme sözleşmesi (Data Processing Agreement) akdedilmiştir. Veri işleyen, yalnızca veri sorumlusunun yazılı talimatları doğrultusunda hareket eder ve gerekli teknik ve idari güvenlik önlemlerini almakla yükümlüdür.
 
@@ -16,7 +27,7 @@ Veri işleyen, veri sorumlusu adına ve onun talimatları doğrultusunda kişise
 
 Yurtdışı eğitim danışmanlığı hizmetlerinin sunulabilmesi amacıyla aşağıda belirtilen kişisel verileriniz, belirtilen amaçlar ve hukuki dayanaklar çerçevesinde işlenmektedir:
 
-Kimlik bilgileri (ad, soyad, doğum tarihi ve yeri, T.C. kimlik numarası, pasaport bilgileri ve sureti), iletişim bilgileri (telefon numarası, e-posta adresi, yerleşim adresi), eğitim bilgileri (diploma, transkript, sınav sonuç belgeleri, dil yeterlilik sertifikaları, özgeçmiş ve motivasyon mektubu), finansal bilgiler (banka hesap dökümleri, bloke hesap belgeleri, sponsorluk ve gelir beyanları) ile başvuru süreçlerine ilişkin diğer belgeler.
+Kimlik bilgileri (ad, soyad, doğum tarihi ve yeri, T.C. kimlik numarası, pasaport bilgileri ve sureti), iletişim bilgileri (telefon numarası, e-posta adresi, yerleşim adresi), eğitim bilgileri (diploma, transkript, sınav sonuç belgeleri, dil yeterlilik sertifikaları — TestDaF/DSH/IELTS/TOEFL, özgeçmiş ve motivasyon mektubu), finansal bilgiler (banka hesap dökümleri, bloke hesap belgeleri — Expatrio/Coracle/Fintiba, sponsorluk ve gelir beyanları, Stripe işlem kimlikleri) ile başvuru süreçlerine ilişkin diğer belgeler.
 
 Hizmetin niteliğine göre gerekli olması halinde; sağlık sigortası işlemleri, vize başvuruları veya resmi makam talepleri kapsamında sınırlı olmak üzere özel nitelikli kişisel verileriniz (örneğin sağlık bilgileri veya adli sicil kaydı) da işlenebilmektedir.
 
@@ -25,49 +36,86 @@ Kişisel verileriniz; başvuru formları, dijital platformlar, e-posta yazışma
 Veri Minimizasyonu Kapsamında İşlenen Veriler ve Amaçları:
 - Kimlik & İletişim → Başvuru ve Süreç Yönetimi → Sözleşmenin İfası (GDPR 6/1-b / KVKK 5/2-c)
 - Eğitim Verileri → Üniversite Kabul Süreçleri → Sözleşmenin İfası (KVKK 5/2-c)
-- Finansal Veriler → Finansal Uygunluk Denetimi → Sözleşmenin İfası (GDPR 6/1-b)
+- Finansal Veriler → Finansal Uygunluk Denetimi & Ödeme → Sözleşmenin İfası (GDPR 6/1-b)
 - Özel Nitelikli Veriler → Vize ve Sağlık Sigortası İşlemleri → Açık Rıza (KVKK 6 / GDPR 9)
 
 3. Kişisel Verilerin İşlenme Amaçları
 
-Kişisel verileriniz; Almanya'daki üniversitelere ve eğitim kurumlarına başvurularınızın gerçekleştirilmesi, Uni-Assist ve benzeri başvuru platformları üzerinden işlemlerinizin yürütülmesi, Alman Konsoloslukları nezdinde vize başvuru süreçlerinin yürütülmesi ve takibi, Almanya'da yasal zorunluluk olan bloke hesap açılışı ve sağlık sigortası işlemlerinin gerçekleştirilmesi, konaklama başvurularının yapılması ve danışmanlık hizmetlerinin sunulması ile ilgili mevzuattan doğan yükümlülüklerin yerine getirilmesi amaçlarıyla işlenmektedir.
+Kişisel verileriniz; Almanya'daki üniversitelere ve eğitim kurumlarına başvurularınızın gerçekleştirilmesi, Uni-Assist ve benzeri başvuru platformları üzerinden işlemlerinizin yürütülmesi, Alman Konsoloslukları nezdinde vize başvuru süreçlerinin yürütülmesi ve takibi, Almanya'da yasal zorunluluk olan bloke hesap açılışı (Expatrio, Coracle, Fintiba) ve sağlık sigortası işlemlerinin gerçekleştirilmesi, konaklama başvurularının yapılması ve danışmanlık hizmetlerinin sunulması ile ilgili mevzuattan doğan yükümlülüklerin yerine getirilmesi amaçlarıyla işlenmektedir.
 
 Kişisel verileriniz, KVKK'nın 5/2 maddesi (sözleşmenin kurulması ve ifası, veri sorumlusunun hukuki yükümlülüğünü yerine getirmesi) ve GDPR Madde 6/1(b) ve (c) hükümleri uyarınca işlenmektedir. Özel nitelikli kişisel verileriniz ise KVKK madde 6 ve GDPR Madde 9 kapsamında açık rızanıza dayanılarak işlenmektedir.
 
-4. Kişisel Verilerin Aktarılması ve Yurtdışına Aktarım
+4. Hizmet Altyapısı ve Kullanılan Tedarikçiler
 
-Kişisel verileriniz, yukarıda belirtilen amaçların yerine getirilebilmesi için, KVKK ve GDPR hükümlerine uygun olarak gerekli teknik ve idari tedbirler alınmak suretiyle; Almanya'da mukim veri işleyen Horizon STS GmbH (Mentorde) başta olmak üzere, üniversiteler, eğitim kurumları, Uni-Assist platformu, konsolosluklar, yabancılar daireleri (Ausländerbehörde), sigorta şirketleri, finans kuruluşları ve hizmetin ifası için gerekli diğer iş ortakları ve alt yükleniciler ile paylaşılabilmektedir.
+Hizmetlerimizin sunulması sürecinde aşağıdaki tedarikçiler ve veri işleyenler kullanılmaktadır:
 
-Bu kapsamda kişisel verileriniz, hizmetin doğası gereği yurt dışına aktarılmaktadır. Yurt dışına veri aktarımı, GDPR kapsamında Avrupa Komisyonu tarafından yeterli koruma sağlanan ülkeler veya uygun güvencelerin (örneğin Standart Sözleşme Maddeleri – Standard Contractual Clauses) bulunduğu durumlarda gerçekleştirilmektedir.
+- Sunucu / Hosting: ALL-INKL.COM (Neue Medien Münnich, Almanya). Sunucular Almanya'dadır, üçüncü ülkeye veri aktarımı yoktur.
+- Ödeme: Stripe Payments Europe Limited (İrlanda). Kart bilgileri yalnızca Stripe tarafından işlenir.
+- Transactional E-posta: Resend, Inc. (ABD). EU-U.S. Data Privacy Framework + SCC kapsamında.
+- Web Analitiği: PostHog Inc. (ABD), Frankfurt am Main EU bölgesi sunucularında. SCC kapsamında.
+- Yapay Zeka Hizmetleri: OpenAI Ireland Ltd. (İrlanda), Anthropic PBC (ABD), Google Ireland Ltd. (İrlanda — Gemini API). EU-U.S. Data Privacy Framework + SCC kapsamında. Sağlayıcılar girilen içerikleri model eğitiminde kullanmamaktadır (zero-retention).
+- Takvim: Google Calendar (Google Ireland Ltd., İrlanda) — opsiyonel randevu senkronizasyonu.
+- Şehir Tanıtım Videoları: YouTube (Google Ireland Ltd.) gelişmiş gizlilik modunda (youtube-nocookie).
+
+Tüm bu tedarikçilerle GDPR Madde 28 kapsamında veri işleme sözleşmesi (DPA / AVV) imzalanmıştır.
+
+5. Kişisel Verilerin Aktarılması ve Yurtdışına Aktarım
+
+Kişisel verileriniz, yukarıda belirtilen amaçların yerine getirilebilmesi için, KVKK ve GDPR hükümlerine uygun olarak gerekli teknik ve idari tedbirler alınmak suretiyle; Almanya'da mukim Horizon STS GmbH (mentorde.com) başta olmak üzere, üniversiteler, eğitim kurumları, Uni-Assist platformu, konsolosluklar, yabancılar daireleri (Ausländerbehörde), sigorta şirketleri, finans kuruluşları (bloke hesap sağlayıcıları) ve hizmetin ifası için gerekli diğer iş ortakları ve alt yükleniciler ile paylaşılabilmektedir.
+
+Bu kapsamda kişisel verileriniz, hizmetin doğası gereği yurt dışına (özellikle Almanya'ya, AB üyesi diğer ülkelere ve sınırlı durumlarda ABD'ye) aktarılmaktadır. AB üyesi ülkelere aktarımlarda Avrupa Komisyonu yeterlilik düzeyi geçerlidir; ABD aktarımlarında EU-U.S. Data Privacy Framework ve Standart Sözleşme Maddeleri (SCC) güvencesi uygulanmaktadır.
 
 KVKK kapsamında yurt dışına veri aktarımı, ilgili kişinin açık rızasına dayanmakta olup gerekli hallerde Kişisel Verileri Koruma Kurulu tarafından öngörülen ek güvenceler sağlanmaktadır. Verileriniz, yukarıda belirtilen zorunlu durumlar dışında üçüncü kişilere satılmaz veya ticari amaçlarla paylaşılmaz.
 
-5. Kişisel Verilerin Saklanma Süresi
+6. Kişisel Verilerin Saklanma Süresi
 
-Kişisel verileriniz, hizmet ilişkisinin devam ettiği süre boyunca ve sonrasında yürürlükteki mevzuat uyarınca saklanması gereken süreler boyunca muhafaza edilmektedir. Bu doğrultuda; ilgili kanunlar ve vergi mevzuatı gereğince mali ve ticari kayıtlar 10 yıl, genel iletişim ve operasyon verileri ise hizmet ilişkisi sona erdikten sonra 2 yıl süreyle saklanmaktadır.
+Kişisel verileriniz, hizmet ilişkisinin devam ettiği süre boyunca ve sonrasında yürürlükteki mevzuat uyarınca saklanması gereken süreler boyunca muhafaza edilmektedir:
+- Mali ve ticari kayıtlar (faturalar, sözleşmeler): 10 yıl (Alman HGB / vergi mevzuatı)
+- Genel iletişim ve operasyon verileri: hizmet ilişkisi sona erdikten sonra 2 yıl
+- Sunucu log kayıtları: 7 gün
+- Başvuru süreci belgeleri (kabul, vize, bloke hesap): danışmanlık ilişkisi bitiminden sonra 5 yıl (ispat yükümlülüğü)
+- Reddedilen başvuranların özgeçmiş/aday belgeleri: 6 ay
 
-Hizmetin sona ermesi halinde, yasal olarak saklanması zorunlu olan mali, vergisel ve hukuki kayıtlar hariç olmak üzere kişisel verileriniz silinir, yok edilir veya anonim hale getirilir. Yetkisiz erişimler teknik ve idari tedbirlerle kalıcı olarak engellenir. Saklama süreleri belirlenirken ilgili mevzuatta öngörülen süreler, sözleşme ilişkisi, olası hukuki uyuşmazlık süreleri ve veri minimizasyonu ilkesi dikkate alınmaktadır.
+Hizmetin sona ermesi halinde, yasal olarak saklanması zorunlu olan mali, vergisel ve hukuki kayıtlar hariç olmak üzere kişisel verileriniz silinir, yok edilir veya anonim hale getirilir. Yetkisiz erişimler teknik ve idari tedbirlerle kalıcı olarak engellenir.
 
-6. Veri Sahibinin Hakları
+7. Veri Sahibinin Hakları
 
 KVKK'nın 11. maddesi ve GDPR kapsamında veri sahibi olarak; kişisel verilerinizin işlenip işlenmediğini öğrenme, işlenmişse buna ilişkin bilgi talep etme, işlenme amacını öğrenme, eksik veya yanlış işlenmiş olması halinde düzeltilmesini isteme, silinmesini veya yok edilmesini talep etme ve hukuka aykırı işleme nedeniyle zarara uğramanız halinde zararın giderilmesini talep etme haklarına sahipsiniz.
 
-Ayrıca GDPR kapsamında; verilerin taşınabilirliğini talep etme (data portability), işlemeye itiraz etme (right to object) ve belirli durumlarda işlemenin kısıtlanmasını talep etme haklarına da sahipsiniz.
+Ayrıca GDPR kapsamında; verilerin taşınabilirliğini talep etme (data portability — Madde 20), işlemeye itiraz etme (right to object — Madde 21), açık rızanızı geri alma (Madde 7/3) ve belirli durumlarda işlemenin kısıtlanmasını talep etme (Madde 18) haklarına da sahipsiniz.
 
-Ayrıca veri sahibi olarak, ilgili veri koruma otoritesine (Türkiye'de Kişisel Verileri Koruma Kurumu, Avrupa Birliği'nde ilgili denetim otoriteleri) şikâyette bulunma hakkına sahipsiniz.
+Veri sahibi olarak, ilgili veri koruma otoritesine — Türkiye'de Kişisel Verileri Koruma Kurumu (KVKK), Avrupa Birliği'nde mentorde.com bakımından Hessen Veri Koruma Komiseri (Der Hessische Beauftragte für Datenschutz und Informationsfreiheit, Wiesbaden) — şikâyette bulunma hakkına sahipsiniz.
 
-Bu kapsamda taleplerinizi, yukarıda bilgileri yer alan veri sorumlusuna yazılı olarak veya e-posta yoluyla iletebilirsiniz. Talebinizin işleme alınabilmesi için kimliğinizi teyit edici resmi belgelerin (Kimlik/Pasaport fotokopisi vb.) [Partner E-posta Adresi] adresine iletilmesi gerekmektedir. Başvurularınız, tarafımıza ulaştığı tarihten itibaren en geç 30 gün içinde ücretsiz olarak sonuçlandırılacaktır.
+Bu kapsamda taleplerinizi, yukarıda bilgileri yer alan veri sorumlusuna yazılı olarak veya e-posta yoluyla iletebilirsiniz. Talebinizin işleme alınabilmesi için kimliğinizi teyit edici resmi belgelerin (Kimlik/Pasaport fotokopisi vb.) info@mentorde.com adresine (veya partner acente üzerinden başvurularda partner acente e-posta adresine) iletilmesi gerekmektedir. Başvurularınız, tarafımıza ulaştığı tarihten itibaren en geç 30 gün içinde ücretsiz olarak sonuçlandırılacaktır.
 
-7. Reşit Olmayan Veri Sahipleri
+8. Reşit Olmayan Veri Sahipleri
 
 18 yaşından küçük veri sahipleri bakımından, işbu Aydınlatma Metni ve Açık Rıza Beyanı kapsamında kişisel verilerin işlenmesine ilişkin açık rıza, veri sahibinin velisi veya yasal temsilcisi tarafından verilecektir. Veri sorumlusu, gerekli gördüğü hallerde veli/yasal temsilci kimlik doğrulaması talep etme hakkını saklı tutar.
+
+9. Çerezler ve Üçüncü Taraf Hizmetleri
+
+Web sitemiz, oturum yönetimi ve CSRF koruması için zorunlu çerezler kullanır. Tercih çerezleri (dil seçimi, koyu mod) ve analitik çerezler (PostHog) yalnızca açık rızanız sonrasında etkinleştirilir. Çerez tercihlerinizi her zaman footer'daki "Çerez Ayarları" linki üzerinden değiştirebilirsiniz.
+
+Pazarlama veya reklam amaçlı üçüncü taraf çerezleri (Google Analytics, Google Ads, Meta Pixel vb.) şu an itibarıyla kullanılmamaktadır.
+
+10. Veri Güvenliği
+
+Web sitemize tüm bağlantılar SSL/TLS ile şifrelenmiştir (https://). Ek olarak şu teknik ve idari önlemleri uygulamaktayız:
+- Veritabanı bağlantılarında TLS 1.3 zorunluluğu
+- Hassas alanlarda pseudonymization
+- Rol bazlı erişim kontrolü (Yönetici, Senior, Bayi, Müşteri)
+- İdari hesaplar için iki faktörlü kimlik doğrulama (2FA)
+- Günlük şifrelenmiş yedeklemeler
+- Yönetim alanları için IP bazlı erişim kısıtlamaları
+- Güvenlik olaylarının denetim kayıtları (audit log)
+- Düzenli güvenlik güncellemeleri ve bağımlılık taramaları
 
 AÇIK RIZA BEYANI
 
 Yukarıda yer alan Aydınlatma Metni kapsamında tarafıma gerekli bilgilendirmenin yapıldığını beyan ederim. Bu doğrultuda; yurtdışı eğitim danışmanlığı hizmetlerinin yürütülebilmesi amacıyla;
 - Vize, sağlık sigortası ve resmi makam süreçleri için gerekli olması halinde özel nitelikli kişisel verilerimin (sağlık bilgileri, adli sicil kaydı vb.) işlenmesine,
 - Hizmetin ifası için zorunlu olan tüm kişisel verilerimin yurt içinde ve yurt dışında üçüncü taraflara aktarılmasına,
-- Almanya'da mukim Horizon STS GmbH (Mentorde) tarafından veri işleyen sıfatıyla işlenmesine
+- Almanya'da mukim Horizon STS GmbH (mentorde.com) tarafından veri sorumlusu veya veri işleyen sıfatıyla işlenmesine
 
 özgür irademle, açık ve bilgilendirilmiş şekilde rıza gösterdiğimi kabul ederim. Verdiğim açık rızayı dilediğim zaman geri alma hakkına sahip olduğumu, bu geri almanın geri alma öncesinde gerçekleştirilen veri işleme faaliyetlerinin hukuka uygunluğunu etkilemeyeceğini bildiğimi beyan ederim.
 
