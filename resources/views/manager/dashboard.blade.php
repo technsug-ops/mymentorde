@@ -268,6 +268,28 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
         'href'=>'/manager/pipeline/oversight?risk=overdue',
         'tone'=>'warn',
     ];
+    // Sözleşme bekleyen guest'ler — manager hazırlamak / onaylamak / düzeltmek zorunda
+    if (($iv['contracts_pending_prep'] ?? 0) > 0) $alertCards[] = [
+        'cnt'=>$iv['contracts_pending_prep'], 'icon'=>'📝',
+        'title'=>'Sözleşme Hazırla',
+        'hint'=>'Aday sözleşme talep etti',
+        'href'=>'/manager/contract-template?status=pending_manager',
+        'tone'=>'danger',
+    ];
+    if (($iv['contracts_pending_approval'] ?? 0) > 0) $alertCards[] = [
+        'cnt'=>$iv['contracts_pending_approval'], 'icon'=>'✍',
+        'title'=>'İmzalı Sözleşme Onayla',
+        'hint'=>'Aday imzasını yükledi',
+        'href'=>'/manager/contract-template?status=signed_uploaded',
+        'tone'=>'warn',
+    ];
+    if (($iv['contracts_rejected'] ?? 0) > 0) $alertCards[] = [
+        'cnt'=>$iv['contracts_rejected'], 'icon'=>'⚠',
+        'title'=>'Reddedilen Sözleşme',
+        'hint'=>'Aday düzeltme istedi',
+        'href'=>'/manager/contract-template?status=rejected',
+        'tone'=>'warn',
+    ];
     if (($stats['overdue_outcomes'] ?? 0) > 0) $alertCards[] = [
         'cnt'=>$stats['overdue_outcomes'], 'icon'=>'📋',
         'title'=>'Geciken Outcome',

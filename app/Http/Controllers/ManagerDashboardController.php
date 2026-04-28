@@ -38,7 +38,7 @@ class ManagerDashboardController extends Controller
         $base = GuestApplication::query()
             ->when($cid > 0, fn ($q) => $q->where('company_id', $cid))
             ->whereNull('deleted_at')
-            ->get(['id', 'lead_status', 'lead_score_tier', 'assigned_senior_email', 'updated_at']);
+            ->get(['id', 'lead_status', 'lead_score_tier', 'assigned_senior_email', 'updated_at', 'contract_status']);
 
         $active = $base->whereNotIn('lead_status', ['converted', 'lost']);
 
@@ -46,6 +46,10 @@ class ManagerDashboardController extends Controller
             'unassigned'     => $active->whereNull('assigned_senior_email')->count(),
             'hot_no_contact' => $base->where('lead_score_tier', 'hot')->where('lead_status', 'new')->count(),
             'overdue'        => $active->filter(fn ($g) => $g->updated_at && $g->updated_at->lt($overdueCutoff))->count(),
+            // Sözleşme talepleri — manager hazırlamak / onaylamak zorunda
+            'contracts_pending_prep'     => $base->where('contract_status', 'pending_manager')->count(),
+            'contracts_pending_approval' => $base->where('contract_status', 'signed_uploaded')->count(),
+            'contracts_rejected'         => $base->where('contract_status', 'rejected')->count(),
             'total_active'   => $active->count(),
         ];
     }
