@@ -18,10 +18,16 @@ Route::view('/landing/mentorde', 'landing.mentorde')->name('landing.mentorde');
 
 // ── Yasal Sayfalar (Privacy / Terms) ─────────────────────────────────────────
 // SaaS gerekliliği: Google OAuth consent screen + KVKK/GDPR uyumu için public erişim
-Route::view('/privacy', 'legal.privacy')->name('legal.privacy');
-Route::view('/terms',   'legal.terms')->name('legal.terms');
-// SEO/UX friendly aliases
-Route::view('/legal/privacy', 'legal.privacy');
+// Public yasal sayfalar — manager paneli üzerinden DB'den render edilir
+// (eski statik view'lar fallback olarak kalsın diye route name'leri korundu)
+Route::get('/privacy',     [\App\Http\Controllers\LegalController::class, 'privacy'])->name('legal.privacy');
+Route::get('/cookies',     [\App\Http\Controllers\LegalController::class, 'cookies'])->name('legal.cookies');
+Route::get('/terms',       [\App\Http\Controllers\LegalController::class, 'terms'])->name('legal.terms');
+Route::get('/imprint',     [\App\Http\Controllers\LegalController::class, 'imprint'])->name('legal.imprint');
+// Almanca alias'lar (Almanya kullanıcıları için doğal URL)
+Route::get('/datenschutz', [\App\Http\Controllers\LegalController::class, 'privacy'])->defaults('lang', 'de')->name('legal.datenschutz');
+Route::get('/impressum',   [\App\Http\Controllers\LegalController::class, 'imprint'])->defaults('lang', 'de')->name('legal.impressum');
+Route::get('/agb',         [\App\Http\Controllers\LegalController::class, 'terms'])->defaults('lang', 'de')->name('legal.agb');
 Route::view('/legal/terms',   'legal.terms');
 
 Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (): void {
