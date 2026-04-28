@@ -569,40 +569,56 @@ class PortalController extends Controller
     }
 
     /**
-     * Akıllı randevu yönlendirici — guest'in atanmış danışmanı varsa onun
-     * widget sayfasına (/book/{slug}), yoksa public landing'e (/randevu) gider.
+     * Aday öğrenci için iç randevu sayfası — guest layout altında embed widget.
      *
-     * Niçin: Sidebar'daki "Randevu Al" linki public landing'e atıyordu →
-     * giriş yapmış aday tekrar mentor seçmek zorunda kalıyordu, kendi
-     * danışmanının takvimini bulamıyordu.
+     * Akış:
+     *  - Atanmış danışmanın aktif booking ayarı varsa → guest.booking view'ı
+     *    içinde iframe ile widget'ı göster (sidebar/topbar guest panelinden)
+     *  - Yoksa → public landing'e redirect (mentor listesi)
+     *
+     * Niçin iframe: Public widget standalone HTML (kendi head/CSS/JS).
+     * Guest layout'a HTML olarak embed etmek refactor + duplikasyon gerektirir;
+     * iframe ile auth session paylaşılır (Laravel session cookie), prefill
+     * çalışır, captcha skip edilir, controller guest_application_id ile
+     * booking'i guest'e bağlar.
      */
-    public function bookingRedirect(Request $request): \Illuminate\Http\RedirectResponse
+    public function bookingRedirect(Request $request)
     {
         $guest = $this->resolveGuest($request);
 
         $assignedEmail = trim((string) ($guest?->assigned_senior_email ?? ''));
+        $slug = null;
+        $seniorName = null;
+
         if ($assignedEmail !== '') {
             $senior = \App\Models\User::query()
                 ->withoutGlobalScopes()
                 ->where('email', $assignedEmail)
-                ->first(['id']);
+                ->first(['id', 'name']);
             if ($senior) {
                 $setting = \App\Models\SeniorBookingSetting::query()
                     ->withoutGlobalScopes()
                     ->where('senior_user_id', $senior->id)
                     ->where('is_active', true)
-                    ->first(['public_slug', 'is_public']);
-                // Atanmış danışmanın aktif booking ayarı varsa direkt onun
-                // widget'ına yolla (public_slug zorunlu, is_public=false olsa
-                // bile authenticated guest erişebilir — controller kontrol eder)
+                    ->first(['public_slug']);
                 if ($setting && trim((string) $setting->public_slug) !== '') {
-                    return redirect()->route('booking.public.show', ['slug' => $setting->public_slug]);
+                    $slug = $setting->public_slug;
+                    $seniorName = $senior->name;
                 }
             }
         }
 
-        // Atanmış danışman yok veya booking ayarı yok → public mentor listesi
-        return redirect()->route('booking.landing');
+        // Atanmış danışman yok / booking ayarı yapılmamış → public listeye düş
+        if ($slug === null) {
+            return redirect()->route('booking.landing');
+        }
+
+        $data = $this->viewData->build($request, $guest);
+        $data['bookingSlug']   = $slug;
+        $data['seniorName']    = $seniorName ?: $assignedEmail;
+        $data['bookingEmbedUrl'] = route('booking.public.show', ['slug' => $slug]);
+
+        return view('guest.booking', $data);
     }
 
     // ── Sözleşme ─────────────────────────────────────────────────────────────
