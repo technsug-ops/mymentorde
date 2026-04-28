@@ -339,6 +339,7 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
     Route::get('/manager/contract-template/pdf/{guestId}', [ContractPrintController::class, 'downloadPdf'])->name('manager.contract-template.pdf');
     Route::get('/manager/notification-stats', [ManagerAnalyticsController::class, 'notificationStats'])->name('manager.notification-stats');
     Route::get('/manager/gdpr-dashboard', [ManagerAnalyticsController::class, 'gdprDashboard'])->name('manager.gdpr-dashboard');
+    Route::post('/manager/gdpr-dashboard/policy', [ManagerAnalyticsController::class, 'gdprPolicySave'])->name('manager.gdpr.policy.save');
 
     // Business Contracts (Dealer / Staff)
     Route::get('/manager/business-contracts',                        [BusinessContractController::class, 'index'])->name('manager.business-contracts.index');

@@ -185,4 +185,130 @@ $activeRate   = round($consentStats['active'] / $totalConsent * 100, 1);
     </div>
     @endif
 </section>
+
+{{-- ════ YASAL METİN EDİTÖRÜ (3 kind × 3 locale) ════ --}}
+@php
+    $kinds = [
+        'privacy' => ['emoji' => '📜', 'label' => 'Gizlilik / Veri Koruma', 'placeholders' => [
+            'tr' => 'Kişisel Verilerin Korunması Aydınlatma Metni (KVKK)',
+            'de' => 'Datenschutzerklärung (DSGVO)',
+            'en' => 'Privacy Policy (GDPR)',
+        ]],
+        'cookie'  => ['emoji' => '🍪', 'label' => 'Çerez Politikası', 'placeholders' => [
+            'tr' => 'Çerez Politikası',
+            'de' => 'Cookie-Richtlinie',
+            'en' => 'Cookie Policy',
+        ]],
+        'terms'   => ['emoji' => '📋', 'label' => 'Kullanım Şartları', 'placeholders' => [
+            'tr' => 'Kullanım Şartları ve Hizmet Sözleşmesi',
+            'de' => 'Nutzungsbedingungen / AGB',
+            'en' => 'Terms of Use / Service Agreement',
+        ]],
+    ];
+@endphp
+
+@if(session('flash_success'))
+    <div style="background:#dcfce7;border:1px solid #86efac;color:#166534;padding:10px 14px;border-radius:8px;margin:14px 0;font-size:13px;">
+        {{ session('flash_success') }}
+    </div>
+@endif
+
+<form method="post" action="{{ route('manager.gdpr.policy.save') }}" id="policyForm">
+    @csrf
+
+    @foreach($kinds as $kindKey => $kindMeta)
+        <section class="gd-section">
+            <h3>{{ $kindMeta['emoji'] }} {{ $kindMeta['label'] }}
+                <span style="font-size:11px;font-weight:600;color:var(--u-muted,#64748b);margin-left:8px;">— 3 dil</span>
+            </h3>
+
+            @if($loop->first)
+                <p style="font-size:12px;color:var(--u-muted,#64748b);margin:0 0 14px;line-height:1.6;">
+                    Aşağıdaki 3 yasal metni KVKK (TR), DSGVO/Datenschutz (DE) ve GDPR (EN) olarak doğrudan düzenle.
+                    Kayıt sonrası anında geçerli olur — config dosyasına dokunmaya gerek yok. HTML işaretleri kullanabilirsin
+                    (<code>&lt;p&gt;</code>, <code>&lt;ul&gt;</code>, <code>&lt;strong&gt;</code> vb.).
+                </p>
+            @endif
+
+            <div class="pt-tabs" style="display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--u-line,#e5e9f0);padding-bottom:0;">
+                @foreach(\App\Models\PolicyDocument::LOCALES as $i => $loc)
+                    <button type="button"
+                            class="pt-tab {{ $i === 0 ? 'active' : '' }}"
+                            data-pt-kind="{{ $kindKey }}"
+                            data-pt-tab="{{ $loc }}"
+                            style="padding:8px 16px;border:none;border-bottom:2px solid transparent;background:transparent;font-size:13px;font-weight:600;color:var(--u-muted,#64748b);cursor:pointer;">
+                        {{ \App\Models\PolicyDocument::LOCALE_LABELS[$loc] ?? $loc }}
+                    </button>
+                @endforeach
+            </div>
+
+            @foreach(\App\Models\PolicyDocument::LOCALES as $i => $loc)
+                @php $entry = $policyTexts[$kindKey][$loc] ?? ['title' => '', 'body' => '', 'updated_at' => null]; @endphp
+                <div class="pt-pane" data-pt-kind-pane="{{ $kindKey }}" data-pt-pane="{{ $loc }}" style="display:{{ $i === 0 ? 'block' : 'none' }};">
+                    <label style="display:block;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Başlık ({{ strtoupper($loc) }})</label>
+                    <input type="text"
+                           name="titles[{{ $kindKey }}][{{ $loc }}]"
+                           value="{{ $entry['title'] }}"
+                           maxlength="190"
+                           placeholder="{{ $kindMeta['placeholders'][$loc] ?? '' }}"
+                           style="width:100%;padding:9px 11px;border:1px solid var(--u-line,#cbd5e1);border-radius:8px;font-size:13px;margin-bottom:10px;">
+
+                    <label style="display:block;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">İçerik ({{ strtoupper($loc) }})</label>
+                    <textarea name="bodies[{{ $kindKey }}][{{ $loc }}]"
+                              rows="16"
+                              style="width:100%;padding:11px 13px;border:1px solid var(--u-line,#cbd5e1);border-radius:8px;font-size:13px;font-family:ui-monospace,'SF Mono',Monaco,monospace;line-height:1.6;resize:vertical;">{{ $entry['body'] }}</textarea>
+
+                    @if(!empty($entry['updated_at']))
+                        <div style="font-size:11px;color:var(--u-muted,#94a3b8);margin-top:6px;">
+                            Son güncelleme: {{ \Carbon\Carbon::parse($entry['updated_at'])->format('d.m.Y H:i') }}
+                        </div>
+                    @endif
+                </div>
+            @endforeach
+        </section>
+    @endforeach
+
+    {{-- Sticky save bar --}}
+    <div style="position:sticky;bottom:0;background:var(--u-card,#fff);padding:14px 18px;border-top:1px solid var(--u-line,#e5e9f0);border-radius:0 0 10px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 -2px 8px rgba(0,0,0,.04);margin-top:14px;">
+        <div style="font-size:12px;color:var(--u-muted,#64748b);">
+            💾 Kaydet butonu 3 yasal metnin de TR/DE/EN dillerini topluca günceller (toplam 9 alan).
+        </div>
+        <button type="submit" class="btn ok" style="padding:10px 24px;font-size:13px;font-weight:700;">
+            💾 Tümünü Kaydet
+        </button>
+    </div>
+</form>
+
+@push('scripts')
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    // Her kind için ayrı tab grubu (kind içinde locale tab'ları)
+    document.querySelectorAll('[data-pt-tab]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var kind = this.dataset.ptKind;
+            var key  = this.dataset.ptTab;
+            // Sadece bu kind'in tab'larını sıfırla
+            document.querySelectorAll('[data-pt-kind="' + kind + '"]').forEach(function(b){
+                b.classList.remove('active');
+                b.style.borderBottomColor = 'transparent';
+                b.style.color = 'var(--u-muted,#64748b)';
+            });
+            this.classList.add('active');
+            this.style.borderBottomColor = '#1e40af';
+            this.style.color = '#1e40af';
+            // Sadece bu kind'in pane'lerini göster/gizle
+            document.querySelectorAll('[data-pt-kind-pane="' + kind + '"]').forEach(function(p){
+                p.style.display = (p.dataset.ptPane === key) ? 'block' : 'none';
+            });
+        });
+    });
+    // İlk active stillerini uygula (her kind için)
+    document.querySelectorAll('[data-pt-tab].active').forEach(function(b){
+        b.style.borderBottomColor = '#1e40af';
+        b.style.color = '#1e40af';
+    });
+})();
+</script>
+@endpush
+
 @endsection

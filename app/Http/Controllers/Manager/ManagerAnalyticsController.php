@@ -641,6 +641,8 @@ class ManagerAnalyticsController extends Controller
 
     public function gdprDashboard(Request $request)
     {
+        $companyId = (int) ($request->user()?->company_id ?? 1);
+
         return view('manager.gdpr-dashboard', [
             'pendingErasures'   => ManagerRequest::where('request_type', 'gdpr_erasure')
                 ->whereIn('status', ['pending', 'in_review'])->count(),
@@ -656,6 +658,70 @@ class ManagerAnalyticsController extends Controller
                 'active'  => ConsentRecord::whereNull('revoked_at')->count(),
                 'revoked' => ConsentRecord::whereNotNull('revoked_at')->count(),
             ],
+            'policyTexts' => [
+                'privacy' => \App\Models\PolicyDocument::loadAllLocales($companyId, \App\Models\PolicyDocument::KIND_PRIVACY),
+                'cookie'  => \App\Models\PolicyDocument::loadAllLocales($companyId, \App\Models\PolicyDocument::KIND_COOKIE),
+                'terms'   => \App\Models\PolicyDocument::loadAllLocales($companyId, \App\Models\PolicyDocument::KIND_TERMS),
+            ],
         ]);
+    }
+
+    /**
+     * GDPR/KVKK/Datenschutz, Çerez, Kullanım Şartları metinlerini toplu kaydet.
+     * Form: titles[kind][locale] + bodies[kind][locale]
+     */
+    public function gdprPolicySave(Request $request)
+    {
+        $allowedKinds = [
+            \App\Models\PolicyDocument::KIND_PRIVACY,
+            \App\Models\PolicyDocument::KIND_COOKIE,
+            \App\Models\PolicyDocument::KIND_TERMS,
+        ];
+
+        $companyId = (int) ($request->user()?->company_id ?? 1);
+        $userId    = (int) ($request->user()?->id ?? 0);
+
+        $titles = (array) $request->input('titles', []);
+        $bodies = (array) $request->input('bodies', []);
+
+        // Debug log — hangi alanların geldiğini görmek için (tek seferlik tanı)
+        \Illuminate\Support\Facades\Log::info('gdpr.policy.save', [
+            'has_titles_key' => $request->has('titles'),
+            'has_bodies_key' => $request->has('bodies'),
+            'titles_keys'    => array_keys($titles),
+            'bodies_keys'    => array_keys($bodies),
+            'sample_lens'    => [
+                'privacy.tr' => mb_strlen((string) ($bodies['privacy']['tr'] ?? '')),
+                'privacy.de' => mb_strlen((string) ($bodies['privacy']['de'] ?? '')),
+                'privacy.en' => mb_strlen((string) ($bodies['privacy']['en'] ?? '')),
+            ],
+            'all_input_keys' => array_keys($request->all()),
+            'content_type'   => $request->header('Content-Type'),
+            'method'         => $request->method(),
+        ]);
+
+        foreach ($allowedKinds as $kind) {
+            foreach (\App\Models\PolicyDocument::LOCALES as $locale) {
+                $title = (string) ($titles[$kind][$locale] ?? '');
+                $body  = (string) ($bodies[$kind][$locale] ?? '');
+                if (mb_strlen($title) > 190) $title = mb_substr($title, 0, 190);
+                if (mb_strlen($body)  > 200000) $body  = mb_substr($body, 0, 200000);
+
+                \App\Models\PolicyDocument::query()->updateOrCreate(
+                    [
+                        'company_id' => $companyId,
+                        'kind'       => $kind,
+                        'locale'     => $locale,
+                    ],
+                    [
+                        'title'              => $title,
+                        'body'               => $body,
+                        'updated_by_user_id' => $userId ?: null,
+                    ]
+                );
+            }
+        }
+
+        return back()->with('flash_success', '✅ Tüm yasal metinler kaydedildi (Gizlilik · Çerez · Kullanım Şartları × 3 dil).');
     }
 }
