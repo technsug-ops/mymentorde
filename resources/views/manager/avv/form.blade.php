@@ -31,6 +31,9 @@
 @endpush
 
 @section('content')
+@php($gdprActive = 'avv')
+@include('manager._partials.gdpr-tabs')
+
 <div class="af-wrap">
     <a href="{{ route('manager.avv.index') }}" class="af-back">← AVV Listesine Dön</a>
 

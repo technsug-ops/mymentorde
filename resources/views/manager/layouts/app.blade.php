@@ -489,16 +489,8 @@
                     <span class="nav-icon">🔍</span> Denetim Kayıtları
                 </a>
                 <a href="/manager/gdpr-dashboard"
-                   class="nav-link {{ request()->is('manager/gdpr-dashboard*') ? 'active' : '' }}">
-                    <span class="nav-icon">🔒</span> GDPR Paneli
-                </a>
-                <a href="/manager/ropa"
-                   class="nav-link {{ request()->is('manager/ropa*') ? 'active' : '' }}">
-                    <span class="nav-icon">📋</span> ROPA (Art. 30)
-                </a>
-                <a href="/manager/avv"
-                   class="nav-link {{ request()->is('manager/avv*') ? 'active' : '' }}">
-                    <span class="nav-icon">📑</span> AVV Registry (Art. 28)
+                   class="nav-link {{ (request()->is('manager/gdpr-dashboard*') || request()->is('manager/ropa*') || request()->is('manager/avv*')) ? 'active' : '' }}">
+                    <span class="nav-icon">🔒</span> GDPR Uyumluluk
                 </a>
                 <a href="/manager/webhooks"
                    class="nav-link {{ request()->is('manager/webhooks*') ? 'active' : '' }}">

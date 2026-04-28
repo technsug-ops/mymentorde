@@ -35,6 +35,9 @@
 @endpush
 
 @section('content')
+@php($gdprActive = 'ropa')
+@include('manager._partials.gdpr-tabs')
+
 <div class="rf-wrap">
     <a href="{{ route('manager.ropa.index') }}" class="rf-back">← ROPA Listesine Dön</a>
 

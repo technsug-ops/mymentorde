@@ -63,6 +63,9 @@ table.ropa-table { width:100%; border-collapse:collapse; font-size:13px; min-wid
 @endpush
 
 @section('content')
+@php($gdprActive = 'ropa')
+@include('manager._partials.gdpr-tabs')
+
 <div class="ropa-wrap">
     <div class="ropa-head">
         <h2>📋 ROPA — Veri İşleme Sicili</h2>

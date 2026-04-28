@@ -49,6 +49,9 @@ table.avv-table { width:100%; border-collapse:collapse; font-size:13px; min-widt
 @endpush
 
 @section('content')
+@php($gdprActive = 'avv')
+@include('manager._partials.gdpr-tabs')
+
 <div class="avv-wrap">
     <div class="avv-head">
         <h2>📁 AVV Registry — Veri İşleme Sözleşmeleri</h2>

@@ -61,7 +61,10 @@
 @php
 $totalConsent = max(1, $consentStats['total']);
 $activeRate   = round($consentStats['active'] / $totalConsent * 100, 1);
+$gdprActive = 'policies';
 @endphp
+
+@include('manager._partials.gdpr-tabs')
 
 {{-- Hero --}}
 <div class="gd-hero">
