@@ -585,38 +585,73 @@ class PortalController extends Controller
     public function bookingRedirect(Request $request)
     {
         $guest = $this->resolveGuest($request);
+        $companyId  = (int) ($guest?->company_id ?? (app()->bound('current_company_id') ? app('current_company_id') : 1));
 
-        $assignedEmail = trim((string) ($guest?->assigned_senior_email ?? ''));
+        // Aynı çözümleyici Messages sayfasıyla — assigned_senior > operations_admin fallback
+        // Böylece "Mesajlar"da görünen kişi "Randevu Al"da da aynı kişi olur (senkron)
+        $advisor = $this->resolveAdvisorForGuest($guest, $companyId);
+
         $slug = null;
-        $seniorName = null;
+        $advisorName = null;
         $emptyReason = null;
         $autoProvisioned = false;
 
-        if ($assignedEmail === '') {
-            // Atanmış danışman yok — empty state'de mesaj/destek yönlendirmesi
+        if (!$advisor) {
             $emptyReason = 'no_senior';
         } else {
-            $senior = \App\Models\User::query()
-                ->withoutGlobalScopes()
-                ->where('email', $assignedEmail)
-                ->first(['id', 'name']);
-            if (!$senior) {
-                $emptyReason = 'no_senior';
-            } else {
-                $seniorName = $senior->name ?: $assignedEmail;
-                $companyId  = (int) ($guest?->company_id ?? (app()->bound('current_company_id') ? app('current_company_id') : 1));
-                [$slug, $autoProvisioned] = $this->ensureSeniorBookingReady($senior, $companyId);
-            }
+            $advisorName = $advisor->name ?: $advisor->email;
+            [$slug, $autoProvisioned] = $this->ensureSeniorBookingReady($advisor, $companyId);
         }
 
         $data = $this->viewData->build($request, $guest);
         $data['bookingSlug']     = $slug;
-        $data['seniorName']      = $seniorName;
+        $data['seniorName']      = $advisorName;
         $data['bookingEmbedUrl'] = $slug ? route('booking.public.show', ['slug' => $slug]) : null;
         $data['emptyReason']     = $emptyReason;
         $data['autoProvisioned'] = $autoProvisioned;
 
         return view('guest.booking', $data);
+    }
+
+    /**
+     * Aday öğrencinin "danışmanı"nı çözer — Mesajlar sayfasıyla AYNI mantık.
+     *
+     * Sıra:
+     *  1) assigned_senior_email → role IN (senior, mentor), active
+     *  2) Fallback: ilk operations_admin / operations_staff (messages thread bunu kullanıyor)
+     *
+     * Niçin: ConversationController::resolveAdvisorUserIdForGuest aynı sırayı
+     * kullanıyor; iki sayfa arasında tutarsızlık olmasın diye burada da
+     * paralelleştirildi.
+     */
+    private function resolveAdvisorForGuest(?\App\Models\GuestApplication $guest, int $companyId): ?\App\Models\User
+    {
+        if (!$guest) {
+            return null;
+        }
+
+        $assignedEmail = strtolower(trim((string) ($guest->assigned_senior_email ?? '')));
+        if ($assignedEmail !== '') {
+            $senior = \App\Models\User::query()
+                ->withoutGlobalScopes()
+                ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+                ->where('email', $assignedEmail)
+                ->whereIn('role', [\App\Models\User::ROLE_SENIOR, \App\Models\User::ROLE_MENTOR])
+                ->where('is_active', true)
+                ->first(['id', 'name', 'email']);
+            if ($senior) {
+                return $senior;
+            }
+        }
+
+        // Fallback — messages thread'inin de düştüğü ops admin (örn. Cem Arslan)
+        return \App\Models\User::query()
+            ->withoutGlobalScopes()
+            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->whereIn('role', [\App\Models\User::ROLE_OPERATIONS_ADMIN, \App\Models\User::ROLE_OPERATIONS_STAFF])
+            ->where('is_active', true)
+            ->orderBy('id')
+            ->first(['id', 'name', 'email']);
     }
 
     /**
