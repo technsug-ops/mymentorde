@@ -7,52 +7,69 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
 
 /**
- * Default policy templates — DSGVO/KVKK Datenschutzerklärung in 3 dil.
+ * Default policy templates — DSGVO/KVKK uyumlu metinler 3 dilde.
  *
- * Bir SaaS müşterisi açıldığında bu seeder çalıştırılarak privacy/de, en, tr
- * placeholder şablonları policy_documents tablosuna yazılır. Müşteri sonra
- * GDPR Uyumluluk → GDPR Politikalar sekmesinden kendi şirket bilgilerini
- * doldurur.
+ * Kapsam:
+ *  - privacy  → Datenschutzerklärung / Privacy Policy / KVKK Aydınlatma Metni
+ *  - cookie   → Cookie-Richtlinie / Cookie Policy / Çerez Politikası
+ *
+ * Yeni kind eklemek için $kinds dizisine ekle + database/seed-content/policy/
+ * altına {kind}_{locale}.txt dosyalarını koy. Seeder otomatik bulur.
  *
  * Idempotent — updateOrCreate ile aynı kayıt 2x yazılmaz.
  */
 class DefaultPolicyTemplatesSeeder extends Seeder
 {
+    /**
+     * @var array<string,array<string,string>> kind => locale => human title
+     */
+    private const TITLES = [
+        'privacy' => [
+            'de' => 'Datenschutzerklärung',
+            'en' => 'Privacy Policy',
+            'tr' => 'Aydınlatma Metni ve Açık Rıza Beyanı (KVKK)',
+        ],
+        'cookie' => [
+            'de' => 'Cookie-Richtlinie',
+            'en' => 'Cookie Policy',
+            'tr' => 'Çerez Politikası',
+        ],
+    ];
+
     public function run(): void
     {
         // Hedef company — env COMPANY_ID ile override edilebilir, default = 1 (mentorde)
         $companyId = (int) (env('COMPANY_ID') ?: 1);
 
-        $titles = [
-            'de' => 'Datenschutzerklärung',
-            'en' => 'Privacy Policy',
-            'tr' => 'Aydınlatma Metni ve Açık Rıza Beyanı (KVKK)',
-        ];
+        $total = 0;
+        foreach (self::TITLES as $kind => $titles) {
+            foreach (['de', 'en', 'tr'] as $locale) {
+                $path = database_path("seed-content/policy/{$kind}_{$locale}.txt");
+                if (!File::exists($path)) {
+                    $this->command?->warn("⚠ Atlandı (dosya yok): {$kind}_{$locale}.txt");
+                    continue;
+                }
 
-        foreach (['de', 'en', 'tr'] as $locale) {
-            $path = database_path("seed-content/policy/privacy_{$locale}.txt");
-            if (!File::exists($path)) {
-                $this->command?->warn("⚠ Eksik: {$path}");
-                continue;
+                $raw  = File::get($path);
+                $body = $this->textToHtml($raw);
+
+                PolicyDocument::query()->updateOrCreate(
+                    [
+                        'company_id' => $companyId,
+                        'kind'       => $kind,
+                        'locale'     => $locale,
+                    ],
+                    [
+                        'title' => $titles[$locale],
+                        'body'  => $body,
+                    ]
+                );
+
+                $this->command?->info("✅ {$kind} [{$locale}] seeded for company {$companyId} (" . number_format(strlen($body)) . " chars)");
+                $total++;
             }
-
-            $raw  = File::get($path);
-            $body = $this->textToHtml($raw);
-
-            PolicyDocument::query()->updateOrCreate(
-                [
-                    'company_id' => $companyId,
-                    'kind'       => PolicyDocument::KIND_PRIVACY,
-                    'locale'     => $locale,
-                ],
-                [
-                    'title' => $titles[$locale],
-                    'body'  => $body,
-                ]
-            );
-
-            $this->command?->info("✅ Privacy [{$locale}] seeded for company {$companyId} (" . number_format(strlen($body)) . " chars)");
         }
+        $this->command?->info("Toplam {$total} doküman yazıldı.");
     }
 
     /**
@@ -112,7 +129,7 @@ class DefaultPolicyTemplatesSeeder extends Seeder
                 continue;
             }
 
-            // h2: "X. ..." (top section)  — sadece ilk karakteri rakam ve "."  olan
+            // h2: "X. ..." (top section)
             if (preg_match('/^(\d+)\.\s+(.+)$/u', $trimmed, $m)) {
                 $flushPara();
                 $out[] = '<h2>' . htmlspecialchars("{$m[1]}. {$m[2]}", ENT_QUOTES | ENT_HTML5, 'UTF-8') . '</h2>';

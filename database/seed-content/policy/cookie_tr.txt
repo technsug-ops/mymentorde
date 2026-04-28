@@ -1,0 +1,147 @@
+Çerez Politikası — mentorde.com
+
+[TASLAK: Bu Çerez Politikası mentorde.com'da gerçekten yerleştirilen çerezleri yansıtır. Yayınlanmadan önce bir IT/veri koruma hukuku uzmanı tarafından incelenmelidir. Almanya denetim makamları için bağlayıcı sürüm Almanca Cookie-Richtlinie'dir; bu Türkçe sürüm Türkçe konuşan ziyaretçiler için bilgilendirme amaçlıdır. Stand: Nisan 2026.]
+
+1. Çerezler Nedir?
+
+Çerezler, bir web sitesini ziyaret ettiğinizde cihazınıza (bilgisayar, tablet, akıllı telefon) kaydedilen küçük metin dosyalarıdır. Web sitesinin belirli bilgileri tanımasını ve hatırlamasını sağlarlar — örneğin dil tercihiniz, oturum açma bilgileriniz veya görünüm tercihleriniz.
+
+Klasik çerezlere ek olarak, Local Storage ve Session Storage gibi benzer teknolojiler de kullanmaktayız. Bu politika kapsamında tüm bu teknolojiler birlikte "çerezler" olarak adlandırılmaktadır.
+
+2. Hukuki Dayanak
+
+Çerez kullanımımız aşağıdaki düzenlemelere dayanmaktadır:
+- Almanya Telekomünikasyon-Dijital Hizmetler-Veri Koruma Kanunu (TDDDG) § 25 Abs. 1: Zorunlu olmayan çerezler için açık rıza
+- TDDDG § 25 Abs. 2 Nr. 2: Teknik olarak zorunlu çerezler için istisna
+- AB Genel Veri Koruma Yönetmeliği (DSGVO/GDPR) Madde 6(1)(a): Veri işleme için açık rıza
+- DSGVO Madde 6(1)(f): Teknik olarak gerekli çerezler için meşru menfaat
+
+Zorunlu olmayan tüm çerezler için (özellikle analiz çerezleri), kullanılmaya başlanmadan önce çerez onay banner'ımız aracılığıyla açık rızanızı alıyoruz.
+
+3. Çerez Kategorileri
+
+3.1 Teknik Olarak Zorunlu Çerezler (her zaman aktif)
+
+Bu çerezler web sitesinin çalışması için kesinlikle gereklidir ve devre dışı bırakılamazlar. Yalnızca gizlilik tercihlerini belirleme, oturum açma veya form doldurma gibi sizin gerçekleştirdiğiniz hizmet talebi niteliğindeki eylemlere yanıt olarak ayarlanırlar.
+
+Hukuki dayanak: TDDDG § 25 Abs. 2 Nr. 2 ile bağlantılı olarak DSGVO Madde 6(1)(f)
+
+3.2 Fonksiyonel Çerezler (rıza gerekli)
+
+Bu çerezler genişletilmiş işlevsellik ve kişiselleştirme sağlar; örneğin görünüm tercihlerinin (koyu mod, tasarım varyantı) saklanması. Local Storage üzerinden uygulanırlar ve yalnızca cihazınızda kalırlar.
+
+Hukuki dayanak: TDDDG § 25 Abs. 1 ile bağlantılı olarak DSGVO Madde 6(1)(a)
+
+3.3 Analiz Çerezleri (rıza gerekli)
+
+Bu çerezler ziyaretleri ve trafik kaynaklarını saymamızı sağlar; böylece web sitemizin performansını ölçebilir ve geliştirebiliriz. Hangi sayfaların en popüler olduğunu, ziyaretçilerin sitede nasıl gezindiğini anlamamıza yardımcı olurlar.
+
+Hukuki dayanak: TDDDG § 25 Abs. 1 ile bağlantılı olarak DSGVO Madde 6(1)(a)
+
+3.4 Pazarlama ve Takip Çerezleri
+
+Şu an itibarıyla pazarlama, reklam veya üçüncü taraf takip çerezi KULLANMIYORUZ. Özellikle Google Analytics, Google Ads, Meta Pixel, LinkedIn Insight veya TikTok Pixel çerezleri kullanılmamaktadır. Gelecekte böyle çerezler eklenirse, bu Çerez Politikasını güncelleyecek ve ayrıca açık rızanızı alacağız.
+
+4. Detaylı Çerez Listesi
+
+4.1 Teknik Olarak Zorunlu Çerezler
+
+- mentorde-session — Sağlayıcı: mentorde.com — Amaç: Oturum yönetimi (giriş, sepet, form durumu) — Saklama Süresi: Oturum süresi — Tip: HTTP çerezi
+- XSRF-TOKEN — Sağlayıcı: mentorde.com — Amaç: Siteler arası istek sahteciliği (CSRF) koruması — Saklama Süresi: Oturum süresi — Tip: HTTP çerezi
+- cookie_consent — Sağlayıcı: mentorde.com — Amaç: Çerez onayınızı saklar (kabul / red) — Saklama Süresi: 12 ay — Tip: Local Storage
+- analytics_consent — Sağlayıcı: mentorde.com — Amaç: Analiz çerezleri için ayrıca onayınızı saklar — Saklama Süresi: 12 ay — Tip: HTTP çerezi
+
+4.2 Fonksiyonel Saklama (Local Storage, rıza gerekli)
+
+- mentorde_dark — Amaç: Koyu mod tercihi (aydınlık/karanlık) — Saklama Süresi: silinene kadar — Tip: Local Storage
+- mentorde_design — Amaç: Tasarım varyantı (standart / minimalist) — Saklama Süresi: silinene kadar — Tip: Local Storage
+- mentorde-theme — Amaç: Görünüm tercihi yardımcı anahtarı — Saklama Süresi: silinene kadar — Tip: Local Storage
+
+4.3 Analiz Çerezleri (rıza gerekli)
+
+- ph_<token>_posthog — Sağlayıcı: PostHog Inc. (EU Cloud Frankfurt) — Amaç: Ürün iyileştirme için anonim kullanıcı analitiği — Saklama Süresi: 14 ay — Tip: Local Storage / HTTP çerezi
+
+PostHog, kişisel referans olmadan anonim tanımlayıcılar yerleştirir. IP adresi saklanmadan önce anonimleştirilir (son oktet kaldırılır). İşleme AB içinde (Frankfurt am Main) gerçekleşir.
+
+5. Üçüncü Taraf Sağlayıcılar ve Veri Aktarımı
+
+5.1 PostHog (EU Cloud)
+
+Sağlayıcı: PostHog Inc., 2261 Market Street #4008, San Francisco, CA 94114, ABD. Frankfurt am Main sunucularıyla EU Cloud bölgesini kullanmaktayız. Normal işletim sırasında ABD'ye doğrudan veri aktarımı gerçekleşmez. Destek veya bakım talepleri kapsamında ABD ana şirketinin erişimi olabilir. PostHog ile DSGVO Madde 46(2)(c) uyarınca AB Standart Sözleşme Maddeleri (SCC) imzalanmıştır.
+
+5.2 Türkiye'ye Veri Aktarımı
+
+Çerez işlemenin dışında, mentoring ve danışmanlık hizmetlerimiz çerçevesinde Türkiye'ye veri aktarımı gerçekleşir. Bu durum doğrudan Çerez Politikasını ilgilendirmez; ayrıntılar için Aydınlatma Metnimize bakınız: mentorde.com/kvkk.
+
+6. Çerez Ayarlarınızı Yönetme
+
+6.1 Çerez Banner'ı
+
+Web sitemizi ilk ziyaret ettiğinizde, onay verme veya reddetme imkanı sunan bir çerez banner'ı görüntülenir. Şu seçenekleriniz vardır:
+- Tümünü kabul et: Tüm çerezlerin kullanımına onay verirsiniz (analiz dahil)
+- Tümünü reddet: Yalnızca teknik olarak zorunlu çerezler kullanılır
+- Ayarları özelleştir: Belirli kategorileri ayrı ayrı seçersiniz
+
+6.2 Onayınızı İstediğiniz Zaman Geri Alabilirsiniz
+
+Çerez onayınızı istediğiniz zaman, gelecekte etkili olacak şekilde geri alabilir veya değiştirebilirsiniz. Bunun için web sitemizin alt kısmındaki (footer) "Çerez Ayarları" bağlantısını tıklayın.
+
+6.3 Çerezleri Tarayıcınız Üzerinden Yönetme
+
+Çerezleri doğrudan tarayıcınızdan da devre dışı bırakabilir veya silebilirsiniz:
+- Google Chrome: support.google.com/chrome/answer/95647
+- Mozilla Firefox: support.mozilla.org/tr/kb/cerezler
+- Microsoft Edge: support.microsoft.com/tr-tr/microsoft-edge
+- Apple Safari: support.apple.com/tr-tr/guide/safari
+
+Uyarı: Çerezleri tamamen devre dışı bırakırsanız, web sitemizin bazı özellikleri (oturum açma, tercihlerin saklanması) düzgün çalışmayabilir.
+
+7. Çerezlerin Saklama Süresi
+
+Çerezlerin saklama süresi, ilgili amaçlarına bağlıdır. Genel olarak şu ayrımı yaparız:
+- Oturum çerezleri: Tarayıcıyı kapattığınızda otomatik olarak silinir
+- Kalıcı çerezler: Tarayıcı kapatıldıktan sonra da kalır, bireysel ömürlere sahiptir (bkz. Bölüm 4'teki tablo)
+
+Kullandığımız çerezlerin maksimum saklama süresi 14 aydır (PostHog). Çerez onay banner'ının kendisine ait çerezler, onayınızı belgeleyebilmemiz için 12 ay saklanır (DSGVO Madde 7(1) ispat yükümlülüğü).
+
+8. Haklarınız
+
+Çerezler aracılığıyla verilerinizin işlenmesiyle bağlantılı olarak DSGVO Madde 15-22 kapsamındaki tüm haklara sahipsiniz. Bunlar Aydınlatma Metnimizde detaylı olarak açıklanmıştır: mentorde.com/kvkk.
+
+Özellikle aşağıdaki haklara sahipsiniz:
+- Hakkınızda saklanan veriler hakkında bilgi alma hakkı (Madde 15 DSGVO)
+- Verilerinizin düzeltilmesi veya silinmesini isteme hakkı (Madde 16, 17 DSGVO)
+- Veri işlemenin kısıtlanmasını isteme hakkı (Madde 18 DSGVO)
+- Veri işlemeye itiraz etme hakkı (Madde 21 DSGVO)
+- Veri taşınabilirliği hakkı (Madde 20 DSGVO)
+- Onayınızı geri alma hakkı (Madde 7(3) DSGVO)
+- Yetkili denetim makamına şikayette bulunma hakkı (Madde 77 DSGVO)
+
+mentorde.com için yetkili denetim makamı:
+
+Hessen Veri Koruma ve Bilgi Edinme Komiseri
+(Der Hessische Beauftragte für Datenschutz und Informationsfreiheit)
+Postfach 3163
+65021 Wiesbaden, Almanya
+Telefon: +49 611 1408-0
+E-posta: poststelle@datenschutz.hessen.de
+Web: www.datenschutz.hessen.de
+
+Türkiye'deki ziyaretçiler için yetkili otorite Kişisel Verileri Koruma Kurumu'dur (KVKK).
+
+9. Bu Çerez Politikasındaki Değişiklikler
+
+Bu Çerez Politikası'nı, güncel yasal gerekliliklere uyum sağlamak veya hizmetlerimizdeki değişiklikleri yansıtmak amacıyla (örn. yeni hizmetlerin sunulması durumunda) değiştirme hakkını saklı tutarız. Bir sonraki ziyaretinizde güncel Çerez Politikası geçerli olacaktır.
+
+10. İletişim
+
+Çerez Politikamız veya verilerinizin işlenmesi hakkında sorularınız için bizimle iletişime geçebilirsiniz:
+
+Horizon STS GmbH (mentorde.com)
+Herwigstraße 24
+35683 Dillenburg
+Almanya
+
+Yönetici (Geschäftsführer): Halil Aktas
+E-posta: info@mentorde.com
+Telefon: +49 157 84218282

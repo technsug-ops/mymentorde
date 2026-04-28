@@ -1,0 +1,145 @@
+Cookie Policy — mentorde.com
+
+[DRAFT: This Cookie Policy reflects the cookies actually set on mentorde.com. It should be reviewed by an IT/data protection lawyer before publication. The legally authoritative version for German supervisory authorities is the German Cookie-Richtlinie. Status: April 2026.]
+
+1. What Are Cookies?
+
+Cookies are small text files that are stored on your device (computer, tablet, smartphone) when you visit a website. They allow the website to recognize and remember certain information – for example, your language preference, login data, or display preferences.
+
+In addition to traditional cookies, we also use similar technologies such as Local Storage and Session Storage. In the following, all of these technologies are uniformly referred to as "cookies".
+
+2. Legal Basis
+
+The use of cookies is based on the following provisions:
+- Section 25(1) TDDDG (German Telecommunications Digital Services Data Protection Act): Consent for non-essential cookies
+- Section 25(2)(2) TDDDG: Exception for strictly necessary technical cookies
+- Art. 6(1)(a) GDPR: Consent as legal basis for data processing
+- Art. 6(1)(f) GDPR: Legitimate interest for technically necessary cookies
+
+For all non-essential cookies (in particular analytics cookies), we obtain your explicit consent via our cookie consent banner before they are set.
+
+3. Cookie Categories
+
+3.1 Strictly Necessary Cookies (always active)
+
+These cookies are essential for the operation of the website and cannot be disabled. They are only set in response to actions you take, such as setting privacy preferences, logging in, or filling out forms.
+
+Legal basis: Section 25(2)(2) TDDDG in conjunction with Art. 6(1)(f) GDPR
+
+3.2 Functional Cookies (with consent)
+
+These cookies enable enhanced functionality and personalization, such as storing display preferences (dark mode, design variant). They are implemented via Local Storage and remain only on your device.
+
+Legal basis: Section 25(1) TDDDG in conjunction with Art. 6(1)(a) GDPR
+
+3.3 Analytics Cookies (with consent)
+
+These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our website. They help us understand which pages are most popular and how visitors move around the site.
+
+Legal basis: Section 25(1) TDDDG in conjunction with Art. 6(1)(a) GDPR
+
+3.4 Marketing and Tracking Cookies
+
+We currently DO NOT use any marketing, advertising, or third-party tracking cookies. In particular, we do not use Google Analytics, Google Ads, Meta Pixel, LinkedIn Insight, or TikTok Pixel cookies. Should we deploy such cookies in the future, we will update this Cookie Policy and explicitly obtain your consent.
+
+4. Detailed Cookie List
+
+4.1 Strictly Necessary Cookies
+
+- mentorde-session — Provider: mentorde.com — Purpose: Session management (login, cart, form state) — Duration: Session — Type: HTTP cookie
+- XSRF-TOKEN — Provider: mentorde.com — Purpose: Cross-site request forgery (CSRF) protection — Duration: Session — Type: HTTP cookie
+- cookie_consent — Provider: mentorde.com — Purpose: Stores your cookie consent (accept / reject) — Duration: 12 months — Type: Local Storage
+- analytics_consent — Provider: mentorde.com — Purpose: Stores your consent specifically for analytics cookies — Duration: 12 months — Type: HTTP cookie
+
+4.2 Functional Storage (Local Storage, with consent)
+
+- mentorde_dark — Purpose: Dark mode preference (light/dark) — Duration: until deleted — Type: Local Storage
+- mentorde_design — Purpose: Design variant (default / minimalist) — Duration: until deleted — Type: Local Storage
+- mentorde-theme — Purpose: Display preference helper key — Duration: until deleted — Type: Local Storage
+
+4.3 Analytics Cookies (with consent)
+
+- ph_<token>_posthog — Provider: PostHog Inc. (EU Cloud Frankfurt) — Purpose: Anonymous user analytics for product improvement — Duration: 14 months — Type: Local Storage / HTTP cookie
+
+PostHog sets anonymous identifiers without personal reference. The IP address is anonymized before storage (last octet removed). Processing takes place in the EU (Frankfurt am Main).
+
+5. Third-Party Providers and Data Transfers
+
+5.1 PostHog (EU Cloud)
+
+Provider: PostHog Inc., 2261 Market Street #4008, San Francisco, CA 94114, USA. We use the EU Cloud region with servers in Frankfurt am Main. No direct data transfer to the USA takes place under normal operations. In the context of support or maintenance requests, access by the US parent company may occur. EU Standard Contractual Clauses (SCCs) under Art. 46(2)(c) GDPR have been concluded with PostHog.
+
+5.2 Data Transfers to Türkiye
+
+Outside of cookie processing, data transfers to Türkiye take place in the context of our mentoring and consulting services. This does not directly concern the Cookie Policy; details can be found in our Privacy Policy at mentorde.com/privacy.
+
+6. Managing Your Cookie Settings
+
+6.1 Cookie Banner
+
+On your first visit to our website, a cookie banner will appear, allowing you to grant or refuse your consent. You have the following options:
+- Accept all: You consent to the use of all cookies (including analytics)
+- Reject all: Only strictly necessary cookies will be set
+- Adjust settings: You select individual categories
+
+6.2 Withdrawal of Consent at Any Time
+
+You can withdraw or adjust your cookie consent at any time with effect for the future. To do so, click on the "Cookie Settings" link in the footer of our website.
+
+6.3 Managing Cookies via Your Browser
+
+You can also disable or delete cookies directly in your browser:
+- Google Chrome: support.google.com/chrome/answer/95647
+- Mozilla Firefox: support.mozilla.org/en-US/kb/cookies-information-websites-store-on-your-computer
+- Microsoft Edge: support.microsoft.com/en-us/microsoft-edge
+- Apple Safari: support.apple.com/guide/safari
+
+Note: If you completely disable cookies, some functions of our website (e.g., login, preference storage) may no longer work properly.
+
+7. Cookie Storage Duration
+
+The storage duration of cookies depends on their respective purpose. We generally distinguish between:
+- Session cookies: Automatically deleted when you close your browser
+- Persistent cookies: Remain after the browser is closed, with individual lifespans (see table in Section 4)
+
+The maximum storage duration of the cookies we use is 14 months (PostHog). Cookies for the cookie consent itself are stored for 12 months so that we can document your consent (proof obligation under Art. 7(1) GDPR).
+
+8. Your Rights
+
+In connection with the processing of your data through cookies, you have all rights under Art. 15 to 22 GDPR. These are described in detail in our Privacy Policy at mentorde.com/privacy.
+
+In particular, you have the right to:
+- Obtain information about the data stored about you (Art. 15 GDPR)
+- Rectification or erasure of your data (Art. 16, 17 GDPR)
+- Restriction of processing (Art. 18 GDPR)
+- Object to processing (Art. 21 GDPR)
+- Data portability (Art. 20 GDPR)
+- Withdraw your consent (Art. 7(3) GDPR)
+- Lodge a complaint with the competent supervisory authority (Art. 77 GDPR)
+
+Competent supervisory authority:
+
+The Hessian Commissioner for Data Protection and Freedom of Information
+(Der Hessische Beauftragte für Datenschutz und Informationsfreiheit)
+Postfach 3163
+65021 Wiesbaden, Germany
+Phone: +49 611 1408-0
+Email: poststelle@datenschutz.hessen.de
+Website: www.datenschutz.hessen.de
+
+9. Changes to this Cookie Policy
+
+We reserve the right to amend this Cookie Policy to ensure that it always meets current legal requirements or to reflect changes to our services (e.g., when introducing new services). The new Cookie Policy will then apply to your next visit.
+
+10. Contact
+
+If you have any questions about our Cookie Policy or the processing of your data, please feel free to contact us:
+
+Horizon STS GmbH (mentorde.com)
+Herwigstraße 24
+35683 Dillenburg
+Germany
+
+Managing Director: Halil Aktas
+Email: info@mentorde.com
+Phone: +49 157 84218282

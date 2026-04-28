@@ -1,0 +1,144 @@
+Cookie-Richtlinie — mentorde.com
+
+[ENTWURF: Diese Cookie-Richtlinie wurde auf Basis der tatsächlich auf mentorde.com gesetzten Cookies erstellt. Vor Veröffentlichung sollte sie durch einen IT-Rechtsanwalt oder Datenschutzbeauftragten überprüft werden. Stand: April 2026.]
+
+1. Was sind Cookies?
+
+Cookies sind kleine Textdateien, die beim Besuch einer Website auf Ihrem Endgerät (Computer, Tablet, Smartphone) gespeichert werden. Sie ermöglichen es der Website, bestimmte Informationen zu erkennen und zu speichern – zum Beispiel Ihre Spracheinstellung, Login-Daten oder Designpräferenzen.
+
+Neben klassischen Cookies setzen wir auch ähnliche Technologien ein, wie z. B. Local Storage und Session Storage. Im Folgenden werden alle diese Technologien einheitlich als „Cookies" bezeichnet.
+
+2. Rechtliche Grundlagen
+
+Die Verwendung von Cookies erfolgt auf Grundlage folgender Vorschriften:
+- § 25 Abs. 1 TDDDG (Telekommunikation-Digitale-Dienste-Datenschutz-Gesetz): Einwilligung für nicht zwingend erforderliche Cookies
+- § 25 Abs. 2 Nr. 2 TDDDG: Ausnahme für technisch zwingend erforderliche Cookies
+- Art. 6 Abs. 1 lit. a DSGVO: Einwilligung als Rechtsgrundlage
+- Art. 6 Abs. 1 lit. f DSGVO: Berechtigtes Interesse für technisch erforderliche Cookies
+
+Für alle nicht zwingend erforderlichen Cookies (insbesondere Analyse-Cookies) holen wir Ihre ausdrückliche Einwilligung über unser Cookie-Consent-Banner ein, bevor diese gesetzt werden.
+
+3. Cookie-Kategorien
+
+3.1 Technisch notwendige Cookies (immer aktiv)
+
+Diese Cookies sind für den Betrieb der Website unbedingt erforderlich und können nicht deaktiviert werden. Sie werden nur als Reaktion auf von Ihnen getätigte Aktionen gesetzt – etwa das Festlegen von Datenschutzpräferenzen, das Anmelden oder das Ausfüllen von Formularen.
+
+Rechtsgrundlage: § 25 Abs. 2 Nr. 2 TDDDG i. V. m. Art. 6 Abs. 1 lit. f DSGVO
+
+3.2 Funktionale Cookies (mit Einwilligung)
+
+Diese Cookies ermöglichen erweiterte Funktionalität und Personalisierung, z. B. Speicherung von Designpräferenzen (Dark Mode, Schriftart-Stil). Sie werden über Local Storage realisiert und bleiben nur auf Ihrem Gerät gespeichert.
+
+Rechtsgrundlage: § 25 Abs. 1 TDDDG i. V. m. Art. 6 Abs. 1 lit. a DSGVO
+
+3.3 Analyse-Cookies (mit Einwilligung)
+
+Diese Cookies ermöglichen es uns, Besuche und Verkehrsquellen zu zählen, damit wir die Leistung unserer Website messen und verbessern können. Sie helfen uns zu verstehen, welche Seiten am beliebtesten sind und wie sich Besucher auf der Website bewegen.
+
+Rechtsgrundlage: § 25 Abs. 1 TDDDG i. V. m. Art. 6 Abs. 1 lit. a DSGVO
+
+3.4 Marketing- und Tracking-Cookies
+
+Wir setzen aktuell KEINE Marketing-, Werbe- oder Drittanbieter-Tracking-Cookies ein. Insbesondere verwenden wir keine Google-Analytics-, Google-Ads-, Meta-Pixel-, LinkedIn-Insight- oder TikTok-Pixel-Cookies. Sollten wir solche Cookies in Zukunft einsetzen, werden wir diese Cookie-Richtlinie aktualisieren und ausdrücklich Ihre Einwilligung einholen.
+
+4. Detaillierte Cookie-Liste
+
+4.1 Technisch notwendige Cookies
+
+- mentorde-session — Anbieter: mentorde.com — Zweck: Sitzungsverwaltung (Login, Warenkorb, Formularstatus) — Speicherdauer: Sitzung — Typ: HTTP-Cookie
+- XSRF-TOKEN — Anbieter: mentorde.com — Zweck: Schutz vor Cross-Site-Request-Forgery (CSRF) — Speicherdauer: Sitzung — Typ: HTTP-Cookie
+- cookie_consent — Anbieter: mentorde.com — Zweck: Speichert Ihre Cookie-Einwilligung (Annahme / Ablehnung) — Speicherdauer: 12 Monate — Typ: Local Storage
+- analytics_consent — Anbieter: mentorde.com — Zweck: Speichert Ihre Einwilligung speziell für Analyse-Cookies — Speicherdauer: 12 Monate — Typ: HTTP-Cookie
+
+4.2 Funktionale Speicherungen (Local Storage, mit Einwilligung)
+
+- mentorde_dark — Zweck: Dark-Mode-Präferenz (Tag/Nacht) — Speicherdauer: bis zur Löschung — Typ: Local Storage
+- mentorde_design — Zweck: Design-Variante (Standard / Minimalist) — Speicherdauer: bis zur Löschung — Typ: Local Storage
+- mentorde-theme — Zweck: Designpräferenz Hilfsschlüssel — Speicherdauer: bis zur Löschung — Typ: Local Storage
+
+4.3 Analyse-Cookies (mit Einwilligung)
+
+- ph_<token>_posthog — Anbieter: PostHog Inc. (EU-Cloud Frankfurt) — Zweck: Anonyme Nutzeranalyse für Produktverbesserung — Speicherdauer: 14 Monate — Typ: Local Storage / HTTP-Cookie
+
+PostHog setzt anonyme Identifier ohne Personenbezug. Die IP-Adresse wird vor der Speicherung anonymisiert (letztes Oktett entfernt). Verarbeitung erfolgt in der EU (Frankfurt am Main).
+
+5. Drittanbieter und Datenübermittlung
+
+5.1 PostHog (EU-Cloud)
+
+Anbieter: PostHog Inc., 2261 Market Street #4008, San Francisco, CA 94114, USA. Wir nutzen die EU-Cloud-Region mit Servern in Frankfurt am Main. Eine direkte Datenübermittlung in die USA findet im Normalbetrieb nicht statt. Im Rahmen von Support- oder Wartungsanfragen kann es zu einem Zugriff durch das US-amerikanische Mutterunternehmen kommen. Mit PostHog wurden EU-Standardvertragsklauseln (SCC) gemäß Art. 46 Abs. 2 lit. c DSGVO abgeschlossen.
+
+5.2 Datenübermittlung in die Türkei
+
+Außerhalb der Cookie-Verarbeitung findet im Rahmen unserer Mentoring- und Beratungsleistungen eine Datenübermittlung in die Türkei statt. Diese betrifft die Cookie-Richtlinie nicht direkt; Details finden Sie in unserer Datenschutzerklärung unter mentorde.com/datenschutz.
+
+6. Verwaltung Ihrer Cookie-Einstellungen
+
+6.1 Cookie-Banner
+
+Beim ersten Besuch unserer Website erscheint ein Cookie-Banner, über das Sie Ihre Einwilligung erteilen oder verweigern können. Sie haben folgende Möglichkeiten:
+- Alle akzeptieren: Sie stimmen der Verwendung aller Cookies zu (einschließlich Analyse)
+- Alle ablehnen: Es werden nur technisch notwendige Cookies gesetzt
+- Einstellungen anpassen: Sie wählen einzelne Kategorien aus
+
+6.2 Einwilligung jederzeit widerrufbar
+
+Sie können Ihre Cookie-Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen oder anpassen. Klicken Sie hierzu auf den Link „Cookie-Einstellungen" in der Fußzeile unserer Website.
+
+6.3 Cookies über den Browser verwalten
+
+Sie können Cookies auch direkt in Ihrem Browser deaktivieren oder löschen:
+- Google Chrome: support.google.com/chrome/answer/95647
+- Mozilla Firefox: support.mozilla.org/de/kb/cookies-erlauben-und-ablehnen
+- Microsoft Edge: support.microsoft.com/de-de/microsoft-edge
+- Apple Safari: support.apple.com/de-de/guide/safari
+
+Hinweis: Wenn Sie Cookies vollständig deaktivieren, können einzelne Funktionen unserer Website (z. B. Login, Speicherung von Präferenzen) nicht mehr ordnungsgemäß funktionieren.
+
+7. Speicherdauer
+
+Die Speicherdauer der Cookies hängt von ihrem jeweiligen Zweck ab. Grundsätzlich unterscheiden wir zwischen:
+- Session-Cookies: Werden nach Schließen des Browsers automatisch gelöscht
+- Persistente Cookies: Bleiben nach Schließen des Browsers bestehen, mit individueller Lebensdauer (siehe Tabelle in Abschnitt 4)
+
+Die maximale Speicherdauer der von uns eingesetzten Cookies beträgt 14 Monate (PostHog). Cookies für die Cookie-Einwilligung selbst werden 12 Monate gespeichert, damit wir Ihre Einwilligung dokumentieren können (Nachweispflicht gemäß Art. 7 Abs. 1 DSGVO).
+
+8. Ihre Rechte
+
+Im Zusammenhang mit der Verarbeitung Ihrer Daten durch Cookies haben Sie alle Rechte gemäß Art. 15 bis 22 DSGVO. Diese sind detailliert in unserer Datenschutzerklärung unter mentorde.com/datenschutz beschrieben.
+
+Insbesondere haben Sie das Recht:
+- auf Auskunft über die zu Ihrer Person gespeicherten Daten (Art. 15 DSGVO)
+- auf Berichtigung oder Löschung Ihrer Daten (Art. 16, 17 DSGVO)
+- auf Einschränkung der Verarbeitung (Art. 18 DSGVO)
+- auf Widerspruch gegen die Verarbeitung (Art. 21 DSGVO)
+- auf Datenübertragbarkeit (Art. 20 DSGVO)
+- auf Widerruf Ihrer Einwilligung (Art. 7 Abs. 3 DSGVO)
+- auf Beschwerde bei der zuständigen Aufsichtsbehörde (Art. 77 DSGVO)
+
+Zuständige Aufsichtsbehörde:
+
+Der Hessische Beauftragte für Datenschutz und Informationsfreiheit
+Postfach 3163
+65021 Wiesbaden
+Telefon: +49 611 1408-0
+E-Mail: poststelle@datenschutz.hessen.de
+Website: www.datenschutz.hessen.de
+
+9. Änderungen dieser Cookie-Richtlinie
+
+Wir behalten uns vor, diese Cookie-Richtlinie anzupassen, damit sie stets den aktuellen rechtlichen Anforderungen entspricht oder um Änderungen unserer Leistungen umzusetzen (z. B. bei der Einführung neuer Services). Für Ihren erneuten Besuch gilt dann die neue Cookie-Richtlinie.
+
+10. Kontakt
+
+Bei Fragen zu unserer Cookie-Richtlinie oder zur Verarbeitung Ihrer Daten kontaktieren Sie uns gerne:
+
+Horizon STS GmbH (mentorde.com)
+Herwigstraße 24
+35683 Dillenburg
+Deutschland
+
+Geschäftsführer: Halil Aktas
+E-Mail: info@mentorde.com
+Telefon: +49 157 84218282
