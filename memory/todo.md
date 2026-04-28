@@ -74,3 +74,79 @@ INDEX idx_registration_form_level (registration_form_level);
 - Migration'da `down()` metodu tüm yeni kolonları drop eder
 - Mevcut Level 2 form **çalışmaya devam eder** (sadece URL'i student tarafına taşınıyor)
 - Apply form **hiç dokunulmuyor**
+
+---
+
+# 📲 Premium "Belge Talep Linki" — Tüm Modül Aktivasyon Planı
+
+**Modül kodu:** `doc_request` (premium)
+**Başlangıç:** 2026-04-28
+**Mevcut durum:** Polymorphic altyapı + Guest/Student modülleri tamamlandı.
+
+## Phase 0 — TAMAMLANDI ✅
+- [x] Migration: `document_upload_tokens` + polymorphic kolonlar + backfill
+- [x] Model: `DocumentUploadToken` (4 sabit, helpers, dual-write)
+- [x] Public controller + view: mobile-first kamera capture
+- [x] Manager + Senior controller (generic `*For()` methodlar)
+- [x] Guest/Student detail view'larda buton + modal
+- [x] Permission: `doc_request.use` + manager senior'a yetki açma toggle'ı
+
+**Şu an çalışan target'lar:** `guest_application`, `student`
+
+## 🎯 Phase 1 — Yüksek değer (yapılacak: ~50 dk)
+
+- [ ] **D1 — HR Onboarding (User target_type)** ~25 dk
+  - `routes/manager.php`: 3 endpoint `/manager/hr/persons/{user}/document-tokens`
+  - Controller: `indexForUser/storeForUser/destroyForUser` (mevcut `*For()`'a delegasyon)
+  - View `manager/hr/persons/card.blade.php` — Hesap tab'ında onboarding bölümü + buton + modal
+  - Saklama: `user-documents/{user_id}/`
+
+- [ ] **D2 — Dealer KYC (Dealer target_type)** ~25 dk
+  - `routes/manager.php`: 3 endpoint `/manager/dealers/{dealer}/document-tokens`
+  - Controller: `indexForDealer/storeForDealer/destroyForDealer`
+  - View `manager/dealer-detail.blade.php` — buton + modal
+  - Saklama: `dealer-documents/{id}/`
+
+## 🟡 Phase 2 — Orta değer (~60 dk)
+
+- [ ] **D3 — Ticket eki** ~30 dk + yeni `TARGET_TICKET` sabiti
+  - Saklama: `ticket-attachments/{ticket_id}/`
+  - Custom message ile "ne istediğini yaz" alanı önemli
+
+- [ ] **D4 — Sözleşme imzalı geri yükleme** ~30 dk + yeni `TARGET_CONTRACT` sabiti
+  - Saklama: `contract-files/{id}/signed/`
+  - Custom message sözleşme adıyla pre-filled
+
+## 🔵 Phase 3 — Niş (~3-4 saat)
+
+- [ ] **D5 — Toplu belge talebi** — `max_uses > 1` aktivasyonu, multi-category JSON
+- [ ] **D6 — WhatsApp Business API** — Twilio veya Meta Cloud API entegrasyonu
+
+## 🟣 Phase 4 — Premium iyileştirmeler (~8-10 saat, opsiyonel)
+
+- [ ] **D7 — Hatırlatma SMS/email** — 24h cron job
+- [ ] **D8 — OCR (pasaport/kimlik)** — Tesseract veya cloud vision
+- [ ] **D9 — Manager dashboard widget** — bekleyen talep sayısı + haftalık istatistik
+
+## 💰 SaaS Tier Stratejisi
+
+| Tier | doc_request | Kapsam |
+|---|---|---|
+| Basic | ❌ Kapalı | — |
+| Gold | ✅ Açık | Guest + Student. Aylık 50 link. |
+| Premium | ✅ Açık | Tüm target'lar (HR, Dealer, Ticket, Contract). Sınırsız. WhatsApp API. |
+
+**Implementation:** `companies` tablosuna `doc_request_tier` enum + `doc_request_monthly_limit` int. Token üretimi öncesi quota check. (~1 saat)
+
+## 🔧 Genişletme Prosedürü (her modül)
+
+3 dosya, ~25 satır kod:
+1. **Token modeli sabiti:** `TARGET_X = 'x'` + `TARGET_TYPES` label + `resolveDocumentOwnerId()` case + `resolveStorageDir()` case
+2. **Controller endpoint:** `storeFor()` çağıran wrapper
+3. **View:** mevcut modal markup'ını kopyala, `STORE_URL` değiştir
+
+## Risk / Geri Alma
+- Her phase izole, küçük commit'ler
+- Mevcut akışları bozmaz (dual-write geri uyum garantisi)
+- Yeni target_type eklemek = sadece sabit + match case (DB değişikliği yok)
+- Module flag (`doc_request`) tüm özelliği tek noktadan kapatır
