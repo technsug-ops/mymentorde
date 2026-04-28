@@ -10,9 +10,7 @@
 <title>Satış Ortaklığı Başvurusu — {{ $brand }}</title>
 <meta name="robots" content="noindex, follow">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">
 
 <style>
 :root { --primary:#5b2e91; --primary-dark:#4a2377; --primary-deep:#3d1c67; --primary-soft:#f1e8fb; --accent:#e8b931; --text:#12233a; --muted:#5e7187; --line:#d9e2ee; --success:#16a34a; --danger:#dc2626; }

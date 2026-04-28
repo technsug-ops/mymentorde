@@ -220,13 +220,11 @@ Diese Funktion ist optional; eine Beratung ist auch ohne Kalender-Synchronisatio
 
 15. Eingebettete Inhalte und Tools
 
-15.1 Google Fonts
+15.1 Schriftarten (lokal gehostet)
 
-Unsere Website verwendet zur einheitlichen Darstellung von Schriftarten Google Fonts (Plus Jakarta Sans, DM Serif Display). [HINWEIS: Aktuell werden die Schriften über die Google-CDN (fonts.googleapis.com) geladen, wobei eine Verbindung mit Google-Servern in den USA aufgebaut und die IP-Adresse übertragen wird. Eine Umstellung auf lokales Hosting ist geplant, um den Anforderungen des LG München I (Urteil vom 20.01.2022, Az. 3 O 17493/20) vollständig zu entsprechen.]
+Unsere Website verwendet zur einheitlichen Darstellung von Schriftarten die Google Fonts „Plus Jakarta Sans" und „DM Serif Display". Diese Schriftarten werden ausschließlich von unseren eigenen Servern ausgeliefert (Self-Hosting). Es findet keine Verbindung zu Google-Servern statt; Ihre IP-Adresse wird hierbei nicht an Google übermittelt.
 
-Anbieter: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland.
-
-Rechtsgrundlage bis zur Umstellung: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer einheitlichen Schriftdarstellung). Die Datenübermittlung in die USA erfolgt auf Grundlage des EU-U.S. Data Privacy Framework.
+Diese Vorgehensweise entspricht den Anforderungen des LG München I (Urteil vom 20.01.2022, Az. 3 O 17493/20).
 
 15.2 YouTube (erweiterter Datenschutzmodus)
 

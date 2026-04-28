@@ -16,10 +16,8 @@
         $textMuted = $theme['text_muted'] ?? '#64748b';
     @endphp
 
-    {{-- Typography --}}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    {{-- Typography (self-hosted, DSGVO-compliant) --}}
+    <link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">
 
     {{-- Schema.org FAQPage structured data (SEO) — PHP'de build edip @json ile yaz (Blade @context ile çakışmasın) --}}
     @php

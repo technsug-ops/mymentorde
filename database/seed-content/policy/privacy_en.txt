@@ -220,13 +220,11 @@ This feature is optional; consultation is also possible without calendar synchro
 
 15. Embedded Content and Tools
 
-15.1 Google Fonts
+15.1 Fonts (Self-Hosted)
 
-Our website uses Google Fonts (Plus Jakarta Sans, DM Serif Display) for the consistent display of fonts. [NOTE: Currently the fonts are loaded via the Google CDN (fonts.googleapis.com), whereby a connection is established with Google servers in the USA and the IP address is transmitted. A migration to local hosting is planned in order to fully comply with the requirements of the Munich Regional Court (judgment of 20.01.2022, case no. 3 O 17493/20).]
+Our website uses the open-source fonts "Plus Jakarta Sans" and "DM Serif Display" for consistent typography. These fonts are served exclusively from our own servers (self-hosting). No connection is established with Google servers; your IP address is not transmitted to Google.
 
-Provider: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland.
-
-Legal Basis until migration: Art. 6(1)(f) GDPR (legitimate interest in consistent font display). The data transfer to the USA is based on the EU-U.S. Data Privacy Framework.
+This approach complies with the requirements of the Munich Regional Court (judgment of 20.01.2022, case no. 3 O 17493/20).
 
 15.2 YouTube (Extended Privacy Mode)
 

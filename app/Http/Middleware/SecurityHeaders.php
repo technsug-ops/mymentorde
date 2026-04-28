@@ -82,8 +82,8 @@ class SecurityHeaders
             "default-src 'self'",
             // Production: nonce kaldırıldı — unsafe-inline aktif. Tüm view'lar nonce'a geçirildiğinde geri eklenecek.
             "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.qrserver.com" . $posthogScript . $viteScript,
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net" . $viteStyle,
-            "font-src 'self' https://fonts.gstatic.com data:",
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net" . $viteStyle,
+            "font-src 'self' data:",
             "img-src 'self' data: https: blob:",
             "connect-src 'self' https:" . $posthogConnect . $viteConnect,
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://docs.google.com https://www.canva.com",

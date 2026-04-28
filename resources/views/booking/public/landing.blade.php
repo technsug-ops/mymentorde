@@ -6,9 +6,7 @@
     <title>Randevu Al — Yurt Dışı Eğitim Danışmanları · {{ $brandName ?? 'MentorDE' }}</title>
     <meta name="description" content="Almanya yurt dışı eğitim başvurunuz için uzman danışmanlarla birebir görüşme planlayın. Üniversite seçimi, belge süreci, vize ve daha fazlası.">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">
 
     <style>
         :root {
