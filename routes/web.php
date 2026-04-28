@@ -479,6 +479,12 @@ Route::middleware(['auth'])->group(function (): void {
         ->name('verification.send');
 });
 
+// Public welcome verify — apply sonrası gönderilen maildeki linke tıklayınca
+// (auth gerektirmez, signed URL ile imzalanmış)
+Route::get('/welcome/verify/{id}/{hash}', [EmailVerificationController::class, 'verifyPublic'])
+    ->middleware(['signed', 'throttle:10,1'])
+    ->name('welcome.verify');
+
 // ── Portal Kök Yönlendirmeleri ────────────────────────────────────────────────
 Route::redirect('/marketing-admin', '/mktg-admin/dashboard');
 Route::redirect('/manager',         '/manager/dashboard');

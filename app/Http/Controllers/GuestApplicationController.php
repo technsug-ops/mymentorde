@@ -555,17 +555,34 @@ class GuestApplicationController extends Controller
     private function queueOnRegisterNotifications(GuestApplication $row, ?string $seniorEmail, ?string $generatedPassword): void
     {
         $guestBody  = "Merhaba {$row->first_name},\n\n";
-        $guestBody .= "Başvurunuz başarıyla alındı. Takip kodunuz: {$row->tracking_token}\n\n";
-        $guestBody .= "Portal girişi: ".url('/login')."\n";
+        $guestBody .= "MentorDE'ye hoş geldiniz! Başvurunuz başarıyla alındı.\n\n";
+        $guestBody .= "Takip kodunuz: {$row->tracking_token}\n\n";
+
         if ($generatedPassword) {
-            // Plaintext şifre yerine güvenli parola kurulum linki gönder.
             $user = \App\Models\User::query()->where('email', $row->email)->first();
             if ($user) {
-                $token = Password::createToken($user);
-                $setupUrl = url(route('password.reset', ['token' => $token, 'email' => $row->email], false));
-                $guestBody .= "Hesabınıza erişmek için aşağıdaki bağlantıdan şifrenizi belirleyiniz (24 saat geçerli):\n";
-                $guestBody .= $setupUrl . "\n";
+                // Plaintext giriş bilgileri
+                $guestBody .= "──────────────────────────────────\n";
+                $guestBody .= "🔐 GİRİŞ BİLGİLERİNİZ\n";
+                $guestBody .= "──────────────────────────────────\n";
+                $guestBody .= "📧 Kullanıcı: {$row->email}\n";
+                $guestBody .= "🔑 Şifre: {$generatedPassword}\n";
+                $guestBody .= "──────────────────────────────────\n\n";
+
+                // Signed verification link (7 gün geçerli)
+                $verifyUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                    'welcome.verify',
+                    now()->addDays(7),
+                    ['id' => $user->id, 'hash' => sha1((string) $user->email)]
+                );
+
+                $guestBody .= "Hesabınızı aktive etmek için aşağıdaki bağlantıya tıklayın:\n";
+                $guestBody .= $verifyUrl . "\n\n";
+                $guestBody .= "Bağlantıya tıkladıktan sonra giriş ekranında yukarıdaki email ve şifre ile portala erişebilirsiniz.\n\n";
+                $guestBody .= "(Bağlantı 7 gün geçerli. Şifrenizi güvenli tutun, ilk girişte değiştirmeniz önerilir.)\n";
             }
+        } else {
+            $guestBody .= "Portal girişi: ".url('/login')."\n";
         }
         $guestBody .= "\nMentorDE Ekibi";
 
