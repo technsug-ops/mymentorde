@@ -1,0 +1,85 @@
+KİŞİSEL VERİLERİN İŞLENMESİNE İLİŞKİN AYDINLATMA METNİ VE AÇIK RIZA BEYANI
+
+1. Veri Sorumlusu ve Veri İşleyen
+
+İşbu Aydınlatma Metni, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") ve Avrupa Birliği Genel Veri Koruma Tüzüğü ("GDPR") uyarınca kişisel verilerinizin işlenmesine ilişkin usul ve esaslar hakkında bilgilendirilmeniz amacıyla hazırlanmıştır.
+
+Bu kapsamda;
+
+Veri Sorumlusu (Data Controller): [Partner Acente / Kurum Adı – Açık Adres – E-posta]
+
+Veri İşleyen (Data Processor): Horizon STS GmbH (Mentorde) – Herwigstraße 24, 35683 Dillenburg / Almanya.
+
+Veri işleyen, veri sorumlusu adına ve onun talimatları doğrultusunda kişisel verileri işlemektedir. Veri sorumlusu ile veri işleyen arasında, GDPR Madde 28 kapsamında veri işleme sözleşmesi (Data Processing Agreement) akdedilmiştir. Veri işleyen, yalnızca veri sorumlusunun yazılı talimatları doğrultusunda hareket eder ve gerekli teknik ve idari güvenlik önlemlerini almakla yükümlüdür.
+
+2. İşlenen Kişisel Veriler
+
+Yurtdışı eğitim danışmanlığı hizmetlerinin sunulabilmesi amacıyla aşağıda belirtilen kişisel verileriniz, belirtilen amaçlar ve hukuki dayanaklar çerçevesinde işlenmektedir:
+
+Kimlik bilgileri (ad, soyad, doğum tarihi ve yeri, T.C. kimlik numarası, pasaport bilgileri ve sureti), iletişim bilgileri (telefon numarası, e-posta adresi, yerleşim adresi), eğitim bilgileri (diploma, transkript, sınav sonuç belgeleri, dil yeterlilik sertifikaları, özgeçmiş ve motivasyon mektubu), finansal bilgiler (banka hesap dökümleri, bloke hesap belgeleri, sponsorluk ve gelir beyanları) ile başvuru süreçlerine ilişkin diğer belgeler.
+
+Hizmetin niteliğine göre gerekli olması halinde; sağlık sigortası işlemleri, vize başvuruları veya resmi makam talepleri kapsamında sınırlı olmak üzere özel nitelikli kişisel verileriniz (örneğin sağlık bilgileri veya adli sicil kaydı) da işlenebilmektedir.
+
+Kişisel verileriniz; başvuru formları, dijital platformlar, e-posta yazışmaları, sözlü beyanlarınız ve ilgili resmi kurumlar aracılığıyla doğrudan veya dolaylı olarak elde edilebilmektedir.
+
+Veri Minimizasyonu Kapsamında İşlenen Veriler ve Amaçları:
+- Kimlik & İletişim → Başvuru ve Süreç Yönetimi → Sözleşmenin İfası (GDPR 6/1-b / KVKK 5/2-c)
+- Eğitim Verileri → Üniversite Kabul Süreçleri → Sözleşmenin İfası (KVKK 5/2-c)
+- Finansal Veriler → Finansal Uygunluk Denetimi → Sözleşmenin İfası (GDPR 6/1-b)
+- Özel Nitelikli Veriler → Vize ve Sağlık Sigortası İşlemleri → Açık Rıza (KVKK 6 / GDPR 9)
+
+3. Kişisel Verilerin İşlenme Amaçları
+
+Kişisel verileriniz; Almanya'daki üniversitelere ve eğitim kurumlarına başvurularınızın gerçekleştirilmesi, Uni-Assist ve benzeri başvuru platformları üzerinden işlemlerinizin yürütülmesi, Alman Konsoloslukları nezdinde vize başvuru süreçlerinin yürütülmesi ve takibi, Almanya'da yasal zorunluluk olan bloke hesap açılışı ve sağlık sigortası işlemlerinin gerçekleştirilmesi, konaklama başvurularının yapılması ve danışmanlık hizmetlerinin sunulması ile ilgili mevzuattan doğan yükümlülüklerin yerine getirilmesi amaçlarıyla işlenmektedir.
+
+Kişisel verileriniz, KVKK'nın 5/2 maddesi (sözleşmenin kurulması ve ifası, veri sorumlusunun hukuki yükümlülüğünü yerine getirmesi) ve GDPR Madde 6/1(b) ve (c) hükümleri uyarınca işlenmektedir. Özel nitelikli kişisel verileriniz ise KVKK madde 6 ve GDPR Madde 9 kapsamında açık rızanıza dayanılarak işlenmektedir.
+
+4. Kişisel Verilerin Aktarılması ve Yurtdışına Aktarım
+
+Kişisel verileriniz, yukarıda belirtilen amaçların yerine getirilebilmesi için, KVKK ve GDPR hükümlerine uygun olarak gerekli teknik ve idari tedbirler alınmak suretiyle; Almanya'da mukim veri işleyen Horizon STS GmbH (Mentorde) başta olmak üzere, üniversiteler, eğitim kurumları, Uni-Assist platformu, konsolosluklar, yabancılar daireleri (Ausländerbehörde), sigorta şirketleri, finans kuruluşları ve hizmetin ifası için gerekli diğer iş ortakları ve alt yükleniciler ile paylaşılabilmektedir.
+
+Bu kapsamda kişisel verileriniz, hizmetin doğası gereği yurt dışına aktarılmaktadır. Yurt dışına veri aktarımı, GDPR kapsamında Avrupa Komisyonu tarafından yeterli koruma sağlanan ülkeler veya uygun güvencelerin (örneğin Standart Sözleşme Maddeleri – Standard Contractual Clauses) bulunduğu durumlarda gerçekleştirilmektedir.
+
+KVKK kapsamında yurt dışına veri aktarımı, ilgili kişinin açık rızasına dayanmakta olup gerekli hallerde Kişisel Verileri Koruma Kurulu tarafından öngörülen ek güvenceler sağlanmaktadır. Verileriniz, yukarıda belirtilen zorunlu durumlar dışında üçüncü kişilere satılmaz veya ticari amaçlarla paylaşılmaz.
+
+5. Kişisel Verilerin Saklanma Süresi
+
+Kişisel verileriniz, hizmet ilişkisinin devam ettiği süre boyunca ve sonrasında yürürlükteki mevzuat uyarınca saklanması gereken süreler boyunca muhafaza edilmektedir. Bu doğrultuda; ilgili kanunlar ve vergi mevzuatı gereğince mali ve ticari kayıtlar 10 yıl, genel iletişim ve operasyon verileri ise hizmet ilişkisi sona erdikten sonra 2 yıl süreyle saklanmaktadır.
+
+Hizmetin sona ermesi halinde, yasal olarak saklanması zorunlu olan mali, vergisel ve hukuki kayıtlar hariç olmak üzere kişisel verileriniz silinir, yok edilir veya anonim hale getirilir. Yetkisiz erişimler teknik ve idari tedbirlerle kalıcı olarak engellenir. Saklama süreleri belirlenirken ilgili mevzuatta öngörülen süreler, sözleşme ilişkisi, olası hukuki uyuşmazlık süreleri ve veri minimizasyonu ilkesi dikkate alınmaktadır.
+
+6. Veri Sahibinin Hakları
+
+KVKK'nın 11. maddesi ve GDPR kapsamında veri sahibi olarak; kişisel verilerinizin işlenip işlenmediğini öğrenme, işlenmişse buna ilişkin bilgi talep etme, işlenme amacını öğrenme, eksik veya yanlış işlenmiş olması halinde düzeltilmesini isteme, silinmesini veya yok edilmesini talep etme ve hukuka aykırı işleme nedeniyle zarara uğramanız halinde zararın giderilmesini talep etme haklarına sahipsiniz.
+
+Ayrıca GDPR kapsamında; verilerin taşınabilirliğini talep etme (data portability), işlemeye itiraz etme (right to object) ve belirli durumlarda işlemenin kısıtlanmasını talep etme haklarına da sahipsiniz.
+
+Ayrıca veri sahibi olarak, ilgili veri koruma otoritesine (Türkiye'de Kişisel Verileri Koruma Kurumu, Avrupa Birliği'nde ilgili denetim otoriteleri) şikâyette bulunma hakkına sahipsiniz.
+
+Bu kapsamda taleplerinizi, yukarıda bilgileri yer alan veri sorumlusuna yazılı olarak veya e-posta yoluyla iletebilirsiniz. Talebinizin işleme alınabilmesi için kimliğinizi teyit edici resmi belgelerin (Kimlik/Pasaport fotokopisi vb.) [Partner E-posta Adresi] adresine iletilmesi gerekmektedir. Başvurularınız, tarafımıza ulaştığı tarihten itibaren en geç 30 gün içinde ücretsiz olarak sonuçlandırılacaktır.
+
+7. Reşit Olmayan Veri Sahipleri
+
+18 yaşından küçük veri sahipleri bakımından, işbu Aydınlatma Metni ve Açık Rıza Beyanı kapsamında kişisel verilerin işlenmesine ilişkin açık rıza, veri sahibinin velisi veya yasal temsilcisi tarafından verilecektir. Veri sorumlusu, gerekli gördüğü hallerde veli/yasal temsilci kimlik doğrulaması talep etme hakkını saklı tutar.
+
+AÇIK RIZA BEYANI
+
+Yukarıda yer alan Aydınlatma Metni kapsamında tarafıma gerekli bilgilendirmenin yapıldığını beyan ederim. Bu doğrultuda; yurtdışı eğitim danışmanlığı hizmetlerinin yürütülebilmesi amacıyla;
+- Vize, sağlık sigortası ve resmi makam süreçleri için gerekli olması halinde özel nitelikli kişisel verilerimin (sağlık bilgileri, adli sicil kaydı vb.) işlenmesine,
+- Hizmetin ifası için zorunlu olan tüm kişisel verilerimin yurt içinde ve yurt dışında üçüncü taraflara aktarılmasına,
+- Almanya'da mukim Horizon STS GmbH (Mentorde) tarafından veri işleyen sıfatıyla işlenmesine
+
+özgür irademle, açık ve bilgilendirilmiş şekilde rıza gösterdiğimi kabul ederim. Verdiğim açık rızayı dilediğim zaman geri alma hakkına sahip olduğumu, bu geri almanın geri alma öncesinde gerçekleştirilen veri işleme faaliyetlerinin hukuka uygunluğunu etkilemeyeceğini bildiğimi beyan ederim.
+
+(Aşağıdaki alanlardan uygun olanı doldurunuz)
+
+Öğrenci (18 Yaş ve Üzeri İse)
+Ad Soyad: ________________________
+Tarih: ________________________
+İmza: ________________________
+
+Veli / Yasal Temsilci (Öğrenci 18 Yaşından Küçük İse)
+Öğrencinin Adı Soyadı: ________________________
+Veli Ad Soyad: ________________________
+Tarih: ________________________
+İmza: ________________________
