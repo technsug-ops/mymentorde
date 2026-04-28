@@ -440,12 +440,10 @@
         {{-- Genel Toplam --}}
         @if(!empty($selectedPackageCode))
         @php
-            $pkgAmount = (int) (collect(config('service_packages.packages', []))->firstWhere('code', $selectedPackageCode)['price_amount'] ?? 0);
-            $extrasAmount = collect($selectedExtras ?? [])->sum(function($x) {
-                $found = collect(config('service_packages.extra_services', []))->firstWhere('code', $x['code'] ?? '');
-                return (int) ($found['price_amount'] ?? 0);
-            });
-            $grandTotal = $pkgAmount + $extrasAmount;
+            // Controller'dan gelen değerler — view'da yeniden hesap yok (tek-truth)
+            $pkgAmount    = (int) ($packageBaseAmount ?? 0);
+            $extrasAmount = (int) ($extrasTotalAmount ?? 0);
+            $grandTotal   = (int) ($grandTotalAmount ?? ($pkgAmount + $extrasAmount));
         @endphp
         <div style="background:linear-gradient(135deg,#134e4a,#0d9488);border-radius:12px;padding:18px 22px;margin-top:14px;">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
@@ -593,8 +591,14 @@
                                   placeholder="Ödeme ile ilgili not..."></textarea>
                     </div>
                     <button class="btn ok" type="submit" style="width:100%;font-size:var(--tx-sm);">
-                        Ödeme Talebi Gönder → {{ $selectedPackagePrice }}
+                        Ödeme Talebi Gönder → {{ number_format((int) ($grandTotalAmount ?? 0), 0, ',', '.') }} EUR
                     </button>
+                    @if(((int) ($extrasTotalAmount ?? 0)) > 0)
+                    <div style="margin-top:6px;font-size:var(--tx-xs);color:var(--u-muted);text-align:center;line-height:1.4;">
+                        {{ $selectedPackageTitle }} ({{ number_format((int) ($packageBaseAmount ?? 0), 0, ',', '.') }} EUR)
+                        + Ek Hizmetler ({{ number_format((int) ($extrasTotalAmount ?? 0), 0, ',', '.') }} EUR)
+                    </div>
+                    @endif
                 </form>
                 <div style="margin-top:8px;font-size:var(--tx-xs);color:var(--u-muted);line-height:1.5;text-align:center;">
                     Talebiniz danışmanınıza iletilir. Ödeme bilgileri size ayrıca gönderilecektir.

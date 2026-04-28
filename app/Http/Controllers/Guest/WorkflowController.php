@@ -860,17 +860,25 @@ class WorkflowController extends Controller
             'notes'          => ['nullable', 'string', 'max:500'],
         ]);
 
-        $pkgConfig = config('guest_registration_form.packages', []);
-        $selCode   = trim((string) ($guest->selected_package_code ?? ''));
+        // View ile aynı config kaynağını kullan (service_packages) — eski config legacy
+        $packagesConfig = config('service_packages.packages', []);
+        $extrasConfig   = config('service_packages.extra_services', []);
+        $selCode        = trim((string) ($guest->selected_package_code ?? ''));
         abort_if($selCode === '', 422, 'Önce bir paket seçin.');
 
-        $pkg = collect($pkgConfig)->firstWhere('code', $selCode);
+        $pkg = collect($packagesConfig)->firstWhere('code', $selCode);
         if (!$pkg) {
             return redirect()->route('guest.services')->withErrors(['payment' => 'Seçili paket bulunamadı.']);
         }
 
-        $priceStr  = preg_replace('/[^0-9.]/', '', str_replace(['.', ','], ['', '.'], (string) ($pkg['price'] ?? '0')));
-        $amountEur = (float) $priceStr;
+        // Paket fiyatı (numeric) + seçili ek hizmetlerin toplamı = ödeme tutarı
+        $pkgAmount    = (int) ($pkg['price_amount'] ?? 0);
+        $extrasArr    = is_array($guest->selected_extra_services) ? $guest->selected_extra_services : [];
+        $extrasAmount = collect($extrasArr)->sum(function ($x) use ($extrasConfig) {
+            $found = collect($extrasConfig)->firstWhere('code', $x['code'] ?? '');
+            return (int) ($found['price_amount'] ?? 0);
+        });
+        $amountEur = (float) ($pkgAmount + (int) $extrasAmount);
 
         GuestPaymentRequest::create([
             'company_id'           => $guest->company_id,

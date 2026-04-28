@@ -554,6 +554,17 @@ class PortalController extends Controller
         $selectedPkg = collect(config('service_packages.packages', []))->firstWhere('code', $selectedCode);
         $data['includedExtras'] = is_array($selectedPkg['included_extras'] ?? null) ? $selectedPkg['included_extras'] : [];
 
+        // Genel Toplam — paket fiyatı + seçili ek hizmetler
+        // (view'da hem "Genel Toplam" kartı hem "Ödeme Talebi Gönder" butonu aynı tutarı gösterir)
+        $pkgAmount = (int) ($selectedPkg['price_amount'] ?? 0);
+        $extrasAmount = collect($data['selectedExtras'])->sum(function ($x) {
+            $found = collect(config('service_packages.extra_services', []))->firstWhere('code', $x['code'] ?? '');
+            return (int) ($found['price_amount'] ?? 0);
+        });
+        $data['packageBaseAmount'] = $pkgAmount;
+        $data['extrasTotalAmount'] = (int) $extrasAmount;
+        $data['grandTotalAmount']  = $pkgAmount + (int) $extrasAmount;
+
         return view('guest.services', $data);
     }
 
