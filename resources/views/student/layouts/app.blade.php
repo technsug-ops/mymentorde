@@ -559,5 +559,6 @@ if('serviceWorker' in navigator){
 {{-- Analytics: PostHog snippet (consent varsa) + Consent banner --}}
 <x-analytics.posthog-snippet :portal="'student'" />
 <x-analytics.consent-banner />
+@include('partials.cookie-consent')
 </body>
 </html>

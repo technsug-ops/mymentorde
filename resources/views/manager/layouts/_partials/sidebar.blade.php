@@ -67,6 +67,7 @@
 
         @php
             $isSistem = request()->is('manager/notification-stats*') || request()->is('manager/gdpr-dashboard*')
+                     || request()->is('manager/ropa*') || request()->is('manager/avv*')
                      || request()->is('manager/theme*') || request()->is('config*');
         @endphp
         <div class="nav-group {{ $isSistem ? 'open has-active' : '' }}" id="ng-sistem">
@@ -77,6 +78,8 @@
             <div class="nav-sub">
                 <a class="{{ request()->is('manager/notification-stats*') ? 'active' : '' }}" href="/manager/notification-stats">🔔 Bildirim İstatistik</a>
                 <a class="{{ request()->is('manager/gdpr-dashboard*') ? 'active' : '' }}" href="/manager/gdpr-dashboard">🔒 GDPR Paneli</a>
+                <a class="{{ request()->is('manager/ropa*') ? 'active' : '' }}" href="/manager/ropa">📋 ROPA (Art. 30)</a>
+                <a class="{{ request()->is('manager/avv*') ? 'active' : '' }}" href="/manager/avv">📑 AVV Registry (Art. 28)</a>
                 <a class="{{ request()->is('manager/theme*') ? 'active' : '' }}" href="/manager/theme">Tema Yönetimi</a>
                 <a class="{{ request()->is('config*') ? 'active' : '' }}" href="/config">Sistem Ayarları</a>
             </div>

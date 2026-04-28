@@ -659,15 +659,18 @@ class ManagerAnalyticsController extends Controller
                 'revoked' => ConsentRecord::whereNotNull('revoked_at')->count(),
             ],
             'policyTexts' => [
-                'privacy' => \App\Models\PolicyDocument::loadAllLocales($companyId, \App\Models\PolicyDocument::KIND_PRIVACY),
-                'cookie'  => \App\Models\PolicyDocument::loadAllLocales($companyId, \App\Models\PolicyDocument::KIND_COOKIE),
-                'terms'   => \App\Models\PolicyDocument::loadAllLocales($companyId, \App\Models\PolicyDocument::KIND_TERMS),
+                'privacy'        => \App\Models\PolicyDocument::loadAllLocales($companyId, \App\Models\PolicyDocument::KIND_PRIVACY),
+                'cookie'         => \App\Models\PolicyDocument::loadAllLocales($companyId, \App\Models\PolicyDocument::KIND_COOKIE),
+                'terms'          => \App\Models\PolicyDocument::loadAllLocales($companyId, \App\Models\PolicyDocument::KIND_TERMS),
+                'imprint'        => \App\Models\PolicyDocument::loadAllLocales($companyId, \App\Models\PolicyDocument::KIND_IMPRINT),
+                'tom'            => \App\Models\PolicyDocument::loadAllLocales($companyId, \App\Models\PolicyDocument::KIND_TOM),
+                'incident_plan'  => \App\Models\PolicyDocument::loadAllLocales($companyId, \App\Models\PolicyDocument::KIND_INCIDENT_PLAN),
             ],
         ]);
     }
 
     /**
-     * GDPR/KVKK/Datenschutz, Çerez, Kullanım Şartları metinlerini toplu kaydet.
+     * Tüm yasal/uyum metinlerini toplu kaydet (GDPR, Çerez, AGB, Impressum, TOM, Notfallplan).
      * Form: titles[kind][locale] + bodies[kind][locale]
      */
     public function gdprPolicySave(Request $request)
@@ -676,6 +679,9 @@ class ManagerAnalyticsController extends Controller
             \App\Models\PolicyDocument::KIND_PRIVACY,
             \App\Models\PolicyDocument::KIND_COOKIE,
             \App\Models\PolicyDocument::KIND_TERMS,
+            \App\Models\PolicyDocument::KIND_IMPRINT,
+            \App\Models\PolicyDocument::KIND_TOM,
+            \App\Models\PolicyDocument::KIND_INCIDENT_PLAN,
         ];
 
         $companyId = (int) ($request->user()?->company_id ?? 1);

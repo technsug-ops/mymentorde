@@ -492,6 +492,14 @@
                    class="nav-link {{ request()->is('manager/gdpr-dashboard*') ? 'active' : '' }}">
                     <span class="nav-icon">🔒</span> GDPR Paneli
                 </a>
+                <a href="/manager/ropa"
+                   class="nav-link {{ request()->is('manager/ropa*') ? 'active' : '' }}">
+                    <span class="nav-icon">📋</span> ROPA (Art. 30)
+                </a>
+                <a href="/manager/avv"
+                   class="nav-link {{ request()->is('manager/avv*') ? 'active' : '' }}">
+                    <span class="nav-icon">📑</span> AVV Registry (Art. 28)
+                </a>
                 <a href="/manager/webhooks"
                    class="nav-link {{ request()->is('manager/webhooks*') ? 'active' : '' }}">
                     <span class="nav-icon">🔗</span> Webhook Logları
@@ -741,5 +749,6 @@ document.getElementById('sozlesme-btn')?.addEventListener('click', function() {
 {{-- Analytics: PostHog snippet (consent varsa) + Consent banner --}}
 <x-analytics.posthog-snippet :portal="'manager'" />
 <x-analytics.consent-banner />
+@include('partials.cookie-consent')
 </body>
 </html>

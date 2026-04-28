@@ -9,10 +9,12 @@ class PolicyDocument extends Model
 {
     use BelongsToCompany;
 
-    public const KIND_PRIVACY = 'privacy'; // KVKK / Datenschutz / GDPR (3 dil aynı kind altında)
-    public const KIND_COOKIE  = 'cookie';
-    public const KIND_TERMS   = 'terms';
-    public const KIND_IMPRINT = 'imprint';
+    public const KIND_PRIVACY        = 'privacy'; // KVKK / Datenschutz / GDPR (3 dil aynı kind altında)
+    public const KIND_COOKIE         = 'cookie';
+    public const KIND_TERMS          = 'terms';
+    public const KIND_IMPRINT        = 'imprint';
+    public const KIND_TOM            = 'tom';            // Technische und Organisatorische Maßnahmen (DSGVO Art. 32, internal)
+    public const KIND_INCIDENT_PLAN  = 'incident_plan';  // Datenpannen-Notfallplan (DSGVO Art. 33-34, internal)
 
     public const LOCALES = ['tr', 'de', 'en'];
     public const LOCALE_LABELS = [

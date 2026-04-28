@@ -204,6 +204,21 @@ $activeRate   = round($consentStats['active'] / $totalConsent * 100, 1);
             'de' => 'Nutzungsbedingungen / AGB',
             'en' => 'Terms of Use / Service Agreement',
         ]],
+        'imprint' => ['emoji' => '🏛️', 'label' => 'Impressum / Künye', 'placeholders' => [
+            'tr' => 'Künye / Şirket Bilgileri',
+            'de' => 'Impressum (DDG § 5 zorunlu)',
+            'en' => 'Imprint / Company Info',
+        ]],
+        'tom' => ['emoji' => '🛡️', 'label' => 'TOM — Teknik ve Organizasyonel Önlemler', 'placeholders' => [
+            'tr' => 'Erişim kontrolü, şifreleme, yedekleme, çalışan eğitimi, fiziksel güvenlik...',
+            'de' => 'TOM nach Art. 32 DSGVO — Zugangskontrolle, Verschlüsselung, Backup...',
+            'en' => 'Technical and Organizational Measures (Art. 32 GDPR)',
+        ]],
+        'incident_plan' => ['emoji' => '🚨', 'label' => 'Veri İhlali Acil Eylem Planı', 'placeholders' => [
+            'tr' => 'Veri ihlali tespiti → 72 saat bildirim → LDI NRW şablonu...',
+            'de' => 'Datenpannen-Notfallplan (Art. 33-34 DSGVO) — 72h Meldepflicht...',
+            'en' => 'Data Breach Notification Plan (Art. 33-34 GDPR)',
+        ]],
     ];
 @endphp
 
@@ -271,7 +286,7 @@ $activeRate   = round($consentStats['active'] / $totalConsent * 100, 1);
     {{-- Sticky save bar --}}
     <div style="position:sticky;bottom:0;background:var(--u-card,#fff);padding:14px 18px;border-top:1px solid var(--u-line,#e5e9f0);border-radius:0 0 10px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 -2px 8px rgba(0,0,0,.04);margin-top:14px;">
         <div style="font-size:12px;color:var(--u-muted,#64748b);">
-            💾 Kaydet butonu 3 yasal metnin de TR/DE/EN dillerini topluca günceller (toplam 9 alan).
+            💾 Kaydet butonu 6 yasal metnin (Gizlilik · Çerez · Kullanım · Impressum · TOM · Acil Plan) TR/DE/EN dillerini topluca günceller (toplam 18 alan).
         </div>
         <button type="submit" class="btn ok" style="padding:10px 24px;font-size:13px;font-weight:700;">
             💾 Tümünü Kaydet

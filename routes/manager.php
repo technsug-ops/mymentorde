@@ -207,6 +207,26 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     // ─── Audit Log ──────────────────────────────────────────────────────────
     Route::get('/manager/audit-log', [ManagerPortalController::class, 'auditLog'])->name('manager.audit-log');
 
+    // ─── ROPA — Verarbeitungsverzeichnis (DSGVO Art. 30) ────────────────────
+    $ropa = \App\Http\Controllers\Manager\ManagerProcessingActivityController::class;
+    Route::get('/manager/ropa',                       [$ropa, 'index'])->name('manager.ropa.index');
+    Route::get('/manager/ropa/export-csv',            [$ropa, 'exportCsv'])->name('manager.ropa.export-csv');
+    Route::get('/manager/ropa/create',                [$ropa, 'create'])->name('manager.ropa.create');
+    Route::post('/manager/ropa',                      [$ropa, 'store'])->name('manager.ropa.store');
+    Route::get('/manager/ropa/{activity}/edit',       [$ropa, 'edit'])->name('manager.ropa.edit');
+    Route::put('/manager/ropa/{activity}',            [$ropa, 'update'])->name('manager.ropa.update');
+    Route::delete('/manager/ropa/{activity}',         [$ropa, 'destroy'])->name('manager.ropa.destroy');
+
+    // ─── AVV Registry — Auftragsverarbeitungsverträge (DSGVO Art. 28) ───────
+    $avv = \App\Http\Controllers\Manager\ManagerAvvRegistryController::class;
+    Route::get('/manager/avv',                        [$avv, 'index'])->name('manager.avv.index');
+    Route::get('/manager/avv/create',                 [$avv, 'create'])->name('manager.avv.create');
+    Route::post('/manager/avv',                       [$avv, 'store'])->name('manager.avv.store');
+    Route::get('/manager/avv/{avv}/edit',             [$avv, 'edit'])->name('manager.avv.edit');
+    Route::put('/manager/avv/{avv}',                  [$avv, 'update'])->name('manager.avv.update');
+    Route::delete('/manager/avv/{avv}',               [$avv, 'destroy'])->name('manager.avv.destroy');
+    Route::get('/manager/avv/{avv}/download',         [$avv, 'downloadPdf'])->name('manager.avv.download');
+
     // ─── Sistem Admin Paneli ─────────────────────────────────────────────────
     Route::get('/manager/system',                            [SystemAdminController::class, 'dashboard'])->name('manager.system.dashboard');
     Route::get('/manager/system/ip-rules',                   [SystemAdminController::class, 'ipRules'])->name('manager.system.ip-rules');

@@ -646,5 +646,6 @@ document.addEventListener('alpine:init',function(){
 {{-- Analytics: PostHog snippet (consent varsa) + Consent banner --}}
 <x-analytics.posthog-snippet :portal="'senior'" />
 <x-analytics.consent-banner />
+@include('partials.cookie-consent')
 </body>
 </html>
