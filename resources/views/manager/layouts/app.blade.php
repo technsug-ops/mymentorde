@@ -376,6 +376,10 @@
                    class="nav-link {{ request()->is('manager/university-requirements*') ? 'active' : '' }}">
                     <span class="nav-icon">🗺️</span> Üniversite Belge Haritası
                 </a>
+                <a href="/manager/required-documents"
+                   class="nav-link {{ request()->is('manager/required-documents*') ? 'active' : '' }}">
+                    <span class="nav-icon">📦</span> Zorunlu Belge Listesi
+                </a>
                 <a href="/manager/doc-templates"
                    class="nav-link {{ request()->is('manager/doc-templates*') ? 'active' : '' }}">
                     <span class="nav-icon">📝</span> Belge Şablonları
