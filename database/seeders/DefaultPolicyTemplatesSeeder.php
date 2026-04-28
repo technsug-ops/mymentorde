@@ -39,6 +39,16 @@ class DefaultPolicyTemplatesSeeder extends Seeder
             'en' => 'Terms and Conditions',
             'tr' => 'Kullanım Koşulları',
         ],
+        'tom' => [
+            'de' => 'Technische und Organisatorische Maßnahmen (TOM)',
+            'en' => 'Technical and Organizational Measures (TOM)',
+            'tr' => 'Teknik ve Organizasyonel Önlemler (TOM)',
+        ],
+        'incident_plan' => [
+            'de' => 'Datenpannen-Notfallplan',
+            'en' => 'Data Breach Incident Response Plan',
+            'tr' => 'Veri İhlali Acil Eylem Planı',
+        ],
     ];
 
     public function run(): void

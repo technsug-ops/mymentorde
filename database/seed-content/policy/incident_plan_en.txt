@@ -1,0 +1,161 @@
+Data Breach Incident Response Plan — mentorde.com
+
+[INTERNAL DOCUMENT — procedure for the detection, assessment, notification, and documentation of personal data breaches under Art. 33 and Art. 34 GDPR. Status: April 2026.]
+
+Controller: Horizon STS GmbH, Herwigstraße 24, 35683 Dillenburg, Managing Director Halil Aktas, HRB 9127 (Local Court Wetzlar).
+
+1. Definition
+
+A "personal data breach" within the meaning of Art. 4(12) GDPR is a breach of security leading to the accidental or unlawful destruction, loss, alteration, unauthorized disclosure of, or access to personal data.
+
+Examples:
+- Unauthorized access to the database (hacking, insider)
+- Loss of an unencrypted employee laptop containing client data
+- Accidentally sending an email with client data to the wrong recipient
+- Successful phishing attack: employee credentials compromised
+- Hosting provider incident (e.g., data leak at ALL-INKL.COM)
+- Stripe account takeover or payment data leak
+- Misconfigured permissions resulting in cross-tenant data access
+- Loss of a mobile device with access to internal back-office tools
+
+2. Roles and Responsibilities
+
+| Role | Responsible | Tasks |
+|---|---|---|
+| Management | Halil Aktas | Final assessment, authority notification, external communication |
+| Technical Coordination | [Name / Position] | Forensics, containment, recovery |
+| Data Protection Contact | info@mentorde.com | Handling of inquiries from data subjects |
+| External Escalation | [IT-law attorney — to be designated] | Legal advice for critical incidents |
+
+3. Detection and Initial Reporting
+
+3.1 Detection Sources
+- Automated alerts: audit log anomalies, brute-force detection, hosting provider notifications, Stripe security emails.
+- Manual indicators: employee observations, client complaints, external researcher reports.
+- Third-party incidents: AVV partners (Resend, PostHog, AI providers, Stripe) must inform us of their own incidents within 48 hours.
+
+3.2 Initial Internal Report
+For every suspected case, a report MUST be made within 1 hour to:
+- Email: info@mentorde.com (management)
+- Phone: +49 157 84218282
+
+Required information:
+- When and how was the incident detected?
+- Which systems / data are (presumably) affected?
+- Is the incident ongoing or contained?
+- Who reported the incident?
+
+4. Containment (Immediate Measures, T+0 to T+4h)
+
+Immediately after the initial report, the following measures must be evaluated and initiated as needed:
+
+- Isolate affected systems (e.g., take server off the network, lock compromised accounts).
+- Reset passwords for admin accounts, invalidate sessions.
+- Renew 2FA tokens for affected accounts.
+- Copy backups to separate storage (evidence preservation).
+- Protect audit logs from tampering (read-only snapshot).
+- For third-party incidents: rotate API keys (Stripe, Resend, AI providers), invalidate webhook signatures.
+
+5. Assessment (T+1h to T+24h)
+
+5.1 Risk Assessment under Art. 33 GDPR
+
+Evaluate the following factors:
+
+| Criterion | Low | Medium | High |
+|---|---|---|---|
+| Number of affected persons | < 10 | 10-1,000 | > 1,000 |
+| Data sensitivity | Pseudonyms | Contact data | Passport data, health, payment data |
+| Identifiability | Anonymized | Pseudonymized | Directly identifiable |
+| Likelihood of misuse | Very low | Possible | Actively misused |
+| Damage potential | Reputation | Harassment | Identity theft, financial damage |
+
+If assessment shows "likely risk to the rights and freedoms of natural persons" → notification to supervisory authority is required (Art. 33 GDPR).
+
+If assessment shows "likely HIGH risk" → additional notification of data subjects required (Art. 34 GDPR).
+
+5.2 Documentation
+Even for incidents that are not reportable (e.g., internal audit findings without data leak), an entry is created in the internal incident register — regardless of the risk level (Art. 33(5) GDPR).
+
+6. Notification to Supervisory Authority (T+24h to T+72h)
+
+If reportable: notification MUST occur within 72 hours of becoming aware of the incident (Art. 33(1) GDPR). Late notifications must include reasoning.
+
+Competent supervisory authority:
+
+The Hessian Commissioner for Data Protection and Freedom of Information
+Postfach 3163, 65021 Wiesbaden, Germany
+Phone: +49 611 1408-0
+Email: poststelle@datenschutz.hessen.de
+Online breach notification form: www.datenschutz.hessen.de/datenpanne
+
+Content of notification (Art. 33(3) GDPR):
+- Description of the nature of the breach (categories of affected data and persons, approximate number of subjects).
+- Name and contact details of the data protection contact (info@mentorde.com).
+- Likely consequences of the incident.
+- Measures already taken or proposed.
+
+If information is incomplete, the notification can be supplemented progressively (Art. 33(4) GDPR).
+
+7. Notification of Data Subjects (Art. 34 GDPR)
+
+In case of likely HIGH risk, the data subjects must be informed without undue delay — in a language they can understand (Turkish / German / English depending on user's language).
+
+Exceptions (Art. 34(3) GDPR):
+- Data was appropriately encrypted (encryption effective against unauthorized parties).
+- Subsequent measures taken that exclude the high risk.
+- Disproportionate effort → public announcement instead of individual notification.
+
+Content of data subject notification:
+- Description of the nature of the breach (in plain language).
+- Name and contact details of the data protection contact.
+- Likely consequences.
+- Recommendations for risk mitigation (e.g., change password, block bank card).
+- Measures taken and planned.
+
+Distribution channel: Resend transactional email to all affected. For very large incidents, possibly additional public announcement at mentorde.com/incident.
+
+8. Recovery and Remediation (T+24h to T+30 days)
+
+- Clean systems (remove malware, close backdoors).
+- Restore backups (in case of data loss).
+- Close security gaps (patches, harden configurations).
+- Renew compromised credentials (Stripe API key, Resend API key, AI API keys, admin passwords).
+- If needed: external forensic analysis.
+
+9. Post-Incident Review (T+30 to T+60 days)
+
+- Lessons-learned session with all parties involved.
+- Update of TOM (technical / organizational) based on findings.
+- Update of this incident plan if gaps were identified.
+- Employee training on specific incident patterns.
+- Complete incident register entry (lessons learned, preventive measures).
+
+10. Incident Register (Art. 33(5) GDPR)
+
+All breaches — reported or not — are documented in an internal register. Minimum entries:
+- Incident number + date/time of detection.
+- Description of the incident and affected data.
+- Risk assessment (rationale).
+- Measures taken.
+- Notification to authority / data subjects (yes/no, with date).
+- Time to remediation.
+- Lessons learned.
+
+Retention: 6 years.
+
+11. Training and Tests
+
+- All employees are informed about this incident plan at least annually.
+- At least semi-annual tabletop exercise (theoretical incident walkthrough).
+- For substantial system changes (e.g., new AVV partner, new payment method), update the plan.
+
+12. Emergency Contact
+
+24/7 management availability:
+- Email: info@mentorde.com
+- Phone: +49 157 84218282 (also reachable outside office hours)
+
+Last updated: 28 April 2026
+Next review: April 2027
+Responsible: Management of Horizon STS GmbH

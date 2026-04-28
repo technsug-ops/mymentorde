@@ -1,0 +1,161 @@
+Datenpannen-Notfallplan — mentorde.com
+
+[INTERNES DOKUMENT — Verfahren zur Erkennung, Bewertung, Meldung und Dokumentation von Datenschutzverletzungen gemäß Art. 33 und Art. 34 DSGVO. Stand: April 2026.]
+
+Verantwortlicher: Horizon STS GmbH, Herwigstraße 24, 35683 Dillenburg, Geschäftsführer Halil Aktas, HRB 9127 (Amtsgericht Wetzlar).
+
+1. Definition
+
+Eine „Datenpanne" (Datenschutzverletzung) liegt im Sinne des Art. 4 Nr. 12 DSGVO vor, wenn eine Verletzung der Sicherheit zur unbeabsichtigten oder unrechtmäßigen Vernichtung, zum Verlust, zur Veränderung, zur unbefugten Offenlegung oder zum unbefugten Zugang zu personenbezogenen Daten führt.
+
+Beispiele:
+- Unbefugter Zugriff auf die Datenbank (Hacking, Insider)
+- Verlust eines unverschlüsselten Mitarbeiter-Notebooks mit Mandantendaten
+- Versehentlicher Versand einer E-Mail mit Mandantendaten an falschen Empfänger
+- Phishing-Erfolg: Mitarbeiterzugangsdaten kompromittiert
+- Hosting-Anbieter-Vorfall (z. B. Datenleck bei ALL-INKL.COM)
+- Stripe-Account-Übernahme oder Zahlungsdaten-Leck
+- Falsche Berechtigungseinstellung führt zu Cross-Tenant-Datenzugriff
+- Verlust eines mobilen Geräts mit Zugriff auf interne Backoffice-Tools
+
+2. Rollen und Verantwortlichkeiten
+
+| Rolle | Verantwortlich | Aufgaben |
+|---|---|---|
+| Geschäftsführung | Halil Aktas | Endgültige Bewertung, Meldung an Behörde, externe Kommunikation |
+| Technische Koordination | [Name / Position] | Forensik, Eindämmung, Wiederherstellung |
+| Datenschutzkontakt | info@mentorde.com | Bearbeitung von Anfragen Betroffener |
+| Externe Eskalation | [Anwalt für IT-Recht — ggf. einzusetzen] | Rechtliche Beratung bei kritischen Vorfällen |
+
+3. Erkennung und Erstmeldung
+
+3.1 Erkennungsquellen
+- Automatische Alarme: Audit-Log Anomalien, Brute-Force-Erkennung, Hosting-Anbieter-Benachrichtigungen, Stripe-Sicherheits-E-Mails.
+- Manuelle Hinweise: Mitarbeiter-Beobachtungen, Mandanten-Beschwerden, externe Forschermeldungen.
+- Drittanbieter-Vorfälle: AVV-Partner (Resend, PostHog, AI-Anbieter, Stripe) müssen uns binnen 48 Stunden über eigene Vorfälle informieren.
+
+3.2 Erstmeldung intern
+Bei jedem Verdachtsfall MUSS innerhalb von 1 Stunde eine Meldung an folgende Stelle erfolgen:
+- E-Mail: info@mentorde.com (Geschäftsführung)
+- Telefon: +49 157 84218282
+
+Pflichtangaben:
+- Wann und wie wurde der Vorfall entdeckt?
+- Welche Systeme / Daten sind betroffen (vermutlich)?
+- Hat der Vorfall noch Bestand oder ist er abgeschlossen?
+- Wer hat den Vorfall gemeldet?
+
+4. Eindämmung (Sofortmaßnahmen, T+0 bis T+4h)
+
+Sofort nach Erstmeldung sind folgende Maßnahmen zu prüfen und ggf. einzuleiten:
+
+- Betroffene Systeme isolieren (z. B. Server vom Netz nehmen, kompromittierte Accounts sperren).
+- Passwörter für Admin-Konten zurücksetzen, Sessions invalidieren.
+- 2FA-Tokens für betroffene Konten erneuern.
+- Backups in einen separaten Storage kopieren (Beweissicherung).
+- Audit-Logs vor Manipulation schützen (Read-Only-Snapshot).
+- Bei Drittanbieter-Vorfällen: API-Keys rotieren (Stripe, Resend, AI-Anbieter), Webhook-Signaturen invalidieren.
+
+5. Bewertung (T+1h bis T+24h)
+
+5.1 Risikobewertung gemäß Art. 33 DSGVO
+
+Folgende Faktoren bewerten:
+
+| Kriterium | Niedrig | Mittel | Hoch |
+|---|---|---|---|
+| Anzahl betroffener Personen | < 10 | 10-1.000 | > 1.000 |
+| Datensensitivität | Pseudonyme | Kontaktdaten | Pass-Daten, Gesundheit, Zahlungsdaten |
+| Identifizierbarkeit | Anonymisiert | Pseudonymisiert | Direkt identifizierbar |
+| Wahrscheinlichkeit Missbrauch | Sehr gering | Möglich | Aktiv missbraucht |
+| Schadenspotenzial | Reputation | Belästigung | Identitätsdiebstahl, finanzieller Schaden |
+
+Ergibt die Bewertung "voraussichtliches Risiko für die Rechte und Freiheiten natürlicher Personen" → Meldung an Aufsichtsbehörde erforderlich (Art. 33 DSGVO).
+
+Ergibt die Bewertung "voraussichtliches HOHES Risiko" → zusätzliche Benachrichtigung der Betroffenen erforderlich (Art. 34 DSGVO).
+
+5.2 Dokumentation
+Auch bei Vorfällen, die nicht meldepflichtig sind (z. B. internes Audit-Ergebnis ohne Datenleck), wird ein Eintrag im internen Vorfallsregister erstellt — unabhängig vom Risikoniveau (Art. 33 Abs. 5 DSGVO).
+
+6. Meldung an Aufsichtsbehörde (T+24h bis T+72h)
+
+Wenn meldepflichtig: Meldung MUSS binnen 72 Stunden ab Kenntnis des Vorfalls erfolgen (Art. 33 Abs. 1 DSGVO). Verspätung ist mit Begründung zu melden.
+
+Zuständige Aufsichtsbehörde:
+
+Der Hessische Beauftragte für Datenschutz und Informationsfreiheit
+Postfach 3163, 65021 Wiesbaden
+Telefon: +49 611 1408-0
+E-Mail: poststelle@datenschutz.hessen.de
+Online-Meldeformular: www.datenschutz.hessen.de/datenpanne
+
+Inhalt der Meldung (Art. 33 Abs. 3 DSGVO):
+- Beschreibung der Art der Verletzung (Kategorien betroffener Daten und Personen, ungefähre Zahl der Betroffenen).
+- Name und Kontaktdaten des Datenschutzkontakts (info@mentorde.com).
+- Wahrscheinliche Folgen des Vorfalls.
+- Bereits ergriffene Gegenmaßnahmen.
+
+Bei unvollständigen Informationen kann die Meldung schrittweise ergänzt werden (Art. 33 Abs. 4 DSGVO).
+
+7. Benachrichtigung Betroffener (Art. 34 DSGVO)
+
+Bei voraussichtlich HOHEM Risiko sind die Betroffenen unverzüglich über die Datenpanne zu informieren — in einer für sie verständlichen Sprache (Türkisch / Deutsch / Englisch je nach Nutzersprache).
+
+Ausnahmen (Art. 34 Abs. 3 DSGVO):
+- Daten waren angemessen verschlüsselt (Verschlüsselung wirksam gegen Unbefugte).
+- Folgemaßnahmen ergriffen, die das hohe Risiko ausschließen.
+- Unverhältnismäßiger Aufwand → öffentliche Bekanntmachung statt Einzelbenachrichtigung.
+
+Inhalt der Betroffenen-Benachrichtigung:
+- Beschreibung der Art der Datenpanne (in einfacher Sprache).
+- Name und Kontaktdaten des Datenschutzkontakts.
+- Wahrscheinliche Folgen.
+- Empfehlungen zur Risikominderung (z. B. Passwort ändern, Bankkarte sperren).
+- Bereits ergriffene und geplante Maßnahmen.
+
+Versandweg: Resend Transactional E-Mail an alle Betroffenen. Bei sehr großen Vorfällen ggf. zusätzlich öffentliche Bekanntmachung auf mentorde.com/incident.
+
+8. Wiederherstellung und Behebung (T+24h bis T+30 Tage)
+
+- Systeme bereinigen (Malware entfernen, Backdoors schließen).
+- Backups wiederherstellen (sofern Datenverlust).
+- Sicherheitslücken schließen (Patches, Konfigurationen härten).
+- Kompromittierte Credentials erneuern (Stripe API-Key, Resend API-Key, AI-API-Keys, Admin-Passwörter).
+- Bei Bedarf: externe forensische Analyse.
+
+9. Nachbereitung (Post-Incident Review, T+30 bis T+60 Tage)
+
+- Lessons-Learned-Sitzung mit allen Beteiligten.
+- Aktualisierung der TOM (technisch / organisatorisch) basierend auf Erkenntnissen.
+- Aktualisierung dieses Notfallplans, wenn Lücken erkannt wurden.
+- Mitarbeiterschulung zu spezifischen Vorfallsmustern.
+- Eintrag im Vorfallsregister vervollständigen (Lessons Learned, präventive Maßnahmen).
+
+10. Vorfallsregister (Art. 33 Abs. 5 DSGVO)
+
+Alle Datenpannen — gemeldet oder nicht — werden in einem internen Register dokumentiert. Mindestangaben:
+- Vorfallsnummer + Datum/Uhrzeit der Erkennung.
+- Beschreibung des Vorfalls und der betroffenen Daten.
+- Risikobewertung (Begründung).
+- Ergriffene Gegenmaßnahmen.
+- Meldung an Behörde / Betroffene (ja/nein, mit Datum).
+- Dauer bis zur Behebung.
+- Lessons Learned.
+
+Aufbewahrungsfrist: 6 Jahre.
+
+11. Schulung und Tests
+
+- Alle Mitarbeiter werden mindestens jährlich über diesen Notfallplan informiert.
+- Mindestens halbjährlich Tabletop-Übung (theoretischer Vorfallsdurchlauf).
+- Bei wesentlichen Änderungen am System (z. B. neuer AVV-Partner, neue Zahlungsmethode) Plan aktualisieren.
+
+12. Kontakt im Ernstfall
+
+24/7 Erreichbarkeit der Geschäftsführung:
+- E-Mail: info@mentorde.com
+- Telefon: +49 157 84218282 (auch außerhalb Bürozeiten erreichbar)
+
+Letzte Aktualisierung: 28. April 2026
+Nächste Überprüfung: April 2027
+Verantwortlich: Geschäftsführung Horizon STS GmbH

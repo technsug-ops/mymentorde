@@ -1,0 +1,125 @@
+Technical and Organizational Measures (TOM) — mentorde.com
+
+[INTERNAL DOCUMENT — not for public disclosure. Serves as evidence vis-à-vis supervisory authorities under Art. 32 GDPR and vis-à-vis controllers (joint controllers). Status: April 2026.]
+
+Controller: Horizon STS GmbH, Herwigstraße 24, 35683 Dillenburg, Managing Director Halil Aktas, HRB 9127 (Local Court Wetzlar).
+
+1. Scope
+
+This document describes the technical and organizational measures (TOM) we implement under Art. 32 GDPR to secure the personal data of our users (students, mentors, employees, applicants). It applies to the mentorde.com platform, internal back-office tools, and all data processing engagements with third-party providers (see AVV Registry).
+
+2. Pseudonymization and Encryption (Art. 32(1)(a))
+
+2.1 Encryption in Transit
+- All connections to the platform are made exclusively via HTTPS (TLS 1.2 or higher; TLS 1.3 preferred).
+- HSTS header (Strict-Transport-Security) is active with max-age=31536000.
+- Database connections between the application server and MySQL server are TLS-encrypted.
+- Access to the hosting provider (ALL-INKL.COM) is exclusively via SFTP/SSH; unencrypted FTP is disabled.
+
+2.2 Encryption at Rest
+- Hard drives of the hosting servers (ALL-INKL.COM) are LUKS-encrypted (provider assurance).
+- Database backups are encrypted with AES-256 before being transferred to external storage.
+- Sensitive fields (e.g., passport number, IBAN preview) are pseudonymized in application logic.
+
+2.3 Pseudonymization
+- PostHog analytics uses exclusively anonymous session IDs without direct personal reference.
+- AI Labs requests to OpenAI / Anthropic / Gemini contain a pseudonymized session ID instead of the user ID.
+- Audit logs store user IDs instead of email addresses.
+
+3. Confidentiality (Art. 32(1)(b))
+
+3.1 Physical Access Control
+- Servers are located in certified data centers of the hosting provider (ALL-INKL.COM, Friedersdorf, Germany — ISO 27001).
+- Internal offices (35683 Dillenburg) are secured by access restriction; key register is maintained.
+
+3.2 Logical Access Control
+- Multi-factor authentication (2FA / TOTP) is mandatory for all administrative accounts (Manager, Senior, Dealer roles).
+- Passwords are hashed with bcrypt (cost ≥ 12).
+- Session cookies are HttpOnly + Secure + SameSite=Lax.
+- Brute-force protection via login throttling (5 attempts per 15 minutes).
+- IP-based restrictions for administrative areas (manager/system).
+
+3.3 Authorization Control (Permissions System)
+- Role-based permission model: Manager, Senior Mentor, Dealer, Client, HR.
+- Premium modules are gated through the ModuleAccess system (companies.enabled_modules JSON).
+- Cross-tenant data access is strictly isolated through the BelongsToCompany trait and Eloquent global scope.
+- Need-to-know principle: employees only see data required for their tasks.
+
+3.4 Separation Control
+- Test, staging, and production environments are physically and logically separated.
+- Tenants (companies) are isolated at the database level via company_id.
+
+4. Integrity (Art. 32(1)(b))
+
+4.1 Input Control
+- Audit log documents all security-relevant actions (login, modifications of critical fields, permission changes, data exports).
+- Audit log entries are immutable (append-only) and retained for at least 12 months.
+
+4.2 Transfer Control
+- Data transfers to third countries occur exclusively on the basis of SCCs or DPF (see AVV Registry).
+- API interfaces use token authentication (API keys or OAuth).
+- Webhook receivers validate signatures (e.g., Stripe `Stripe-Signature` header).
+
+4.3 Order Control (Auftragskontrolle)
+- Written DPAs / AVVs exist with all data processors under Art. 28 GDPR (see AVV Registry: 9 providers).
+- Sub-processors of data processors are covered by their DPAs and reviewed as needed.
+
+5. Availability and Resilience (Art. 32(1)(c))
+
+5.1 Availability Control
+- Daily automated database backups (mysqldump) to external storage with 30-day retention.
+- Weekly full-system snapshots by the hosting provider.
+- Uptime monitoring [provider to be specified, e.g., UptimeRobot] with alerts to info@mentorde.com when downtime exceeds 5 minutes.
+- DDoS protection at provider level (ALL-INKL.COM standard protection).
+
+5.2 Recoverability
+- Recovery Time Objective (RTO): max. 4 hours for full database restore.
+- Recovery Point Objective (RPO): max. 24 hours of data loss (daily backup cycle).
+- Restore tests are conducted at least every six months and logged.
+
+6. Procedure for Regular Testing (Art. 32(1)(d))
+
+6.1 Security Review
+- Weekly automated dependency scans (Composer Audit, npm audit) — critical vulnerabilities are patched within 7 days.
+- Semi-annual manual code review of security-critical modules (Auth, Permissions, Document Storage).
+- Annual external penetration tests [as needed — to be introduced as the platform scales].
+
+6.2 Data Protection Review
+- Annual update of the Record of Processing Activities (ROPA) and TOM.
+- Quarterly review of the AVV Registry (sub-processor lists, contract renewals, expiring AVVs).
+- Data Protection Impact Assessment (DPIA) for new modules with high risk (e.g., AI, profiling).
+
+7. Data Processing (Art. 28 GDPR)
+
+All sub-processors are documented in the AVV Registry. Currently:
+- Hosting: ALL-INKL.COM (Germany)
+- Payment: Stripe Payments Europe Ltd. (Ireland)
+- Email: Resend, Inc. (USA — DPF + SCC)
+- Analytics: PostHog Inc. (EU Cloud Frankfurt)
+- AI: OpenAI Ireland, Anthropic PBC, Google Gemini (zero-retention)
+- Calendar: Google Calendar (optional)
+- Communication: WhatsApp / Meta Platforms Ireland Ltd.
+
+Before adding new data processors, a risk assessment (third-country transfer, data categories, technical security) is performed. Approval is granted by management.
+
+8. Employee Training and Obligations
+
+- All employees (full-time, working students, freelancers) sign a data protection commitment under Art. 28(3)(b) GDPR.
+- Onboarding includes a 30-minute data protection training (phishing detection, password hygiene, incident reporting).
+- Annual refresher training with documented attendance.
+
+9. Data Protection Officer / Controller
+
+Currently, the appointment of a DPO is not mandatory (< 20 employees with automated processing). Upon reaching the threshold or upon undertaking processing requiring a DPIA, a DPO will be appointed.
+
+Data protection inquiries are handled by: info@mentorde.com (management).
+
+10. Document Control
+
+- This TOM document is reviewed at least annually and updated immediately upon material changes.
+- Versioning takes place in the internal GDPR Compliance Panel (mentorde.com/manager/gdpr-dashboard).
+- Earlier versions are retained for 6 years (proof obligation).
+
+Last updated: 28 April 2026
+Next review: April 2027
+Responsible: Management of Horizon STS GmbH

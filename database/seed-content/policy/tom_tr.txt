@@ -1,0 +1,125 @@
+Teknik ve Organizasyonel Önlemler (TOM) — mentorde.com
+
+[İÇ DOKÜMAN — kamuya açıklanmaz. DSGVO Madde 32 kapsamında denetim makamlarına ve müşterilere (Joint Controller) karşı kanıt belgesi olarak kullanılır. Stand: Nisan 2026.]
+
+Veri Sorumlusu: Horizon STS GmbH, Herwigstraße 24, 35683 Dillenburg, Geschäftsführer Halil Aktas, HRB 9127 (Amtsgericht Wetzlar).
+
+1. Kapsam
+
+Bu doküman, kullanıcılarımızın (öğrenci, mentor, çalışan, başvuran) kişisel verilerini DSGVO Madde 32 uyarınca güvence altına almak için aldığımız teknik ve organizasyonel önlemleri (TOM) tanımlar. mentorde.com platformu, iç back-office araçları ve tüm üçüncü taraf veri işleme ilişkileri (bkz. AVV Registry) için geçerlidir.
+
+2. Pseudonimleştirme ve Şifreleme (Madde 32 Abs. 1 lit. a)
+
+2.1 İletim Sırasında Şifreleme
+- Platforma tüm bağlantılar yalnızca HTTPS üzerinden gerçekleşir (TLS 1.2 veya üstü; TLS 1.3 tercih edilir).
+- HSTS (Strict-Transport-Security) başlığı max-age=31536000 değeriyle aktiftir.
+- Application Server ile MySQL Server arasındaki veritabanı bağlantıları TLS şifrelidir.
+- Hosting sağlayıcısına (ALL-INKL.COM) erişim yalnızca SFTP/SSH üzerinden olur; şifresiz FTP devre dışıdır.
+
+2.2 Saklama Sırasında Şifreleme
+- Hosting sunucularının diskleri (ALL-INKL.COM) LUKS şifrelidir (sağlayıcı garantisi).
+- Veritabanı yedekleri dış depolama alanına aktarılmadan önce AES-256 ile şifrelenir.
+- Hassas alanlar (örn. pasaport numarası, IBAN önizlemesi) uygulama mantığında pseudonimleştirilir.
+
+2.3 Pseudonimleştirme
+- PostHog analitiği yalnızca anonim oturum kimlikleri kullanır, doğrudan kişisel referans yoktur.
+- AI Labs sorguları (OpenAI / Anthropic / Gemini) kullanıcı kimliği yerine pseudonimleştirilmiş oturum kimliği içerir.
+- Audit log kayıtları e-posta yerine kullanıcı kimliklerini saklar.
+
+3. Gizlilik (Madde 32 Abs. 1 lit. b)
+
+3.1 Fiziksel Erişim Kontrolü
+- Sunucular hosting sağlayıcısının (ALL-INKL.COM, Friedersdorf, Almanya — ISO 27001) sertifikalı veri merkezlerinde bulunur.
+- Kendi ofislerimiz (35683 Dillenburg) erişim kısıtlamasıyla güvence altındadır; anahtar sicili tutulur.
+
+3.2 Mantıksal Erişim Kontrolü
+- Tüm idari hesaplar için iki faktörlü kimlik doğrulama (2FA / TOTP) zorunludur (Manager, Senior, Dealer rolleri).
+- Şifreler bcrypt ile hash'lenir (cost ≥ 12).
+- Session cookie'ler HttpOnly + Secure + SameSite=Lax'tır.
+- Login throttling ile brute-force koruması (15 dakikada 5 deneme).
+- İdari alanlar (manager/system) için IP bazlı kısıtlama.
+
+3.3 Yetkilendirme Kontrolü
+- Rol bazlı yetkilendirme modeli: Manager, Senior Mentor, Dealer, Müşteri, HR.
+- Premium modüller ModuleAccess sistemi üzerinden gated (companies.enabled_modules JSON).
+- Tenant'lar arası veri erişimi BelongsToCompany trait ve Eloquent global scope ile katı şekilde izole edilmiştir.
+- Need-to-know prensibi: çalışanlar yalnızca görevleri için gerekli verileri görür.
+
+3.4 Ayırma Kontrolü
+- Test, staging ve production ortamları fiziksel ve mantıksal olarak ayrıdır.
+- Şirketler (tenants) veritabanı seviyesinde company_id ile izole edilmiştir.
+
+4. Bütünlük (Madde 32 Abs. 1 lit. b)
+
+4.1 Giriş Kontrolü
+- Audit log tüm güvenlik-ilişkili eylemleri (giriş, kritik alan değişiklikleri, yetki değişiklikleri, veri ihracı) belgeler.
+- Audit log kayıtları değiştirilemez (append-only) ve en az 12 ay saklanır.
+
+4.2 Aktarım Kontrolü
+- Üçüncü ülkelere veri aktarımı yalnızca SCC veya DPF temelinde gerçekleşir (bkz. AVV Registry).
+- API arayüzleri token doğrulaması kullanır (API key veya OAuth).
+- Webhook alıcıları imza doğrulaması yapar (örn. Stripe `Stripe-Signature` başlığı).
+
+4.3 İşleme Kontrolü
+- DSGVO Madde 28 uyarınca tüm veri işleyicilerle yazılı DPA/AVV mevcut (bkz. AVV Registry: 9 sağlayıcı).
+- Veri işleyicilerin alt yüklenicileri kendi DPA'larıyla kapsanır ve gerektiğinde incelenir.
+
+5. Erişilebilirlik ve Dayanıklılık (Madde 32 Abs. 1 lit. c)
+
+5.1 Erişilebilirlik Kontrolü
+- Veritabanı için günlük otomatik yedekleme (mysqldump), 30 gün retention ile dış depolamaya.
+- Hosting sağlayıcı tarafından haftalık tam sistem snapshot.
+- Uptime izleme [sağlayıcı belirtilecek, örn. UptimeRobot] — 5 dakikadan fazla kesintide info@mentorde.com'a alarm.
+- Sağlayıcı seviyesinde DDoS koruması (ALL-INKL.COM standart koruma).
+
+5.2 Geri Yüklenebilirlik
+- Recovery Time Objective (RTO): tam veritabanı geri yükleme için maks. 4 saat.
+- Recovery Point Objective (RPO): maks. 24 saatlik veri kaybı (günlük backup döngüsü).
+- Geri yükleme testleri en az 6 ayda bir yapılır ve loglanır.
+
+6. Düzenli Doğrulama Prosedürü (Madde 32 Abs. 1 lit. d)
+
+6.1 Güvenlik İncelemesi
+- Haftalık otomatik bağımlılık taramaları (Composer Audit, npm audit) — kritik açıklar 7 gün içinde patch'lenir.
+- 6 ayda bir güvenlik-kritik modüllerin manuel kod incelemesi (Auth, Permissions, Document Storage).
+- Yıllık dış sızma testi [ihtiyaca göre — büyüme ile birlikte uygulanacak].
+
+6.2 Veri Koruma İncelemesi
+- ROPA (Verarbeitungsverzeichnis) ve TOM dokümanı yıllık güncellenir.
+- AVV Registry üç ayda bir gözden geçirilir (alt-işleyici listeleri, sözleşme yenilenmeleri, biten AVV'ler).
+- Yüksek riskli yeni modüller (örn. yapay zeka, profilleme) için Veri Koruma Etki Değerlendirmesi (DSFA / DPIA).
+
+7. Veri İşleme (Madde 28 DSGVO)
+
+Tüm alt-işleyiciler AVV Registry'de belgelenmiştir. Şu an:
+- Hosting: ALL-INKL.COM (Almanya)
+- Ödeme: Stripe Payments Europe Ltd. (İrlanda)
+- E-posta: Resend, Inc. (ABD — DPF + SCC)
+- Analitik: PostHog Inc. (EU Cloud Frankfurt)
+- Yapay Zeka: OpenAI Ireland, Anthropic PBC, Google Gemini (zero-retention)
+- Takvim: Google Calendar (opsiyonel)
+- İletişim: WhatsApp / Meta Platforms Ireland Ltd.
+
+Yeni veri işleyicilerin eklenmesi öncesi risk değerlendirmesi (üçüncü ülke aktarımı, veri kategorileri, teknik güvenlik) yapılır. Onay yönetim tarafından verilir.
+
+8. Çalışan Eğitimi ve Yükümlülükleri
+
+- Tüm çalışanlar (tam zamanlı, part-time öğrenci, freelancer) DSGVO Madde 28 Abs. 3 lit. b uyarınca veri koruma yükümlülüğü beyanı imzalar.
+- Onboarding 30 dakikalık veri koruma eğitimini içerir (phishing tespiti, şifre hijyeni, vaka raporlama).
+- Yıllık yenileme eğitimi, katılımcı listesi belgelenir.
+
+9. Veri Koruma Sorumlusu
+
+Şu anda DSB (Datenschutzbeauftragter) ataması zorunlu değildir (< 20 çalışan otomatik işleme). Eşik aşıldığında veya DSFA gerektiren işleme yapıldığında DSB atanacaktır.
+
+Veri koruma talepleri: info@mentorde.com (yönetim).
+
+10. Doküman Kontrolü
+
+- Bu TOM dokümanı en az yılda bir gözden geçirilir, esaslı değişikliklerde anında güncellenir.
+- Versiyonlama dahili GDPR Compliance Panel'de yapılır (mentorde.com/manager/gdpr-dashboard).
+- Eski versiyonlar 6 yıl saklanır (kanıtlama yükümlülüğü).
+
+Son Güncelleme: 28 Nisan 2026
+Sonraki İnceleme: Nisan 2027
+Sorumlu: Horizon STS GmbH yönetimi

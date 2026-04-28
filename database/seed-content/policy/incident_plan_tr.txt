@@ -1,0 +1,161 @@
+Veri İhlali Acil Eylem Planı — mentorde.com
+
+[İÇ DOKÜMAN — DSGVO Madde 33 ve 34 uyarınca kişisel veri ihlallerinin tespiti, değerlendirilmesi, bildirimi ve belgelenmesi için prosedür. Stand: Nisan 2026.]
+
+Veri Sorumlusu: Horizon STS GmbH, Herwigstraße 24, 35683 Dillenburg, Geschäftsführer Halil Aktas, HRB 9127 (Amtsgericht Wetzlar).
+
+1. Tanım
+
+DSGVO Madde 4(12) anlamında "veri ihlali" — güvenlik ihlalinin kişisel verilerin kasıtsız veya hukuka aykırı şekilde imha edilmesi, kaybolması, değiştirilmesi, yetkisiz açıklanması veya yetkisiz erişime maruz kalması ile sonuçlanmasıdır.
+
+Örnekler:
+- Veritabanına yetkisiz erişim (hacking, içeriden saldırı)
+- Müşteri verisi içeren şifresiz dizüstünün kaybı
+- Müşteri verisi içeren e-postanın yanlış kişiye gönderilmesi
+- Phishing başarısı: çalışan giriş bilgileri ele geçirildi
+- Hosting sağlayıcısı vakası (örn. ALL-INKL.COM'da veri sızıntısı)
+- Stripe hesap ele geçirme veya ödeme verisi sızıntısı
+- Yanlış yetki ayarı sonucu tenant'lar arası veri erişimi
+- İç back-office araçlarına erişimi olan mobil cihazın kaybı
+
+2. Roller ve Sorumluluklar
+
+| Rol | Sorumlu | Görevler |
+|---|---|---|
+| Yönetim | Halil Aktas | Nihai değerlendirme, otoriteye bildirim, dış iletişim |
+| Teknik Koordinasyon | [İsim / Pozisyon] | Forensik, izolasyon, kurtarma |
+| Veri Koruma İletişimi | info@mentorde.com | Veri sahibi taleplerinin işlenmesi |
+| Dış Tırmanış | [IT-hukuk avukatı — atanacak] | Kritik vakalarda hukuki danışmanlık |
+
+3. Tespit ve İlk Bildirim
+
+3.1 Tespit Kaynakları
+- Otomatik alarmlar: audit log anomalileri, brute-force tespiti, hosting sağlayıcı bildirimleri, Stripe güvenlik e-postaları.
+- Manuel ipuçları: çalışan gözlemleri, müşteri şikayetleri, dış araştırmacı raporları.
+- Üçüncü taraf vakaları: AVV ortakları (Resend, PostHog, AI sağlayıcıları, Stripe) kendi vakalarını 48 saat içinde bize bildirmelidir.
+
+3.2 İç İlk Bildirim
+Şüpheli her durumda 1 saat içinde aşağıdaki yere bildirim YAPILMALI:
+- E-posta: info@mentorde.com (yönetim)
+- Telefon: +49 157 84218282
+
+Zorunlu bilgiler:
+- Vaka ne zaman ve nasıl tespit edildi?
+- Hangi sistemler / veriler etkilenmiş (tahminen)?
+- Vaka devam ediyor mu yoksa kapandı mı?
+- Vakayı kim bildirdi?
+
+4. Müdahale (Anlık Önlemler, T+0 — T+4 saat)
+
+İlk bildirimden hemen sonra şunlar değerlendirilmeli ve gerekirse uygulanmalı:
+
+- Etkilenen sistemleri izole et (örn. sunucuyu ağdan ayır, ele geçirilen hesapları kilitle).
+- Admin hesapları için şifreleri sıfırla, oturumları geçersiz kıl.
+- Etkilenen hesaplar için 2FA tokenlerini yenile.
+- Yedekleri ayrı depoya kopyala (delil koruma).
+- Audit logları manipülasyondan koru (read-only snapshot).
+- Üçüncü taraf vakalarında: API key'leri rotate et (Stripe, Resend, AI sağlayıcıları), webhook imzalarını geçersiz kıl.
+
+5. Değerlendirme (T+1 — T+24 saat)
+
+5.1 DSGVO Madde 33 Risk Değerlendirmesi
+
+Şu faktörleri değerlendir:
+
+| Kriter | Düşük | Orta | Yüksek |
+|---|---|---|---|
+| Etkilenen kişi sayısı | < 10 | 10-1.000 | > 1.000 |
+| Veri hassasiyeti | Pseudonim | İletişim verisi | Pasaport, sağlık, ödeme verisi |
+| Kimliklendirilebilirlik | Anonim | Pseudonim | Doğrudan kimliklendirilebilir |
+| Kötüye kullanım olasılığı | Çok düşük | Olası | Aktif olarak kötüye kullanılıyor |
+| Hasar potansiyeli | İtibar | Taciz | Kimlik hırsızlığı, finansal zarar |
+
+Değerlendirme "doğal kişilerin hak ve özgürlüklerine olası risk" gösteriyorsa → denetim makamına bildirim gerekli (Madde 33).
+
+Değerlendirme "olası YÜKSEK risk" gösteriyorsa → veri sahiplerine ek bildirim gerekli (Madde 34).
+
+5.2 Belgeleme
+Bildirim gerektirmeyen vakalar bile (örn. veri sızıntısı olmadan iç audit bulgusu) iç vaka kayıt defterine kaydedilir — risk seviyesinden bağımsız (Madde 33(5)).
+
+6. Denetim Makamına Bildirim (T+24 — T+72 saat)
+
+Bildirim gerekiyorsa: vakanın öğrenilmesinden itibaren 72 saat içinde bildirim YAPILMALI (Madde 33(1)). Geç bildirim gerekçesiyle birlikte yapılır.
+
+Yetkili denetim makamı:
+
+Der Hessische Beauftragte für Datenschutz und Informationsfreiheit
+Postfach 3163, 65021 Wiesbaden, Almanya
+Telefon: +49 611 1408-0
+E-posta: poststelle@datenschutz.hessen.de
+Online bildirim formu: www.datenschutz.hessen.de/datenpanne
+
+Bildirim içeriği (Madde 33(3)):
+- İhlal türünün tanımı (etkilenen veri ve kişi kategorileri, yaklaşık etkilenen sayı).
+- Veri koruma iletişiminin adı ve iletişim bilgileri (info@mentorde.com).
+- Vakanın olası sonuçları.
+- Halihazırda alınan önlemler.
+
+Bilgi eksikse aşamalı tamamlanabilir (Madde 33(4)).
+
+7. Veri Sahiplerine Bildirim (Madde 34)
+
+Olası YÜKSEK risk durumunda veri sahipleri gecikmeksizin ihlal hakkında bilgilendirilmeli — anlayabilecekleri dilde (kullanıcı diline göre Türkçe / Almanca / İngilizce).
+
+İstisnalar (Madde 34(3)):
+- Veri uygun şekilde şifrelenmiş (yetkisizler için şifreleme etkili).
+- Yüksek riski ortadan kaldıran sonraki önlemler alınmış.
+- Orantısız çaba → bireysel bildirim yerine kamuya açık duyuru.
+
+Veri sahibi bildirim içeriği:
+- İhlalin tanımı (basit dille).
+- Veri koruma iletişiminin adı ve iletişim bilgileri.
+- Olası sonuçlar.
+- Risk azaltma önerileri (örn. şifre değiştir, banka kartı blokla).
+- Alınan ve planlanan önlemler.
+
+İletim kanalı: Resend transactional e-posta tüm etkilenenlere. Çok büyük vakalarda ek olarak mentorde.com/incident'ta kamu duyurusu.
+
+8. Kurtarma ve Düzeltme (T+24 saat — T+30 gün)
+
+- Sistemleri temizle (malware kaldır, backdoor kapat).
+- Yedekleri geri yükle (veri kaybı varsa).
+- Güvenlik açıklarını kapat (yamalar, sertleştirilmiş yapılandırma).
+- Ele geçirilen kimlik bilgilerini yenile (Stripe API key, Resend API key, AI API key'leri, admin şifreleri).
+- Gerekirse: dış forensik analiz.
+
+9. Sonradan Değerlendirme (Post-Incident, T+30 — T+60 gün)
+
+- Tüm taraflarla "lessons-learned" oturumu.
+- TOM (teknik / organizasyonel) bulgulara göre güncelle.
+- Bu acil eylem planında boşluk varsa güncelle.
+- Spesifik vaka kalıplarına yönelik çalışan eğitimi.
+- Vaka kayıt defteri girişini tamamla (lessons learned, önleyici tedbirler).
+
+10. Vaka Kayıt Defteri (Madde 33(5))
+
+Tüm ihlaller — bildirilsin veya bildirilmesin — iç defterde belgelenir. Minimum kayıt:
+- Vaka numarası + tespit tarihi/saati.
+- Vaka ve etkilenen verilerin tanımı.
+- Risk değerlendirmesi (gerekçe).
+- Alınan önlemler.
+- Otorite / veri sahiplerine bildirim (evet/hayır + tarih).
+- Çözüme kadar geçen süre.
+- Lessons learned.
+
+Saklama süresi: 6 yıl.
+
+11. Eğitim ve Testler
+
+- Tüm çalışanlar yılda en az bir kez bu acil eylem planı hakkında bilgilendirilir.
+- 6 ayda bir tabletop egzersizi (teorik vaka simülasyonu).
+- Sistemde esaslı değişiklik (örn. yeni AVV partner, yeni ödeme yöntemi) durumunda planı güncelle.
+
+12. Acil Durum İletişimi
+
+Yönetim 7/24 erişilebilir:
+- E-posta: info@mentorde.com
+- Telefon: +49 157 84218282 (mesai dışı saatlerde de aktif)
+
+Son Güncelleme: 28 Nisan 2026
+Sonraki İnceleme: Nisan 2027
+Sorumlu: Horizon STS GmbH yönetimi
