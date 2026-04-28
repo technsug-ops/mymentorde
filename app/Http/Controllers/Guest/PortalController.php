@@ -589,36 +589,104 @@ class PortalController extends Controller
         $assignedEmail = trim((string) ($guest?->assigned_senior_email ?? ''));
         $slug = null;
         $seniorName = null;
+        $emptyReason = null;
+        $autoProvisioned = false;
 
-        if ($assignedEmail !== '') {
+        if ($assignedEmail === '') {
+            // Atanmış danışman yok — empty state'de mesaj/destek yönlendirmesi
+            $emptyReason = 'no_senior';
+        } else {
             $senior = \App\Models\User::query()
                 ->withoutGlobalScopes()
                 ->where('email', $assignedEmail)
                 ->first(['id', 'name']);
-            if ($senior) {
-                $setting = \App\Models\SeniorBookingSetting::query()
-                    ->withoutGlobalScopes()
-                    ->where('senior_user_id', $senior->id)
-                    ->where('is_active', true)
-                    ->first(['public_slug']);
-                if ($setting && trim((string) $setting->public_slug) !== '') {
-                    $slug = $setting->public_slug;
-                    $seniorName = $senior->name;
-                }
+            if (!$senior) {
+                $emptyReason = 'no_senior';
+            } else {
+                $seniorName = $senior->name ?: $assignedEmail;
+                $companyId  = (int) ($guest?->company_id ?? (app()->bound('current_company_id') ? app('current_company_id') : 1));
+                [$slug, $autoProvisioned] = $this->ensureSeniorBookingReady($senior, $companyId);
             }
         }
 
-        // Atanmış danışman yok / booking ayarı yapılmamış → public listeye düş
-        if ($slug === null) {
-            return redirect()->route('booking.landing');
-        }
-
         $data = $this->viewData->build($request, $guest);
-        $data['bookingSlug']   = $slug;
-        $data['seniorName']    = $seniorName ?: $assignedEmail;
-        $data['bookingEmbedUrl'] = route('booking.public.show', ['slug' => $slug]);
+        $data['bookingSlug']     = $slug;
+        $data['seniorName']      = $seniorName;
+        $data['bookingEmbedUrl'] = $slug ? route('booking.public.show', ['slug' => $slug]) : null;
+        $data['emptyReason']     = $emptyReason;
+        $data['autoProvisioned'] = $autoProvisioned;
 
         return view('guest.booking', $data);
+    }
+
+    /**
+     * Atanmış senior'un randevu altyapısını lazy-create eder. Hiç ayar yapılmamışsa
+     * default değerlerle (Pzt-Cum 09-17, 30dk slot, is_public=false) bir
+     * SeniorBookingSetting + SeniorAvailabilityPattern üretir, böylece guest
+     * her halükarda iç widget'tan randevu alabilir. Senior dilediği zaman
+     * /senior/booking-settings'ten kişiselleştirir.
+     *
+     * @return array{0: ?string, 1: bool}  [slug, autoProvisioned]
+     */
+    private function ensureSeniorBookingReady(\App\Models\User $senior, int $companyId): array
+    {
+        $setting = \App\Models\SeniorBookingSetting::query()
+            ->withoutGlobalScopes()
+            ->where('senior_user_id', $senior->id)
+            ->first(['id', 'public_slug', 'is_active']);
+
+        // Var ve aktif + slug dolu → direkt kullan
+        if ($setting && (bool) $setting->is_active && trim((string) $setting->public_slug) !== '') {
+            return [(string) $setting->public_slug, false];
+        }
+
+        // Aktif olmayanı veya slug'sızı düzelt; yoksa yeni yarat — her halükarda
+        // guest widget göstereceğiz
+        $autoSlug = trim((string) ($setting->public_slug ?? '')) !== ''
+            ? (string) $setting->public_slug
+            : ('mentor-' . substr(md5($senior->id . '|' . $senior->email), 0, 10));
+
+        if (!$setting) {
+            $setting = \App\Models\SeniorBookingSetting::create([
+                'company_id'        => $companyId,
+                'senior_user_id'    => $senior->id,
+                'slot_duration'     => 30,
+                'buffer_minutes'    => 5,
+                'min_notice_hours'  => 12,
+                'max_future_days'   => 30,
+                'timezone'          => 'Europe/Berlin',
+                'is_public'         => false, // sadece içeride erişilebilir
+                'public_slug'       => $autoSlug,
+                'display_name'      => $senior->name,
+                'welcome_message'   => null,
+                'is_active'         => true,
+            ]);
+        } else {
+            $setting->forceFill([
+                'is_active'   => true,
+                'public_slug' => $autoSlug,
+            ])->save();
+        }
+
+        // Default haftalık takvim — Pzt(0)..Cum(4) 09:00-17:00, sadece pattern hiç yoksa
+        $hasPattern = \App\Models\SeniorAvailabilityPattern::query()
+            ->withoutGlobalScopes()
+            ->where('senior_user_id', $senior->id)
+            ->exists();
+        if (!$hasPattern) {
+            for ($w = 0; $w <= 4; $w++) {
+                \App\Models\SeniorAvailabilityPattern::create([
+                    'company_id'     => $companyId,
+                    'senior_user_id' => $senior->id,
+                    'weekday'        => $w,
+                    'start_time'     => '09:00:00',
+                    'end_time'       => '17:00:00',
+                    'is_active'      => true,
+                ]);
+            }
+        }
+
+        return [$autoSlug, true];
     }
 
     // ── Sözleşme ─────────────────────────────────────────────────────────────
