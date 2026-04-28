@@ -22,6 +22,9 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     Route::post('/registration/documents/upload', [GuestWorkflowController::class, 'uploadDocument'])->middleware('throttle:60,1')->name('guest.registration.documents.upload');
     Route::delete('/registration/documents/{document}', [GuestWorkflowController::class, 'deleteDocument'])->middleware(['guest.owns.document', 'throttle:60,1'])->name('guest.registration.documents.delete');
     Route::get('/services', [GuestPortalController::class, 'services'])->name('guest.services');
+
+    // Akıllı randevu yönlendirici — atanmış danışmana direkt götürür, yoksa public listeye
+    Route::get('/randevu', [GuestPortalController::class, 'bookingRedirect'])->name('guest.booking');
     Route::post('/services/select-package', [GuestWorkflowController::class, 'selectPackage'])->middleware('throttle:60,1')->name('guest.services.select-package');
     Route::post('/services/add-extra', [GuestWorkflowController::class, 'addExtraService'])->middleware('throttle:60,1')->name('guest.services.add-extra');
     Route::delete('/services/remove-extra/{extraCode}', [GuestWorkflowController::class, 'removeExtraService'])->middleware('throttle:60,1')->name('guest.services.remove-extra');

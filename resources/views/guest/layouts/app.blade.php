@@ -235,8 +235,8 @@
             <div class="nav-section">
                 <div class="nav-section-label">İletişim</div>
                 @module('booking')
-                <a href="{{ route('booking.landing') }}"
-                   class="nav-link {{ request()->is('randevu','book*') ? 'active' : '' }}">
+                <a href="{{ route('guest.booking') }}"
+                   class="nav-link {{ request()->is('guest/randevu','randevu','book*') ? 'active' : '' }}">
                     <span class="nav-icon">📅</span> Randevu Al
                 </a>
                 @endmodule

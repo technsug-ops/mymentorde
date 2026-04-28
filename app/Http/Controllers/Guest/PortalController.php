@@ -568,6 +568,43 @@ class PortalController extends Controller
         return view('guest.services', $data);
     }
 
+    /**
+     * Akıllı randevu yönlendirici — guest'in atanmış danışmanı varsa onun
+     * widget sayfasına (/book/{slug}), yoksa public landing'e (/randevu) gider.
+     *
+     * Niçin: Sidebar'daki "Randevu Al" linki public landing'e atıyordu →
+     * giriş yapmış aday tekrar mentor seçmek zorunda kalıyordu, kendi
+     * danışmanının takvimini bulamıyordu.
+     */
+    public function bookingRedirect(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $guest = $this->resolveGuest($request);
+
+        $assignedEmail = trim((string) ($guest?->assigned_senior_email ?? ''));
+        if ($assignedEmail !== '') {
+            $senior = \App\Models\User::query()
+                ->withoutGlobalScopes()
+                ->where('email', $assignedEmail)
+                ->first(['id']);
+            if ($senior) {
+                $setting = \App\Models\SeniorBookingSetting::query()
+                    ->withoutGlobalScopes()
+                    ->where('senior_user_id', $senior->id)
+                    ->where('is_active', true)
+                    ->first(['public_slug', 'is_public']);
+                // Atanmış danışmanın aktif booking ayarı varsa direkt onun
+                // widget'ına yolla (public_slug zorunlu, is_public=false olsa
+                // bile authenticated guest erişebilir — controller kontrol eder)
+                if ($setting && trim((string) $setting->public_slug) !== '') {
+                    return redirect()->route('booking.public.show', ['slug' => $setting->public_slug]);
+                }
+            }
+        }
+
+        // Atanmış danışman yok veya booking ayarı yok → public mentor listesi
+        return redirect()->route('booking.landing');
+    }
+
     // ── Sözleşme ─────────────────────────────────────────────────────────────
 
     public function contract(Request $request)
