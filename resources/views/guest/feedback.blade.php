@@ -163,7 +163,7 @@
                 @endphp
                 @foreach($types as $val => [$ico, $lbl])
                 <button type="button" class="fb-type-tab {{ $val==='general' ? 'active' : '' }}"
-                        data-val="{{ $val }}" onclick="setType(this)">
+                        data-val="{{ $val }}">
                     <span class="fb-type-ico">{{ $ico }}</span>
                     <span class="fb-type-lbl">{{ $lbl }}</span>
                 </button>
@@ -183,7 +183,7 @@
             <div style="font-size:var(--tx-xs);font-weight:700;color:var(--u-muted);margin-bottom:6px;">Memnuniyetiniz</div>
             <div class="fb-meter" id="meter-row">
                 @foreach([1=>'😞',2=>'😕',3=>'😐',4=>'😊',5=>'😄'] as $v => $em)
-                <div class="fb-meter-face" data-val="{{ $v }}" onclick="setMeter({{ $v }})">
+                <div class="fb-meter-face" data-val="{{ $v }}">
                     <span class="face-emoji">{{ $em }}</span>
                     <span class="face-lbl">{{ ['','Kötü','Fena','Orta','İyi','Harika'][$v] }}</span>
                 </div>
@@ -193,7 +193,7 @@
             <div style="font-size:var(--tx-xs);font-weight:700;color:var(--u-muted);margin-bottom:4px;margin-top:10px;">Puan (1–5)</div>
             <div class="fb-stars" id="star-row">
                 @for($i = 1; $i <= 5; $i++)
-                <span class="fb-star" data-val="{{ $i }}" onclick="setStar({{ $i }})">★</span>
+                <span class="fb-star" data-val="{{ $i }}">★</span>
                 @endfor
             </div>
             <div class="fb-star-label" id="star-lbl" style="min-height:16px;"></div>
@@ -218,7 +218,7 @@
         <div class="fb-nps-row" id="nps-row">
             @for($i = 0; $i <= 10; $i++)
             @php $cls = $i<=6 ? 'det' : ($i<=8 ? 'pas' : 'pro'); @endphp
-            <button type="button" class="fb-nps-btn {{ $cls }}" data-val="{{ $i }}" onclick="setNps({{ $i }})">{{ $i }}</button>
+            <button type="button" class="fb-nps-btn {{ $cls }}" data-val="{{ $i }}">{{ $i }}</button>
             @endfor
         </div>
         <div class="fb-nps-labels">
@@ -232,7 +232,7 @@
             <textarea id="nps-comment" rows="3" placeholder="İsterseniz açıklayın..."></textarea>
         </div>
 
-        <button class="fb-submit" onclick="submitNps()">📊 NPS Gönder</button>
+        <button class="fb-submit" id="nps-submit" type="button">📊 NPS Gönder</button>
         <div id="nps-msg" style="display:none;margin-top:10px;padding:10px 14px;
              background:#f0fdf4;border:1px solid #86efac;border-radius:8px;
              color:#16a34a;font-size:13px;font-weight:700;">
@@ -334,7 +334,7 @@
 @endif
 
 @push('scripts')
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 var selectedStar = 0, selectedNps = null;
 var starLabels = ['', 'Çok Kötü 😞', 'Kötü 😕', 'Orta 😐', 'İyi 😊', 'Mükemmel 😄'];
 
@@ -391,8 +391,28 @@ async function submitNps() {
     }
 }
 
+// CSP-safe event bindings — inline onclick yerine addEventListener
 window.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#star-row .fb-star').forEach(el => el.classList.remove('lit'));
+
+    // Type tabs (Genel / Süreç / Danışman / Portal)
+    document.querySelectorAll('.fb-type-tab').forEach(btn => {
+        btn.addEventListener('click', () => setType(btn));
+    });
+    // Meter (5 emoji yüz: kötü → harika)
+    document.querySelectorAll('#meter-row .fb-meter-face').forEach(btn => {
+        btn.addEventListener('click', () => setMeter(parseInt(btn.dataset.val, 10)));
+    });
+    // Star (1-5)
+    document.querySelectorAll('#star-row .fb-star').forEach(btn => {
+        btn.addEventListener('click', () => setStar(parseInt(btn.dataset.val, 10)));
+    });
+    // NPS (0-10)
+    document.querySelectorAll('#nps-row .fb-nps-btn').forEach(btn => {
+        btn.addEventListener('click', () => setNps(parseInt(btn.dataset.val, 10)));
+    });
+    // NPS Gönder
+    document.getElementById('nps-submit')?.addEventListener('click', submitNps);
 });
 </script>
 @endpush
