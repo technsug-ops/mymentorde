@@ -952,10 +952,10 @@
             <div class="cat-tabs-wrap">
                 <button type="button" class="cat-tabs-arrow prev" aria-label="Önceki" data-cattabs-dir="-1">‹</button>
                 <div class="cat-tabs" id="catTabsTrack">
-                    <button class="cat-tab active" data-cattab="all">Tümü</button>
                     @foreach($topCats as $tc)
                         <button class="cat-tab" data-cattab="{{ $tc }}">{{ $documentTopCategoryLabels[$tc] ?? $tc }}@if(($categoryMissing[$tc] ?? 0) > 0)<span class="tab-badge red">{{ $categoryMissing[$tc] }}</span>@endif</button>
                     @endforeach
+                    <button class="cat-tab active" data-cattab="all">Tümü</button>
                 </div>
                 <button type="button" class="cat-tabs-arrow next" aria-label="Sonraki" data-cattabs-dir="1">›</button>
             </div>

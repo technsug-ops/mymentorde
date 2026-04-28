@@ -12,12 +12,13 @@ class DocumentCategory extends Model
      * guest_required_documents satırı olarak saklanır, kendi sort_order'ı ile.
      */
     public const TOP_CATEGORIES = [
-        'uni_assist' => 'Uni Asist',
-        'vize'       => 'Vize',
-        'dil_okulu'  => 'Dil Okulu',
-        'uni_kayit'  => 'Üniversite Kayıt',
-        'yurt'       => 'İkamet',
-        'diger'      => 'Diğer',
+        'uni_assist'  => 'Uni Asist',
+        'vize'        => 'Vize',
+        'vize_surec'  => 'Vize Süreç Belgeleri',
+        'dil_okulu'   => 'Dil Okulu',
+        'uni_kayit'   => 'Üniversite Kayıt',
+        'yurt'        => 'İkamet',
+        'diger'       => 'Diğer',
     ];
 
     /**

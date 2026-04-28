@@ -119,6 +119,7 @@
 .srf-label-row label { font-weight: 700; color: var(--u-text); font-size: 13px; }
 .required-star { color: var(--u-danger); font-weight: 700; }
 .srf-field-error { color: var(--u-danger); font-size: 13px; }
+.srf-field-help { color: var(--u-muted); font-size: 12px; line-height: 1.5; margin-top: 4px; padding: 6px 10px; background: rgba(37,99,235,.04); border-left: 3px solid var(--u-brand,#2563eb); border-radius: 0 6px 6px 0; }
 
 /* Prefilled + filled state — B9: minimal ✓ sembolü */
 .srf-prefilled {
@@ -325,6 +326,7 @@
                                 $label       = (string) ($field['label'] ?? $key);
                                 $required    = !empty($field['required']);
                                 $placeholder = (string) ($field['placeholder'] ?? '');
+                                $helpText    = (string) ($field['help_text'] ?? '');
                                 $options     = is_array($field['options'] ?? null) ? $field['options'] : [];
                                 $value       = old($key, $draft[$key] ?? ($guestApplication?->{$key} ?? ''));
                                 // B10: application_country DB'de 'de' (code) — eski label kayıtları normalize et
@@ -422,6 +424,9 @@
                                            @if($inputmode) inputmode="{{ $inputmode }}" @endif
                                            @if($isGrade) step="0.01" min="0" max="100" @endif
                                            @if($pattern) pattern="{{ $pattern }}" title="{{ $patternTitle }}" @endif>
+                                @endif
+                                @if($helpText !== '')
+                                    <div class="srf-field-help">{{ $helpText }}</div>
                                 @endif
                                 @error($key)
                                     <div class="srf-field-error">{{ $message }}</div>

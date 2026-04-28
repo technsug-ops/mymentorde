@@ -427,7 +427,7 @@
                     groups[top].push(c);
                 });
                 catSelect.innerHTML = '<option value="">Belge seç...</option>';
-                var labelMap = { uni_assist:'Uni Asist', vize:'Vize', dil_okulu:'Dil Okulu', uni_kayit:'Üniversite Kayıt', yurt:'İkamet', diger:'Diğer' };
+                var labelMap = { uni_assist:'Uni Asist', vize:'Vize', vize_surec:'Vize Süreç Belgeleri', dil_okulu:'Dil Okulu', uni_kayit:'Üniversite Kayıt', yurt:'İkamet', diger:'Diğer' };
                 Object.keys(labelMap).forEach(function(top){
                     if (!groups[top] || !groups[top].length) return;
                     var og = document.createElement('optgroup'); og.label = labelMap[top];

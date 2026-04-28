@@ -154,6 +154,9 @@ class GuestRegistrationFormCatalog
                     self::f('postal_code', 'Posta kodu *', 'text', true, 32),
                     self::f('district', 'İlçe *', 'text', true, 120),
                     self::f('province', 'İl *', 'text', true, 120),
+                    self::f('mail_recipient_name', 'Adresinizdeki 2. Posta Yetkilisi *', 'text', true, 180,
+                        placeholder: 'Örn: Ayşe Yılmaz',
+                        help_text: 'Belirttiğiniz adreste sizin adınıza gelen postaları (uni-assist sonuç, vize evrakı, banka kartı vb.) alacak ikinci kişinin adı soyadı.'),
                     // Level 0 (apply'dan)
                     self::f('application_type', 'Başvuru Tipi *', 'select', true, 40, options: self::applicationTypeOptions(), level: 1),
                     // Level 1 (User listesinde "Hedef bölüm")
