@@ -474,6 +474,12 @@
                    class="nav-link {{ request()->is('manager/system/roles*') ? 'active' : '' }}">
                     <span class="nav-icon">🔑</span> Rol Yönetimi
                 </a>
+                @module('page_visibility')
+                <a href="/manager/page-visibility"
+                   class="nav-link {{ request()->is('manager/page-visibility*') ? 'active' : '' }}">
+                    <span class="nav-icon">🎛</span> Sayfa Görünürlüğü
+                </a>
+                @endmodule
                 <a href="/manager/system/ip-rules"
                    class="nav-link {{ request()->is('manager/system/ip-rules*') ? 'active' : '' }}">
                     <span class="nav-icon">🌐</span> IP Erişim Kuralları

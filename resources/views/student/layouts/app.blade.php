@@ -303,10 +303,12 @@
                    class="nav-link {{ request()->routeIs('student.info.success-stories') ? 'active' : '' }}">
                     <span class="nav-icon">⭐</span> Başarı Hikayeleri
                 </a>
+                @pageVisible('discover')
                 <a href="{{ route('student.discover') }}"
                    class="nav-link {{ request()->routeIs('student.discover') ? 'active' : '' }}">
                     <span class="nav-icon">🧭</span> Icerikler
                 </a>
+                @endpageVisible
                 <a href="{{ route('student.saved') }}"
                    class="nav-link {{ request()->routeIs('student.saved') ? 'active' : '' }}">
                     <span class="nav-icon">🔖</span> Favorilerim

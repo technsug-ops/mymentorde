@@ -209,6 +209,18 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
+        // Sayfa görünürlüğü direktifi — manager rol-bazlı sayfa toggle'ı için.
+        // Kullanım: @pageVisible('discover') ... @endpageVisible
+        // Exception-safe: DB hatasında sayfa default açık kalsın.
+        Blade::if('pageVisible', function (string $pageKey, ?string $role = null): bool {
+            try {
+                return \App\Support\PageAccess::visible($pageKey, $role);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('@pageVisible directive error', ['page' => $pageKey, 'error' => $e->getMessage()]);
+                return true; // fail-open
+            }
+        });
+
         View::composer('*', function ($view): void {
             $theme = PortalTheme::resolve();
             $view->with('uiTheme', $theme);

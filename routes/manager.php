@@ -150,6 +150,10 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::put('/manager/required-documents/{document}',         [\App\Http\Controllers\Manager\ManagerRequiredDocumentController::class, 'update'])->name('manager.required-documents.update');
     Route::delete('/manager/required-documents/{document}',      [\App\Http\Controllers\Manager\ManagerRequiredDocumentController::class, 'destroy'])->name('manager.required-documents.destroy');
 
+    // ─── Sayfa Görünürlüğü Kontrol Paneli (Premium: page_visibility) ────────
+    Route::get('/manager/page-visibility',  [\App\Http\Controllers\Manager\ManagerPageVisibilityController::class, 'index'])->name('manager.page-visibility.index');
+    Route::post('/manager/page-visibility', [\App\Http\Controllers\Manager\ManagerPageVisibilityController::class, 'update'])->name('manager.page-visibility.update');
+
     // ─── Belge Talep Linki (Premium: doc_request mod.) ──────────────────────
     // Manager aday öğrenciden belirli bir belgeyi tek-kullanımlık link ile ister.
     // Aday linke tıklar, telefonla fotoğraf çeker / dosya yükler. Login gerekmez.

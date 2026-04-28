@@ -32,7 +32,8 @@ class ModuleAccess
         'contracts_hub',
         'multi_provider_ai',
         'ai_labs',
-        'doc_request', // Premium: tek-kullanımlık link ile aday öğrenciden belge talep
+        'doc_request',     // Premium: tek-kullanımlık link ile aday öğrenciden belge talep
+        'page_visibility', // Premium: rol-bazlı sayfa görünürlüğü (manager kontrol panelinden)
     ];
 
     public static function enabled(string $module, ?int $companyId = null): bool

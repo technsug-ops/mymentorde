@@ -279,10 +279,12 @@
                    class="nav-link {{ request()->routeIs('guest.vize-guide') ? 'active' : '' }}">
                     <span class="nav-icon">🛂</span> Vize & Sperrkonto
                 </a>
+                @pageVisible('discover')
                 <a href="{{ route('guest.discover') }}"
                    class="nav-link {{ request()->routeIs('guest.discover') ? 'active' : '' }}">
                     <span class="nav-icon">📚</span> Tüm İçerikler
                 </a>
+                @endpageVisible
                 <a href="{{ route('guest.saved') }}"
                    class="nav-link {{ request()->routeIs('guest.saved') ? 'active' : '' }}">
                     <span class="nav-icon">🔖</span> Favorilerim
