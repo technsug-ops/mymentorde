@@ -393,6 +393,11 @@ class PortalController extends Controller
             ->map(fn (Document $d) => (string) ($d->category->code ?? ''))
             ->filter()->values()->all();
 
+        // Journey bar için step durumları: form / paket / sözleşme
+        $data['formCompleted']  = (bool) $guest?->registration_form_submitted_at;
+        $data['packageSelected'] = (bool) $guest?->package_selected_at;
+        $data['contractStatus'] = (string) ($guest?->contract_status ?? 'not_requested');
+
         $data['requiredDocumentChecklist'] = $this->requiredDocumentsByApplicationType(
             (string) ($guest?->application_type ?? ''),
             $uploadedCodes

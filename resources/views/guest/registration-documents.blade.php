@@ -131,8 +131,9 @@
 .sdoc .doc-btn.primary { background:var(--brand); border-color:var(--brand); color:#fff; } .sdoc .doc-btn.primary:hover { background:var(--brand-mid); }
 .sdoc .doc-btn.danger { border-color:var(--danger); color:var(--danger); }
 .sdoc .doc-btn.small { padding:5px 10px; font-size:11px; }
-.sdoc .upload-zone { grid-column:1/-1; padding:16px; margin-top:8px; background:var(--line-light); border-radius:var(--radius-xs); border:2px dashed var(--line); display:none; }
+.sdoc .upload-zone { grid-column:1/-1; padding:16px; margin-top:8px; background:var(--line-light); border-radius:var(--radius-xs); border:2px dashed var(--line); display:none; transition:all .15s; }
 .sdoc .upload-zone.open { display:block; }
+.sdoc .upload-zone.dragging { border-color:var(--brand); background:rgba(13,148,136,.08); border-style:solid; transform:scale(1.005); }
 .sdoc .upload-zone-inner { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
 .sdoc .upload-zone .uz-icon { font-size:28px; opacity:0.3; } .sdoc .upload-zone .uz-text { font-size:12px; color:var(--muted); } .sdoc .upload-zone .uz-text strong { color:var(--brand); cursor:pointer; }
 .sdoc .upload-zone .selected-file { font-size:12px; color:var(--text); font-weight:600; display:none; align-items:center; gap:6px; } .sdoc .upload-zone .selected-file.show { display:flex; }
@@ -180,7 +181,10 @@
     else { $scenario = 'start'; }
 
     $formDone = !empty($formCompleted ?? false);
-    $docsDone = $scenario === 'done';
+    // Belgeler step'i: zorunlu yüklendiği anda "tamamlandı" sayılır (onay danışmanın işi).
+    // 'done' senaryosu (tüm belgeler approved) ekstra bonus göstergesi olarak kalır.
+    $docsDone = $allRequiredDone;
+    $docsApproved = $scenario === 'done';
     $packageDone = !empty($packageSelected ?? false);
     $contractDoneFlag = ($contractStatus ?? '') === 'approved';
 
@@ -338,9 +342,16 @@
     </div>
 </div>
 
-@if(session('docs_complete'))
-<div id="docsCompleteModal" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;">
-    <div style="background:#fff;border-radius:20px;max-width:420px;width:100%;padding:32px 28px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:dcPop .4s cubic-bezier(.34,1.56,.64,1);"><div style="font-size:56px;margin-bottom:12px;">🎉</div><div style="font-size:22px;font-weight:800;margin-bottom:8px;">Tebrikler!</div><div style="font-size:14px;color:#64748b;line-height:1.6;margin-bottom:24px;">Tüm belgeler başarıyla yüklendi.<br>Şimdi hizmet paketini seçebilirsin.</div><a href="{{ route('guest.services') }}" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:12px;background:linear-gradient(135deg,#0d9488,#14b8a6);color:#fff;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(13,148,136,.3);">Paketlere Git →</a><div style="margin-top:14px;"><button type="button" id="docsCompleteClose" style="background:none;border:none;font-size:13px;color:#64748b;cursor:pointer;padding:4px 8px;">Sonra bakarım</button></div></div>
+@if(session('docs_complete') || $docsDone)
+<div id="docsCompleteModal" data-flash="{{ session('docs_complete') ? '1' : '0' }}" data-done="{{ $docsDone ? '1' : '0' }}" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:16px;">
+    <div style="background:#fff;border-radius:20px;max-width:440px;width:100%;padding:32px 28px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:dcPop .4s cubic-bezier(.34,1.56,.64,1);">
+        <div style="font-size:56px;margin-bottom:12px;">🎉</div>
+        <div style="font-size:22px;font-weight:800;margin-bottom:8px;">Tebrikler!</div>
+        <div style="font-size:14px;color:#64748b;line-height:1.6;margin-bottom:6px;">Tüm zorunlu belgelerin yüklendi.<br>Danışmanın inceleyecek; sen şimdi paketini seçebilirsin.</div>
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:22px;">5 saniye sonra Paketler sayfasına yönlendirileceksin…</div>
+        <a id="docsCompleteGo" href="{{ route('guest.services') }}" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:12px;background:linear-gradient(135deg,#0d9488,#14b8a6);color:#fff;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(13,148,136,.3);">Paketlere Git Şimdi →</a>
+        <div style="margin-top:14px;"><button type="button" id="docsCompleteClose" style="background:none;border:none;font-size:13px;color:#64748b;cursor:pointer;padding:4px 8px;">Sonra bakarım</button></div>
+    </div>
 </div>
 <style>@keyframes dcPop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}</style>
 @endif
@@ -369,7 +380,70 @@
     document.querySelectorAll('[data-preview]').forEach(function(b){b.addEventListener('click',function(){openPreview(this.dataset.preview)})});
     var cb=document.getElementById('preview-close-btn');if(cb)cb.addEventListener('click',closePreview);
     if(modal)modal.addEventListener('click',function(e){if(e.target===this)closePreview()});
+    // Belgeler tamam tebrik modal — POST sonrası flash'ta her zaman, refresh sonrası 1 kez
+    var dcModal = document.getElementById('docsCompleteModal');
+    if (dcModal) {
+        var seenKey = 'mentorde_docs_complete_seen_v1';
+        var fromFlash = dcModal.dataset.flash === '1';
+        var showOnce = fromFlash || !localStorage.getItem(seenKey);
+        if (showOnce) {
+            dcModal.style.display = 'flex';
+            try { localStorage.setItem(seenKey, '1'); } catch(e) {}
+
+            // 5 saniyelik auto-redirect — ama sadece flash'ta (POST sonrası).
+            // Refresh'te kullanıcı zaten okuduğu için zorla yönlendirmeyiz.
+            if (fromFlash) {
+                var goLink = document.getElementById('docsCompleteGo');
+                var redirectTimer = setTimeout(function(){
+                    if (goLink && dcModal.style.display !== 'none') goLink.click();
+                }, 5000);
+                // Modal kapatılırsa timer iptal
+                var dcCancel = document.getElementById('docsCompleteClose');
+                if (dcCancel) dcCancel.addEventListener('click', function(){ clearTimeout(redirectTimer); });
+            }
+        }
+    }
     var dc=document.getElementById('docsCompleteClose');if(dc)dc.addEventListener('click',function(){var m=document.getElementById('docsCompleteModal');if(m)m.style.display='none'});
+
+    // Drag-drop file upload — her .upload-zone bir drop hedefidir
+    document.querySelectorAll('.upload-zone').forEach(function(zone){
+        var input = zone.querySelector('input[type="file"]');
+        if(!input) return;
+        var counter = 0; // dragenter/dragleave child element race fix
+        zone.addEventListener('dragenter', function(e){
+            e.preventDefault(); e.stopPropagation();
+            counter++;
+            zone.classList.add('dragging');
+        });
+        zone.addEventListener('dragover', function(e){
+            e.preventDefault(); e.stopPropagation();
+            if(e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+        });
+        zone.addEventListener('dragleave', function(e){
+            e.preventDefault(); e.stopPropagation();
+            counter--;
+            if(counter <= 0){ counter = 0; zone.classList.remove('dragging'); }
+        });
+        zone.addEventListener('drop', function(e){
+            e.preventDefault(); e.stopPropagation();
+            counter = 0;
+            zone.classList.remove('dragging');
+            if(!e.dataTransfer || !e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
+            try{
+                var dt = new DataTransfer();
+                dt.items.add(e.dataTransfer.files[0]);
+                input.files = dt.files;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }catch(err){ console.error('Drag-drop upload failed', err); }
+        });
+    });
+    // Browser default drop davranışını sayfa genelinde engelle (yanlış yere bırakılırsa
+    // dosyayı tarayıcı açmasın)
+    ['dragover','drop'].forEach(function(ev){
+        document.body.addEventListener(ev, function(e){
+            if(!e.target.closest('.upload-zone')) e.preventDefault();
+        });
+    });
 })();
 </script>
 @endsection

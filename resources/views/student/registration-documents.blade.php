@@ -212,6 +212,7 @@
     display:none; transition:all 0.2s;
 }
 .sdoc .upload-zone.open { display:block; }
+.sdoc .upload-zone.dragging { border-color:var(--brand); background:rgba(13,148,136,.08); border-style:solid; transform:scale(1.005); }
 .sdoc .upload-zone-inner { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
 .sdoc .upload-zone .uz-icon { font-size:28px; opacity:0.3; }
 .sdoc .upload-zone .uz-text { font-size:12px; color:var(--muted); }
@@ -1424,6 +1425,44 @@
             activeTab.scrollIntoView({ block: 'nearest', inline: 'center' });
         }
     }
+
+    // Drag-drop file upload — her .upload-zone bir drop hedefi
+    document.querySelectorAll('.upload-zone').forEach(function(zone){
+        var input = zone.querySelector('input[type="file"]');
+        if(!input) return;
+        var counter = 0;
+        zone.addEventListener('dragenter', function(e){
+            e.preventDefault(); e.stopPropagation();
+            counter++;
+            zone.classList.add('dragging');
+        });
+        zone.addEventListener('dragover', function(e){
+            e.preventDefault(); e.stopPropagation();
+            if(e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+        });
+        zone.addEventListener('dragleave', function(e){
+            e.preventDefault(); e.stopPropagation();
+            counter--;
+            if(counter <= 0){ counter = 0; zone.classList.remove('dragging'); }
+        });
+        zone.addEventListener('drop', function(e){
+            e.preventDefault(); e.stopPropagation();
+            counter = 0;
+            zone.classList.remove('dragging');
+            if(!e.dataTransfer || !e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
+            try{
+                var dt = new DataTransfer();
+                dt.items.add(e.dataTransfer.files[0]);
+                input.files = dt.files;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }catch(err){ console.error('Drag-drop upload failed', err); }
+        });
+    });
+    ['dragover','drop'].forEach(function(ev){
+        document.body.addEventListener(ev, function(e){
+            if(!e.target.closest('.upload-zone')) e.preventDefault();
+        });
+    });
 })();
 </script>
 @endsection
