@@ -130,11 +130,15 @@ class ContractsHubController extends Controller
                 'id', 'first_name', 'last_name', 'email',
                 'application_type', 'contract_status', 'contract_signed_at', 'contract_approved_at',
                 'contract_template_code', 'converted_student_id', 'contract_signed_file_path',
+                'contract_digital_signed_at', 'contract_snapshot_text',
             ]);
 
         foreach ($guestContracts as $g) {
             $appType = (string) ($g->application_type ?: 'bachelor');
-            $hasFile = !empty($g->contract_signed_file_path);
+            // Fiziksel imzalı PDF VEYA dijital imza akışı (signed-file endpoint metinden PDF üretir)
+            $hasFile = !empty($g->contract_signed_file_path)
+                    || !empty($g->contract_digital_signed_at)
+                    || trim((string) ($g->contract_snapshot_text ?? '')) !== '';
             $status  = $g->contract_status === 'approved' ? 'approved' : 'signed_uploaded';
             $rows->push([
                 'id'          => 'guest-' . $g->id,
@@ -230,20 +234,34 @@ class ContractsHubController extends Controller
 
     /**
      * Guest'in imzalı sözleşme PDF'ini indirir (manager yetkisiyle).
+     *
+     * Fiziksel dosya yoksa (dijital imza akışında contract_signed_file_path boş kalır)
+     * ContractWorkflowController::serveSignedFile fallback'i devreye girer ve
+     * sözleşme metni + annex'ler + dijital imza bilgisinden PDF üretir.
      */
-    public function downloadGuestContract(GuestApplication $guest): BinaryFileResponse
+    public function downloadGuestContract(GuestApplication $guest)
     {
         abort_if(Auth::user()?->role !== 'manager', 403);
 
         $path = trim((string) ($guest->contract_signed_file_path ?? ''));
         $abs  = storage_path('app/' . $path);
-        abort_if($path === '' || !file_exists($abs), 404, 'İmzalı sözleşme dosyası bulunamadı.');
 
-        return response()->download($abs, 'hizmet-sozlesme-G-' . $guest->id . '.' . pathinfo($path, PATHINFO_EXTENSION));
+        // Fiziksel dosya varsa direkt indir
+        if ($path !== '' && file_exists($abs)) {
+            return response()->download($abs, 'hizmet-sozlesme-G-' . $guest->id . '.' . pathinfo($path, PATHINFO_EXTENSION));
+        }
+
+        // Yoksa: digital sign akışı için snapshot+annex'ten PDF üret (signed-file endpoint)
+        if (!empty($guest->contract_digital_signed_at) || trim((string) ($guest->contract_snapshot_text ?? '')) !== '') {
+            return redirect()->route('manager.contract-template.signed-file', ['guest' => $guest->id]);
+        }
+
+        abort(404, 'İmzalı sözleşme dosyası bulunamadı.');
     }
 
     /**
      * Inline preview — modal iframe için dosyayı stream eder (Content-Disposition inline).
+     * Dijital imza akışında fiziksel dosya yoksa yine PDF render fallback'i kullanılır.
      */
     public function previewGuestContract(GuestApplication $guest)
     {
@@ -251,9 +269,16 @@ class ContractsHubController extends Controller
 
         $path = trim((string) ($guest->contract_signed_file_path ?? ''));
         $abs  = storage_path('app/' . $path);
-        abort_if($path === '' || !file_exists($abs), 404);
 
-        return response()->file($abs);
+        if ($path !== '' && file_exists($abs)) {
+            return response()->file($abs);
+        }
+
+        if (!empty($guest->contract_digital_signed_at) || trim((string) ($guest->contract_snapshot_text ?? '')) !== '') {
+            return redirect()->route('manager.contract-template.signed-file', ['guest' => $guest->id]);
+        }
+
+        abort(404);
     }
 
     /**

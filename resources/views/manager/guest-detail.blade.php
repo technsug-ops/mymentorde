@@ -126,6 +126,29 @@
                     <td>{{ optional($guest->contract_signed_at)->format('d.m.Y') ?: '–' }}</td></tr>
                 <tr><td class="lbl">Sözleşme Onay</td>
                     <td>{{ optional($guest->contract_approved_at)->format('d.m.Y') ?: '–' }}</td></tr>
+                @php
+                    $hasSignedFile = !empty($guest->contract_signed_file_path);
+                    $hasDigitalSig = !empty($guest->contract_digital_signed_at);
+                    $hasSnapshot   = trim((string) ($guest->contract_snapshot_text ?? '')) !== '';
+                    $canViewSigned = $hasSignedFile || $hasDigitalSig || $hasSnapshot;
+                @endphp
+                @if($canViewSigned)
+                <tr><td class="lbl">İmzalı Belge</td>
+                    <td>
+                        <a href="{{ route('manager.contract-template.signed-file', ['guest' => $guest->id]) }}"
+                           target="_blank"
+                           class="badge ok"
+                           style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+                            📄 İmzalı Sözleşmeyi Görüntüle / İndir
+                        </a>
+                        @if($hasDigitalSig && !$hasSignedFile)
+                            <div style="font-size:11px;color:#64748b;margin-top:4px;">
+                                Dijital imza ({{ optional($guest->contract_digital_signed_at)->format('d.m.Y H:i') }})
+                                — PDF anlık olarak metin + ek + imza bilgisinden üretilir.
+                            </div>
+                        @endif
+                    </td></tr>
+                @endif
             </table>
         </section>
 
