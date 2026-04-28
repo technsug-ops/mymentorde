@@ -71,7 +71,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     Route::get('/registration/documents/{document}/serve', [GuestWorkflowController::class, 'serveDocument'])->middleware(['guest.owns.document', 'throttle:60,1'])->name('guest.registration.documents.serve');
 
     // ── Ödeme & Referral ─────────────────────────────────────────────────────
-    Route::post('/services/payment-request', [GuestWorkflowController::class, 'requestPayment'])->middleware('throttle:3,1')->name('guest.services.payment-request');
+    Route::post('/services/payment-request', [GuestWorkflowController::class, 'requestPayment'])->middleware('throttle:10,1')->name('guest.services.payment-request');
     Route::post('/referral/create', [GuestWorkflowController::class, 'createReferralLink'])->middleware('throttle:5,1')->name('guest.referral.create');
     Route::get('/referral/stats', [GuestWorkflowController::class, 'referralStats'])->name('guest.referral.stats');
 
