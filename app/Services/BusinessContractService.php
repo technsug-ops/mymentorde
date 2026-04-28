@@ -2,10 +2,14 @@
 
 namespace App\Services;
 
+use App\Mail\ContractCompletedMail;
 use App\Models\BusinessContract;
 use App\Models\BusinessContractTemplate;
 use App\Models\Dealer;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class BusinessContractService
@@ -88,6 +92,72 @@ class BusinessContractService
             'approved_at' => now(),
             'approved_by' => $approvedBy,
         ]);
+
+        // Sözleşme onaylandığında karşı tarafa zengin mail (PDF + meta) gönder.
+        // Panel notification ayrı yerde tetikleniyor; bu yalnızca e-posta tarafı.
+        $this->sendCompletedMail($contract);
+    }
+
+    private function sendCompletedMail(BusinessContract $contract): void
+    {
+        // Kim alacak? Dealer (e-posta dealer.email'inden) veya staff (User.email)
+        $recipientEmail = '';
+        $recipientName  = '';
+
+        if ($contract->dealer_id) {
+            $dealer = Dealer::find($contract->dealer_id);
+            if ($dealer) {
+                $recipientEmail = trim((string) ($dealer->email ?? ''));
+                $recipientName  = trim((string) ($dealer->contact_name ?? $dealer->name ?? ''));
+            }
+        } elseif ($contract->user_id) {
+            $user = User::query()->withoutGlobalScope('company')->find($contract->user_id);
+            if ($user) {
+                $recipientEmail = trim((string) ($user->email ?? ''));
+                $recipientName  = trim((string) ($user->name ?? ''));
+            }
+        }
+
+        if ($recipientEmail === '') return;
+        if ($recipientName === '') $recipientName = 'Sayın Yetkilimiz';
+
+        $attachments = [];
+        if (!empty($contract->signed_file_path)) {
+            $attachments[] = (string) $contract->signed_file_path;
+        }
+
+        // contract.meta JSON içinde ek dosya yolları varsa
+        $meta = is_array($contract->meta) ? $contract->meta : [];
+        if (!empty($meta['annex_files']) && is_array($meta['annex_files'])) {
+            foreach ($meta['annex_files'] as $f) {
+                $path = is_array($f) ? (string) ($f['path'] ?? '') : (string) $f;
+                if ($path !== '') $attachments[] = $path;
+            }
+        }
+        $annexNotes = [];
+        if (!empty($meta['annex_notes']) && is_array($meta['annex_notes'])) {
+            foreach ($meta['annex_notes'] as $note) {
+                $note = trim((string) (is_array($note) ? ($note['note'] ?? '') : $note));
+                if ($note !== '') $annexNotes[] = $note;
+            }
+        }
+
+        try {
+            Mail::to($recipientEmail)->queue(new ContractCompletedMail(
+                recipientName: $recipientName,
+                contractTitle: (string) ($contract->title ?? 'İş Sözleşmesi'),
+                contractNo: (string) ($contract->contract_no ?? null) ?: null,
+                attachmentPaths: $attachments,
+                annexNotes: $annexNotes,
+                portalUrl: url('/manager/business-contracts/' . $contract->id),
+            ));
+        } catch (\Throwable $e) {
+            Log::warning('business-contract.completed.mail.failed', [
+                'contract_id' => $contract->id,
+                'email'       => $recipientEmail,
+                'error'       => $e->getMessage(),
+            ]);
+        }
     }
 
     public function cancel(BusinessContract $contract): void

@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Manager\Concerns;
 
+use App\Mail\ContractCompletedMail;
 use App\Models\GuestApplication;
 use App\Services\NotificationService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 trait ContractHelperTrait
 {
@@ -88,17 +91,87 @@ trait ContractHelperTrait
         // E-posta bildirimi
         $email = trim((string) ($guest->email ?? ''));
         if ($email !== '') {
-            $notificationService->send([
-                'channel'         => 'email',
-                'category'        => $category,
-                'user_id'         => $userId,
-                'student_id'      => $studentId,
-                'company_id'      => (int) ($guest->company_id ?: 0),
-                'recipient_email' => $email,
-                'subject'         => $msg['subject'],
-                'body'            => $msg['body'],
-                'source_type'     => 'guest_application',
-                'source_id'       => (string) $guest->id,
+            // manager_contract_approved → zengin mail (PDF + ek maddeler) gönder.
+            // Diğer event'ler için mevcut basit notification yeter.
+            if ($sourceType === 'manager_contract_approved') {
+                $this->sendContractCompletedMail($guest);
+            } else {
+                $notificationService->send([
+                    'channel'         => 'email',
+                    'category'        => $category,
+                    'user_id'         => $userId,
+                    'student_id'      => $studentId,
+                    'company_id'      => (int) ($guest->company_id ?: 0),
+                    'recipient_email' => $email,
+                    'subject'         => $msg['subject'],
+                    'body'            => $msg['body'],
+                    'source_type'     => 'guest_application',
+                    'source_id'       => (string) $guest->id,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Sözleşme onaylandığında öğrenciye zengin mail gönder:
+     * imzalı sözleşme PDF'i + varsa ek maddeler. Panel bildirimi yine yapılır,
+     * bu sadece e-posta tarafıdır.
+     */
+    private function sendContractCompletedMail(GuestApplication $guest): void
+    {
+        $email = trim((string) ($guest->email ?? ''));
+        if ($email === '') return;
+
+        $recipient = trim((string) ($guest->first_name ?? '') . ' ' . (string) ($guest->last_name ?? ''));
+        if ($recipient === '') $recipient = 'Sayın Öğrencimiz';
+
+        // İmzalı sözleşme PDF
+        $attachments = [];
+        $signedPath = trim((string) ($guest->contract_signed_file_path ?? ''));
+        if ($signedPath !== '') {
+            $attachments[] = $signedPath;
+        }
+
+        // Ek annex dosyaları (contract_annex_files JSON kolonu varsa)
+        $annexFiles = $guest->contract_annex_files ?? null;
+        if (is_array($annexFiles)) {
+            foreach ($annexFiles as $f) {
+                $path = is_array($f) ? trim((string) ($f['path'] ?? '')) : trim((string) $f);
+                if ($path !== '') $attachments[] = $path;
+            }
+        }
+
+        // Ek metin notları (contract_annex_text JSON kolonu varsa)
+        $annexNotes = [];
+        $annexText = $guest->contract_annex_text ?? null;
+        if (is_array($annexText)) {
+            foreach ($annexText as $t) {
+                $note = is_array($t) ? (string) ($t['note'] ?? '') : (string) $t;
+                $note = trim($note);
+                if ($note !== '') $annexNotes[] = $note;
+            }
+        } elseif (is_string($annexText) && trim($annexText) !== '') {
+            $annexNotes[] = trim($annexText);
+        }
+
+        $contractTitle = trim((string) ($guest->contract_template_code ?? '')) ?: 'Öğrenci Eğitim Sözleşmesi';
+        $contractNo    = trim((string) ($guest->tracking_token ?? ''));
+        $portalUrl     = url('/guest/contract');
+
+        try {
+            Mail::to($email)->queue(new ContractCompletedMail(
+                recipientName: $recipient,
+                contractTitle: $contractTitle,
+                contractNo: $contractNo ?: null,
+                attachmentPaths: $attachments,
+                annexNotes: $annexNotes,
+                portalUrl: $portalUrl,
+            ));
+        } catch (\Throwable $e) {
+            Log::warning('contract.completed.mail.failed', [
+                'guest_id' => $guest->id,
+                'email'    => $email,
+                'error'    => $e->getMessage(),
             ]);
         }
     }
