@@ -102,6 +102,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
             'ticket.center.view',
             'ticket.center.route',
             'dam.view', 'dam.download', 'dam.upload', 'dam.update', 'dam.delete', 'dam.folder.manage', 'dam.admin',
+            'doc_request.use',
         ],
         self::ROLE_SYSTEM_ADMIN => [
             'config.view',
@@ -217,6 +218,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         'auto_assign_enabled',
         'can_view_guest_pool',
         'is_active',
+        'can_request_documents',
         'password',
         'bio',
         'expertise_tags',
@@ -340,6 +342,11 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         $fallback = self::ROLE_DEFAULT_PERMISSION_CODES[(string) $this->role] ?? [];
         foreach ($fallback as $code) {
             $codes[(string) $code] = true;
+        }
+
+        // Per-user "Belge Talep Et" yetkisi (manager senior'lara tek tek verir)
+        if (!empty($this->can_request_documents)) {
+            $codes['doc_request.use'] = true;
         }
 
         $this->_permissionCodesCache = array_keys($codes);

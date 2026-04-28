@@ -352,6 +352,12 @@
             <div style="font-weight:700;font-size:var(--tx-base);">Yüklenen Belgeler</div>
             <div style="display:flex;align-items:center;gap:8px;">
                 <span style="font-size:var(--tx-xs);color:var(--u-muted);">{{ $documents->count() }} belge</span>
+                @module('doc_request')
+                <button type="button" id="docReqOpenBtn"
+                        style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;font-size:var(--tx-xs);font-weight:600;color:#fff;background:linear-gradient(135deg,#1e40af,#3b5fcc);border:none;border-radius:6px;cursor:pointer;">
+                    📲 Belge Talep Et
+                </button>
+                @endmodule
                 @if($documents->isNotEmpty())
                     <a href="{{ route('manager.guest.documents.zip', $guest->id) }}"
                        style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;font-size:var(--tx-xs);font-weight:600;color:#fff;background:#7c3aed;border-radius:6px;text-decoration:none;">
@@ -575,4 +581,182 @@
     });
 })();
 </script>
+
+@module('doc_request')
+{{-- ── Belge Talep Linki Modal (Premium: doc_request) ─────────────────────── --}}
+<div id="docReqModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:#fff;border-radius:14px;max-width:520px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);">
+        <div style="padding:18px 22px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;">
+            <strong style="font-size:15px;">📲 Belge Talep Linki Oluştur</strong>
+            <button type="button" id="docReqCloseBtn" style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;">✕</button>
+        </div>
+        <div id="docReqBody" style="padding:18px 22px;">
+            <p style="font-size:13px;color:#475569;line-height:1.5;margin:0 0 14px;">
+                Aday öğrenciye gönderilecek tek-kullanımlık link oluştur. Aday telefonunda açıp belgeyi fotoğraflayabilir.
+            </p>
+
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                <label style="display:flex;flex-direction:column;gap:4px;">
+                    <span style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;">İstenen Belge</span>
+                    <select id="docReqCategory" style="padding:9px 11px;border-radius:8px;border:1px solid #cbd5e1;font-size:13px;">
+                        <option value="">— Yükleniyor —</option>
+                    </select>
+                </label>
+
+                <label style="display:flex;flex-direction:column;gap:4px;">
+                    <span style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;">Geçerlilik Süresi</span>
+                    <select id="docReqExpiry" style="padding:9px 11px;border-radius:8px;border:1px solid #cbd5e1;font-size:13px;">
+                        <option value="24">24 saat</option>
+                        <option value="48" selected>48 saat (önerilen)</option>
+                        <option value="72">3 gün</option>
+                        <option value="168">7 gün</option>
+                    </select>
+                </label>
+
+                <label style="display:flex;flex-direction:column;gap:4px;">
+                    <span style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;">Özel Mesaj (opsiyonel)</span>
+                    <textarea id="docReqMessage" rows="2" maxlength="500"
+                        style="padding:9px 11px;border-radius:8px;border:1px solid #cbd5e1;font-size:13px;font-family:inherit;resize:vertical;"
+                        placeholder="Örn: Pasaportunuzu net çekin, köşeleri görünsün."></textarea>
+                </label>
+            </div>
+
+            <button type="button" id="docReqGenBtn"
+                    style="margin-top:16px;width:100%;padding:12px 18px;border:none;border-radius:10px;background:linear-gradient(135deg,#1e40af,#3b5fcc);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">
+                🔗 Linki Oluştur
+            </button>
+
+            <div id="docReqResult" style="display:none;margin-top:16px;padding:14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;">
+                <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:8px;">✅ Link hazır — adaya gönder:</div>
+                <input type="text" id="docReqUrl" readonly
+                       style="width:100%;padding:8px 10px;border:1px solid #bbf7d0;border-radius:6px;font-family:ui-monospace,monospace;font-size:11.5px;background:#fff;margin-bottom:10px;">
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button type="button" id="docReqCopyBtn"
+                            style="flex:1;min-width:100px;padding:8px 12px;border:1px solid #16a34a;background:#fff;color:#166534;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">
+                        📋 Kopyala
+                    </button>
+                    <a id="docReqWhatsAppBtn" target="_blank" href="#"
+                       style="flex:1;min-width:100px;padding:8px 12px;background:#25d366;color:#fff;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;text-align:center;">
+                        💬 WhatsApp'la Gönder
+                    </a>
+                </div>
+                <div style="font-size:11px;color:#65a30d;margin-top:8px;line-height:1.5;">
+                    Bu link tek-kullanımlık. Aday yüklediğinde otomatik geçersizleşir.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    var openBtn = document.getElementById('docReqOpenBtn');
+    var modal   = document.getElementById('docReqModal');
+    var closeBtn = document.getElementById('docReqCloseBtn');
+    var catSelect = document.getElementById('docReqCategory');
+    var expirySelect = document.getElementById('docReqExpiry');
+    var messageInput = document.getElementById('docReqMessage');
+    var genBtn = document.getElementById('docReqGenBtn');
+    var resultBox = document.getElementById('docReqResult');
+    var urlInput = document.getElementById('docReqUrl');
+    var copyBtn = document.getElementById('docReqCopyBtn');
+    var waBtn = document.getElementById('docReqWhatsAppBtn');
+
+    if (!openBtn) return;
+
+    var GUEST_ID = {{ $guest->id }};
+    var CSRF = '{{ csrf_token() }}';
+    var INDEX_URL = "{{ route('manager.guest.document-tokens.index', $guest->id) }}";
+    var STORE_URL = "{{ route('manager.guest.document-tokens.store', $guest->id) }}";
+
+    function loadCategories(){
+        catSelect.innerHTML = '<option value="">— Yükleniyor —</option>';
+        fetch(INDEX_URL, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(r => r.json())
+            .then(data => {
+                var groups = {};
+                (data.categories || []).forEach(function(c){
+                    var top = c.top_category_code || 'diger';
+                    if (!groups[top]) groups[top] = [];
+                    groups[top].push(c);
+                });
+                catSelect.innerHTML = '<option value="">Belge seç...</option>';
+                var labelMap = { uni_assist:'Uni Asist', vize:'Vize', dil_okulu:'Dil Okulu', uni_kayit:'Üniversite Kayıt', yurt:'İkamet', diger:'Diğer' };
+                Object.keys(labelMap).forEach(function(top){
+                    if (!groups[top] || !groups[top].length) return;
+                    var og = document.createElement('optgroup');
+                    og.label = labelMap[top];
+                    groups[top].forEach(function(c){
+                        var opt = document.createElement('option');
+                        opt.value = c.code;
+                        opt.textContent = c.name_tr + (c.name_de ? ' / ' + c.name_de : '');
+                        og.appendChild(opt);
+                    });
+                    catSelect.appendChild(og);
+                });
+            })
+            .catch(() => { catSelect.innerHTML = '<option value="">Yükleme hatası</option>'; });
+    }
+
+    function openModal(){
+        modal.style.display = 'flex';
+        resultBox.style.display = 'none';
+        messageInput.value = '';
+        loadCategories();
+    }
+    function closeModal(){ modal.style.display = 'none'; }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
+
+    genBtn.addEventListener('click', function(){
+        var cat = catSelect.value;
+        if (!cat) { alert('Lütfen bir belge seç.'); return; }
+        genBtn.disabled = true;
+        genBtn.textContent = '⏳ Oluşturuluyor...';
+        fetch(STORE_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': CSRF,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({
+                category_code: cat,
+                expires_hours: parseInt(expirySelect.value, 10) || 48,
+                custom_message: messageInput.value || null,
+            })
+        })
+        .then(r => r.json().then(d => ({ ok: r.ok, data: d })))
+        .then(res => {
+            genBtn.disabled = false;
+            genBtn.textContent = '🔗 Linki Oluştur';
+            if (!res.ok) { alert(res.data.error || 'Hata oluştu.'); return; }
+            urlInput.value = res.data.url;
+            var msg = 'Merhaba, MentorDE\'den belge talebimiz var. Lütfen aşağıdaki linke tıklayıp belgeyi yükleyin:\n\n' + res.data.url;
+            waBtn.href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+            resultBox.style.display = 'block';
+        })
+        .catch(() => {
+            genBtn.disabled = false;
+            genBtn.textContent = '🔗 Linki Oluştur';
+            alert('Bağlantı hatası.');
+        });
+    });
+
+    copyBtn.addEventListener('click', function(){
+        urlInput.select();
+        navigator.clipboard.writeText(urlInput.value).then(function(){
+            copyBtn.textContent = '✓ Kopyalandı';
+            setTimeout(function(){ copyBtn.textContent = '📋 Kopyala'; }, 2000);
+        }).catch(function(){
+            document.execCommand('copy');
+        });
+    });
+})();
+</script>
+@endmodule
+
 @endpush

@@ -390,6 +390,18 @@ Route::post('/language', function(\Illuminate\Http\Request $r) {
     return back();
 })->middleware('throttle:60,1')->name('language.switch');
 
+// ── Public Belge Yükleme (Premium: doc_request modülü) ────────────────────────
+// Manager'dan aday öğrenciye gönderilen tek-kullanımlık link. Login gerekmez;
+// token URL parametresi yetki kanıtıdır. /u/{token}.
+Route::get('/u/{token}',  [\App\Http\Controllers\PublicDocumentUploadController::class, 'show'])
+    ->where('token', '[A-Za-z0-9]{20,64}')
+    ->middleware('throttle:30,1')
+    ->name('public.document-upload.show');
+Route::post('/u/{token}', [\App\Http\Controllers\PublicDocumentUploadController::class, 'store'])
+    ->where('token', '[A-Za-z0-9]{20,64}')
+    ->middleware('throttle:10,1')
+    ->name('public.document-upload.store');
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

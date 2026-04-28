@@ -23,6 +23,18 @@ Route::middleware(['company.context', 'auth', 'senior.role'])->group(function ()
     Route::get('/senior/guests/{guest}/documents/{document}/serve', [SeniorPortalController::class, 'guestDocumentServe'])->name('senior.guest.document.serve');
     Route::get('/senior/guests/{guest}/documents/{document}/download', [SeniorPortalController::class, 'guestDocumentDownload'])->name('senior.guest.document.download');
     Route::get('/senior/guests/{guest}/documents/zip', [SeniorPortalController::class, 'guestDocumentsZip'])->name('senior.guest.documents.zip');
+
+    // ─── Belge Talep Linki (Premium: doc_request mod. + doc_request.use izni) ─
+    // Senior bu özelliği kullanabilmek için manager'dan 'doc_request.use' izni almalı.
+    // Aynı controller'ı kullanıyoruz; izin kontrolü authorizeUse()'ta yapılıyor.
+    Route::get('/senior/guests/{guest}/document-tokens',                [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'index'])->name('senior.guest.document-tokens.index');
+    Route::post('/senior/guests/{guest}/document-tokens',               [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'store'])->name('senior.guest.document-tokens.store');
+    Route::delete('/senior/guests/{guest}/document-tokens/{token}',     [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'destroy'])->name('senior.guest.document-tokens.destroy');
+
+    // Öğrenci (student) için aynı CRUD
+    Route::get('/senior/students/{studentId}/document-tokens',           [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'indexForStudent'])->name('senior.student.document-tokens.index');
+    Route::post('/senior/students/{studentId}/document-tokens',          [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'storeForStudent'])->name('senior.student.document-tokens.store');
+    Route::delete('/senior/students/{studentId}/document-tokens/{token}', [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'destroyForStudent'])->name('senior.student.document-tokens.destroy');
     Route::get('/senior/students', [SeniorStudentController::class, 'students'])->name('senior.students');
     Route::get('/senior/students/export-csv', [SeniorStudentController::class, 'studentsExportCsv'])->name('senior.students.export-csv');
     Route::get('/senior/registration-documents', [SeniorPortalController::class, 'registrationDocuments'])->name('senior.registration-documents');

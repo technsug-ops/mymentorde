@@ -90,6 +90,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/staff/{user}',                       [StaffController::class, 'show'])->name('manager.staff.show');
     Route::put('/manager/staff/{user}',                       [StaffController::class, 'update'])->name('manager.staff.update');
     Route::post('/manager/staff/{user}/toggle',               [StaffController::class, 'toggle'])->name('manager.staff.toggle');
+    Route::post('/manager/staff/{user}/toggle-doc-request',   [StaffController::class, 'toggleDocRequest'])->name('manager.staff.toggle-doc-request');
     Route::post('/manager/staff/{user}/kpi-targets',          [StaffController::class, 'setKpiTargets'])->name('manager.staff.kpi-targets');
     Route::post('/manager/staff/bulk',                         [StaffController::class, 'bulkAction'])->name('manager.staff.bulk');
 
@@ -138,6 +139,43 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::put('/manager/university-requirements/{map}',        [ManagerPortalController::class, 'universityRequirementUpdate'])->name('manager.university-requirements.update');
     Route::delete('/manager/university-requirements/{map}',     [ManagerPortalController::class, 'universityRequirementDelete'])->name('manager.university-requirements.delete');
     Route::get('/manager/university-requirements/lookup',       [ManagerPortalController::class, 'universityRequirementLookup'])->name('manager.university-requirements.lookup');
+
+    // ─── Belge Listesi Yönetimi (CRUD) ──────────────────────────────────────
+    // Kayıt formu sonrası öğrenciden istenen belgelerin tanımlandığı katalog.
+    // Bir belge birden fazla top kategoride etiketlenebilir (multi-tag).
+    Route::get('/manager/required-documents',                    [\App\Http\Controllers\Manager\ManagerRequiredDocumentController::class, 'index'])->name('manager.required-documents.index');
+    Route::get('/manager/required-documents/create',             [\App\Http\Controllers\Manager\ManagerRequiredDocumentController::class, 'create'])->name('manager.required-documents.create');
+    Route::post('/manager/required-documents',                   [\App\Http\Controllers\Manager\ManagerRequiredDocumentController::class, 'store'])->name('manager.required-documents.store');
+    Route::get('/manager/required-documents/{document}/edit',    [\App\Http\Controllers\Manager\ManagerRequiredDocumentController::class, 'edit'])->name('manager.required-documents.edit');
+    Route::put('/manager/required-documents/{document}',         [\App\Http\Controllers\Manager\ManagerRequiredDocumentController::class, 'update'])->name('manager.required-documents.update');
+    Route::delete('/manager/required-documents/{document}',      [\App\Http\Controllers\Manager\ManagerRequiredDocumentController::class, 'destroy'])->name('manager.required-documents.destroy');
+
+    // ─── Belge Talep Linki (Premium: doc_request mod.) ──────────────────────
+    // Manager aday öğrenciden belirli bir belgeyi tek-kullanımlık link ile ister.
+    // Aday linke tıklar, telefonla fotoğraf çeker / dosya yükler. Login gerekmez.
+    Route::get('/manager/guests/{guest}/document-tokens',                [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'index'])->name('manager.guest.document-tokens.index');
+    Route::post('/manager/guests/{guest}/document-tokens',               [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'store'])->name('manager.guest.document-tokens.store');
+    Route::delete('/manager/guests/{guest}/document-tokens/{token}',     [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'destroy'])->name('manager.guest.document-tokens.destroy');
+
+    // Aynı endpoint mantığı, ama öğrenci (StudentAssignment.student_id) için
+    Route::get('/manager/students/{studentId}/document-tokens',          [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'indexForStudent'])->name('manager.student.document-tokens.index');
+    Route::post('/manager/students/{studentId}/document-tokens',         [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'storeForStudent'])->name('manager.student.document-tokens.store');
+    Route::delete('/manager/students/{studentId}/document-tokens/{token}', [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'destroyForStudent'])->name('manager.student.document-tokens.destroy');
+
+    // HR onboarding — Çalışan/personel (User) için
+    Route::get('/manager/hr/persons/{user}/document-tokens',             [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'indexForUser'])->name('manager.user.document-tokens.index');
+    Route::post('/manager/hr/persons/{user}/document-tokens',            [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'storeForUser'])->name('manager.user.document-tokens.store');
+    Route::delete('/manager/hr/persons/{user}/document-tokens/{token}',  [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'destroyForUser'])->name('manager.user.document-tokens.destroy');
+
+    // Dealer KYC — Bayi için (code ile lookup)
+    Route::get('/manager/dealers/{code}/document-tokens',                [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'indexForDealer'])->name('manager.dealer.document-tokens.index');
+    Route::post('/manager/dealers/{code}/document-tokens',               [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'storeForDealer'])->name('manager.dealer.document-tokens.store');
+    Route::delete('/manager/dealers/{code}/document-tokens/{token}',     [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'destroyForDealer'])->name('manager.dealer.document-tokens.destroy');
+
+    // Contract — İmzalı PDF geri yükleme (login'siz public link)
+    Route::get('/manager/business-contracts/{businessContract}/document-tokens',          [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'indexForContract'])->name('manager.contract.document-tokens.index');
+    Route::post('/manager/business-contracts/{businessContract}/document-tokens',         [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'storeForContract'])->name('manager.contract.document-tokens.store');
+    Route::delete('/manager/business-contracts/{businessContract}/document-tokens/{token}', [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'destroyForContract'])->name('manager.contract.document-tokens.destroy');
 
     // ─── Katman 2 — Dashboard Alt Modüller ──────────────────────────────────
     Route::get('/manager/revenue-analytics', [ManagerAnalyticsController::class, 'revenueAnalytics'])->name('manager.revenue-analytics');

@@ -490,10 +490,55 @@
                 </div>
             </form>
         </div>
+
+        @module('doc_request')
+            @if(in_array($user->role, ['senior','mentor']))
+                {{-- Premium: Belge Talep Etme Yetkisi (per-user toggle) --}}
+                <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--u-line);">
+                    <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--u-muted);margin-bottom:8px;">
+                        📲 Premium Yetkiler
+                        <span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:#fff;background:#7c3aed;padding:1px 6px;border-radius:8px;">PREMIUM</span>
+                    </div>
+                    <div style="background:linear-gradient(135deg,rgba(99,102,241,.06) 0%,rgba(139,92,246,.06) 100%);border:1px solid rgba(124,58,237,.18);border-radius:8px;padding:10px 12px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                            <div style="flex:1;min-width:180px;">
+                                <div style="font-size:12px;font-weight:700;color:var(--u-text);">Belge Talep Etme</div>
+                                <div style="font-size:10.5px;color:var(--u-muted);line-height:1.4;margin-top:2px;">
+                                    Aday öğrenciye tek-kullanımlık link gönderip belge isteyebilsin.
+                                </div>
+                            </div>
+                            <form method="POST" action="{{ route('manager.staff.toggle-doc-request', $user->id) }}" style="margin:0;">
+                                @csrf
+                                <button type="submit"
+                                        class="btn {{ $user->can_request_documents ? 'warn' : 'ok' }}"
+                                        style="font-size:10.5px;padding:5px 12px;font-weight:700;">
+                                    {{ $user->can_request_documents ? '🔒 Kapat' : '🔓 Aç' }}
+                                </button>
+                            </form>
+                        </div>
+                        @if($user->can_request_documents)
+                            <div style="margin-top:6px;font-size:10.5px;color:var(--u-ok,#16a34a);font-weight:600;">
+                                ✓ Yetki AÇIK — Senior aday detayında "Belge Talep Et" butonu görüyor.
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+        @endmodule
     </div>
 
     <div style="background:var(--u-card);border:1px solid var(--u-line);border-radius:10px;padding:14px 18px;">
-        <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:12px;">Hızlı Bağlantılar</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+            <div style="font-weight:700;font-size:var(--tx-sm);">Hızlı Bağlantılar</div>
+            @module('doc_request')
+                @can('doc_request.use')
+                    <button type="button" id="docReqOpenBtn_user"
+                            style="padding:5px 12px;border:none;border-radius:6px;font-size:11px;font-weight:700;color:#fff;background:linear-gradient(135deg,#1e40af,#3b5fcc);cursor:pointer;">
+                        📲 Belge Talep Et
+                    </button>
+                @endcan
+            @endmodule
+        </div>
         <div style="display:flex;flex-direction:column;gap:8px;">
             <a href="/manager/hr/persons/{{ $user->id }}?tab=kpi" style="padding:8px 14px;font-size:12px;font-weight:600;border:1.5px solid var(--u-line);border-radius:8px;text-decoration:none;color:var(--u-text);background:var(--u-bg);">📊 KPI Performansı</a>
             <a href="/manager/hr/persons/{{ $user->id }}?tab=contracts" style="padding:8px 14px;font-size:12px;font-weight:600;border:1.5px solid var(--u-line);border-radius:8px;text-decoration:none;color:var(--u-text);background:var(--u-bg);">📄 Sözleşmeler</a>
@@ -537,6 +582,20 @@
 @endif
 
 </div>
+
+@module('doc_request')
+    @can('doc_request.use')
+        @include('partials.doc-request-modal', [
+            'modalId'     => 'docReqModal_user',
+            'btnId'       => 'docReqOpenBtn_user',
+            'indexRoute'  => 'manager.user.document-tokens.index',
+            'storeRoute'  => 'manager.user.document-tokens.store',
+            'routeParam'  => $user->id,
+            'targetLabel' => $user->name . ' (Personel)',
+            'sendIntro'   => "Merhaba {$user->name}, MentorDE İK'dan onboarding belgesi talebimiz var. Lütfen aşağıdaki linke tıklayıp belgeyi yükleyin:",
+        ])
+    @endcan
+@endmodule
 
 @endsection
 

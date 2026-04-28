@@ -474,6 +474,26 @@ class StaffController extends Controller
         return back()->with('status', $msg);
     }
 
+    /**
+     * Per-user "Belge Talep Et" yetkisi (premium feature gate).
+     * Manager senior'a bu yetkiyi tek tek açar/kapatır.
+     */
+    public function toggleDocRequest(User $user)
+    {
+        $cid = $this->companyId();
+        abort_if(
+            ($cid > 0 && (int) $user->company_id !== $cid) || !in_array($user->role, self::STAFF_ROLES),
+            404
+        );
+
+        $user->update(['can_request_documents' => !$user->can_request_documents]);
+
+        $msg = $user->can_request_documents
+            ? "{$user->name} artık aday öğrencilerden belge talep edebilir."
+            : "{$user->name} için belge talep yetkisi kapatıldı.";
+        return back()->with('status', $msg);
+    }
+
     public function bulkAction(Request $request)
     {
         $data = $request->validate([

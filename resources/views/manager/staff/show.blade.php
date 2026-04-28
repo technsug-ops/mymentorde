@@ -54,6 +54,35 @@
         <tr><td style="padding:6px 0;color:var(--u-muted);">Kayıt Tarihi</td><td>{{ optional($user->created_at)->format('d.m.Y H:i') }}</td></tr>
     </table>
 
+    @module('doc_request')
+        @if(in_array($user->role, ['senior','mentor']))
+            <div style="margin-top:16px;padding:14px 16px;background:linear-gradient(135deg,#eff6ff 0%,#ede9fe 100%);border:1px solid #c7d2fe;border-radius:10px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                    <div style="flex:1;min-width:240px;">
+                        <div style="font-size:12.5px;font-weight:700;color:#3730a3;display:flex;align-items:center;gap:6px;">
+                            📲 Belge Talep Etme Yetkisi
+                            <span style="font-size:9.5px;font-weight:700;letter-spacing:.5px;color:#fff;background:#7c3aed;padding:1px 7px;border-radius:8px;">PREMIUM</span>
+                        </div>
+                        <div style="font-size:11.5px;color:#4338ca;line-height:1.5;margin-top:3px;">
+                            Açıkken bu danışman aday öğrenciye tek-kullanımlık link gönderip belge talep edebilir.
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ route('manager.staff.toggle-doc-request', $user->id) }}" style="margin:0;">
+                        @csrf
+                        <button type="submit" style="padding:8px 16px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;color:#fff;background:{{ $user->can_request_documents ? '#dc2626' : 'linear-gradient(135deg,#1e40af,#3b5fcc)' }};">
+                            {{ $user->can_request_documents ? '🔒 Yetkiyi Kapat' : '🔓 Yetkiyi Aç' }}
+                        </button>
+                    </form>
+                </div>
+                @if($user->can_request_documents)
+                    <div style="margin-top:8px;padding:6px 10px;background:#dcfce7;color:#166534;font-size:11px;font-weight:600;border-radius:6px;">
+                        ✓ Yetki AÇIK — Senior'ın aday detayında "Belge Talep Et" butonu görünüyor.
+                    </div>
+                @endif
+            </div>
+        @endif
+    @endmodule
+
     <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--u-line);display:flex;gap:8px;flex-wrap:wrap;">
         <a href="/manager/hr/persons/{{ $user->id }}?tab=kpi" style="padding:6px 14px;font-size:12px;font-weight:600;border:1.5px solid var(--u-line);border-radius:8px;text-decoration:none;color:var(--u-text);background:var(--u-bg);">📊 KPI Performansı</a>
         <a href="/manager/hr/persons/{{ $user->id }}?tab=contracts" style="padding:6px 14px;font-size:12px;font-weight:600;border:1.5px solid var(--u-line);border-radius:8px;text-decoration:none;color:var(--u-text);background:var(--u-bg);">📄 Sözleşmeler</a>

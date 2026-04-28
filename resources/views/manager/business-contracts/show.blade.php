@@ -95,6 +95,15 @@
                 <input type="file" name="signed_file" accept=".pdf" class="form-control" style="margin-bottom:8px;">
                 <button type="submit" class="btn ok" style="width:100%;">📄 Yükle</button>
             </form>
+            @module('doc_request')
+                @can('doc_request.use')
+                    <button type="button" id="docReqOpenBtn_contract"
+                            style="width:100%;margin-top:6px;padding:8px 14px;border:none;border-radius:6px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#1e40af,#3b5fcc);cursor:pointer;">
+                        📲 Karşı Tarafa Belge Talep Linki
+                    </button>
+                    <div style="font-size:10px;color:var(--u-muted);margin-top:4px;text-align:center;">Karşı taraf telefondan imzalı PDF'i yükleyebilir</div>
+                @endcan
+            @endmodule
             @endif
 
             @if($contract->status === 'signed_uploaded')
@@ -161,6 +170,20 @@
 </div>
 
 </div>
+
+@module('doc_request')
+    @can('doc_request.use')
+        @include('partials.doc-request-modal', [
+            'modalId'     => 'docReqModal_contract',
+            'btnId'       => 'docReqOpenBtn_contract',
+            'indexRoute'  => 'manager.contract.document-tokens.index',
+            'storeRoute'  => 'manager.contract.document-tokens.store',
+            'routeParam'  => $contract->id,
+            'targetLabel' => ($contract->title ?: 'Sözleşme') . ' (#' . ($contract->contract_no ?? $contract->id) . ')',
+            'sendIntro'   => "Merhaba, MentorDE'den imzalı sözleşmenizi geri göndermeniz için link:",
+        ])
+    @endcan
+@endmodule
 
 @endsection
 

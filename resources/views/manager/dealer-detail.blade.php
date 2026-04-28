@@ -73,7 +73,17 @@
             @endif
         </div>
     </div>
-    <a class="btn" href="/manager/preview/dealer/{{ $dealer->code }}" target="_blank" style="font-size:12px;padding:6px 14px;">Dealer Önizleme</a>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        @module('doc_request')
+            @can('doc_request.use')
+                <button type="button" id="docReqOpenBtn_dealer"
+                        style="padding:6px 14px;border:none;border-radius:6px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#1e40af,#3b5fcc);cursor:pointer;">
+                    📲 Belge Talep Et
+                </button>
+            @endcan
+        @endmodule
+        <a class="btn" href="/manager/preview/dealer/{{ $dealer->code }}" target="_blank" style="font-size:12px;padding:6px 14px;">Dealer Önizleme</a>
+    </div>
 </section>
 
 {{-- KPI Çubuğu --}}
@@ -290,5 +300,19 @@
         </div>
     @endif
 </section>
+
+@module('doc_request')
+    @can('doc_request.use')
+        @include('partials.doc-request-modal', [
+            'modalId'     => 'docReqModal_dealer',
+            'btnId'       => 'docReqOpenBtn_dealer',
+            'indexRoute'  => 'manager.dealer.document-tokens.index',
+            'storeRoute'  => 'manager.dealer.document-tokens.store',
+            'routeParam'  => $dealer->code,
+            'targetLabel' => $dealer->name . ' (Bayi · ' . $dealer->code . ')',
+            'sendIntro'   => "Merhaba, MentorDE'den bayilik dosyanız için belge talebimiz var. Lütfen aşağıdaki linke tıklayıp belgeyi yükleyin:",
+        ])
+    @endcan
+@endmodule
 
 @endsection
