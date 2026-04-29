@@ -160,7 +160,7 @@ class StudentInteractionController extends Controller
         if ($guest) {
             \App\Models\GuestTicket::where('guest_application_id', $guest->id)
                 ->where(fn ($w) => $w->where('subject', 'like', $needle)
-                    ->orWhere('body', 'like', $needle))
+                    ->orWhere('message', 'like', $needle))
                 ->limit(5)
                 ->get(['id', 'subject', 'status', 'created_at'])
                 ->each(fn ($t) => $results->push([
