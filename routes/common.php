@@ -75,6 +75,14 @@ Route::middleware(['company.context'])->group(function (): void {
         ->middleware('throttle:30,1')->name('guest.ai-labs.feedback');
 });
 
+// ── Expatrio program search — form autocomplete (guest + student + manager) ──
+// Public listede 13K+ Almanya programı. Cache DB'den hızlı LIKE search.
+Route::middleware(['company.context'])->group(function (): void {
+    Route::get('/api/expatrio/programs', \App\Http\Controllers\Api\ExpatrioProgramSearchController::class)
+        ->middleware('throttle:120,1')
+        ->name('api.expatrio.programs.search');
+});
+
 // ── Contracts Hub (Manager) — /my-contracts tek sayfada tüm bitmiş sözleşmeler ─
 // NOT: Eski StaffContractController::index (sadece kendi sözleşmesi) kaldırıldı;
 // manager kendi iş sözleşmesini profil sayfasından görür. Sözleşme detay/upload
