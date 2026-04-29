@@ -18,7 +18,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>{{ $title }} — {{ $brandName }}</title>
 
-    {{-- Open Graph (WhatsApp, Insta, FB önizleme) --}}
+    {{-- Open Graph --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ $shareUrl }}">
     <meta property="og:title" content="{{ $title }} — {{ $brandName }}">
@@ -32,100 +32,136 @@
     <style>
         * { box-sizing: border-box; }
         html, body { margin: 0; padding: 0; font-family: 'Inter', -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-        body { min-height: 100vh; padding: 16px; }
+        body { min-height: 100vh; padding: 20px 16px 40px; }
 
-        /* ── Toolbar ───────────────────────────────────────────────── */
-        .promo-toolbar { max-width: 600px; margin: 0 auto 16px; display: flex; gap: 8px; flex-wrap: wrap; }
-        .promo-toolbar button, .promo-toolbar a {
-            padding: 10px 16px; font-size: 13px; font-weight: 600; border-radius: 8px;
-            border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.18);
-            color: white; cursor: pointer; text-decoration: none; backdrop-filter: blur(10px);
+        /* ── Toolbar — sabit koyu, her zaman okunabilir ───────────── */
+        .promo-toolbar {
+            max-width: 600px; margin: 0 auto 20px;
+            display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
         }
-        .promo-toolbar button:hover, .promo-toolbar a:hover { background: rgba(255,255,255,.28); }
+        .promo-toolbar button, .promo-toolbar a {
+            padding: 11px 18px; font-size: 13px; font-weight: 700; border-radius: 10px;
+            border: 1px solid rgba(15,23,42,.15);
+            background: rgba(15,23,42,.92); color: white;
+            cursor: pointer; text-decoration: none;
+            box-shadow: 0 4px 14px rgba(0,0,0,.18);
+            transition: transform .12s, background .12s;
+        }
+        .promo-toolbar button:hover, .promo-toolbar a:hover {
+            background: #0f172a; transform: translateY(-1px);
+        }
+        .promo-toolbar button:disabled { opacity: .6; cursor: wait; }
 
         /* ── Card frame ──────────────────────────────────────────── */
         .promo-card-wrap { max-width: 600px; margin: 0 auto; }
         .promo-card {
-            border-radius: 24px; padding: 0; box-shadow: 0 25px 70px rgba(0,0,0,.35);
+            border-radius: 24px; padding: 0; box-shadow: 0 30px 70px rgba(0,0,0,.25);
             position: relative; overflow: hidden; isolation: isolate;
         }
-        .promo-card-inner { padding: 36px 32px; position: relative; z-index: 2; }
+        .promo-card-inner { padding: 40px 36px 36px; position: relative; z-index: 2; }
 
-        /* ── Logo ────────────────────────────────────────────────── */
+        /* ── Logo ─────────────────────────────────────────────────── */
+        .promo-header { margin-bottom: 26px; }
         .promo-logo {
-            display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+            display: flex; align-items: center; gap: 12px; margin-bottom: 6px;
         }
+        .promo-logo-img-wrap {
+            display: inline-flex; align-items: center;
+            background: rgba(255,255,255,.95);
+            padding: 6px 12px; border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.12);
+        }
+        .promo-logo .logo-img { height: 30px; width: auto; max-width: 180px; display: block; }
         .promo-logo .logo-mark {
-            width: 36px; height: 36px; border-radius: 10px;
+            width: 42px; height: 42px; border-radius: 11px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 16px; letter-spacing: -.5px;
+            font-weight: 900; font-size: 17px; letter-spacing: -.5px;
             background: rgba(255,255,255,.95); color: var(--brand-color, #6d28d9);
-            box-shadow: 0 4px 12px rgba(0,0,0,.15);
+            box-shadow: 0 4px 14px rgba(0,0,0,.18);
         }
-        .promo-logo .logo-text {
-            font-size: 18px; font-weight: 800; letter-spacing: -.3px;
-        }
+        .promo-logo .logo-text { font-size: 19px; font-weight: 800; letter-spacing: -.3px; line-height: 1; }
         .promo-logo .logo-text .accent { font-weight: 900; opacity: .9; }
-        .promo-logo img.logo-img { height: 36px; width: auto; }
 
-        .promo-tagline { font-size: 11.5px; opacity: .7; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 22px; }
+        .promo-tagline {
+            font-size: 11px; opacity: .75;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            font-weight: 600;
+        }
 
-        /* ── Slots ──────────────────────────────────────────────── */
-        .promo-discount-bar { font-size: 13px; font-weight: 800; padding: 8px 16px;
-            border-radius: 999px; display: inline-block; letter-spacing: 1.5px; margin-bottom: 14px; text-transform: uppercase; }
-        .promo-title { font-size: 32px; font-weight: 900; line-height: 1.08; margin: 0 0 12px 0; letter-spacing: -.5px; }
-        .promo-subtitle { font-size: 15px; line-height: 1.55; opacity: .88; margin-bottom: 24px; }
+        /* ── Slots ────────────────────────────────────────────────── */
+        .promo-discount-bar {
+            font-size: 13px; font-weight: 800; padding: 9px 18px;
+            border-radius: 999px; display: inline-block;
+            letter-spacing: 1.5px; margin-bottom: 16px; text-transform: uppercase;
+        }
+        .promo-title {
+            font-size: 30px; font-weight: 900; line-height: 1.12;
+            margin: 0 0 14px 0; letter-spacing: -.6px;
+            word-break: keep-all;
+        }
+        .promo-subtitle { font-size: 15px; line-height: 1.55; opacity: .9; margin-bottom: 28px; }
 
         .promo-code-box {
-            border: 2px dashed rgba(255,255,255,.5); border-radius: 16px;
-            padding: 22px; text-align: center; margin: 22px 0; position: relative;
+            border: 2px dashed rgba(255,255,255,.55); border-radius: 16px;
+            padding: 22px 26px; text-align: center; margin: 22px 0; position: relative;
             background: rgba(255,255,255,.1);
         }
         .promo-code-box::before, .promo-code-box::after {
             content: ''; position: absolute; top: 50%; transform: translateY(-50%);
-            width: 24px; height: 24px; border-radius: 50%; background: var(--card-bg-circle, #6d28d9);
+            width: 26px; height: 26px; border-radius: 50%;
+            background: var(--card-bg-circle, #6d28d9);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,.1);
         }
-        .promo-code-box::before { left: -12px; }
-        .promo-code-box::after  { right: -12px; }
+        .promo-code-box::before { left: -13px; }
+        .promo-code-box::after  { right: -13px; }
 
-        .promo-code-label { font-size: 11px; opacity: .7; letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase; }
+        .promo-code-label {
+            font-size: 10.5px; opacity: .75; letter-spacing: 2.5px;
+            margin-bottom: 10px; text-transform: uppercase; font-weight: 700;
+        }
         .promo-code-value {
-            font-family: 'Inter', monospace; font-size: 36px; font-weight: 900;
-            letter-spacing: 5px; line-height: 1;
+            font-family: 'Inter', monospace; font-size: 32px; font-weight: 900;
+            letter-spacing: 4px; line-height: 1; word-break: break-all;
         }
 
-        .promo-expiry { font-size: 12.5px; opacity: .8; margin-bottom: 22px; display:flex; align-items:center; gap:6px; }
-        .promo-expiry .pill { background: rgba(0,0,0,.25); padding: 3px 10px; border-radius: 999px; font-weight: 700; font-size: 11.5px; letter-spacing: .5px; }
+        .promo-expiry {
+            font-size: 13px; opacity: .85; margin-bottom: 22px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .promo-expiry .pill {
+            background: rgba(0,0,0,.28); padding: 4px 12px; border-radius: 999px;
+            font-weight: 700; font-size: 12px; letter-spacing: .5px;
+        }
 
         .promo-cta {
             display: block; width: 100%; padding: 17px; font-size: 15px; font-weight: 800;
             border-radius: 14px; text-align: center; text-decoration: none;
             border: none; cursor: pointer; letter-spacing: .8px; text-transform: uppercase;
             transition: transform .15s, box-shadow .15s;
-            box-shadow: 0 8px 20px rgba(0,0,0,.15);
+            box-shadow: 0 10px 24px rgba(0,0,0,.18);
         }
-        .promo-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,.25); }
-        .promo-disclaimer { font-size: 11px; opacity: .6; margin-top: 18px; line-height: 1.5; text-align: center; }
+        .promo-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0,0,0,.28); }
+        .promo-disclaimer { font-size: 11px; opacity: .65; margin-top: 22px; line-height: 1.55; text-align: center; }
 
-        /* ── Decorative SVGs (decorative, common positioning) ──── */
+        /* ── Decorative SVGs (positioning, kırpma azaltıldı) ───── */
         .promo-deco { position: absolute; pointer-events: none; z-index: 1; }
-        .promo-deco-tr { top: -40px; right: -40px; }
-        .promo-deco-bl { bottom: -50px; left: -50px; }
-        .promo-deco-br { bottom: -40px; right: -40px; }
-        .promo-deco-tl { top: -40px; left: -40px; }
+        .promo-deco-tr { top: -20px; right: -20px; }
+        .promo-deco-bl { bottom: -30px; left: -30px; }
+        .promo-deco-br { bottom: -20px; right: -20px; }
 
-        /* ── Bayrak şeridi (Almanya — Classic + Premium) ───────── */
-        .promo-flag-strip { display: flex; height: 6px; border-radius: 0; overflow: hidden; margin-bottom: 26px; }
+        /* ── Bayrak şeridi (sadece Classic'te) ──────────────────── */
+        .promo-flag-strip { display: flex; height: 5px; border-radius: 0; overflow: hidden; margin: 0 0 28px; }
         .promo-flag-strip > div { flex: 1; }
         .promo-flag-black { background: #1a1a1a; }
         .promo-flag-red   { background: #dc2626; }
         .promo-flag-gold  { background: #fbbf24; }
 
-        @media print { .promo-toolbar { display:none; } body { padding:0; } }
+        @media print { .promo-toolbar { display: none; } body { padding: 0; } }
         @media (max-width: 500px) {
-            .promo-card-inner { padding: 28px 22px; }
+            .promo-card-inner { padding: 32px 24px 28px; }
             .promo-title { font-size: 26px; }
-            .promo-code-value { font-size: 28px; letter-spacing: 4px; }
+            .promo-code-value { font-size: 26px; letter-spacing: 3px; }
+            .promo-toolbar button, .promo-toolbar a { padding: 9px 14px; font-size: 12px; }
         }
 
         @include('promo.templates.styles')

@@ -1,48 +1,41 @@
-{{-- Template 1 — Classic (Profesyonel) — Almanya bayrak şeridi + dot pattern + diploma SVG --}}
+{{-- Template 1 — Classic --}}
 
-{{-- Sağ üst dekoratif: diploma + dünya --}}
-<svg class="promo-deco promo-deco-tr" width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="160" cy="60" r="80" fill="rgba(255,255,255,0.06)"/>
-    <circle cx="160" cy="60" r="50" fill="rgba(255,255,255,0.05)"/>
-    <g transform="translate(130 30)" opacity="0.5">
-        {{-- Mezuniyet kepi --}}
-        <path d="M30 30 L60 22 L90 30 L60 38 Z" fill="rgba(255,255,255,0.5)"/>
-        <rect x="55" y="38" width="10" height="20" fill="rgba(255,255,255,0.4)"/>
-        <line x1="60" y1="58" x2="60" y2="68" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
-        <circle cx="60" cy="70" r="3" fill="rgba(255,255,255,0.5)"/>
-    </g>
+{{-- Sağ üst: konsantrik daireler --}}
+<svg class="promo-deco promo-deco-tr" width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="160" cy="60" r="80" fill="rgba(255,255,255,0.07)"/>
+    <circle cx="160" cy="60" r="50" fill="rgba(255,255,255,0.06)"/>
+    <circle cx="160" cy="60" r="22" fill="rgba(255,255,255,0.05)"/>
 </svg>
 
-{{-- Sol alt dekoratif: brandenburg gate silhouette --}}
-<svg class="promo-deco promo-deco-bl" width="240" height="180" viewBox="0 0 240 180" fill="none" xmlns="http://www.w3.org/2000/svg" opacity="0.18">
-    <g transform="translate(40 50)">
-        {{-- Brandenburg Gate stylized --}}
-        <rect x="0" y="80" width="160" height="50" fill="white"/>
-        <rect x="10" y="10" width="14" height="80" fill="white"/>
-        <rect x="32" y="10" width="14" height="80" fill="white"/>
-        <rect x="54" y="10" width="14" height="80" fill="white"/>
-        <rect x="76" y="10" width="14" height="80" fill="white"/>
-        <rect x="98" y="10" width="14" height="80" fill="white"/>
-        <rect x="120" y="10" width="14" height="80" fill="white"/>
-        <rect x="142" y="10" width="14" height="80" fill="white"/>
-        <rect x="0" y="0" width="160" height="14" fill="white"/>
-        {{-- Quadriga (dört atlı araba simgesi) --}}
-        <rect x="60" y="-20" width="40" height="22" fill="white"/>
-        <circle cx="78" cy="-8" r="3" fill="rgba(255,255,255,0.6)"/>
+{{-- Sol alt: brandenburg gate (subtle) --}}
+<svg class="promo-deco promo-deco-bl" width="240" height="160" viewBox="0 0 240 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g transform="translate(45 60)" opacity="0.14">
+        <rect x="0" y="80" width="160" height="40" fill="white"/>
+        <rect x="10" y="20" width="14" height="60" fill="white"/>
+        <rect x="32" y="20" width="14" height="60" fill="white"/>
+        <rect x="54" y="20" width="14" height="60" fill="white"/>
+        <rect x="76" y="20" width="14" height="60" fill="white"/>
+        <rect x="98" y="20" width="14" height="60" fill="white"/>
+        <rect x="120" y="20" width="14" height="60" fill="white"/>
+        <rect x="142" y="20" width="14" height="60" fill="white"/>
+        <rect x="0" y="10" width="160" height="14" fill="white"/>
+        <rect x="60" y="-12" width="40" height="22" fill="white"/>
     </g>
 </svg>
 
 <div class="promo-card-inner">
-    {{-- Logo --}}
-    <div class="promo-logo">
-        @if(!empty($logoUrl))
-            <img class="logo-img" src="{{ $logoUrl }}" alt="{{ $brandName }}">
-        @else
-            <div class="logo-mark">M{{ mb_substr($brandAccent, 0, 1) }}</div>
-            <div class="logo-text">{{ $brandShort }}<span class="accent">{{ $brandAccent }}</span></div>
-        @endif
+    {{-- Logo + tagline header --}}
+    <div class="promo-header">
+        <div class="promo-logo">
+            @if(!empty($logoUrl))
+                <span class="promo-logo-img-wrap"><img class="logo-img" src="{{ $logoUrl }}" alt="{{ $brandName }}"></span>
+            @else
+                <div class="logo-mark">M{{ mb_substr($brandAccent, 0, 1) }}</div>
+                <div class="logo-text">{{ $brandShort }}<span class="accent">{{ $brandAccent }}</span></div>
+            @endif
+        </div>
+        <div class="promo-tagline">{{ $tagline }}</div>
     </div>
-    <div class="promo-tagline">{{ $tagline }}</div>
 
     {{-- Almanya bayrak şeridi --}}
     <div class="promo-flag-strip">
