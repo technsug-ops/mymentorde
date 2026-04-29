@@ -8,7 +8,7 @@
     $brand = $brandName ?? config('brand.name', 'MentorDE');
 @endphp
 <title>{{ $brand }} Platform — Almanya Eğitim Danışmanlığı için End-to-End SaaS</title>
-<meta name="description" content="6 portal · 24+ modül · AI asistan · entegre CRM, vize, ödeme & analytics. Yurt dışı eğitim danışmanlığı firmaları için profesyonel SaaS çözümü.">
+<meta name="description" content="6 portal · 27+ modül · AI asistan · entegre CRM, vize, ödeme & analytics. Yurt dışı eğitim danışmanlığı firmaları için profesyonel SaaS çözümü.">
 <meta name="robots" content="index, follow">
 <meta property="og:title" content="{{ $brand }} Platform — Yurt Dışı Eğitim Danışmanlığı SaaS">
 <meta property="og:description" content="Tek panel, sınırsız ölçek. Almanya odaklı, çok-portal, AI destekli end-to-end danışmanlık platformu.">
@@ -575,7 +575,7 @@ footer a:hover { color:var(--accent); }
             <span class="hero-badge"><span class="dot"></span> 2026 — End-to-End SaaS Platform</span>
             <h1>Yurt Dışı Eğitim Danışmanlığında<br><em>Tam Otomasyon</em></h1>
             <p class="hero-lead">
-                <strong>{{ $brand }}</strong> — Almanya odaklı eğitim danışmanlığı firmaları için 6 portal, 24+ modül,
+                <strong>{{ $brand }}</strong> — Almanya odaklı eğitim danışmanlığı firmaları için 6 portal, 27+ modül,
                 AI destekli, end-to-end bulut platformu. Aday → vize → kabul → mezuniyet sürecinin tamamı tek dashboard'da.
             </p>
             <div class="hero-ctas">
@@ -600,7 +600,7 @@ footer a:hover { color:var(--accent); }
                     Ayrı Portal
                 </div>
                 <div class="hero-trust-item">
-                    <strong>24+</strong>
+                    <strong>27+</strong>
                     Modül
                 </div>
                 <div class="hero-trust-item">
@@ -651,7 +651,7 @@ footer a:hover { color:var(--accent); }
             </div>
             <div class="stat">
                 <div class="stat-icon">⚡</div>
-                <div class="stat-num">24+</div>
+                <div class="stat-num">27+</div>
                 <div class="stat-lbl">Hazır Modül + Genişleyebilir Mimari</div>
             </div>
             <div class="stat">
@@ -805,7 +805,7 @@ footer a:hover { color:var(--accent); }
 {{-- ═══ MODULES === --}}
 <section id="moduller" class="sec-bg-soft">
     <div class="container">
-        <span class="sec-label">24+ Hazır Modül</span>
+        <span class="sec-label">27+ Hazır Modül</span>
         <h2 class="sec-title">Eğitim danışmanlığının her iş süreci için modül.</h2>
         <p class="sec-lead">Hiçbir modülü baştan yazmana gerek yok — hepsi kutudan çıkar çıkmaz çalışıyor.</p>
 
@@ -834,6 +834,9 @@ footer a:hover { color:var(--accent); }
             <div class="module"><div class="module-icon">🛡️</div><div><h4>Security</h4><p>2FA, role-based access, brute-force koruması, anomaly detection.</p></div></div>
             <div class="module"><div class="module-icon">💱</div><div><h4>Currency Sync</h4><p>EUR/TRY/USD canlı kur, multi-currency invoice.</p></div></div>
             <div class="module"><div class="module-icon">📝</div><div><h4>Audit Reports</h4><p>Aylık otomatik rapor, scheduled exports, KPI snapshots.</p></div></div>
+            <div class="module"><div class="module-icon">📍</div><div><h4>Sessizlik Monitörü</h4><p>Aday + öğrenci timeline'ında hareket olmayan kayıtlara otomatik "süreç aktif" touchpoint, stage'e göre kadans (haftalık / 2 haftalık), manager kontrol paneli.</p></div></div>
+            <div class="module"><div class="module-icon">🎟️</div><div><h4>İndirim Kodları</h4><p>Kupon üretim (yüzde/sabit, expiry, kota), 5 paylaşım kartı template (Classic/Bold/Premium/Playful/Urgency), AI öneri, public landing, görsel PNG indirme.</p></div></div>
+            <div class="module"><div class="module-icon">⏰</div><div><h4>Ödeme Hatırlatma Akışı</h4><p>4 otomatik + 1 manuel kademeli hatırlatma maili, manager "ödeme alındı" teyidi + bildirim, pause/resume, kişi-bazlı override.</p></div></div>
         </div>
     </div>
 </section>
@@ -1606,7 +1609,7 @@ footer a:hover { color:var(--accent); }
                 mentor<span style="color:var(--accent);">de</span>
             </div>
             <p style="margin:0; color:rgba(255,255,255,.6);">
-                Almanya eğitim danışmanlığında end-to-end SaaS platformu. 6 portal, 24+ modül, AI destekli — tek panel, sınırsız ölçek.
+                Almanya eğitim danışmanlığında end-to-end SaaS platformu. 6 portal, 27+ modül, AI destekli — tek panel, sınırsız ölçek.
             </p>
         </div>
         <div>
