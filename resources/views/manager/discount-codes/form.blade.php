@@ -68,7 +68,7 @@
                 <label>Kod *</label>
                 <input type="text" name="code" required maxlength="64"
                        value="{{ old('code', $code->code) }}" placeholder="Örn: HOSGELDIN10" style="text-transform:uppercase;">
-                <div class="dc-hint">Sadece harf/rakam/tire/altçizgi. Otomatik büyük harfe çevrilir.</div>
+                <div class="dc-hint">Boşluk → _, Türkçe karakter → ASCII (İ→I, Ş→S, Ğ→G), otomatik büyük harf. Örn: "Hoşgeldin Kardes" → <code>HOSGELDIN_KARDES</code></div>
             </div>
             <div>
                 <label>Açıklama</label>

@@ -266,12 +266,35 @@ TXT;
     }
 
     /**
+     * Manager doğal yazsın diye kodu request'e dokunmadan önce normalize et:
+     * boşluk → _, Türkçe karakter → ASCII karşılığı, büyük harf.
+     * Böylece "Hoşgeldin Kardes" → "HOSGELDIN_KARDES".
+     */
+    private function normalizeCode(?string $raw): string
+    {
+        if ($raw === null) return '';
+        $s = trim((string) $raw);
+        // Türkçe → ASCII
+        $tr = ['İ'=>'I','I'=>'I','Ş'=>'S','Ğ'=>'G','Ü'=>'U','Ö'=>'O','Ç'=>'C',
+               'ı'=>'i','ş'=>'s','ğ'=>'g','ü'=>'u','ö'=>'o','ç'=>'c'];
+        $s = strtr($s, $tr);
+        // Boşluk + ardışık whitespace → tek _
+        $s = preg_replace('/\s+/u', '_', $s);
+        // Tire-altçizgi-harf-rakam dışını sil (kullanıcı bilinmeyen char tiplettiyse)
+        $s = preg_replace('/[^A-Za-z0-9_\-]/', '', $s);
+        return mb_strtoupper((string) $s, 'UTF-8');
+    }
+
+    /**
      * @return array<string,mixed>
      */
     private function validatePayload(Request $request, ?DiscountCode $existing = null): array
     {
+        // Kullanıcı doğal yazsın, biz normalize edelim — sonra validate
+        $request->merge(['code' => $this->normalizeCode($request->input('code'))]);
+
         $data = $request->validate([
-            'code'               => 'required|string|min:3|max:64|regex:/^[A-Za-z0-9_\-]+$/',
+            'code'               => 'required|string|min:3|max:64|regex:/^[A-Z0-9_\-]+$/',
             'description'        => 'nullable|string|max:255',
             'discount_type'      => 'required|in:percent,fixed',
             'discount_value'     => 'required|numeric|min:0',
