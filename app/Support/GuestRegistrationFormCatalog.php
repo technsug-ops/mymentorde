@@ -265,7 +265,7 @@ class GuestRegistrationFormCatalog
                     // Level 1 — Pasaport bloğu (has_passport='yes' ise diğer 4 alan görünür)
                     // S ile başlayan no → Yeşil Pasaport / SONDERNPASS, diğerleri → REISEPASS
                     self::f('has_passport', 'Pasaportunuz var mı? *', 'select', true, 10, options: self::yesNoOptions(), level: 1),
-                    self::f('passport_number', 'Pasaport seri numarası', 'text', false, 64, placeholder: 'Örn: SDCF123444', help_text: 'Pasaport seri numaran "U" ile başlıyorsa REISEPASS, "S" ile başlıyorsa SONDERNPASS pasaport tipidir.', level: 1),
+                    self::f('passport_number', 'Pasaport seri numarası', 'text', false, 64, placeholder: 'Örn: SDCF123444', help_text: 'Pasaport seri numaran "S" ile başlıyorsa SONDERNPASS, diğer seri numaralar REISEPASS olarak geçer.', level: 1),
                     self::f('passport_issue_date', 'Pasaport veriliş tarihi', 'date', false, 20, level: 1),
                     self::f('passport_expiry_date', 'Pasaport bitiş tarihi', 'date', false, 20, level: 1),
                     self::f('passport_issue_place', 'Pasaportun verildiği yer', 'text', false, 120, placeholder: 'Örn: İstanbul Emniyeti', level: 1),
