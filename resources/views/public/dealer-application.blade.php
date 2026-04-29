@@ -11,18 +11,43 @@
 <meta name="robots" content="noindex, follow">
 
 <link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-:root { --primary:#5b2e91; --primary-dark:#4a2377; --primary-deep:#3d1c67; --primary-soft:#f1e8fb; --accent:#e8b931; --text:#12233a; --muted:#5e7187; --line:#d9e2ee; --success:#16a34a; --danger:#dc2626; }
+:root {
+    /* MentörDE Brand Palette (brandbook 2026-01-26) */
+    --primary:#7e58bf;
+    --primary-dark:#6c47a8;
+    --primary-deep:#5a3a8d;
+    --primary-mid:#a07ed9;
+    --primary-light:#b79ae9;
+    --primary-soft:#efe9fb;
+    --neutral:#e9e7e2;
+    --neutral-soft:#faf9f5;
+    --accent:#7e58bf;
+    --text:#1a1325;
+    --muted:#6b6377;
+    --line:#e3dcec;
+    --success:#16a34a;
+    --danger:#dc2626;
+    --font-base:"Space Grotesk", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+}
 * { box-sizing:border-box; }
 html, body { margin:0; padding:0; }
-body { font-family:"Plus Jakarta Sans", sans-serif; background:linear-gradient(140deg, #f7f3ff, #f9fafd); min-height:100vh; color:var(--text); line-height:1.6; }
-.serif { font-family:"DM Serif Display", serif; }
+body {
+    font-family:var(--font-base);
+    background:linear-gradient(140deg, #f7f3ff 0%, #faf9f5 50%, #e9e7e2 100%);
+    min-height:100vh; color:var(--text); line-height:1.6;
+    font-feature-settings:"ss01", "ss02"; -webkit-font-smoothing:antialiased;
+}
+.serif { font-family:var(--font-base); font-weight:600; font-style:italic; }
 a { color:var(--primary); text-decoration:none; }
 
 .wz-shell { max-width:720px; margin:30px auto; padding:0 18px; }
 .wz-header { text-align:center; margin-bottom:24px; }
-.wz-logo { font-family:"DM Serif Display", serif; font-size:32px; color:var(--primary); line-height:1; }
+.wz-logo { font-family:var(--font-base); font-weight:700; font-size:32px; color:var(--primary); line-height:1; display:inline-flex; align-items:center; gap:8px; }
+.wz-logo img { height:40px; width:auto; max-width:200px; display:block; }
+.wz-logo .logo-accent { color:var(--primary-mid); font-style:italic; font-weight:600; }
 .wz-logo span { color:var(--primary-dark); font-style:italic; }
 .wz-back { display:inline-block; margin-top:6px; color:var(--muted); font-size:13px; }
 
@@ -59,7 +84,7 @@ a { color:var(--primary); text-decoration:none; }
 .wz-step { display:none; animation:fadeIn .3s ease; }
 .wz-step.active { display:block; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-.wz-step-title { font-family:"DM Serif Display", serif; font-size:28px; color:var(--primary-deep); margin:0 0 8px; line-height:1.2; }
+.wz-step-title { font-family:var(--font-base); font-size:28px; color:var(--primary-deep); margin:0 0 8px; line-height:1.2; }
 .wz-step-sub { color:var(--muted); font-size:14px; margin:0 0 24px; }
 
 /* Form fields */
@@ -159,8 +184,13 @@ a { color:var(--primary); text-decoration:none; }
 
 <div class="wz-shell">
     <div class="wz-header">
+        @php $logoUrl = config('brand.logo_url') ?: null; @endphp
         <a href="{{ route('public.dealer-landing') }}" class="wz-logo">
-            mentor<span>de</span>
+            @if($logoUrl)
+                <img src="{{ $logoUrl }}" alt="{{ $brand }}">
+            @else
+                mentor<span class="logo-accent">de</span>
+            @endif
         </a>
         <div class="wz-back">
             <a href="{{ route('public.dealer-landing') }}">← Programa geri dön</a>

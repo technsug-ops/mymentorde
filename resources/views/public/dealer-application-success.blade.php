@@ -7,22 +7,28 @@
 <title>Başvurunuz Alındı — {{ $brand }}</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-:root { --primary:#5b2e91; --primary-dark:#4a2377; --primary-deep:#3d1c67; --primary-soft:#f1e8fb; --accent:#e8b931; --text:#12233a; --muted:#5e7187; --success:#16a34a; }
+:root {
+    --primary:#7e58bf; --primary-dark:#6c47a8; --primary-deep:#5a3a8d;
+    --primary-soft:#efe9fb; --neutral:#e9e7e2; --accent:#7e58bf;
+    --text:#1a1325; --muted:#6b6377; --success:#16a34a; --line:#e3dcec;
+    --font-base:"Space Grotesk", "Plus Jakarta Sans", -apple-system, sans-serif;
+}
 * { box-sizing:border-box; }
 html, body { margin:0; padding:0; }
-body { font-family:"Plus Jakarta Sans", sans-serif; background:linear-gradient(140deg, #f7f3ff, #f9fafd); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+body { font-family:var(--font-base); background:linear-gradient(140deg, #f7f3ff 0%, #faf9f5 50%, #e9e7e2 100%); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; -webkit-font-smoothing:antialiased; }
 .wrap { max-width:620px; width:100%; text-align:center; }
 .icon-success { font-size:80px; margin-bottom:20px; animation:pop .5s ease-out; }
 @keyframes pop { 0% { transform:scale(0); } 70% { transform:scale(1.1); } 100% { transform:scale(1); } }
-h1 { font-family:"DM Serif Display", serif; font-size:40px; color:var(--primary-deep); margin:0 0 14px; line-height:1.15; }
+h1 { font-family:var(--font-base); font-weight:700; font-size:40px; color:var(--primary-deep); margin:0 0 14px; line-height:1.15; letter-spacing:-1px; }
 .sub { color:var(--muted); font-size:16px; margin:0 0 30px; }
 
-.card { background:#fff; border:1px solid #e2e8f0; border-radius:20px; padding:32px; box-shadow:0 12px 32px rgba(91,46,145,.08); text-align:left; }
-.ref-box { background:var(--primary-soft); border-radius:12px; padding:16px; margin-bottom:20px; text-align:center; }
-.ref-box .lbl { font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--primary); font-weight:700; }
-.ref-box .num { font-family:"DM Serif Display", serif; font-size:32px; color:var(--primary-deep); margin-top:4px; }
+.card { background:#fff; border:1px solid var(--line); border-radius:20px; padding:32px; box-shadow:0 16px 40px rgba(126,88,191,.10); text-align:left; }
+.ref-box { background:var(--primary-soft); border-radius:12px; padding:18px; margin-bottom:20px; text-align:center; border:1px solid rgba(126,88,191,.2); }
+.ref-box .lbl { font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--primary); font-weight:700; }
+.ref-box .num { font-family:var(--font-base); font-weight:700; font-size:32px; color:var(--primary-deep); margin-top:4px; letter-spacing:-1px; }
 
 h3 { font-size:14px; text-transform:uppercase; letter-spacing:.08em; color:var(--primary); margin:20px 0 10px; }
 ul.steps { padding-left:20px; color:var(--text); font-size:14px; }

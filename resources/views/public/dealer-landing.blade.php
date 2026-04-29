@@ -281,8 +281,17 @@ section { padding:70px 0; }
 .cta-section .container { position:relative; z-index:1; }
 .cta-section h2 { font-family:var(--font-base); font-size:clamp(32px, 4vw, 48px); margin:0 0 16px; line-height:1.1; }
 .cta-section p { font-size:18px; opacity:.9; margin:0 0 36px; max-width:640px; margin-left:auto; margin-right:auto; }
-.cta-section .btn-primary { background:var(--accent); color:var(--primary-deep) !important; font-size:17px; padding:18px 36px; box-shadow:0 8px 24px rgba(233,231,226,.4); }
-.cta-section .btn-primary:hover { background:var(--accent-dark); }
+.cta-section .btn-primary {
+    background:#fff; color:var(--primary-deep) !important;
+    font-size:17px; padding:18px 38px; font-weight:800;
+    border:2px solid #fff;
+    box-shadow:0 12px 32px rgba(0,0,0,.22), 0 0 0 1px rgba(255,255,255,.4);
+}
+.cta-section .btn-primary:hover {
+    background:var(--neutral); color:var(--primary) !important;
+    transform:translateY(-2px);
+    box-shadow:0 18px 40px rgba(0,0,0,.32);
+}
 .cta-contacts { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:48px; color:#fff; font-size:14px; }
 .cta-contact { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.1); padding:10px 18px; border-radius:10px; }
 .cta-contact a { color:#fff !important; text-decoration:underline; text-decoration-color:rgba(255,255,255,.4); }
@@ -475,7 +484,7 @@ section { padding:70px 0; }
 }
 .testim-name { font-weight:700; color:var(--primary-deep); font-size:14px; }
 .testim-role { color:var(--muted); font-size:12px; }
-.testim-earnings { margin-left:auto; background:var(--accent); color:var(--primary-deep); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:800; }
+.testim-earnings { margin-left:auto; background:var(--success); color:#fff; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:800; box-shadow:0 4px 12px rgba(22,163,74,.28); }
 .testim-placeholder {
     background:linear-gradient(140deg, var(--primary-soft), #fff);
     border:2px dashed var(--primary); border-radius:18px; padding:32px; text-align:center;

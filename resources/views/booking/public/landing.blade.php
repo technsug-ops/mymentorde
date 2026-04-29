@@ -364,14 +364,18 @@
         .l-foot-cols { display:grid; grid-template-columns:2fr 1fr 1fr; gap:36px; margin-bottom:32px; }
         @media(max-width:720px){ .l-foot-cols { grid-template-columns:1fr; gap:24px; } }
         .l-foot-logo {
-            font-family:var(--font-base); font-size:28px;
-            color:#fff; margin-bottom:10px; display:inline-block; line-height:1;
+            font-family:var(--font-base); font-size:28px; font-weight:700;
+            color:#fff; margin-bottom:14px; display:inline-flex; align-items:center; line-height:1;
         }
-        .l-foot-logo span { color:#fff; font-style:italic; opacity:.85; }
-        .l-foot-logo img { height:36px; width:auto; max-width:180px; }
+        .l-foot-logo span { color:var(--neutral); font-style:italic; opacity:.95; }
+        .l-foot-logo img {
+            height:38px; width:auto; max-width:180px;
+            background:#fff; padding:6px 12px; border-radius:8px;
+            box-shadow:0 4px 14px rgba(0,0,0,.18);
+        }
         .l-foot h4 { color:#fff; margin:0 0 14px; font-size:14px; font-weight:700; }
         .l-foot a { color:rgba(255,255,255,.72); display:block; margin-bottom:8px; font-size:13px; }
-        .l-foot a:hover { color:var(--accent); text-decoration:none; }
+        .l-foot a:hover { color:#fff; text-decoration:none; }
         .l-foot p { color:rgba(255,255,255,.68); font-size:13px; line-height:1.65; margin:0 0 14px; max-width:340px; }
         .l-foot-bottom {
             border-top:1px solid rgba(255,255,255,.12); padding-top:22px;
@@ -396,7 +400,7 @@
             <a href="#danismanlar">Danışmanlar</a>
             <a href="#sss">SSS</a>
         </div>
-        <a href="{{ route('apply.create') }}" class="l-nav-cta">Başvur</a>
+        <a href="#danismanlar" class="l-nav-cta">📅 Randevu Al</a>
     </div>
 </nav>
 
@@ -416,10 +420,10 @@
                    data-track="cta_clicked"
                    data-ph-cta-name="book_appointment_hero"
                    data-ph-location="booking_landing_hero">📅 Hemen Randevu Al</a>
-                <a href="{{ route('apply.create') }}" class="l-btn l-btn-ghost"
+                <a href="#nasil-calisir" class="l-btn l-btn-ghost"
                    data-track="cta_clicked"
-                   data-ph-cta-name="apply_form_hero"
-                   data-ph-location="booking_landing_hero">Tam Başvuru Başlat →</a>
+                   data-ph-cta-name="learn_how_hero"
+                   data-ph-location="booking_landing_hero">Nasıl Çalışır? ↓</a>
             </div>
             <div class="l-hero-trust">
                 <div>
@@ -567,11 +571,13 @@
             <div class="l-empty">
                 <div class="l-empty-icon">🎓</div>
                 <h3>Danışmanlarımız Hazırlanıyor</h3>
-                <p>Şu anda public randevu veren danışman yok. Hemen başvuru formumuzu doldurup kayıtlı öğrenci olarak bekleme listesine katılabilirsin — sıra sana geldiğinde sana özel danışman atanacak.</p>
-                <a href="{{ route('apply.create') }}" class="l-btn l-btn-primary" style="display:inline-flex;"
+                <p>Şu anda public randevu veren danışman yok. WhatsApp üzerinden bize yazarsan sıraya alıp en yakın müsait danışmanı sana atayalım.</p>
+                <a href="https://wa.me/4915203253691?text={{ urlencode('Merhaba, randevu almak istiyorum. Müsait danışman olunca haber verir misiniz?') }}"
+                   target="_blank" rel="noopener"
+                   class="l-btn l-btn-primary" style="display:inline-flex;"
                    data-track="cta_clicked"
-                   data-ph-cta-name="apply_form_empty_state"
-                   data-ph-location="booking_landing_empty">Başvuru Formunu Doldur →</a>
+                   data-ph-cta-name="whatsapp_empty_state"
+                   data-ph-location="booking_landing_empty">💬 WhatsApp ile İletişime Geç →</a>
             </div>
         @endif
     </div>
@@ -631,7 +637,6 @@
                 <h4>Platform</h4>
                 <a href="#nasil-calisir">Nasıl Çalışır</a>
                 <a href="#danismanlar">Danışmanlar</a>
-                <a href="{{ route('apply.create') }}">Başvur</a>
                 <a href="/sss">Sık Sorulan Sorular</a>
                 <a href="/login">Giriş Yap</a>
             </div>
