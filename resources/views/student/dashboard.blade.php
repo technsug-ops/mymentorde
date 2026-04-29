@@ -134,42 +134,73 @@
 @endphp
 
 @php
+    $totalRequired   = ($requiredChecklist ?? collect())->where('is_required', true)->count();
+    $missingRequired = ($requiredChecklist ?? collect())->where('is_required', true)->where('done', false)->count();
 
-    // Stage-based greeting (mockup'taki gibi)
+    // Hero — eksik bilgi varsa kullanıcı onları görür, yoksa stage'e göre tebrik mesajı
+    $hasIncomplete = ($level2Pending ?? false) || $missingRequired > 0;
+
+    // Stage-based renk + başlık + altyazı
+    $stageColor = match($stage) {
+        'contract'   => 'blue',
+        'documents'  => 'teal',
+        'uni_assist' => 'purple',
+        'visa'       => 'amber',
+        'abroad'     => 'green',
+        default      => 'purple',
+    };
     $stageGreet = match($stage) {
-        'contract'   => "Merhaba {$firstName}! Sozlesme surecin seni bekliyor.",
-        'documents'  => "Merhaba {$firstName} 👋",
+        'contract'   => "Merhaba {$firstName}! Sözleşme sürecin seni bekliyor.",
+        'documents'  => "Merhaba {$firstName}! 👋",
         'uni_assist' => "Harika gidiyorsun {$firstName}! 🚀",
         'visa'       => "Kabul geldi {$firstName}! 🎉",
         'abroad'     => "Tebrikler {$firstName}! 🇩🇪",
         default      => $greeting ?? 'Merhaba!',
     };
     $stageSub = match($stage) {
-        'contract'   => 'Basvurun alindi. Sozlesme surecini tamamla.',
-        'documents'  => 'Danismanlik surecin devam ediyor. Siradaki adimini asagida goruyorsun.',
-        'uni_assist' => 'Belgeler tamamlandi - Uni-Assist basvurun hazirlaniyor.',
-        'visa'       => 'Universiteden kabul aldin - vize sureci basliyor.',
-        'abroad'     => 'Tum surec tamamlandi. Almanya\'da yeni hayatin basliyor!',
+        'contract'   => 'Başvurun alındı. Sözleşme sürecini tamamla.',
+        'documents'  => 'Danışmanlık sürecin devam ediyor. Sıradaki adımın aşağıda.',
+        'uni_assist' => 'Uni-Assist başvurun hazırlanıyor.',
+        'visa'       => 'Üniversiteden kabul aldın — vize süreci başlıyor.',
+        'abroad'     => 'Tüm süreç tamamlandı. Almanya\'da yeni hayatın başlıyor!',
         default      => $greetingSub ?? '',
     };
 
-    $totalRequired   = ($requiredChecklist ?? collect())->where('is_required', true)->count();
-    $missingRequired = ($requiredChecklist ?? collect())->where('is_required', true)->where('done', false)->count();
+    // Eksik bilgi varsa hero rengi + altyazı override edilir (mantıksal çelişki olmasın)
+    if ($hasIncomplete) {
+        $stageColor = 'amber';
+        $parts = [];
+        if (($level2Pending ?? false)) $parts[] = 'detaylı bilgi formu';
+        if ($missingRequired > 0)      $parts[] = "{$missingRequired} zorunlu belge";
+        $stageSub = 'Önce ' . implode(' ve ', $parts) . ' eksik — sürecini ilerletmek için tamamla.';
+    }
 @endphp
 
-{{-- Greeting --}}
-<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-    <div>
-        <h2 style="font-size:20px;font-weight:800;letter-spacing:-.3px;">{{ $stageGreet }}</h2>
-        <p style="font-size:13px;color:var(--u-muted);margin-top:2px;">{{ $stageSub }}</p>
+{{-- Hero card (sd-hero, stage-based renk) --}}
+<div class="sd-hero {{ $stageColor }}" style="display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:240px;">
+        <div class="sd-hero-badge"><span class="pulse"></span> {{ strtoupper($stage) }}</div>
+        <div class="sd-hero-title">{{ $stageGreet }}</div>
+        <div class="sd-hero-sub">{{ $stageSub }}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            @if($level2Pending ?? false)
+                <a href="{{ route('student.registration') }}" class="sd-hero-btn">📋 Detaylı Form (Level 2)</a>
+            @endif
+            @if($missingRequired > 0)
+                <a href="{{ route('student.registration.documents') }}" class="sd-hero-btn">📄 Belgeleri Yükle ({{ $missingRequired }})</a>
+            @endif
+            @if(!$hasIncomplete)
+                <a href="/student/messages" class="sd-hero-btn">✉ Danışmana Mesaj</a>
+            @endif
+        </div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <a href="/student/messages" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--u-line);background:var(--u-card);color:var(--u-text);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">✉ Danismana Mesaj</a>
-        <a href="/student/tickets" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--u-line);background:var(--u-card);color:var(--u-text);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">📞 Destek</a>
+    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+        <a href="/student/messages" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);">✉ Mesaj</a>
+        <a href="/student/tickets" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);">🛟 Destek</a>
     </div>
 </div>
 
-{{-- Alerts --}}
+{{-- Alerts (sistem alarmlarına özel — eksik form/belge zaten hero'da görünüyor) --}}
 @foreach(($alerts ?? collect()) as $al)
 <div class="sd-alert {{ $al['type'] ?? 'info' }}">
     <span class="sd-alert-icon">{{ $al['icon'] ?? 'ℹ' }}</span>
@@ -179,18 +210,6 @@
     @endif
 </div>
 @endforeach
-
-{{-- Aday→Öğrenci promosyon sonrası: Level 2 detaylı form eksikse tek satırlık alert.
-     Belgeler için zaten "X zorunlu belgeniz eksik" alert mevcut. Çift hero/banner yok. --}}
-@if($level2Pending ?? false)
-<div class="sd-alert info">
-    <span class="sd-alert-icon">📋</span>
-    <div class="sd-alert-body">
-        <strong>Detaylı bilgi formu (Level 2)</strong> hala eksik — vize ve üniversite süreçleri için doldurman gerekiyor. Aday öğrenciliğindeki cevaplar korundu.
-    </div>
-    <a href="{{ route('student.registration') }}" class="sd-alert-btn">Doldur →</a>
-</div>
-@endif
 
 {{-- Journey Funnel --}}
 <div class="sd-journey">
