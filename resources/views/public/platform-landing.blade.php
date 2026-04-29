@@ -772,22 +772,8 @@ footer a:hover { color:var(--accent); }
             </div>
 
             <div class="portal">
-                <div class="portal-icon-wrap manager">👔</div>
-                <div class="portal-name">Portal 5</div>
-                <h3>Yönetici (Manager)</h3>
-                <p>Tüm operasyonun komuta merkezi — analytics, finans, HR, ayarlar, AI Labs.</p>
-                <ul class="portal-features">
-                    <li>16+ analytics dashboard (BI ready)</li>
-                    <li>Finans (Stripe + invoice + payout)</li>
-                    <li>İK (personel + izin + bordro)</li>
-                    <li>AI Labs ayarları + intent intelligence</li>
-                    <li>GDPR + audit + güvenlik kontrol</li>
-                </ul>
-            </div>
-
-            <div class="portal">
                 <div class="portal-icon-wrap marketing">📣</div>
-                <div class="portal-name">Portal 6</div>
+                <div class="portal-name">Portal 5</div>
                 <h3>Marketing Admin</h3>
                 <p>Pazarlama ve satış ekibi için kampanya yönetimi + lead funnel analytics.</p>
                 <ul class="portal-features">
@@ -796,6 +782,20 @@ footer a:hover { color:var(--accent); }
                     <li>Multi-touch attribution</li>
                     <li>Email/SMS drip otomasyonu</li>
                     <li>UTM tracking link analytics</li>
+                </ul>
+            </div>
+
+            <div class="portal">
+                <div class="portal-icon-wrap manager">👔</div>
+                <div class="portal-name">Portal 6</div>
+                <h3>Yönetici (Manager)</h3>
+                <p>Tüm operasyonun komuta merkezi — analytics, finans, HR, ayarlar, AI Labs.</p>
+                <ul class="portal-features">
+                    <li>16+ analytics dashboard (BI ready)</li>
+                    <li>Finans (Stripe + invoice + payout)</li>
+                    <li>İK (personel + izin + bordro)</li>
+                    <li>AI Labs ayarları + intent intelligence</li>
+                    <li>GDPR + audit + güvenlik kontrol</li>
                 </ul>
             </div>
         </div>
