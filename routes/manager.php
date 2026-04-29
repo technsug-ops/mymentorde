@@ -421,10 +421,16 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::post('/manager/silence-monitor/company-overrides',               [$sm, 'updateCompanyOverrides'])->middleware('throttle:10,1')->name('manager.silence-monitor.company-overrides');
     });
 
-    // ── Application Guides (Uni-Assist + Vize başvurusu rehber sayfaları) ────
+    // ── Application Guides — student altında (Uni-Assist + Vize) ──────────────
+    // Uni-Assist sözleşme+ödeme sonrası (öğrenci aşamasında) yapılır.
+    // Guest URL legacy backward-compat için tutuldu.
     {
         $uag = \App\Http\Controllers\Manager\UniAssistGuideController::class;
+        // Primary route — öğrenci sayfası altında
+        Route::get('/manager/students/{studentId}/uni-assist-rehber',          [$uag, 'showForStudent'])->name('manager.student.uni-assist-guide.show');
+        // Legacy guest URL (eski bookmark'lar)
         Route::get('/manager/guests/{guest}/uni-assist-rehber',                [$uag, 'show'])->name('manager.uni-assist-guide.show');
+        // POST endpoint'ler underlying guest_application'a yazar (data tek yerde)
         Route::post('/manager/guests/{guest}/uni-assist-rehber/save-meta',     [$uag, 'saveMeta'])->middleware('throttle:30,1')->name('manager.uni-assist-guide.save-meta');
         Route::post('/manager/guests/{guest}/uni-assist-rehber/request-missing', [$uag, 'requestMissingFields'])->middleware('throttle:10,1')->name('manager.uni-assist-guide.request-missing');
     }

@@ -31,7 +31,28 @@ class UniAssistGuideController extends Controller
         private readonly EventLogService $eventLogService,
     ) {}
 
+    /**
+     * Öğrenci üzerinden Uni-Assist rehberi (öğrenciye dönüşmüş guest_application'ı çözer).
+     * URL: /manager/students/{studentId}/uni-assist-rehber
+     */
+    public function showForStudent(string $studentId): View
+    {
+        $guest = GuestApplication::query()
+            ->where('converted_student_id', $studentId)
+            ->firstOrFail();
+
+        return $this->renderShow($guest, $studentId);
+    }
+
+    /**
+     * Legacy guest URL desteği — mevcut bookmark'lar kırılmasın.
+     */
     public function show(GuestApplication $guest): View
+    {
+        return $this->renderShow($guest, $guest->converted_student_id);
+    }
+
+    private function renderShow(GuestApplication $guest, ?string $studentId): View
     {
         $tabs = $this->mapper->buildAllTabs($guest);
         $missing = $this->mapper->missingFields($guest);
@@ -41,6 +62,7 @@ class UniAssistGuideController extends Controller
 
         return view('manager.uni-assist-guide.show', [
             'guest'          => $guest,
+            'studentId'      => $studentId,
             'tabs'           => $tabs,
             'missing'        => $missing,
             'canRequestDocs' => $canRequestDocs,

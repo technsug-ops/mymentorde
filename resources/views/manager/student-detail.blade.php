@@ -40,8 +40,14 @@
 
 @section('content')
 
-<div style="margin-bottom:10px;">
+<div style="margin-bottom:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
     <a class="btn" href="/manager/students">← Öğrenci Listesi</a>
+    @if(! empty($studentId))
+        <a href="{{ route('manager.student.uni-assist-guide.show', $studentId) }}"
+           style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:linear-gradient(135deg,#c8102e,#9f1239); color:#fff; border-radius:8px; font-size:13px; font-weight:700; text-decoration:none; margin-left:auto;">
+            🎓 Uni-Assist Rehberi →
+        </a>
+    @endif
 </div>
 
 @if($assignment->is_archived)
