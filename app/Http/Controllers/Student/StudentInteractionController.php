@@ -118,7 +118,8 @@ class StudentInteractionController extends Controller
             }
         }
 
-        // 1. Belgeler
+        // 1. Belgeler — yüklenen dosyalar + ZORUNLU belge kategorileri (henüz yüklenmemiş olsa bile
+        // "pasaport", "diploma" gibi terimler arandığında bulunsun, kullanıcı yükleme sayfasına gitsin)
         if ($ownerIds->isNotEmpty()) {
             \App\Models\Document::whereIn('student_id', $ownerIds)
                 ->where(fn ($w) => $w->where('original_file_name', 'like', $needle)
@@ -134,6 +135,25 @@ class StudentInteractionController extends Controller
                     'date'  => $d->updated_at?->format('d.m.Y'),
                 ]));
         }
+
+        // Belge kategorileri (DocumentCategory.name_tr / name_de / code)
+        \App\Models\DocumentCategory::query()
+            ->where('is_active', true)
+            ->where(function ($w) use ($needle) {
+                $w->where('name_tr', 'like', $needle)
+                  ->orWhere('name_de', 'like', $needle)
+                  ->orWhere('code', 'like', $needle);
+            })
+            ->limit(5)
+            ->get(['id', 'name_tr', 'code'])
+            ->each(fn ($c) => $results->push([
+                'type'  => 'document_category',
+                'icon'  => '📋',
+                'title' => $c->name_tr ?: $c->code,
+                'sub'   => 'Belge kategorisi — yüklemek için tıkla',
+                'url'   => '/student/registration/documents',
+                'date'  => '',
+            ]));
 
         // 2. Biletler
         if ($guest) {
