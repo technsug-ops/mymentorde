@@ -119,6 +119,65 @@ class DiscountCodeController extends Controller
     }
 
     /**
+     * Form'da kullanıcı yazarken iframe ile gösterilen canlı önizleme.
+     * Veritabanına dokunmaz — query param'lardan in-memory DiscountCode kurar
+     * ve promo.show view'ını render eder.
+     */
+    public function preview(Request $request): View
+    {
+        $templates = (array) config('discount_templates', []);
+        $maxTpl = empty($templates) ? 5 : max(array_keys($templates));
+
+        $data = $request->validate([
+            'code'               => 'nullable|string|max:64',
+            'description'        => 'nullable|string|max:255',
+            'discount_type'      => 'nullable|in:percent,fixed',
+            'discount_value'     => 'nullable|numeric|min:0',
+            'valid_until'        => 'nullable|date',
+            'template_id'        => 'nullable|integer|min:1|max:' . $maxTpl,
+            'landing_title'      => 'nullable|string|max:255',
+            'landing_subtitle'   => 'nullable|string|max:500',
+            'landing_cta_text'   => 'nullable|string|max:120',
+            'landing_disclaimer' => 'nullable|string|max:1000',
+        ]);
+
+        // In-memory mock — DB'ye kaydetmeden render
+        $code = new DiscountCode([
+            'code'              => strtoupper($data['code'] ?? 'KOD'),
+            'description'       => $data['description'] ?? null,
+            'discount_type'     => $data['discount_type'] ?? 'percent',
+            'discount_value'    => $data['discount_value'] ?? 10,
+            'valid_until'       => ! empty($data['valid_until']) ? \Carbon\Carbon::parse($data['valid_until']) : null,
+            'template_id'       => $data['template_id'] ?? 1,
+            'landing_title'     => $data['landing_title'] ?? null,
+            'landing_subtitle'  => $data['landing_subtitle'] ?? null,
+            'landing_cta_text'  => $data['landing_cta_text'] ?? null,
+            'landing_disclaimer'=> $data['landing_disclaimer'] ?? null,
+            'is_active'         => true,
+            'redemption_count'  => 0,
+            'max_redemptions'   => null,
+        ]);
+
+        $tplId = $code->effectiveTemplateId();
+        $title       = $code->landing_title ?: 'Sana Özel İndirim';
+        $subtitle    = $code->landing_subtitle ?: 'Almanya yolculuğunu daha hesaplı başlat — bu kupon ile özel indirimden yararlan.';
+        $ctaText     = $code->landing_cta_text ?: 'Hemen Başvur';
+        $disclaimer  = $code->landing_disclaimer ?: 'Kupon kullanım koşulları geçerlidir. Tek kullanım, son kullanma tarihiyle sınırlıdır.';
+
+        return view('promo.show', [
+            'code'        => $code,
+            'templateId'  => $tplId,
+            'title'       => $title,
+            'subtitle'    => $subtitle,
+            'ctaText'     => $ctaText,
+            'disclaimer'  => $disclaimer,
+            'discountText'=> $code->discountText(),
+            'applyUrl'    => url('/apply'),
+            'previewMode' => true, // toolbar/script gizleme için (opsiyonel)
+        ]);
+    }
+
+    /**
      * AI ile paylaşım kartı metinlerini öner (4 alan: title, subtitle, cta, disclaimer).
      * Form'daki current state'e göre context kurar — tone template'e göre değişir.
      */
@@ -129,7 +188,7 @@ class DiscountCodeController extends Controller
             'description'    => 'nullable|string|max:255',
             'discount_type'  => 'required|in:percent,fixed',
             'discount_value' => 'required|numeric|min:0',
-            'template_id'    => 'nullable|integer|min:1|max:5',
+            'template_id'    => 'nullable|integer|min:1|max:' . max(array_keys((array) config('discount_templates', [1 => null]))),
             'valid_until'    => 'nullable|date',
         ]);
 
@@ -237,17 +296,16 @@ TXT;
     }
 
     /**
-     * Template'a göre AI'a tone talimatı.
+     * Template'a göre AI'a tone talimatı (config'ten okur, yeni template eklenince
+     * otomatik destekler).
      */
     private function toneForTemplate(int $tplId): string
     {
-        return match ($tplId) {
-            2 => 'Canlı, genç, enerjik. Emoji kullan. Heyecanlı kelimeler.',
-            3 => 'Lüks, ayrıcalıklı, sofistike. Az emoji. Şık, hafif resmi ama soğuk değil.',
-            4 => 'Eğlenceli, samimi, oyuncu. Bol emoji. Genç-arkadaş gibi konuşur.',
-            5 => 'Aciliyet hissi. "Kaçırma", "sadece X gün", "son fırsat" tarzı. Direkt eylem çağrısı.',
-            default => 'Profesyonel ama sıcak. 1-2 emoji. Güven veren, net, sade.',
-        };
+        $tpl = config('discount_templates.' . $tplId);
+        if (is_array($tpl) && ! empty($tpl['tone'])) {
+            return (string) $tpl['tone'];
+        }
+        return 'Profesyonel ama sıcak. 1-2 emoji. Güven veren, net, sade.';
     }
 
     /**
@@ -304,7 +362,7 @@ TXT;
             'valid_until'        => 'nullable|date|after_or_equal:valid_from',
             'is_active'          => 'sometimes|boolean',
             // Paylaşım kartı
-            'template_id'        => 'nullable|integer|min:1|max:5',
+            'template_id'        => 'nullable|integer|min:1|max:' . max(array_keys((array) config('discount_templates', [1 => null]))),
             'landing_title'      => 'nullable|string|max:255',
             'landing_subtitle'   => 'nullable|string|max:500',
             'landing_cta_text'   => 'nullable|string|max:120',

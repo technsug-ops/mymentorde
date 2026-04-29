@@ -169,11 +169,13 @@
 </head>
 <body class="promo-tpl-{{ $templateId }}">
 
+    @unless(! empty($previewMode ?? false))
     <div class="promo-toolbar">
         <button id="downloadBtn" type="button">📥 Görsel İndir</button>
         <button id="copyLinkBtn" type="button" data-url="{{ $shareUrl }}">🔗 Linki Kopyala</button>
         <a href="{{ $applyUrl }}">✨ Başvuruyu Aç</a>
     </div>
+    @endunless
 
     <div class="promo-card-wrap">
         <div id="promoCard" class="promo-card">
