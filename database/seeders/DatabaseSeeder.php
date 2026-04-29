@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             DocumentCategoryFromConfigSeeder::class,
             GuestRegistrationSpouseFieldsSeeder::class,
             GermanyCitySeeder::class,
+            TurkeyProvinceDistrictSeeder::class,
         ]);
     }
 }
