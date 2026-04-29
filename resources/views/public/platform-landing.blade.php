@@ -15,39 +15,48 @@
 <meta property="og:type" content="website">
 
 <link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
-    --primary:#5b2e91;
-    --primary-dark:#4a2377;
-    --primary-deep:#3d1c67;
-    --primary-soft:#f1e8fb;
-    --accent:#e8b931;
-    --accent-dark:#c99c26;
+    /* MentörDE Brand Palette (brandbook 2026-01-26) */
+    --primary:#7e58bf;          /* en koyu mor */
+    --primary-dark:#6c47a8;
+    --primary-deep:#5a3a8d;
+    --primary-mid:#a07ed9;       /* orta geçiş mor */
+    --primary-light:#b79ae9;     /* en açık mor */
+    --primary-soft:#efe9fb;      /* mor zarf */
+    --neutral:#e9e7e2;           /* brandbook nötr/cream */
+    --neutral-soft:#faf9f5;
+    --accent:#7e58bf;            /* legacy alias (eski kodda kullanılıyor — moruyla uyumlu) */
+    --accent-dark:#6c47a8;
     --success:#16a34a;
     --info:#2563eb;
     --danger:#dc2626;
     --warn:#f59e0b;
-    --text:#12233a;
-    --muted:#5e7187;
-    --line:#d9e2ee;
+    --text:#1a1325;              /* brandbook'taki koyu yumuşak siyah */
+    --muted:#6b6377;
+    --line:#e3dcec;
     --surface:#ffffff;
-    --bg:#f9fafd;
-    --gradient-purple:linear-gradient(140deg, #5b2e91 0%, #3d1c67 100%);
-    --gradient-gold:linear-gradient(140deg, #e8b931 0%, #c99c26 100%);
-    --gradient-mix:linear-gradient(140deg, #5b2e91 0%, #e8b931 200%);
+    --bg:#faf9f5;
+    --gradient-purple:linear-gradient(140deg, #7e58bf 0%, #5a3a8d 100%);
+    --gradient-mid:linear-gradient(140deg, #a07ed9 0%, #7e58bf 100%);
+    --gradient-mix:linear-gradient(140deg, #7e58bf 0%, #b79ae9 100%);
+    --gradient-soft:linear-gradient(180deg, #efe9fb 0%, #faf9f5 100%);
+    --font-base:"Space Grotesk", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 * { box-sizing:border-box; }
 html, body { margin:0; padding:0; scroll-behavior:smooth; }
 body {
-    font-family:"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family:var(--font-base);
     color:var(--text);
-    background:linear-gradient(180deg, #f7f3ff 0%, #f9fafd 50%, #fff8e8 100%);
+    background:linear-gradient(180deg, #f7f3ff 0%, #faf9f5 50%, #e9e7e2 100%);
     line-height:1.6;
     font-size:15px;
     -webkit-font-smoothing:antialiased;
+    font-feature-settings:"ss01", "ss02";
 }
-.serif { font-family:"DM Serif Display", Georgia, serif; font-weight:normal; font-style:italic; }
+.serif { font-family:var(--font-base); font-weight:600; font-style:italic; letter-spacing:-.5px; }
 a { color:var(--primary); text-decoration:none; }
 img { max-width:100%; height:auto; display:block; }
 
@@ -58,7 +67,7 @@ img { max-width:100%; height:auto; display:block; }
     border-bottom:1px solid var(--line);
 }
 .p-nav-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:14px 22px; gap:16px; }
-.p-logo { font-family:"DM Serif Display", serif; font-size:28px; color:var(--primary); letter-spacing:-.5px; line-height:1; display:inline-flex; align-items:center; gap:2px; }
+.p-logo { font-family:var(--font-base); font-size:28px; color:var(--primary); letter-spacing:-.5px; line-height:1; display:inline-flex; align-items:center; gap:2px; }
 .p-logo span { color:var(--primary-dark); font-style:italic; }
 .p-nav-links { display:flex; gap:28px; font-size:14px; font-weight:600; }
 .p-nav-links a { color:var(--muted); }
@@ -84,7 +93,7 @@ section { padding:90px 0; position:relative; }
 }
 .sec-bg-dark .sec-label { color:var(--accent); background:rgba(232,185,49,.15); }
 .sec-title {
-    font-family:"DM Serif Display", serif; font-style:italic;
+    font-family:var(--font-base); font-style:italic;
     font-size:clamp(32px, 4.5vw, 52px); line-height:1.1; color:var(--primary-deep);
     letter-spacing:-1.5px; margin:0 0 18px; max-width:900px;
 }
@@ -138,7 +147,7 @@ section { padding:90px 0; position:relative; }
 .hero-badge .dot { width:8px; height:8px; border-radius:50%; background:var(--success); animation:pulse 1.6s ease-out infinite; }
 @keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(22,163,74,.6); } 70% { box-shadow:0 0 0 10px rgba(22,163,74,0); } 100% { box-shadow:0 0 0 0 rgba(22,163,74,0); } }
 .hero h1 {
-    font-family:"DM Serif Display", serif;
+    font-family:var(--font-base);
     font-size:clamp(40px, 6vw, 68px); line-height:1.04; letter-spacing:-2px;
     margin:0 0 24px; color:var(--primary-deep); font-style:normal;
 }
@@ -147,7 +156,7 @@ section { padding:90px 0; position:relative; }
 .hero-ctas { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:36px; }
 .hero-trust { display:flex; gap:32px; flex-wrap:wrap; align-items:center; padding-top:24px; border-top:1px solid var(--line); }
 .hero-trust-item { font-size:12px; color:var(--muted); }
-.hero-trust-item strong { display:block; font-size:24px; color:var(--primary-deep); font-family:"DM Serif Display", serif; line-height:1; }
+.hero-trust-item strong { display:block; font-size:24px; color:var(--primary-deep); font-family:var(--font-base); line-height:1; }
 
 .hero-visual {
     position:relative; perspective:1200px;
@@ -165,7 +174,7 @@ section { padding:90px 0; position:relative; }
 .hero-card-2 { transform:translateZ(20px) translateX(40px) translateY(20px); position:absolute; top:80px; right:-30px; width:240px; }
 .hero-card-3 { transform:translateZ(40px) translateX(-30px) translateY(60px); position:absolute; bottom:-30px; left:-20px; width:220px; }
 .hero-card .lbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; font-weight:700; margin-bottom:6px; }
-.hero-card .val { font-family:"DM Serif Display", serif; font-size:24px; color:var(--primary-deep); line-height:1; }
+.hero-card .val { font-family:var(--font-base); font-size:24px; color:var(--primary-deep); line-height:1; }
 .hero-card .val.eur { color:var(--success); }
 .hero-card .delta { font-size:11px; color:var(--success); font-weight:700; margin-top:4px; }
 
@@ -182,9 +191,31 @@ section { padding:90px 0; position:relative; }
     background:var(--gradient-mix);
 }
 .stat-icon { font-size:36px; margin-bottom:14px; }
-.stat-num { font-family:"DM Serif Display", serif; font-size:46px; line-height:1; color:var(--primary-deep); margin-bottom:8px; letter-spacing:-1px; }
+.stat-num { font-family:var(--font-base); font-weight:700; font-size:46px; line-height:1; color:var(--primary-deep); margin-bottom:8px; letter-spacing:-1px; }
 .stat-num span { color:var(--accent-dark); }
 .stat-lbl { font-size:13px; color:var(--muted); font-weight:600; }
+
+/* === ROI PROOF PANEL === */
+.roi-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:18px; }
+@media(max-width:900px) { .roi-grid { grid-template-columns:repeat(2, 1fr); } }
+@media(max-width:520px) { .roi-grid { grid-template-columns:1fr; } }
+.roi-card {
+    background:linear-gradient(145deg, #fff 0%, var(--neutral-soft) 100%);
+    border:1px solid var(--line); border-radius:16px;
+    padding:28px 22px; text-align:left; position:relative; overflow:hidden;
+    transition:all .2s;
+}
+.roi-card:hover { transform:translateY(-3px); box-shadow:0 16px 36px rgba(126,88,191,.15); border-color:var(--primary-light); }
+.roi-card::before {
+    content:''; position:absolute; top:0; left:0; bottom:0; width:5px;
+    background:var(--gradient-mid);
+}
+.roi-num {
+    font-family:var(--font-base); font-weight:700; font-size:48px; line-height:1;
+    color:var(--primary); margin-bottom:10px; letter-spacing:-2px;
+}
+.roi-lbl { font-size:14px; font-weight:700; color:var(--text); line-height:1.4; margin-bottom:6px; }
+.roi-sub { font-size:12px; color:var(--muted); line-height:1.5; }
 
 /* === PROBLEM-SOLUTION === */
 .compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:30px; }
@@ -201,6 +232,86 @@ section { padding:90px 0; position:relative; }
 .compare-card li:last-child { border-bottom:0; }
 .compare-card.bad li::before { content:'✕'; position:absolute; left:0; color:#dc2626; font-weight:900; font-size:16px; }
 .compare-card.good li::before { content:'✓'; position:absolute; left:0; color:var(--success); font-weight:900; font-size:16px; }
+
+/* === 3-TIER PRICING === */
+.tier-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:22px; align-items:stretch; }
+@media(max-width:980px) { .tier-grid { grid-template-columns:1fr; gap:16px; } }
+.tier-card {
+    background:#fff; border:1px solid var(--line); border-radius:18px;
+    padding:32px 28px; position:relative; display:flex; flex-direction:column;
+    transition:all .25s;
+}
+.tier-card:hover { transform:translateY(-3px); box-shadow:0 20px 48px rgba(126,88,191,.12); }
+.tier-card.featured {
+    border:2px solid var(--primary);
+    background:linear-gradient(180deg, #fff 0%, var(--primary-soft) 100%);
+    box-shadow:0 24px 56px rgba(126,88,191,.18);
+    transform:scale(1.03);
+}
+.tier-card.featured:hover { transform:scale(1.03) translateY(-3px); }
+.tier-tag-pop {
+    position:absolute; top:-13px; left:50%; transform:translateX(-50%);
+    background:var(--gradient-purple); color:#fff;
+    padding:6px 18px; border-radius:999px;
+    font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+    box-shadow:0 6px 16px rgba(126,88,191,.32);
+}
+.tier-header { margin-bottom:18px; }
+.tier-icon { font-size:34px; margin-bottom:10px; }
+.tier-name { font-family:var(--font-base); font-weight:700; font-size:24px; color:var(--primary-deep); margin:0 0 6px; letter-spacing:-.5px; }
+.tier-tag { font-size:12px; color:var(--muted); margin:0; line-height:1.4; }
+.tier-price { display:flex; align-items:baseline; gap:6px; margin-top:8px; }
+.tier-num { font-family:var(--font-base); font-weight:700; font-size:44px; color:var(--primary-deep); line-height:1; letter-spacing:-1.5px; }
+.tier-per { font-size:14px; color:var(--muted); font-weight:600; }
+.tier-yearly { font-size:12px; color:var(--muted); margin-bottom:22px; }
+.tier-yearly small { color:var(--success); font-weight:700; }
+.tier-features { list-style:none; padding:0; margin:0 0 24px; flex:1; }
+.tier-features li {
+    padding:9px 0 9px 24px; position:relative; font-size:13.5px; line-height:1.5;
+    border-bottom:1px solid var(--line);
+}
+.tier-features li:last-child { border-bottom:0; }
+.tier-features li::before { content:'✓'; position:absolute; left:0; color:var(--success); font-weight:900; }
+.tier-features li.tier-disabled { color:var(--muted); opacity:.6; }
+.tier-features li.tier-disabled::before { content:'—'; color:var(--muted); }
+.tier-cta {
+    display:block; padding:14px 22px; text-align:center;
+    background:var(--surface); color:var(--primary) !important;
+    border:2px solid var(--primary); border-radius:12px;
+    font-size:14px; font-weight:700; text-decoration:none;
+    transition:all .15s;
+}
+.tier-cta:hover { background:var(--primary); color:#fff !important; }
+.tier-card.featured .tier-cta { background:var(--primary); color:#fff !important; }
+.tier-card.featured .tier-cta:hover { background:var(--primary-deep); }
+.tier-trust {
+    display:flex; flex-wrap:wrap; justify-content:center; gap:24px;
+    margin-top:34px; font-size:13px; color:var(--muted); font-weight:600;
+}
+
+/* === VS MATRIX === */
+.vs-matrix-wrap { margin-top:50px; padding:36px; background:#fff; border:1px solid var(--line); border-radius:20px; box-shadow:0 4px 18px rgba(0,0,0,.04); }
+.vs-matrix-title { font-family:var(--font-base); font-weight:700; font-size:24px; color:var(--primary-deep); margin:0 0 8px; letter-spacing:-.5px; }
+.vs-matrix-sub { font-size:14px; color:var(--muted); margin:0 0 22px; line-height:1.55; }
+.vs-matrix-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.vs-matrix { width:100%; min-width:780px; border-collapse:collapse; font-size:13.5px; }
+.vs-matrix th, .vs-matrix td { text-align:left; padding:14px 16px; vertical-align:top; }
+.vs-matrix thead th {
+    font-family:var(--font-base); font-weight:700; font-size:13px;
+    color:var(--text); border-bottom:2px solid var(--line);
+    background:var(--neutral-soft);
+}
+.vs-matrix thead th span { display:block; font-size:11px; font-weight:500; color:var(--muted); margin-top:2px; }
+.vs-matrix tbody tr { border-bottom:1px solid var(--line); }
+.vs-matrix tbody tr:last-child { border-bottom:0; }
+.vs-matrix tbody tr:hover { background:var(--neutral-soft); }
+.vs-matrix tbody td:first-child { font-weight:600; color:var(--text); width:28%; }
+.vs-matrix .col-bad { background:rgba(220,38,38,.04); color:#7f1d1d; }
+.vs-matrix .col-mid { background:rgba(245,158,11,.04); color:#92400e; }
+.vs-matrix .col-good { background:rgba(126,88,191,.06); color:var(--primary-deep); font-weight:600; }
+.vs-matrix thead th.col-bad  { background:rgba(220,38,38,.1);  color:#991b1b; }
+.vs-matrix thead th.col-mid  { background:rgba(245,158,11,.1); color:#92400e; }
+.vs-matrix thead th.col-good { background:rgba(126,88,191,.12); color:var(--primary-deep); }
 
 /* === PORTAL CARDS === */
 .portals-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:24px; }
@@ -245,6 +356,64 @@ section { padding:90px 0; position:relative; }
 .module h4 { margin:0 0 6px; font-size:15px; color:var(--primary-deep); font-weight:800; }
 .module p { margin:0; font-size:13px; color:var(--muted); line-height:1.55; }
 
+/* === FLAGSHIP MODULES (Vurgu) === */
+.hl-section-tag {
+    display:inline-block; background:var(--primary-soft); color:var(--primary);
+    padding:8px 18px; border-radius:999px; font-size:12px; font-weight:700;
+    text-transform:uppercase; letter-spacing:1.5px; margin-bottom:18px;
+}
+.hl-section-sub { font-size:14px; color:var(--muted); margin:0 0 22px; max-width:680px; }
+.hl-modules-grid {
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:18px; margin-bottom:30px;
+}
+@media(max-width:1100px) { .hl-modules-grid { grid-template-columns:repeat(3, 1fr); } }
+@media(max-width:820px)  { .hl-modules-grid { grid-template-columns:repeat(2, 1fr); } }
+@media(max-width:520px)  { .hl-modules-grid { grid-template-columns:1fr; } }
+.hl-module {
+    background:#fff; border:1px solid var(--line); border-radius:18px;
+    padding:26px 22px; transition:all .2s; position:relative; overflow:hidden;
+}
+.hl-module::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:4px;
+    background:var(--gradient-mid); opacity:.85;
+}
+.hl-module:hover {
+    transform:translateY(-3px); border-color:var(--primary-light);
+    box-shadow:0 18px 40px rgba(126,88,191,.15);
+}
+.hl-module-icon {
+    width:54px; height:54px; border-radius:14px;
+    background:linear-gradient(135deg, var(--primary-soft) 0%, var(--neutral) 100%);
+    color:var(--primary); display:flex; align-items:center; justify-content:center;
+    font-size:28px; margin-bottom:14px;
+    box-shadow:inset 0 0 0 1px rgba(126,88,191,.1);
+}
+.hl-module h4 {
+    font-family:var(--font-base); font-weight:700; font-size:16px;
+    color:var(--primary-deep); margin:0 0 8px; letter-spacing:-.3px; line-height:1.25;
+}
+.hl-module p { margin:0; font-size:13px; color:var(--muted); line-height:1.55; }
+
+/* === COMPACT MODULE PILLS === */
+.modules-pills {
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;
+}
+@media(max-width:900px) { .modules-pills { grid-template-columns:repeat(2, 1fr); } }
+@media(max-width:520px) { .modules-pills { grid-template-columns:1fr; } }
+.m-pill {
+    background:#fff; border:1px solid var(--line); border-radius:10px;
+    padding:11px 14px; display:flex; align-items:center; gap:10px;
+    font-size:12.5px; line-height:1.4; color:var(--text);
+    transition:all .15s;
+}
+.m-pill:hover { border-color:var(--primary-light); background:var(--neutral-soft); }
+.m-pill-icon {
+    flex-shrink:0; width:30px; height:30px; border-radius:8px;
+    background:var(--primary-soft); display:flex; align-items:center; justify-content:center;
+    font-size:15px;
+}
+.m-pill strong { color:var(--primary-deep); font-weight:700; }
+
 /* === AI HIGHLIGHT === */
 .ai-spotlight {
     background:var(--gradient-purple); color:#fff;
@@ -258,7 +427,7 @@ section { padding:90px 0; position:relative; }
 }
 .ai-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:50px; align-items:center; position:relative; z-index:1; }
 @media(max-width:900px) { .ai-grid { grid-template-columns:1fr; } }
-.ai-spotlight h2 { font-family:"DM Serif Display", serif; font-style:italic; font-size:42px; line-height:1.1; margin:0 0 18px; color:#fff; }
+.ai-spotlight h2 { font-family:var(--font-base); font-style:italic; font-size:42px; line-height:1.1; margin:0 0 18px; color:#fff; }
 .ai-spotlight h2 em { color:var(--accent); }
 .ai-spotlight p { font-size:17px; opacity:.9; margin:0 0 30px; }
 .ai-features { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:30px; }
@@ -341,9 +510,9 @@ section { padding:90px 0; position:relative; }
 .pricing-card.featured:hover { transform:scale(1.04) translateY(-4px); }
 .pricing-badge { position:absolute; top:-14px; left:50%; transform:translateX(-50%); background:var(--accent); color:var(--primary-deep); padding:6px 16px; border-radius:20px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
 .pricing-tier { font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.12em; font-weight:700; margin-bottom:6px; }
-.pricing-name { font-family:"DM Serif Display", serif; font-style:italic; font-size:32px; color:var(--primary-deep); margin:0 0 14px; }
+.pricing-name { font-family:var(--font-base); font-style:italic; font-size:32px; color:var(--primary-deep); margin:0 0 14px; }
 .pricing-price { display:flex; align-items:baseline; gap:6px; margin-bottom:6px; }
-.pricing-price .num { font-family:"DM Serif Display", serif; font-size:48px; color:var(--primary-deep); line-height:1; }
+.pricing-price .num { font-family:var(--font-base); font-size:48px; color:var(--primary-deep); line-height:1; }
 .pricing-price .period { color:var(--muted); font-size:14px; }
 .pricing-desc { color:var(--muted); font-size:13px; margin-bottom:24px; min-height:50px; }
 .pricing-features { list-style:none; padding:0; margin:0 0 30px; flex:1; }
@@ -373,11 +542,11 @@ section { padding:90px 0; position:relative; }
     padding:5px 12px; border-radius:14px; font-size:11px; font-weight:800;
     text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px;
 }
-.core-name { margin:0 0 8px; font-family:"DM Serif Display", serif; font-style:italic; font-size:32px; color:#fff; }
+.core-name { margin:0 0 8px; font-family:var(--font-base); font-style:italic; font-size:32px; color:#fff; }
 .core-desc { margin:0; color:rgba(255,255,255,.85); font-size:14px; }
 .core-price-block { text-align:right; }
 .core-price-row { display:flex; align-items:baseline; gap:6px; justify-content:flex-end; }
-.core-price { font-family:"DM Serif Display", serif; font-size:56px; line-height:1; color:var(--accent); }
+.core-price { font-family:var(--font-base); font-size:56px; line-height:1; color:var(--accent); }
 .core-period { color:rgba(255,255,255,.7); font-size:14px; }
 .core-price-yearly { font-size:12px; color:rgba(255,255,255,.7); margin-top:4px; }
 .core-features { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; position:relative; z-index:1; }
@@ -433,8 +602,8 @@ section { padding:90px 0; position:relative; }
 .addon-switch input:checked + .addon-slider::after { transform:translateX(22px); }
 
 .addon-card h4 { margin:0 0 6px; font-size:17px; color:var(--primary-deep); font-weight:800; }
-.addon-price { font-family:"DM Serif Display", serif; font-size:28px; color:var(--primary); margin-bottom:10px; }
-.addon-price span { font-size:13px; color:var(--muted); font-family:"Plus Jakarta Sans", sans-serif; }
+.addon-price { font-family:var(--font-base); font-size:28px; color:var(--primary); margin-bottom:10px; }
+.addon-price span { font-size:13px; color:var(--muted); font-family:var(--font-base); }
 .addon-card > p { color:var(--muted); font-size:13px; line-height:1.55; margin:0 0 14px; }
 .addon-features { list-style:none; padding:0; margin:0; flex:1; }
 .addon-features li { padding:5px 0 5px 20px; position:relative; font-size:12px; color:var(--text); line-height:1.5; }
@@ -471,8 +640,8 @@ section { padding:90px 0; position:relative; }
 .ps-row:last-child { border-bottom:0; }
 .ps-row.total { padding-top:14px; margin-top:6px; border-top:2px solid var(--primary); border-bottom:0; font-size:18px; }
 .ps-lbl { color:var(--text); }
-.ps-val { color:var(--primary-deep); font-weight:700; font-family:"DM Serif Display", serif; font-size:20px; }
-.ps-val small { font-size:11px; color:var(--muted); font-family:"Plus Jakarta Sans", sans-serif; font-weight:normal; }
+.ps-val { color:var(--primary-deep); font-weight:700; font-family:var(--font-base); font-size:20px; }
+.ps-val small { font-size:11px; color:var(--muted); font-family:var(--font-base); font-weight:normal; }
 .total-amount { color:var(--primary); font-size:36px !important; }
 .ps-yearly { background:var(--primary-soft); border-radius:10px; padding:12px 16px; margin-top:14px; font-size:13px; color:var(--primary-deep); }
 .ps-yearly small { color:var(--muted); }
@@ -502,7 +671,7 @@ section { padding:90px 0; position:relative; }
 @media(max-width:900px) { .partner-grid { grid-template-columns:1fr; } }
 .partner-stats { display:grid; grid-template-columns:repeat(2, 1fr); gap:14px; margin-top:24px; }
 .partner-stat { background:#fff; border-radius:14px; padding:18px; border:1px solid var(--line); text-align:center; }
-.partner-stat .num { font-family:"DM Serif Display", serif; font-size:28px; color:var(--primary-deep); }
+.partner-stat .num { font-family:var(--font-base); font-size:28px; color:var(--primary-deep); }
 .partner-stat .lbl { font-size:11px; color:var(--muted); text-transform:uppercase; }
 
 /* === FAQ === */
@@ -526,7 +695,7 @@ section { padding:90px 0; position:relative; }
     background:radial-gradient(60% 50% at 30% 30%, rgba(232,185,49,.2), transparent 70%);
 }
 .cta-final .container { position:relative; z-index:1; }
-.cta-final h2 { font-family:"DM Serif Display", serif; font-style:italic; font-size:clamp(36px, 5vw, 56px); margin:0 0 18px; line-height:1.1; }
+.cta-final h2 { font-family:var(--font-base); font-style:italic; font-size:clamp(36px, 5vw, 56px); margin:0 0 18px; line-height:1.1; }
 .cta-final p { font-size:18px; opacity:.9; margin:0 0 36px; max-width:700px; margin-left:auto; margin-right:auto; }
 .cta-final .ctas { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
 .cta-final .contacts { display:flex; gap:24px; justify-content:center; flex-wrap:wrap; margin-top:42px; font-size:14px; }
@@ -572,11 +741,11 @@ footer a:hover { color:var(--accent); }
 <section class="hero">
     <div class="container hero-grid">
         <div>
-            <span class="hero-badge"><span class="dot"></span> 2026 — End-to-End SaaS Platform</span>
-            <h1>Yurt Dışı Eğitim Danışmanlığında<br><em>Tam Otomasyon</em></h1>
+            <span class="hero-badge"><span class="dot"></span> Yurt Dışı Eğitim Danışmanlığı SaaS</span>
+            <h1>5 Excel + WhatsApp + Calendar = <em>kaybedilen aday.</em><br>Tek panel, ekibin <em>2× kapasite.</em></h1>
             <p class="hero-lead">
-                <strong>{{ $brand }}</strong> — Almanya odaklı eğitim danışmanlığı firmaları için 6 portal, 27+ modül,
-                AI destekli, end-to-end bulut platformu. Aday → vize → kabul → mezuniyet sürecinin tamamı tek dashboard'da.
+                <strong>{{ $brand }}</strong> — Almanya'ya öğrenci gönderen danışmanlık firmaları için end-to-end bulut platformu.
+                Lead'den vizeye, sözleşmeden mezuniyete — bütün süreç tek dashboard'da, ekibin gerçek işine odaklansın.
             </p>
             <div class="hero-ctas">
                 <a href="#cta"
@@ -668,8 +837,42 @@ footer a:hover { color:var(--accent); }
     </div>
 </section>
 
+{{-- ═══ ROI PROOF PANEL ═══ --}}
+<section class="sec-bg-soft" style="padding:70px 0;">
+    <div class="container">
+        <span class="sec-label">Kanıtlanmış Etki</span>
+        <h2 class="sec-title">Sayılarla {{ $brand }}.</h2>
+        <p class="sec-lead">
+            Mevcut müşteri firmalarımızın iç ölçümlerinden alınan gerçek etki rakamları —
+            ekibin günlük operasyonu nasıl değişiyor.
+        </p>
+        <div class="roi-grid">
+            <div class="roi-card">
+                <div class="roi-num">2×</div>
+                <div class="roi-lbl">Senior başına aktif aday kapasitesi</div>
+                <div class="roi-sub">30 → 60 paralel takip</div>
+            </div>
+            <div class="roi-card">
+                <div class="roi-num">+%40</div>
+                <div class="roi-lbl">Lead conversion artışı</div>
+                <div class="roi-sub">Otomatik nurture + AI follow-up ile</div>
+            </div>
+            <div class="roi-card">
+                <div class="roi-num">30 sa</div>
+                <div class="roi-lbl">Aylık manuel rapor tasarrufu</div>
+                <div class="roi-sub">Excel cehennemine veda</div>
+            </div>
+            <div class="roi-card">
+                <div class="roi-num">%92</div>
+                <div class="roi-lbl">Aday belge tamamlanma oranı</div>
+                <div class="roi-sub">Otomatik reminder + sessizlik check-in</div>
+            </div>
+        </div>
+    </div>
+</section>
+
 {{-- ═══ PROBLEM/SOLUTION ═══ --}}
-<section class="sec-bg-soft">
+<section class="sec-bg-white">
     <div class="container">
         <span class="sec-label">Sorun & Çözüm</span>
         <h2 class="sec-title">Excel'lerden, dağınık WhatsApp gruplarından, eksik takipten kurtul.</h2>
@@ -702,6 +905,80 @@ footer a:hover { color:var(--accent); }
                     <li>Stripe entegrasyonu + invoice/fatura akışı</li>
                     <li>UTM tracking + multi-touch attribution + ROI</li>
                 </ul>
+            </div>
+        </div>
+
+        {{-- Detaylı karşılaştırma matrisi --}}
+        <div class="vs-matrix-wrap">
+            <h3 class="vs-matrix-title">"Generic CRM kullansam aynı şey değil mi?" — Hayır.</h3>
+            <p class="vs-matrix-sub">Eğitim danışmanlığı domain'ine özel akışlar (vize, Anmeldung, üniversite başvuru, bayi attribution) generic SaaS'larda yok. {{ $brand }} bu sürecin <strong>tamamını</strong> kapsar.</p>
+            <div class="vs-matrix-scroll">
+                <table class="vs-matrix">
+                    <thead>
+                        <tr>
+                            <th>Operasyonel İhtiyaç</th>
+                            <th class="col-bad">Excel + WhatsApp</th>
+                            <th class="col-mid">Generic CRM<br><span>(HubSpot, Pipedrive vb.)</span></th>
+                            <th class="col-good">{{ $brand }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Aday → Öğrenci dönüşüm akışı</td>
+                            <td class="col-bad">Manuel takip</td>
+                            <td class="col-mid">Lead → Deal mantığı (zorla)</td>
+                            <td class="col-good">Native: aday/öğrenci ayrı portal</td>
+                        </tr>
+                        <tr>
+                            <td>Üniversite başvuru pipeline + DAAD entegrasyonu</td>
+                            <td class="col-bad">❌ Yok</td>
+                            <td class="col-mid">❌ Yok</td>
+                            <td class="col-good">✓ 500+ üni + deadline tracker</td>
+                        </tr>
+                        <tr>
+                            <td>Vize süreci (Sperrkonto · randevu · konsolosluk)</td>
+                            <td class="col-bad">❌ Yok</td>
+                            <td class="col-mid">❌ Yok</td>
+                            <td class="col-good">✓ Checklist + status timeline</td>
+                        </tr>
+                        <tr>
+                            <td>Bayi/Partner komisyon + payout</td>
+                            <td class="col-bad">Excel formülleri</td>
+                            <td class="col-mid">Custom field workaround</td>
+                            <td class="col-good">✓ Native dealer modülü + portal</td>
+                        </tr>
+                        <tr>
+                            <td>AI knowledge base + adaya RAG asistan</td>
+                            <td class="col-bad">❌ Yok</td>
+                            <td class="col-mid">Eklenti gerekir (extra cost)</td>
+                            <td class="col-good">✓ AI Labs dahil + intent analizi</td>
+                        </tr>
+                        <tr>
+                            <td>Sözleşme dijital imza + ödeme planı</td>
+                            <td class="col-bad">DocuSign + manuel takip</td>
+                            <td class="col-mid">Eklenti</td>
+                            <td class="col-good">✓ Native + sözleşme PDF + Stripe</td>
+                        </tr>
+                        <tr>
+                            <td>EU Data Residency + DSGVO/KVKK uyumu</td>
+                            <td class="col-bad">Sorumluluk sende</td>
+                            <td class="col-mid">Genelde ABD veri merkezi</td>
+                            <td class="col-good">✓ Almanya hosting + AVV registry</td>
+                        </tr>
+                        <tr>
+                            <td>Multi-portal (aday/öğrenci/senior/bayi/yönetici)</td>
+                            <td class="col-bad">❌ Yok</td>
+                            <td class="col-mid">Tek arayüz, role-based gizleme</td>
+                            <td class="col-good">✓ 6 ayrı UX, izole portal</td>
+                        </tr>
+                        <tr>
+                            <td>Türkçe arayüz + yerelleştirilmiş süreçler</td>
+                            <td class="col-bad">—</td>
+                            <td class="col-mid">İngilizce ağırlıklı</td>
+                            <td class="col-good">✓ Tam Türkçe + Almanya odaklı</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -809,34 +1086,74 @@ footer a:hover { color:var(--accent); }
         <h2 class="sec-title">Eğitim danışmanlığının her iş süreci için modül.</h2>
         <p class="sec-lead">Hiçbir modülü baştan yazmana gerek yok — hepsi kutudan çıkar çıkmaz çalışıyor.</p>
 
-        <div class="modules-grid">
-            <div class="module"><div class="module-icon">👥</div><div><h4>CRM & Lead</h4><p>Lead scoring (5 tier), atama, süreç takibi, dormant alarm.</p></div></div>
-            <div class="module"><div class="module-icon">📅</div><div><h4>Booking</h4><p>Senior takvimi, public booking, Google Calendar 2-way sync, reminder.</p></div></div>
-            <div class="module"><div class="module-icon">📄</div><div><h4>Document Pipeline</h4><p>Belge upload, OCR, kategori, deadline tracker, e-imza altyapı.</p></div></div>
-            <div class="module"><div class="module-icon">📜</div><div><h4>Contracts Hub</h4><p>Sözleşme şablonları, dijital imza, ödeme planı, koşulsuz revize.</p></div></div>
-            <div class="module"><div class="module-icon">💳</div><div><h4>Payments</h4><p>Stripe checkout, fatura, taksitli ödeme, overdue takibi, dealer payout.</p></div></div>
-            <div class="module"><div class="module-icon">🏛️</div><div><h4>Üniversite Belge Haritası</h4><p>500+ üniversite başvuru gereklilikleri, DAAD entegrasyonu.</p></div></div>
-            <div class="module"><div class="module-icon">🛂</div><div><h4>Vize Süreci</h4><p>Konsolosluk randevu, dosya kontrol checklist, mülakat hazırlık.</p></div></div>
-            <div class="module"><div class="module-icon">🏠</div><div><h4>Konaklama</h4><p>Wohnung araştırma, Anmeldung, sigorta partner ağı.</p></div></div>
-            <div class="module"><div class="module-icon">💬</div><div><h4>Messaging Hub</h4><p>İç DM + Email + WhatsApp + auto-reply (away periods).</p></div></div>
-            <div class="module"><div class="module-icon">🎫</div><div><h4>Ticket System</h4><p>SLA tracking, kategorize, auto-assign, çözüm süresi metrikleri.</p></div></div>
-            <div class="module"><div class="module-icon">📢</div><div><h4>Bulletin Board</h4><p>Şirket içi duyurular, role-based hedefleme, okundu takibi.</p></div></div>
-            <div class="module"><div class="module-icon">📊</div><div><h4>Dashboards (16+)</h4><p>Lead funnel, senior perf, revenue, NPS, GDPR, kampanya ROI.</p></div></div>
-            <div class="module"><div class="module-icon">📈</div><div><h4>Marketing Attribution</h4><p>UTM tracking, multi-touch, kanal ROI, lead quality score.</p></div></div>
-            <div class="module"><div class="module-icon">📧</div><div><h4>Email Campaigns</h4><p>Resend SMTP, A/B test, drip otomasyonu, analytics.</p></div></div>
-            <div class="module"><div class="module-icon">📱</div><div><h4>Sosyal Medya</h4><p>İçerik takvimi, kampanya yönetimi, performans takibi.</p></div></div>
-            <div class="module"><div class="module-icon">🤝</div><div><h4>Dealer Network</h4><p>Bayi onboarding, kademe sistemi, komisyon hesap, materyal kütüphanesi.</p></div></div>
-            <div class="module"><div class="module-icon">👔</div><div><h4>İnsan Kaynakları</h4><p>Personel, izin, devam, sertifika, bordro profilleri.</p></div></div>
-            <div class="module"><div class="module-icon">📋</div><div><h4>Görev Yönetimi</h4><p>Task otomasyon, escalation, kanban, SLA, departman bazlı.</p></div></div>
-            <div class="module"><div class="module-icon">📑</div><div><h4>Workflow Engine</h4><p>Kural tabanlı süreç, otomatik atama, koşullu eskalasyon.</p></div></div>
-            <div class="module"><div class="module-icon">🤖</div><div><h4>AI Labs</h4><p>Knowledge base, RAG, intent analizi, FAQ önerileri.</p></div></div>
-            <div class="module"><div class="module-icon">🔒</div><div><h4>GDPR & Audit</h4><p>Data export, erasure, audit trail, retention policy, IP allowlist.</p></div></div>
-            <div class="module"><div class="module-icon">🛡️</div><div><h4>Security</h4><p>2FA, role-based access, brute-force koruması, anomaly detection.</p></div></div>
-            <div class="module"><div class="module-icon">💱</div><div><h4>Currency Sync</h4><p>EUR/TRY/USD canlı kur, multi-currency invoice.</p></div></div>
-            <div class="module"><div class="module-icon">📝</div><div><h4>Audit Reports</h4><p>Aylık otomatik rapor, scheduled exports, KPI snapshots.</p></div></div>
-            <div class="module"><div class="module-icon">📍</div><div><h4>Sessizlik Monitörü</h4><p>Aday + öğrenci timeline'ında hareket olmayan kayıtlara otomatik "süreç aktif" touchpoint, stage'e göre kadans (haftalık / 2 haftalık), manager kontrol paneli.</p></div></div>
-            <div class="module"><div class="module-icon">🎟️</div><div><h4>İndirim Kodları</h4><p>Kupon üretim (yüzde/sabit, expiry, kota), 5 paylaşım kartı template (Classic/Bold/Premium/Playful/Urgency), AI öneri, public landing, görsel PNG indirme.</p></div></div>
-            <div class="module"><div class="module-icon">⏰</div><div><h4>Ödeme Hatırlatma Akışı</h4><p>4 otomatik + 1 manuel kademeli hatırlatma maili, manager "ödeme alındı" teyidi + bildirim, pause/resume, kişi-bazlı override.</p></div></div>
+        {{-- ── Vurgu Modülleri (flagship 8) ────────────────────── --}}
+        <div class="hl-section-tag">★ Flagship Modüller</div>
+        <div class="hl-modules-grid">
+            <div class="hl-module">
+                <div class="hl-module-icon">👥</div>
+                <h4>CRM &amp; Lead Pipeline</h4>
+                <p>5-tier scoring · otomatik atama · dormant alarm · multi-touch attribution. Eğitim danışmanlığına özel akışlar — generic CRM'de bulamazsın.</p>
+            </div>
+            <div class="hl-module">
+                <div class="hl-module-icon">📜</div>
+                <h4>Contracts Hub</h4>
+                <p>Sözleşme şablonları · dijital imza · ödeme planı · ek madde versiyonu · iptal akışı. Aday → öğrenci geçişinin yasal kalbi.</p>
+            </div>
+            <div class="hl-module">
+                <div class="hl-module-icon">📄</div>
+                <h4>Document Pipeline</h4>
+                <p>Belge upload · OCR · kategori · deadline tracker · e-imza altyapı · public talep linki. Sperrkonto'dan diplomaya 50+ belge tipi.</p>
+            </div>
+            <div class="hl-module">
+                <div class="hl-module-icon">📅</div>
+                <h4>Booking &amp; Calendar</h4>
+                <p>Senior takvimi · public booking widget · Google Calendar 2-way sync · otomatik reminder · ücretli/ücretsiz seans yönetimi.</p>
+            </div>
+            <div class="hl-module">
+                <div class="hl-module-icon">🤖</div>
+                <h4>AI Labs (Diferansiyatör)</h4>
+                <p>Gemini 2.5 + RAG knowledge base · intent analizi · FAQ önerileri · streaming yanıt · token guard. Aday soruları otomatik öğrenir.</p>
+            </div>
+            <div class="hl-module">
+                <div class="hl-module-icon">💳</div>
+                <h4>Payments &amp; Invoicing</h4>
+                <p>Stripe checkout · fatura · taksitli plan · overdue takibi · dealer payout · ödeme hatırlatma akışı (4+1 kademeli mail).</p>
+            </div>
+            <div class="hl-module">
+                <div class="hl-module-icon">📈</div>
+                <h4>Marketing Attribution</h4>
+                <p>UTM tracking · multi-touch · kanal ROI · lead quality score · A/B test · email/SMS drip · referral programı.</p>
+            </div>
+            <div class="hl-module">
+                <div class="hl-module-icon">📊</div>
+                <h4>Analytics Hub (16+ Dashboard)</h4>
+                <p>Lead funnel · senior performans · revenue · NPS · GDPR · kampanya ROI · scheduled snapshots. BI-ready, export edilebilir.</p>
+            </div>
+        </div>
+
+        {{-- ── Tamamlayıcı Modüller (kompakt pill) ────────────── --}}
+        <div class="hl-section-tag" style="margin-top:60px;">+ Tamamlayıcı Modüller (19)</div>
+        <p class="hl-section-sub">Çekirdek operasyonu tamamlayan iş akışı modülleri — hepsi dahil, ayrıca yapılandırma gerekmez.</p>
+        <div class="modules-pills">
+            <div class="m-pill"><span class="m-pill-icon">🏛️</span><span><strong>Üniversite Belge Haritası</strong> · 500+ üni + DAAD</span></div>
+            <div class="m-pill"><span class="m-pill-icon">🛂</span><span><strong>Vize Süreci</strong> · randevu + checklist</span></div>
+            <div class="m-pill"><span class="m-pill-icon">🏠</span><span><strong>Konaklama</strong> · Wohnung + Anmeldung</span></div>
+            <div class="m-pill"><span class="m-pill-icon">💬</span><span><strong>Messaging Hub</strong> · DM + Email + WhatsApp</span></div>
+            <div class="m-pill"><span class="m-pill-icon">🎫</span><span><strong>Ticket System</strong> · SLA + auto-assign</span></div>
+            <div class="m-pill"><span class="m-pill-icon">📢</span><span><strong>Bulletin Board</strong> · iç duyuru</span></div>
+            <div class="m-pill"><span class="m-pill-icon">📧</span><span><strong>Email Campaigns</strong> · A/B + drip</span></div>
+            <div class="m-pill"><span class="m-pill-icon">📱</span><span><strong>Sosyal Medya</strong> · içerik takvimi</span></div>
+            <div class="m-pill"><span class="m-pill-icon">🤝</span><span><strong>Dealer Network</strong> · komisyon + payout</span></div>
+            <div class="m-pill"><span class="m-pill-icon">👔</span><span><strong>İnsan Kaynakları</strong> · personel + izin</span></div>
+            <div class="m-pill"><span class="m-pill-icon">📋</span><span><strong>Görev Yönetimi</strong> · kanban + SLA</span></div>
+            <div class="m-pill"><span class="m-pill-icon">📑</span><span><strong>Workflow Engine</strong> · kural tabanlı</span></div>
+            <div class="m-pill"><span class="m-pill-icon">🔒</span><span><strong>GDPR &amp; Audit</strong> · export + retention</span></div>
+            <div class="m-pill"><span class="m-pill-icon">🛡️</span><span><strong>Security</strong> · 2FA + anomaly detect</span></div>
+            <div class="m-pill"><span class="m-pill-icon">💱</span><span><strong>Currency Sync</strong> · EUR/TRY/USD canlı</span></div>
+            <div class="m-pill"><span class="m-pill-icon">📝</span><span><strong>Audit Reports</strong> · aylık snapshot</span></div>
+            <div class="m-pill"><span class="m-pill-icon">📍</span><span><strong>Sessizlik Monitörü</strong> · auto check-in</span></div>
+            <div class="m-pill"><span class="m-pill-icon">🎟️</span><span><strong>İndirim Kodları</strong> · 5 template + AI</span></div>
+            <div class="m-pill"><span class="m-pill-icon">⏰</span><span><strong>Ödeme Hatırlatma</strong> · 4+1 kademeli</span></div>
         </div>
     </div>
 </section>
@@ -1106,11 +1423,106 @@ footer a:hover { color:var(--accent); }
     </div>
 </section>
 
+{{-- ═══ TIER PRICING — 3 paket ═══ --}}
+<section id="paketler" class="sec-bg-white" style="padding:80px 0 50px;">
+    <div class="container">
+        <span class="sec-label">Hızlı Paketler</span>
+        <h2 class="sec-title">Ekibinin boyutuna göre paket seç.</h2>
+        <p class="sec-lead">
+            Üç hazır paket — solo danışmandan kurumsal ekibe kadar. Karar veremiyorsan
+            <a href="#fiyat" style="color:var(--primary); border-bottom:1px solid var(--primary);">modüler hesabı</a>
+            ile kendi paketini oluştur.
+        </p>
+
+        <div class="tier-grid">
+            {{-- SOLO --}}
+            <div class="tier-card">
+                <div class="tier-header">
+                    <div class="tier-icon">👤</div>
+                    <h3 class="tier-name">Solo</h3>
+                    <p class="tier-tag">1–3 kişilik ekip · ≤100 aday/yıl</p>
+                </div>
+                <div class="tier-price">
+                    <span class="tier-num">€199</span>
+                    <span class="tier-per">/ay</span>
+                </div>
+                <div class="tier-yearly">veya €1.910/yıl <small>(%20 indirim)</small></div>
+                <ul class="tier-features">
+                    <li>3 portal (Aday + Öğrenci + Senior)</li>
+                    <li>Lead pipeline + temel skoring</li>
+                    <li>Belge yönetimi + reminder</li>
+                    <li>50 aktif öğrenci · 5 senior</li>
+                    <li>Email destek (24h SLA)</li>
+                    <li class="tier-disabled">— AI Asistan (ek modül)</li>
+                    <li class="tier-disabled">— Bayi network</li>
+                </ul>
+                <a href="#cta" class="tier-cta">Solo'yu Seç →</a>
+            </div>
+
+            {{-- BÜYÜYEN — featured --}}
+            <div class="tier-card featured">
+                <div class="tier-tag-pop">⭐ En Popüler</div>
+                <div class="tier-header">
+                    <div class="tier-icon">📈</div>
+                    <h3 class="tier-name">Büyüyen Ekip</h3>
+                    <p class="tier-tag">3–10 kişi · 100–500 aday/yıl</p>
+                </div>
+                <div class="tier-price">
+                    <span class="tier-num">€499</span>
+                    <span class="tier-per">/ay</span>
+                </div>
+                <div class="tier-yearly">veya €4.790/yıl <small>(%20 indirim)</small></div>
+                <ul class="tier-features">
+                    <li><strong>Solo'daki her şey +</strong></li>
+                    <li>🤖 AI Asistan dahil (Gemini RAG)</li>
+                    <li>📣 Marketing Admin modülü</li>
+                    <li>📜 Contracts Hub + dijital imza</li>
+                    <li>250 aktif öğrenci · 15 senior · 3 manager</li>
+                    <li>Analytics Hub (16+ dashboard)</li>
+                    <li>Öncelikli destek (4h SLA)</li>
+                </ul>
+                <a href="#cta" class="tier-cta">Büyüyen'i Seç →</a>
+            </div>
+
+            {{-- KURUMSAL --}}
+            <div class="tier-card">
+                <div class="tier-header">
+                    <div class="tier-icon">🏢</div>
+                    <h3 class="tier-name">Kurumsal</h3>
+                    <p class="tier-tag">10+ kişi · 500+ aday/yıl · bayi ağı</p>
+                </div>
+                <div class="tier-price">
+                    <span class="tier-num">€999</span>
+                    <span class="tier-per">/ay</span>
+                </div>
+                <div class="tier-yearly">veya €9.590/yıl <small>(%20 indirim)</small></div>
+                <ul class="tier-features">
+                    <li><strong>Büyüyen'deki her şey +</strong></li>
+                    <li>🤝 Dealer Network modülü + komisyon</li>
+                    <li>🌐 White-label + custom domain</li>
+                    <li>📦 DAM (Dijital Varlık Yönetimi)</li>
+                    <li>Sınırsız öğrenci · sınırsız senior</li>
+                    <li>API erişim + webhook</li>
+                    <li>Dedicated success manager (1h SLA)</li>
+                </ul>
+                <a href="#cta" class="tier-cta">Kurumsal'ı Seç →</a>
+            </div>
+        </div>
+
+        <div class="tier-trust">
+            <span>✓ 14 gün ücretsiz deneme</span>
+            <span>✓ Kredi kartı gerekmez</span>
+            <span>✓ İstediğin zaman iptal</span>
+            <span>✓ Veri taşıma desteği dahil</span>
+        </div>
+    </div>
+</section>
+
 {{-- ═══ PRICING — MODULAR === --}}
 <section id="fiyat" class="sec-bg-soft">
     <div class="container">
-        <span class="sec-label">Modüler Fiyatlandırma</span>
-        <h2 class="sec-title">İhtiyacın olanı seç, ödediğin kadar al.</h2>
+        <span class="sec-label">Modüler Hesap</span>
+        <h2 class="sec-title">Veya kendi paketini oluştur.</h2>
         <p class="sec-lead">
             Core plan zorunlu — sonrasında 11 add-on modülden ihtiyacın olanları aktif et.
             Anlık fiyat hesabı, esnek ölçekleme, 14 gün ücretsiz deneme.
