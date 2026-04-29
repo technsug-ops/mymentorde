@@ -75,6 +75,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
 
     // ── Ödeme & Referral ─────────────────────────────────────────────────────
     Route::post('/services/payment-request', [GuestWorkflowController::class, 'requestPayment'])->middleware('throttle:10,1')->name('guest.services.payment-request');
+    Route::post('/services/discount-code/validate', [GuestWorkflowController::class, 'validateDiscountCode'])->middleware('throttle:30,1')->name('guest.services.discount-code.validate');
     Route::post('/referral/create', [GuestWorkflowController::class, 'createReferralLink'])->middleware('throttle:5,1')->name('guest.referral.create');
     Route::get('/referral/stats', [GuestWorkflowController::class, 'referralStats'])->name('guest.referral.stats');
 

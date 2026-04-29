@@ -385,6 +385,18 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::post('/manager/payments/reminders/{guest}/mark-received',[$gpr, 'markReceived'])->middleware('throttle:30,1')->name('manager.payments.reminders.mark-received');
     }
 
+    // ── İndirim Kodları (Manager üretir, aday services sayfasında kullanır) ──
+    {
+        $dc = \App\Http\Controllers\Manager\DiscountCodeController::class;
+        Route::get('/manager/discount-codes',                    [$dc, 'index'])->name('manager.discount-codes.index');
+        Route::get('/manager/discount-codes/redemptions',        [$dc, 'redemptions'])->name('manager.discount-codes.redemptions');
+        Route::get('/manager/discount-codes/create',             [$dc, 'create'])->name('manager.discount-codes.create');
+        Route::post('/manager/discount-codes',                   [$dc, 'store'])->middleware('throttle:30,1')->name('manager.discount-codes.store');
+        Route::get('/manager/discount-codes/{discountCode}/edit',[$dc, 'edit'])->name('manager.discount-codes.edit');
+        Route::put('/manager/discount-codes/{discountCode}',     [$dc, 'update'])->middleware('throttle:30,1')->name('manager.discount-codes.update');
+        Route::post('/manager/discount-codes/{discountCode}/toggle', [$dc, 'toggleActive'])->middleware('throttle:30,1')->name('manager.discount-codes.toggle');
+    }
+
     // ── Silence Monitor (sessizlik check-in akışı yönetimi) ──────────────────
     {
         $sm = \App\Http\Controllers\Manager\SilenceMonitorController::class;

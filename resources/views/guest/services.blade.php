@@ -574,9 +574,24 @@
                 <div class="card-title" style="font-size:var(--tx-sm);color:var(--u-brand);">💳 Ödeme Talebi Oluştur</div>
             </div>
             <div class="card-body" style="padding:12px 16px;">
-                <form method="POST" action="{{ route('guest.services.payment-request') }}">
+                <form method="POST" action="{{ route('guest.services.payment-request') }}" id="paymentRequestForm">
                     @csrf
                     @error('payment')<div class="badge danger" style="margin-bottom:8px;display:block;">{{ $message }}</div>@enderror
+                    @error('discount_code')<div class="badge danger" style="margin-bottom:8px;display:block;">{{ $message }}</div>@enderror
+
+                    {{-- Kupon kutusu --}}
+                    <div style="margin-bottom:10px;">
+                        <label style="font-size:var(--tx-xs);color:var(--u-muted);display:block;margin-bottom:3px;">🎟️ İndirim kodun var mı?</label>
+                        <div style="display:flex;gap:6px;">
+                            <input type="text" id="couponInput" name="discount_code" maxlength="64" autocomplete="off"
+                                   style="flex:1;border:1.5px solid var(--u-line);border-radius:8px;padding:7px 10px;font-size:var(--tx-sm);font-family:inherit;background:var(--u-card);color:var(--u-text);text-transform:uppercase;"
+                                   placeholder="HOSGELDIN10">
+                            <button type="button" id="couponApplyBtn" class="btn"
+                                    style="font-size:var(--tx-xs);padding:7px 12px;white-space:nowrap;">Uygula</button>
+                        </div>
+                        <div id="couponFeedback" style="margin-top:6px;font-size:var(--tx-xs);line-height:1.4;"></div>
+                    </div>
+
                     <div style="margin-bottom:10px;">
                         <label style="font-size:var(--tx-xs);color:var(--u-muted);display:block;margin-bottom:3px;">Ödeme Yöntemi</label>
                         <select name="payment_method" style="width:100%;border:1.5px solid var(--u-line);border-radius:8px;padding:7px 10px;font-size:var(--tx-sm);font-family:inherit;background:var(--u-card);color:var(--u-text);" required>
@@ -590,8 +605,8 @@
                                   style="width:100%;border:1.5px solid var(--u-line);border-radius:8px;padding:7px 10px;font-size:var(--tx-xs);font-family:inherit;resize:none;background:var(--u-card);color:var(--u-text);"
                                   placeholder="Ödeme ile ilgili not..."></textarea>
                     </div>
-                    <button class="btn ok" type="submit" style="width:100%;font-size:var(--tx-sm);">
-                        Ödeme Talebi Gönder → {{ number_format((int) ($grandTotalAmount ?? 0), 0, ',', '.') }} EUR
+                    <button class="btn ok" type="submit" style="width:100%;font-size:var(--tx-sm);" id="paymentSubmitBtn">
+                        <span id="paymentSubmitLabel">Ödeme Talebi Gönder → {{ number_format((int) ($grandTotalAmount ?? 0), 0, ',', '.') }} EUR</span>
                     </button>
                     @if(((int) ($extrasTotalAmount ?? 0)) > 0)
                     <div style="margin-top:6px;font-size:var(--tx-xs);color:var(--u-muted);text-align:center;line-height:1.4;">
@@ -600,6 +615,63 @@
                     </div>
                     @endif
                 </form>
+
+                @push('scripts')
+                <script nonce="{{ $cspNonce ?? '' }}">
+                (function(){
+                    var input = document.getElementById('couponInput');
+                    var btn   = document.getElementById('couponApplyBtn');
+                    var fb    = document.getElementById('couponFeedback');
+                    var submitLabel = document.getElementById('paymentSubmitLabel');
+                    var originalLabel = submitLabel ? submitLabel.textContent : '';
+                    if (!input || !btn) return;
+
+                    btn.addEventListener('click', function(){
+                        var code = (input.value || '').trim().toUpperCase();
+                        if (!code) {
+                            fb.innerHTML = '<span style="color:var(--u-muted);">Bir kod yaz, sonra Uygula\'ya bas.</span>';
+                            return;
+                        }
+                        fb.innerHTML = '<span style="color:var(--u-muted);">Kontrol ediliyor…</span>';
+                        btn.disabled = true;
+
+                        fetch('{{ route('guest.services.discount-code.validate') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify({ code: code }),
+                        })
+                        .then(function(r){ return r.json(); })
+                        .then(function(d){
+                            btn.disabled = false;
+                            if (d.ok) {
+                                fb.innerHTML = '<span style="color:#15803d;font-weight:600;">✓ ' + d.discount_text + ' indirim uygulandı.</span>'
+                                    + '<div style="color:var(--u-muted);margin-top:2px;">Ödenecek: <strong>'
+                                    + Number(d.final).toLocaleString('tr-TR', {maximumFractionDigits:0}) + ' EUR</strong>'
+                                    + ' (önceki: ' + Number(d.original).toLocaleString('tr-TR', {maximumFractionDigits:0}) + ' EUR)</div>';
+                                if (submitLabel) {
+                                    submitLabel.textContent = 'Ödeme Talebi Gönder → ' + Number(d.final).toLocaleString('tr-TR', {maximumFractionDigits:0}) + ' EUR';
+                                }
+                            } else {
+                                fb.innerHTML = '<span style="color:rgb(185,28,28);">⚠ ' + (d.error || 'Geçersiz kod.') + '</span>';
+                                if (submitLabel) submitLabel.textContent = originalLabel;
+                            }
+                        })
+                        .catch(function(){
+                            btn.disabled = false;
+                            fb.innerHTML = '<span style="color:rgb(185,28,28);">⚠ Doğrulama hatası.</span>';
+                        });
+                    });
+
+                    input.addEventListener('keydown', function(e){
+                        if (e.key === 'Enter') { e.preventDefault(); btn.click(); }
+                    });
+                })();
+                </script>
+                @endpush
                 <div style="margin-top:8px;font-size:var(--tx-xs);color:var(--u-muted);line-height:1.5;text-align:center;">
                     Talebiniz danışmanınıza iletilir. Ödeme bilgileri size ayrıca gönderilecektir.
                 </div>

@@ -858,6 +858,7 @@ class WorkflowController extends Controller
         $data = $request->validate([
             'payment_method' => ['required', 'in:bank_transfer,credit_card'],
             'notes'          => ['nullable', 'string', 'max:500'],
+            'discount_code'  => ['nullable', 'string', 'max:64'],
         ]);
 
         // View ile aynı config kaynağını kullan (service_packages) — eski config legacy
@@ -880,7 +881,22 @@ class WorkflowController extends Controller
         });
         $amountEur = (float) ($pkgAmount + (int) $extrasAmount);
 
-        GuestPaymentRequest::create([
+        // ── İndirim kodu (opsiyonel) ─────────────────────────────────────
+        $discountCode = $discountAmount = $finalAmount = null;
+        $couponInput = trim((string) ($data['discount_code'] ?? ''));
+        if ($couponInput !== '') {
+            $svc = app(\App\Services\DiscountCodeService::class);
+            $check = $svc->validateForGuest($couponInput, $guest, $amountEur);
+            if (! $check['ok']) {
+                return redirect()->route('guest.services')->withErrors(['discount_code' => $check['error']])->withInput();
+            }
+            $discountCode   = $check['code'];
+            $discountAmount = $check['discount'];
+            $finalAmount    = $check['final'];
+            $amountEur      = $finalAmount; // payment request indirimli tutarla yazılır
+        }
+
+        $req = GuestPaymentRequest::create([
             'company_id'           => $guest->company_id,
             'guest_application_id' => $guest->id,
             'package_code'         => $selCode,
@@ -891,17 +907,85 @@ class WorkflowController extends Controller
             'notes'                => $data['notes'] ?? null,
         ]);
 
+        // İndirim varsa redemption kaydı + sayaç artır
+        if ($discountCode) {
+            app(\App\Services\DiscountCodeService::class)->applyToPaymentRequest(
+                $discountCode,
+                $req,
+                $guest,
+                original: (float) ($pkgAmount + (int) $extrasAmount),
+                discount: (float) $discountAmount,
+                final: (float) $finalAmount,
+            );
+        }
+
         $this->eventLogService->log(
             eventType: 'guest_payment_requested',
             entityType: 'guest_payment_request',
             entityId: (string) $guest->id,
-            message: "Guest #{$guest->id} ödeme talebi oluşturdu.",
-            meta: ['package' => $selCode, 'method' => $data['payment_method']],
+            message: "Guest #{$guest->id} ödeme talebi oluşturdu." . ($discountCode ? " (kupon: {$discountCode->code})" : ''),
+            meta: [
+                'package' => $selCode,
+                'method'  => $data['payment_method'],
+                'coupon'  => $discountCode?->code,
+                'discount_amount' => $discountAmount,
+            ],
             actorEmail: (string) optional($request->user())->email,
             companyId: (int) ($guest->company_id ?: 0)
         );
 
-        return redirect()->route('guest.services')->with('status', 'Ödeme talebiniz alındı. Danışmanınız en kısa sürede size dönecek.');
+        $msg = 'Ödeme talebiniz alındı. Danışmanınız en kısa sürede size dönecek.';
+        if ($discountCode) {
+            $msg .= ' Kupon kodunuz uygulandı: -' . number_format((float) $discountAmount, 0, ',', '.') . ' EUR.';
+        }
+        return redirect()->route('guest.services')->with('status', $msg);
+    }
+
+    /**
+     * AJAX kupon doğrulama — services sayfasında "Uygula" butonu çağırır.
+     * Henüz redemption oluşturmaz, sadece tutarı önizler.
+     */
+    public function validateDiscountCode(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $guest = $this->resolveGuest($request);
+        if (! $guest) return response()->json(['ok' => false, 'error' => 'Oturum bulunamadı.'], 401);
+
+        $data = $request->validate([
+            'code' => 'required|string|max:64',
+        ]);
+
+        $packagesConfig = config('service_packages.packages', []);
+        $extrasConfig   = config('service_packages.extra_services', []);
+        $selCode        = trim((string) ($guest->selected_package_code ?? ''));
+        if ($selCode === '') {
+            return response()->json(['ok' => false, 'error' => 'Önce paket seçmelisiniz.']);
+        }
+        $pkg = collect($packagesConfig)->firstWhere('code', $selCode);
+        $pkgAmount = (int) ($pkg['price_amount'] ?? 0);
+        $extrasArr = is_array($guest->selected_extra_services) ? $guest->selected_extra_services : [];
+        $extrasAmount = collect($extrasArr)->sum(function ($x) use ($extrasConfig) {
+            $found = collect($extrasConfig)->firstWhere('code', $x['code'] ?? '');
+            return (int) ($found['price_amount'] ?? 0);
+        });
+        $amountEur = (float) ($pkgAmount + (int) $extrasAmount);
+
+        $check = app(\App\Services\DiscountCodeService::class)->validateForGuest($data['code'], $guest, $amountEur);
+
+        if (! $check['ok']) {
+            return response()->json(['ok' => false, 'error' => $check['error']]);
+        }
+
+        return response()->json([
+            'ok'              => true,
+            'code'            => $check['code']->code,
+            'description'     => $check['code']->description,
+            'original'        => $check['original'],
+            'discount'        => $check['discount'],
+            'final'           => $check['final'],
+            'discount_text'   => $check['code']->discount_type === 'percent'
+                ? '%' . rtrim(rtrim(number_format((float) $check['code']->discount_value, 2, '.', ''), '0'), '.')
+                : number_format((float) $check['code']->discount_value, 0, ',', '.') . ' EUR',
+        ]);
     }
 
     public function storeFeedback(Request $request): \Illuminate\Http\RedirectResponse

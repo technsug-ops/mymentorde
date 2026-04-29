@@ -330,6 +330,10 @@
                    class="nav-link {{ request()->is('manager/silence-monitor*') ? 'active' : '' }}">
                     <span class="nav-icon">📍</span> Sessizlik Monitörü
                 </a>
+                <a href="{{ route('manager.discount-codes.index') }}"
+                   class="nav-link {{ request()->is('manager/discount-codes*') ? 'active' : '' }}">
+                    <span class="nav-icon">🎟️</span> İndirim Kodları
+                </a>
             </div>
 
             <div class="nav-section">
