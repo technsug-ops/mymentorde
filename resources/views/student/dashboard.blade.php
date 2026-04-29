@@ -140,15 +140,9 @@
     // Hero — eksik bilgi varsa kullanıcı onları görür, yoksa stage'e göre tebrik mesajı
     $hasIncomplete = ($level2Pending ?? false) || $missingRequired > 0;
 
-    // Stage-based renk + başlık + altyazı
-    $stageColor = match($stage) {
-        'contract'   => 'blue',
-        'documents'  => 'teal',
-        'uni_assist' => 'purple',
-        'visa'       => 'amber',
-        'abroad'     => 'green',
-        default      => 'purple',
-    };
+    // Hero her zaman panel brand rengi (mor) — stage'e göre renk değişmez
+    $stageColor = 'purple';
+
     $stageGreet = match($stage) {
         'contract'   => "Merhaba {$firstName}! Sözleşme sürecin seni bekliyor.",
         'documents'  => "Merhaba {$firstName}! 👋",
@@ -166,9 +160,8 @@
         default      => $greetingSub ?? '',
     };
 
-    // Eksik bilgi varsa hero rengi + altyazı override edilir (mantıksal çelişki olmasın)
+    // Eksik bilgi varsa altyazı override edilir (renk panel brand'inde kalır)
     if ($hasIncomplete) {
-        $stageColor = 'amber';
         $parts = [];
         if (($level2Pending ?? false)) $parts[] = 'detaylı bilgi formu';
         if ($missingRequired > 0)      $parts[] = "{$missingRequired} zorunlu belge";
