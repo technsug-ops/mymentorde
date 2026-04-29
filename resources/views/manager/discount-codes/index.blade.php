@@ -124,6 +124,10 @@
                         <td>
                             <div class="dc-actions">
                                 <a class="dc-btn" href="{{ route('manager.discount-codes.edit', $c) }}">Düzenle</a>
+                                <a class="dc-btn" href="{{ route('promo.show', $c->code) }}" target="_blank">👁 Önizle</a>
+                                <button class="dc-btn dc-share-btn" type="button"
+                                        data-url="{{ url(route('promo.show', $c->code, false)) }}"
+                                        title="Paylaşım linkini panoya kopyala">🔗 Linki Kopyala</button>
                                 <form method="POST" action="{{ route('manager.discount-codes.toggle', $c) }}">
                                     @csrf
                                     <button class="dc-btn warn" type="submit">{{ $c->is_active ? 'Pasif yap' : 'Aktif yap' }}</button>
@@ -139,4 +143,26 @@
         <div style="margin-top:12px;">{{ $codes->links() }}</div>
     @endif
 </div>
+
+@push('scripts')
+<script nonce="{{ $cspNonce ?? '' }}">
+document.querySelectorAll('.dc-share-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+        var url = this.getAttribute('data-url');
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(url).then(() => {
+                var orig = btn.textContent; btn.textContent = '✓ Kopyalandı!';
+                setTimeout(()=>{ btn.textContent = orig; }, 1500);
+            });
+        } else {
+            // fallback
+            var ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta);
+            ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+            var orig = btn.textContent; btn.textContent = '✓ Kopyalandı!';
+            setTimeout(()=>{ btn.textContent = orig; }, 1500);
+        }
+    });
+});
+</script>
+@endpush
 @endsection

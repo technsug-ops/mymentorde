@@ -15,6 +15,11 @@ class DiscountCode extends Model
         'company_id',
         'code',
         'description',
+        'template_id',
+        'landing_title',
+        'landing_subtitle',
+        'landing_cta_text',
+        'landing_disclaimer',
         'discount_type',
         'discount_value',
         'max_redemptions',
@@ -35,12 +40,31 @@ class DiscountCode extends Model
         'max_redemptions'          => 'integer',
         'redemption_count'         => 'integer',
         'max_per_user'             => 'integer',
+        'template_id'              => 'integer',
         'is_active'                => 'boolean',
         'valid_from'               => 'datetime',
         'valid_until'              => 'datetime',
         'applies_to_package_codes' => 'array',
         'metadata'                 => 'array',
     ];
+
+    /**
+     * Hangi template'i kullanacak (1-5). Default: 1 (Classic).
+     */
+    public function effectiveTemplateId(): int
+    {
+        $id = (int) ($this->template_id ?? 1);
+        return ($id >= 1 && $id <= 5) ? $id : 1;
+    }
+
+    public function discountText(): string
+    {
+        if ($this->discount_type === 'percent') {
+            $val = rtrim(rtrim(number_format((float) $this->discount_value, 2, '.', ''), '0'), '.');
+            return '%' . $val . ' İNDİRİM';
+        }
+        return number_format((float) $this->discount_value, 0, ',', '.') . ' EUR İNDİRİM';
+    }
 
     public function redemptions(): HasMany
     {

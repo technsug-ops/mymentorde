@@ -139,15 +139,21 @@ class DiscountCodeController extends Controller
     private function validatePayload(Request $request, ?DiscountCode $existing = null): array
     {
         $data = $request->validate([
-            'code'             => 'required|string|min:3|max:64|regex:/^[A-Za-z0-9_\-]+$/',
-            'description'      => 'nullable|string|max:255',
-            'discount_type'    => 'required|in:percent,fixed',
-            'discount_value'   => 'required|numeric|min:0',
-            'max_redemptions'  => 'nullable|integer|min:1',
-            'max_per_user'     => 'required|integer|min:1|max:100',
-            'valid_from'       => 'nullable|date',
-            'valid_until'      => 'nullable|date|after_or_equal:valid_from',
-            'is_active'        => 'sometimes|boolean',
+            'code'               => 'required|string|min:3|max:64|regex:/^[A-Za-z0-9_\-]+$/',
+            'description'        => 'nullable|string|max:255',
+            'discount_type'      => 'required|in:percent,fixed',
+            'discount_value'     => 'required|numeric|min:0',
+            'max_redemptions'    => 'nullable|integer|min:1',
+            'max_per_user'       => 'required|integer|min:1|max:100',
+            'valid_from'         => 'nullable|date',
+            'valid_until'        => 'nullable|date|after_or_equal:valid_from',
+            'is_active'          => 'sometimes|boolean',
+            // Paylaşım kartı
+            'template_id'        => 'nullable|integer|min:1|max:5',
+            'landing_title'      => 'nullable|string|max:255',
+            'landing_subtitle'   => 'nullable|string|max:500',
+            'landing_cta_text'   => 'nullable|string|max:120',
+            'landing_disclaimer' => 'nullable|string|max:1000',
         ]);
 
         // Yüzde sınırı

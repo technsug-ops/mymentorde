@@ -1,47 +1,53 @@
-# İndirim Kodu Sistemi (MVP — Genişletilebilir)
+# İndirim Kodu — Public Share Page + 5 Template + PNG İndir
 
-**Başlangıç:** 2026-04-29
-**Sahibi:** Manager (kod üreten + listeyen). Bayi/dealer kendi kodunu üretmesi sonraki sprint'te.
+**Başlangıç:** 2026-04-29 (devam)
 
-## MVP Kapsamı (kullanıcının kararı)
+## Hedef
 
-- ✅ Manager kod üretir (code, % veya sabit EUR, expiry, max use, max use/kişi)
-- ✅ Aday `services` sayfasında havale talebi öncesi kupon yazar
-- ✅ Doğrulanırsa `GuestPaymentRequest.amount_eur` indirimli kaydedilir + meta'ya kod izi
-- ✅ Manager kullanım listesi: kim, ne zaman, ne kadar tasarruf
+Manager kuponlu link üretir, sosyal medya / WhatsApp'a yapıştırır.
+Karşı taraf güzel mobile-friendly bir landing görür, "**Görsel indir**" butonu ile PNG kaydeder.
 
-## Future-proof altyapı (UI'da YOK ama şemada VAR)
+## 5 Template (görsel stiller)
 
-- `applies_to_package_codes` JSON — paket-spesifik (null = hepsi)
-- `min_purchase_amount_eur` — minimum tutar şartı
-- `dealer_id` — bayi attribution (komisyon hesaplama hook için)
-- `metadata` JSON — catch-all
-- Redemption tablosu **polymorphic** (`redeemable_type`/`redeemable_id`) — ileride StudentPayment, BookingPayment de aynı tabloyu kullanır
+1. **Classic** — White bg, brand purple gradient header, ticket-style dashed code box
+2. **Bold** — Full purple→pink gradient bg, big confetti, devasa kod
+3. **Premium** — Dark navy + altın aksanlar, serif font, az emoji
+4. **Playful** — Lavanta + sarı, emoji-rich, "Almanya'ya uçuşa hazır mısın? ✈️" tone
+5. **Urgency** — Kırmızı/turuncu gradient, "LIMITED" ribbon, "SADECE X GÜN" badge
+
+## Düzenlenebilir Metinler (her template'de aynı slot'lar)
+
+- `landing_title` — Hero başlık (default: kod açıklaması veya "Sana özel indirim")
+- `landing_subtitle` — Alt başlık
+- `landing_cta_text` — CTA buton metni (default: "Hemen Başvur")
+- `landing_disclaimer` — Footer disclaimer
+
+Hepsi opsiyonel — boş bırakılırsa template-spesifik default kullanılır.
 
 ## Adımlar
 
-- [ ] **1. DB migration** — 2 tablo:
-  - `discount_codes` (company_id, code unique per company, type, value, expiry, limits, future cols, is_active, created_by, redemption_count denormalize)
-  - `discount_code_redemptions` (company_id, discount_code_id, redeemable_type, redeemable_id, guest_application_id, user_id, original/discount/final amount, redeemed_at)
-- [ ] **2. Model'ler** — `DiscountCode` (BelongsToCompany), `DiscountCodeRedemption`
-- [ ] **3. Servis** — `App\Services\DiscountCodeService`:
-  - `validateForGuest(string $code, GuestApplication $g, float $amount): array` → ['ok' => bool, 'code' => DiscountCode?, 'discount' => float, 'final' => float, 'error' => string?]
-  - `applyToPaymentRequest(DiscountCode $c, GuestPaymentRequest $req, GuestApplication $g): DiscountCodeRedemption`
-- [ ] **4. Manager Controller** — `Manager/DiscountCodeController`:
-  - index (liste + filtre)
-  - create / store
-  - edit / update
-  - destroy (soft? aktif/pasif toggle daha iyi)
-  - toggleActive
-  - redemptions (kullanım listesi)
-- [ ] **5. Manager Views** — `manager/discount-codes/{index,form,redemptions}.blade.php`
-- [ ] **6. Routes + nav link**
-- [ ] **7. Guest entegrasyonu** — `guest/services` sayfasına kupon input + `POST /guest/discount-codes/validate` (AJAX)
-- [ ] **8. WorkflowController.processPayment update** — kupon submit edildiyse discount uygula + redemption kaydı
-- [ ] **9. Smoke test** — tinker'la kod üret + AJAX validate + payment request oluştur, redemption sayaç artıyor mu
-
-## Kapsam dışı (sonraki sprint)
-- Bayi-kendi-kodu üretimi (bayi paneline taşınacak)
-- Paket-spesifik / minimum tutar UI'ları (şema hazır, form'da gösterme)
-- Stripe checkout discount entegrasyonu (havale akışı yeter MVP'de)
-- E-posta kuponu / one-time link
+- [x] Plan
+- [ ] **1. Migration** — `discount_codes` tablosuna 5 kolon:
+  - `template_id` tinyInt nullable (1-5, null = 1 default)
+  - `landing_title` varchar(255) nullable
+  - `landing_subtitle` varchar(500) nullable
+  - `landing_cta_text` varchar(120) nullable
+  - `landing_disclaimer` text nullable
+- [ ] **2. Model fillable + cast** güncelle
+- [ ] **3. Manager form** — yeni bölüm "Paylaşım kartı":
+  - Template seçici (5 görsel preview thumbnails)
+  - 4 metin alanı (placeholder'da default text gösterilir)
+- [ ] **4. Manager controller** — validation + save
+- [ ] **5. Manager index** — her satıra:
+  - "🔗 Paylaş Linki Kopyala" butonu (clipboard JS)
+  - "👁 Önizleme" → /promo/{code} yeni sekmede
+- [ ] **6. Public route** — `GET /promo/{code}` (auth YOK, throttle var)
+- [ ] **7. PromoController** — kodu çöz (case-insensitive), expired/inactive durumda farklı view
+- [ ] **8. Public layout + 5 template partials**:
+  - `resources/views/promo/layout.blade.php` (head, OG meta, html2canvas script)
+  - `resources/views/promo/templates/{1-5}.blade.php`
+  - `resources/views/promo/expired.blade.php`
+- [ ] **9. html2canvas entegrasyonu** — "Görsel İndir" butonu kart div'ini PNG olarak indirir
+- [ ] **10. Open Graph meta** — WhatsApp/sosyal medyada link önizleme
+- [ ] **11. PostHog event** — `discount_code_landing_viewed`
+- [ ] **12. Smoke test** — manager kod üret + paylaş linki aç + PNG indir

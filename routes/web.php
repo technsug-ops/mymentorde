@@ -220,6 +220,14 @@ Route::get('/share/{token}', [\App\Http\Controllers\Shared\DigitalAssetControlle
     ->middleware('throttle:60,1')
     ->name('dam.share.public');
 
+// İndirim kodu paylaşım kartı — public landing
+// Manager linki WhatsApp/Insta/mail'a yapıştırır, karşı taraf güzel sayfayı görür
+Route::middleware(['company.context'])->group(function (): void {
+    Route::get('/promo/{code}', [\App\Http\Controllers\Public\PromoController::class, 'show'])
+        ->middleware('throttle:60,1')
+        ->name('promo.show');
+});
+
 // ── Public Booking Widget + Landing (booking modülü) ────────────────────────
 // Auth opsiyonel: senior settings.is_public=true ise herkes erişebilir,
 // aksi halde login student/guest gereklidir (controller kontrol eder).

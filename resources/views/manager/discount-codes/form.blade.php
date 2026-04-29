@@ -21,6 +21,33 @@
 .dc-btn.primary { background: var(--u-brand, #2563eb); color: white; border-color: var(--u-brand); }
 .dc-checkbox { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 .dc-checkbox input { width: auto; }
+
+.dc-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--u-line); }
+.dc-section h3 { font-size: 13px; font-weight: 700; color: var(--u-text); margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: .4px; }
+
+.dc-templates { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
+@media(max-width:700px){ .dc-templates { grid-template-columns: repeat(2, 1fr); } }
+.dc-tpl-card {
+    cursor: pointer; border: 2px solid var(--u-line); border-radius: 8px;
+    padding: 12px 8px; text-align: center; background: var(--u-bg);
+    transition: all .15s; user-select: none;
+}
+.dc-tpl-card:hover { border-color: var(--u-brand); }
+.dc-tpl-card input { display: none; }
+.dc-tpl-card .dc-tpl-preview {
+    height: 70px; border-radius: 6px; margin-bottom: 8px; display:flex;
+    align-items:center; justify-content:center; font-weight:800; font-size:11px;
+    color:white; letter-spacing:1px;
+}
+.dc-tpl-card .dc-tpl-name { font-size: 11.5px; font-weight: 700; color: var(--u-text); }
+.dc-tpl-card .dc-tpl-mood { font-size: 10px; color: var(--u-muted); margin-top: 2px; }
+.dc-tpl-card.selected { border-color: var(--u-brand); background: rgba(37,99,235,.05); }
+
+.dc-tpl-1 .dc-tpl-preview { background: linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%); }
+.dc-tpl-2 .dc-tpl-preview { background: linear-gradient(135deg, #ec4899 0%, #f97316 100%); }
+.dc-tpl-3 .dc-tpl-preview { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fbbf24; }
+.dc-tpl-4 .dc-tpl-preview { background: linear-gradient(135deg, #c084fc 0%, #fde047 100%); color: #581c87; }
+.dc-tpl-5 .dc-tpl-preview { background: linear-gradient(135deg, #dc2626 0%, #f97316 100%); }
 </style>
 @endpush
 
@@ -103,10 +130,79 @@
             <label for="is_active" style="margin:0;">Aktif</label>
         </div>
 
+        {{-- ── Paylaşım kartı (public landing /promo/{code}) ──────── --}}
+        <div class="dc-section">
+            <h3>🎨 Paylaşım Kartı Tasarımı</h3>
+            <div style="font-size:11.5px;color:var(--u-muted);margin-bottom:12px;">
+                Bu kupona özel public link otomatik üretilir: <code>/promo/{{ $code->code ?: 'KOD' }}</code> —
+                seçtiğin template ve metinlerle güzel bir landing oluşur. Aday "Görsel İndir" ile PNG kaydedebilir.
+            </div>
+
+            <label>Template seç</label>
+            @php $selectedTpl = (int) old('template_id', $code->template_id ?: 1); @endphp
+            <div class="dc-templates">
+                @foreach([1=>['Classic','Sade · Profesyonel'], 2=>['Bold','Canlı · Genç'], 3=>['Premium','Lüks · Şık'], 4=>['Playful','Eğlenceli · Renkli'], 5=>['Urgency','Aciliyet · Limited']] as $tid => $info)
+                    <label class="dc-tpl-card dc-tpl-{{ $tid }} {{ $selectedTpl === $tid ? 'selected' : '' }}">
+                        <input type="radio" name="template_id" value="{{ $tid }}" {{ $selectedTpl === $tid ? 'checked' : '' }}>
+                        <div class="dc-tpl-preview">{{ $info[0] }}</div>
+                        <div class="dc-tpl-name">{{ $info[0] }}</div>
+                        <div class="dc-tpl-mood">{{ $info[1] }}</div>
+                    </label>
+                @endforeach
+            </div>
+
+            <div class="dc-row">
+                <div class="dc-full">
+                    <label>Hero başlık (opsiyonel)</label>
+                    <input type="text" name="landing_title" maxlength="255"
+                           value="{{ old('landing_title', $code->landing_title) }}"
+                           placeholder="Örn: 'Sana Özel Hoş Geldin Hediyesi 🎉' — boş bırakırsan default kullanılır">
+                </div>
+            </div>
+            <div class="dc-row">
+                <div class="dc-full">
+                    <label>Alt başlık / açıklama (opsiyonel)</label>
+                    <textarea name="landing_subtitle" maxlength="500" rows="2"
+                              placeholder="Örn: 'Almanya yolculuğun başlasın — bu kupon ile hizmet paketinde özel indirim seni bekliyor.'"
+                              style="width:100%;padding:7px 10px;border:1px solid var(--u-line);border-radius:7px;background:var(--u-bg);color:var(--u-text);font-size:13px;font-family:inherit;resize:vertical;">{{ old('landing_subtitle', $code->landing_subtitle) }}</textarea>
+                </div>
+            </div>
+            <div class="dc-row">
+                <div>
+                    <label>CTA buton metni</label>
+                    <input type="text" name="landing_cta_text" maxlength="120"
+                           value="{{ old('landing_cta_text', $code->landing_cta_text) }}"
+                           placeholder="Hemen Başvur">
+                </div>
+                <div>
+                    <label>Disclaimer / küçük yazı</label>
+                    <input type="text" name="landing_disclaimer" maxlength="1000"
+                           value="{{ old('landing_disclaimer', $code->landing_disclaimer) }}"
+                           placeholder="Kupon kullanım koşulları geçerlidir. Tek kişi tek kullanım.">
+                </div>
+            </div>
+        </div>
+
         <div class="dc-actions">
             <button type="submit" class="dc-btn primary">{{ $mode === 'create' ? 'Oluştur' : 'Kaydet' }}</button>
             <a href="{{ route('manager.discount-codes.index') }}" class="dc-btn">İptal</a>
+            @if($mode === 'edit')
+                <a href="{{ route('promo.show', $code->code) }}" target="_blank" class="dc-btn" style="margin-left:auto;">
+                    👁 Önizle (yeni sekme)
+                </a>
+            @endif
         </div>
     </form>
+
+    @push('scripts')
+    <script nonce="{{ $cspNonce ?? '' }}">
+    document.querySelectorAll('.dc-tpl-card input[type=radio]').forEach(function(r){
+        r.addEventListener('change', function(){
+            document.querySelectorAll('.dc-tpl-card').forEach(c => c.classList.remove('selected'));
+            this.closest('.dc-tpl-card').classList.add('selected');
+        });
+    });
+    </script>
+    @endpush
 </div>
 @endsection
