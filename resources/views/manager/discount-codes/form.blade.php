@@ -331,8 +331,14 @@ document.querySelectorAll('.dc-tpl-card input[type=radio]').forEach(function(r){
         el.addEventListener(ev, schedulePreview);
     });
 
-    // İlk yükleme — current state ile
-    setTimeout(function(){ iframe.src = buildPreviewUrl(); }, 100);
+    // İlk yükleme — page tamamen yüklenip browser idle olduktan sonra
+    // (php artisan serve single-thread olduğu için parent ile yarış olmasın)
+    var firstLoad = function() { iframe.src = buildPreviewUrl(); };
+    if (document.readyState === 'complete') {
+        setTimeout(firstLoad, 600);
+    } else {
+        window.addEventListener('load', function(){ setTimeout(firstLoad, 600); });
+    }
 })();
 
 // ── AI ile öneri üret ───────────────────────────────────────────────
