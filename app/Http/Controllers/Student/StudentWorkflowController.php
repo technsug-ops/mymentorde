@@ -138,7 +138,17 @@ class StudentWorkflowController extends Controller
         // kontrol etmeli. Level 1'de doldurulmuş zorunlu alanlar (birth_date, vb.)
         // Level 2 form'unda görünmüyor ama hâlâ dolu olmalı.
         $existingDraft = is_array($guest->registration_form_draft) ? $guest->registration_form_draft : [];
-        $mergedDraft   = array_merge($existingDraft, $payload);
+
+        // ÖNEMLİ: payload'daki BOŞ değerler existingDraft'taki dolu değerleri
+        // EZMEMELİ. Student form'unda gizli olan Level 1 alanları sanitize sonrası
+        // '' ile gelir → array_merge ezer → Level 1'in dolu birth_date'i kaybolur.
+        // Bu yüzden boş payload key'leri merge öncesi temizliyoruz.
+        $payloadForMerge = collect($payload)->reject(function ($v) {
+            if ($v === null) return true;
+            if (is_array($v)) return empty($v);
+            return trim((string) $v) === '';
+        })->all();
+        $mergedDraft = array_merge($existingDraft, $payloadForMerge);
 
         // Sadece OPSİYONEL Level 1 key'leri skip et — zorunlular merge edilmiş
         // veride hâlâ kontrol edilir. Aday öğrenciliğinde doldurmadıysa şimdi
@@ -153,14 +163,26 @@ class StudentWorkflowController extends Controller
         $fieldByKey = [];
         foreach ($allFields as $f) { $fieldByKey[$f['key'] ?? ''] = $f; }
 
+        // Bir değerin "boş" olduğunu belirleyen helper —
+        // null, '', '   ', boş array hepsi boş sayılır. ?? operatörü '' için
+        // tetiklenmez, bu yüzden manuel fallback şart.
+        $isBlank = function ($v): bool {
+            if ($v === null) return true;
+            if (is_array($v)) return empty($v);
+            return trim((string) $v) === '';
+        };
+
         $missingErrors = [];
         foreach ($schemaService->requiredKeysByLevel(2, $companyId) as $key) {
             if (in_array($key, $skipKeys, true)) {
                 continue;
             }
-            // L0 (guest model col) → L1 (existingDraft) → L2 (payload) sıralı bak
-            $val = $payload[$key] ?? $existingDraft[$key] ?? ($guest->{$key} ?? null);
-            $isEmpty = is_array($val) ? empty($val) : ($val === null || trim((string) $val) === '');
+            // L2 payload → L1 existingDraft → L0 guest model col sıralı, boş olmayan ilk değeri al
+            $val = null;
+            foreach ([$payload[$key] ?? null, $existingDraft[$key] ?? null, $guest->{$key} ?? null] as $candidate) {
+                if (!$isBlank($candidate)) { $val = $candidate; break; }
+            }
+            $isEmpty = $isBlank($val);
             if ($isEmpty) {
                 $field = $fieldByKey[$key] ?? null;
                 $label = $field
