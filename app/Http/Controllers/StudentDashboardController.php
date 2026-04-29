@@ -418,6 +418,11 @@ class StudentDashboardController extends Controller
             'achievementPoints'  => $achievementPoints,
             'onboardingPending'  => $onboardingPending,
             'onboardingSteps'    => $onboardingSteps,
+            // Aday öğrencilikten promote edilen öğrenciye Level 2 form +
+            // belgeleri tamamlattıracak onboarding banner için flag'ler
+            'level2FormPending'   => (string) ($guestApplication?->registration_form_level ?? 'level_2_pending') !== 'level_2_done',
+            'pendingRequiredDocs' => (int) $requiredChecklist->where('is_required', true)->where('done', false)->count(),
+            'totalRequiredDocs'   => (int) $requiredChecklist->where('is_required', true)->count(),
         ]);
     }
 
