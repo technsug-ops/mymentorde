@@ -123,7 +123,8 @@ class StudentInteractionController extends Controller
         if ($ownerIds->isNotEmpty()) {
             \App\Models\Document::whereIn('student_id', $ownerIds)
                 ->where(fn ($w) => $w->where('original_file_name', 'like', $needle)
-                    ->orWhere('title', 'like', $needle))
+                    ->orWhere('standard_file_name', 'like', $needle)
+                    ->orWhere('document_id', 'like', $needle))
                 ->limit(5)
                 ->get(['id', 'original_file_name', 'status', 'updated_at'])
                 ->each(fn ($d) => $results->push([
