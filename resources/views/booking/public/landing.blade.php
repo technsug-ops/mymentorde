@@ -7,34 +7,42 @@
     <meta name="description" content="Almanya yurt dışı eğitim başvurunuz için uzman danışmanlarla birebir görüşme planlayın. Üniversite seçimi, belge süreci, vize ve daha fazlası.">
 
     <link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --primary:#5b2e91;
-            --primary-dark:#4a2377;
-            --primary-deep:#3d1c67;
-            --primary-soft:#f1e8fb;
-            --accent:#e8b931;
-            --accent-dark:#c99c26;
-            --text:#12233a;
-            --muted:#5e7187;
-            --line:#d9e2ee;
+            /* MentörDE Brand Palette (brandbook 2026-01-26) */
+            --primary:#7e58bf;
+            --primary-dark:#6c47a8;
+            --primary-deep:#5a3a8d;
+            --primary-mid:#a07ed9;
+            --primary-light:#b79ae9;
+            --primary-soft:#efe9fb;
+            --neutral:#e9e7e2;
+            --neutral-soft:#faf9f5;
+            --accent:#7e58bf;
+            --accent-dark:#6c47a8;
+            --text:#1a1325;
+            --muted:#6b6377;
+            --line:#e3dcec;
             --surface:#ffffff;
-            --bg:#f9fafd;
+            --bg:#faf9f5;
             --success-bg:#e8f5ed;
             --success-text:#2d8b55;
+            --font-base:"Space Grotesk", var(--font-base);
         }
         * { box-sizing:border-box; }
         html, body { margin:0; padding:0; }
         body {
-            font-family:"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family:var(--font-base);
             color:var(--text);
-            background:linear-gradient(140deg, #f7f3ff 0%, #f9fafd 42%, #fff8e8 100%);
+            background:linear-gradient(140deg, #f7f3ff 0%, #faf9f5 50%, #e9e7e2 100%);
             line-height:1.6;
             font-size:15px;
             -webkit-font-smoothing:antialiased;
+            font-feature-settings:"ss01", "ss02";
         }
-        .serif { font-family:"DM Serif Display", Georgia, serif; font-weight:normal; }
+        .serif { font-family:var(--font-base); font-weight:600; font-style:italic; }
         a { color:var(--primary); text-decoration:none; }
         a:hover { text-decoration:underline; }
 
@@ -45,7 +53,7 @@
             border-bottom:1px solid var(--line);
         }
         .l-nav-inner { max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:14px 22px; gap:16px; }
-        .l-logo { font-family:"DM Serif Display", serif; font-size:28px; color:var(--primary); letter-spacing:-.5px; line-height:1; display:inline-flex; align-items:center; gap:2px; }
+        .l-logo { font-family:var(--font-base); font-size:28px; color:var(--primary); letter-spacing:-.5px; line-height:1; display:inline-flex; align-items:center; gap:2px; }
         .l-logo span { color:var(--primary-dark); font-style:italic; }
         .l-logo img { height:36px; width:auto; max-width:180px; }
         .l-nav-links { display:flex; gap:24px; font-size:14px; font-weight:600; }
@@ -69,7 +77,7 @@
             font-size:12px; font-weight:700; margin-bottom:20px;
         }
         .l-hero h1 {
-            font-family:"DM Serif Display", serif; font-weight:normal;
+            font-family:var(--font-base); font-weight:normal;
             font-size:44px; line-height:1.08; margin:0 0 18px; color:var(--text);
         }
         .l-hero h1 em { color:var(--primary); font-style:italic; }
@@ -96,7 +104,7 @@
             padding-top:28px; border-top:1px solid var(--line);
         }
         .l-trust-num {
-            font-family:"DM Serif Display", serif;
+            font-family:var(--font-base);
             font-size:32px; color:var(--primary); line-height:1;
         }
         .l-trust-lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-top:4px; }
@@ -163,7 +171,7 @@
             font-size:26px; margin-bottom:18px;
         }
         .l-hero-welcome h3 {
-            font-family:"DM Serif Display", serif; font-weight:normal;
+            font-family:var(--font-base); font-weight:normal;
             font-size:24px; color:var(--text); margin:0 0 12px; line-height:1.25;
         }
         .l-hero-welcome p {
@@ -186,7 +194,7 @@
             text-transform:uppercase; letter-spacing:.12em; margin-bottom:12px;
         }
         .l-sec-title {
-            font-family:"DM Serif Display", serif; font-weight:normal;
+            font-family:var(--font-base); font-weight:normal;
             font-size:36px; color:var(--text);
             margin:0 0 14px; line-height:1.2;
         }
@@ -230,7 +238,7 @@
             width:42px; height:42px; border-radius:50%;
             background:var(--primary); color:#fff;
             display:flex; align-items:center; justify-content:center;
-            font-family:"DM Serif Display", serif; font-size:20px;
+            font-family:var(--font-base); font-size:20px;
             border:3px solid var(--bg);
         }
         .l-step-icon { font-size:44px; display:block; margin:18px 0 10px; }
@@ -265,7 +273,7 @@
             width:64px; height:64px; border-radius:50%;
             background:linear-gradient(135deg, var(--primary-soft), #e4d4f5);
             display:flex; align-items:center; justify-content:center;
-            font-family:"DM Serif Display", serif; font-size:26px;
+            font-family:var(--font-base); font-size:26px;
             color:var(--primary); margin-bottom:16px; overflow:hidden;
             border:3px solid #fff;
         }
@@ -291,7 +299,7 @@
             max-width:640px; margin:0 auto;
         }
         .l-empty-icon { font-size:54px; margin-bottom:16px; }
-        .l-empty h3 { margin:0 0 10px; font-size:22px; color:var(--text); font-family:"DM Serif Display", serif; font-weight:normal; }
+        .l-empty h3 { margin:0 0 10px; font-size:22px; color:var(--text); font-family:var(--font-base); font-weight:normal; }
         .l-empty p { margin:0 0 22px; color:var(--muted); font-size:14px; max-width:460px; margin-left:auto; margin-right:auto; line-height:1.65; }
 
         /* === CTA BANNER — primary gradient === */
@@ -303,11 +311,11 @@
         .l-cta::before {
             content:''; position:absolute; top:-20%; right:-10%;
             width:400px; height:400px; border-radius:50%;
-            background:radial-gradient(circle, rgba(232,185,49,.18) 0%, transparent 70%);
+            background:radial-gradient(circle, rgba(233,231,226,.18) 0%, transparent 70%);
         }
         .l-cta-inner { position:relative; z-index:1; max-width:780px; margin:0 auto; }
         .l-cta h2 {
-            font-family:"DM Serif Display", serif; font-weight:normal;
+            font-family:var(--font-base); font-weight:normal;
             margin:0 0 16px; font-size:34px;
         }
         .l-cta h2 em { color:var(--accent); font-style:italic; }
@@ -347,7 +355,7 @@
         .l-foot-cols { display:grid; grid-template-columns:2fr 1fr 1fr; gap:36px; margin-bottom:32px; }
         @media(max-width:720px){ .l-foot-cols { grid-template-columns:1fr; gap:24px; } }
         .l-foot-logo {
-            font-family:"DM Serif Display", serif; font-size:28px;
+            font-family:var(--font-base); font-size:28px;
             color:#fff; margin-bottom:10px; display:inline-block; line-height:1;
         }
         .l-foot-logo span { color:#fff; font-style:italic; opacity:.85; }
@@ -466,50 +474,7 @@
     </div>
 </section>
 
-{{-- ══════════════ BENEFITS — ortalanmış ══════════════ --}}
-<section class="l-sec l-sec-alt">
-    <div class="l-sec-inner">
-        <div class="l-sec-head">
-            <div class="l-sec-eyebrow">Neden {{ $brandName ?? 'MentorDE' }}</div>
-            <h2 class="l-sec-title">Almanya hedefin için bütün süreç tek platformda</h2>
-            <p class="l-sec-sub">Sadece bir randevu sistemi değiliz — üniversite seçiminden vize alımına kadar her adımda yanındayız.</p>
-        </div>
-        <div class="l-benefits">
-            <div class="l-benefit">
-                <div class="l-benefit-icon">🎯</div>
-                <h3>Uzman Danışmanlık</h3>
-                <p>Almanya eğitim sistemini yıllardır tanıyan danışmanlarla birebir görüşme. Her biri Alman üniversitelerini bizzat deneyimlemiş.</p>
-            </div>
-            <div class="l-benefit">
-                <div class="l-benefit-icon">📄</div>
-                <h3>Belge Süreci Yönetimi</h3>
-                <p>Uni-Assist başvurusundan Sperrkonto açılımına, vize evrakından Anmeldung'a kadar tüm belgeler dijital havuzda.</p>
-            </div>
-            <div class="l-benefit">
-                <div class="l-benefit-icon">🎓</div>
-                <h3>Üniversite Eşleştirme</h3>
-                <p>AI destekli program önerileri + gerçek kabul verileri. Hangi üniversitenin seni alabileceğini bilimsel olarak analiz ediyoruz.</p>
-            </div>
-            <div class="l-benefit">
-                <div class="l-benefit-icon">📅</div>
-                <h3>Takvim Senkronizasyonu</h3>
-                <p>Google Takvim + Zoom otomatik. Randevun onaylanır onaylanmaz takvimine düşer, link hazır.</p>
-            </div>
-            <div class="l-benefit">
-                <div class="l-benefit-icon">🇩🇪</div>
-                <h3>Vize & Sperrkonto</h3>
-                <p>Vize randevusu, bloke hesap, sağlık sigortası — resmî süreçlerin her birini adım adım takip ediyoruz.</p>
-            </div>
-            <div class="l-benefit">
-                <div class="l-benefit-icon">🤖</div>
-                <h3>AI Asistan 7/24</h3>
-                <p>Danışmanın müsait olmadığı zamanlarda AI asistanımıza sor — belgelerin, süreç sorularını anında yanıtlar.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-{{-- ══════════════ HOW IT WORKS ══════════════ --}}
+{{-- ══════════════ HOW IT WORKS — odaklı, üst sıraya alındı ══════════════ --}}
 <section class="l-sec" id="nasil-calisir">
     <div class="l-sec-inner">
         <div class="l-sec-head">
@@ -603,64 +568,36 @@
     </div>
 </section>
 
-{{-- ══════════════ CTA ══════════════ --}}
-<section class="l-cta">
-    <div class="l-cta-inner">
-        <h2>Almanya hedefine <em>bugün</em> başla</h2>
-        <p>Bir görüşme yeterli — kafandaki soru işaretleri netleşir, hedefin adım adım yol haritasına dönüşür. Randevu almak ücretsiz, sana herhangi bir taahhüt yok.</p>
-        <a href="#danismanlar" class="l-btn l-btn-accent">📅 Hemen Randevu Al</a>
-        <a href="{{ route('apply.create') }}" class="l-btn l-btn-ghost" style="color:#fff !important; border-color:rgba(255,255,255,.3);background:transparent;">Tam Başvuru Başlat →</a>
-    </div>
-</section>
-
-{{-- ══════════════ FAQ ══════════════ --}}
-<section class="l-sec" id="sss">
+{{-- ══════════════ MİNİ FAQ — kompakt 4 soru, sayfa odağını dağıtmaz ══════════════ --}}
+<section class="l-sec l-sec-alt" id="sss">
     <div class="l-sec-inner">
         <div class="l-sec-head">
-            <div class="l-sec-eyebrow">Sık Sorulan Sorular</div>
-            <h2 class="l-sec-title">Her şey net ve şeffaf</h2>
+            <div class="l-sec-eyebrow">Hızlı Cevaplar</div>
+            <h2 class="l-sec-title">Önce bunları sormak istersin</h2>
         </div>
         <div class="l-faq">
-            <details>
+            <details open>
                 <summary>Randevu ücretli mi?</summary>
                 <div class="l-faq-body">
-                    Şu an randevular <strong>ücretsiz</strong>. Danışmanlarımızla tanışma ve hedef analizi görüşmeleri için tek kuruş alınmıyor. Eğer tam danışmanlık paketine geçersen oradan itibaren paket ücretlendirmesi başlar.
+                    Hayır — <strong>ücretsiz</strong>. Tanışma + hedef analizi görüşmeleri tek kuruş alınmıyor. Tam danışmanlık paketine geçersen oradan itibaren paket ücretlendirmesi başlar.
                 </div>
             </details>
             <details>
-                <summary>Kimler randevu alabilir?</summary>
+                <summary>Görüşme ne kadar sürer ve nasıl olur?</summary>
                 <div class="l-faq-body">
-                    Almanya'da üniversite okumak isteyen veya yurt dışı eğitim süreciyle ilgili tavsiye arayan herkes. Lise son sınıf, üniversite öğrencisi veya mezun olabilirsin. Çalışan veya yüksek lisans planlayan profesyoneller de başvurabilir.
+                    30-60 dakika online — Google Meet veya Zoom. Randevu onaylandığında link mailine + Google Takvim'e otomatik düşer.
                 </div>
             </details>
             <details>
-                <summary>Görüşme ne kadar sürer?</summary>
+                <summary>İptal / erteleme yapabilir miyim?</summary>
                 <div class="l-faq-body">
-                    Danışmanın tanımladığı slot süresine göre 15, 30, 45 veya 60 dakika. Çoğu tanışma görüşmesi 30 dakikadır. Görüşmeden önce hangi konulara odaklanmak istediğini belirtebilirsin, danışmanın hazırlıklı gelir.
+                    Evet. Onay mailindeki link üzerinden <strong>24 saat öncesine kadar</strong> ücretsiz iptal/yeniden planla.
                 </div>
             </details>
             <details>
-                <summary>Görüşme nasıl gerçekleşir?</summary>
+                <summary>Sonrasında ne oluyor?</summary>
                 <div class="l-faq-body">
-                    Online — Google Meet veya Zoom üzerinden. Randevu onaylandığında linki mailine gelir, aynı link Google Takvim davetiyesinde de yer alır. Kamera ve mikrofonun açık olsun yeterli.
-                </div>
-            </details>
-            <details>
-                <summary>Randevumu iptal veya ertele yapabilir miyim?</summary>
-                <div class="l-faq-body">
-                    Evet. Onay mailinde gelen iptal linki üzerinden randevundan en az <strong>24 saat önce</strong> ücretsiz iptal edebilirsin. Sonraki süreç için yeni bir randevu alabilirsin.
-                </div>
-            </details>
-            <details>
-                <summary>Danışmanımı nasıl seçerim?</summary>
-                <div class="l-faq-body">
-                    Yukarıdaki listede her danışmanın uzmanlık alanını (üniversite başvurusu, vize süreci, burs, dil sınavı vb.) gör. Eğer tam başvuru sürecine girersen, profiline en uygun danışman otomatik olarak sana atanır.
-                </div>
-            </details>
-            <details>
-                <summary>Sonrasında danışmanlık süreci nasıl devam eder?</summary>
-                <div class="l-faq-body">
-                    İlk görüşmeden sonra durumuna uygun paketler gösterilir (sadece belge yönetimi / tam başvuru paketi / premium). Paket seçersen sözleşme imzalanır, Uni-Assist'ten Immatrikulation'a kadar tüm süreç platformda ilerler.
+                    İlk görüşmeden sonra durumuna uygun paketler (belge yönetimi / tam başvuru / premium) gösterilir. Paket seçersen sözleşme imzalanır, Uni-Assist'ten Immatrikulation'a kadar süreç platformda ilerler.
                 </div>
             </details>
         </div>
