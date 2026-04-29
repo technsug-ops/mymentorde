@@ -256,6 +256,10 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
             'failed_login_attempts'  => 'integer',
             'locked_until'           => 'datetime',
             'last_failed_login_at'   => 'datetime',
+
+            // Sessizlik check-in (sadece role=student için kullanılır)
+            'silence_checkin_paused_at' => 'datetime',
+            'last_silence_checkin_at'   => 'datetime',
         ];
     }
 

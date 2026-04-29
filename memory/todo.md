@@ -1,152 +1,91 @@
-# Aday Öğrenci 3-Level Form Refactor
+# Sessizlik Check-In Touchpoint Akışı
 
-**Başlangıç:** 2026-04-27
-**Onaylayan:** Kullanıcı (tüm öneriler kabul edildi)
+**Başlangıç:** 2026-04-29
+**Sahibi:** Manager (finans admin gibi ileride başka role devredilebilir, şimdilik manager)
 
-## Kabul Edilen 5 Karar
+## Hedef
 
-1. ✅ 9 yeni Level 1 field — karma: 6 kolon + 3 JSON
-2. ✅ `registration_form_level` enum kolonu (4 değer)
-3. ✅ Level 2 route: `/student/full-registration`
-4. ✅ Level 2 soft-zorunlu (banner uyarısı, hard block yok)
-5. ✅ Mevcut 27 guest → `level_2_done` backfill
+Aday ve öğrencide **N gün** boyunca timeline'da hareket yoksa sistem otomatik
+"süreciniz aktif olarak devam ediyor" tipi bir touchpoint (in-app notif +
+event log) düşürür. Müşteri "unutulduk" hissinden kurtulur.
 
-## Mimari Hiyerarşi (Cumulative Subset)
+## Tasarım
 
+### Stage haritası
+
+**Aday (lead_status üzerinden):**
+| Stage         | Default cadence |
+|---------------|-----------------|
+| new           | 7 gün           |
+| contacted     | 7 gün           |
+| qualified     | 7 gün           |
+| converted     | EXCLUDED (student tarafına geçti) |
+| lost          | EXCLUDED        |
+
+**Öğrenci (kompozit stage tespiti):**
+| Stage      | Tespit                                           | Default cadence |
+|------------|--------------------------------------------------|-----------------|
+| visa       | StudentVisaApplication aktif (status pending/active) | 14 gün       |
+| uni_assist | StudentUniversityApplication aktif, visa yok    | 7 gün           |
+| general    | Hiçbiri yok (genel takip)                        | 7 gün           |
+
+### Override hiyerarşisi (priority)
+1. **Kişi bazında**: `guest_applications.silence_checkin_days_override` / `users.silence_checkin_days_override` (smallint nullable)
+2. **Şirket bazında**: `companies.silence_checkin_overrides` JSON (stage → days)
+3. **Config default**: `config/brand.php` `silence_checkin_days` array
+
+### Sessizlik tetik formülü
 ```
-Level 0 (Apply Form)        — public, /apply
-   ↓ 8 field + KVKK
-Level 1 (Aday Öğrenci)       — /registration/form (mevcut URL)
-   ↓ 6 wizard, Level 0 readonly + 9 yeni field
-Level 2 (Öğrenci)            — /student/full-registration (yeni)
-   ↓ 8 wizard, Level 0+1 readonly + 60 ek field
-```
-
-**Cumulative kural:** Level N field'ları Level N+1'de pre-filled.
-**Validation tutarlılığı:** Level 2 kuralları otomatik Level 1'de de uygulanır (tek catalog, `level` tag).
-
-## 6 Wizard Yapısı (Level 1)
-
-| # | Başlık | Field'lar (* = yeni) |
-|---|--------|----------------------|
-| 1 | 👤 KİŞİSEL BİLGİLER | first_name, last_name, gender, email, phone, communication_language (apply readonly) + birth_date |
-| 2 | 🎓 AKADEMİK PROFİL | high_school_type, high_school_grad_year*, high_school_grade, higher_education_status*, (devamsa) university_name, university_department, university_year* |
-| 3 | 🎯 HEDEF VE PLANLAR | application_type (readonly) + target_program |
-| 4 | 🗣️ DİL YETERLİLİĞİ | german_level, german_certificate_held*, german_certificate_type*, german_certificate_score*, english_level, english_certificate_score* |
-| 5 | 💰 MALİ DURUM VE LOJİSTİK | finance_method (+ undecided opt), accommodation_contact_status*, accommodation_contact_city* |
-| 6 | 💭 MOTİVASYON VE HAZIRLIK | motivation_thinking_duration*, biggest_concerns* |
-
-## İmplementasyon Adımları (Commit Bazlı)
-
-- [ ] **C1** — Migration + Model fillable + 27 guest backfill (`level_2_done`)
-- [ ] **C2** — Catalog refactor: `level` tag eklenir, mevcut field'lara level=1/2 işaretlenir
-- [ ] **C3** — Yeni 11 field catalog'a eklenir + yeni opsiyon listeleri (higherEducationStatus, universityYear, germanCertificateType, accommodationContact, motivationDuration, biggestConcerns)
-- [ ] **C4** — Level 1 wizard rendering: `WorkflowController::form()` level parameter, view 6 step yapısına geçer, level=1 field'ları render
-- [ ] **C5** — Level 2 student route + controller + view (yeni `/student/full-registration`)
-- [ ] **C6** — Sözleşme akışı: Level 1 submit → `registration_form_level=level_1_done` → contract trigger
-- [ ] **C7** — Manager/Senior guest-detail Level 1 + Level 2 verilerini ayrı section'larda göster (UI küçük güncelleme)
-
-## Yeni Migration Şeması
-
-```sql
-ALTER TABLE guest_applications ADD COLUMN
-    high_school_grad_year         SMALLINT NULL,
-    higher_education_status       VARCHAR(20) NULL,    -- enrolled/dropped/not_started
-    university_year               VARCHAR(20) NULL,    -- prep/1/2/3/4/5plus
-    german_certificate_held       BOOLEAN DEFAULT NULL,
-    german_certificate_type       VARCHAR(40) NULL,    -- testdaf/dsh/goethe/telc/other
-    german_certificate_score      VARCHAR(20) NULL,
-    english_certificate_score     VARCHAR(40) NULL,
-    accommodation_contact_status  VARCHAR(20) NULL,    -- yes/no/maybe
-    accommodation_contact_city    VARCHAR(100) NULL,
-    biggest_concerns              JSON NULL,
-    motivation_thinking_duration  VARCHAR(20) NULL,    -- under_1y / 1_2y / over_2y
-    registration_form_level       VARCHAR(30) DEFAULT 'level_1_pending'
-        -- level_1_pending / level_1_done / level_2_pending / level_2_done
-INDEX idx_registration_form_level (registration_form_level);
+last_activity = MAX(updated_at, last_senior_action_at ?? 0, last_silence_checkin_at ?? 0)
+trigger_if   = (now() - last_activity) >= effective_cadence_days
+                AND silence_checkin_paused_at IS NULL
 ```
 
-**Backfill:** Tüm mevcut guest'lerde `registration_form_submitted_at IS NOT NULL` olanlar `level_2_done`, diğerleri `level_1_pending`.
+`last_silence_checkin_at` — dedup amacıyla kullanılır (üst üste check-in yok).
 
-## Risk / Geri Alma
+### Touchpoint içeriği
 
-- Her commit izole — sorun çıkarsa o commit revert edilir
-- Migration'da `down()` metodu tüm yeni kolonları drop eder
-- Mevcut Level 2 form **çalışmaya devam eder** (sadece URL'i student tarafına taşınıyor)
-- Apply form **hiç dokunulmuyor**
+In-app notification body:
+> 📍 Süreciniz aktif olarak devam ediyor — durum: **{stage_label}**, danışman: **{senior_name}**, son işlem: **{X gün önce}**. Önümüzdeki adım: {next_step}
 
----
+`system_event_logs` event_type: `silence_checkin_posted`
+- entity_type: `guest_application` / `student`
+- meta: `{stage, cadence_days, days_silent}`
 
-# 📲 Premium "Belge Talep Linki" — Tüm Modül Aktivasyon Planı
+**Mail göndermez** — `guest:inactivity-reminder` zaten o tarafı dövüyor.
 
-**Modül kodu:** `doc_request` (premium)
-**Başlangıç:** 2026-04-28
-**Mevcut durum:** Polymorphic altyapı + Guest/Student modülleri tamamlandı.
+## Adımlar
 
-## Phase 0 — TAMAMLANDI ✅
-- [x] Migration: `document_upload_tokens` + polymorphic kolonlar + backfill
-- [x] Model: `DocumentUploadToken` (4 sabit, helpers, dual-write)
-- [x] Public controller + view: mobile-first kamera capture
-- [x] Manager + Senior controller (generic `*For()` methodlar)
-- [x] Guest/Student detail view'larda buton + modal
-- [x] Permission: `doc_request.use` + manager senior'a yetki açma toggle'ı
+- [ ] **1. DB migration** — 4 tablo:
+  - `guest_applications`: `silence_checkin_days_override` (smallint null), `silence_checkin_paused_at` (datetime null), `last_silence_checkin_at` (datetime null)
+  - `users`: aynı 3 kolon (sadece role='student' kullanılacak)
+  - `companies`: `silence_checkin_overrides` (json null)
+- [ ] **2. Config default** — `config/brand.php` içinde `silence_checkin_days` map
+- [ ] **3. Servis sınıfı** — `app/Services/SilenceCheckinService.php`:
+  - `resolveGuestStage(GuestApplication $g): ?string`
+  - `resolveStudentStage(User $u): ?string`
+  - `effectiveCadenceDays($entity, string $stage): int` — override hiyerarşisi
+  - `daysSinceLastActivity($entity): int`
+  - `shouldPostCheckin($entity, string $stage): bool`
+  - `postCheckin($entity, string $stage): void` — notif + log + last_silence_checkin_at update
+- [ ] **4. Console command** — `silence:checkin-guests` daily 09:30
+- [ ] **5. Console command** — `silence:checkin-students` daily 09:35
+- [ ] **6. Scheduler** — `routes/console.php`'ye 2 satır
+- [ ] **7. Manager UI** — `/manager/silence-monitor`:
+  - Tab: Aday | Öğrenci
+  - Kolonlar: Kişi | Stage | Son aktivite | Cadence (effective + kaynak) | Son check-in
+  - Aksiyonlar: [Şimdi check-in tetikle] [Cadence override] [Pause/Resume]
+- [ ] **8. Global ayarlar** — `/manager/silence-monitor/settings` (company-level override)
+- [ ] **9. Manager controller** — `Manager/SilenceMonitorController`:
+  - `index` (list)
+  - `triggerCheckin($entity)` — şimdi gönder
+  - `setOverride($entity, days?)` — kişi bazında
+  - `pause/resume($entity)`
+  - `updateGlobalOverrides()` — company JSON
+- [ ] **10. Routes + nav link**
+- [ ] **11. Smoke test** — tinker'da bir aday seç, last_senior_action_at -10 gün, command --dry-run
 
-**Şu an çalışan target'lar:** `guest_application`, `student`
-
-## 🎯 Phase 1 — Yüksek değer (yapılacak: ~50 dk)
-
-- [ ] **D1 — HR Onboarding (User target_type)** ~25 dk
-  - `routes/manager.php`: 3 endpoint `/manager/hr/persons/{user}/document-tokens`
-  - Controller: `indexForUser/storeForUser/destroyForUser` (mevcut `*For()`'a delegasyon)
-  - View `manager/hr/persons/card.blade.php` — Hesap tab'ında onboarding bölümü + buton + modal
-  - Saklama: `user-documents/{user_id}/`
-
-- [ ] **D2 — Dealer KYC (Dealer target_type)** ~25 dk
-  - `routes/manager.php`: 3 endpoint `/manager/dealers/{dealer}/document-tokens`
-  - Controller: `indexForDealer/storeForDealer/destroyForDealer`
-  - View `manager/dealer-detail.blade.php` — buton + modal
-  - Saklama: `dealer-documents/{id}/`
-
-## 🟡 Phase 2 — Orta değer (~60 dk)
-
-- [ ] **D3 — Ticket eki** ~30 dk + yeni `TARGET_TICKET` sabiti
-  - Saklama: `ticket-attachments/{ticket_id}/`
-  - Custom message ile "ne istediğini yaz" alanı önemli
-
-- [ ] **D4 — Sözleşme imzalı geri yükleme** ~30 dk + yeni `TARGET_CONTRACT` sabiti
-  - Saklama: `contract-files/{id}/signed/`
-  - Custom message sözleşme adıyla pre-filled
-
-## 🔵 Phase 3 — Niş (~3-4 saat)
-
-- [ ] **D5 — Toplu belge talebi** — `max_uses > 1` aktivasyonu, multi-category JSON
-- [ ] **D6 — WhatsApp Business API** — Twilio veya Meta Cloud API entegrasyonu
-
-## 🟣 Phase 4 — Premium iyileştirmeler (~8-10 saat, opsiyonel)
-
-- [ ] **D7 — Hatırlatma SMS/email** — 24h cron job
-- [ ] **D8 — OCR (pasaport/kimlik)** — Tesseract veya cloud vision
-- [ ] **D9 — Manager dashboard widget** — bekleyen talep sayısı + haftalık istatistik
-
-## 💰 SaaS Tier Stratejisi
-
-| Tier | doc_request | Kapsam |
-|---|---|---|
-| Basic | ❌ Kapalı | — |
-| Gold | ✅ Açık | Guest + Student. Aylık 50 link. |
-| Premium | ✅ Açık | Tüm target'lar (HR, Dealer, Ticket, Contract). Sınırsız. WhatsApp API. |
-
-**Implementation:** `companies` tablosuna `doc_request_tier` enum + `doc_request_monthly_limit` int. Token üretimi öncesi quota check. (~1 saat)
-
-## 🔧 Genişletme Prosedürü (her modül)
-
-3 dosya, ~25 satır kod:
-1. **Token modeli sabiti:** `TARGET_X = 'x'` + `TARGET_TYPES` label + `resolveDocumentOwnerId()` case + `resolveStorageDir()` case
-2. **Controller endpoint:** `storeFor()` çağıran wrapper
-3. **View:** mevcut modal markup'ını kopyala, `STORE_URL` değiştir
-
-## Risk / Geri Alma
-- Her phase izole, küçük commit'ler
-- Mevcut akışları bozmaz (dual-write geri uyum garantisi)
-- Yeni target_type eklemek = sadece sabit + match case (DB değişikliği yok)
-- Module flag (`doc_request`) tüm özelliği tek noktadan kapatır
+## Bilinçli kapsam dışı (sonraki sprint)
+- Stage başına touchpoint metni özelleştirme (UI ile düzenle)
+- Aday/öğrenci paneline manager-tarafında "manuel check-in yap" mini buton (bir guest detayında)
+- Senior'a "X kişide hareket yok — gerçek not ekleyin" haftalık özet

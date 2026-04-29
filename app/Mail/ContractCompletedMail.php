@@ -18,6 +18,7 @@ class ContractCompletedMail extends Mailable
     /**
      * @param  array<int,string>  $attachmentPaths  Storage 'local' disk'inde göreceli yollar
      * @param  array<int,string>  $annexNotes       Sözleşmeye ait ek metinler (mail body'sinde gösterilir)
+     * @param  array<string,string>  $bankInfo      ['account_holder','bank_name','iban','bic','currency']
      */
     public function __construct(
         public readonly string $recipientName,
@@ -26,6 +27,11 @@ class ContractCompletedMail extends Mailable
         public readonly array $attachmentPaths = [],
         public readonly array $annexNotes = [],
         public readonly ?string $portalUrl = null,
+        // Ödeme bilgisi — manager onayında sözleşme mailine ödeme detayı eklenir
+        public readonly ?string $paymentAmountText = null,    // örn. "2.490 EUR"
+        public readonly ?string $paymentReference = null,     // örn. "AHMET YILMAZ #STU-00000123"
+        public readonly array $bankInfo = [],                 // banka detayları (config('brand.banking'))
+        public readonly int $paymentDueDays = 14,             // ödeme süresi (gün)
     ) {}
 
     public function envelope(): Envelope

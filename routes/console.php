@@ -194,6 +194,28 @@ Schedule::command('contract:send-reminders')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/contract-reminders.log'));
 
+// ─── Payment Reminders (L1..L4 oto, L5 manager butonu ile manuel) ─────────────
+
+Schedule::command('payments:send-reminders')
+    ->dailyAt('09:15')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/payment-reminders.log'));
+
+// ─── Silence Check-In (sessizlik touchpoint — aday + öğrenci) ─────────────────
+// "Süreciniz devam ediyor" tipi otomatik in-app touchpoint düşürür.
+// Stage'e göre kadans (config/brand.silence_checkin_days, company + kişi override).
+// Mail GÖNDERMEZ — guest:inactivity-reminder zaten mail tarafını dövüyor.
+
+Schedule::command('silence:checkin-guests')
+    ->dailyAt('09:30')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/silence-checkin-guests.log'));
+
+Schedule::command('silence:checkin-students')
+    ->dailyAt('09:35')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/silence-checkin-students.log'));
+
 // ─── K3: Scheduled Notifications ─────────────────────────────────────────────
 
 Schedule::command('notifications:process-scheduled')

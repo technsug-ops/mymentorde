@@ -158,6 +158,47 @@ trait ContractHelperTrait
         $contractNo    = trim((string) ($guest->tracking_token ?? ''));
         $portalUrl     = url('/guest/contract');
 
+        // ── Ödeme bilgisi (sözleşme onayında zorunlu havale yönlendirmesi) ──
+        // Tutar: önce mevcut GuestPaymentRequest kaydından, yoksa paket + ek hizmetler toplamından.
+        $bankInfo = (array) config('brand.banking', []);
+        $paymentAmountText = null;
+        $paymentReference  = null;
+        if (! empty($bankInfo['iban'] ?? '')) {
+            $currency = (string) ($bankInfo['currency'] ?? 'EUR');
+
+            $latestPayment = \App\Models\GuestPaymentRequest::query()
+                ->where('guest_application_id', $guest->id)
+                ->orderByDesc('id')
+                ->first();
+
+            $amount = $latestPayment ? (float) $latestPayment->amount_eur : null;
+            if ($amount === null) {
+                $selCode = (string) ($guest->selected_package_code ?? '');
+                if ($selCode !== '') {
+                    $pkg = collect(config('service_packages.packages', []))->firstWhere('code', $selCode);
+                    $pkgAmount = (int) ($pkg['price_amount'] ?? 0);
+                    $extrasArr = is_array($guest->selected_extra_services) ? $guest->selected_extra_services : [];
+                    $extrasAmount = collect($extrasArr)->sum(function ($x) {
+                        $found = collect(config('service_packages.extra_services', []))->firstWhere('code', $x['code'] ?? '');
+                        return (int) ($found['price_amount'] ?? 0);
+                    });
+                    $amount = (float) ($pkgAmount + (int) $extrasAmount);
+                }
+            }
+
+            if ($amount !== null && $amount > 0) {
+                $paymentAmountText = number_format($amount, 0, ',', '.') . ' ' . $currency;
+
+                // Açıklama: "AD SOYAD #ID" — ödeme eşleştirmede kişi karışıklığı önlemek için
+                $studentRef = trim((string) ($guest->converted_student_id ?? ''));
+                if ($studentRef === '') {
+                    $studentRef = 'GST-' . str_pad((string) $guest->id, 8, '0', STR_PAD_LEFT);
+                }
+                $fullName = trim(((string) ($guest->first_name ?? '')) . ' ' . ((string) ($guest->last_name ?? '')));
+                $paymentReference = mb_strtoupper($fullName !== '' ? $fullName : 'ÖĞRENCİ', 'UTF-8') . ' #' . $studentRef;
+            }
+        }
+
         try {
             Mail::to($email)->queue(new ContractCompletedMail(
                 recipientName: $recipient,
@@ -166,6 +207,10 @@ trait ContractHelperTrait
                 attachmentPaths: $attachments,
                 annexNotes: $annexNotes,
                 portalUrl: $portalUrl,
+                paymentAmountText: $paymentAmountText,
+                paymentReference: $paymentReference,
+                bankInfo: $bankInfo,
+                paymentDueDays: (int) config('brand.payment_due_days', 14),
             ));
         } catch (\Throwable $e) {
             Log::warning('contract.completed.mail.failed', [

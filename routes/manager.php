@@ -373,6 +373,29 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
     Route::get('/manager/business-contracts/{businessContract}/download-signed',[BusinessContractController::class, 'downloadSigned'])->name('manager.business-contracts.download-signed');
     Route::patch('/manager/business-contracts/{businessContract}/update-body',  [BusinessContractController::class, 'updateBody'])->name('manager.business-contracts.update-body');
 
+    // ── Guest Payment Reminders (sözleşme onaylı + ödeme bekleyen) ────────────
+    // Manager: hatırlatma şimdi gönder / pause-resume / manuel teyit / L5 iptal uyarısı
+    // İleride finans admin rolüne taşınacak (bkz. memory/project_finance_admin_role_pending.md)
+    {
+        $gpr = \App\Http\Controllers\Manager\GuestPaymentReminderController::class;
+        Route::get('/manager/payments/reminders',                       [$gpr, 'index'])->name('manager.payments.reminders.index');
+        Route::post('/manager/payments/reminders/{guest}/send',         [$gpr, 'sendReminder'])->middleware('throttle:30,1')->name('manager.payments.reminders.send');
+        Route::post('/manager/payments/reminders/{guest}/pause',        [$gpr, 'pause'])->middleware('throttle:30,1')->name('manager.payments.reminders.pause');
+        Route::post('/manager/payments/reminders/{guest}/resume',       [$gpr, 'resume'])->middleware('throttle:30,1')->name('manager.payments.reminders.resume');
+        Route::post('/manager/payments/reminders/{guest}/mark-received',[$gpr, 'markReceived'])->middleware('throttle:30,1')->name('manager.payments.reminders.mark-received');
+    }
+
+    // ── Silence Monitor (sessizlik check-in akışı yönetimi) ──────────────────
+    {
+        $sm = \App\Http\Controllers\Manager\SilenceMonitorController::class;
+        Route::get('/manager/silence-monitor',                                  [$sm, 'index'])->name('manager.silence-monitor.index');
+        Route::post('/manager/silence-monitor/{type}/{id}/trigger',             [$sm, 'trigger'])->whereIn('type', ['guest', 'student'])->middleware('throttle:30,1')->name('manager.silence-monitor.trigger');
+        Route::post('/manager/silence-monitor/{type}/{id}/override',            [$sm, 'setOverride'])->whereIn('type', ['guest', 'student'])->middleware('throttle:30,1')->name('manager.silence-monitor.override');
+        Route::post('/manager/silence-monitor/{type}/{id}/pause',               [$sm, 'pause'])->whereIn('type', ['guest', 'student'])->middleware('throttle:30,1')->name('manager.silence-monitor.pause');
+        Route::post('/manager/silence-monitor/{type}/{id}/resume',              [$sm, 'resume'])->whereIn('type', ['guest', 'student'])->middleware('throttle:30,1')->name('manager.silence-monitor.resume');
+        Route::post('/manager/silence-monitor/company-overrides',               [$sm, 'updateCompanyOverrides'])->middleware('throttle:10,1')->name('manager.silence-monitor.company-overrides');
+    }
+
     // ── El Kitabı ─────────────────────────────────────────────────────────────
     Route::get('/manager/handbook', [HandbookController::class, 'manager'])->name('manager.handbook');
     Route::get('/manager/handbook/download', [HandbookController::class, 'download'])->defaults('role', 'manager')->name('manager.handbook.download');

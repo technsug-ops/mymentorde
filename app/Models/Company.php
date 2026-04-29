@@ -14,6 +14,7 @@ class Company extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'silence_checkin_overrides' => 'array',
     ];
 }
 

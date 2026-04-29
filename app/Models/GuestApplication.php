@@ -134,5 +134,15 @@ class GuestApplication extends Model
         'converted_at' => 'datetime',
         'last_senior_action_at' => 'datetime',
         'follow_up_date' => 'date',
+
+        // Ödeme hatırlatma akışı (forceFill ile yazılır — fillable değil)
+        'payment_reminder_level' => 'integer',
+        'payment_reminder_last_sent_at' => 'datetime',
+        'payment_reminders_paused_at' => 'datetime',
+        'payment_received_at' => 'datetime',
+
+        // Sessizlik check-in akışı
+        'silence_checkin_paused_at' => 'datetime',
+        'last_silence_checkin_at' => 'datetime',
     ];
 }

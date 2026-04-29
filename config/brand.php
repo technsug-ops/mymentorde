@@ -45,6 +45,39 @@ return [
     'terms_url'    => env('BRAND_TERMS_URL', ''),
     'privacy_url'  => env('BRAND_PRIVACY_URL', ''),
 
+    // ── Banka / ödeme bilgisi (sözleşme mailinde gösterilir) ─────────
+    'banking' => [
+        'account_holder' => env('BRAND_BANK_HOLDER', ''),
+        'bank_name'      => env('BRAND_BANK_NAME', ''),
+        'iban'           => env('BRAND_BANK_IBAN', ''),
+        'bic'            => env('BRAND_BANK_BIC', ''),
+        'currency'       => env('BRAND_BANK_CURRENCY', 'EUR'),
+    ],
+
+    // ── Ödeme akışı (hatırlatma + iptal süreleri) ─────────────────────
+    // Cron L1..L4'ü contract_approved_at + N gün geçtiğinde gönderir.
+    // L5 (iptal uyarısı) manager butonu ile manuel tetiklenir.
+    'payment_due_days' => (int) env('BRAND_PAYMENT_DUE_DAYS', 14),
+    'payment_reminder_days' => [
+        1 => (int) env('BRAND_PAYMENT_REMINDER_L1', 7),
+        2 => (int) env('BRAND_PAYMENT_REMINDER_L2', 14),
+        3 => (int) env('BRAND_PAYMENT_REMINDER_L3', 21),
+        4 => (int) env('BRAND_PAYMENT_REMINDER_L4', 28),
+    ],
+    'payment_final_grace_days' => (int) env('BRAND_PAYMENT_FINAL_GRACE_DAYS', 15),
+
+    // ── Sessizlik check-in (aday/öğrenci timeline'ında hareket yoksa) ────
+    // Stage → kaç günden uzun sessizlikten sonra otomatik touchpoint.
+    // Override hiyerarşisi: kişi > şirket (companies.silence_checkin_overrides) > bu default.
+    'silence_checkin_days' => [
+        // Aday tarafı
+        'application' => 7,   // lead_status: new/contacted/qualified
+        // Öğrenci tarafı
+        'uni_assist'  => 7,
+        'visa'        => 14,
+        'general'     => 7,
+    ],
+
     // ── Sosyal medya ─────────────────────────────────────────────────
     'social' => [
         'instagram' => env('BRAND_INSTAGRAM', ''),

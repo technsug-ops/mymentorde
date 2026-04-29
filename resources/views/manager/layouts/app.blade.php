@@ -319,8 +319,16 @@
                     <span class="nav-icon">💸</span> Komisyonlar
                 </a>
                 <a href="/manager/payments"
-                   class="nav-link {{ request()->is('manager/payments*') ? 'active' : '' }}">
+                   class="nav-link {{ (request()->is('manager/payments') || request()->is('manager/payments/[0-9]*')) ? 'active' : '' }}">
                     <span class="nav-icon">🧾</span> Öğrenci Faturaları
+                </a>
+                <a href="{{ route('manager.payments.reminders.index') }}"
+                   class="nav-link {{ request()->is('manager/payments/reminders*') ? 'active' : '' }}">
+                    <span class="nav-icon">⏰</span> Ödeme Hatırlatmaları
+                </a>
+                <a href="{{ route('manager.silence-monitor.index') }}"
+                   class="nav-link {{ request()->is('manager/silence-monitor*') ? 'active' : '' }}">
+                    <span class="nav-icon">📍</span> Sessizlik Monitörü
                 </a>
             </div>
 
