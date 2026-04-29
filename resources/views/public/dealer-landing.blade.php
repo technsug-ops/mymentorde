@@ -130,11 +130,11 @@ a:hover { text-decoration:underline; }
     border-radius:50%;
 }
 .hero-visual-title { font-size:13px; text-transform:uppercase; letter-spacing:.1em; opacity:.8; margin-bottom:12px; }
-.hero-visual-amount { font-family:var(--font-base); font-size:56px; line-height:1; margin:0 0 8px; color:var(--accent); }
+.hero-visual-amount { font-family:var(--font-base); font-weight:700; font-size:56px; line-height:1; margin:0 0 8px; color:#fff; text-shadow:0 2px 16px rgba(0,0,0,.25); letter-spacing:-2px; }
 .hero-visual-sub { font-size:14px; opacity:.9; margin-bottom:24px; }
 .hero-visual-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; font-size:13px; }
 .hero-visual-list li { display:flex; align-items:center; gap:10px; }
-.hero-visual-list li::before { content:'✓'; color:var(--accent); font-weight:900; font-size:16px; }
+.hero-visual-list li::before { content:'✓'; color:#fff; font-weight:900; font-size:16px; }
 
 /* === SECTIONS === */
 section { padding:70px 0; }
@@ -341,12 +341,12 @@ section { padding:70px 0; }
     border-radius:50%;
 }
 .calc-result-label { font-size:13px; text-transform:uppercase; letter-spacing:.1em; opacity:.85; margin-bottom:6px; }
-.calc-result-amount { font-family:var(--font-base); font-size:64px; line-height:1; color:var(--accent); margin:0 0 8px; }
+.calc-result-amount { font-family:var(--font-base); font-weight:700; font-size:64px; line-height:1; color:#fff; margin:0 0 8px; letter-spacing:-2.5px; text-shadow:0 2px 18px rgba(0,0,0,.28); }
 .calc-result-sub { font-size:14px; opacity:.85; margin-bottom:22px; }
 .calc-breakdown { background:rgba(255,255,255,.08); border-radius:12px; padding:16px; margin-top:14px; font-size:13px; }
 .calc-breakdown-row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,.1); }
-.calc-breakdown-row:last-child { border-bottom:0; font-weight:700; color:var(--accent); padding-top:10px; margin-top:4px; border-top:1px solid rgba(255,255,255,.15); border-bottom:0; }
-.calc-tier-badge { display:inline-flex; align-items:center; gap:6px; background:var(--accent); color:var(--primary-deep); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; margin-top:10px; }
+.calc-breakdown-row:last-child { border-bottom:0; font-weight:800; color:#fff; padding-top:10px; margin-top:4px; border-top:1px solid rgba(255,255,255,.25); border-bottom:0; }
+.calc-tier-badge { display:inline-flex; align-items:center; gap:6px; background:#fff; color:var(--primary-deep); padding:5px 14px; border-radius:20px; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; margin-top:12px; box-shadow:0 4px 14px rgba(0,0,0,.18); }
 
 /* === SLIDER / MOCKUP CAROUSEL === */
 /* Slider uses Manager portal's accent color (dynamic) — --mgr-accent */
@@ -430,7 +430,7 @@ section { padding:70px 0; }
     box-shadow:0 12px 32px rgba(0,0,0,.3); display:flex; gap:14px; align-items:center;
     font-size:14px; backdrop-filter:blur(6px);
 }
-.mockup-overlay strong { color:var(--accent); }
+.mockup-overlay strong { color:#fff; }
 .mockup-overlay .btn-primary { padding:8px 18px; font-size:13px; margin:0; }
 
 /* === FAQ === */
@@ -486,21 +486,25 @@ section { padding:70px 0; }
 /* === TIER GRAPH (Calculator) === */
 .tier-bars { display:flex; gap:3px; margin-top:14px; align-items:flex-end; height:60px; }
 .tier-bar {
-    flex:1; background:rgba(255,255,255,.18); border-radius:4px 4px 0 0;
+    flex:1; background:rgba(255,255,255,.22); border-radius:4px 4px 0 0;
     position:relative; transition:all .35s;
     display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
     min-height:14px; padding-top:4px;
 }
-.tier-bar.active { background:var(--accent); box-shadow:0 0 12px rgba(233,231,226,.5); }
+.tier-bar.active {
+    background:#fff;
+    box-shadow:0 0 18px rgba(255,255,255,.45);
+}
 .tier-bar .t-lbl {
-    font-size:9px; color:rgba(255,255,255,.7); position:absolute; bottom:-18px; white-space:nowrap; font-weight:700;
+    font-size:10px; color:#fff; position:absolute; bottom:-18px;
+    white-space:nowrap; font-weight:700; opacity:.85;
 }
-.tier-bar.active .t-lbl { color:var(--accent); }
+.tier-bar.active .t-lbl { color:#fff; opacity:1; text-shadow:0 1px 6px rgba(0,0,0,.3); }
 .tier-bar .t-val {
-    writing-mode:vertical-rl; transform:rotate(180deg); font-size:10px; font-weight:700;
-    color:rgba(255,255,255,.5); letter-spacing:.04em;
+    writing-mode:vertical-rl; transform:rotate(180deg); font-size:10px; font-weight:800;
+    color:#fff; letter-spacing:.04em; opacity:.95;
 }
-.tier-bar.active .t-val { color:var(--primary-deep); }
+.tier-bar.active .t-val { color:var(--primary-deep); opacity:1; }
 
 /* === INLINE APPLICATION FORM === */
 .inline-form-wrap {

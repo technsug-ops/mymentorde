@@ -100,14 +100,23 @@
         .l-btn-ghost { background:var(--surface); color:var(--text) !important; border:1px solid var(--line); }
         .l-btn-ghost:hover { border-color:var(--primary); color:var(--primary) !important; text-decoration:none !important; }
         .l-hero-trust {
-            display:flex; gap:40px; flex-wrap:wrap;
+            display:flex; gap:32px; flex-wrap:wrap;
             padding-top:28px; border-top:1px solid var(--line);
         }
-        .l-trust-num {
-            font-family:var(--font-base);
-            font-size:32px; color:var(--primary); line-height:1;
+        .l-hero-trust > div {
+            position:relative; padding-left:14px;
         }
-        .l-trust-lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-top:4px; }
+        .l-hero-trust > div::before {
+            content:''; position:absolute; left:0; top:4px; bottom:4px; width:3px;
+            background:var(--gradient-mid, linear-gradient(180deg, #a07ed9, #7e58bf));
+            border-radius:2px;
+        }
+        .l-trust-num {
+            font-family:var(--font-base); font-weight:700;
+            font-size:34px; color:var(--primary-deep); line-height:1;
+            letter-spacing:-1px;
+        }
+        .l-trust-lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-top:6px; font-weight:600; }
         @media(max-width:720px){ .l-hero h1 { font-size:32px; } .l-hero-sub { font-size:15px; } .l-hero-trust { gap:20px; } .l-trust-num { font-size:24px; } }
 
         /* === Hero Right Side: Video/Welcome === */

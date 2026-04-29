@@ -153,22 +153,37 @@ section { padding:90px 0; position:relative; }
 .hero-badge .dot { width:8px; height:8px; border-radius:50%; background:var(--success); animation:pulse 1.6s ease-out infinite; }
 @keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(22,163,74,.6); } 70% { box-shadow:0 0 0 10px rgba(22,163,74,0); } 100% { box-shadow:0 0 0 0 rgba(22,163,74,0); } }
 .hero h1 {
-    font-family:var(--font-base);
+    font-family:var(--font-base); font-weight:700;
     font-size:clamp(40px, 6vw, 68px); line-height:1.04; letter-spacing:-2px;
     margin:0 0 24px; color:var(--primary-deep); font-style:normal;
 }
 .hero h1 em {
-    font-style:italic; font-weight:700;
-    color:var(--primary);
-    text-shadow:0 1px 0 rgba(255,255,255,.4);
-    background:none;
+    font-style:italic; font-weight:800;
+    color:var(--primary-deep);
+    background:linear-gradient(180deg, transparent 60%, var(--primary-light) 60%, var(--primary-light) 92%, transparent 92%);
     -webkit-background-clip:initial; background-clip:initial;
+    padding:0 4px; box-decoration-break:clone; -webkit-box-decoration-break:clone;
 }
 .hero-lead { font-size:19px; color:var(--muted); margin:0 0 36px; max-width:600px; line-height:1.6; }
 .hero-ctas { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:36px; }
 .hero-trust { display:flex; gap:32px; flex-wrap:wrap; align-items:center; padding-top:24px; border-top:1px solid var(--line); }
-.hero-trust-item { font-size:12px; color:var(--muted); }
-.hero-trust-item strong { display:block; font-size:24px; color:var(--primary-deep); font-family:var(--font-base); line-height:1; }
+.hero-trust-item { font-size:12px; color:var(--muted); position:relative; padding-left:14px; }
+.hero-trust-item::before {
+    content:''; position:absolute; left:0; top:4px; bottom:4px; width:3px;
+    background:var(--gradient-mid); border-radius:2px;
+}
+.hero-trust-item strong { display:block; font-size:28px; color:var(--primary-deep); font-family:var(--font-base); font-weight:700; line-height:1; letter-spacing:-.5px; }
+
+/* Hero altında Almanya bayrak şeridi (brandbook görsel kimliği) */
+.hero-flag-strip {
+    display:flex; height:5px; border-radius:3px; overflow:hidden;
+    margin:0 0 28px; max-width:200px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+.hero-flag-strip > div { flex:1; }
+.hero-flag-strip .fl-blk { background:#1a1a1a; }
+.hero-flag-strip .fl-red { background:#dc2626; }
+.hero-flag-strip .fl-gld { background:#fbbf24; }
 
 .hero-visual {
     position:relative; perspective:1200px;
@@ -179,14 +194,14 @@ section { padding:90px 0; position:relative; }
 }
 .hero-card {
     background:#fff; border:1px solid var(--line); border-radius:18px;
-    padding:18px; box-shadow:0 24px 48px rgba(91,46,145,.18);
+    padding:20px; box-shadow:0 28px 56px rgba(126,88,191,.22);
     margin-bottom:14px;
 }
-.hero-card-1 { transform:translateZ(0); }
-.hero-card-2 { transform:translateZ(20px) translateX(40px) translateY(20px); position:absolute; top:80px; right:-30px; width:240px; }
-.hero-card-3 { transform:translateZ(40px) translateX(-30px) translateY(60px); position:absolute; bottom:-30px; left:-20px; width:220px; }
+.hero-card-1 { transform:translateZ(0); border-top:3px solid var(--primary); }
+.hero-card-2 { transform:translateZ(20px) translateX(40px) translateY(20px); position:absolute; top:80px; right:-30px; width:240px; border-top:3px solid var(--success); }
+.hero-card-3 { transform:translateZ(40px) translateX(-30px) translateY(60px); position:absolute; bottom:-30px; left:-20px; width:220px; border-top:3px solid var(--primary-mid); }
 .hero-card .lbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; font-weight:700; margin-bottom:6px; }
-.hero-card .val { font-family:var(--font-base); font-size:24px; color:var(--primary-deep); line-height:1; }
+.hero-card .val { font-family:var(--font-base); font-weight:700; font-size:28px; color:var(--primary-deep); line-height:1; letter-spacing:-1px; }
 .hero-card .val.eur { color:var(--success); }
 .hero-card .delta { font-size:11px; color:var(--success); font-weight:700; margin-top:4px; }
 
@@ -761,6 +776,9 @@ footer a:hover { color:#fff; }
     <div class="container hero-grid">
         <div>
             <span class="hero-badge"><span class="dot"></span> Yurt Dışı Eğitim Danışmanlığı SaaS</span>
+            <div class="hero-flag-strip" aria-hidden="true">
+                <div class="fl-blk"></div><div class="fl-red"></div><div class="fl-gld"></div>
+            </div>
             <h1>5 Excel + WhatsApp + Calendar = <em>kaybedilen aday.</em><br>Tek panel, ekibin <em>2× kapasite.</em></h1>
             <p class="hero-lead">
                 <strong>{{ $brand }}</strong> — Almanya'ya öğrenci gönderen danışmanlık firmaları için end-to-end bulut platformu.
