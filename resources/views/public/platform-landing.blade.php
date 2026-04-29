@@ -565,9 +565,11 @@ section { padding:90px 0; position:relative; }
 }
 .core-plan-header { display:flex; justify-content:space-between; align-items:flex-start; gap:24px; flex-wrap:wrap; margin-bottom:24px; position:relative; z-index:1; }
 .core-badge {
-    display:inline-block; background:var(--accent); color:var(--primary-deep);
-    padding:5px 12px; border-radius:14px; font-size:11px; font-weight:800;
-    text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px;
+    display:inline-block;
+    background:#fff; color:var(--primary-deep);
+    padding:6px 14px; border-radius:14px; font-size:11px; font-weight:800;
+    text-transform:uppercase; letter-spacing:.12em; margin-bottom:12px;
+    box-shadow:0 4px 14px rgba(0,0,0,.18), 0 0 0 1px rgba(255,255,255,.4);
 }
 .core-name { margin:0 0 8px; font-family:var(--font-base); font-style:italic; font-size:32px; color:#fff; }
 .core-desc { margin:0; color:rgba(255,255,255,.85); font-size:14px; }

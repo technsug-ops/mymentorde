@@ -385,6 +385,17 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::post('/manager/payments/reminders/{guest}/mark-received',[$gpr, 'markReceived'])->middleware('throttle:30,1')->name('manager.payments.reminders.mark-received');
     }
 
+    // ── Bayi Komisyon Kademeleri (Lead Gen 5 + Freelance 3 tier yönetimi) ────
+    {
+        $dt = \App\Http\Controllers\Manager\DealerCommissionTierController::class;
+        Route::get('/manager/dealer-tiers',                          [$dt, 'index'])->name('manager.dealer-tiers.index');
+        Route::get('/manager/dealer-tiers/create',                   [$dt, 'create'])->name('manager.dealer-tiers.create');
+        Route::post('/manager/dealer-tiers',                         [$dt, 'store'])->middleware('throttle:30,1')->name('manager.dealer-tiers.store');
+        Route::get('/manager/dealer-tiers/{dealerCommissionTier}/edit', [$dt, 'edit'])->name('manager.dealer-tiers.edit');
+        Route::put('/manager/dealer-tiers/{dealerCommissionTier}',   [$dt, 'update'])->middleware('throttle:30,1')->name('manager.dealer-tiers.update');
+        Route::post('/manager/dealer-tiers/{dealerCommissionTier}/toggle', [$dt, 'toggleActive'])->middleware('throttle:30,1')->name('manager.dealer-tiers.toggle');
+    }
+
     // ── İndirim Kodları (extra feature — module:discount_codes) ──────────────
     Route::middleware('module:discount_codes')->group(function (): void {
         $dc = \App\Http\Controllers\Manager\DiscountCodeController::class;

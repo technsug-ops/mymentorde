@@ -187,6 +187,65 @@
 </div>
 <style>@media(max-width:700px){.dd-greeting+.dd-journey+div{grid-template-columns:1fr !important;}}</style>
 
+{{-- ── 4.5. Komisyon Kademe Progress (sadece tier varsa) ── --}}
+@if(!empty($tierProgress) && $tierProgress['current'])
+@php $tp = $tierProgress; @endphp
+<div class="dd-tier-card">
+    <div class="dd-tier-head">
+        <div>
+            <div class="dd-tier-now">{{ $tp['current']->tier_emoji }} {{ $tp['current']->tier_name }} Seviye</div>
+            <div class="dd-tier-rate">Komisyon: <strong>{{ $tp['current']->rateLabel() }}/kayıt</strong> · {{ $tp['count'] }} kümülatif kayıt</div>
+        </div>
+        @if($tp['next'])
+            <div class="dd-tier-next-badge">
+                {{ $tp['to_next'] }} kayıt sonra → {{ $tp['next']->tier_emoji }} {{ $tp['next']->tier_name }} ({{ $tp['next']->rateLabel() }})
+            </div>
+        @else
+            <div class="dd-tier-next-badge dd-tier-max">🏆 En yüksek kademeye ulaştın!</div>
+        @endif
+    </div>
+    <div class="dd-tier-progress">
+        <div class="dd-tier-progress-fill" style="width:{{ $tp['percent'] }}%"></div>
+    </div>
+    @if($tp['current']->advantages_text)
+        <div class="dd-tier-advantages">✓ {{ $tp['current']->advantages_text }}</div>
+    @endif
+</div>
+<style>
+.dd-tier-card {
+    background:linear-gradient(140deg, #7e58bf 0%, #5a3a8d 100%); color:white;
+    border-radius:16px; padding:22px 24px; margin-bottom:18px;
+    box-shadow:0 14px 36px rgba(126,88,191,.22);
+    position:relative; overflow:hidden;
+}
+.dd-tier-card::before {
+    content:''; position:absolute; top:-30px; right:-30px; width:140px; height:140px;
+    border-radius:50%; background:rgba(255,255,255,.06); pointer-events:none;
+}
+.dd-tier-head { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap; margin-bottom:14px; position:relative; }
+.dd-tier-now { font-size:18px; font-weight:800; letter-spacing:-.3px; }
+.dd-tier-rate { font-size:12.5px; opacity:.85; margin-top:3px; }
+.dd-tier-rate strong { color:#fde68a; font-weight:800; }
+.dd-tier-next-badge {
+    background:rgba(255,255,255,.15); padding:6px 14px; border-radius:999px;
+    font-size:11.5px; font-weight:700; backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.2);
+}
+.dd-tier-next-badge.dd-tier-max { background:#fbbf24; color:#5a3a8d; border-color:#fbbf24; }
+.dd-tier-progress {
+    height:10px; background:rgba(0,0,0,.22); border-radius:999px; overflow:hidden;
+    box-shadow:inset 0 1px 2px rgba(0,0,0,.2); position:relative;
+}
+.dd-tier-progress-fill {
+    height:100%; background:linear-gradient(90deg, #fde68a, #fff);
+    border-radius:999px; transition:width .4s ease-out;
+    box-shadow:0 0 12px rgba(255,255,255,.4);
+}
+.dd-tier-advantages { font-size:11.5px; opacity:.78; margin-top:10px; font-style:italic; }
+@media(max-width:700px) { .dd-tier-head { flex-direction:column; align-items:stretch; } .dd-tier-next-badge { align-self:flex-start; } }
+</style>
+@endif
+
 {{-- ── 5. KPI Grid (4 kart) ── --}}
 <div class="dd-kpis">
     <div class="dd-kpi">

@@ -338,6 +338,12 @@
                         <span class="nav-icon">🎟️</span> İndirim Kodları
                     </a>
                 @endmodule
+                @module('dealer')
+                    <a href="{{ route('manager.dealer-tiers.index') }}"
+                       class="nav-link {{ request()->is('manager/dealer-tiers*') ? 'active' : '' }}">
+                        <span class="nav-icon">🏆</span> Bayi Kademeleri
+                    </a>
+                @endmodule
             </div>
 
             <div class="nav-section">

@@ -211,6 +211,7 @@ class DealerPortalController extends Controller
             'earningsHero'        => $earningsHero,
             'leadPipeline'        => $leadPipeline,
             'tierPerms'           => DealerTierPermissions::for($dealer),
+            'tierProgress'        => app(\App\Services\DealerTierResolverService::class)->progress($dealer),
             'referralAnalysis'    => $referralAnalysis,
             'avgConversionDays'   => $avgConversionDays,
             'weeklyLeads'         => $weeklyLeads,
