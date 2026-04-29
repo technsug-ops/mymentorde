@@ -33,13 +33,34 @@
         <table>
             @foreach($group['fields'] ?? [] as $field)
                 @php
-                    $key = $field['key'] ?? '';
-                    $val = trim((string) ($draft[$key] ?? ($guest->{$key} ?? '')));
+                    $key   = $field['key'] ?? '';
+                    $type  = (string) ($field['type'] ?? 'text');
+                    $rawVal = $draft[$key] ?? ($guest->{$key} ?? '');
                     $label = $field['label'] ?? $key;
+
+                    // Select / radio / checkbox_group → value yerine label göster
+                    // (örn. "yes" → "Evet", "secondary_school" → "Lise" gibi)
+                    $displayVal = '';
+                    if (is_array($rawVal)) {
+                        // checkbox_group — birden çok seçim
+                        $opts = collect($field['options'] ?? [])->keyBy('value');
+                        $displayVal = collect($rawVal)
+                            ->map(fn ($v) => (string) (($opts[$v]['label'] ?? null) ?: $v))
+                            ->filter()
+                            ->implode(', ');
+                    } else {
+                        $strVal = trim((string) $rawVal);
+                        if ($strVal !== '' && in_array($type, ['select', 'radio'], true) && !empty($field['options'])) {
+                            $match = collect($field['options'])->firstWhere('value', $strVal);
+                            $displayVal = $match ? (string) ($match['label'] ?? $strVal) : $strVal;
+                        } else {
+                            $displayVal = $strVal;
+                        }
+                    }
                 @endphp
                 <tr>
                     <td class="label">{{ $label }}{{ !empty($field['required']) ? ' *' : '' }}</td>
-                    <td class="{{ $val !== '' ? 'value' : 'empty' }}">{{ $val !== '' ? $val : '-' }}</td>
+                    <td class="{{ $displayVal !== '' ? 'value' : 'empty' }}">{{ $displayVal !== '' ? $displayVal : '-' }}</td>
                 </tr>
             @endforeach
         </table>
