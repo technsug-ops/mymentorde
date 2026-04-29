@@ -74,6 +74,9 @@ class UniAssistGuideController extends Controller
      */
     public function saveMeta(Request $request, GuestApplication $guest): RedirectResponse
     {
+        $schulabschlussKeys = array_keys(\App\Services\UniAssistFieldMapperService::SCHULABSCHLUSS_OPTIONS);
+        $geschlechtKeys = array_keys(\App\Services\UniAssistFieldMapperService::GESCHLECHT_OPTIONS);
+
         $data = $request->validate([
             'meta'             => 'array',
             'meta.hochschulstart_bid'      => 'nullable|string|regex:/^B?\d{12}$/i',
@@ -84,6 +87,8 @@ class UniAssistGuideController extends Controller
             'meta.eu_marriage'             => 'nullable|in:Ja,Nein',
             'meta.is_refugee'              => 'sometimes|boolean',
             'meta.feststellungspruefung_done' => 'nullable|in:Ja,Nein',
+            'meta.schulabschluss_type'     => 'nullable|in:' . implode(',', $schulabschlussKeys),
+            'meta.geschlecht_de'           => 'nullable|in:' . implode(',', $geschlechtKeys),
         ]);
 
         $current = is_array($guest->application_meta) ? $guest->application_meta : [];

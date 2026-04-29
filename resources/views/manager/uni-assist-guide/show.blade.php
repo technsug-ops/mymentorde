@@ -188,9 +188,62 @@
     </div>
 
     {{-- ═══ PANELS ═══ --}}
+    @php
+        $schulOpts = \App\Services\UniAssistFieldMapperService::SCHULABSCHLUSS_OPTIONS;
+        $gesOpts   = \App\Services\UniAssistFieldMapperService::GESCHLECHT_OPTIONS;
+        $metaArr   = is_array($guest->application_meta) ? $guest->application_meta : [];
+    @endphp
+
     @foreach($tabs as $tabKey => $tab)
         <div class="ua-panel {{ $loop->first ? 'active' : '' }}" data-panel="{{ $tabKey }}">
             <div class="ua-tab-meta">{{ count($tab['fields']) }} alan · Uni-Assist sekmesi: <strong>{{ $tab['title'] }}</strong></div>
+
+            {{-- Persönliche Daten — Geschlecht override --}}
+            @if($tabKey === 'persoenliche')
+                <form method="POST" action="{{ route('manager.uni-assist-guide.save-meta', $guest) }}" style="margin-bottom:16px;">
+                    @csrf
+                    <div class="ua-field editable">
+                        <div style="font-size:13px; font-weight:700; color:var(--u-text); margin-bottom:8px;">⚙ Cinsiyet (Uni-Assist'in tanıdığı 4 seçenek)</div>
+                        <div style="display:grid; grid-template-columns:1fr auto; gap:10px; align-items:flex-end;">
+                            <div>
+                                <label style="font-size:11px; color:var(--u-muted); font-weight:600; display:block; margin-bottom:4px;">Geschlecht (öğrenci doldurmadıysa elle seç)</label>
+                                <select name="meta[geschlecht_de]" class="ua-meta-input">
+                                    <option value="">— Auto (öğrenci datası) —</option>
+                                    @foreach($gesOpts as $key => $label)
+                                        <option value="{{ $key }}" {{ ($metaArr['geschlecht_de'] ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <button type="submit" class="ua-meta-save">💾 Kaydet</button>
+                        </div>
+                    </div>
+                </form>
+            @endif
+
+            {{-- Bildungshistorie — Schulabschluss tipi (8 Türk lisesi seçeneği) --}}
+            @if($tabKey === 'bildungs')
+                <form method="POST" action="{{ route('manager.uni-assist-guide.save-meta', $guest) }}" style="margin-bottom:16px;">
+                    @csrf
+                    <div class="ua-field editable">
+                        <div style="font-size:13px; font-weight:700; color:var(--u-text); margin-bottom:8px;">⚙ Lise Diploma Türü (Uni-Assist 8 Türk lisesi tanır)</div>
+                        <div style="font-size:11.5px; color:var(--u-muted); margin-bottom:10px;">
+                            Default: <strong>12-jährige Sekundarschule</strong> (1997 sonrası doğum). Açık lise / İmam Hatip / Meslek Lisesi ise dropdown'dan seç.
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr auto; gap:10px; align-items:flex-end;">
+                            <div>
+                                <label style="font-size:11px; color:var(--u-muted); font-weight:600; display:block; margin-bottom:4px;">Schulabschluss Type</label>
+                                <select name="meta[schulabschluss_type]" class="ua-meta-input">
+                                    <option value="">— Auto-detect (doğum yılına göre) —</option>
+                                    @foreach($schulOpts as $key => $label)
+                                        <option value="{{ $key }}" {{ ($metaArr['schulabschluss_type'] ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <button type="submit" class="ua-meta-save">💾 Kaydet</button>
+                        </div>
+                    </div>
+                </form>
+            @endif
 
             {{-- BID/BAN editable form (sadece hochschulstart sekmesinde) --}}
             @if($tabKey === 'hochschulstart')

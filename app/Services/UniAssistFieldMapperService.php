@@ -22,6 +22,29 @@ use App\Models\GuestApplication;
  */
 class UniAssistFieldMapperService
 {
+    /**
+     * Uni-Assist'in tanıdığı 8 Türk lise diploma türü (Bildungshistorie sekmesi).
+     * Manager bu listeden seçer. Default: 12-jährige (1997 sonrası en yaygın).
+     */
+    public const SCHULABSCHLUSS_OPTIONS = [
+        'lise_12'         => 'Lise Diplomasi einer 12-jährigen allgemeinbildenden Sekundarschule',
+        'lise_11'         => 'Lise Diplomasi einer 11-jährigen allgemeinbildenden Sekundarschule',
+        'anadolu_imam'    => 'Anadolu Imam Hatip Lisesi Diplomasi',
+        'anadolu_meslek'  => 'Anadolu Mesleki ve Teknik Lisesi Diplomasi',
+        'anadolu_teknik'  => 'Anadolu Teknik Lisesi Diplomasi',
+        'acik_lise'       => 'Lise Diplomasi eines türkischen Ferngymnasiums (Acik Ögretim Lisesi)',
+        'lise_onlisans'   => 'Lise Diplomasi in Verbindung mit Önlisans',
+        'meslek_lisesi'   => 'Meslek Lisesi Diplomasi einer 11- oder 12-jährigen berufsbildenden Sekundarschule',
+    ];
+
+    /** Geschlecht dropdown options */
+    public const GESCHLECHT_OPTIONS = [
+        'Männlich'   => 'Männlich (Erkek)',
+        'Weiblich'   => 'Weiblich (Kadın)',
+        'Divers'     => 'Divers (Diğer)',
+        'Unbestimmt' => 'Unbestimmt (Belirtilmemiş)',
+    ];
+
     public function buildAllTabs(GuestApplication $guest): array
     {
         return [
@@ -53,13 +76,21 @@ class UniAssistFieldMapperService
     {
         $draft = is_array($guest->registration_form_draft) ? $guest->registration_form_draft : [];
 
-        $genderMap = ['m' => 'Männlich', 'male' => 'Männlich', 'f' => 'Weiblich', 'female' => 'Weiblich', 'erkek' => 'Männlich', 'kadın' => 'Weiblich', 'kadin' => 'Weiblich'];
-        $rawGender = strtolower((string) ($guest->gender ?? ''));
+        // Geschlecht: önce manager override (meta.geschlecht_de), yoksa guest.gender'dan map
+        $meta = is_array($guest->application_meta) ? $guest->application_meta : [];
+        $managerGender = (string) ($meta['geschlecht_de'] ?? '');
+        if ($managerGender !== '' && isset(self::GESCHLECHT_OPTIONS[$managerGender])) {
+            $resolvedGender = $managerGender;
+        } else {
+            $genderMap = ['m' => 'Männlich', 'male' => 'Männlich', 'f' => 'Weiblich', 'female' => 'Weiblich', 'erkek' => 'Männlich', 'kadın' => 'Weiblich', 'kadin' => 'Weiblich'];
+            $rawGender = strtolower((string) ($guest->gender ?? ''));
+            $resolvedGender = $genderMap[$rawGender] ?? null;
+        }
 
         $birthDate = $draft['birth_date'] ?? null;
 
         return [
-            $this->field('geschlecht', 'Geschlecht', 'Cinsiyet', $genderMap[$rawGender] ?? null, 'guest.gender', true),
+            $this->field('geschlecht', 'Geschlecht', 'Cinsiyet', $resolvedGender, 'guest.gender|meta.geschlecht_de', true, 'Manager dropdown\'dan da seçebilir: Männlich/Weiblich/Divers/Unbestimmt'),
             $this->field('vorname', 'Vorname', 'Ad', $guest->first_name, 'guest.first_name', true),
             $this->field('nachname', 'Nachname', 'Soyad', $guest->last_name, 'guest.last_name', true),
             $this->field('namenszusatz', 'Namenszusatz', 'Soyad eki', null, 'manual', false, 'Türkiye\'de kullanılmıyorsa boş bırak'),
@@ -104,7 +135,7 @@ class UniAssistFieldMapperService
         return [
             $this->field('schulabschluss_done', 'Haben Sie einen Schulabschluss gemacht?', 'Lise bitirme yaptın mı?', 'Ja', 'static', true, 'Lise diplomanız var → Ja'),
             $this->field('schulabschluss_land', 'In welchem Land?', 'Hangi ülkede lise bitti?', 'Türkei', 'static', true),
-            $this->field('schulabschluss_typ', 'Name des höchsten Schulabschlusszeugnisses', 'Lise diploması tipi', $this->resolveSchulabschlussType($draft), 'derived', true, 'Türkiye lise diploması varsa: "Lise Diplomasi einer 12-jährigen allgemeinbildenden Sekundarschule"'),
+            $this->field('schulabschluss_typ', 'Name des höchsten Schulabschlusszeugnisses', 'Lise diploması tipi', $this->resolveSchulabschlussType($guest, $draft), 'derived', true, '8 Türk lise türü tanınır. Default: 12-jährige (1997 sonrası en yaygın). Açık lise/imam hatip/meslek için manager dropdown\'dan seçer.'),
             $this->field('feststellungspruefung', 'Feststellungsprüfung yaptı mı?', '(Studienkolleg sınavı)', $this->metaVal($guest, 'feststellungspruefung_done', 'Nein'), 'meta.feststellungspruefung_done', false, 'Lise yetersizse Studienkolleg + FSP. Genelde Nein.'),
             $this->field('studienabschluss', 'Studienabschluss var mı?', 'Üniversite diploması var mı? (en az 3 yıllık)', $this->resolveStudienabschluss($draft), 'derived', false, 'Yüksek lisans/Master için → Ja, Bachelor için → Nein'),
             $this->field('high_school_grad_year', 'Lise Mezuniyet Yılı', '(yardımcı bilgi)', $draft['high_school_grad_year'] ?? null, 'draft.high_school_grad_year', false),
@@ -155,10 +186,34 @@ class UniAssistFieldMapperService
         }
     }
 
-    private function resolveSchulabschlussType(array $draft): string
+    /**
+     * Schulabschluss tipi:
+     * 1) Manager elle seçtiyse meta.schulabschluss_type'tan oku
+     * 2) Yoksa birth_date / high_school_grad_year'dan auto-detect
+     *    - 1997 sonrası doğum → 12-jährige (8+4 sistemi)
+     *    - öncesi → 11-jährige
+     *    Default: 12-jährige
+     */
+    public function resolveSchulabschlussType(GuestApplication $guest, array $draft): string
     {
-        // Mevcut form'da "Lise tipi" multi-select yok — varsayılan en yaygın
-        return 'Lise Diplomasi einer 12-jährigen allgemeinbildenden Sekundarschule';
+        $meta = is_array($guest->application_meta) ? $guest->application_meta : [];
+        $key = trim((string) ($meta['schulabschluss_type'] ?? ''));
+        if ($key !== '' && isset(self::SCHULABSCHLUSS_OPTIONS[$key])) {
+            return self::SCHULABSCHLUSS_OPTIONS[$key];
+        }
+
+        // Auto-detect — 1997 sonrası 12-jährige (8+4 sistemi)
+        $birthDate = $draft['birth_date'] ?? null;
+        if ($birthDate) {
+            try {
+                $birthYear = (int) \Carbon\Carbon::parse($birthDate)->format('Y');
+                if ($birthYear >= 1997) return self::SCHULABSCHLUSS_OPTIONS['lise_12'];
+                if ($birthYear < 1997 && $birthYear > 1900) return self::SCHULABSCHLUSS_OPTIONS['lise_11'];
+            } catch (\Throwable $e) {}
+        }
+
+        // Default: 12-jährige (en yaygın)
+        return self::SCHULABSCHLUSS_OPTIONS['lise_12'];
     }
 
     private function resolveStudienabschluss(array $draft): ?string
