@@ -140,6 +140,30 @@ class StudentPortalController extends Controller
 
         $draft = is_array($guest?->registration_form_draft) ? $guest->registration_form_draft : [];
 
+        // Level 1 + Level 2 schema'sındaki tüm alanları otomatik prefill et —
+        // CV/Doküman builder kişisel + eğitim + dil + finans + hedef bilgilerini
+        // baştan girmeden hazır görsün.
+        $companyIdForBuilder = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
+        $schemaService       = app(GuestRegistrationFieldSchemaService::class);
+        $allSchemaGroups     = array_merge(
+            $schemaService->groupsByLevel(1, $companyIdForBuilder),
+            $schemaService->groupsByLevel(2, $companyIdForBuilder)
+        );
+        $autoPrefill = [];
+        foreach ($allSchemaGroups as $g) {
+            foreach (($g['fields'] ?? []) as $f) {
+                $k = (string) ($f['key'] ?? '');
+                if ($k === '') continue;
+                // Önce draft, sonra guest model property — boş bırakma
+                $v = $draft[$k] ?? ($guest?->{$k} ?? '');
+                if (is_array($v)) {
+                    $autoPrefill[$k] = $v;
+                } else {
+                    $autoPrefill[$k] = (string) $v;
+                }
+            }
+        }
+
         return view('student.document-builder', array_merge($base, [
             'guestApplication'  => $guest,
             'builderDocuments'  => $builderDocuments,
@@ -180,25 +204,18 @@ class StudentPortalController extends Controller
                 'outputFormat'          => 'docx',
                 'aiMode'                => 'template',
                 'signatureCity'         => (string) ($draft['cv_city_signature_tr'] ?? $draft['application_city'] ?? ''),
-                'prefill'               => [
+                'prefill'               => array_merge($autoPrefill, [
+                    // Guest model property'leri schema'da tanımlı olmayabilir; explicitly
+                    // override (kullanıcı başvuru kaydında girdiği temel veriler)
                     'first_name'           => (string) ($guest->first_name ?? ''),
                     'last_name'            => (string) ($guest->last_name ?? ''),
                     'email'                => (string) ($guest->email ?? ''),
-                    'phone'                => (string) ($guest->phone ?? ''),
-                    'birth_date'           => (string) ($draft['birth_date'] ?? ''),
-                    'birth_place'          => (string) ($draft['birth_place'] ?? ''),
-                    'marital_status'       => (string) ($draft['marital_status'] ?? ''),
-                    'marital_status_label' => (string) ($draft['marital_status'] ?? ''),
-                    'nationality'          => (string) ($draft['nationality'] ?? ''),
-                    'address_line'         => (string) ($draft['address_line'] ?? ''),
-                    'district'             => (string) ($draft['district'] ?? ''),
-                    'city'                 => (string) ($draft['application_city'] ?? $draft['city'] ?? ''),
-                    'country'              => (string) ($draft['application_country'] ?? ''),
-                    'postal_code'          => (string) ($draft['postal_code'] ?? ''),
-                    'cv_computer_skills_tr'=> (string) ($draft['cv_computer_skills_tr'] ?? ''),
-                    'cv_skills_tr'         => (string) ($draft['cv_skills_tr'] ?? ''),
-                    'cv_hobbies_tr'        => (string) ($draft['cv_hobbies_tr'] ?? ''),
-                ],
+                    'phone'                => (string) ($guest->phone ?? $autoPrefill['phone'] ?? ''),
+                    // Schema'da olmayan ama view'ın beklediği alias'lar
+                    'marital_status_label' => (string) ($autoPrefill['marital_status'] ?? ''),
+                    'city'                 => (string) ($autoPrefill['application_city'] ?? $autoPrefill['city'] ?? ''),
+                    'country'              => (string) ($autoPrefill['application_country'] ?? $autoPrefill['country'] ?? ''),
+                ]),
             ],
         ]));
     }
