@@ -354,6 +354,10 @@
             font-family:var(--font-base); font-weight:700; font-size:22px;
             color:var(--primary-deep); margin:0 0 10px; letter-spacing:-.4px;
         }
+        .l-waitlist-accent {
+            background:linear-gradient(180deg, transparent 60%, var(--primary-light) 60%, var(--primary-light) 92%, transparent 92%);
+            padding:0 4px;
+        }
         .l-waitlist-card p { margin:0 0 26px; color:var(--muted); font-size:14px; line-height:1.6; }
         .l-waitlist-form { text-align:left; }
         .l-waitlist-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
@@ -665,11 +669,11 @@
                         @endforeach
                     </div>
                 @else
-                    {{-- Empty state — bekleme listesi formu (WhatsApp yok, lead-quality için form) --}}
+                    {{-- Pozitif framing — "kişisel danışman ataması" hissi --}}
                     <div class="l-waitlist-card">
                         <div class="l-waitlist-icon">{{ $t['emoji'] }}</div>
-                        <h3>{{ $t['title'] }} kategorisinde şu an müsait danışman yok</h3>
-                        <p>Kayıt bırakırsan, bu kategoride uygun danışman müsait olduğunda <strong>email + telefon ile</strong> sana ulaşacağız. Genelde 1-2 iş günü içinde dönüyoruz.</p>
+                        <h3>{{ $t['title'] }} sürecin için <span class="l-waitlist-accent">sana özel danışman</span></h3>
+                        <p>Bilgilerini bırak, <strong>{{ $t['title'] }}</strong> alanında uzman danışmanımız <strong>1-2 iş günü</strong> içinde email + telefondan ulaşıp ücretsiz tanışma görüşmesini birlikte planlayalım.</p>
                         <form method="POST" action="{{ route('booking.waitlist.join') }}" class="l-waitlist-form">
                             @csrf
                             <input type="hidden" name="track" value="{{ $code }}">
@@ -684,10 +688,10 @@
                                 <textarea name="message" maxlength="1000" rows="2" placeholder="Aklındaki kısa not — hangi alanı düşünüyorsun? (opsiyonel)"></textarea>
                             </div>
                             <button type="submit" class="l-btn l-btn-primary" style="width:100%;">
-                                📋 Bekleme listesine kaydol
+                                ✨ Danışmanım Beni Arasın
                             </button>
                             <div class="l-waitlist-fineprint">
-                                ✓ Spam yok · Sadece müsait danışman olduğunda iletişime geçeriz · İstediğin zaman silebilirsin
+                                ✓ Tanışma görüşmesi ücretsiz · ✓ Spam yok · ✓ İstediğin zaman silebilirsin
                             </div>
                         </form>
                     </div>
