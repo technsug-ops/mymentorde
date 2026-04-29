@@ -267,11 +267,10 @@ class StudentDashboardController extends Controller
                 $alerts->push(['type' => 'warning', 'icon' => '📄', 'message' => "{$rejectedDocs} belgeniz reddedildi. Lütfen düzeltip yeniden yükleyin.", 'action_url' => '/student/registration/documents', 'action_text' => 'Belgeleri Gör']);
             }
 
-            // 3. Eksik zorunlu belgeler
+            // 3. Eksik zorunlu belgeler — hero zaten ana CTA olarak gösteriyor.
+            // Burada alert olarak DUPLİKE etmiyoruz; alerts collection sadece
+            // "yan-bilgi" (mesaj/ticket/bildirim) tipinde alert tutsun.
             $missingDocs = (int) $requiredChecklist->where('is_required', true)->where('done', false)->count();
-            if ($missingDocs > 0) {
-                $alerts->push(['type' => 'warning', 'icon' => '📋', 'message' => "{$missingDocs} zorunlu belgeniz eksik.", 'action_url' => '/student/registration/documents', 'action_text' => 'Yükle']);
-            }
 
             // 4. Yanıt bekleyen biletler
             $waitingTickets = (int) GuestTicket::where('guest_application_id', $guestApplication->id)->where('status', 'waiting_response')->count();

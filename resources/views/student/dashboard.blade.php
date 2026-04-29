@@ -176,28 +176,45 @@
     }
 @endphp
 
-{{-- Hero card (sd-hero, stage-based renk) --}}
-<div class="sd-hero {{ $stageColor }}" style="display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;">
-    <div style="flex:1;min-width:240px;">
-        <div class="sd-hero-badge"><span class="pulse"></span> {{ strtoupper($stage) }}</div>
-        <div class="sd-hero-title">{{ $stageGreet }}</div>
-        <div class="sd-hero-sub">{{ $stageSub }}</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
-            @if($level2Pending ?? false)
-                <a href="{{ route('student.registration') }}" class="sd-hero-btn">📋 Detaylı Form (Level 2)</a>
-            @endif
-            @if($missingRequired > 0)
-                <a href="{{ route('student.registration.documents') }}" class="sd-hero-btn">📄 Belgeleri Yükle ({{ $missingRequired }})</a>
-            @endif
-            @if(!$hasIncomplete)
-                <a href="/student/messages" class="sd-hero-btn">✉ Danışmana Mesaj</a>
-            @endif
+{{-- Hero card — stage-based renk + (eksik bilgi varsa) yan yana 2 büyük CTA kartı --}}
+<div class="sd-hero {{ $stageColor }}">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:260px;">
+            <div class="sd-hero-badge"><span class="pulse"></span> {{ strtoupper($stage) }}</div>
+            <div class="sd-hero-title">{{ $stageGreet }}</div>
+            <div class="sd-hero-sub">{{ $stageSub }}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
+            <a href="/student/messages" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.25);">✉ Mesaj</a>
+            <a href="/student/tickets" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.25);">🛟 Destek</a>
         </div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-        <a href="/student/messages" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);">✉ Mesaj</a>
-        <a href="/student/tickets" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);">🛟 Destek</a>
+
+    {{-- Action kartları — yan yana 2 büyük tile (sadece eksik varsa) --}}
+    @if($hasIncomplete)
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:18px;">
+        @if($level2Pending ?? false)
+        <a href="{{ route('student.registration') }}" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);text-decoration:none;color:#fff;transition:all .15s;">
+            <span style="font-size:32px;flex-shrink:0;line-height:1;">📋</span>
+            <span style="flex:1;min-width:0;">
+                <span style="display:block;font-size:14px;font-weight:800;line-height:1.2;margin-bottom:3px;">Detaylı Form (Level 2)</span>
+                <span style="display:block;font-size:11.5px;opacity:.88;line-height:1.4;">Eğitim, finansal ve aile bilgileri — vize ile üniversite süreçleri için gerekli</span>
+            </span>
+            <span style="font-size:18px;flex-shrink:0;opacity:.85;">→</span>
+        </a>
+        @endif
+        @if($missingRequired > 0)
+        <a href="{{ route('student.registration.documents') }}" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);text-decoration:none;color:#fff;transition:all .15s;">
+            <span style="font-size:32px;flex-shrink:0;line-height:1;">📄</span>
+            <span style="flex:1;min-width:0;">
+                <span style="display:block;font-size:14px;font-weight:800;line-height:1.2;margin-bottom:3px;">Belgelerim ({{ $missingRequired }} eksik)</span>
+                <span style="display:block;font-size:11.5px;opacity:.88;line-height:1.4;">{{ $missingRequired }}/{{ $totalRequired }} zorunlu belge — vize, sigorta ve başvuru için</span>
+            </span>
+            <span style="font-size:18px;flex-shrink:0;opacity:.85;">→</span>
+        </a>
+        @endif
     </div>
+    @endif
 </div>
 
 {{-- Alerts (sistem alarmlarına özel — eksik form/belge zaten hero'da görünüyor) --}}
@@ -236,7 +253,10 @@
     </div>
 </div>
 
-{{-- ══ 4. HERO KARTI (state'e gore) ══ --}}
+{{-- ══ 4. STAGE-SPECIFIC NEXT-STEP HERO ══
+     Eksik form/belge varsa stage-hero gizlenir — üstteki ana hero zaten doğru
+     CTA'yı (form doldur / belge yükle) gösteriyor. Aksi halde duplikat olur. --}}
+@if(!$hasIncomplete)
 @if($stage === 'contract')
 <div class="sd-hero purple">
     <div class="sd-hero-badge"><span class="pulse"></span> Siradaki adim</div>
@@ -285,6 +305,7 @@
     <p>Tum surec tamamlandi. Artik Almanya'da yeni hayatina basliyorsun. Danismanin hala yaninda!</p>
 </div>
 @endif
+@endif {{-- /!$hasIncomplete --}}
 
 {{-- ══ 5. STAT KARTLARI (HER ZAMAN) ══ --}}
 <div class="sd-grid-4">
