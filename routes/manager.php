@@ -435,6 +435,15 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::post('/manager/guests/{guest}/uni-assist-rehber/request-missing', [$uag, 'requestMissingFields'])->middleware('throttle:10,1')->name('manager.uni-assist-guide.request-missing');
     }
 
+    // ── Vize Rehberi (VIDEX — Auswärtiges Amt Auslandsportal 7 bölüm) ─────────
+    {
+        $vag = \App\Http\Controllers\Manager\VisaGuideController::class;
+        Route::get('/manager/students/{studentId}/vize-rehber',                [$vag, 'showForStudent'])->name('manager.student.visa-guide.show');
+        Route::get('/manager/guests/{guest}/vize-rehber',                      [$vag, 'show'])->name('manager.visa-guide.show');
+        Route::post('/manager/guests/{guest}/vize-rehber/save-meta',           [$vag, 'saveMeta'])->middleware('throttle:30,1')->name('manager.visa-guide.save-meta');
+        Route::post('/manager/guests/{guest}/vize-rehber/request-missing',     [$vag, 'requestMissingFields'])->middleware('throttle:10,1')->name('manager.visa-guide.request-missing');
+    }
+
     // ── Public Landing Envanter (sisteme bağlı public sayfa registry'si) ─────
     Route::get('/manager/landing-inventory', [\App\Http\Controllers\Manager\LandingInventoryController::class, 'index'])
         ->name('manager.landing-inventory.index');

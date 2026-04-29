@@ -113,7 +113,7 @@ class UniAssistFieldMapperService
             $this->field('strasse', 'Straße, Hausnummer', 'Sokak ve numara', $draft['address_line'] ?? null, 'draft.address_line', true),
             $this->field('adresszusatz', 'Adresszusatz', 'Apartman/Site adı', $this->metaVal($guest, 'address_extra'), 'meta.address_extra', false),
             $this->field('plz', 'Postleitzahl', 'Posta kodu', $draft['postal_code'] ?? null, 'draft.postal_code', false),
-            $this->field('stadt', 'Stadt/Provinz/Region', 'Şehir/İlçe', $this->metaVal($guest, 'home_city'), 'meta.home_city', true, 'Türkiye\'deki ikamet şehri (örn: Ankara/Etimesgut). Mevcut sistemde direkt yok, manager girer.'),
+            $this->field('stadt', 'Stadt/Provinz/Region', 'Şehir/İlçe', $this->resolveStadtFromDraft($draft) ?? $this->metaVal($guest, 'home_city'), 'draft.district+province|meta.home_city', true, 'Form\'da il+ilçe seçildiyse "İLÇE/İL" formatında otomatik üretilir, yoksa manager elle girer.'),
             $this->field('land', 'Land', 'Ülke', 'Türkei', 'static', true),
         ];
     }
@@ -169,6 +169,30 @@ class UniAssistFieldMapperService
         $v = $meta[$key] ?? null;
         if ($v === null || $v === '') return $default;
         return (string) $v;
+    }
+
+    /**
+     * Form draft'tan il+ilçe slug'larını "İLÇE/İL" formatında label'a çevirir.
+     * Uni-Assist Stadt alanı için.
+     */
+    private function resolveStadtFromDraft(array $draft): ?string
+    {
+        $provinceSlug = trim((string) ($draft['province'] ?? ''));
+        $districtSlug = trim((string) ($draft['district'] ?? ''));
+        if ($provinceSlug === '' && $districtSlug === '') return null;
+
+        try {
+            $province = $provinceSlug !== '' ? \App\Models\TrProvince::where('slug', $provinceSlug)->first() : null;
+            $district = $districtSlug !== '' ? \App\Models\TrDistrict::where('slug', $districtSlug)->first() : null;
+
+            $provinceName = $province->name ?? null;
+            $districtName = $district->name ?? null;
+
+            if ($districtName && $provinceName) return mb_strtoupper("{$districtName}/{$provinceName}");
+            if ($provinceName) return mb_strtoupper($provinceName);
+            if ($districtName) return mb_strtoupper($districtName);
+        } catch (\Throwable $e) {}
+        return null;
     }
 
     private function metaBool(GuestApplication $guest, string $key): bool

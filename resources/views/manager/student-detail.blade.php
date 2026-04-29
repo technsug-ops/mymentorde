@@ -47,6 +47,10 @@
            style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:linear-gradient(135deg,#c8102e,#9f1239); color:#fff; border-radius:8px; font-size:13px; font-weight:700; text-decoration:none; margin-left:auto;">
             🎓 Uni-Assist Rehberi →
         </a>
+        <a href="{{ route('manager.student.visa-guide.show', $studentId) }}"
+           style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:linear-gradient(135deg,#003c8f,#002966); color:#fff; border-radius:8px; font-size:13px; font-weight:700; text-decoration:none;">
+            🛂 Vize Rehberi →
+        </a>
     @endif
 </div>
 
