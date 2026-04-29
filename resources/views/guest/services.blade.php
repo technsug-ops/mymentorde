@@ -577,9 +577,10 @@
                 <form method="POST" action="{{ route('guest.services.payment-request') }}" id="paymentRequestForm">
                     @csrf
                     @error('payment')<div class="badge danger" style="margin-bottom:8px;display:block;">{{ $message }}</div>@enderror
+                    @module('discount_codes')
                     @error('discount_code')<div class="badge danger" style="margin-bottom:8px;display:block;">{{ $message }}</div>@enderror
 
-                    {{-- Kupon kutusu --}}
+                    {{-- Kupon kutusu (extra feature — module:discount_codes) --}}
                     <div style="margin-bottom:10px;">
                         <label style="font-size:var(--tx-xs);color:var(--u-muted);display:block;margin-bottom:3px;">🎟️ İndirim kodun var mı?</label>
                         <div style="display:flex;gap:6px;">
@@ -591,6 +592,7 @@
                         </div>
                         <div id="couponFeedback" style="margin-top:6px;font-size:var(--tx-xs);line-height:1.4;"></div>
                     </div>
+                    @endmodule
 
                     <div style="margin-bottom:10px;">
                         <label style="font-size:var(--tx-xs);color:var(--u-muted);display:block;margin-bottom:3px;">Ödeme Yöntemi</label>

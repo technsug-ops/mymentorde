@@ -34,6 +34,8 @@ class ModuleAccess
         'ai_labs',
         'doc_request',     // Premium: tek-kullanımlık link ile aday öğrenciden belge talep
         'page_visibility', // Premium: rol-bazlı sayfa görünürlüğü (manager kontrol panelinden)
+        'discount_codes',  // Manager üretir, aday services sayfasında uygular + paylaşım kartı
+        'silence_checkin', // Aday/öğrenci timeline sessizliğinde otomatik "süreç aktif" touchpoint
     ];
 
     public static function enabled(string $module, ?int $companyId = null): bool

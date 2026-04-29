@@ -385,8 +385,8 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::post('/manager/payments/reminders/{guest}/mark-received',[$gpr, 'markReceived'])->middleware('throttle:30,1')->name('manager.payments.reminders.mark-received');
     }
 
-    // ── İndirim Kodları (Manager üretir, aday services sayfasında kullanır) ──
-    {
+    // ── İndirim Kodları (extra feature — module:discount_codes) ──────────────
+    Route::middleware('module:discount_codes')->group(function (): void {
         $dc = \App\Http\Controllers\Manager\DiscountCodeController::class;
         Route::get('/manager/discount-codes',                    [$dc, 'index'])->name('manager.discount-codes.index');
         Route::get('/manager/discount-codes/redemptions',        [$dc, 'redemptions'])->name('manager.discount-codes.redemptions');
@@ -397,10 +397,10 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::get('/manager/discount-codes/{discountCode}/edit',[$dc, 'edit'])->name('manager.discount-codes.edit');
         Route::put('/manager/discount-codes/{discountCode}',     [$dc, 'update'])->middleware('throttle:30,1')->name('manager.discount-codes.update');
         Route::post('/manager/discount-codes/{discountCode}/toggle', [$dc, 'toggleActive'])->middleware('throttle:30,1')->name('manager.discount-codes.toggle');
-    }
+    });
 
-    // ── Silence Monitor (sessizlik check-in akışı yönetimi) ──────────────────
-    {
+    // ── Silence Monitor (extra feature — module:silence_checkin) ─────────────
+    Route::middleware('module:silence_checkin')->group(function (): void {
         $sm = \App\Http\Controllers\Manager\SilenceMonitorController::class;
         Route::get('/manager/silence-monitor',                                  [$sm, 'index'])->name('manager.silence-monitor.index');
         Route::post('/manager/silence-monitor/{type}/{id}/trigger',             [$sm, 'trigger'])->whereIn('type', ['guest', 'student'])->middleware('throttle:30,1')->name('manager.silence-monitor.trigger');
@@ -408,7 +408,7 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::post('/manager/silence-monitor/{type}/{id}/pause',               [$sm, 'pause'])->whereIn('type', ['guest', 'student'])->middleware('throttle:30,1')->name('manager.silence-monitor.pause');
         Route::post('/manager/silence-monitor/{type}/{id}/resume',              [$sm, 'resume'])->whereIn('type', ['guest', 'student'])->middleware('throttle:30,1')->name('manager.silence-monitor.resume');
         Route::post('/manager/silence-monitor/company-overrides',               [$sm, 'updateCompanyOverrides'])->middleware('throttle:10,1')->name('manager.silence-monitor.company-overrides');
-    }
+    });
 
     // ── El Kitabı ─────────────────────────────────────────────────────────────
     Route::get('/manager/handbook', [HandbookController::class, 'manager'])->name('manager.handbook');

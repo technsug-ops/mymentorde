@@ -31,7 +31,9 @@ class SilenceCheckinGuestsCommand extends Command
         $guests = GuestApplication::query()
             ->whereNotIn('lead_status', ['converted', 'lost'])
             ->whereNull('silence_checkin_paused_at')
-            ->get();
+            ->get()
+            // Module gate: silence_checkin disabled olan company'lerin kayıtlarını skip
+            ->filter(fn ($g) => \App\Support\ModuleAccess::enabled('silence_checkin', (int) $g->company_id));
 
         $posted = 0; $skipped = 0; $errors = 0;
 

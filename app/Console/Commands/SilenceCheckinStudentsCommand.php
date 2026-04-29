@@ -32,7 +32,9 @@ class SilenceCheckinStudentsCommand extends Command
             ->where('role', 'student')
             ->where('is_active', true)
             ->whereNull('silence_checkin_paused_at')
-            ->get();
+            ->get()
+            // Module gate: silence_checkin disabled olan company'lerin öğrencilerini skip
+            ->filter(fn ($u) => \App\Support\ModuleAccess::enabled('silence_checkin', (int) $u->company_id));
 
         $posted = 0; $skipped = 0; $errors = 0;
 

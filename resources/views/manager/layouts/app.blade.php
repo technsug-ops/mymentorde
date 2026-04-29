@@ -326,14 +326,18 @@
                    class="nav-link {{ request()->is('manager/payments/reminders*') ? 'active' : '' }}">
                     <span class="nav-icon">⏰</span> Ödeme Hatırlatmaları
                 </a>
-                <a href="{{ route('manager.silence-monitor.index') }}"
-                   class="nav-link {{ request()->is('manager/silence-monitor*') ? 'active' : '' }}">
-                    <span class="nav-icon">📍</span> Sessizlik Monitörü
-                </a>
-                <a href="{{ route('manager.discount-codes.index') }}"
-                   class="nav-link {{ request()->is('manager/discount-codes*') ? 'active' : '' }}">
-                    <span class="nav-icon">🎟️</span> İndirim Kodları
-                </a>
+                @module('silence_checkin')
+                    <a href="{{ route('manager.silence-monitor.index') }}"
+                       class="nav-link {{ request()->is('manager/silence-monitor*') ? 'active' : '' }}">
+                        <span class="nav-icon">📍</span> Sessizlik Monitörü
+                    </a>
+                @endmodule
+                @module('discount_codes')
+                    <a href="{{ route('manager.discount-codes.index') }}"
+                       class="nav-link {{ request()->is('manager/discount-codes*') ? 'active' : '' }}">
+                        <span class="nav-icon">🎟️</span> İndirim Kodları
+                    </a>
+                @endmodule
             </div>
 
             <div class="nav-section">

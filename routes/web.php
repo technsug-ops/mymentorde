@@ -220,9 +220,9 @@ Route::get('/share/{token}', [\App\Http\Controllers\Shared\DigitalAssetControlle
     ->middleware('throttle:60,1')
     ->name('dam.share.public');
 
-// İndirim kodu paylaşım kartı — public landing
-// Manager linki WhatsApp/Insta/mail'a yapıştırır, karşı taraf güzel sayfayı görür
-Route::middleware(['company.context'])->group(function (): void {
+// İndirim kodu paylaşım kartı — public landing (extra feature)
+// Module disabled olursa 404, mevcut akış etkilenmez.
+Route::middleware(['company.context', 'module:discount_codes'])->group(function (): void {
     Route::get('/promo/{code}', [\App\Http\Controllers\Public\PromoController::class, 'show'])
         ->middleware('throttle:60,1')
         ->name('promo.show');

@@ -881,19 +881,33 @@ class WorkflowController extends Controller
         });
         $amountEur = (float) ($pkgAmount + (int) $extrasAmount);
 
-        // ── İndirim kodu (opsiyonel) ─────────────────────────────────────
+        // ── İndirim kodu (extra feature — module:discount_codes) ─────────
+        // Modül kapalıysa kupon kontrolü hiç yapılmaz, ödeme akışı normal sürer.
+        // Servis exception fırlatırsa: log + ödeme akışını bloke ETME.
         $discountCode = $discountAmount = $finalAmount = null;
         $couponInput = trim((string) ($data['discount_code'] ?? ''));
-        if ($couponInput !== '') {
-            $svc = app(\App\Services\DiscountCodeService::class);
-            $check = $svc->validateForGuest($couponInput, $guest, $amountEur);
-            if (! $check['ok']) {
-                return redirect()->route('guest.services')->withErrors(['discount_code' => $check['error']])->withInput();
+        $moduleEnabled = \App\Support\ModuleAccess::enabled('discount_codes', (int) ($guest->company_id ?: 0));
+
+        if ($couponInput !== '' && $moduleEnabled) {
+            try {
+                $svc = app(\App\Services\DiscountCodeService::class);
+                $check = $svc->validateForGuest($couponInput, $guest, $amountEur);
+                if (! $check['ok']) {
+                    // Validation hatası — kullanıcıya göster, ödeme akışı bekler
+                    return redirect()->route('guest.services')->withErrors(['discount_code' => $check['error']])->withInput();
+                }
+                $discountCode   = $check['code'];
+                $discountAmount = $check['discount'];
+                $finalAmount    = $check['final'];
+                $amountEur      = $finalAmount; // payment request indirimli tutarla yazılır
+            } catch (\Throwable $e) {
+                // Discount servis çöktü → kupon yokmuş gibi devam et, kullanıcıya bildirme
+                \Illuminate\Support\Facades\Log::warning('discount_codes.guest_payment.failed_safe', [
+                    'guest_id' => $guest->id,
+                    'error'    => $e->getMessage(),
+                ]);
+                $discountCode = $discountAmount = $finalAmount = null;
             }
-            $discountCode   = $check['code'];
-            $discountAmount = $check['discount'];
-            $finalAmount    = $check['final'];
-            $amountEur      = $finalAmount; // payment request indirimli tutarla yazılır
         }
 
         $req = GuestPaymentRequest::create([
@@ -907,16 +921,26 @@ class WorkflowController extends Controller
             'notes'                => $data['notes'] ?? null,
         ]);
 
-        // İndirim varsa redemption kaydı + sayaç artır
+        // İndirim varsa redemption kaydı + sayaç artır (sessizce başarısız olabilir)
         if ($discountCode) {
-            app(\App\Services\DiscountCodeService::class)->applyToPaymentRequest(
-                $discountCode,
-                $req,
-                $guest,
-                original: (float) ($pkgAmount + (int) $extrasAmount),
-                discount: (float) $discountAmount,
-                final: (float) $finalAmount,
-            );
+            try {
+                app(\App\Services\DiscountCodeService::class)->applyToPaymentRequest(
+                    $discountCode,
+                    $req,
+                    $guest,
+                    original: (float) ($pkgAmount + (int) $extrasAmount),
+                    discount: (float) $discountAmount,
+                    final: (float) $finalAmount,
+                );
+            } catch (\Throwable $e) {
+                // Redemption kaydı yazılamadı ama payment request indirimli tutarla zaten oluştu;
+                // kullanıcıya hata gösterme — manager log'tan görür.
+                \Illuminate\Support\Facades\Log::warning('discount_codes.redemption.failed_safe', [
+                    'guest_id' => $guest->id,
+                    'code'     => $discountCode->code,
+                    'error'    => $e->getMessage(),
+                ]);
+            }
         }
 
         $this->eventLogService->log(
