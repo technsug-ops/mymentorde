@@ -190,7 +190,7 @@
         <a href="{{ route('student.registration') }}" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);text-decoration:none;color:#fff;transition:all .15s;">
             <span style="font-size:32px;flex-shrink:0;line-height:1;">📋</span>
             <span style="flex:1;min-width:0;">
-                <span style="display:block;font-size:14px;font-weight:800;line-height:1.2;margin-bottom:3px;">Detaylı Form (Level 2)</span>
+                <span style="display:block;font-size:14px;font-weight:800;line-height:1.2;margin-bottom:3px;">Detaylı Form</span>
                 <span style="display:block;font-size:11.5px;opacity:.88;line-height:1.4;">Eğitim, finansal ve aile bilgileri — vize ile üniversite süreçleri için gerekli</span>
             </span>
             <span style="font-size:18px;flex-shrink:0;opacity:.85;">→</span>
