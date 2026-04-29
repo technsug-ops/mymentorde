@@ -81,6 +81,43 @@ class StudentInteractionController extends Controller
         $needle    = '%' . $q . '%';
         $results   = collect();
 
+        // 0. Sayfa/menü öğeleri — kullanıcı "takvim" yazınca "Takvimim" çıksın.
+        // Veri yoksa bile en azından navigasyon hedefleri bulunabilir olmalı.
+        // Sidebar/route uyumlu liste — tüm hedefler routes/student.php'de mevcut
+        $pages = [
+            ['icon' => '🏠', 'title' => 'Ana Sayfa',                 'url' => '/student/dashboard',                 'tags' => 'ana sayfa dashboard'],
+            ['icon' => '📋', 'title' => 'Kayıt Formu',                'url' => '/student/registration',              'tags' => 'kayit formu detayli registration form egitim finansal'],
+            ['icon' => '📁', 'title' => 'Belgelerim',                'url' => '/student/registration/documents',    'tags' => 'belgelerim belge documents pdf yukle dosya'],
+            ['icon' => '📜', 'title' => 'Sözleşme',                  'url' => '/student/contract',                  'tags' => 'sozlesme contract imza'],
+            ['icon' => '🎓', 'title' => 'Süreç Takibi',              'url' => '/student/process-tracking',          'tags' => 'surec takibi sureci'],
+            ['icon' => '🏛', 'title' => 'Üniversite Başvurularım',   'url' => '/student/university-applications',   'tags' => 'universite basvuru uni-assist hochschulstart'],
+            ['icon' => '📅', 'title' => 'Takvimim',                  'url' => '/student/calendar',                  'tags' => 'takvim calendar takvimim etkinlik'],
+            ['icon' => '🗓', 'title' => 'Randevular',                'url' => '/student/appointments',              'tags' => 'randevular randevu booking gorusme'],
+            ['icon' => '🤖', 'title' => 'AI Asistan',                'url' => '/student/ai-assistant',              'tags' => 'ai asistan yapay zeka chatbot'],
+            ['icon' => '📚', 'title' => 'Materyaller',               'url' => '/student/materials',                 'tags' => 'materyal kaynak dokuman bilgi rehber'],
+            ['icon' => '💬', 'title' => 'Mesajlar',                  'url' => '/student/messages',                  'tags' => 'mesajlar mesaj danisman chat'],
+            ['icon' => '🛟', 'title' => 'Destek',                    'url' => '/student/tickets',                   'tags' => 'destek bilet ticket support yardim'],
+            ['icon' => '📝', 'title' => 'Geri Bildirim',             'url' => '/student/feedback',                  'tags' => 'geri bildirim feedback nps puan'],
+            ['icon' => '👤', 'title' => 'Profilim',                  'url' => '/student/profile',                   'tags' => 'profil profile hesap kisisel'],
+            ['icon' => '⚙', 'title' => 'Ayarlar',                   'url' => '/student/settings',                   'tags' => 'ayarlar settings bildirim sifre'],
+        ];
+        // Türkçe karakterleri normalize et — "Takvimim" arar, "takvim" yazınca da bul
+        $tr = ['ı'=>'i','İ'=>'i','ç'=>'c','Ç'=>'c','ğ'=>'g','Ğ'=>'g','ö'=>'o','Ö'=>'o','ş'=>'s','Ş'=>'s','ü'=>'u','Ü'=>'u'];
+        $needleNorm = strtr(mb_strtolower($q, 'UTF-8'), $tr);
+        foreach ($pages as $p) {
+            $haystack = strtr(mb_strtolower($p['title'] . ' ' . $p['tags'], 'UTF-8'), $tr);
+            if (str_contains($haystack, $needleNorm)) {
+                $results->push([
+                    'type'  => 'page',
+                    'icon'  => $p['icon'],
+                    'title' => $p['title'],
+                    'sub'   => 'Sayfa',
+                    'url'   => $p['url'],
+                    'date'  => '',
+                ]);
+            }
+        }
+
         // 1. Belgeler
         if ($ownerIds->isNotEmpty()) {
             \App\Models\Document::whereIn('student_id', $ownerIds)
