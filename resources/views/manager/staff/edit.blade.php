@@ -67,10 +67,66 @@
             </label>
         </div>
 
+        {{-- Senior için Hedef Kitle (track) — /randevu sayfasında kategorize görünür --}}
+        @php
+            $currentTags = method_exists($user, 'expertiseTags') ? array_map('strtolower', $user->expertiseTags()) : [];
+            $hasTrack = function(string $code) use ($currentTags): bool {
+                if ($code === 'bachelor') return in_array('bachelor', $currentTags, true) || in_array('lisans', $currentTags, true);
+                if ($code === 'master')   return in_array('master', $currentTags, true) || in_array('yuksek_lisans', $currentTags, true) || in_array('yüksek_lisans', $currentTags, true);
+                return in_array('other', $currentTags, true);
+            };
+            $tracks = [
+                'bachelor' => ['emoji' => '🎓', 'title' => 'Bachelor', 'sub' => 'Lisans danışmanlığı'],
+                'master'   => ['emoji' => '🎯', 'title' => 'Master',   'sub' => 'Yüksek lisans / Doktora'],
+                'other'    => ['emoji' => '🌟', 'title' => 'Diğer',    'sub' => 'Dil okulu / Ausbildung / Vize'],
+            ];
+        @endphp
+        <div id="staff-tracks-row" style="margin-bottom:22px; padding:14px 16px; background:var(--u-bg); border:1px solid var(--u-line); border-radius:10px; {{ $user->role === 'senior' ? '' : 'display:none;' }}">
+            <div style="font-size:13px; font-weight:700; color:var(--u-text); margin-bottom:6px;">🎯 Hedef Kitle (Senior için)</div>
+            <div style="font-size:11.5px; color:var(--u-muted); margin-bottom:12px;">
+                /randevu sayfasında bu danışmanın hangi kategoride görüneceğini belirler. Birden fazla seçilebilir.
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
+                @foreach($tracks as $code => $t)
+                    <label style="display:flex; gap:10px; align-items:flex-start; padding:10px 12px; background:#fff; border:2px solid var(--u-line); border-radius:8px; cursor:pointer; transition:all .15s;"
+                           onmouseover="this.style.borderColor='var(--u-brand)'"
+                           onmouseout="this.style.borderColor=this.querySelector('input').checked?'var(--u-brand)':'var(--u-line)'">
+                        <input type="checkbox" name="tracks[]" value="{{ $code }}"
+                               {{ $hasTrack($code) ? 'checked' : '' }}
+                               style="width:16px; height:16px; margin-top:2px;"
+                               onchange="this.closest('label').style.borderColor=this.checked?'var(--u-brand)':'var(--u-line)';this.closest('label').style.background=this.checked?'rgba(126,88,191,.06)':'#fff';">
+                        <div>
+                            <div style="font-size:13px; font-weight:700; color:var(--u-text);">{{ $t['emoji'] }} {{ $t['title'] }}</div>
+                            <div style="font-size:11px; color:var(--u-muted); margin-top:2px;">{{ $t['sub'] }}</div>
+                        </div>
+                    </label>
+                @endforeach
+            </div>
+        </div>
+
         <div style="display:flex;gap:8px;">
             <button type="submit" class="btn ok" style="padding:9px 20px;">Kaydet</button>
             <a href="/manager/staff/{{ $user->id }}" class="btn alt" style="padding:9px 16px;">İptal</a>
         </div>
+
+        <script>
+            // Role değiştiğinde Hedef Kitle bloğunu sadece senior için göster
+            (function(){
+                var roleSelect = document.querySelector('select[name=role]');
+                var trackBlock = document.getElementById('staff-tracks-row');
+                if (!roleSelect || !trackBlock) return;
+                roleSelect.addEventListener('change', function(){
+                    trackBlock.style.display = (roleSelect.value === 'senior') ? '' : 'none';
+                });
+                // İlk yüklemede checkboxları görsel olarak işaretle
+                trackBlock.querySelectorAll('input[type=checkbox]').forEach(function(cb){
+                    if (cb.checked) {
+                        cb.closest('label').style.borderColor = 'var(--u-brand)';
+                        cb.closest('label').style.background = 'rgba(126,88,191,.06)';
+                    }
+                });
+            })();
+        </script>
     </form>
 </div>
 </div>

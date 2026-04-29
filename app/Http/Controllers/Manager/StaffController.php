@@ -448,12 +448,33 @@ class StaffController extends Controller
             'name'      => 'required|string|max:100',
             'role'      => ['required', Rule::in(self::STAFF_ROLES)],
             'is_active' => 'boolean',
+            // Senior için /randevu kategorize etiketleri (Bachelor / Master / Diğer)
+            'tracks'    => 'sometimes|array',
+            'tracks.*'  => ['string', Rule::in(['bachelor', 'master', 'other'])],
         ]);
 
+        // Senior ise expertise_tags CSV string'ine track tag'lerini yaz (mevcut diğer tag'leri koru)
+        // Not: User.expertise_tags kolonu CSV string (cast yok, expertiseTags() metoduyla parse).
+        $existing = $user->expertiseTags(); // [] veya ['bachelor','almanca'] gibi
+        $newTags = $existing;
+
+        if ($data['role'] === 'senior') {
+            // Mevcut tag'lerden track tag'lerini çıkar
+            $newTags = array_values(array_filter(
+                $newTags,
+                fn ($t) => ! in_array(strtolower((string) $t), ['bachelor', 'master', 'other', 'lisans', 'yuksek_lisans', 'yüksek_lisans'], true)
+            ));
+            // Yeni seçilen track tag'lerini ekle
+            foreach ((array) ($data['tracks'] ?? []) as $t) {
+                if (! in_array($t, $newTags, true)) $newTags[] = $t;
+            }
+        }
+
         $user->update([
-            'name'      => $data['name'],
-            'role'      => $data['role'],
-            'is_active' => (bool) ($data['is_active'] ?? true),
+            'name'           => $data['name'],
+            'role'           => $data['role'],
+            'is_active'      => (bool) ($data['is_active'] ?? true),
+            'expertise_tags' => empty($newTags) ? null : implode(',', $newTags),
         ]);
 
         return redirect("/manager/staff/{$user->id}")

@@ -40,7 +40,8 @@ class BookingLandingController extends Controller
 
         $list = $settings->map(function (SeniorBookingSetting $s) use ($seniors) {
             $u = $seniors->get($s->senior_user_id);
-            $expertise = is_array($u?->expertise_tags) ? array_map('strval', $u->expertise_tags) : [];
+            // expertise_tags CSV string olarak saklanır — User::expertiseTags() helper parse eder
+            $expertise = $u ? $u->expertiseTags() : [];
             return [
                 'slug'          => $s->public_slug,
                 'display_name'  => $s->display_name ?: ($u?->name ?? 'Danışman'),

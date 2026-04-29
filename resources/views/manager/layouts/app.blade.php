@@ -344,6 +344,10 @@
                         <span class="nav-icon">🏆</span> Bayi Kademeleri
                     </a>
                 @endmodule
+                <a href="{{ route('manager.landing-inventory.index') }}"
+                   class="nav-link {{ request()->is('manager/landing-inventory*') ? 'active' : '' }}">
+                    <span class="nav-icon">🌐</span> Landing Envanter
+                </a>
             </div>
 
             <div class="nav-section">

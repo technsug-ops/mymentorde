@@ -1,0 +1,252 @@
+<?php
+
+/**
+ * Sisteme bağlı public landing sayfalarının manuel registry'si.
+ *
+ * Her yeni public landing eklendiğinde buraya entry yaz, yoksa
+ * /manager/landing-inventory ekranı "kayıp/orphan" uyarısı gösterir.
+ *
+ * Kurulu olan auto-discovery servisi (LandingInventoryService) routes/web.php
+ * üzerinde GET method + auth-gerekli olmayan route'ları gezer ve buradaki
+ * registry ile karşılaştırır.
+ *
+ * Format:
+ *   path: '/...'                    Public URL (params placeholder olarak)
+ *   name: 'Kısa İsim'               Yöneticinin tanıdığı isim
+ *   type: 'marketing|form|widget|legal|utility'  Renkli kategori
+ *   description: 'Ne işe yarar?'     1-2 cümle
+ *   edit_route: 'manager.xxx'        Manager'da düzenleme route'u (varsa)
+ *   edit_notes: '...'                Edit yapılması için ek not (config/seeder/blade)
+ *   is_active: true|false            Şu an yayında mı
+ *   tags: ['saas', 'b2b']            Filtrelemek için
+ *   owner: 'marketing'               İçeriğin sorumlusu (rol/ekip)
+ *   tier: 'critical|important|nice'  Öncelik
+ */
+
+return [
+    // ── MARKETING / TANITIM ──────────────────────────────────────────────
+    [
+        'path' => '/platform',
+        'name' => 'Platform Tanıtım (SaaS Satış)',
+        'type' => 'marketing',
+        'description' => 'B2B SaaS satış sayfası — eğitim danışmanlık firmalarına platformu satar. 3-tier pricing, 27+ modül, AI Labs vurgusu.',
+        'edit_route' => null,
+        'edit_notes' => 'resources/views/public/platform-landing.blade.php — yeni feature eklendiğinde modules-grid + 27+ sayısı senkron tut',
+        'is_active' => true,
+        'tags' => ['saas', 'b2b', 'pricing'],
+        'owner' => 'marketing',
+        'tier' => 'critical',
+    ],
+    [
+        'path' => '/satis-ortagi',
+        'name' => 'Satış Ortaklığı Programı',
+        'type' => 'marketing',
+        'description' => 'Bayi/dealer landing — komisyon kademe sistemi (Bronz €200 → Elmas €400), kazanç hesaplayıcı, partner başarı hikayeleri.',
+        'edit_route' => 'manager.dealer-tiers.index',
+        'edit_notes' => 'resources/views/public/dealer-landing.blade.php (statik içerik) + /manager/dealer-tiers (kademe oranları runtime)',
+        'is_active' => true,
+        'tags' => ['dealer', 'commission', 'partner'],
+        'owner' => 'marketing',
+        'tier' => 'critical',
+    ],
+    [
+        'path' => '/randevu',
+        'name' => 'Randevu / Booking Landing',
+        'type' => 'marketing',
+        'description' => 'Aday → senior randevu akışı. 3 kategori (Bachelor / Master / Diğer), uygun senior yoksa "kişisel danışman" waitlist formu.',
+        'edit_route' => null,
+        'edit_notes' => 'resources/views/booking/public/landing.blade.php — senior tag ataması manager senior düzenle ekranından (expertise_tags JSON)',
+        'is_active' => true,
+        'tags' => ['booking', 'lead', 'student'],
+        'owner' => 'marketing',
+        'tier' => 'critical',
+    ],
+
+    // ── FORM / CONVERSION ────────────────────────────────────────────────
+    [
+        'path' => '/apply',
+        'name' => 'Aday Başvuru Formu',
+        'type' => 'form',
+        'description' => 'Aday öğrenci public başvuru formu — KVKK + Level 0 alanlar (kişisel + tercih). Submit sonrası /apply/onay.',
+        'edit_route' => null,
+        'edit_notes' => 'resources/views/public/apply.blade.php — alanlar GuestRegistrationFormCatalog (Level 0 kısmı)',
+        'is_active' => true,
+        'tags' => ['student', 'lead', 'kvkk'],
+        'owner' => 'product',
+        'tier' => 'critical',
+    ],
+    [
+        'path' => '/satis-ortagi/basvuru',
+        'name' => 'Bayi Başvuru Formu',
+        'type' => 'form',
+        'description' => 'Dealer 5-step wizard (Kişisel → Plan → Profil → Kaynak → Onay). Submit → DealerApplication tablosuna düşer.',
+        'edit_route' => 'manager.dealer-applications.index',
+        'edit_notes' => 'resources/views/public/dealer-application.blade.php',
+        'is_active' => true,
+        'tags' => ['dealer', 'partner', 'wizard'],
+        'owner' => 'sales',
+        'tier' => 'critical',
+    ],
+    [
+        'path' => '/satis-ortagi/basvuru/tamamlandi',
+        'name' => 'Bayi Başvuru Success',
+        'type' => 'form',
+        'description' => 'Bayi başvuru sonrası teşekkür sayfası. Reference no + sonraki adımlar + WhatsApp destek.',
+        'edit_route' => null,
+        'edit_notes' => 'resources/views/public/dealer-application-success.blade.php',
+        'is_active' => true,
+        'tags' => ['dealer', 'success'],
+        'owner' => 'sales',
+        'tier' => 'important',
+    ],
+
+    // ── PUBLIC WIDGETS / UTILITY ─────────────────────────────────────────
+    [
+        'path' => '/book/{slug}',
+        'name' => 'Senior Booking Widget',
+        'type' => 'widget',
+        'description' => 'Senior\'a özel public booking widget — takvim, müsait saatler, online onay. Google Calendar 2-way sync.',
+        'edit_route' => null,
+        'edit_notes' => 'Senior kendi /senior/booking-settings\'inden düzenler (slot süresi, public_slug, müsaitlik pattern\'leri)',
+        'is_active' => true,
+        'tags' => ['booking', 'widget', 'senior'],
+        'owner' => 'product',
+        'tier' => 'critical',
+    ],
+    [
+        'path' => '/promo/{code}',
+        'name' => 'İndirim Kodu Paylaşım Kartı',
+        'type' => 'widget',
+        'description' => 'Manager\'ın ürettiği kupon kodları için 5 template\'li paylaşım sayfası (PNG indir + sosyal medya OG meta).',
+        'edit_route' => 'manager.discount-codes.index',
+        'edit_notes' => 'Manager /manager/discount-codes\'tan kod üretir, template seçer + landing metinleri özelleştirir',
+        'is_active' => true,
+        'tags' => ['discount', 'marketing', 'shareable'],
+        'owner' => 'marketing',
+        'tier' => 'important',
+    ],
+    [
+        'path' => '/share/{token}',
+        'name' => 'DAM Public Share Link',
+        'type' => 'widget',
+        'description' => 'Belge/asset public paylaşım linki — expire date + opsiyonel password. Manager DAM modülünden üretir.',
+        'edit_route' => null,
+        'edit_notes' => 'DAM modülü altında — /manager/dam veya senior/student panellerinden share oluşturulur',
+        'is_active' => true,
+        'tags' => ['dam', 'share', 'document'],
+        'owner' => 'product',
+        'tier' => 'nice',
+    ],
+    [
+        'path' => '/go/{code}',
+        'name' => 'Tracked Link Redirect',
+        'type' => 'utility',
+        'description' => 'UTM tracking redirect — bir URL\'ye tıklamayı kayıt eder, sonra hedefe yönlendirir. Marketing kampanyalarında.',
+        'edit_route' => 'manager.marketing-attribution',
+        'edit_notes' => 'Marketing Admin paneli — kampanya UTM linkleri',
+        'is_active' => true,
+        'tags' => ['marketing', 'tracking', 'utm'],
+        'owner' => 'marketing',
+        'tier' => 'important',
+    ],
+
+    // ── LEGAL ────────────────────────────────────────────────────────────
+    [
+        'path' => '/privacy',
+        'name' => 'Gizlilik Politikası (TR)',
+        'type' => 'legal',
+        'description' => 'KVKK + GDPR uyumlu gizlilik politikası. policy_documents tablosundan okunur.',
+        'edit_route' => null,
+        'edit_notes' => 'Manager paneli legal docs editörü (gelecek) — şu an PolicyDocumentTrSeeder + manuel update',
+        'is_active' => true,
+        'tags' => ['legal', 'kvkk', 'gdpr', 'tr'],
+        'owner' => 'legal',
+        'tier' => 'critical',
+    ],
+    [
+        'path' => '/terms',
+        'name' => 'Kullanım Koşulları (TR)',
+        'type' => 'legal',
+        'description' => '13 maddelik kullanım koşulları. 14gün cayma + sahte belge yasağı + İstanbul Anadolu yargı.',
+        'edit_route' => null,
+        'edit_notes' => 'PolicyDocumentTrSeeder veya manager legal editörü',
+        'is_active' => true,
+        'tags' => ['legal', 'terms', 'tr'],
+        'owner' => 'legal',
+        'tier' => 'critical',
+    ],
+    [
+        'path' => '/cookies',
+        'name' => 'Çerez Politikası',
+        'type' => 'legal',
+        'description' => 'Çerez kullanımı ve onay yönetimi.',
+        'edit_route' => null,
+        'edit_notes' => 'PolicyDocument kind=cookie',
+        'is_active' => true,
+        'tags' => ['legal', 'cookies'],
+        'owner' => 'legal',
+        'tier' => 'important',
+    ],
+    [
+        'path' => '/imprint',
+        'name' => 'Künye / Impressum (TR)',
+        'type' => 'legal',
+        'description' => 'Yasal mercii + iletişim bilgileri.',
+        'edit_route' => null,
+        'edit_notes' => 'PolicyDocument kind=imprint, locale=tr',
+        'is_active' => true,
+        'tags' => ['legal', 'imprint', 'tr'],
+        'owner' => 'legal',
+        'tier' => 'important',
+    ],
+    [
+        'path' => '/datenschutz',
+        'name' => 'Datenschutzerklärung (DE)',
+        'type' => 'legal',
+        'description' => 'Almanca gizlilik politikası — DSGVO Art. 13 zorunlu.',
+        'edit_route' => null,
+        'edit_notes' => 'PolicyDocument kind=privacy, locale=de — henüz seedlenmedi',
+        'is_active' => true,
+        'tags' => ['legal', 'gdpr', 'de'],
+        'owner' => 'legal',
+        'tier' => 'important',
+    ],
+    [
+        'path' => '/impressum',
+        'name' => 'Impressum (DE)',
+        'type' => 'legal',
+        'description' => 'Almanca künye — Almanya yasası gereği zorunlu.',
+        'edit_route' => null,
+        'edit_notes' => 'PolicyDocument kind=imprint, locale=de — henüz seedlenmedi',
+        'is_active' => true,
+        'tags' => ['legal', 'imprint', 'de'],
+        'owner' => 'legal',
+        'tier' => 'important',
+    ],
+    [
+        'path' => '/agb',
+        'name' => 'Allgemeine Geschäftsbedingungen (DE)',
+        'type' => 'legal',
+        'description' => 'Almanca kullanım şartları.',
+        'edit_route' => null,
+        'edit_notes' => 'PolicyDocument kind=terms, locale=de — henüz seedlenmedi',
+        'is_active' => true,
+        'tags' => ['legal', 'terms', 'de'],
+        'owner' => 'legal',
+        'tier' => 'important',
+    ],
+
+    // ── INFO / FAQ ───────────────────────────────────────────────────────
+    [
+        'path' => '/sss',
+        'name' => 'Sıkça Sorulan Sorular (Public AI)',
+        'type' => 'marketing',
+        'description' => 'Public FAQ sayfası — AI Labs intent analizinden beslenir, en çok sorulan sorular otomatik FAQ\'e dönüşür.',
+        'edit_route' => 'manager.ai-labs.faq',
+        'edit_notes' => 'AI Labs modülü — intent analiz + FAQ aday seçimi manager onayıyla yayına çıkar',
+        'is_active' => true,
+        'tags' => ['faq', 'ai', 'support'],
+        'owner' => 'product',
+        'tier' => 'important',
+    ],
+];

@@ -421,6 +421,10 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::post('/manager/silence-monitor/company-overrides',               [$sm, 'updateCompanyOverrides'])->middleware('throttle:10,1')->name('manager.silence-monitor.company-overrides');
     });
 
+    // ── Public Landing Envanter (sisteme bağlı public sayfa registry'si) ─────
+    Route::get('/manager/landing-inventory', [\App\Http\Controllers\Manager\LandingInventoryController::class, 'index'])
+        ->name('manager.landing-inventory.index');
+
     // ── El Kitabı ─────────────────────────────────────────────────────────────
     Route::get('/manager/handbook', [HandbookController::class, 'manager'])->name('manager.handbook');
     Route::get('/manager/handbook/download', [HandbookController::class, 'download'])->defaults('role', 'manager')->name('manager.handbook.download');
