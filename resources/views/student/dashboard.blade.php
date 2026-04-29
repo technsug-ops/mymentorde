@@ -133,62 +133,6 @@
     $showOnboarding = $level2Pending || $docsPending > 0;
 @endphp
 
-@if($showOnboarding)
-{{-- ══ Yeni öğrenci onboarding rehberi (Level 2 form + belgeler) ══ --}}
-<div style="background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:14px;padding:22px 26px;margin-bottom:20px;color:#fff;box-shadow:0 6px 18px rgba(124,58,237,.22);">
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px;">
-        <span style="font-size:11px;text-transform:uppercase;letter-spacing:1.4px;color:#fff;opacity:.92;background:rgba(255,255,255,.16);padding:4px 10px 4px 8px;border-radius:999px;font-weight:700;">
-            🎓 Hoş geldin
-        </span>
-    </div>
-    <h2 style="font-size:22px;font-weight:800;margin:0 0 8px;line-height:1.25;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.08);">
-        Tebrikler {{ $firstName ?: 'öğrenci' }}, sözleşmen onaylandı!
-    </h2>
-    <p style="font-size:14px;color:rgba(255,255,255,.92);line-height:1.55;margin:0 0 16px;max-width:660px;">
-        Şimdi süreci hızlandırmak için iki kısa adım kaldı: detaylı bilgi formunu tamamla ve eksik belgelerini yükle. Aday öğrenciliğin tüm cevapları korundu — sadece eksik kısımları doldurman yeterli.
-    </p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
-        @if($level2Pending)
-        <a href="{{ route('student.registration') }}" style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:14px 16px;text-decoration:none;color:#fff;display:flex;align-items:center;gap:12px;transition:all .15s;backdrop-filter:blur(6px);">
-            <span style="font-size:24px;flex-shrink:0;">📋</span>
-            <span style="flex:1;">
-                <span style="display:block;font-size:13px;font-weight:800;margin-bottom:2px;">Detaylı Form (Level 2)</span>
-                <span style="display:block;font-size:11.5px;opacity:.88;">Eğitim, finansal, aile bilgileri — vize ve üniversite süreçleri için gerekli</span>
-            </span>
-            <span style="font-size:13px;font-weight:700;flex-shrink:0;">Doldur →</span>
-        </a>
-        @else
-        <div style="background:rgba(34,197,94,.18);border:1px solid rgba(134,239,172,.4);border-radius:10px;padding:14px 16px;color:#fff;display:flex;align-items:center;gap:12px;">
-            <span style="font-size:24px;flex-shrink:0;">✅</span>
-            <span style="flex:1;">
-                <span style="display:block;font-size:13px;font-weight:800;margin-bottom:2px;">Detaylı Form (Level 2)</span>
-                <span style="display:block;font-size:11.5px;opacity:.88;">Tamamlandı — danışmanın inceleyebilir</span>
-            </span>
-        </div>
-        @endif
-
-        @if($docsPending > 0)
-        <a href="{{ route('student.registration.documents') }}" style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:14px 16px;text-decoration:none;color:#fff;display:flex;align-items:center;gap:12px;transition:all .15s;backdrop-filter:blur(6px);">
-            <span style="font-size:24px;flex-shrink:0;">📄</span>
-            <span style="flex:1;">
-                <span style="display:block;font-size:13px;font-weight:800;margin-bottom:2px;">Belgelerim ({{ $docsPending }} eksik)</span>
-                <span style="display:block;font-size:11.5px;opacity:.88;">{{ $docsPending }}/{{ $docsTotal }} zorunlu belge — vize, sigorta, başvuru için</span>
-            </span>
-            <span style="font-size:13px;font-weight:700;flex-shrink:0;">Yükle →</span>
-        </a>
-        @else
-        <div style="background:rgba(34,197,94,.18);border:1px solid rgba(134,239,172,.4);border-radius:10px;padding:14px 16px;color:#fff;display:flex;align-items:center;gap:12px;">
-            <span style="font-size:24px;flex-shrink:0;">✅</span>
-            <span style="flex:1;">
-                <span style="display:block;font-size:13px;font-weight:800;margin-bottom:2px;">Belgelerim</span>
-                <span style="display:block;font-size:11.5px;opacity:.88;">Tüm zorunlu belgeler yüklendi</span>
-            </span>
-        </div>
-        @endif
-    </div>
-</div>
-@endif
-
 @php
 
     // Stage-based greeting (mockup'taki gibi)
@@ -235,6 +179,18 @@
     @endif
 </div>
 @endforeach
+
+{{-- Aday→Öğrenci promosyon sonrası: Level 2 detaylı form eksikse tek satırlık alert.
+     Belgeler için zaten "X zorunlu belgeniz eksik" alert mevcut. Çift hero/banner yok. --}}
+@if($level2Pending ?? false)
+<div class="sd-alert info">
+    <span class="sd-alert-icon">📋</span>
+    <div class="sd-alert-body">
+        <strong>Detaylı bilgi formu (Level 2)</strong> hala eksik — vize ve üniversite süreçleri için doldurman gerekiyor. Aday öğrenciliğindeki cevaplar korundu.
+    </div>
+    <a href="{{ route('student.registration') }}" class="sd-alert-btn">Doldur →</a>
+</div>
+@endif
 
 {{-- Journey Funnel --}}
 <div class="sd-journey">
