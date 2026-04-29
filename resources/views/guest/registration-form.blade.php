@@ -24,6 +24,29 @@
 </style>
 
 <style>
+/* ── Expatrio Program Autocomplete (ep-*) ── */
+.ep-search { position: relative; }
+.ep-search-input {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--u-line, #cbd5e1);
+    border-radius: 7px; font-size: 13.5px; background: var(--u-card, #fff); color: var(--u-text, #0f172a);
+    font-family: inherit;
+}
+.ep-search-input:focus { border-color: #003c8f; outline: none; box-shadow: 0 0 0 3px rgba(0,60,143,0.12); }
+.ep-results {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+    background: var(--u-card, #fff); border: 1px solid var(--u-line, #cbd5e1);
+    border-radius: 0 0 8px 8px; max-height: 380px; overflow-y: auto;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+}
+.ep-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--u-line, #f1f5f9); }
+.ep-item:last-child { border-bottom: none; }
+.ep-item:hover { background: rgba(0,60,143,0.06); }
+.ep-item-label { font-size: 13px; font-weight: 600; color: var(--u-text, #0f172a); margin-bottom: 2px; }
+.ep-item-meta { font-size: 11px; color: var(--u-muted, #64748b); }
+.ep-empty { padding: 14px; text-align: center; color: var(--u-muted, #64748b); font-size: 13px; }
+</style>
+
+<style>
 /* ── grf-* Aday Öğrenci Kayıtistration Form — Step Pills Redesign ── */
 
 /* ── Form Topbar with Step Pills ── */
@@ -478,6 +501,11 @@
                                     @endphp
                                     @if($key === '') @continue @endif
                                     @php $hasError = $errors->has($key); @endphp
+                                    @if($type === 'hidden')
+                                        {{-- Hidden field — UI'da görünmez, sadece form value taşır (target_program_source vb.) --}}
+                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}" data-source-hidden="{{ $key }}">
+                                        @continue
+                                    @endif
                                     <div class="form-group{{ $isFilled ? ' is-filled' : '' }}{{ $isWide ? ' grf-full' : '' }}{{ $hasError ? ' has-error' : '' }}" data-field-key="{{ $key }}">
                                         <div class="label-row">
                                             <label>{{ $label }} @if($required)<span class="required-star">*</span>@endif</label>
@@ -490,11 +518,35 @@
                                                     onclick="var p=this.nextElementSibling;p.classList.toggle('open');this.textContent=p.classList.contains('open')?'▲ Kapat':'ℹ Rehber';">ℹ Rehber</button>
                                             <div class="help-panel">{{ $field['help_text'] }}</div>
                                         @endif
-                                        @if($type === 'select')
-                                            <select class="{{ $required ? 'final-required' : '' }}" name="{{ $key }}" data-required="{{ $required ? '1' : '0' }}">
+                                        @if($type === 'hidden')
+                                            <input type="hidden" name="{{ $key }}" value="{{ $value }}" data-source-hidden="{{ $key }}">
+                                        @elseif($type === 'expatrio_program')
+                                            @php
+                                                $currentProgram = null;
+                                                if (!empty($value)) {
+                                                    try { $currentProgram = \App\Models\ExpatrioProgram::find($value); } catch (\Throwable $e) {}
+                                                }
+                                            @endphp
+                                            <div class="ep-search" data-ep-search>
+                                                <input type="text" class="ep-search-input"
+                                                    placeholder="{{ $placeholder ?: 'Yazmaya başlayın (örn: Informatik, Business)' }}"
+                                                    autocomplete="off"
+                                                    value="{{ $currentProgram ? $currentProgram->course_name . ' — ' . $currentProgram->university_name : '' }}">
+                                                <input type="hidden" name="{{ $key }}" value="{{ $value }}" data-ep-hidden>
+                                                <div class="ep-results" data-ep-results style="display:none;"></div>
+                                                @if($currentProgram)
+                                                    <div class="ep-current-info" style="font-size:11.5px; color:var(--u-muted, #64748b); margin-top:4px;">
+                                                        ✓ Seçili: <strong>{{ $currentProgram->course_name }}</strong>
+                                                        ({{ $currentProgram->degree_specification ?: 'Program' }}) — {{ $currentProgram->university_name }}
+                                                        @if($currentProgram->location), {{ $currentProgram->location }}@endif
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @elseif($type === 'select')
+                                            <select class="{{ $required ? 'final-required' : '' }}" name="{{ $key }}" data-required="{{ $required ? '1' : '0' }}" @if($key === 'district') data-cascade-from="province" @endif>
                                                 <option value="">Seçiniz</option>
                                                 @foreach(($field['options'] ?? []) as $opt)
-                                                    <option value="{{ $opt['value'] }}" @selected((string)$value === (string)$opt['value'])>{{ $opt['label'] }}</option>
+                                                    <option value="{{ $opt['value'] }}" @selected((string)$value === (string)$opt['value']) @isset($opt['province']) data-province="{{ $opt['province'] }}" @endisset>{{ $opt['label'] }}</option>
                                                 @endforeach
                                             </select>
                                         @elseif($type === 'checkbox_group')
@@ -1016,6 +1068,120 @@
         numberEl.addEventListener('change', applyPassportTypeBadge);
     }
     applyPassportVisibility();
+})();
+
+// Expatrio program autocomplete — 13K+ Almanya programı arasında smart-search
+(function(){
+    var endpoint = '{{ route("api.expatrio.programs.search") }}';
+    document.querySelectorAll('[data-ep-search]').forEach(function(box){
+        var input    = box.querySelector('.ep-search-input');
+        var hidden   = box.querySelector('[data-ep-hidden]');
+        var results  = box.querySelector('[data-ep-results]');
+        if (!input || !hidden || !results) return;
+
+        var debounceTimer = null;
+        var lastQuery = '';
+
+        function search(){
+            var q = (input.value || '').trim();
+            if (q.length < 2) { results.style.display = 'none'; results.innerHTML = ''; hidden.value = ''; return; }
+            if (q === lastQuery) return;
+            lastQuery = q;
+
+            fetch(endpoint + '?q=' + encodeURIComponent(q) + '&limit=15', {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(data){
+                var items = (data && data.items) || [];
+                if (items.length === 0) {
+                    results.innerHTML = '<div class="ep-empty">Sonuç bulunamadı</div>';
+                    results.style.display = 'block';
+                    return;
+                }
+                results.innerHTML = items.map(function(it){
+                    var meta = [it.degree, it.location].filter(Boolean).join(' · ');
+                    var langs = (it.languages || []).join(' / ');
+                    return '<div class="ep-item" data-id="' + it.id + '" data-label="' + (it.label||'').replace(/"/g, '&quot;') + '">'
+                        + '<div class="ep-item-label">' + (it.label || '') + '</div>'
+                        + '<div class="ep-item-meta">' + meta + (langs ? ' · ' + langs : '') + '</div>'
+                        + '</div>';
+                }).join('');
+                results.style.display = 'block';
+            })
+            .catch(function(){ /* silent */ });
+        }
+
+        input.addEventListener('input', function(){
+            clearTimeout(debounceTimer);
+            hidden.value = ''; // Manuel düzenleme yapıldıysa eski seçimi sıfırla
+            debounceTimer = setTimeout(search, 250);
+        });
+        input.addEventListener('focus', function(){ if (input.value.length >= 2) search(); });
+        input.addEventListener('blur', function(){ setTimeout(function(){ results.style.display = 'none'; }, 200); });
+
+        results.addEventListener('mousedown', function(e){
+            var item = e.target.closest('.ep-item');
+            if (!item) return;
+            var id = item.getAttribute('data-id');
+            var label = item.getAttribute('data-label');
+            input.value = label;
+            hidden.value = id;
+            results.style.display = 'none';
+            lastQuery = label; // re-search etmesin
+        });
+    });
+})();
+
+// Cascading il → ilçe dropdown — province değişince district options filtrelenir
+(function(){
+    var provinceEl = document.querySelector('select[name="province"]');
+    var districtEl = document.querySelector('select[data-cascade-from="province"]');
+    if (!provinceEl || !districtEl) return;
+
+    // Tüm option'ları başta ezberle (filter sonrası restore için)
+    var allOptions = Array.prototype.slice.call(districtEl.querySelectorAll('option')).map(function(o){
+        return { value: o.value, label: o.textContent, province: o.getAttribute('data-province') || '' };
+    });
+
+    function rebuildDistrictOptions(){
+        var selectedProvince = provinceEl.value || '';
+        var currentDistrict = districtEl.value || '';
+        // Tüm option'ları temizle
+        while (districtEl.firstChild) districtEl.removeChild(districtEl.firstChild);
+        // Boş ön seçenek
+        var blank = document.createElement('option');
+        blank.value = '';
+        blank.textContent = selectedProvince ? 'İlçe seçiniz' : 'Önce il seçin';
+        districtEl.appendChild(blank);
+        // Filter — il seçilmediyse hiçbir ilçe gösterilmez
+        if (!selectedProvince) {
+            districtEl.disabled = true;
+            return;
+        }
+        districtEl.disabled = false;
+        var preserved = false;
+        allOptions.forEach(function(o){
+            if (!o.value) return; // başlangıçtaki "Seçiniz"
+            if (o.province !== selectedProvince) return;
+            var opt = document.createElement('option');
+            opt.value = o.value;
+            opt.textContent = o.label;
+            opt.setAttribute('data-province', o.province);
+            if (o.value === currentDistrict) {
+                opt.selected = true;
+                preserved = true;
+            }
+            districtEl.appendChild(opt);
+        });
+        // Önce seçili olan ilçe yeni il'e ait değilse temizle
+        if (!preserved) districtEl.value = '';
+    }
+
+    provinceEl.addEventListener('change', rebuildDistrictOptions);
+    provinceEl.addEventListener('input', rebuildDistrictOptions);
+    rebuildDistrictOptions(); // ilk yüklemede sayfada il seçiliyse ilçe filtrele
 })();
 </script>
 

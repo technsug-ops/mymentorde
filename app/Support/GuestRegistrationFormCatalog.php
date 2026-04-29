@@ -4,6 +4,9 @@ namespace App\Support;
 
 class GuestRegistrationFormCatalog
 {
+    // CountryCatalog ve TrProvince/TrDistrict aynı namespace olmadığı için
+    // FQCN ile çağrıldı (yıkım risk yok, autoload temiz).
+
     /**
      * @return array<int,array<string,mixed>>
      */
@@ -18,6 +21,47 @@ class GuestRegistrationFormCatalog
             ],
             ApplicationCountryCatalog::options()
         );
+    }
+
+    /**
+     * 250 ülke uyruk/ülke dropdown'u (CountryCatalog → ext-intl runtime label).
+     * Value: ISO 3166-1 alpha-2 kodu (büyük harf, "TR" gibi).
+     * CountryCatalog 'code' döndürür; form sanitize 'value' bekler — burada normalize edilir.
+     */
+    public static function countryOptions(): array
+    {
+        return array_map(
+            static fn (array $c) => ['value' => $c['code'], 'label' => $c['label']],
+            CountryCatalog::optionsForLocale('tr')
+        );
+    }
+
+    /**
+     * Türkiye 81 il dropdown'u. Value: slug (istanbul, ankara).
+     * DB'den okur — eğer migrate edilmediyse boş döner (form text alanı gibi davranır).
+     */
+    public static function trProvinceOptions(): array
+    {
+        try {
+            return \App\Models\TrProvince::options();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Türkiye ~973 ilçe dropdown'u. Value: slug. Cascading: data-province
+     * attribute Blade tarafında option'lara eklenmeli (filter için).
+     */
+    public static function trDistrictOptions(): array
+    {
+        try {
+            return collect(\App\Models\TrDistrict::allWithProvince())
+                ->map(fn ($d) => ['value' => $d['value'], 'label' => $d['label'], 'province' => $d['province_slug']])
+                ->all();
+        } catch (\Throwable $e) {
+            return [];
+        }
     }
 
     /**
@@ -138,6 +182,11 @@ class GuestRegistrationFormCatalog
                     self::f('marital_status', 'Medeni Hali *', 'select', true, 40, options: self::maritalOptions()),
                     self::f('reference_text', 'Referans', 'text', false, 180),
                     self::f('birth_place', 'Doğum yeriniz *', 'text', true, 120),
+                    self::f('birth_country', 'Doğum ülkeniz', 'select', false, 4, options: self::countryOptions(), help_text: 'ISO ülke kodu saklanır. Türkiye dışında doğmuş iseniz seçin; aksi halde "Türkiye" varsayılır.'),
+                    // ── Vize / Uni-Assist eksikleri (29-30 Nisan 2026) ──
+                    self::f('birth_name', 'Doğum / önceki soyadınız (varsa)', 'text', false, 120, placeholder: 'Örn: evlilik öncesi kızlık soyadı', help_text: 'Almanca form\'larda "Geburtsname / frühere Familienname". Soyadı hiç değişmediyse boş bırakın.'),
+                    self::f('nationality', 'Mevcut uyruğunuz', 'select', false, 4, options: self::countryOptions(), help_text: 'ISO ülke kodu. Boş bırakırsanız Türkiye varsayılır. Çift vatandaşlık varsa "Önceki uyruk" alanına yazın.'),
+                    self::f('previous_nationality', 'Önceki uyruğunuz (varsa)', 'select', false, 4, options: self::countryOptions(), help_text: 'Çift vatandaşlık veya sonradan kazanılmış vatandaşlık varsa belirtin. ISO kodu saklanır.'),
                 ],
             ],
             [
@@ -152,8 +201,8 @@ class GuestRegistrationFormCatalog
                     // Sadece Level 2
                     self::f('address_line', 'Açık Adresiniz *', 'text', true, 255),
                     self::f('postal_code', 'Posta kodu *', 'text', true, 32),
-                    self::f('district', 'İlçe *', 'text', true, 120),
-                    self::f('province', 'İl *', 'text', true, 120),
+                    self::f('province', 'İl *', 'select', true, 60, options: self::trProvinceOptions(), help_text: 'Türkiye 81 il. Slug saklanır (istanbul, ankara). Cascading: İlçe seçimi il\'e göre filtrelenir.'),
+                    self::f('district', 'İlçe *', 'select', true, 80, options: self::trDistrictOptions(), help_text: 'Önce il seçin; sonra bu listeden ilçe filtrelenir. Slug saklanır (kadikoy, atasehir).'),
                     self::f('mail_recipient_name', 'Adresinizdeki 2. Posta Yetkilisi *', 'text', true, 180,
                         placeholder: 'Örn: Ayşe Yılmaz',
                         help_text: 'Belirttiğiniz adreste sizin adınıza gelen postaları (uni-assist sonuç, vize evrakı, banka kartı vb.) alacak ikinci kişinin adı soyadı.'),
@@ -161,8 +210,16 @@ class GuestRegistrationFormCatalog
                     self::f('application_type', 'Başvuru Tipi *', 'select', true, 40, options: self::applicationTypeOptions(), level: 1),
                     // Level 1 (User listesinde "Hedef bölüm")
                     self::f('target_program', 'Okumayı hedeflediğiniz bölüm/program *', 'text', true, 255, level: 1),
+                    // ── Program kataloğundan smart-search (autocomplete) ──
+                    // 13K+ Almanya programı (Expatrio + ileride Hochschulkompass).
+                    // target_program_id = source-spesifik UUID/identifier
+                    // target_program_source = 'expatrio' | 'hk' (default expatrio, hidden)
+                    self::f('target_program_id', 'Hedef program (kataloğundan ara)', 'expatrio_program', false, 64, placeholder: 'Örn: Informatik, Wirtschaft, ...', help_text: 'Yazmaya başlayın, 13.000+ program arasından seçim yapın. İsteğe bağlı — yukarıdaki "Hedef bölüm" alanı zorunlu.'),
+                    self::f('target_program_source', 'Program kaynağı (auto)', 'hidden', false, 20, help_text: 'Otomatik atanır — şu an "expatrio". İleride Hochschulkompass aktif olunca seçilebilir.'),
                     // Sadece Level 2
                     self::f('university_start_target_date', 'Üniversite başlangıç tarihi hedefiniz *', 'date', true, 20),
+                    // ── Vize için planlanan kalış bitiş tarihi ──
+                    self::f('travel_planned_end_date', 'Almanya\'da kalış bitiş tarihi (planlanan)', 'date', false, 20, help_text: 'Vize başvurusunda VIDEX\'in istediği "Beabsichtigte Dauer — Bis" alanı. Genelde başlangıçtan +1 yıl sonrası girilir, sonradan uzatılır.'),
                 ],
             ],
             [
@@ -269,6 +326,10 @@ class GuestRegistrationFormCatalog
                     self::f('passport_issue_date', 'Pasaport veriliş tarihi', 'date', false, 20, level: 1),
                     self::f('passport_expiry_date', 'Pasaport bitiş tarihi', 'date', false, 20, level: 1),
                     self::f('passport_issue_place', 'Pasaportun verildiği yer', 'text', false, 120, placeholder: 'Örn: İstanbul Emniyeti', level: 1),
+                    // ── Vize VIDEX için kaymakamlık ilçesi ("Ausgestellt von") ──
+                    self::f('passport_authority', 'Pasaportu veren kaymakamlık ilçesi', 'text', false, 120, placeholder: 'Örn: ATASEHIR, KADIKOY', help_text: 'VIDEX vize formu pasaportun verildiği şehrin yanı sıra ilçeyi de istiyor. Pasaportun ön sayfasında "Veren Makam" altında yazar.', level: 1),
+                    // ── VIDEX zorunlu — öğrencinin öğrenim/meslek alanı ("Erlernter Beruf") ──
+                    self::f('erlernter_beruf', 'Öğrenim / mesleki eğitim alanınız', 'text', false, 200, placeholder: 'Örn: Student/in, Praktikant/-in, Lehrling', help_text: 'Vize VIDEX formunda "Erlernter Beruf" alanı. Öğrenciyseniz "Student/in" yeterli; daha önce mesleki eğitim aldıysanız (Lise/Üniversite veya iş) o alanı yazın.', level: 1),
                     // Sadece Level 2
                     self::f('estimated_monthly_budget_eur', 'Aylık bütçe planı (EUR)', 'text', false, 32),
                     self::f('knows_blocked_account', 'Bloke hesap gerekliliği hakkında bilginiz var mı? *', 'select', true, 10, options: self::yesNoOptions()),
@@ -292,12 +353,20 @@ class GuestRegistrationFormCatalog
                 'section_order' => 60,
                 'title' => 'Aile Bilgileri',
                 'fields' => [
-                    self::f('father_full_name', 'Babanızın Adı Soyadı *', 'text', true, 180),
+                    // ── Baba ──
+                    self::f('father_full_name', 'Babanızın Adı Soyadı *', 'text', true, 180, help_text: 'Vize VIDEX formu Ad ve Soyad\'ı ayrı ayrı ister; aşağıda da girebilirsiniz.'),
+                    self::f('father_first_name', 'Babanızın adı (ayrı)', 'text', false, 120, placeholder: 'Sadece ad', help_text: 'VIDEX vize formu için ayrı tutulur — boş bırakırsanız yukarıdaki birleşik isimden çıkarılır.'),
+                    self::f('father_last_name', 'Babanızın soyadı (ayrı)', 'text', false, 120, placeholder: 'Sadece soyad'),
+                    self::f('father_nationality', 'Babanızın uyruğu', 'select', false, 4, options: self::countryOptions(), help_text: 'ISO ülke kodu saklanır. Vize VIDEX formu için zorunlu — anne ve baba uyruğu ayrı ayrı sorulur.'),
                     self::f('father_birth_date', 'Babanızın doğum tarihi *', 'date', true, 20),
                     self::f('father_job', 'Babanızın mesleği *', 'text', true, 120),
                     self::f('father_birth_place', 'Babanızın doğum yeri *', 'text', true, 120),
                     self::f('father_address', 'Babanızın açık adresi *', 'text', true, 255),
+                    // ── Anne ──
                     self::f('mother_full_name', 'Annenizin adı soyadı *', 'text', true, 180),
+                    self::f('mother_first_name', 'Annenizin adı (ayrı)', 'text', false, 120, placeholder: 'Sadece ad'),
+                    self::f('mother_last_name', 'Annenizin soyadı (ayrı — kızlık varsa o)', 'text', false, 120, placeholder: 'Sadece soyad', help_text: 'Almanca formlar genelde annenin kızlık soyadını ister.'),
+                    self::f('mother_nationality', 'Annenizin uyruğu', 'select', false, 4, options: self::countryOptions(), help_text: 'ISO ülke kodu saklanır.'),
                     self::f('mother_birth_date', 'Annenizin doğum tarihi *', 'date', true, 20),
                     self::f('mother_birth_place', 'Annenizin doğum yeri *', 'text', true, 120),
                     self::f('mother_job', 'Annenizin mesleği *', 'text', true, 120),
@@ -432,6 +501,7 @@ class GuestRegistrationFormCatalog
                     }
                 } elseif (in_array($key, [
                     'university_start_target_date', 'planned_start_date', 'target_start_date',
+                    'travel_planned_end_date',
                 ], true)) {
                     // Hedef tarih field'ları — geçmişte olamaz
                     if ($txt < $today) {
@@ -485,6 +555,36 @@ class GuestRegistrationFormCatalog
                     ->filter(fn ($v) => in_array($v, $options, true))
                     ->values()
                     ->all();
+                continue;
+            }
+
+            if ($type === 'expatrio_program') {
+                // Source-bağımsız program UUID — formdaki target_program_source ile birlikte değerlendirilir.
+                // Şu an sadece expatrio; ileride hk için aynı validasyon source-aware olacak.
+                $txt = trim((string) $val);
+                if ($txt === '') { $out[$key] = null; continue; }
+
+                // Expatrio UUID v4 formatı
+                if (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $txt)) {
+                    try {
+                        $exists = \App\Models\ExpatrioProgram::query()->whereKey($txt)->exists();
+                    } catch (\Throwable $e) { $exists = false; }
+                    $out[$key] = $exists ? $txt : null;
+                    continue;
+                }
+
+                // İleride HK identifier patterns burada eklenecek
+                $out[$key] = null;
+                continue;
+            }
+
+            if ($type === 'hidden') {
+                // Internal hidden field — JS tarafında set edilir, validation'a dokunma
+                // (target_program_source gibi). Format: alphanumeric + underscore + dash.
+                $txt = trim((string) $val);
+                if ($txt === '') { $out[$key] = null; continue; }
+                if (! preg_match('/^[a-z0-9_-]{1,40}$/i', $txt)) { $out[$key] = null; continue; }
+                $out[$key] = mb_substr($txt, 0, $max);
                 continue;
             }
 
@@ -586,10 +686,13 @@ class GuestRegistrationFormCatalog
 
     private static function yesNoGenderOptions(): array
     {
+        // Uni-Assist + VIDEX'in tanıdığı 4 cinsiyet seçeneği. Form'daki value
+        // küçük harfli; mapper Almanca karşılıklarına dönüştürür (männlich/weiblich/divers/unbestimmt).
         return [
-            ['value' => 'male', 'label' => 'Erkek'],
-            ['value' => 'female', 'label' => 'Kadın'],
-            ['value' => 'other', 'label' => 'Diğer'],
+            ['value' => 'male', 'label' => 'Erkek (männlich)'],
+            ['value' => 'female', 'label' => 'Kadın (weiblich)'],
+            ['value' => 'diverse', 'label' => 'Diğer cinsiyet (divers)'],
+            ['value' => 'unspecified', 'label' => 'Belirtmek istemiyorum (unbestimmt)'],
         ];
     }
 

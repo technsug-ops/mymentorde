@@ -23,6 +23,8 @@ return [
             ['document_code' => 'GSTP-003', 'category_code' => 'transkript_lise',    'top_category_code' => 'egitim_belgeleri','name' => 'Lise Transkripti',             'description' => 'Notlu ve mühürlü lise transkripti',             'is_required' => true,  'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
             ['document_code' => 'GSTP-004', 'category_code' => 'dil_belgesi',        'top_category_code' => 'dil_belgeleri',   'name' => 'Dil Belgesi (Almanca/İngilizce)', 'description' => 'TestDaF, DSH, IELTS, TOEFL veya muadili',  'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
             ['document_code' => 'GSTP-005', 'category_code' => 'banka_dekontu',      'top_category_code' => 'mali_belgeler',   'name' => 'Mali Yeterlilik Belgesi',      'description' => 'Banka hesap özeti veya bloke hesap belgesi',    'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            // ── Vize öncesi belge ihtiyaçları (manager talep edebilir, opsiyonel) ──
+            ['document_code' => 'GSTP-006', 'category_code' => 'wohnsitz_belgesi',   'top_category_code' => 'vize',  'name' => 'Wohnsitzbescheinigung (Nüfus / İkametgah)', 'description' => 'E-Devlet\'ten alınmış nüfus kayıt örneği veya ikametgah belgesi (Almanca tercüme önerilir)', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
         ],
 
         'bachelor' => [
@@ -31,6 +33,11 @@ return [
             ['document_code' => 'GSTB-003', 'category_code' => 'transkript_lise',    'top_category_code' => 'egitim_belgeleri','name' => 'Lise Transkripti',             'description' => 'Notlu, mühürlü, apostilli lise transkripti',    'is_required' => true,  'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
             ['document_code' => 'GSTB-004', 'category_code' => 'dil_belgesi',        'top_category_code' => 'dil_belgeleri',   'name' => 'Almanca Dil Belgesi',          'description' => 'B1+ Almanca dil belgesi (TestDaF, DSH, Goethe)', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
             ['document_code' => 'GSTB-005', 'category_code' => 'motivasyon_mektubu', 'top_category_code' => 'basvuru_dosyasi', 'name' => 'Motivasyon Mektubu',           'description' => 'Almanca yazılmış motivasyon mektubu',            'is_required' => false, 'accepted' => 'pdf,docx',    'max_mb' => 5],
+            // ── Bachelor için akademik denklik + vize belgeleri ──
+            ['document_code' => 'GSTB-006', 'category_code' => 'aps_sertifikasi',    'top_category_code' => 'uni_assist','name' => 'APS Sertifikası',             'description' => 'Akademik Tetkik Merkezi (Almanya konsolosluğu) — Türk lise mezunları için zorunlu, lisans öncesi alınır', 'is_required' => true,  'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            ['document_code' => 'GSTB-007', 'category_code' => 'vpd_anerkennung',    'top_category_code' => 'uni_assist','name' => 'VPD (Vorprüfungsdokumentation)','description' => 'Uni-Assist tarafından hazırlanan denklik dökümanı; bazı üniversiteler doğrudan VPD ister', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            ['document_code' => 'GSTB-008', 'category_code' => 'sperrkonto_belgesi', 'top_category_code' => 'vize',   'name' => 'Sperrkonto Bestätigung',      'description' => 'Bloke hesap onay belgesi (Coracle/Fintiba/Expatrio/Deutsche Bank) — vize başvurusu için kritik', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            ['document_code' => 'GSTB-009', 'category_code' => 'kranken_sigorta',    'top_category_code' => 'vize',  'name' => 'Krankenversicherung (Sağlık Sigortası)', 'description' => 'Mawista, Care Concept veya muadili — min. 30.000 € kapsamlı poliçe (vize için zorunlu)', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
         ],
 
         'master' => [
@@ -41,6 +48,10 @@ return [
             ['document_code' => 'GSTM-005', 'category_code' => 'motivasyon_mektubu', 'top_category_code' => 'basvuru_dosyasi', 'name' => 'Motivasyon Mektubu',           'description' => 'Almanca yazılmış motivasyon mektubu (1-2 sayfa)','is_required' => true,  'accepted' => 'pdf,docx',    'max_mb' => 5],
             ['document_code' => 'GSTM-006', 'category_code' => 'referans_mektubu',   'top_category_code' => 'basvuru_dosyasi', 'name' => 'Referans Mektubu',             'description' => 'En az 1 akademik/profesyonel referans mektubu', 'is_required' => false, 'accepted' => 'pdf,docx',    'max_mb' => 5],
             ['document_code' => 'GSTM-007', 'category_code' => 'ozgecmis',           'top_category_code' => 'basvuru_dosyasi', 'name' => 'Özgeçmiş (CV)',               'description' => 'Almanca veya İngilizce güncel CV',               'is_required' => true,  'accepted' => 'pdf,docx',    'max_mb' => 5],
+            // ── Master için akademik denklik + vize belgeleri ──
+            ['document_code' => 'GSTM-008', 'category_code' => 'vpd_anerkennung',    'top_category_code' => 'uni_assist','name' => 'VPD (Vorprüfungsdokumentation)','description' => 'Uni-Assist tarafından hazırlanan denklik dökümanı; bazı üniversiteler doğrudan VPD ister', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            ['document_code' => 'GSTM-009', 'category_code' => 'sperrkonto_belgesi', 'top_category_code' => 'vize',   'name' => 'Sperrkonto Bestätigung',      'description' => 'Bloke hesap onay belgesi (Coracle/Fintiba/Expatrio/Deutsche Bank) — vize başvurusu için kritik', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            ['document_code' => 'GSTM-010', 'category_code' => 'kranken_sigorta',    'top_category_code' => 'vize',  'name' => 'Krankenversicherung (Sağlık Sigortası)', 'description' => 'Mawista, Care Concept veya muadili — min. 30.000 € kapsamlı poliçe (vize için zorunlu)', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
         ],
 
         'ausbildung' => [
@@ -49,12 +60,20 @@ return [
             ['document_code' => 'GSTA-003', 'category_code' => 'transkript_lise',    'top_category_code' => 'egitim_belgeleri','name' => 'Lise Transkripti',             'description' => 'Notlu lise transkripti',                        'is_required' => true,  'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
             ['document_code' => 'GSTA-004', 'category_code' => 'dil_belgesi',        'top_category_code' => 'dil_belgeleri',   'name' => 'Almanca Dil Belgesi (en az B1)', 'description' => 'Ausbildung için B1-B2 Almanca zorunlu',       'is_required' => true,  'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
             ['document_code' => 'GSTA-005', 'category_code' => 'ozgecmis',           'top_category_code' => 'basvuru_dosyasi', 'name' => 'Özgeçmiş (CV)',               'description' => 'Almanca güncel CV',                             'is_required' => true,  'accepted' => 'pdf,docx',    'max_mb' => 5],
+            // ── Ausbildung için adli sicil + vize belgeleri ──
+            ['document_code' => 'GSTA-006', 'category_code' => 'adli_sicil',         'top_category_code' => 'vize',  'name' => 'Adli Sicil Kaydı',            'description' => 'E-Devlet\'ten alınan adli sicil belgesi + Almanca tercüme — Ausbildung/iş vizesi için zorunlu', 'is_required' => true,  'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            ['document_code' => 'GSTA-007', 'category_code' => 'sperrkonto_belgesi', 'top_category_code' => 'vize',   'name' => 'Sperrkonto Bestätigung',      'description' => 'Bloke hesap onay belgesi (Coracle/Fintiba/Expatrio/Deutsche Bank)', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            ['document_code' => 'GSTA-008', 'category_code' => 'kranken_sigorta',    'top_category_code' => 'vize',  'name' => 'Krankenversicherung (Sağlık Sigortası)', 'description' => 'Min. 30.000 € kapsamlı poliçe (vize için zorunlu)', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
         ],
 
         'sprachkurs' => [
             ['document_code' => 'GSTS-001', 'category_code' => 'kimlik_pasaport',    'top_category_code' => 'kimlik',          'name' => 'Pasaport / Kimlik',            'description' => 'Geçerli pasaport veya kimlik belgesi',          'is_required' => true,  'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
             ['document_code' => 'GSTS-002', 'category_code' => 'diploma_lise',       'top_category_code' => 'egitim_belgeleri','name' => 'Lise Diploması veya öğrenci belgesi', 'description' => 'Mevcut eğitim durumunu gösterir belge',  'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
             ['document_code' => 'GSTS-003', 'category_code' => 'dil_belgesi',        'top_category_code' => 'dil_belgeleri',   'name' => 'Mevcut Dil Belgesi (varsa)',   'description' => 'Herhangi bir seviyede mevcut Almanca belgesi',   'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            // ── Sprachkurs için kabul mektubu + vize belgeleri ──
+            ['document_code' => 'GSTS-004', 'category_code' => 'dil_okul_kayit',     'top_category_code' => 'dil_okulu',       'name' => 'Anmeldebestätigung Sprachkurs (Dil Okulu Kayıt Yazısı)', 'description' => 'Almanca dil okulundan alınan resmi kayıt onay yazısı — vize için zorunlu (studienvorbereitend)', 'is_required' => true,  'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            ['document_code' => 'GSTS-005', 'category_code' => 'sperrkonto_belgesi', 'top_category_code' => 'vize',   'name' => 'Sperrkonto Bestätigung',      'description' => 'Bloke hesap onay belgesi (Coracle/Fintiba/Expatrio)', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            ['document_code' => 'GSTS-006', 'category_code' => 'kranken_sigorta',    'top_category_code' => 'vize',  'name' => 'Krankenversicherung (Sağlık Sigortası)', 'description' => 'Min. 30.000 € kapsamlı poliçe (vize için zorunlu)', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
         ],
     ],
 
@@ -66,6 +85,11 @@ return [
             ['document_code' => 'STUD-002', 'category_code' => 'diploma',            'top_category_code' => 'egitim_belgeleri','name' => 'Diploma',                      'description' => 'Mezuniyet diploması + apostil',                 'is_required' => true,  'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
             ['document_code' => 'STUD-003', 'category_code' => 'transkript',         'top_category_code' => 'egitim_belgeleri','name' => 'Transkript',                   'description' => 'Notlu transkript + apostil',                    'is_required' => true,  'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
             ['document_code' => 'STUD-004', 'category_code' => 'dil_belgesi',        'top_category_code' => 'dil_belgeleri',   'name' => 'Dil Belgesi',                  'description' => 'Almanca/İngilizce yeterlilik belgesi',           'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            // ── Student aşamasında vize randevu hazırlığı belgeleri ──
+            ['document_code' => 'STUD-005', 'category_code' => 'sperrkonto_belgesi', 'top_category_code' => 'vize',   'name' => 'Sperrkonto Bestätigung',      'description' => 'Bloke hesap onay belgesi (vize randevusu öncesi hazırlanır)', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            ['document_code' => 'STUD-006', 'category_code' => 'kranken_sigorta',    'top_category_code' => 'vize',  'name' => 'Krankenversicherung (Sağlık Sigortası)', 'description' => 'Mawista / Care Concept poliçesi (min. 30.000 € kapsam)', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            ['document_code' => 'STUD-007', 'category_code' => 'idata_dekont',       'top_category_code' => 'vize',  'name' => 'iDATA / Konsolosluk Ödeme Dekontu', 'description' => 'Vize ücreti (75 €) ödeme makbuzu — iDATA üzerinden yapılır', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
+            ['document_code' => 'STUD-008', 'category_code' => 'wohnsitz_belgesi',   'top_category_code' => 'vize',  'name' => 'Wohnsitzbescheinigung (Nüfus / İkametgah)', 'description' => 'E-Devlet\'ten alınmış nüfus kayıt örneği veya ikametgah belgesi', 'is_required' => false, 'accepted' => 'pdf,jpg,png', 'max_mb' => 10],
         ],
 
         'bachelor' => [
