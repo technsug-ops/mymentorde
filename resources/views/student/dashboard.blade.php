@@ -149,7 +149,7 @@
     </p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
         @if($level2Pending)
-        <a href="{{ route('student.registration.form') }}" style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:14px 16px;text-decoration:none;color:#fff;display:flex;align-items:center;gap:12px;transition:all .15s;backdrop-filter:blur(6px);">
+        <a href="{{ route('student.registration') }}" style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:14px 16px;text-decoration:none;color:#fff;display:flex;align-items:center;gap:12px;transition:all .15s;backdrop-filter:blur(6px);">
             <span style="font-size:24px;flex-shrink:0;">📋</span>
             <span style="flex:1;">
                 <span style="display:block;font-size:13px;font-weight:800;margin-bottom:2px;">Detaylı Form (Level 2)</span>
