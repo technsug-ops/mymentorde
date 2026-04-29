@@ -30,23 +30,17 @@ class StudentPortalController extends Controller
         $guest     = $this->resolveStudentGuest($request);
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
 
-        // Student tarafı SADECE Level 2'ye özel field'ları sorar.
-        // Level 1'de (Aday Öğrenci formunda) doldurulan alanlar burada tekrar
-        // sorulmaz — manager/senior gerekirse düzenler.
-        // Schema service Level 2 için DB'den çekebileceğinden field'lar level
-        // metadata'sız gelebilir. Bu yüzden Catalog'taki level=1 key listesini
-        // referans alıp key match ile çıkarıyoruz.
-        $level1Keys = collect(\App\Support\GuestRegistrationFormCatalog::flatFieldsByLevel(1))
-            ->pluck('key')->filter()->values()->all();
-
-        $allLevel2Groups = app(GuestRegistrationFieldSchemaService::class)->groupsByLevel(2, $companyId);
-        $fieldGroups = collect($allLevel2Groups)->map(function (array $group) use ($level1Keys): array {
-            $group['fields'] = collect($group['fields'] ?? [])
-                ->reject(fn (array $f) => in_array($f['key'] ?? '', $level1Keys, true))
-                ->values()
-                ->all();
-            return $group;
-        })->filter(fn (array $g) => !empty($g['fields']))->values()->all();
+        // Student form'u Level 2 schema'sının TAMAMINI gösterir — Level 1
+        // alanları da dahil. Level 1'de doldurulmuş veriler draft'tan otomatik
+        // pre-fill edilir, kullanıcı isterse düzenler. Eksik alanları (örn.
+        // birth_date Level 1'de doldurulmamışsa) burada doldurabilir.
+        //
+        // Önceki davranış: Level 1 key'leri reject ile gizleniyordu →
+        // kullanıcı eksik bir Level 1 alanı için Level 2 form'unda hata alsa
+        // bile geri dönüp düzeltemiyordu (asla göremiyordu). Bu yüzden tüm
+        // Level 2 schema'sı (Level 1 alanları dahil) gösterilir.
+        $fieldGroups = app(GuestRegistrationFieldSchemaService::class)
+            ->groupsByLevel(2, $companyId);
 
         if ($guest) {
             $guest->registration_form_draft = $this->ensureRegistrationDraftHydrated($guest, $companyId);
