@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Manager;
 use App\Http\Controllers\Controller;
 use App\Models\DiscountCode;
 use App\Models\DiscountCodeRedemption;
+use App\Services\AiWritingService;
 use App\Services\EventLogService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -116,6 +118,107 @@ class DiscountCodeController extends Controller
         return back()->with('success', $discountCode->is_active ? 'Kod aktif edildi.' : 'Kod pasif edildi.');
     }
 
+    /**
+     * AI ile paylaşım kartı metinlerini öner (4 alan: title, subtitle, cta, disclaimer).
+     * Form'daki current state'e göre context kurar — tone template'e göre değişir.
+     */
+    public function aiSuggest(Request $request, AiWritingService $ai): JsonResponse
+    {
+        $data = $request->validate([
+            'code'           => 'nullable|string|max:64',
+            'description'    => 'nullable|string|max:255',
+            'discount_type'  => 'required|in:percent,fixed',
+            'discount_value' => 'required|numeric|min:0',
+            'template_id'    => 'nullable|integer|min:1|max:5',
+            'valid_until'    => 'nullable|date',
+        ]);
+
+        if (! $ai->isAvailable()) {
+            return response()->json([
+                'ok'    => false,
+                'error' => 'AI yazıcı yapılandırılmamış. Marketing Admin → AI Asistan ayarlarından provider + API key girilmesi gerekiyor.',
+            ], 422);
+        }
+
+        $tplId = (int) ($data['template_id'] ?? 1);
+        $tone  = $this->toneForTemplate($tplId);
+
+        $discountText = $data['discount_type'] === 'percent'
+            ? '%' . rtrim(rtrim(number_format((float) $data['discount_value'], 2, '.', ''), '0'), '.') . ' indirim'
+            : number_format((float) $data['discount_value'], 0, ',', '.') . ' EUR sabit indirim';
+
+        $brandName = config('brand.name', 'MentorDE');
+        $tagline   = config('brand.tagline', 'Almanya Eğitim Danışmanlığı');
+
+        $systemPrompt = <<<TXT
+Sen {$brandName} ({$tagline}) için pazarlama metni yazan bir uzman copywriter'sın.
+Hedef kitle: Türkiye'den Almanya'da üniversite okumak isteyen genç adaylar (18–28 yaş).
+Yazım dili: TÜRKÇE. Doğal, akıcı, samimi ama kalitesiz değil.
+
+Tone for this kart: {$tone}
+
+Bu indirim kuponu için 4 metin oluştur:
+- title: Hero başlık. Dikkat çekici, max 60 karakter. Gerekirse 1 emoji.
+- subtitle: Açıklayıcı alt başlık. Max 200 karakter, 1-2 cümle.
+- cta: Buton metni. Eylemsel (hadi/başla/yararlan tarzı), max 25 karakter.
+- disclaimer: Küçük disclaimer. Max 150 karakter. "Kullanım koşulları geçerlidir, X tarihine kadar..." tarzı.
+
+KURAL:
+- Başlık her seferinde aynı klişe olmasın ("Sana özel" gibi). Yaratıcı ol.
+- Almanya/üniversite/öğrenci yolculuğu temasını kullan.
+- Yapay/abartı reklam dilinden kaçın ("inanılmaz fırsat!" gibi). Doğal kal.
+- "Sen" hitabı kullan (resmi "siz" değil).
+- {$brandName} markasından bahsetme metnin içinde — kart üstünde zaten görünüyor.
+
+ÇIKTI: SADECE geçerli JSON. ` veya markdown code fence YOK. Başka açıklama YOK.
+Format:
+{"title": "...", "subtitle": "...", "cta": "...", "disclaimer": "..."}
+TXT;
+
+        $userParts = [
+            "İndirim: {$discountText}",
+        ];
+        if (! empty($data['description'])) {
+            $userParts[] = "Manager iç notu: " . $data['description'];
+        }
+        if (! empty($data['valid_until'])) {
+            $userParts[] = "Son kullanma: " . \Carbon\Carbon::parse($data['valid_until'])->format('d.m.Y');
+        }
+        if (! empty($data['code'])) {
+            $userParts[] = "Kod: " . strtoupper($data['code']);
+        }
+
+        $result = $ai->chat($systemPrompt, implode("\n", $userParts), maxTokens: 600);
+
+        if (! ($result['ok'] ?? false)) {
+            return response()->json([
+                'ok'    => false,
+                'error' => 'AI çağrısı başarısız: ' . ($result['error'] ?? 'unknown'),
+            ], 502);
+        }
+
+        $content = (string) ($result['content'] ?? '');
+        $parsed  = $this->extractJson($content);
+
+        if (! $parsed) {
+            return response()->json([
+                'ok'    => false,
+                'error' => 'AI yanıtı parse edilemedi. Yeniden dene.',
+                'raw'   => $content,
+            ], 502);
+        }
+
+        return response()->json([
+            'ok'         => true,
+            'title'      => (string) ($parsed['title'] ?? ''),
+            'subtitle'   => (string) ($parsed['subtitle'] ?? ''),
+            'cta'        => (string) ($parsed['cta'] ?? ''),
+            'disclaimer' => (string) ($parsed['disclaimer'] ?? ''),
+            'provider'   => $result['provider'] ?? null,
+            'model'      => $result['model'] ?? null,
+        ]);
+    }
+
     public function redemptions(Request $request): View
     {
         $codeId = $request->query('code_id');
@@ -131,6 +234,35 @@ class DiscountCodeController extends Controller
             'redemptions' => $query->paginate(50)->appends($request->query()),
             'filteredCode' => $codeId ? DiscountCode::find($codeId) : null,
         ]);
+    }
+
+    /**
+     * Template'a göre AI'a tone talimatı.
+     */
+    private function toneForTemplate(int $tplId): string
+    {
+        return match ($tplId) {
+            2 => 'Canlı, genç, enerjik. Emoji kullan. Heyecanlı kelimeler.',
+            3 => 'Lüks, ayrıcalıklı, sofistike. Az emoji. Şık, hafif resmi ama soğuk değil.',
+            4 => 'Eğlenceli, samimi, oyuncu. Bol emoji. Genç-arkadaş gibi konuşur.',
+            5 => 'Aciliyet hissi. "Kaçırma", "sadece X gün", "son fırsat" tarzı. Direkt eylem çağrısı.',
+            default => 'Profesyonel ama sıcak. 1-2 emoji. Güven veren, net, sade.',
+        };
+    }
+
+    /**
+     * AI bazen ```json ... ``` markdown wrap'i ekleyebilir veya başına/sonuna text koyabilir.
+     * İlk { ile son } arasını alıp parse et.
+     */
+    private function extractJson(string $raw): ?array
+    {
+        $start = strpos($raw, '{');
+        $end   = strrpos($raw, '}');
+        if ($start === false || $end === false || $end <= $start) return null;
+
+        $candidate = substr($raw, $start, $end - $start + 1);
+        $decoded = json_decode($candidate, true);
+        return is_array($decoded) ? $decoded : null;
     }
 
     /**

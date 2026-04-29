@@ -138,6 +138,19 @@
                 seçtiğin template ve metinlerle güzel bir landing oluşur. Aday "Görsel İndir" ile PNG kaydedebilir.
             </div>
 
+            {{-- AI önerisi butonu --}}
+            <div id="aiSuggestBox" style="margin-bottom:14px; padding:10px 12px; background:linear-gradient(135deg,rgba(168,85,247,.08),rgba(59,130,246,.08)); border:1px solid rgba(168,85,247,.25); border-radius:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <div style="font-size:18px;">✨</div>
+                <div style="flex:1; min-width:200px;">
+                    <div style="font-size:12.5px; font-weight:700; color:var(--u-text);">AI ile metinleri otomatik oluştur</div>
+                    <div style="font-size:11px; color:var(--u-muted); margin-top:1px;">İndirim tutarı, template tonu ve geçerliliğine göre 4 alan birden dolar.</div>
+                </div>
+                <button type="button" id="aiSuggestBtn" class="dc-btn primary" style="white-space:nowrap;">
+                    ✨ Önerileri Üret
+                </button>
+            </div>
+            <div id="aiSuggestFeedback" style="font-size:12px; line-height:1.5; margin-bottom:12px;"></div>
+
             <label>Template seç</label>
             @php $selectedTpl = (int) old('template_id', $code->template_id ?: 1); @endphp
             <div class="dc-templates">
@@ -196,12 +209,86 @@
 
     @push('scripts')
     <script nonce="{{ $cspNonce ?? '' }}">
+    // Template card highlight
     document.querySelectorAll('.dc-tpl-card input[type=radio]').forEach(function(r){
         r.addEventListener('change', function(){
             document.querySelectorAll('.dc-tpl-card').forEach(c => c.classList.remove('selected'));
             this.closest('.dc-tpl-card').classList.add('selected');
         });
     });
+
+    // AI ile öneri üret
+    (function(){
+        var btn = document.getElementById('aiSuggestBtn');
+        var fb  = document.getElementById('aiSuggestFeedback');
+        if (!btn) return;
+
+        btn.addEventListener('click', function(){
+            var form = btn.closest('form');
+            if (!form) return;
+
+            var fd = new FormData(form);
+            var dv = parseFloat(fd.get('discount_value') || '0');
+            if (!dv || dv <= 0) {
+                fb.innerHTML = '<span style="color:rgb(180,83,9);">⚠ Önce indirim tipi + değerini gir, sonra AI öner.</span>';
+                return;
+            }
+
+            var payload = {
+                code:            fd.get('code') || '',
+                description:     fd.get('description') || '',
+                discount_type:   fd.get('discount_type') || 'percent',
+                discount_value:  dv,
+                template_id:     parseInt(fd.get('template_id') || '1', 10),
+                valid_until:     fd.get('valid_until') || null,
+            };
+
+            var orig = btn.textContent;
+            btn.textContent = '⏳ AI düşünüyor…'; btn.disabled = true;
+            fb.innerHTML = '<span style="color:var(--u-muted);">İndirim + template tonuna göre 4 metin üretiliyor…</span>';
+
+            fetch('{{ route('manager.discount-codes.ai-suggest') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            })
+            .then(function(r){ return r.json().then(function(d){ return { status: r.status, data: d }; }); })
+            .then(function(res){
+                btn.textContent = orig; btn.disabled = false;
+                if (res.data && res.data.ok) {
+                    var fields = {
+                        landing_title:      res.data.title,
+                        landing_subtitle:   res.data.subtitle,
+                        landing_cta_text:   res.data.cta,
+                        landing_disclaimer: res.data.disclaimer,
+                    };
+                    Object.keys(fields).forEach(function(name){
+                        var el = form.querySelector('[name="' + name + '"]');
+                        if (el && fields[name]) {
+                            el.value = fields[name];
+                            // Hafif yanıp sön efekti
+                            el.style.transition = 'background-color .3s';
+                            el.style.backgroundColor = 'rgba(168,85,247,.15)';
+                            setTimeout(function(){ el.style.backgroundColor = ''; }, 800);
+                        }
+                    });
+                    var meta = res.data.provider ? ' (' + res.data.provider + ')' : '';
+                    fb.innerHTML = '<span style="color:#15803d;">✓ 4 alan dolduruldu' + meta + '. İstersen elle düzenle veya tekrar üret.</span>';
+                } else {
+                    var err = (res.data && res.data.error) || ('HTTP ' + res.status);
+                    fb.innerHTML = '<span style="color:rgb(185,28,28);">⚠ ' + err + '</span>';
+                }
+            })
+            .catch(function(e){
+                btn.textContent = orig; btn.disabled = false;
+                fb.innerHTML = '<span style="color:rgb(185,28,28);">⚠ Network hatası: ' + e.message + '</span>';
+            });
+        });
+    })();
     </script>
     @endpush
 </div>

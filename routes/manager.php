@@ -390,6 +390,7 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         $dc = \App\Http\Controllers\Manager\DiscountCodeController::class;
         Route::get('/manager/discount-codes',                    [$dc, 'index'])->name('manager.discount-codes.index');
         Route::get('/manager/discount-codes/redemptions',        [$dc, 'redemptions'])->name('manager.discount-codes.redemptions');
+        Route::post('/manager/discount-codes/ai-suggest',        [$dc, 'aiSuggest'])->middleware('throttle:20,1')->name('manager.discount-codes.ai-suggest');
         Route::get('/manager/discount-codes/create',             [$dc, 'create'])->name('manager.discount-codes.create');
         Route::post('/manager/discount-codes',                   [$dc, 'store'])->middleware('throttle:30,1')->name('manager.discount-codes.store');
         Route::get('/manager/discount-codes/{discountCode}/edit',[$dc, 'edit'])->name('manager.discount-codes.edit');
