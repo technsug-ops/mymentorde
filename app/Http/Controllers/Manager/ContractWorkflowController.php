@@ -133,12 +133,8 @@ class ContractWorkflowController extends Controller
                     'q'        => (string) ($guest->converted_student_id ?: $guest->email),
                 ])->withErrors(['contract' => "Onay icin uygun durum degil. Mevcut: {$currentStatus}."]);
             }
-            if ($note === '') {
-                return redirect()->route('manager.contract-template.show', [
-                    'guest_id' => (int) $guest->id,
-                    'q'        => (string) ($guest->converted_student_id ?: $guest->email),
-                ])->withErrors(['contract' => 'Onay icin not/sebep yazmaniz zorunludur.']);
-            }
+            // Onay pozitif bir aksiyon — sebep girmek zorunlu DEĞİL.
+            // Red için sebep zorunluluğu aşağıda korunur (kullanıcıya ne hata yaptığı bildirilmeli).
             $newStudentId = trim((string) ($guest->converted_student_id ?? ''));
             if ($newStudentId === '') {
                 $newStudentId = 'STU-' . str_pad((string) $guest->id, 8, '0', STR_PAD_LEFT);

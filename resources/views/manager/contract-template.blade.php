@@ -506,7 +506,7 @@
                     {{ $guestContractStatusForDecision === 'signed_uploaded' ? 'Imzali sozlesme yuklendi' : 'Sozlesme gonderildi' }}
                     @if($guestContractStatusForDecision === 'rejected') <span class="badge danger" style="font-size:10px;">Daha once reddedildi</span> @endif
                 </div>
-                <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-top:1px;">Onay veya red karari verebilirsiniz. Not/sebep zorunludur.</div>
+                <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-top:1px;">Onay icin not opsiyonel; red icin sebep zorunludur.</div>
             </div>
         </div>
         <form method="post" action="{{ route('manager.contract-template.decision') }}" id="quickDecisionForm">
@@ -527,14 +527,14 @@
                     </select>
                 </div>
                 <div>
-                    <label style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);display:block;margin-bottom:3px;">Not / Aciklama <span style="color:#dc2626;">*</span></label>
-                    <input name="note" id="qd_note" placeholder="Karar sebebini yazin..." required
+                    <label style="font-size:var(--tx-xs);font-weight:600;color:var(--u-muted);display:block;margin-bottom:3px;">Not / Aciklama <span style="color:#94a3b8;font-weight:500;">(red icin zorunlu)</span></label>
+                    <input name="note" id="qd_note" placeholder="Onay icin opsiyonel — red icin sebebini yazin..."
                            style="width:100%;padding:7px 10px;border:1px solid var(--u-line);border-radius:8px;font-size:var(--tx-xs);font-family:inherit;box-sizing:border-box;">
                 </div>
             </div>
             <div style="display:flex;gap:8px;justify-content:flex-end;">
                 <button type="submit" name="decision" value="approve"
-                        onclick="if(!document.getElementById('qd_note').value.trim()){alert('Onay sebebi/notu zorunludur.');return false;}return confirm('Sozlesme onaylanacak. Devam?')"
+                        onclick="return confirm('Sozlesme onaylanacak. Devam?')"
                         style="padding:9px 22px;border-radius:8px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;font-size:var(--tx-xs);font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;">
                     ✓ Onayla
                 </button>
