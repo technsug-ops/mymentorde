@@ -144,5 +144,8 @@ class GuestApplication extends Model
         // Sessizlik check-in akışı
         'silence_checkin_paused_at' => 'datetime',
         'last_silence_checkin_at' => 'datetime',
+
+        // Application Guide (Uni-Assist, Vize, vb.) extra alanlar
+        'application_meta' => 'array',
     ];
 }

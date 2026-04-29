@@ -421,6 +421,14 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::post('/manager/silence-monitor/company-overrides',               [$sm, 'updateCompanyOverrides'])->middleware('throttle:10,1')->name('manager.silence-monitor.company-overrides');
     });
 
+    // ── Application Guides (Uni-Assist + Vize başvurusu rehber sayfaları) ────
+    {
+        $uag = \App\Http\Controllers\Manager\UniAssistGuideController::class;
+        Route::get('/manager/guests/{guest}/uni-assist-rehber',                [$uag, 'show'])->name('manager.uni-assist-guide.show');
+        Route::post('/manager/guests/{guest}/uni-assist-rehber/save-meta',     [$uag, 'saveMeta'])->middleware('throttle:30,1')->name('manager.uni-assist-guide.save-meta');
+        Route::post('/manager/guests/{guest}/uni-assist-rehber/request-missing', [$uag, 'requestMissingFields'])->middleware('throttle:10,1')->name('manager.uni-assist-guide.request-missing');
+    }
+
     // ── Public Landing Envanter (sisteme bağlı public sayfa registry'si) ─────
     Route::get('/manager/landing-inventory', [\App\Http\Controllers\Manager\LandingInventoryController::class, 'index'])
         ->name('manager.landing-inventory.index');
