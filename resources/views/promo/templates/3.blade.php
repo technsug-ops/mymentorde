@@ -85,7 +85,7 @@
     <div class="promo-header" style="text-align: center;">
         <div class="promo-logo" style="justify-content: center;">
             @if(!empty($logoUrl))
-                <span class="promo-logo-img-wrap" style="background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.35); padding: 8px 14px;"><img class="logo-img" src="{{ $logoUrl }}" alt="{{ $brandName }}"></span>
+                <span class="promo-logo-img-wrap" style="background: white; border: 1px solid rgba(251,191,36,.55); padding: 8px 16px; box-shadow: 0 6px 18px rgba(251,191,36,.22);"><img class="logo-img" src="{{ $logoUrl }}" alt="{{ $brandName }}" style="height: 36px;"></span>
             @else
                 <div class="logo-mark">{{ mb_substr($brandShort, 0, 1) }}{{ mb_substr($brandAccent, 0, 1) }}</div>
                 <div class="logo-text">{{ $brandShort }}<span class="accent">{{ $brandAccent }}</span></div>
