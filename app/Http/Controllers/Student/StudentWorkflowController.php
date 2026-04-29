@@ -134,11 +134,19 @@ class StudentWorkflowController extends Controller
             $schemaService->spouseSkippedKeys($payload),
         );
 
-        // Level 1'de zaten doldurulmuş olan field'ları Student form sorunu doğurmasın
-        // diye required check'ten muaf tut (Student form'unda gösterilmiyorlar).
-        $level1Keys = collect(\App\Support\GuestRegistrationFormCatalog::flatFieldsByLevel(1))
+        // Eski draft (Level 1'den kalan veriler) — validation HER İKİSİNİ birleşik
+        // kontrol etmeli. Level 1'de doldurulmuş zorunlu alanlar (birth_date, vb.)
+        // Level 2 form'unda görünmüyor ama hâlâ dolu olmalı.
+        $existingDraft = is_array($guest->registration_form_draft) ? $guest->registration_form_draft : [];
+        $mergedDraft   = array_merge($existingDraft, $payload);
+
+        // Sadece OPSİYONEL Level 1 key'leri skip et — zorunlular merge edilmiş
+        // veride hâlâ kontrol edilir. Aday öğrenciliğinde doldurmadıysa şimdi
+        // hata göstererek kullanıcıya geri dönüp tamamlatırız.
+        $level1OptionalKeys = collect(\App\Support\GuestRegistrationFormCatalog::flatFieldsByLevel(1))
+            ->reject(fn ($f) => !empty($f['required']))
             ->pluck('key')->filter()->all();
-        $skipKeys = array_merge($skipKeys, $level1Keys);
+        $skipKeys = array_merge($skipKeys, $level1OptionalKeys);
 
         // Field-specific hata mesajı için catalog'dan label + tip lookup
         $allFields = $schemaService->flatFieldsByLevel(2, $companyId);
@@ -150,7 +158,8 @@ class StudentWorkflowController extends Controller
             if (in_array($key, $skipKeys, true)) {
                 continue;
             }
-            $val = $payload[$key] ?? null;
+            // L0 (guest model col) → L1 (existingDraft) → L2 (payload) sıralı bak
+            $val = $payload[$key] ?? $existingDraft[$key] ?? ($guest->{$key} ?? null);
             $isEmpty = is_array($val) ? empty($val) : ($val === null || trim((string) $val) === '');
             if ($isEmpty) {
                 $field = $fieldByKey[$key] ?? null;
@@ -164,12 +173,10 @@ class StudentWorkflowController extends Controller
                 $missingErrors[$key] = $label . ' ' . $verb;
             }
         }
-        // B13/B15: eğitim tarih sırası + parent dob kontrolü
-        foreach ($schemaService->educationDateOrderErrors($payload) as $f => $err) {
+        // B13/B15: eğitim tarih sırası + parent dob kontrolü (merged'da)
+        foreach ($schemaService->educationDateOrderErrors($mergedDraft) as $f => $err) {
             $missingErrors[$f] = $err;
         }
-        $existingDraft = is_array($guest->registration_form_draft) ? $guest->registration_form_draft : [];
-        $mergedDraft   = array_merge($existingDraft, $payload);
         foreach ($this->conditionalRequiredErrors($mergedDraft) as $field => $msg) {
             $missingErrors[$field] = $msg;
         }
