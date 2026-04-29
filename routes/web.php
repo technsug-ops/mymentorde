@@ -235,6 +235,8 @@ Route::middleware(['company.context', 'module:booking'])->group(function (): voi
     $bc = \App\Http\Controllers\Booking\PublicBookingController::class;
     Route::get('/randevu', [\App\Http\Controllers\Booking\BookingLandingController::class, 'index'])
         ->middleware('throttle:60,1')->name('booking.landing');
+    Route::post('/randevu/sirada', [\App\Http\Controllers\Booking\BookingLandingController::class, 'joinWaitlist'])
+        ->middleware('throttle:5,1')->name('booking.waitlist.join');
     Route::get('/book/{slug}',                       [$bc, 'show'])->middleware('throttle:60,1')->name('booking.public.show');
     Route::post('/book/{slug}/slots',                [$bc, 'slots'])->middleware('throttle:120,1')->name('booking.public.slots');
     Route::post('/book/{slug}/confirm',              [$bc, 'confirm'])->middleware('throttle:10,1')->name('booking.public.confirm');

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Booking;
 
 use App\Http\Controllers\Controller;
+use App\Models\BookingWaitlistRequest;
 use App\Models\MarketingAdminSetting;
 use App\Models\SeniorBookingSetting;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 /**
@@ -37,6 +40,7 @@ class BookingLandingController extends Controller
 
         $list = $settings->map(function (SeniorBookingSetting $s) use ($seniors) {
             $u = $seniors->get($s->senior_user_id);
+            $expertise = is_array($u?->expertise_tags) ? array_map('strval', $u->expertise_tags) : [];
             return [
                 'slug'          => $s->public_slug,
                 'display_name'  => $s->display_name ?: ($u?->name ?? 'Danışman'),
@@ -46,14 +50,79 @@ class BookingLandingController extends Controller
                 'name'          => $u?->name,
                 'photo_url'     => $u?->photo_url,
                 'bio'           => $u?->bio,
-                'expertise'     => is_array($u?->expertise_tags) ? $u->expertise_tags : [],
+                'expertise'     => $expertise,
+                // 3-kategori track çözümü: tags'tan derive
+                // 'bachelor' / 'master' tag'i varsa ilgili kategori, yoksa 'other'
+                'tracks'        => $this->resolveTracks($expertise),
             ];
         })->values();
 
+        // 3 kategoriye ayır (bir senior birden fazla track'te görünebilir)
+        $byTrack = [
+            'bachelor' => $list->filter(fn ($s) => in_array('bachelor', $s['tracks'], true))->values(),
+            'master'   => $list->filter(fn ($s) => in_array('master', $s['tracks'], true))->values(),
+            'other'    => $list->filter(fn ($s) => in_array('other', $s['tracks'], true))->values(),
+        ];
+
         return view('booking.public.landing', [
-            'seniors' => $list,
+            'seniors'    => $list,
+            'byTrack'    => $byTrack,
             'landingCms' => $this->loadLandingCms(),
         ]);
+    }
+
+    /**
+     * Senior'ın expertise_tags'inden 3 kategoriye uygun track listesi türetir.
+     * - 'bachelor' tag → ['bachelor']
+     * - 'master' tag → ['master']
+     * - İkisi birden → ['bachelor', 'master']
+     * - Hiçbiri yoksa → ['other'] (genel danışman varsayar)
+     *
+     * @param  array<int,string>  $tags
+     * @return array<int,string>
+     */
+    private function resolveTracks(array $tags): array
+    {
+        $normalized = array_map(fn ($t) => strtolower(trim((string) $t)), $tags);
+        $tracks = [];
+        if (in_array('bachelor', $normalized, true) || in_array('lisans', $normalized, true)) $tracks[] = 'bachelor';
+        if (in_array('master', $normalized, true) || in_array('yuksek_lisans', $normalized, true) || in_array('yüksek_lisans', $normalized, true)) $tracks[] = 'master';
+        if (empty($tracks)) $tracks[] = 'other';
+        return $tracks;
+    }
+
+    /**
+     * Bekleme listesi formu — kategori için uygun senior yoksa kullanıcı buraya bilgi bırakır.
+     */
+    public function joinWaitlist(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name'    => 'required|string|max:120',
+            'email'   => 'required|email|max:180',
+            'phone'   => 'nullable|string|max:32',
+            'track'   => 'required|in:bachelor,master,other',
+            'message' => 'nullable|string|max:1000',
+        ]);
+
+        $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
+
+        try {
+            BookingWaitlistRequest::create($data + [
+                'company_id'   => $companyId,
+                'status'       => 'new',
+                'utm_source'   => $request->cookie('utm_source'),
+                'utm_medium'   => $request->cookie('utm_medium'),
+                'utm_campaign' => $request->cookie('utm_campaign'),
+                'referrer_url' => substr((string) $request->headers->get('referer', ''), 0, 500),
+                'ip_address'   => $request->ip(),
+                'user_agent'   => substr((string) $request->userAgent(), 0, 500),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('booking.waitlist.failed', ['error' => $e->getMessage(), 'email' => $data['email']]);
+            return back()->withErrors(['waitlist' => 'Kaydın oluşturulamadı, lütfen tekrar dene.'])->withInput();
+        }
+
+        return back()->with('waitlist_success', 'Kaydın alındı! Müsait danışman olduğunda email/telefon ile sana ulaşacağız.');
     }
 
     /**

@@ -311,6 +311,72 @@
         .l-empty h3 { margin:0 0 10px; font-size:22px; color:var(--text); font-family:var(--font-base); font-weight:normal; }
         .l-empty p { margin:0 0 22px; color:var(--muted); font-size:14px; max-width:460px; margin-left:auto; margin-right:auto; line-height:1.65; }
 
+        /* === Track tabs (Bachelor/Master/Diğer) === */
+        .l-track-tabs {
+            display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;
+            margin-bottom:26px;
+        }
+        @media(max-width:720px) { .l-track-tabs { grid-template-columns:1fr; } }
+        .l-track-tab {
+            display:flex; align-items:center; gap:14px;
+            background:var(--surface); border:2px solid var(--line); border-radius:14px;
+            padding:16px 20px; cursor:pointer; font-family:inherit;
+            text-align:left; transition:all .15s;
+        }
+        .l-track-tab:hover { border-color:var(--primary-light); transform:translateY(-2px); }
+        .l-track-tab.active {
+            border-color:var(--primary);
+            background:linear-gradient(140deg, var(--primary-soft) 0%, #fff 100%);
+            box-shadow:0 12px 28px rgba(126,88,191,.18);
+        }
+        .l-track-emoji { font-size:30px; flex-shrink:0; }
+        .l-track-text { flex:1; display:flex; flex-direction:column; gap:2px; }
+        .l-track-text strong { font-size:15px; font-weight:700; color:var(--primary-deep); letter-spacing:-.3px; }
+        .l-track-text small { font-size:11.5px; color:var(--muted); font-weight:600; }
+        .l-track-count {
+            background:var(--primary); color:#fff;
+            min-width:28px; height:28px; border-radius:14px;
+            display:inline-flex; align-items:center; justify-content:center;
+            font-weight:800; font-size:12.5px; padding:0 8px;
+            box-shadow:0 4px 12px rgba(126,88,191,.32);
+        }
+        .l-track-tab:not(.active) .l-track-count { background:var(--muted); box-shadow:none; opacity:.7; }
+
+        /* === Bekleme listesi formu (lead-quality) === */
+        .l-waitlist-card {
+            max-width:600px; margin:0 auto;
+            background:var(--surface); border:1px solid var(--line);
+            border-radius:18px; padding:36px 30px; text-align:center;
+            box-shadow:0 12px 32px rgba(126,88,191,.08);
+        }
+        .l-waitlist-icon { font-size:54px; margin-bottom:14px; }
+        .l-waitlist-card h3 {
+            font-family:var(--font-base); font-weight:700; font-size:22px;
+            color:var(--primary-deep); margin:0 0 10px; letter-spacing:-.4px;
+        }
+        .l-waitlist-card p { margin:0 0 26px; color:var(--muted); font-size:14px; line-height:1.6; }
+        .l-waitlist-form { text-align:left; }
+        .l-waitlist-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+        .l-waitlist-row:last-of-type, .l-waitlist-row:has(textarea) { grid-template-columns:1fr; }
+        .l-waitlist-form input, .l-waitlist-form textarea {
+            width:100%; padding:11px 14px; border:1px solid var(--line); border-radius:10px;
+            font-family:inherit; font-size:14px; background:#fff; color:var(--text);
+            resize:vertical;
+        }
+        .l-waitlist-form input:focus, .l-waitlist-form textarea:focus {
+            outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft);
+        }
+        .l-waitlist-form button { margin-top:6px; padding:14px 22px; font-size:14.5px; }
+        .l-waitlist-fineprint {
+            margin-top:14px; font-size:11.5px; color:var(--muted); text-align:center; line-height:1.6;
+        }
+        .l-waitlist-success, .l-waitlist-error {
+            max-width:600px; margin:0 auto 22px; padding:14px 18px; border-radius:10px;
+            font-size:13.5px; font-weight:600; text-align:center;
+        }
+        .l-waitlist-success { background:rgba(22,163,74,.1); color:#15803d; border:1px solid rgba(22,163,74,.3); }
+        .l-waitlist-error { background:rgba(220,38,38,.08); color:rgb(185,28,28); border:1px solid rgba(220,38,38,.3); }
+
         /* === CTA BANNER — primary gradient === */
         .l-cta {
             background:linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
@@ -527,59 +593,107 @@
             <p class="l-sec-sub">Her biri Almanya'da eğitim görmüş veya hâlâ aktif çalışan profesyoneller. Deneyimlerini senin adımlarına dönüştürüyorlar.</p>
         </div>
 
-        @if ($seniors->isNotEmpty())
-            <div class="l-seniors-bar">
-                <input type="text" id="l-search" placeholder="🔍 Danışman adı veya uzmanlık alanı ara...">
-            </div>
-            <div class="l-seniors-grid" id="l-grid">
-                @foreach ($seniors as $s)
-                    <div class="l-senior-card" data-search="{{ strtolower(($s['name'] ?? '').' '.($s['display_name'] ?? '').' '.implode(' ', (array)$s['expertise'])) }}">
-                        <div class="l-senior-avatar">
-                            @if (!empty($s['photo_url']))
-                                <img src="{{ $s['photo_url'] }}" alt="{{ $s['name'] }}">
-                            @else
-                                {{ strtoupper(mb_substr($s['name'] ?? 'D', 0, 1)) }}
-                            @endif
-                        </div>
-                        <h3>{{ $s['name'] ?? $s['display_name'] }}</h3>
-                        <div class="l-senior-sub">{{ $s['display_name'] }}</div>
+        {{-- 3 kategori tab — Bachelor / Master / Diğer --}}
+        @php
+            $tracks = [
+                'bachelor' => ['emoji' => '🎓', 'title' => 'Bachelor', 'subtitle' => 'Lisans (4 yıllık üniversite)'],
+                'master'   => ['emoji' => '🎯', 'title' => 'Master',   'subtitle' => 'Yüksek Lisans · Doktora'],
+                'other'    => ['emoji' => '🌟', 'title' => 'Diğer',    'subtitle' => 'Dil okulu · Ausbildung · Vize'],
+            ];
+            $defaultTrack = ! empty($byTrack['bachelor']) && count($byTrack['bachelor']) > 0 ? 'bachelor'
+                : (! empty($byTrack['master']) && count($byTrack['master']) > 0 ? 'master' : 'other');
+        @endphp
 
-                        @if (!empty($s['bio']))
-                            <div class="l-senior-bio">{{ \Illuminate\Support\Str::limit($s['bio'], 120) }}</div>
-                        @else
-                            <div class="l-senior-bio" style="color:#94a3b8;font-style:italic;">Uzman tanıtımı yakında eklenecek.</div>
-                        @endif
+        <div class="l-track-tabs">
+            @foreach($tracks as $code => $t)
+                <button type="button"
+                        class="l-track-tab {{ $defaultTrack === $code ? 'active' : '' }}"
+                        data-track-tab="{{ $code }}">
+                    <span class="l-track-emoji">{{ $t['emoji'] }}</span>
+                    <span class="l-track-text">
+                        <strong>{{ $t['title'] }}</strong>
+                        <small>{{ $t['subtitle'] }}</small>
+                    </span>
+                    <span class="l-track-count">{{ count($byTrack[$code] ?? []) }}</span>
+                </button>
+            @endforeach
+        </div>
 
-                        @if (!empty($s['expertise']))
-                            <div class="l-senior-tags">
-                                @foreach (array_slice($s['expertise'], 0, 5) as $tag)
-                                    <span class="l-senior-tag">{{ $tag }}</span>
-                                @endforeach
-                            </div>
-                        @endif
-
-                        <div class="l-senior-meta">
-                            <span>⏱ {{ $s['slot_duration'] }} dk</span>
-                            <span>🌍 {{ $s['timezone'] }}</span>
-                        </div>
-
-                        <a href="{{ route('booking.public.show', ['slug' => $s['slug']]) }}" class="l-senior-btn">Müsait Saatleri Gör →</a>
-                    </div>
-                @endforeach
-            </div>
-        @else
-            <div class="l-empty">
-                <div class="l-empty-icon">🎓</div>
-                <h3>Danışmanlarımız Hazırlanıyor</h3>
-                <p>Şu anda public randevu veren danışman yok. WhatsApp üzerinden bize yazarsan sıraya alıp en yakın müsait danışmanı sana atayalım.</p>
-                <a href="https://wa.me/4915203253691?text={{ urlencode('Merhaba, randevu almak istiyorum. Müsait danışman olunca haber verir misiniz?') }}"
-                   target="_blank" rel="noopener"
-                   class="l-btn l-btn-primary" style="display:inline-flex;"
-                   data-track="cta_clicked"
-                   data-ph-cta-name="whatsapp_empty_state"
-                   data-ph-location="booking_landing_empty">💬 WhatsApp ile İletişime Geç →</a>
-            </div>
+        @if(session('waitlist_success'))
+            <div class="l-waitlist-success">✅ {{ session('waitlist_success') }}</div>
         @endif
+        @error('waitlist')
+            <div class="l-waitlist-error">⚠ {{ $message }}</div>
+        @enderror
+
+        @foreach($tracks as $code => $t)
+            <div class="l-track-panel" data-track-panel="{{ $code }}" style="display:{{ $defaultTrack === $code ? 'block' : 'none' }};">
+                @if(! empty($byTrack[$code]) && count($byTrack[$code]) > 0)
+                    <div class="l-seniors-bar">
+                        <input type="text" class="l-track-search" data-track-search="{{ $code }}" placeholder="🔍 {{ $t['title'] }} kategorisinde danışman ara...">
+                    </div>
+                    <div class="l-seniors-grid">
+                        @foreach($byTrack[$code] as $s)
+                            <div class="l-senior-card" data-search="{{ strtolower(($s['name'] ?? '').' '.($s['display_name'] ?? '').' '.implode(' ', (array)$s['expertise'])) }}">
+                                <div class="l-senior-avatar">
+                                    @if (!empty($s['photo_url']))
+                                        <img src="{{ $s['photo_url'] }}" alt="{{ $s['name'] }}">
+                                    @else
+                                        {{ strtoupper(mb_substr($s['name'] ?? 'D', 0, 1)) }}
+                                    @endif
+                                </div>
+                                <h3>{{ $s['name'] ?? $s['display_name'] }}</h3>
+                                <div class="l-senior-sub">{{ $s['display_name'] }}</div>
+                                @if (!empty($s['bio']))
+                                    <div class="l-senior-bio">{{ \Illuminate\Support\Str::limit($s['bio'], 120) }}</div>
+                                @else
+                                    <div class="l-senior-bio" style="color:#94a3b8;font-style:italic;">Uzman tanıtımı yakında eklenecek.</div>
+                                @endif
+                                @if (!empty($s['expertise']))
+                                    <div class="l-senior-tags">
+                                        @foreach (array_slice($s['expertise'], 0, 5) as $tag)
+                                            <span class="l-senior-tag">{{ $tag }}</span>
+                                        @endforeach
+                                    </div>
+                                @endif
+                                <div class="l-senior-meta">
+                                    <span>⏱ {{ $s['slot_duration'] }} dk</span>
+                                    <span>🌍 {{ $s['timezone'] }}</span>
+                                </div>
+                                <a href="{{ route('booking.public.show', ['slug' => $s['slug']]) }}" class="l-senior-btn">Müsait Saatleri Gör →</a>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    {{-- Empty state — bekleme listesi formu (WhatsApp yok, lead-quality için form) --}}
+                    <div class="l-waitlist-card">
+                        <div class="l-waitlist-icon">{{ $t['emoji'] }}</div>
+                        <h3>{{ $t['title'] }} kategorisinde şu an müsait danışman yok</h3>
+                        <p>Kayıt bırakırsan, bu kategoride uygun danışman müsait olduğunda <strong>email + telefon ile</strong> sana ulaşacağız. Genelde 1-2 iş günü içinde dönüyoruz.</p>
+                        <form method="POST" action="{{ route('booking.waitlist.join') }}" class="l-waitlist-form">
+                            @csrf
+                            <input type="hidden" name="track" value="{{ $code }}">
+                            <div class="l-waitlist-row">
+                                <input type="text" name="name" required maxlength="120" placeholder="Adın Soyadın *">
+                                <input type="email" name="email" required maxlength="180" placeholder="Email *">
+                            </div>
+                            <div class="l-waitlist-row">
+                                <input type="tel" name="phone" maxlength="32" placeholder="Telefon (+90 ...)">
+                            </div>
+                            <div class="l-waitlist-row">
+                                <textarea name="message" maxlength="1000" rows="2" placeholder="Aklındaki kısa not — hangi alanı düşünüyorsun? (opsiyonel)"></textarea>
+                            </div>
+                            <button type="submit" class="l-btn l-btn-primary" style="width:100%;">
+                                📋 Bekleme listesine kaydol
+                            </button>
+                            <div class="l-waitlist-fineprint">
+                                ✓ Spam yok · Sadece müsait danışman olduğunda iletişime geçeriz · İstediğin zaman silebilirsin
+                            </div>
+                        </form>
+                    </div>
+                @endif
+            </div>
+        @endforeach
     </div>
 </section>
 
@@ -654,15 +768,30 @@
 </footer>
 
 <script>
-// Senior arama
+// Track tab switch (Bachelor / Master / Diğer)
 (function(){
-    var search = document.getElementById('l-search');
-    if (!search) return;
-    search.addEventListener('input', function(){
-        var q = search.value.toLowerCase().trim();
-        document.querySelectorAll('.l-senior-card').forEach(function(card){
-            var haystack = card.getAttribute('data-search') || '';
-            card.style.display = (q === '' || haystack.indexOf(q) !== -1) ? '' : 'none';
+    document.querySelectorAll('.l-track-tab').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var track = btn.getAttribute('data-track-tab');
+            document.querySelectorAll('.l-track-tab').forEach(function(t){ t.classList.toggle('active', t === btn); });
+            document.querySelectorAll('.l-track-panel').forEach(function(p){
+                p.style.display = (p.getAttribute('data-track-panel') === track) ? 'block' : 'none';
+            });
+        });
+    });
+})();
+
+// Per-track senior arama
+(function(){
+    document.querySelectorAll('.l-track-search').forEach(function(input){
+        input.addEventListener('input', function(){
+            var q = input.value.toLowerCase().trim();
+            var panel = input.closest('.l-track-panel');
+            if (!panel) return;
+            panel.querySelectorAll('.l-senior-card').forEach(function(card){
+                var haystack = card.getAttribute('data-search') || '';
+                card.style.display = (q === '' || haystack.indexOf(q) !== -1) ? '' : 'none';
+            });
         });
     });
 })();
