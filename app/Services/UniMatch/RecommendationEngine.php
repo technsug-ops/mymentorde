@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Services\StudyBuddy;
+namespace App\Services\UniMatch;
 
 use App\Models\Program;
-use App\Models\StudyBuddyResponse;
+use App\Models\UniMatchResponse;
 use Illuminate\Support\Collection;
 
 /**
- * Discovery Wizard rule-based recommendation engine (Faz 2 v0).
+ * UniMatch rule-based recommendation engine.
  *
  * Şu an: rule-based scoring (language match, degree match, finance fit,
  * field of study, location preference, public-only filter).
@@ -19,7 +19,7 @@ use Illuminate\Support\Collection;
 class RecommendationEngine
 {
     /** Top-N recommendation döndür. */
-    public function recommend(StudyBuddyResponse $response, int $limit = 10): array
+    public function recommend(UniMatchResponse $response, int $limit = 10): array
     {
         $a = is_array($response->answers) ? $response->answers : [];
 

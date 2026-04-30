@@ -525,8 +525,8 @@
 </div>
 @endif
 
-{{-- ── Akıllı Program Bulucu (Discovery Wizard) ── --}}
-<a href="{{ route('study-buddy.landing') }}" target="_blank" rel="noopener"
+{{-- ── UniMatch (Akıllı Program Bulucu) ── --}}
+<a href="{{ route('uni-match.landing') }}" target="_blank" rel="noopener"
    style="display:flex; align-items:center; justify-content:space-between; gap:16px;
           padding:18px 22px; margin:16px 0;
           background:linear-gradient(135deg,#7e58bf,#a07ed9);

@@ -1,4 +1,4 @@
-@extends('study-buddy.layout')
+@extends('uni-match.layout')
 
 @section('title', $program->course_name . ' — ' . $program->university_name_cached)
 
@@ -275,7 +275,7 @@
     <div style="font-size: 36px; margin-bottom: 8px;">🎯</div>
     <h2 class="sb-title" style="font-size: 22px;">Bu programa başvurmaya hazır mısın?</h2>
     <p class="sb-subtitle" style="font-size: 14px;">Danışmanın bu programı senin profilinle birlikte değerlendirip yol haritası hazırlasın.</p>
-    <a href="/study-buddy/start" class="sb-btn sb-btn-primary" style="padding: 14px 32px; font-size: 15px; font-weight: 700;">
+    <a href="/uni-match/start" class="sb-btn sb-btn-primary" style="padding: 14px 32px; font-size: 15px; font-weight: 700;">
         Sihirbazla Başla
         <span style="font-size: 18px;">→</span>
     </a>

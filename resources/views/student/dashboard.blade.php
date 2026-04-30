@@ -406,7 +406,7 @@
 @endif
 
 {{-- Akıllı Program Bulucu (alternatif / Master sonrası program keşfi) --}}
-<a href="{{ route('study-buddy.landing') }}" target="_blank" rel="noopener"
+<a href="{{ route('uni-match.landing') }}" target="_blank" rel="noopener"
    style="display:flex; align-items:center; justify-content:space-between; gap:14px;
           padding:14px 18px; margin-bottom:14px;
           background:linear-gradient(135deg,#7e58bf,#a07ed9);

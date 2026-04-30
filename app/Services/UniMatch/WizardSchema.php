@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Services\StudyBuddy;
+namespace App\Services\UniMatch;
 
 /**
- * Discovery Wizard adım tanımları (Faz 2).
+ * UniMatch wizard adım tanımları.
  *
  * 20 adım — Expatrio kopyası DEĞİL, TR-spesifik öne çıkarılmış:
  *  - Türk lise türü (8 detay)

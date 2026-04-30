@@ -296,7 +296,7 @@
                 <div class="nav-acc-body" style="{{ $isIcerik ? '' : 'display:none;' }}">
                     <a href="/senior/document-builder" class="nav-link {{ request()->is('senior/document-builder*') ? 'active' : '' }}"><span class="nav-icon">📝</span> Doküman Oluştur</a>
                     <a href="/senior/ai-assistant"     class="nav-link {{ request()->is('senior/ai-assistant*') ? 'active' : '' }}"><span class="nav-icon">🤖</span> AI Asistan</a>
-                    <a href="{{ route('study-buddy.landing') }}" target="_blank" rel="noopener" class="nav-link"><span class="nav-icon">🎯</span> Program Bulucu (Wizard)</a>
+                    <a href="{{ route('uni-match.landing') }}" target="_blank" rel="noopener" class="nav-link"><span class="nav-icon">🎯</span> UniMatch</a>
                     <a href="/senior/knowledge-base"   class="nav-link {{ request()->is('senior/knowledge-base*','senior/materials*') ? 'active' : '' }}"><span class="nav-icon">📚</span> Materyaller & KB</a>
                     <a href="/senior/services"         class="nav-link {{ request()->is('senior/services*') ? 'active' : '' }}"><span class="nav-icon">🔧</span> Servisler</a>
                     @can('dam.view')

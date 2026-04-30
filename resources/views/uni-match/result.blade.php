@@ -1,6 +1,6 @@
-@extends('study-buddy.layout')
+@extends('uni-match.layout')
 
-@section('title', 'Sana özel program önerileri — Study Buddy')
+@section('title', 'Sana özel program önerileri — UniMatch')
 
 @section('content')
 <div class="sb-progress-wrap">
@@ -23,7 +23,7 @@
     <div class="sb-card" style="text-align: center;">
         <p style="color: #6b5894; font-size: 14px;">Cevaplarına tam uyan program bulunamadı. Filtreleri biraz genişletmek için cevaplarını tekrar gözden geçirelim.</p>
         <div style="margin-top: 20px;">
-            <a href="{{ route('study-buddy.start') }}" class="sb-btn sb-btn-primary">Yeniden Başla</a>
+            <a href="{{ route('uni-match.start') }}" class="sb-btn sb-btn-primary">Yeniden Başla</a>
         </div>
     </div>
 @else
@@ -89,7 +89,7 @@
         <div style="font-size: 32px; margin-bottom: 8px;">🚀</div>
         <h2 class="sb-title">Hadi adım atalım</h2>
         <p class="sb-subtitle">MentorDE'ye kayıt ol, danışmanın bu programlardan hangisinin sana en uygun olduğunu birlikte değerlendirin. Cevapların form'a otomatik aktarılacak — sadece kalan bilgileri tamamlarsın.</p>
-        <form method="POST" action="{{ route('study-buddy.convert') }}">
+        <form method="POST" action="{{ route('uni-match.convert') }}">
             @csrf
             <button type="submit" class="sb-btn sb-btn-primary" style="padding: 16px 36px; font-size: 16px; font-weight: 700;">
                 Şimdi Kayıt Ol & Danışmanla Görüş

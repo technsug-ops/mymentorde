@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Discovery Wizard cevap kaydı (Faz 2).
+ * UniMatch wizard cevap kaydı.
  *
  * İZOLASYON: COMPANY-SCOPED (BelongsToCompany trait).
  * - Bayi A'nın wizard cevapları bayi B ile paylaşılmaz
@@ -15,11 +15,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * - Tamamlandığında recommendations alanına ranked program listesi yazılır
  * - "Kayıt ol" CTA → guest_application'a dönüşür (converted_to_guest_id)
  */
-class StudyBuddyResponse extends Model
+class UniMatchResponse extends Model
 {
     use BelongsToCompany;
 
-    protected $table = 'study_buddy_responses';
+    protected $table = 'uni_match_responses';
 
     protected $fillable = [
         'company_id', 'session_token',

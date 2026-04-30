@@ -1,10 +1,10 @@
-@extends('study-buddy.layout')
+@extends('uni-match.layout')
 
-@section('title', $stepDef['title'] . ' — Study Buddy')
+@section('title', $stepDef['title'] . ' — UniMatch')
 
 @section('back-link')
     @if($currentStep > 1)
-        <a href="{{ route('study-buddy.step', ['n' => $currentStep - 1]) }}" class="sb-back">← Geri</a>
+        <a href="{{ route('uni-match.step', ['n' => $currentStep - 1]) }}" class="sb-back">← Geri</a>
     @endif
 @endsection
 
@@ -25,7 +25,7 @@
         <p class="sb-subtitle">{{ $stepDef['subtitle'] }}</p>
     @endif
 
-    <form method="POST" action="{{ route('study-buddy.step.save', ['n' => $currentStep]) }}" id="stepForm">
+    <form method="POST" action="{{ route('uni-match.step.save', ['n' => $currentStep]) }}" id="stepForm">
         @csrf
 
         @if($stepDef['type'] === 'cards')
@@ -81,7 +81,7 @@
         @endif
 
         <div class="sb-nav">
-            <a href="{{ route('study-buddy.landing') }}" class="sb-btn sb-btn-ghost">Vazgeç</a>
+            <a href="{{ route('uni-match.landing') }}" class="sb-btn sb-btn-ghost">Vazgeç</a>
             <button type="submit" class="sb-btn sb-btn-primary" id="nextBtn">
                 {{ $currentStep >= $totalSteps ? 'Sonuçları Göster' : 'Devam Et' }}
                 <span style="font-size: 16px;">→</span>

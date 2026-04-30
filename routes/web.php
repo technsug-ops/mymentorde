@@ -16,16 +16,16 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/login');
 Route::view('/landing/mentorde', 'landing.mentorde')->name('landing.mentorde');
 
-// ── Discovery Wizard (Faz 2) — Public, login gerekmez ────────────────────────
+// ── UniMatch Wizard — Public, login gerekmez ────────────────────────────────
 Route::middleware('company.context')->group(function (): void {
-    $sb = \App\Http\Controllers\StudyBuddy\WizardController::class;
-    Route::get('/study-buddy',                     [$sb, 'landing'])->name('study-buddy.landing');
-    Route::get('/study-buddy/start',               [$sb, 'start'])->middleware('throttle:30,1')->name('study-buddy.start');
-    Route::get('/study-buddy/step/{n}',            [$sb, 'step'])->whereNumber('n')->name('study-buddy.step');
-    Route::post('/study-buddy/step/{n}',           [$sb, 'saveStep'])->whereNumber('n')->middleware('throttle:60,1')->name('study-buddy.step.save');
-    Route::get('/study-buddy/complete',            [$sb, 'complete'])->name('study-buddy.complete');
-    Route::get('/study-buddy/result',              [$sb, 'result'])->name('study-buddy.result');
-    Route::post('/study-buddy/convert',            [$sb, 'convert'])->middleware('throttle:10,1')->name('study-buddy.convert');
+    $um = \App\Http\Controllers\UniMatch\WizardController::class;
+    Route::get('/uni-match',                       [$um, 'landing'])->name('uni-match.landing');
+    Route::get('/uni-match/start',                 [$um, 'start'])->middleware('throttle:30,1')->name('uni-match.start');
+    Route::get('/uni-match/step/{n}',              [$um, 'step'])->whereNumber('n')->name('uni-match.step');
+    Route::post('/uni-match/step/{n}',             [$um, 'saveStep'])->whereNumber('n')->middleware('throttle:60,1')->name('uni-match.step.save');
+    Route::get('/uni-match/complete',              [$um, 'complete'])->name('uni-match.complete');
+    Route::get('/uni-match/result',                [$um, 'result'])->name('uni-match.result');
+    Route::post('/uni-match/convert',              [$um, 'convert'])->middleware('throttle:10,1')->name('uni-match.convert');
 
     // Canonical Program detay (public, throttle korumalı)
     Route::get('/program/{program}',               [\App\Http\Controllers\ProgramController::class, 'show'])

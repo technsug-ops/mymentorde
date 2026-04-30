@@ -1155,15 +1155,15 @@ footer a:hover { color:#fff; }
             </div>
             <div class="hl-module" style="border-left:3px solid var(--primary);">
                 <div class="hl-module-icon">🎯</div>
-                <h4>Akıllı Program Bulucu <span style="font-size:10px; background:var(--primary); color:#fff; padding:2px 6px; border-radius:4px; vertical-align:middle; margin-left:4px;">YENİ</span></h4>
-                <p>13.000+ Almanya programı canonical katalog · 19 adımlık discovery wizard · 9-faktör akıllı öneri motoru · TR↔EN otomatik çeviri (Gemini). Aday tek tıkla en uygun 5 programı görür — danışman ön elemeyi atlar.</p>
-                <a href="{{ route('study-buddy.landing') }}"
+                <h4>UniMatch — Akıllı Program Bulucu <span style="font-size:10px; background:var(--primary); color:#fff; padding:2px 6px; border-radius:4px; vertical-align:middle; margin-left:4px;">YENİ</span></h4>
+                <p>13.000+ Almanya programı canonical katalog · 19 adımlık UniMatch wizard · 9-faktör akıllı öneri motoru · TR↔EN otomatik çeviri (Gemini). Aday tek tıkla en uygun 5 programı görür — danışman ön elemeyi atlar.</p>
+                <a href="{{ route('uni-match.landing') }}"
                    target="_blank"
                    style="display:inline-block; margin-top:10px; font-size:12px; color:var(--primary); font-weight:600; text-decoration:none; border-bottom:1px solid var(--primary);"
                    data-track="cta_clicked"
-                   data-ph-cta-name="modules_wizard_demo"
+                   data-ph-cta-name="modules_unimatch_demo"
                    data-ph-location="platform_modules">
-                    → Canlı Demo: Aday Wizard'ını Dene
+                    → Canlı Demo: UniMatch'ı Dene
                 </a>
             </div>
             <div class="hl-module">

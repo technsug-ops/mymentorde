@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\StudyBuddy;
+namespace App\Http\Controllers\UniMatch;
 
 use App\Http\Controllers\Controller;
 use App\Models\GuestApplication;
-use App\Models\StudyBuddyResponse;
-use App\Services\StudyBuddy\RecommendationEngine;
-use App\Services\StudyBuddy\WizardSchema;
+use App\Models\UniMatchResponse;
+use App\Services\UniMatch\RecommendationEngine;
+use App\Services\UniMatch\WizardSchema;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
@@ -17,12 +17,12 @@ use Illuminate\View\View;
  * Discovery Wizard — Aday öğrenci için akıllı program keşif sihirbazı (Faz 2).
  *
  * Akış:
- *   GET  /study-buddy           → landing
- *   GET  /study-buddy/start     → yeni session, step 1'e yönlendir
- *   GET  /study-buddy/step/{n}  → adım göster (cevap varsa pre-fill)
- *   POST /study-buddy/step/{n}  → cevabı kaydet, sonraki adıma git
- *   GET  /study-buddy/result    → öneri listesi
- *   POST /study-buddy/convert   → guest_application'a dönüştür + form'a yönlendir
+ *   GET  /uni-match           → landing
+ *   GET  /uni-match/start     → yeni session, step 1'e yönlendir
+ *   GET  /uni-match/step/{n}  → adım göster (cevap varsa pre-fill)
+ *   POST /uni-match/step/{n}  → cevabı kaydet, sonraki adıma git
+ *   GET  /uni-match/result    → öneri listesi
+ *   POST /uni-match/convert   → guest_application'a dönüştür + form'a yönlendir
  */
 class WizardController extends Controller
 {
@@ -33,7 +33,7 @@ class WizardController extends Controller
 
     public function landing(Request $request): View
     {
-        return view('study-buddy.landing');
+        return view('uni-match.landing');
     }
 
     public function start(Request $request): RedirectResponse
@@ -41,7 +41,7 @@ class WizardController extends Controller
         $companyId = (int) ($request->attributes->get('company_id') ?? 1);
         $token = (string) Str::uuid();
 
-        StudyBuddyResponse::query()->create([
+        UniMatchResponse::query()->create([
             'company_id'     => $companyId,
             'session_token'  => $token,
             'answers'        => [],
@@ -56,24 +56,24 @@ class WizardController extends Controller
         ]);
 
         // Session token'ı cookie'ye yaz (3 ay) — kullanıcı yarıda bıraktıysa devam edebilir
-        Cookie::queue('study_buddy_session', $token, 60 * 24 * 90);
+        Cookie::queue('uni_match_session', $token, 60 * 24 * 90);
 
-        return redirect()->route('study-buddy.step', ['n' => 1, 't' => $token]);
+        return redirect()->route('uni-match.step', ['n' => 1, 't' => $token]);
     }
 
     public function step(Request $request, int $n): View|RedirectResponse
     {
         $response = $this->resolveSession($request);
-        if (! $response) return redirect()->route('study-buddy.start');
+        if (! $response) return redirect()->route('uni-match.start');
 
         $total = $this->schema->totalSteps();
         $n = max(1, min($total, $n));
 
         // Bu step'in tanımı
         $stepDef = $this->schema->stepAt($n);
-        if (! $stepDef) return redirect()->route('study-buddy.start');
+        if (! $stepDef) return redirect()->route('uni-match.start');
 
-        return view('study-buddy.step', [
+        return view('uni-match.step', [
             'response'   => $response,
             'stepDef'    => $stepDef,
             'currentStep'=> $n,
@@ -86,11 +86,11 @@ class WizardController extends Controller
     public function saveStep(Request $request, int $n): RedirectResponse
     {
         $response = $this->resolveSession($request);
-        if (! $response) return redirect()->route('study-buddy.start');
+        if (! $response) return redirect()->route('uni-match.start');
 
         $total = $this->schema->totalSteps();
         $stepDef = $this->schema->stepAt($n);
-        if (! $stepDef) return redirect()->route('study-buddy.start');
+        if (! $stepDef) return redirect()->route('uni-match.start');
 
         $key = $stepDef['key'];
         $type = $stepDef['type'] ?? 'cards';
@@ -121,15 +121,15 @@ class WizardController extends Controller
         $response->save();
 
         if ($n >= $total) {
-            return redirect()->route('study-buddy.complete');
+            return redirect()->route('uni-match.complete');
         }
-        return redirect()->route('study-buddy.step', ['n' => $n + 1]);
+        return redirect()->route('uni-match.step', ['n' => $n + 1]);
     }
 
     public function complete(Request $request): RedirectResponse
     {
         $response = $this->resolveSession($request);
-        if (! $response) return redirect()->route('study-buddy.start');
+        if (! $response) return redirect()->route('uni-match.start');
 
         // Recommendation engine çalıştır
         $recs = $this->engine->recommend($response, 10);
@@ -139,17 +139,17 @@ class WizardController extends Controller
         $response->last_active_at = now();
         $response->save();
 
-        return redirect()->route('study-buddy.result');
+        return redirect()->route('uni-match.result');
     }
 
     public function result(Request $request): View|RedirectResponse
     {
         $response = $this->resolveSession($request);
         if (! $response || ! $response->isCompleted()) {
-            return redirect()->route('study-buddy.start');
+            return redirect()->route('uni-match.start');
         }
 
-        return view('study-buddy.result', [
+        return view('uni-match.result', [
             'response'        => $response,
             'recommendations' => $response->recommendations ?? [],
         ]);
@@ -163,7 +163,7 @@ class WizardController extends Controller
     {
         $response = $this->resolveSession($request);
         if (! $response || ! $response->isCompleted()) {
-            return redirect()->route('study-buddy.start');
+            return redirect()->route('uni-match.start');
         }
 
         if ($response->converted_to_guest_id) {
@@ -246,13 +246,13 @@ class WizardController extends Controller
     }
 
     /** Session token cookie veya URL'den, sonra DB lookup. */
-    private function resolveSession(Request $request): ?StudyBuddyResponse
+    private function resolveSession(Request $request): ?UniMatchResponse
     {
-        $token = (string) ($request->query('t') ?: $request->cookie('study_buddy_session', ''));
+        $token = (string) ($request->query('t') ?: $request->cookie('uni_match_session', ''));
         if ($token === '') return null;
 
         $companyId = (int) ($request->attributes->get('company_id') ?? 1);
-        return StudyBuddyResponse::query()
+        return UniMatchResponse::query()
             ->where('session_token', $token)
             ->where('company_id', $companyId)
             ->first();
