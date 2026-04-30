@@ -360,6 +360,85 @@ class GuestRegistrationFieldSchemaService
         return $options;
     }
 
+    /**
+     * Catalog'taki güncel type+options'ı DB'deki mevcut field rows'una
+     * push eder. Yeni alan eklendiğinde de DB'ye seed yapar.
+     *
+     * - is_system=true rows için type/options/label/help_text güncellenir
+     * - is_system=false (manager elle eklemiş) rows korunur
+     * - Catalog'da olmayan eski rows soft-deactivate edilmez (manuel temizlik)
+     *
+     * Çalıştır: php artisan tinker → app(GuestRegistrationFieldSchemaService::class)->syncFromCatalog(0)
+     */
+    public function syncFromCatalog(int $companyId = 0): array
+    {
+        if (!Schema::hasTable('guest_registration_fields')) {
+            return ['updated' => 0, 'inserted' => 0, 'skipped' => 0];
+        }
+        $cid = $companyId > 0 ? $companyId : 0;
+        $now = CarbonImmutable::now();
+        $updated = 0;
+        $inserted = 0;
+        $skipped = 0;
+
+        $existing = GuestRegistrationField::query()
+            ->where('company_id', $cid)
+            ->get()
+            ->keyBy('field_key');
+
+        foreach (GuestRegistrationFormCatalog::groups() as $sectionIndex => $group) {
+            $sectionKey = $this->safeCode($group['section_key'] ?? ('section_' . ($sectionIndex + 1)), 'section_' . ($sectionIndex + 1));
+            $sectionTitle = $this->safeText($group['title'] ?? ('Bolum ' . ($sectionIndex + 1)), 'Bolum ' . ($sectionIndex + 1));
+            $sectionOrder = (int) ($group['section_order'] ?? (($sectionIndex + 1) * 10));
+
+            foreach ((array) ($group['fields'] ?? []) as $fieldIndex => $field) {
+                $fieldKey = $this->safeCode($field['key'] ?? null, 'field_' . ($fieldIndex + 1));
+                $type = $this->safeText($field['type'] ?? 'text', 'text');
+                if (!in_array($type, ['text', 'email', 'date', 'month', 'select', 'textarea', 'phone', 'checkbox_group', 'canonical_program', 'expatrio_program', 'hidden'], true)) {
+                    $type = 'text';
+                }
+
+                $payload = [
+                    'section_key'   => $sectionKey,
+                    'section_title' => $sectionTitle,
+                    'section_order' => $sectionOrder,
+                    'label'         => $this->safeText($field['label'] ?? null, $fieldKey),
+                    'type'          => $type,
+                    'is_required'   => (bool) ($field['required'] ?? false),
+                    'sort_order'    => (int) ($field['sort_order'] ?? (($fieldIndex + 1) * 10)),
+                    'max_length'    => isset($field['max']) ? (int) $field['max'] : null,
+                    'placeholder'   => $this->safeNullableText($field['placeholder'] ?? null, 255),
+                    'help_text'     => $this->safeNullableText($field['help_text'] ?? null, 500),
+                    'options_json'  => $this->normalizeOptionsJson($field['options'] ?? null),
+                    'updated_at'    => $now,
+                ];
+
+                $existingRow = $existing->get($fieldKey);
+
+                if ($existingRow) {
+                    // Manager elle eklediyse (is_system=false) sadece options sync yap, label/type değiştirme
+                    if (! $existingRow->is_system) {
+                        $skipped++;
+                        continue;
+                    }
+                    $existingRow->fill($payload)->save();
+                    $updated++;
+                } else {
+                    GuestRegistrationField::query()->insert(array_merge($payload, [
+                        'company_id' => $cid,
+                        'field_key'  => $fieldKey,
+                        'is_active'  => true,
+                        'is_system'  => true,
+                        'created_at' => $now,
+                    ]));
+                    $inserted++;
+                }
+            }
+        }
+
+        return ['updated' => $updated, 'inserted' => $inserted, 'skipped' => $skipped];
+    }
+
     public function ensureDefaults(int $companyId = 0): void
     {
         if (!Schema::hasTable('guest_registration_fields')) {
@@ -381,7 +460,7 @@ class GuestRegistrationFieldSchemaService
                 $fieldKey = $this->safeCode($field['key'] ?? null, 'field_'.($fieldIndex + 1));
                 $label = $this->safeText($field['label'] ?? null, $fieldKey);
                 $type = $this->safeText($field['type'] ?? 'text', 'text');
-                if (!in_array($type, ['text', 'email', 'date', 'month', 'select', 'textarea', 'phone'], true)) {
+                if (!in_array($type, ['text', 'email', 'date', 'month', 'select', 'textarea', 'phone', 'checkbox_group', 'canonical_program', 'expatrio_program', 'hidden'], true)) {
                     $type = 'text';
                 }
                 $placeholder = $this->safeNullableText($field['placeholder'] ?? null, 255);
