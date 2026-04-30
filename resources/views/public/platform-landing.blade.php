@@ -8,7 +8,7 @@
     $brand = $brandName ?? config('brand.name', 'MentorDE');
 @endphp
 <title>{{ $brand }} Platform — Almanya Eğitim Danışmanlığı için End-to-End SaaS</title>
-<meta name="description" content="6 portal · 27+ modül · AI asistan · entegre CRM, vize, ödeme & analytics. Yurt dışı eğitim danışmanlığı firmaları için profesyonel SaaS çözümü.">
+<meta name="description" content="6 portal · 28+ modül · AI asistan · 13K+ Almanya programı · entegre CRM, vize, ödeme & analytics. Yurt dışı eğitim danışmanlığı firmaları için profesyonel SaaS çözümü.">
 <meta name="robots" content="index, follow">
 <meta property="og:title" content="{{ $brand }} Platform — Yurt Dışı Eğitim Danışmanlığı SaaS">
 <meta property="og:description" content="Tek panel, sınırsız ölçek. Almanya odaklı, çok-portal, AI destekli end-to-end danışmanlık platformu.">
@@ -808,7 +808,7 @@ footer a:hover { color:#fff; }
                     Ayrı Portal
                 </div>
                 <div class="hero-trust-item">
-                    <strong>27+</strong>
+                    <strong>28+</strong>
                     Modül
                 </div>
                 <div class="hero-trust-item">
@@ -859,7 +859,7 @@ footer a:hover { color:#fff; }
             </div>
             <div class="stat">
                 <div class="stat-icon">⚡</div>
-                <div class="stat-num">27+</div>
+                <div class="stat-num">28+</div>
                 <div class="stat-lbl">Hazır Modül + Genişleyebilir Mimari</div>
             </div>
             <div class="stat">
@@ -1121,7 +1121,7 @@ footer a:hover { color:#fff; }
 {{-- ═══ MODULES === --}}
 <section id="moduller" class="sec-bg-soft">
     <div class="container">
-        <span class="sec-label">27+ Hazır Modül</span>
+        <span class="sec-label">28+ Hazır Modül</span>
         <h2 class="sec-title">Eğitim danışmanlığının her iş süreci için modül.</h2>
         <p class="sec-lead">Hiçbir modülü baştan yazmana gerek yok — hepsi kutudan çıkar çıkmaz çalışıyor.</p>
 
@@ -1152,6 +1152,19 @@ footer a:hover { color:#fff; }
                 <div class="hl-module-icon">🤖</div>
                 <h4>AI Labs (Diferansiyatör)</h4>
                 <p>Gemini 2.5 + RAG knowledge base · intent analizi · FAQ önerileri · streaming yanıt · token guard. Aday soruları otomatik öğrenir.</p>
+            </div>
+            <div class="hl-module" style="border-left:3px solid var(--primary);">
+                <div class="hl-module-icon">🎯</div>
+                <h4>Akıllı Program Bulucu <span style="font-size:10px; background:var(--primary); color:#fff; padding:2px 6px; border-radius:4px; vertical-align:middle; margin-left:4px;">YENİ</span></h4>
+                <p>13.000+ Almanya programı canonical katalog · 19 adımlık discovery wizard · 9-faktör akıllı öneri motoru · TR↔EN otomatik çeviri (Gemini). Aday tek tıkla en uygun 5 programı görür — danışman ön elemeyi atlar.</p>
+                <a href="{{ route('study-buddy.landing') }}"
+                   target="_blank"
+                   style="display:inline-block; margin-top:10px; font-size:12px; color:var(--primary); font-weight:600; text-decoration:none; border-bottom:1px solid var(--primary);"
+                   data-track="cta_clicked"
+                   data-ph-cta-name="modules_wizard_demo"
+                   data-ph-location="platform_modules">
+                    → Canlı Demo: Aday Wizard'ını Dene
+                </a>
             </div>
             <div class="hl-module">
                 <div class="hl-module-icon">💳</div>
@@ -2064,7 +2077,7 @@ footer a:hover { color:#fff; }
                 @endif
             </div>
             <p style="margin:0; color:rgba(255,255,255,.6);">
-                Almanya eğitim danışmanlığında end-to-end SaaS platformu. 6 portal, 27+ modül, AI destekli — tek panel, sınırsız ölçek.
+                Almanya eğitim danışmanlığında end-to-end SaaS platformu. 6 portal, 28+ modül, AI destekli — tek panel, sınırsız ölçek.
             </p>
         </div>
         <div>

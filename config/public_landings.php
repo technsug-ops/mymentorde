@@ -61,6 +61,18 @@ return [
         'owner' => 'marketing',
         'tier' => 'critical',
     ],
+    [
+        'path' => '/study-buddy',
+        'name' => 'Akıllı Program Bulucu (Discovery Wizard)',
+        'type' => 'marketing',
+        'description' => '19 adımlık aday wizard\'ı — TR-spesifik (lise türü, APS, vize hazırlığı, MentorDE help). Sonuçta 9-faktör scoring ile en uygun 5 program + canonical detay (TR çeviri dahil).',
+        'edit_route' => 'manager.canonical-programs.index',
+        'edit_notes' => 'Wizard adımları: app/Services/StudyBuddy/WizardSchema.php · Engine: RecommendationEngine.php · Sonuç tasarımı: resources/views/study-buddy/result.blade.php',
+        'is_active' => true,
+        'tags' => ['student', 'lead', 'wizard', 'ai', 'catalog'],
+        'owner' => 'product',
+        'tier' => 'critical',
+    ],
 
     // ── FORM / CONVERSION ────────────────────────────────────────────────
     [

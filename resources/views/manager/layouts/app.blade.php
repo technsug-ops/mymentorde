@@ -504,6 +504,11 @@
                         <span style="background:#dc2626;color:#fff;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:800;margin-left:6px;">{{ $pccUnreviewed }}</span>
                     @endif
                 </a>
+                <a href="{{ route('study-buddy.landing') }}"
+                   target="_blank" rel="noopener"
+                   class="nav-link">
+                    <span class="nav-icon">🎯</span> Program Bulucu (Wizard)
+                </a>
                 <a href="/manager/system/security"
                    class="nav-link {{ request()->is('manager/system/security*') ? 'active' : '' }}">
                     <span class="nav-icon">🛡</span> Güvenlik Paneli

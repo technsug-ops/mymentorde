@@ -525,6 +525,30 @@
 </div>
 @endif
 
+{{-- ── Akıllı Program Bulucu (Discovery Wizard) ── --}}
+<a href="{{ route('study-buddy.landing') }}" target="_blank" rel="noopener"
+   style="display:flex; align-items:center; justify-content:space-between; gap:16px;
+          padding:18px 22px; margin:16px 0;
+          background:linear-gradient(135deg,#7e58bf,#a07ed9);
+          border-radius:14px; color:#fff; text-decoration:none;
+          box-shadow:0 4px 14px rgba(126,88,191,.22);">
+    <div style="display:flex; align-items:center; gap:14px;">
+        <div style="font-size:26px; line-height:1;">🎯</div>
+        <div>
+            <div style="font-size:15px; font-weight:700; letter-spacing:-.2px;">
+                Sana en uygun Almanya programını bul
+                <span style="display:inline-block; background:rgba(255,255,255,.22); font-size:10px; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle;">YENİ</span>
+            </div>
+            <div style="font-size:12.5px; opacity:.92; margin-top:2px;">
+                19 sorulu kısa anket · 13.000+ program · senin profiline özel ilk 5 öneri (~3 dk)
+            </div>
+        </div>
+    </div>
+    <div style="font-size:13px; font-weight:600; background:rgba(255,255,255,.18); padding:8px 14px; border-radius:8px; flex-shrink:0;">
+        Başla →
+    </div>
+</a>
+
 {{-- ── Stats Row ── --}}
 <div class="gdb-grid-3">
     <div class="gdb-stat">

@@ -405,6 +405,30 @@
 </div>
 @endif
 
+{{-- Akıllı Program Bulucu (alternatif / Master sonrası program keşfi) --}}
+<a href="{{ route('study-buddy.landing') }}" target="_blank" rel="noopener"
+   style="display:flex; align-items:center; justify-content:space-between; gap:14px;
+          padding:14px 18px; margin-bottom:14px;
+          background:linear-gradient(135deg,#7e58bf,#a07ed9);
+          border-radius:12px; color:#fff; text-decoration:none;
+          box-shadow:0 4px 12px rgba(126,88,191,.2);">
+    <div style="display:flex; align-items:center; gap:12px;">
+        <div style="font-size:22px; line-height:1;">🎯</div>
+        <div>
+            <div style="font-size:13.5px; font-weight:700;">
+                Yeni / Yedek Program Keşfet
+                <span style="display:inline-block; background:rgba(255,255,255,.22); font-size:9px; padding:2px 7px; border-radius:8px; margin-left:4px; vertical-align:middle;">YENİ</span>
+            </div>
+            <div style="font-size:11.5px; opacity:.92; margin-top:1px;">
+                13.000+ Almanya programı arasından profiline uyanları gör — Master/yedek/transfer için ideal
+            </div>
+        </div>
+    </div>
+    <div style="font-size:12px; font-weight:600; background:rgba(255,255,255,.18); padding:6px 12px; border-radius:7px; flex-shrink:0;">
+        Aç →
+    </div>
+</a>
+
 {{-- Quick Links (her zaman) --}}
 <div class="sd-ql">
     <a href="/student/registration">
