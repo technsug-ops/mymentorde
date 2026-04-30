@@ -348,20 +348,27 @@
                                 $type        = (string) ($field['type'] ?? 'text');
                                 $label       = (string) ($field['label'] ?? $key);
                                 $required    = !empty($field['required']);
-                                $placeholder = (string) ($field['placeholder'] ?? '');
-                                $helpText    = (string) ($field['help_text'] ?? '');
+                                $placeholder = is_scalar($field['placeholder'] ?? null) ? (string) $field['placeholder'] : '';
+                                $helpText    = is_scalar($field['help_text'] ?? null) ? (string) $field['help_text'] : '';
                                 $options     = is_array($field['options'] ?? null) ? $field['options'] : [];
                                 $value       = old($key, $draft[$key] ?? ($guestApplication?->{$key} ?? ''));
+                                // checkbox_group gibi multi-select array değerler — string cast'e koruma
+                                $valueIsArray = is_array($value);
                                 // B10: application_country DB'de 'de' (code) — eski label kayıtları normalize et
-                                if ($key === 'application_country') {
+                                if ($key === 'application_country' && ! $valueIsArray) {
                                     $value = \App\Support\GuestRegistrationFormCatalog::normalizeCountryValue($value);
                                 }
-                                $isFilled    = trim((string)$value) !== '';
-                                $isWide      = $type === 'textarea' || $type === 'email'
+                                $isFilled    = $valueIsArray ? ! empty($value) : trim((string) $value) !== '';
+                                $isWide      = $type === 'textarea' || $type === 'email' || $type === 'checkbox_group'
                                     || !empty($field['full_width']) || !empty($field['help_text'])
                                     || str_contains($key, 'address') || str_contains($key, 'motivation');
                             @endphp
                             @if($key === '') @continue @endif
+                            @if($type === 'hidden')
+                                {{-- Hidden field — UI'da görünmez, sadece form value taşır (target_program_source vb.) --}}
+                                <input type="hidden" name="{{ $key }}" value="{{ $valueIsArray ? '' : $value }}" data-source-hidden="{{ $key }}">
+                                @continue
+                            @endif
                             <div class="srf-form-group{{ $isFilled ? ' is-filled' : '' }}{{ $isWide ? ' srf-full' : '' }}" data-field-key="{{ $key }}">
                                 <div class="srf-label-row">
                                     <label>{{ $label }} @if($required)<span class="required-star">*</span>@endif</label>
@@ -399,6 +406,22 @@
                                             </div>
                                         @endif
                                     </div>
+                                @elseif($type === 'checkbox_group')
+                                    @php
+                                        $checked = $valueIsArray ? collect($value)->map(fn ($v) => (string) $v)->all() : [];
+                                    @endphp
+                                    <div class="srf-cbx-grid" style="display:flex; flex-wrap:wrap; gap:8px;">
+                                        @foreach($options as $opt)
+                                            @php
+                                                $ov = is_array($opt) ? (string)($opt['value'] ?? '') : (string) $opt;
+                                                $ol = is_array($opt) ? (string)($opt['label'] ?? $ov) : (string) $opt;
+                                            @endphp
+                                            <label style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border:1px solid var(--u-line); border-radius:8px; cursor:pointer;">
+                                                <input type="checkbox" name="{{ $key }}[]" value="{{ $ov }}" @checked(in_array($ov, $checked, true)) {{ $formLocked ? 'disabled' : '' }}>
+                                                <span>{{ $ol }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
                                 @elseif($type === 'select')
                                     <select name="{{ $key }}" data-required="{{ $required ? '1' : '0' }}" {{ $formLocked ? 'disabled' : '' }} @if($key === 'district') data-cascade-from="province" @endif>
                                         <option value="">Seçiniz</option>
@@ -408,12 +431,12 @@
                                             $ol = is_array($opt) ? (string)($opt['label'] ?? $opt['name'] ?? $ov) : (string)$opt;
                                             $oprov = is_array($opt) && isset($opt['province']) ? (string)$opt['province'] : null;
                                         @endphp
-                                            <option value="{{ $ov }}" @selected((string)$value === $ov) @if($oprov !== null) data-province="{{ $oprov }}" @endif>{{ $ol }}</option>
+                                            <option value="{{ $ov }}" @selected(! $valueIsArray && (string) $value === $ov) @if($oprov !== null) data-province="{{ $oprov }}" @endif>{{ $ol }}</option>
                                         @endforeach
                                     </select>
                                 @elseif($type === 'textarea')
                                     <textarea name="{{ $key }}" rows="4" placeholder="{{ $placeholder }}"
-                                              data-required="{{ $required ? '1' : '0' }}" {{ $formLocked ? 'disabled' : '' }}>{{ (string)$value }}</textarea>
+                                              data-required="{{ $required ? '1' : '0' }}" {{ $formLocked ? 'disabled' : '' }}>{{ $valueIsArray ? '' : (string) $value }}</textarea>
                                 @elseif($type === 'date')
                                     @php
                                         // 1) Geçmişte olamaz (gelecek hedef tarihler)
@@ -441,7 +464,7 @@
                                             $maxMessage = 'Tarih gelecekte olamaz.';
                                         }
                                     @endphp
-                                    <input type="date" name="{{ $key }}" value="{{ $value }}"
+                                    <input type="date" name="{{ $key }}" value="{{ $valueIsArray ? '' : $value }}"
                                            @if($dateMin) min="{{ $dateMin }}" @endif
                                            @if($dateMax) max="{{ $dateMax }}" @endif
                                            data-required="{{ $required ? '1' : '0' }}" {{ $formLocked ? 'disabled' : '' }}
@@ -472,7 +495,7 @@
                                             : '';
                                     @endphp
                                     <input type="{{ $inputType }}"
-                                           name="{{ $key }}" value="{{ (string)$value }}"
+                                           name="{{ $key }}" value="{{ $valueIsArray ? '' : (string) $value }}"
                                            placeholder="{{ $placeholder }}"
                                            data-required="{{ $required ? '1' : '0' }}" {{ $formLocked ? 'disabled' : '' }}
                                            @if($inputmode) inputmode="{{ $inputmode }}" @endif
