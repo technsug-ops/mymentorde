@@ -30,6 +30,10 @@ Route::middleware('company.context')->group(function (): void {
     // Canonical Program detay (public, throttle korumalı)
     Route::get('/program/{program}',               [\App\Http\Controllers\ProgramController::class, 'show'])
         ->middleware('throttle:60,1')->name('program.show');
+
+    // EN→TR çeviri (lazy on-demand, Gemini, 10/dk per IP)
+    Route::post('/program/{program}/translate',    [\App\Http\Controllers\ProgramTranslationController::class, 'translate'])
+        ->middleware('throttle:10,1')->name('program.translate');
 });
 
 // ── Yasal Sayfalar (Privacy / Terms) ─────────────────────────────────────────

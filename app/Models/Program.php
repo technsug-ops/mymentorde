@@ -35,6 +35,9 @@ class Program extends Model
         'admission_type', 'nc_value',
         'study_fields', 'subjects',
         'description', 'qualification_requirements', 'language_requirements', 'required_documents',
+        'description_tr', 'qualification_requirements_tr',
+        'language_requirements_tr', 'required_documents_tr',
+        'translated_at',
         'quality_score', 'metadata',
         'is_manually_curated', 'is_active',
     ];
@@ -46,6 +49,7 @@ class Program extends Model
         'metadata'                     => 'array',
         'application_deadline_summer'  => 'date',
         'application_deadline_winter'  => 'date',
+        'translated_at'                => 'datetime',
         'duration_semesters'           => 'integer',
         'tuition_eur_per_semester'     => 'integer',
         'application_fee_eur'          => 'integer',
