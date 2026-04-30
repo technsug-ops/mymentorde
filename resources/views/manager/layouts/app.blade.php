@@ -326,12 +326,6 @@
                    class="nav-link {{ request()->is('manager/payments/reminders*') ? 'active' : '' }}">
                     <span class="nav-icon">⏰</span> Ödeme Hatırlatmaları
                 </a>
-                @module('silence_checkin')
-                    <a href="{{ route('manager.silence-monitor.index') }}"
-                       class="nav-link {{ request()->is('manager/silence-monitor*') ? 'active' : '' }}">
-                        <span class="nav-icon">📍</span> Sessizlik Monitörü
-                    </a>
-                @endmodule
                 @module('discount_codes')
                     <a href="{{ route('manager.discount-codes.index') }}"
                        class="nav-link {{ request()->is('manager/discount-codes*') ? 'active' : '' }}">
@@ -344,10 +338,6 @@
                         <span class="nav-icon">🏆</span> Bayi Kademeleri
                     </a>
                 @endmodule
-                <a href="{{ route('manager.landing-inventory.index') }}"
-                   class="nav-link {{ request()->is('manager/landing-inventory*') ? 'active' : '' }}">
-                    <span class="nav-icon">🌐</span> Landing Envanter
-                </a>
                 <a href="{{ route('manager.program-catalog.changes') }}"
                    class="nav-link {{ request()->is('manager/program-catalog*') ? 'active' : '' }}">
                     <span class="nav-icon">📚</span> Program Kataloğu
@@ -504,6 +494,16 @@
                    class="nav-link {{ request()->is('manager/system') ? 'active' : '' }}">
                     <span class="nav-icon">🖥</span> Sistem Paneli
                 </a>
+                <a href="{{ route('manager.landing-inventory.index') }}"
+                   class="nav-link {{ request()->is('manager/landing-inventory*') ? 'active' : '' }}">
+                    <span class="nav-icon">🌐</span> Landing Envanter
+                </a>
+                @module('silence_checkin')
+                    <a href="{{ route('manager.silence-monitor.index') }}"
+                       class="nav-link {{ request()->is('manager/silence-monitor*') ? 'active' : '' }}">
+                        <span class="nav-icon">📍</span> Sessizlik Monitörü
+                    </a>
+                @endmodule
                 <a href="/manager/system/security"
                    class="nav-link {{ request()->is('manager/system/security*') ? 'active' : '' }}">
                     <span class="nav-icon">🛡</span> Güvenlik Paneli
