@@ -520,25 +520,38 @@
                                         @endif
                                         @if($type === 'hidden')
                                             <input type="hidden" name="{{ $key }}" value="{{ $value }}" data-source-hidden="{{ $key }}">
-                                        @elseif($type === 'expatrio_program')
+                                        @elseif($type === 'expatrio_program' || $type === 'canonical_program')
                                             @php
+                                                // Faz 1: target_program_id canonical Program UUID saklıyor.
+                                                // Geriye uyumluluk: eski Expatrio UUID'si saklıysa onu da çöz.
                                                 $currentProgram = null;
                                                 if (!empty($value)) {
-                                                    try { $currentProgram = \App\Models\ExpatrioProgram::find($value); } catch (\Throwable $e) {}
+                                                    try { $currentProgram = \App\Models\Program::find($value); } catch (\Throwable $e) {}
+                                                    // Legacy fallback: eski expatrio UUID'si → source_link üzerinden canonical
+                                                    if (!$currentProgram) {
+                                                        try {
+                                                            $link = \App\Models\ProgramSourceLink::where('source', 'expatrio')->where('external_id', $value)->first();
+                                                            if ($link) $currentProgram = \App\Models\Program::find($link->program_id);
+                                                        } catch (\Throwable $e) {}
+                                                    }
                                                 }
+                                                $currentLabel = $currentProgram ? ($currentProgram->course_name . ' — ' . $currentProgram->university_name_cached) : '';
                                             @endphp
                                             <div class="ep-search" data-ep-search>
                                                 <input type="text" class="ep-search-input"
                                                     placeholder="{{ $placeholder ?: 'Yazmaya başlayın (örn: Informatik, Business)' }}"
                                                     autocomplete="off"
-                                                    value="{{ $currentProgram ? $currentProgram->course_name . ' — ' . $currentProgram->university_name : '' }}">
-                                                <input type="hidden" name="{{ $key }}" value="{{ $value }}" data-ep-hidden>
+                                                    value="{{ $currentLabel }}">
+                                                <input type="hidden" name="{{ $key }}" value="{{ $currentProgram?->id ?? $value }}" data-ep-hidden>
                                                 <div class="ep-results" data-ep-results style="display:none;"></div>
                                                 @if($currentProgram)
                                                     <div class="ep-current-info" style="font-size:11.5px; color:var(--u-muted, #64748b); margin-top:4px;">
                                                         ✓ Seçili: <strong>{{ $currentProgram->course_name }}</strong>
-                                                        ({{ $currentProgram->degree_specification ?: 'Program' }}) — {{ $currentProgram->university_name }}
+                                                        ({{ $currentProgram->degree_specification ?: 'Program' }}) — {{ $currentProgram->university_name_cached }}
                                                         @if($currentProgram->location), {{ $currentProgram->location }}@endif
+                                                        @if($currentProgram->is_manually_curated)
+                                                            <span style="background:#16a34a; color:#fff; padding:1px 6px; border-radius:4px; font-size:10px; margin-left:6px;">✓ Manuel onay</span>
+                                                        @endif
                                                     </div>
                                                 @endif
                                             </div>

@@ -2,155 +2,126 @@
 
 namespace App\Console\Commands;
 
-use App\Models\ExpatrioProgram;
 use App\Models\ExpatrioUniversity;
+use App\Models\Program;
+use App\Models\ProgramChangeLog;
+use App\Models\ProgramSourceLink;
 use App\Services\ExpatrioStudyBuddyClient;
+use App\Services\ProgramCatalog\ExpatrioCatalogAdapter;
 use Illuminate\Console\Command;
 
 /**
- * Expatrio Study Buddy program kataloğunu DB'ye senkronize eder.
+ * Expatrio Study Buddy → Canonical Program kataloğu senkronize.
+ *
+ * Faz 1 refactor: Adapter canonical layer'a yazar; mevcut ExpatrioProgram
+ * eski cache hâlâ duruyor ama kullanılmıyor (legacy, ileride drop).
  *
  * Akış:
- *  1) /studybuddy/universities → ~500 üni
- *  2) /studybuddy/programs/search → 13K program (paginated, list view)
- *  3) Sadece YENİ veya değişen program ID'leri için /studybuddy/programs/{id} → tam detay
+ *  1. Expatrio /programs/search → 13K liste tek POST
+ *  2. Her item için ExpatrioCatalogAdapter::upsertCanonical()
+ *     → University findOrCreate
+ *     → Canonical Program upsert (manuel curation öncelikli)
+ *     → ChangeDetectionService.record (diff log)
+ *  3. Detail endpoint opsiyonel (--details) — extra alanlar
  *
- * Optimizasyon: detay endpoint'ini sadece eksik/güncellenmeyen kayıtlar için
- * çağırır. İlk full sync ~3-5 dakika sürer (rate limit: ~600 ms/req).
- *
- * Kullanım:
- *  php artisan expatrio:sync                  → tam sync
- *  php artisan expatrio:sync --limit=50       → ilk 50 program (test)
- *  php artisan expatrio:sync --details        → tüm programlar için detay endpoint çağır (yavaş)
- *  php artisan expatrio:sync --no-details     → sadece search endpoint, detay atla (hızlı)
+ * Çıktı: yeni eklenen / güncellenen / değişiklik tespit edilen sayılar
+ * + critical change'leri terminal'de göster.
  */
 class SyncExpatrioPrograms extends Command
 {
     protected $signature = 'expatrio:sync
         {--limit=0 : Sadece bu kadar program çek (0 = sınırsız)}
-        {--details : Her programın detay endpoint\'ini çağır (yavaş ama tam veri)}
-        {--no-details : Search verisi yeterli, detay atla (hızlı)}
-        {--throttle=600 : İstekler arası bekleme (ms)}';
+        {--details : Her program için detay endpoint çağır (yavaş)}
+        {--throttle=400 : İstekler arası bekleme (ms)}';
 
-    protected $description = 'Expatrio Study Buddy program kataloğunu DB\'ye senkronize eder';
+    protected $description = 'Expatrio Study Buddy → Canonical Program kataloğunu senkronize eder (change detection ile)';
 
-    public function handle(ExpatrioStudyBuddyClient $client): int
+    public function handle(): int
     {
         $limit = max(0, (int) $this->option('limit'));
-        $fetchDetails = $this->option('details') && ! $this->option('no-details');
+        $fetchDetails = (bool) $this->option('details');
         $throttleMs = max(0, (int) $this->option('throttle'));
 
-        // Throttle override
         $client = new ExpatrioStudyBuddyClient($throttleMs);
+        $adapter = app(ExpatrioCatalogAdapter::class);
 
-        // ── 1) Üniversiteler ──
-        $this->info('1/3 — Üniversiteler indiriliyor...');
-        $unis = $client->listUniversities();
-        $now = now();
-
-        foreach ($unis as $u) {
-            ExpatrioUniversity::query()->updateOrCreate(
-                ['id' => $u['id']],
-                ['name' => $u['name'], 'synced_at' => $now]
-            );
-        }
-        $this->info('   ✓ ' . count($unis) . ' üniversite kaydedildi.');
-
-        // ── 2) Tüm programlar (single-shot — limit yüksek tek POST) ──
-        $this->info('2/3 — Program listesi indiriliyor (single-shot)...');
-        $singleShotLimit = $limit > 0 ? $limit : 20000; // 13K aşan büyük limit → tüm liste
+        // ── 1) Liste indir (single-shot, max 20K limit) ─────────────
+        $this->info('1/2 — Expatrio program listesi indiriliyor...');
+        $singleShotLimit = $limit > 0 ? $limit : 20000;
         $page = $client->searchPrograms($singleShotLimit, 0);
         $programs = $page['programs'];
         $totalRemote = $page['total'];
         $this->info("   Server toplam: {$totalRemote}, çekildi: " . count($programs));
 
-        $totalFetched = 0;
-        $allListIds = [];
-        $skippedNoUni = 0;
+        // ── 2) Canonical layer'a upsert + change detection ──────────
+        $this->info('2/2 — Canonical layer\'a yazılıyor...');
+        $created = 0;
+        $updated = 0;
+        $unchanged = 0;
+        $skipped = 0;
+        $totalDeltas = 0;
+        $criticalChanges = 0;
 
-        foreach ($programs as $p) {
-            $uniId = $this->resolveUniversityId($p['universityName'] ?? null);
-            if (! $uniId) {
-                $skippedNoUni++;
-                continue;
-            }
-            $allListIds[] = $p['id'];
+        foreach ($programs as $i => $raw) {
+            try {
+                $result = $adapter->upsertCanonical($raw);
 
-            ExpatrioProgram::query()->updateOrCreate(
-                ['id' => $p['id']],
-                [
-                    'university_id'             => $uniId,
-                    'university_name'           => (string) ($p['universityName'] ?? ''),
-                    'course_name'               => (string) ($p['courseName'] ?? ''),
-                    'degree_specification'      => $p['degreeSpecification'] ?? null,
-                    'location'                  => $p['location'] ?? null,
-                    'languages'                 => (array) ($p['languages'] ?? []),
-                    'tuition_fees_per_semester' => isset($p['tuitionFeesPerSemester']) ? (int) $p['tuitionFeesPerSemester'] : null,
-                    'synced_at'                 => $now,
-                ]
-            );
-            $totalFetched++;
-
-            if ($totalFetched % 1000 === 0) {
-                $this->info(sprintf('   ... %d / %d kaydedildi', $totalFetched, count($programs)));
-            }
-        }
-
-        $this->info("   ✓ {$totalFetched} program kaydedildi (skip: {$skippedNoUni}).");
-
-        // ── 3) Detay endpoint (opsiyonel — yavaş) ──
-        if ($fetchDetails && ! empty($allListIds)) {
-            $this->info('3/3 — Detay verileri indiriliyor (yavaş — rate limit ile)...');
-            $bar = $this->output->createProgressBar(count($allListIds));
-            $bar->start();
-
-            foreach ($allListIds as $id) {
-                $detail = $client->getProgram($id);
-                if ($detail) {
-                    ExpatrioProgram::query()->where('id', $id)->update([
-                        'study_fields'    => array_values((array) ($detail['studyFields'] ?? [])),
-                        'subjects'        => array_values((array) ($detail['subjects'] ?? [])),
-                        'semester_count'  => isset($detail['semesterCount']) ? (int) $detail['semesterCount'] : null,
-                        'data'            => $detail,
-                        'synced_at'       => now(),
-                    ]);
+                if ($result['was_created']) {
+                    $created++;
+                } elseif (! empty($result['canonical_delta'])) {
+                    $updated++;
+                    $totalDeltas += count($result['canonical_delta']);
+                    // Critical alanlar var mı bu delta'da?
+                    foreach (array_keys($result['canonical_delta']) as $field) {
+                        if (in_array($field, ['university_name_cached', 'course_name', 'is_active'], true)) {
+                            $criticalChanges++;
+                        }
+                    }
+                } else {
+                    $unchanged++;
                 }
-                $bar->advance();
+            } catch (\Throwable $e) {
+                $skipped++;
+                $this->warn("   ⚠ Skip: " . substr($e->getMessage(), 0, 100));
             }
-            $bar->finish();
-            $this->newLine();
-            $this->info("   ✓ Detaylar kaydedildi.");
-        } else {
-            $this->info('3/3 — Detay endpoint atlandı (--details flag\'i verilmedi).');
+
+            // Detay endpoint opsiyonel
+            if ($fetchDetails && isset($raw['id'])) {
+                try {
+                    $detail = $client->getProgram($raw['id']);
+                    if ($detail) {
+                        $adapter->upsertCanonical(array_merge($raw, $detail));
+                    }
+                } catch (\Throwable $e) {
+                    // detay yoksa atla
+                }
+            }
+
+            if (($i + 1) % 1000 === 0) {
+                $this->info(sprintf('   ... %d / %d (created:%d updated:%d unchanged:%d)', $i + 1, count($programs), $created, $updated, $unchanged));
+            }
+
+            if ($limit > 0 && ($i + 1) >= $limit) break;
         }
 
-        // ── Üni program sayılarını güncelle ──
-        $this->info('Üniversite program sayıları hesaplanıyor...');
-        ExpatrioUniversity::query()->each(function (ExpatrioUniversity $u) {
-            $u->program_count = ExpatrioProgram::where('university_id', $u->id)->count();
-            $u->save();
-        });
+        $this->newLine();
+        $this->info('✅ Sync tamamlandı.');
+        $this->table(
+            ['Metric', 'Count'],
+            [
+                ['Created (yeni canonical)',   $created],
+                ['Updated (değişiklik tespit)', $updated],
+                ['Unchanged',                   $unchanged],
+                ['Skipped (hata)',              $skipped],
+                ['Total field deltas',          $totalDeltas],
+                ['CRITICAL changes',            $criticalChanges],
+            ]
+        );
 
-        $this->info("\n✅ Senkronizasyon tamamlandı.");
-        $this->info('   Üniversite: ' . ExpatrioUniversity::count());
-        $this->info('   Program:    ' . ExpatrioProgram::count());
+        $this->info('   Canonical Program: ' . Program::count());
+        $this->info('   Source links (Expatrio): ' . ProgramSourceLink::where('source', 'expatrio')->count());
+        $this->info('   Total change logs: ' . ProgramChangeLog::count());
 
         return self::SUCCESS;
-    }
-
-    /**
-     * Üniversite name'inden ID'yi resolve eder. Search response'unda sadece
-     * universityName var; üni katalogunda name → id eşleştirmesi cache'lenir.
-     */
-    private array $uniNameToId = [];
-
-    private function resolveUniversityId(?string $name): ?string
-    {
-        if ($name === null || $name === '') return null;
-
-        if (empty($this->uniNameToId)) {
-            $this->uniNameToId = ExpatrioUniversity::query()->pluck('id', 'name')->all();
-        }
-        return $this->uniNameToId[$name] ?? null;
     }
 }

@@ -210,12 +210,13 @@ class GuestRegistrationFormCatalog
                     self::f('application_type', 'Başvuru Tipi *', 'select', true, 40, options: self::applicationTypeOptions(), level: 1),
                     // Level 1 (User listesinde "Hedef bölüm")
                     self::f('target_program', 'Okumayı hedeflediğiniz bölüm/program *', 'text', true, 255, level: 1),
-                    // ── Program kataloğundan smart-search (autocomplete) ──
-                    // 13K+ Almanya programı (Expatrio + ileride Hochschulkompass).
-                    // target_program_id = source-spesifik UUID/identifier
-                    // target_program_source = 'expatrio' | 'hk' (default expatrio, hidden)
-                    self::f('target_program_id', 'Hedef program (kataloğundan ara)', 'expatrio_program', false, 64, placeholder: 'Örn: Informatik, Wirtschaft, ...', help_text: 'Yazmaya başlayın, 13.000+ program arasından seçim yapın. İsteğe bağlı — yukarıdaki "Hedef bölüm" alanı zorunlu.'),
-                    self::f('target_program_source', 'Program kaynağı (auto)', 'hidden', false, 20, help_text: 'Otomatik atanır — şu an "expatrio". İleride Hochschulkompass aktif olunca seçilebilir.'),
+                    // ── Canonical Program kataloğundan smart-search (autocomplete) ──
+                    // Faz 1 sonrası: target_program_id artık CANONICAL UUID
+                    // (programs tablosu, kaynak-bağımsız). Source linkleri
+                    // program_source_links üzerinden tutuluyor.
+                    self::f('target_program_id', 'Hedef program (kataloğundan ara)', 'canonical_program', false, 36, placeholder: 'Örn: Informatik, Wirtschaft, ...', help_text: 'Yazmaya başlayın, 13.000+ program arasından seçim yapın. İsteğe bağlı — yukarıdaki "Hedef bölüm" alanı zorunlu. Veriler Almanya program kataloğundan otomatik gelir.'),
+                    // target_program_source legacy — yeni canonical akışta gerekli değil ama backward-compat için tutuldu
+                    self::f('target_program_source', 'Program kaynağı (legacy)', 'hidden', false, 20, help_text: 'Eski formlardan migrasyon için. Yeni akışta canonical UUID self-explanatory.'),
                     // Sadece Level 2
                     self::f('university_start_target_date', 'Üniversite başlangıç tarihi hedefiniz *', 'date', true, 20),
                     // ── Vize için planlanan kalış bitiş tarihi ──
@@ -558,23 +559,20 @@ class GuestRegistrationFormCatalog
                 continue;
             }
 
-            if ($type === 'expatrio_program') {
-                // Source-bağımsız program UUID — formdaki target_program_source ile birlikte değerlendirilir.
-                // Şu an sadece expatrio; ileride hk için aynı validasyon source-aware olacak.
+            if ($type === 'expatrio_program' || $type === 'canonical_program') {
+                // Faz 1: target_program_id artık canonical Program UUID saklıyor.
+                // Eski 'expatrio_program' type alias olarak korunuyor (geriye uyumluluk).
                 $txt = trim((string) $val);
                 if ($txt === '') { $out[$key] = null; continue; }
 
-                // Expatrio UUID v4 formatı
-                if (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $txt)) {
-                    try {
-                        $exists = \App\Models\ExpatrioProgram::query()->whereKey($txt)->exists();
-                    } catch (\Throwable $e) { $exists = false; }
-                    $out[$key] = $exists ? $txt : null;
-                    continue;
+                if (! preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $txt)) {
+                    $out[$key] = null; continue;
                 }
 
-                // İleride HK identifier patterns burada eklenecek
-                $out[$key] = null;
+                try {
+                    $exists = \App\Models\Program::query()->whereKey($txt)->exists();
+                } catch (\Throwable $e) { $exists = false; }
+                $out[$key] = $exists ? $txt : null;
                 continue;
             }
 

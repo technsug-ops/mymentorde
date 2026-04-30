@@ -437,7 +437,11 @@ class VisaFieldMapperService
 
     /**
      * Hedef program ID'den (form'da seçilen) üniversite bilgisini çek.
-     * ProgramCatalogRegistry üzerinden source-aware (Expatrio veya HK).
+     *
+     * Faz 1: target_program_id artık CANONICAL Program UUID. Registry
+     * canonical-first lookup yapar — kaynak Expatrio mı HK mı farketmez.
+     * Legacy fallback: eski formdan gelen Expatrio UUID source_links
+     * üzerinden çözülür.
      *
      * @param  array  $draft  registration_form_draft
      * @return array{universityName?:string, location?:string, courseName?:string}|null
@@ -446,12 +450,18 @@ class VisaFieldMapperService
     {
         if ($programId === null || trim($programId) === '') return null;
 
-        // Source default: 'expatrio'. Form'da target_program_source set edilmişse onu kullan.
-        $source = trim((string) ($draft['target_program_source'] ?? '')) ?: 'expatrio';
-
         try {
             $registry = app(\App\Services\ProgramCatalog\ProgramCatalogRegistry::class);
-            $program = $registry->find($source, $programId);
+
+            // Önce canonical lookup (yeni formlardan)
+            $program = $registry->findCanonical($programId);
+
+            // Legacy fallback: eski Expatrio UUID
+            if (! $program) {
+                $source = trim((string) ($draft['target_program_source'] ?? '')) ?: 'expatrio';
+                $program = $registry->find($source, $programId);
+            }
+
             if (! $program) return null;
 
             return [

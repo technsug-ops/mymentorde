@@ -421,6 +421,13 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::post('/manager/silence-monitor/company-overrides',               [$sm, 'updateCompanyOverrides'])->middleware('throttle:10,1')->name('manager.silence-monitor.company-overrides');
     });
 
+    // ── Program Kataloğu Değişiklik Takibi (canonical layer + change detection) ──
+    {
+        $pcc = \App\Http\Controllers\Manager\ProgramCatalogChangesController::class;
+        Route::get('/manager/program-catalog/changes',                  [$pcc, 'index'])->name('manager.program-catalog.changes');
+        Route::post('/manager/program-catalog/changes/{log}/review',    [$pcc, 'review'])->middleware('throttle:60,1')->name('manager.program-catalog.changes.review');
+    }
+
     // ── Application Guides — student altında (Uni-Assist + Vize) ──────────────
     // Uni-Assist sözleşme+ödeme sonrası (öğrenci aşamasında) yapılır.
     // Guest URL legacy backward-compat için tutuldu.

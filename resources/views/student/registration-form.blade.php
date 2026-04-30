@@ -369,25 +369,33 @@
                                         <span class="srf-prefilled" title="Aday öğrenci formundan otomatik dolduruldu — düzenleyebilirsin">✓</span>
                                     @endif
                                 </div>
-                                @if($type === 'expatrio_program')
+                                @if($type === 'expatrio_program' || $type === 'canonical_program')
                                     @php
+                                        // Faz 1: canonical Program UUID. Legacy Expatrio UUID fallback.
                                         $currentProgram = null;
                                         if (!empty($value)) {
-                                            try { $currentProgram = \App\Models\ExpatrioProgram::find($value); } catch (\Throwable $e) {}
+                                            try { $currentProgram = \App\Models\Program::find($value); } catch (\Throwable $e) {}
+                                            if (!$currentProgram) {
+                                                try {
+                                                    $link = \App\Models\ProgramSourceLink::where('source', 'expatrio')->where('external_id', $value)->first();
+                                                    if ($link) $currentProgram = \App\Models\Program::find($link->program_id);
+                                                } catch (\Throwable $e) {}
+                                            }
                                         }
+                                        $currentLabel = $currentProgram ? ($currentProgram->course_name . ' — ' . $currentProgram->university_name_cached) : '';
                                     @endphp
                                     <div class="ep-search" data-ep-search>
                                         <input type="text" class="ep-search-input"
                                             placeholder="{{ $placeholder ?: 'Yazmaya başlayın (örn: Informatik, Business)' }}"
                                             autocomplete="off"
-                                            value="{{ $currentProgram ? $currentProgram->course_name . ' — ' . $currentProgram->university_name : '' }}"
+                                            value="{{ $currentLabel }}"
                                             {{ $formLocked ? 'disabled' : '' }}>
-                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}" data-ep-hidden>
+                                        <input type="hidden" name="{{ $key }}" value="{{ $currentProgram?->id ?? $value }}" data-ep-hidden>
                                         <div class="ep-results" data-ep-results style="display:none;"></div>
                                         @if($currentProgram)
                                             <div class="ep-current-info" style="font-size:11.5px; color:var(--u-muted, #64748b); margin-top:4px;">
                                                 ✓ Seçili: <strong>{{ $currentProgram->course_name }}</strong>
-                                                ({{ $currentProgram->degree_specification ?: 'Program' }}) — {{ $currentProgram->university_name }}
+                                                ({{ $currentProgram->degree_specification ?: 'Program' }}) — {{ $currentProgram->university_name_cached }}
                                             </div>
                                         @endif
                                     </div>
