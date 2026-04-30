@@ -182,11 +182,11 @@ class GuestRegistrationFormCatalog
                     self::f('marital_status', 'Medeni Hali *', 'select', true, 40, options: self::maritalOptions()),
                     self::f('reference_text', 'Referans', 'text', false, 180),
                     self::f('birth_place', 'Doğum yeriniz *', 'text', true, 120),
-                    self::f('birth_country', 'Doğum ülkeniz', 'select', false, 4, options: self::countryOptions(), help_text: 'ISO ülke kodu saklanır. Türkiye dışında doğmuş iseniz seçin; aksi halde "Türkiye" varsayılır.'),
+                    self::f('birth_country', 'Doğum ülkeniz', 'select', false, 4, options: self::countryOptions(), help_text: 'Türkiye dışında doğmuş iseniz seçin; aksi halde Türkiye varsayılır.'),
                     // ── Vize / Uni-Assist eksikleri (29-30 Nisan 2026) ──
-                    self::f('birth_name', 'Doğum / önceki soyadınız (varsa)', 'text', false, 120, placeholder: 'Örn: evlilik öncesi kızlık soyadı', help_text: 'Almanca form\'larda "Geburtsname / frühere Familienname". Soyadı hiç değişmediyse boş bırakın.'),
-                    self::f('nationality', 'Mevcut uyruğunuz', 'select', false, 4, options: self::countryOptions(), help_text: 'ISO ülke kodu. Boş bırakırsanız Türkiye varsayılır. Çift vatandaşlık varsa "Önceki uyruk" alanına yazın.'),
-                    self::f('previous_nationality', 'Önceki uyruğunuz (varsa)', 'select', false, 4, options: self::countryOptions(), help_text: 'Çift vatandaşlık veya sonradan kazanılmış vatandaşlık varsa belirtin. ISO kodu saklanır.'),
+                    self::f('birth_name', 'Doğum / önceki soyadınız (varsa)', 'text', false, 120, placeholder: 'Örn: evlilik öncesi kızlık soyadı', help_text: 'Soyadı hiç değişmediyse boş bırakın.'),
+                    self::f('nationality', 'Mevcut uyruğunuz', 'select', false, 4, options: self::countryOptions(), help_text: 'Boş bırakırsanız Türkiye varsayılır. Çift vatandaşlık varsa "Önceki uyruk" alanına yazın.'),
+                    self::f('previous_nationality', 'Önceki uyruğunuz (varsa)', 'select', false, 4, options: self::countryOptions(), help_text: 'Çift vatandaşlık veya sonradan kazanılmış vatandaşlık varsa belirtin.'),
                 ],
             ],
             [
@@ -201,8 +201,8 @@ class GuestRegistrationFormCatalog
                     // Sadece Level 2
                     self::f('address_line', 'Açık Adresiniz *', 'text', true, 255),
                     self::f('postal_code', 'Posta kodu *', 'text', true, 32),
-                    self::f('province', 'İl *', 'select', true, 60, options: self::trProvinceOptions(), help_text: 'Türkiye 81 il. Slug saklanır (istanbul, ankara). Cascading: İlçe seçimi il\'e göre filtrelenir.'),
-                    self::f('district', 'İlçe *', 'select', true, 80, options: self::trDistrictOptions(), help_text: 'Önce il seçin; sonra bu listeden ilçe filtrelenir. Slug saklanır (kadikoy, atasehir).'),
+                    self::f('province', 'İl *', 'select', true, 60, options: self::trProvinceOptions(), help_text: 'İlçe seçimi il\'e göre filtrelenir.'),
+                    self::f('district', 'İlçe *', 'select', true, 80, options: self::trDistrictOptions(), help_text: 'Önce il seçin.'),
                     self::f('mail_recipient_name', 'Adresinizdeki 2. Posta Yetkilisi *', 'text', true, 180,
                         placeholder: 'Örn: Ayşe Yılmaz',
                         help_text: 'Belirttiğiniz adreste sizin adınıza gelen postaları (uni-assist sonuç, vize evrakı, banka kartı vb.) alacak ikinci kişinin adı soyadı.'),
@@ -214,13 +214,12 @@ class GuestRegistrationFormCatalog
                     // Faz 1 sonrası: target_program_id artık CANONICAL UUID
                     // (programs tablosu, kaynak-bağımsız). Source linkleri
                     // program_source_links üzerinden tutuluyor.
-                    self::f('target_program_id', 'Hedef program (kataloğundan ara)', 'canonical_program', false, 36, placeholder: 'Örn: Informatik, Wirtschaft, ...', help_text: 'Yazmaya başlayın, 13.000+ program arasından seçim yapın. İsteğe bağlı — yukarıdaki "Hedef bölüm" alanı zorunlu. Veriler Almanya program kataloğundan otomatik gelir.'),
-                    // target_program_source legacy — yeni canonical akışta gerekli değil ama backward-compat için tutuldu
-                    self::f('target_program_source', 'Program kaynağı (legacy)', 'hidden', false, 20, help_text: 'Eski formlardan migrasyon için. Yeni akışta canonical UUID self-explanatory.'),
+                    self::f('target_program_id', 'Hedef program (kataloğundan ara)', 'canonical_program', false, 36, placeholder: 'Örn: Informatik, Wirtschaft, ...', help_text: 'Yazmaya başlayın, 13.000+ program arasından seçim yapın. İsteğe bağlı.'),
+                    self::f('target_program_source', '', 'hidden', false, 20),
                     // Sadece Level 2
                     self::f('university_start_target_date', 'Üniversite başlangıç tarihi hedefiniz *', 'date', true, 20),
                     // ── Vize için planlanan kalış bitiş tarihi ──
-                    self::f('travel_planned_end_date', 'Almanya\'da kalış bitiş tarihi (planlanan)', 'date', false, 20, help_text: 'Vize başvurusunda VIDEX\'in istediği "Beabsichtigte Dauer — Bis" alanı. Genelde başlangıçtan +1 yıl sonrası girilir, sonradan uzatılır.'),
+                    self::f('travel_planned_end_date', 'Almanya\'da kalış bitiş tarihi (planlanan)', 'date', false, 20, help_text: 'Genelde başlangıçtan +1 yıl sonrası girilir, sonradan uzatılır.'),
                 ],
             ],
             [
@@ -328,9 +327,9 @@ class GuestRegistrationFormCatalog
                     self::f('passport_expiry_date', 'Pasaport bitiş tarihi', 'date', false, 20, level: 1),
                     self::f('passport_issue_place', 'Pasaportun verildiği yer', 'text', false, 120, placeholder: 'Örn: İstanbul Emniyeti', level: 1),
                     // ── Vize VIDEX için kaymakamlık ilçesi ("Ausgestellt von") ──
-                    self::f('passport_authority', 'Pasaportu veren kaymakamlık ilçesi', 'text', false, 120, placeholder: 'Örn: ATASEHIR, KADIKOY', help_text: 'VIDEX vize formu pasaportun verildiği şehrin yanı sıra ilçeyi de istiyor. Pasaportun ön sayfasında "Veren Makam" altında yazar.', level: 1),
+                    self::f('passport_authority', 'Pasaportu veren kaymakamlık ilçesi', 'text', false, 120, placeholder: 'Örn: ATASEHIR, KADIKOY', help_text: 'Pasaportun ön sayfasında "Veren Makam" altında yazar.', level: 1),
                     // ── VIDEX zorunlu — öğrencinin öğrenim/meslek alanı ("Erlernter Beruf") ──
-                    self::f('erlernter_beruf', 'Öğrenim / mesleki eğitim alanınız', 'text', false, 200, placeholder: 'Örn: Student/in, Praktikant/-in, Lehrling', help_text: 'Vize VIDEX formunda "Erlernter Beruf" alanı. Öğrenciyseniz "Student/in" yeterli; daha önce mesleki eğitim aldıysanız (Lise/Üniversite veya iş) o alanı yazın.', level: 1),
+                    self::f('erlernter_beruf', 'Öğrenim / mesleki eğitim alanınız', 'text', false, 200, placeholder: 'Örn: Öğrenci, Stajyer', help_text: 'Öğrenciyseniz "Öğrenci" yeterli; daha önce mesleki eğitim aldıysanız o alanı yazın.', level: 1),
                     // Sadece Level 2
                     self::f('estimated_monthly_budget_eur', 'Aylık bütçe planı (EUR)', 'text', false, 32),
                     self::f('knows_blocked_account', 'Bloke hesap gerekliliği hakkında bilginiz var mı? *', 'select', true, 10, options: self::yesNoOptions()),
@@ -355,10 +354,10 @@ class GuestRegistrationFormCatalog
                 'title' => 'Aile Bilgileri',
                 'fields' => [
                     // ── Baba ──
-                    self::f('father_full_name', 'Babanızın Adı Soyadı *', 'text', true, 180, help_text: 'Vize VIDEX formu Ad ve Soyad\'ı ayrı ayrı ister; aşağıda da girebilirsiniz.'),
-                    self::f('father_first_name', 'Babanızın adı (ayrı)', 'text', false, 120, placeholder: 'Sadece ad', help_text: 'VIDEX vize formu için ayrı tutulur — boş bırakırsanız yukarıdaki birleşik isimden çıkarılır.'),
+                    self::f('father_full_name', 'Babanızın Adı Soyadı *', 'text', true, 180, help_text: 'Ad ve Soyad ayrı ayrı da girebilirsiniz (alttaki alanlar).'),
+                    self::f('father_first_name', 'Babanızın adı (ayrı)', 'text', false, 120, placeholder: 'Sadece ad', help_text: 'Boş bırakırsanız yukarıdaki birleşik isimden otomatik çıkarılır.'),
                     self::f('father_last_name', 'Babanızın soyadı (ayrı)', 'text', false, 120, placeholder: 'Sadece soyad'),
-                    self::f('father_nationality', 'Babanızın uyruğu', 'select', false, 4, options: self::countryOptions(), help_text: 'ISO ülke kodu saklanır. Vize VIDEX formu için zorunlu — anne ve baba uyruğu ayrı ayrı sorulur.'),
+                    self::f('father_nationality', 'Babanızın uyruğu', 'select', false, 4, options: self::countryOptions(), help_text: 'Vize için zorunlu — anne ve baba uyruğu ayrı ayrı sorulur.'),
                     self::f('father_birth_date', 'Babanızın doğum tarihi *', 'date', true, 20),
                     self::f('father_job', 'Babanızın mesleği *', 'text', true, 120),
                     self::f('father_birth_place', 'Babanızın doğum yeri *', 'text', true, 120),
@@ -366,8 +365,8 @@ class GuestRegistrationFormCatalog
                     // ── Anne ──
                     self::f('mother_full_name', 'Annenizin adı soyadı *', 'text', true, 180),
                     self::f('mother_first_name', 'Annenizin adı (ayrı)', 'text', false, 120, placeholder: 'Sadece ad'),
-                    self::f('mother_last_name', 'Annenizin soyadı (ayrı — kızlık varsa o)', 'text', false, 120, placeholder: 'Sadece soyad', help_text: 'Almanca formlar genelde annenin kızlık soyadını ister.'),
-                    self::f('mother_nationality', 'Annenizin uyruğu', 'select', false, 4, options: self::countryOptions(), help_text: 'ISO ülke kodu saklanır.'),
+                    self::f('mother_last_name', 'Annenizin soyadı (ayrı — kızlık varsa o)', 'text', false, 120, placeholder: 'Sadece soyad', help_text: 'Annenin kızlık soyadı varsa onu yazın.'),
+                    self::f('mother_nationality', 'Annenizin uyruğu', 'select', false, 4, options: self::countryOptions()),
                     self::f('mother_birth_date', 'Annenizin doğum tarihi *', 'date', true, 20),
                     self::f('mother_birth_place', 'Annenizin doğum yeri *', 'text', true, 120),
                     self::f('mother_job', 'Annenizin mesleği *', 'text', true, 120),
