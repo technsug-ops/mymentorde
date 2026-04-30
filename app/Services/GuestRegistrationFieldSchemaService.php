@@ -421,7 +421,8 @@ class GuestRegistrationFieldSchemaService
                         $skipped++;
                         continue;
                     }
-                    $existingRow->fill($payload)->save();
+                    // RAW UPDATE — Eloquent array cast bypass (lesson #2 double-encode)
+                    GuestRegistrationField::query()->where('id', $existingRow->id)->update($payload);
                     $updated++;
                 } else {
                     GuestRegistrationField::query()->insert(array_merge($payload, [
