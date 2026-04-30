@@ -959,9 +959,9 @@
                 <button type="button" class="cat-tabs-arrow prev" aria-label="Önceki" data-cattabs-dir="-1">‹</button>
                 <div class="cat-tabs" id="catTabsTrack">
                     @foreach($topCats as $tc)
-                        <button class="cat-tab" data-cattab="{{ $tc }}">{{ $documentTopCategoryLabels[$tc] ?? $tc }}@if(($categoryMissing[$tc] ?? 0) > 0)<span class="tab-badge red">{{ $categoryMissing[$tc] }}</span>@endif</button>
+                        <button class="cat-tab{{ $tc === 'uni_assist' ? ' active' : '' }}" data-cattab="{{ $tc }}">{{ $documentTopCategoryLabels[$tc] ?? $tc }}@if(($categoryMissing[$tc] ?? 0) > 0)<span class="tab-badge red">{{ $categoryMissing[$tc] }}</span>@endif</button>
                     @endforeach
-                    <button class="cat-tab active" data-cattab="all">Tümü</button>
+                    <button class="cat-tab" data-cattab="all">Tümü</button>
                 </div>
                 <button type="button" class="cat-tabs-arrow next" aria-label="Sonraki" data-cattabs-dir="1">›</button>
             </div>
@@ -1314,7 +1314,8 @@
     });
 
     // Category tabs — kategori seçildiğinde filtre "all"e geçer (urgent boşsa)
-    var curCat='all';
+    // Default: uni_assist sekmesi tıklanmış gelir (öğrenci akışında ilk önce Uni-Assist)
+    var curCat='uni_assist';
     document.querySelectorAll('.sdoc .cat-tab').forEach(function(tab){
         tab.addEventListener('click', function(){
             document.querySelectorAll('.sdoc .cat-tab').forEach(function(t){t.classList.remove('active')});
