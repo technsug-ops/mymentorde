@@ -133,8 +133,10 @@
                         <td><span class="pcc-sev pcc-sev-{{ $log->severity }}">{{ $log->severity }}</span></td>
                         <td>
                             @if($log->program)
-                                <strong>{{ $log->program->course_name }}</strong><br>
-                                <small style="color:var(--u-muted);">{{ $log->program->university_name_cached }}</small>
+                                <a href="{{ route('program.show', ['program' => $log->program->id]) }}" target="_blank" style="text-decoration:none; color:inherit;" title="Detayları yeni sekmede aç">
+                                    <strong style="color:#7e58bf;">{{ $log->program->course_name }}</strong> <span style="font-size:10px; color:#7e58bf;">↗</span><br>
+                                    <small style="color:var(--u-muted);">{{ $log->program->university_name_cached }}</small>
+                                </a>
                             @else
                                 <em>(silinmiş program)</em>
                             @endif

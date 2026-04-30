@@ -26,6 +26,10 @@ Route::middleware('company.context')->group(function (): void {
     Route::get('/study-buddy/complete',            [$sb, 'complete'])->name('study-buddy.complete');
     Route::get('/study-buddy/result',              [$sb, 'result'])->name('study-buddy.result');
     Route::post('/study-buddy/convert',            [$sb, 'convert'])->middleware('throttle:10,1')->name('study-buddy.convert');
+
+    // Canonical Program detay (public, throttle korumalı)
+    Route::get('/program/{program}',               [\App\Http\Controllers\ProgramController::class, 'show'])
+        ->middleware('throttle:60,1')->name('program.show');
 });
 
 // ── Yasal Sayfalar (Privacy / Terms) ─────────────────────────────────────────

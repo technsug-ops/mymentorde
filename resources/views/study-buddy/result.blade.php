@@ -74,6 +74,14 @@
                     @endforeach
                 </div>
             @endif
+
+            <div style="margin-top: 12px; text-align: right;">
+                <a href="{{ route('program.show', ['program' => $rec['program_id']]) }}" target="_blank"
+                   style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(126, 88, 191, 0.08); color: #7e58bf; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none;">
+                    Detayları gör
+                    <span style="font-size: 14px;">→</span>
+                </a>
+            </div>
         </div>
     @endforeach
 
