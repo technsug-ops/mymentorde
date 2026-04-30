@@ -26,6 +26,8 @@ Route::middleware('company.context')->group(function (): void {
     Route::get('/uni-match/complete',              [$um, 'complete'])->name('uni-match.complete');
     Route::get('/uni-match/result',                [$um, 'result'])->name('uni-match.result');
     Route::post('/uni-match/convert',              [$um, 'convert'])->middleware('throttle:10,1')->name('uni-match.convert');
+    // GET fallback: F5/back tuşundan gelen kullanıcılar 405 görmesin, result'a dön
+    Route::get('/uni-match/convert', fn() => redirect()->route('uni-match.result'));
 
     // Canonical Program detay (public, throttle korumalı)
     Route::get('/program/{program}',               [\App\Http\Controllers\ProgramController::class, 'show'])

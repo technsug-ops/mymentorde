@@ -183,8 +183,8 @@ class WizardController extends Controller
         }
 
         if ($response->converted_to_guest_id) {
-            // Daha önce dönüşmüş — formuna yönlendir
-            return redirect('/guest/registration')->with('info', 'Daha önce kayıt başlatmıştın, kaldığın yerden devam ediyorsun.');
+            // Daha önce dönüşmüş — public başvuru formuna yönlendir
+            return redirect('/apply')->with('info', 'Daha önce kayıt başlatmıştın, kaldığın yerden devam ediyorsun.');
         }
 
         $a = is_array($response->answers) ? $response->answers : [];
@@ -224,7 +224,7 @@ class WizardController extends Controller
         $response->converted_at = now();
         $response->save();
 
-        return redirect('/guest/registration')->with('success', 'Wizard cevapların form\'a aktarıldı — sadece kalan bilgileri tamamla.');
+        return redirect('/apply')->with('success', 'Wizard cevapların form\'a aktarıldı — sadece kalan bilgileri tamamla.');
     }
 
     /** Wizard target_degree → form application_type. */
