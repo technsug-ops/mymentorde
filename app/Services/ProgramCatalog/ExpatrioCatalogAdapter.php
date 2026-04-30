@@ -82,6 +82,12 @@ class ExpatrioCatalogAdapter implements ProgramCatalogContract
      * Expatrio raw_data → canonical Program field'larına map.
      * Sync command bu method'u çağırır.
      *
+     * Detail endpoint field'ları (search'te yok, --details ile gelir):
+     *   - location, semesterCount, studyFields, subjects
+     *   - infoText, qualificationRequirements, languageRequirements,
+     *     requiredDocuments, applicationFee, costPerSemester
+     *   - summerApplicationDeadline, winterApplicationDeadline
+     *
      * @param  array  $raw  Expatrio search/detail response item
      * @return array  canonical fields hashmap
      */
@@ -97,9 +103,36 @@ class ExpatrioCatalogAdapter implements ProgramCatalogContract
             'location'                    => $raw['location'] ?? null,
             'duration_semesters'          => isset($raw['semesterCount']) ? (int) $raw['semesterCount'] : null,
             'tuition_eur_per_semester'    => isset($raw['tuitionFeesPerSemester']) ? (int) $raw['tuitionFeesPerSemester'] : null,
+            'application_fee_eur'         => isset($raw['applicationFee']) ? (int) $raw['applicationFee'] : null,
+            'cost_per_semester_eur'       => isset($raw['costPerSemester']) ? (int) $raw['costPerSemester'] : null,
             'study_fields'                => array_values((array) ($raw['studyFields'] ?? [])),
             'subjects'                    => array_values((array) ($raw['subjects'] ?? [])),
+            'description'                 => $this->trimText($raw['infoText'] ?? null, 5000),
+            'qualification_requirements'  => $this->trimText($raw['qualificationRequirements'] ?? null, 5000),
+            'language_requirements'       => $this->trimText($raw['languageRequirements'] ?? null, 2000),
+            'required_documents'          => $this->trimText($raw['requiredDocuments'] ?? null, 3000),
+            'application_deadline_summer' => $this->parseDate($raw['summerApplicationDeadline'] ?? null),
+            'application_deadline_winter' => $this->parseDate($raw['winterApplicationDeadline'] ?? null),
         ];
+    }
+
+    /** Long text alanlar için güvenli trim (DB MEDIUMTEXT'i koruma). */
+    private function trimText(mixed $value, int $maxLen = 5000): ?string
+    {
+        if ($value === null || $value === '') return null;
+        $s = trim((string) $value);
+        if ($s === '') return null;
+        if (mb_strlen($s) > $maxLen) $s = mb_substr($s, 0, $maxLen);
+        return $s;
+    }
+
+    /** Expatrio date string → Y-m-d veya null. */
+    private function parseDate(mixed $value): ?string
+    {
+        if ($value === null || $value === '' || $value === 'None') return null;
+        try {
+            return \Carbon\Carbon::parse((string) $value)->format('Y-m-d');
+        } catch (\Throwable $e) { return null; }
     }
 
     /** "Bachelor of Arts (B.A.)" → "bachelor" gibi normalize. */
@@ -203,21 +236,42 @@ class ExpatrioCatalogAdapter implements ProgramCatalogContract
             }
         }
 
-        // Canonical fields (university_name → university_name_cached + university_id)
-        $canonicalFields = [
-            'university_id'               => $university->id,
-            'university_name_cached'      => $uniName,
-            'course_name'                 => $canonical['course_name'],
-            'degree_specification'        => $canonical['degree_specification'],
-            'degree_type'                 => $canonical['degree_type'],
-            'language'                    => $canonical['language'],
-            'languages_raw'               => $canonical['languages_raw'],
-            'location'                   => $canonical['location'],
-            'duration_semesters'          => $canonical['duration_semesters'],
-            'tuition_eur_per_semester'    => $canonical['tuition_eur_per_semester'],
-            'study_fields'                => $canonical['study_fields'],
-            'subjects'                    => $canonical['subjects'],
+        // Canonical fields — sadece "value var" olanları gönder; null'lar mevcut value'yu ezmesin
+        $candidateFields = [
+            'university_id'                => $university->id,
+            'university_name_cached'       => $uniName,
+            'course_name'                  => $canonical['course_name'],
+            'degree_specification'         => $canonical['degree_specification'],
+            'degree_type'                  => $canonical['degree_type'],
+            'language'                     => $canonical['language'],
+            'languages_raw'                => $canonical['languages_raw'],
+            'location'                     => $canonical['location'],
+            'duration_semesters'           => $canonical['duration_semesters'],
+            'tuition_eur_per_semester'     => $canonical['tuition_eur_per_semester'],
+            'application_fee_eur'          => $canonical['application_fee_eur'] ?? null,
+            'cost_per_semester_eur'        => $canonical['cost_per_semester_eur'] ?? null,
+            'study_fields'                 => $canonical['study_fields'],
+            'subjects'                     => $canonical['subjects'],
+            'description'                  => $canonical['description'] ?? null,
+            'qualification_requirements'   => $canonical['qualification_requirements'] ?? null,
+            'language_requirements'        => $canonical['language_requirements'] ?? null,
+            'required_documents'           => $canonical['required_documents'] ?? null,
+            'application_deadline_summer'  => $canonical['application_deadline_summer'] ?? null,
+            'application_deadline_winter'  => $canonical['application_deadline_winter'] ?? null,
         ];
+
+        // Search vs detail: search'te detail-only alanlar yok — null gelirse ezme
+        // (örn. ilk sync search-only oldu, sonra detail sync ekstra field'ları doldurur)
+        $canonicalFields = collect($candidateFields)
+            ->filter(function ($v, $k) {
+                // Required core fields her zaman gönderilir (null bile olsa)
+                if (in_array($k, ['university_id', 'university_name_cached', 'course_name'], true)) return true;
+                // Diğer alanlar için: null/[] ise ezme, dolu ise güncelle
+                if ($v === null) return false;
+                if (is_array($v) && empty($v)) return false;
+                return true;
+            })
+            ->all();
 
         $wasCreated = ! ($existingLink && Program::query()->whereKey($existingLink->program_id)->exists());
 
