@@ -23,7 +23,7 @@ class RecommendationEngine
     {
         $a = is_array($response->answers) ? $response->answers : [];
 
-        // Hard filters — adayın cevaplarına aykırı programları bile sıralamadan dışla
+        // ── Hard filters — aday'ın cevaplarına aykırı programları çıkar ──
         $query = Program::query()->active();
 
         // Degree filter
@@ -36,23 +36,27 @@ class RecommendationEngine
             $query->whereIn('language', [$a['study_language'], 'both']);
         }
 
-        // Public-only (öğrenci tercih ettiyse)
-        if (($a['private_ok'] ?? null) === 'public_only') {
+        // Public-only filtresi (tuition_tolerance)
+        if (($a['tuition_tolerance'] ?? null) === 'public_only') {
             $query->where(function ($q) {
                 $q->whereNull('tuition_eur_per_semester')
-                  ->orWhere('tuition_eur_per_semester', '<=', 500); // Devlet üniversitelerde semestral ücret ~300
+                  ->orWhere('tuition_eur_per_semester', '<=', 500);
             });
         }
 
-        // Stochastic limit — 100x candidate'ten skor hesapla, top-N seç
-        $candidates = $query->limit(max(200, $limit * 30))->get();
+        // Şehir filtresi (preferred_cities — array)
+        $preferredCities = is_array($a['preferred_cities'] ?? null) ? $a['preferred_cities'] : [];
+        // Burada hard filter YERİNE soft scoring kullanıyoruz — kullanıcı "boş bırakırsam tümü" demişti
 
-        // Score her programa
-        $scored = $candidates->map(function (Program $p) use ($a) {
-            $score = 50; // baseline
+        // Stochastic limit — top-N seç
+        $candidates = $query->limit(max(300, $limit * 40))->get();
+
+        // ── Scoring ──
+        $scored = $candidates->map(function (Program $p) use ($a, $preferredCities) {
+            $score = 50;
             $reasons = [];
 
-            // Language match (30 puan)
+            // 1) Language match (max +30)
             $studyLang = $a['study_language'] ?? null;
             if ($studyLang === 'flexible') {
                 $score += 10;
@@ -61,37 +65,48 @@ class RecommendationEngine
                 $reasons[] = $studyLang === 'de' ? 'Almanca eğitim ✓' : 'İngilizce eğitim ✓';
             } elseif ($p->language === 'both') {
                 $score += 25;
-                $reasons[] = 'Hem Almanca hem İngilizce';
+                $reasons[] = 'Almanca + İngilizce';
             }
 
-            // Language level vs requirement (her programın kendi requirements'ı yok yet — basitleştir)
+            // 2) Language level vs requirement (max +12 / -15)
             $userLang = $studyLang === 'de' ? ($a['german_level'] ?? null) : ($a['english_level'] ?? null);
-            if (in_array($userLang, ['b2', 'c1', 'c2', 'native'], true)) {
-                $score += 10;
+            $cert = $a['language_certificate'] ?? null;
+            if ($cert === 'have_de_high' || $cert === 'have_en_high' || $cert === 'have_both') {
+                $score += 12;
+                $reasons[] = 'Dil sertifikan var ✓';
+            } elseif (in_array($userLang, ['b2', 'c1', 'c2', 'native'], true)) {
+                $score += 8;
                 $reasons[] = 'Dil seviyen yeterli';
             } elseif ($userLang === 'b1') {
-                $score += 5;
+                $score += 3;
             } elseif (in_array($userLang, ['none', 'a1', 'a2'], true)) {
                 $score -= 15;
                 $reasons[] = '⚠ Dil seviyen düşük';
             }
 
-            // Finance match (15 puan)
+            // 3) GPA boost — yüksek not, prestijli üni şansı
+            $gpa = $a['gpa_range'] ?? null;
+            if ($gpa === 'excellent') $score += 5;
+            elseif ($gpa === 'very_good') $score += 3;
+            elseif ($gpa === 'low') $score -= 3;
+
+            // 4) Finance match (max +15)
             $finance = $a['finance_method'] ?? null;
+            $budget = $a['monthly_budget'] ?? null;
             $tuition = (int) ($p->tuition_eur_per_semester ?? 0);
-            if ($finance === 'self_funded' || $finance === 'sponsor') {
-                // Ücretli/ücretsiz farketmez
-                $score += 5;
-            } elseif (in_array($finance, ['blocked_account', 'undecided'], true)) {
+
+            if ($finance === 'scholarship') {
+                $score += 8; // Burs alacaksa ücret esnek
+            } elseif (in_array($finance, ['blocked_account', 'undecided'], true) || $budget === 'tight') {
                 if ($tuition === 0) { $score += 15; $reasons[] = 'Ücretsiz devlet üniversitesi'; }
-                elseif ($tuition < 500) { $score += 10; $reasons[] = 'Düşük semester ücreti'; }
+                elseif ($tuition < 500) { $score += 10; }
                 else { $score -= 5; }
-            } elseif ($finance === 'scholarship') {
-                $score += 8; // Burs öğrencileri için ücret esnek
+            } elseif ($finance === 'self_funded' || $finance === 'sponsor') {
+                $score += 5;
             }
 
-            // Field of study match (15 puan)
-            $userField = $a['target_field'] ?? null; // örn. 'Computer Science', 'Engineering'
+            // 5) Field of study match (max +15)
+            $userField = $a['target_field'] ?? null;
             if ($userField && is_array($p->study_fields)) {
                 foreach ($p->study_fields as $f) {
                     if (mb_strtolower($f) === mb_strtolower($userField) ||
@@ -103,15 +118,36 @@ class RecommendationEngine
                 }
             }
 
-            // City preference (10 puan)
-            $cityPref = $a['target_city'] ?? null;
-            if ($cityPref && $p->location && mb_strtolower($p->location) === mb_strtolower($cityPref)) {
-                $score += 10;
-                $reasons[] = "Hedef şehir: {$p->location}";
+            // 6) Preferred cities match (multi, max +10)
+            if (! empty($preferredCities) && $p->location) {
+                foreach ($preferredCities as $city) {
+                    if (mb_strtolower($p->location) === mb_strtolower((string) $city)) {
+                        $score += 10;
+                        $reasons[] = "Hedef şehrin: {$p->location}";
+                        break;
+                    }
+                }
             }
 
-            // Quality penalty (eksik veriler)
+            // 7) Living priority — lokasyon karakteri (basit heuristic)
+            $livingPref = $a['living_priority'] ?? null;
+            if ($livingPref === 'big_city' && in_array($p->location, ['Berlin', 'Munich', 'Hamburg', 'Cologne', 'Frankfurt'], true)) {
+                $score += 4;
+            } elseif ($livingPref === 'uni_town' && in_array($p->location, ['Heidelberg', 'Tübingen', 'Göttingen', 'Freiburg'], true)) {
+                $score += 4;
+            }
+
+            // 8) Start term — deadline yaklaşımı (soft soft scoring)
+            $startTerm = $a['start_term'] ?? null;
+            if ($startTerm === 'winter_2026' && $p->application_deadline_winter) {
+                $score += 3; // Kış için deadline biliniyor
+            } elseif ($startTerm === 'summer_2027' && $p->application_deadline_summer) {
+                $score += 3;
+            }
+
+            // 9) Quality penalty (eksik veriler)
             if (($p->quality_score ?? 50) < 40) $score -= 5;
+            elseif (($p->quality_score ?? 50) >= 80) $score += 3;
 
             // Cap 0-100
             $score = max(0, min(100, $score));
@@ -127,7 +163,7 @@ class RecommendationEngine
                 'tuition_eur'          => $p->tuition_eur_per_semester,
                 'duration_semesters'   => $p->duration_semesters,
                 'match_score'          => $score,
-                'reasons'              => $reasons,
+                'reasons'              => array_slice($reasons, 0, 4), // İlk 4 sebep yeter
             ];
         });
 

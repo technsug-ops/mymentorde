@@ -92,16 +92,34 @@ class WizardController extends Controller
         $stepDef = $this->schema->stepAt($n);
         if (! $stepDef) return redirect()->route('study-buddy.start');
 
-        // Cevabı sanitize + kaydet
         $key = $stepDef['key'];
+        $type = $stepDef['type'] ?? 'cards';
         $rules = $stepDef['validation'] ?? ['nullable', 'string', 'max:500'];
-        $data = $request->validate([$key => $rules]);
 
-        $response->setAnswer($key, $data[$key] ?? null);
+        // checkbox_group için item-level validation + max enforcement
+        if ($type === 'checkbox_group') {
+            $validRules = [$key => $rules, $key . '.*' => ['string', 'max:120']];
+            $data = $request->validate($validRules);
+            $value = array_values((array) ($data[$key] ?? []));
+
+            // Max enforcement (server-side)
+            $max = (int) ($stepDef['max'] ?? 0);
+            if ($max > 0 && count($value) > $max) {
+                $value = array_slice($value, 0, $max);
+            }
+
+            // Sadece options içindeki valid value'ları kabul et
+            $allowed = array_column($stepDef['options'] ?? [], 'value');
+            $value = array_values(array_intersect($value, $allowed));
+        } else {
+            $data = $request->validate([$key => $rules]);
+            $value = $data[$key] ?? null;
+        }
+
+        $response->setAnswer($key, $value);
         $response->current_step = max($response->current_step, $n + 1);
         $response->save();
 
-        // Son adımsa result'a yönlendir, değilse sonraki step
         if ($n >= $total) {
             return redirect()->route('study-buddy.complete');
         }
@@ -154,28 +172,36 @@ class WizardController extends Controller
         }
 
         $a = is_array($response->answers) ? $response->answers : [];
+        $cities = is_array($a['preferred_cities'] ?? null) ? $a['preferred_cities'] : [];
 
-        // Wizard cevapları → registration_form_draft mapping
+        // Wizard cevapları → registration_form_draft mapping (15 alan)
         $draft = [
             'application_country' => 'de',
-            'application_type'    => $a['target_degree'] ?? null,
-            'target_program_id'   => $a['target_program_id'] ?? null,
-            'application_city'    => $a['target_city'] ?? null,
+            'application_type'    => $this->mapDegreeToApplicationType($a['target_degree'] ?? null),
+            'application_city'    => $cities[0] ?? null, // İlk tercih şehir
             'german_level'        => $a['german_level'] ?? null,
             'english_level'       => $a['english_level'] ?? null,
             'finance_method'      => $a['finance_method'] ?? null,
+            'high_school_type'    => $a['high_school_type'] ?? null,
+            'high_school_grade'   => $this->mapGpaRangeToGrade($a['gpa_range'] ?? null),
+            'higher_education_status' => $this->mapEducationLevelToStatus($a['current_education_level'] ?? null),
+            // Wizard'a özel: meta wizard.* alanlarına saklanabilir (ileride)
         ];
         $draft = array_filter($draft, fn ($v) => $v !== null && $v !== '');
 
+        // Cevapların TAMAMI'nı meta'ya yedekle — manager tüm wizard cevaplarına ulaşabilsin
+        $meta = ['wizard' => $a];
+
         $guest = GuestApplication::query()->create([
-            'company_id'             => $response->company_id,
-            'tracking_token'         => (string) Str::uuid(),
-            'application_country'    => $a['target_country'] ?? 'de',
-            'application_type'       => $a['target_degree'] ?? null,
+            'company_id'              => $response->company_id,
+            'tracking_token'          => (string) Str::uuid(),
+            'application_country'     => 'de',
+            'application_type'        => $this->mapDegreeToApplicationType($a['target_degree'] ?? null),
             'registration_form_draft' => $draft,
-            'first_name'             => null,
+            'application_meta'        => $meta,
+            'first_name'              => null,
             'last_name'               => null,
-            'email'                  => null,
+            'email'                   => null,
         ]);
 
         $response->converted_to_guest_id = $guest->id;
@@ -183,6 +209,40 @@ class WizardController extends Controller
         $response->save();
 
         return redirect('/guest/registration')->with('success', 'Wizard cevapların form\'a aktarıldı — sadece kalan bilgileri tamamla.');
+    }
+
+    /** Wizard target_degree → form application_type. */
+    private function mapDegreeToApplicationType(?string $degree): ?string
+    {
+        return match ($degree) {
+            'bachelor', 'master', 'phd' => $degree,
+            'studienkolleg' => 'language_course', // Studienkolleg ≈ hazırlık
+            default => null,
+        };
+    }
+
+    /** Wizard gpa_range → 100 üzerinden ortalama not (yaklaşık merkez). */
+    private function mapGpaRangeToGrade(?string $range): ?string
+    {
+        return match ($range) {
+            'excellent' => '95',
+            'very_good' => '85',
+            'good'      => '75',
+            'medium'    => '65',
+            'low'       => '55',
+            default     => null,
+        };
+    }
+
+    /** Wizard current_education_level → form higher_education_status. */
+    private function mapEducationLevelToStatus(?string $level): ?string
+    {
+        return match ($level) {
+            'high_school_student', 'high_school_graduate' => 'not_started',
+            'bachelor_student', 'master_student'          => 'enrolled',
+            'bachelor_graduate', 'master_graduate'        => 'graduated',
+            default => null,
+        };
     }
 
     /** Session token cookie veya URL'den, sonra DB lookup. */
