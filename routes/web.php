@@ -16,6 +16,18 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/login');
 Route::view('/landing/mentorde', 'landing.mentorde')->name('landing.mentorde');
 
+// ── Discovery Wizard (Faz 2) — Public, login gerekmez ────────────────────────
+Route::middleware('company.context')->group(function (): void {
+    $sb = \App\Http\Controllers\StudyBuddy\WizardController::class;
+    Route::get('/study-buddy',                     [$sb, 'landing'])->name('study-buddy.landing');
+    Route::get('/study-buddy/start',               [$sb, 'start'])->middleware('throttle:30,1')->name('study-buddy.start');
+    Route::get('/study-buddy/step/{n}',            [$sb, 'step'])->whereNumber('n')->name('study-buddy.step');
+    Route::post('/study-buddy/step/{n}',           [$sb, 'saveStep'])->whereNumber('n')->middleware('throttle:60,1')->name('study-buddy.step.save');
+    Route::get('/study-buddy/complete',            [$sb, 'complete'])->name('study-buddy.complete');
+    Route::get('/study-buddy/result',              [$sb, 'result'])->name('study-buddy.result');
+    Route::post('/study-buddy/convert',            [$sb, 'convert'])->middleware('throttle:10,1')->name('study-buddy.convert');
+});
+
 // ── Yasal Sayfalar (Privacy / Terms) ─────────────────────────────────────────
 // SaaS gerekliliği: Google OAuth consent screen + KVKK/GDPR uyumu için public erişim
 // Public yasal sayfalar — manager paneli üzerinden DB'den render edilir
