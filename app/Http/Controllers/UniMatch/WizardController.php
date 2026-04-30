@@ -73,6 +73,21 @@ class WizardController extends Controller
         $stepDef = $this->schema->stepAt($n);
         if (! $stepDef) return redirect()->route('uni-match.start');
 
+        // preferred_cities adımı için tüm şehir kataloğunu hazırla (autocomplete)
+        $allCities = null;
+        if (($stepDef['key'] ?? '') === 'preferred_cities') {
+            $allCities = \Illuminate\Support\Facades\Cache::remember('unimatch.all_cities', 3600, function () {
+                return \DB::table('programs')
+                    ->select('location')
+                    ->whereNotNull('location')->where('location', '!=', '')
+                    ->groupBy('location')
+                    ->orderByRaw('COUNT(*) DESC')
+                    ->pluck('location')
+                    ->values()
+                    ->all();
+            });
+        }
+
         return view('uni-match.step', [
             'response'   => $response,
             'stepDef'    => $stepDef,
@@ -80,6 +95,7 @@ class WizardController extends Controller
             'totalSteps' => $total,
             'progress'   => (int) round(($n / $total) * 100),
             'answer'     => $response->getAnswer($stepDef['key']),
+            'allCities'  => $allCities,
         ]);
     }
 

@@ -131,9 +131,9 @@ class RecommendationEngine
 
             // 7) Living priority — lokasyon karakteri (basit heuristic)
             $livingPref = $a['living_priority'] ?? null;
-            if ($livingPref === 'big_city' && in_array($p->location, ['Berlin', 'Munich', 'Hamburg', 'Cologne', 'Frankfurt'], true)) {
+            if ($livingPref === 'big_city' && in_array($p->location, ['Berlin', 'Munich', 'Hamburg', 'Cologne', 'Frankfurt am Main', 'Düsseldorf', 'Stuttgart'], true)) {
                 $score += 4;
-            } elseif ($livingPref === 'uni_town' && in_array($p->location, ['Heidelberg', 'Tübingen', 'Göttingen', 'Freiburg'], true)) {
+            } elseif ($livingPref === 'uni_town' && in_array($p->location, ['Heidelberg', 'Tübingen', 'Göttingen', 'Freiburg im Breisgau', 'Marburg', 'Jena', 'Würzburg', 'Erlangen'], true)) {
                 $score += 4;
             }
 

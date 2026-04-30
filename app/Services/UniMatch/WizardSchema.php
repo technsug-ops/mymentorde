@@ -259,12 +259,12 @@ class WizardSchema
 
             // ── BÖLÜM 6: ŞEHİR & YAŞAM ────────────────────────────
             [
-                'key'      => 'preferred_cities',
-                'type'     => 'checkbox_group',
-                'title'    => 'Hangi şehirlerde okumak istersin?',
-                'subtitle' => 'En fazla 5 şehir seçebilirsin. Boş bırakırsan tüm Almanya görüntülenir.',
-                'max'      => 5,
-                'options'  => [
+                'key'         => 'preferred_cities',
+                'type'        => 'searchable_cities',
+                'title'       => 'Hangi şehirlerde okumak istersin?',
+                'subtitle'    => 'En fazla 5 şehir seçebilirsin. Aşağıdaki popüler şehirlere tıkla veya yukarıdan ara. Boş bırakırsan tüm Almanya görüntülenir.',
+                'max'         => 5,
+                'popular'     => [
                     ['value' => 'Berlin',               'label' => 'Berlin',         'icon' => '🏙'],
                     ['value' => 'Munich',               'label' => 'Münih',          'icon' => '🍻'],
                     ['value' => 'Hamburg',              'label' => 'Hamburg',        'icon' => '⚓'],
@@ -284,7 +284,7 @@ class WizardSchema
                     ['value' => 'Bochum',               'label' => 'Bochum',         'icon' => '⚙️'],
                     ['value' => 'Karlsruhe',            'label' => 'Karlsruhe',      'icon' => '⚖️'],
                     ['value' => 'Münster',              'label' => 'Münster',        'icon' => '🚲'],
-                    ['value' => 'Nürnberg',             'label' => 'Nürnberg',       'icon' => '🏯'],
+                    ['value' => 'Nuremberg',            'label' => 'Nürnberg',       'icon' => '🏯'],
                     ['value' => 'Erlangen',             'label' => 'Erlangen',       'icon' => '🔬'],
                     ['value' => 'Göttingen',            'label' => 'Göttingen',      'icon' => '📚'],
                     ['value' => 'Würzburg',             'label' => 'Würzburg',       'icon' => '🏰'],
@@ -295,12 +295,8 @@ class WizardSchema
                     ['value' => 'Darmstadt',            'label' => 'Darmstadt',      'icon' => '🚀'],
                     ['value' => 'Kiel',                 'label' => 'Kiel',           'icon' => '⛵'],
                     ['value' => 'Mannheim',             'label' => 'Mannheim',       'icon' => '🎼'],
-                    ['value' => 'Potsdam',              'label' => 'Potsdam',        'icon' => '🏛️'],
-                    ['value' => 'Dortmund',             'label' => 'Dortmund',       'icon' => '⚽'],
-                    ['value' => 'Augsburg',             'label' => 'Augsburg',       'icon' => '🏛'],
-                    ['value' => 'Regensburg',           'label' => 'Regensburg',     'icon' => '🏰'],
                 ],
-                'validation' => ['nullable', 'array', 'max:5'],
+                'validation'  => ['nullable', 'array', 'max:5'],
             ],
 
             [
