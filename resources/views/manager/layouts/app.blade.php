@@ -338,18 +338,6 @@
                         <span class="nav-icon">🏆</span> Bayi Kademeleri
                     </a>
                 @endmodule
-                <a href="{{ route('manager.program-catalog.changes') }}"
-                   class="nav-link {{ request()->is('manager/program-catalog*') ? 'active' : '' }}">
-                    <span class="nav-icon">📚</span> Program Kataloğu
-                    @php
-                        try {
-                            $pccUnreviewed = \App\Models\ProgramChangeLog::query()->whereNull('reviewed_at')->count();
-                        } catch (\Throwable $e) { $pccUnreviewed = 0; }
-                    @endphp
-                    @if($pccUnreviewed > 0)
-                        <span style="background:#dc2626;color:#fff;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:800;margin-left:6px;">{{ $pccUnreviewed }}</span>
-                    @endif
-                </a>
             </div>
 
             <div class="nav-section">
@@ -504,6 +492,18 @@
                         <span class="nav-icon">📍</span> Sessizlik Monitörü
                     </a>
                 @endmodule
+                <a href="{{ route('manager.program-catalog.changes') }}"
+                   class="nav-link {{ request()->is('manager/program-catalog*') ? 'active' : '' }}">
+                    <span class="nav-icon">📚</span> Program Kataloğu
+                    @php
+                        try {
+                            $pccUnreviewed = \App\Models\ProgramChangeLog::query()->whereNull('reviewed_at')->count();
+                        } catch (\Throwable $e) { $pccUnreviewed = 0; }
+                    @endphp
+                    @if($pccUnreviewed > 0)
+                        <span style="background:#dc2626;color:#fff;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:800;margin-left:6px;">{{ $pccUnreviewed }}</span>
+                    @endif
+                </a>
                 <a href="/manager/system/security"
                    class="nav-link {{ request()->is('manager/system/security*') ? 'active' : '' }}">
                     <span class="nav-icon">🛡</span> Güvenlik Paneli
