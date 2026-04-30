@@ -566,8 +566,14 @@ class StudentPortalController extends Controller
 
         $changed = false;
         foreach ($schemaKeys as $key) {
-            if (array_key_exists($key, $draft) && trim((string) $draft[$key]) !== '') {
-                continue;
+            if (array_key_exists($key, $draft)) {
+                $val = $draft[$key];
+                // checkbox_group / array değerler — boş array değilse atla
+                if (is_array($val)) {
+                    if (! empty($val)) continue;
+                } elseif (trim((string) $val) !== '') {
+                    continue;
+                }
             }
             $fallback = $fallbackMap[$key] ?? '';
             if ($fallback !== '') {

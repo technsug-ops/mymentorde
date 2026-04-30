@@ -185,9 +185,17 @@
                     📧 Öğrenciye Mail Gönder ({{ count($missing) }} alan)
                 </button>
                 @if($canRequestDocs)
-                    <a class="vg-missing-btn doc-link" href="{{ route('manager.guest.document-tokens.index', $guest) }}">
-                        🔗 Belge Talep Linki Oluştur (Premium)
-                    </a>
+                    {{-- Vize Rehberi student aşamasında — student belge talep route'u kullanılır --}}
+                    @if($studentId)
+                        <a class="vg-missing-btn doc-link" href="{{ route('manager.student.document-tokens.index', $studentId) }}">
+                            🔗 Belge Talep Linki Oluştur (Premium)
+                        </a>
+                    @else
+                        {{-- Legacy fallback: guest aşamasında çağrı (geriye uyumluluk) --}}
+                        <a class="vg-missing-btn doc-link" href="{{ route('manager.guest.document-tokens.index', $guest) }}">
+                            🔗 Belge Talep Linki Oluştur (Premium)
+                        </a>
+                    @endif
                 @else
                     <button type="button" class="vg-missing-btn doc-link" disabled title="Bu yetki bayide aktif değil">
                         🔒 Belge Talep Linki (Premium)
