@@ -1,0 +1,33 @@
+{
+  "_meta": {
+    "purpose": "uni-assist üye → canonical university name manuel mapping. Fuzzy match'in karıştırdığı veya kaçırdığı durumlarda kullanılır.",
+    "format": "ua_id (uni-assist iç ID) → canonical_name (exact match, universities.name kolonuna where = ile sorgulanır)",
+    "review_date": "2026-05-01",
+    "note": "Yeni mapping eklemek için önce DB'den canonical name'i doğrula: Universität::where('name', 'X')->exists()"
+  },
+  "matches": {
+    "70":  "Hochschule Bremen",
+    "72":  "Universität Bremen",
+    "77":  "Hochschule für Angewandte Wissenschaften Hamburg",
+    "151": "Hochschule Mainz",
+    "408": "Hochschule Mainz",
+    "406": "Hochschule Mainz",
+    "328": "Katholische Hochschule Mainz",
+    "82":  "Hochschule Darmstadt",
+    "92":  "Universität Kassel",
+    "125": "Universität Duisburg-Essen",
+    "416": "Universität Duisburg-Essen",
+    "59":  "Universität der Künste Berlin",
+    "50":  "Hochschule für Technik und Wirtschaft Berlin",
+    "418": "Hochschule für Technik und Wirtschaft Berlin",
+    "410": "Hochschule für Wirtschaft und Recht Berlin",
+    "51":  "Hochschule für Wirtschaft und Recht Berlin",
+    "426": "Hochschule Ruhr West",
+    "111": "Hochschule Osnabrück",
+    "112": "Universität Osnabrück",
+    "153": "Hochschule für Technik und Wirtschaft des Saarlandes",
+    "473": "Hochschule Anhalt",
+    "370": "Hochschule Anhalt",
+    "467": "Hochschule Anhalt"
+  }
+}

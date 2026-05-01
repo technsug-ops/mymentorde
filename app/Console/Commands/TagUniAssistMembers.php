@@ -47,7 +47,16 @@ class TagUniAssistMembers extends Command
             return self::FAILURE;
         }
 
+        // Manuel mapping (fuzzy match'in kaçırdığı / karıştırdığı durumlar)
+        $manualPath = database_path('data/uni_assist_manual_matches.json');
+        $manualMatches = [];
+        if (file_exists($manualPath)) {
+            $manualPayload = json_decode(file_get_contents($manualPath), true);
+            $manualMatches = $manualPayload['matches'] ?? [];
+        }
+
         $this->info('uni-assist üye listesi: ' . count($members) . ' üniversite.');
+        $this->info('Manuel mapping: ' . count($manualMatches) . ' override.');
         $this->info('Canonical katalog: ' . University::count() . ' üniversite.');
 
         // Canonical: hem normalize ad hem core-token (noise temizlenmiş) ile index
@@ -64,6 +73,16 @@ class TagUniAssistMembers extends Command
 
         foreach ($members as $m) {
             $hit = null;
+
+            // 0) Manuel override (en yüksek öncelik)
+            $uaIdStr = (string) $m['ua_id'];
+            if (isset($manualMatches[$uaIdStr])) {
+                $hit = University::query()->where('name', $manualMatches[$uaIdStr])->first();
+                if ($hit) {
+                    $matched[] = ['member' => $m, 'university' => $hit, 'method' => 'manual'];
+                    continue;
+                }
+            }
 
             // 1) Tam normalize match
             $key = $this->normalize($m['name']);
