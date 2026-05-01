@@ -110,6 +110,13 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         } catch (\Throwable $e) {
             $output['repair_registration_fields_error'] = $e->getMessage();
         }
+        // uni-assist üye üniversiteleri etiketle (idempotent — yeniden çalıştırılabilir)
+        try {
+            \Illuminate\Support\Facades\Artisan::call('unimatch:tag-uni-assist-members');
+            $output['unimatch_tag_uni_assist'] = trim(\Illuminate\Support\Facades\Artisan::output());
+        } catch (\Throwable $e) {
+            $output['unimatch_tag_uni_assist_error'] = $e->getMessage();
+        }
         return response()->json(['ok' => true, 'output' => $output]);
     })->middleware('throttle:5,1')->name('system.post-deploy');
 
