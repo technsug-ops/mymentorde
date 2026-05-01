@@ -63,6 +63,13 @@ jobs:
         if: steps.composer-cache.outputs.cache-hit != 'true' || steps.changes.outputs.composer == 'true' || inputs.force_rebuild == 'true'
         run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
 
+      - name: Regenerate Composer autoload classmap
+        # composer.lock değişmese de yeni PHP class dosyaları classmap'e
+        # girmesi için her deploy'da autoload regenerate. Hızlı (~1-2 sn).
+        # Sebep: app/Models/X.php yeni eklendiğinde "Class not found" hatası
+        # vendor/composer cache'lenmiş classmap'ten kaynaklanır.
+        run: composer dump-autoload --optimize --no-dev
+
       - name: Setup Node 20
         # Sadece frontend değişti veya manual force
         if: steps.changes.outputs.frontend == 'true' || inputs.force_rebuild == 'true'
