@@ -1,0 +1,1186 @@
+{
+    "_meta": {
+        "source": "https:\/\/www.uni-assist.de\/en\/tools\/uni-assist-universities\/",
+        "scraped_at": "2026-05-01T10:10:01+00:00",
+        "count": 196,
+        "note": "uni-assist üye üniversite listesi (campus düzeyinde). region_id\/city_id uni-assist iç ID. is_uni_assist_member flagging için isim match yapılır."
+    },
+    "universities": [
+        {
+            "ua_id": 473,
+            "region_id": 92,
+            "city_id": 8,
+            "name": "Anhalt University of Applied Sciences (Campus Bernburg)"
+        },
+        {
+            "ua_id": 370,
+            "region_id": 92,
+            "city_id": 22,
+            "name": "Anhalt University of Applied Sciences (Campus Dessau)"
+        },
+        {
+            "ua_id": 467,
+            "region_id": 92,
+            "city_id": 71,
+            "name": "Anhalt University of Applied Sciences (Campus Köthen)"
+        },
+        {
+            "ua_id": 16,
+            "region_id": 81,
+            "city_id": 3,
+            "name": "Ansbach University of Applied Sciences"
+        },
+        {
+            "ua_id": 69,
+            "region_id": 84,
+            "city_id": 15,
+            "name": "APOLLON University of Health Management"
+        },
+        {
+            "ua_id": 17,
+            "region_id": 81,
+            "city_id": 4,
+            "name": "Aschaffenburg University of Applied Sciences (UAS Aschaffenburg)"
+        },
+        {
+            "ua_id": 180,
+            "region_id": 94,
+            "city_id": 116,
+            "name": "Bauhaus-Universität Weimar"
+        },
+        {
+            "ua_id": 59,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "Berlin University of the Arts (Udk Berlin)"
+        },
+        {
+            "ua_id": 43,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "BHT Berliner Hochschule für Technik"
+        },
+        {
+            "ua_id": 116,
+            "region_id": 88,
+            "city_id": 9,
+            "name": "Bielefeld University"
+        },
+        {
+            "ua_id": 117,
+            "region_id": 88,
+            "city_id": 11,
+            "name": "Bochum University of Applied Sciences"
+        },
+        {
+            "ua_id": 61,
+            "region_id": 83,
+            "city_id": 13,
+            "name": "Brandenburg University of Applied Sciences"
+        },
+        {
+            "ua_id": 62,
+            "region_id": 83,
+            "city_id": 20,
+            "name": "Brandenburg University of Technology Cottbus-Senftenberg (BTU Campus Cottbus)"
+        },
+        {
+            "ua_id": 432,
+            "region_id": 83,
+            "city_id": 108,
+            "name": "Brandenburg University of Technology Cottbus-Senftenberg (BTU Campus Senftenberg)"
+        },
+        {
+            "ua_id": 582,
+            "region_id": 79,
+            "city_id": 14,
+            "name": "Braunschweig University of Art"
+        },
+        {
+            "ua_id": 70,
+            "region_id": 84,
+            "city_id": 15,
+            "name": "Bremen University of Applied Sciences"
+        },
+        {
+            "ua_id": 695,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "BSP Business and Law School  Hochschule für Management und Recht"
+        },
+        {
+            "ua_id": 689,
+            "region_id": 85,
+            "city_id": 49,
+            "name": "BSP Business and Law School – Campus Hamburg  Hochschule für Management und Recht"
+        },
+        {
+            "ua_id": 648,
+            "region_id": 85,
+            "city_id": 49,
+            "name": "Bucerius Law School Hamburg"
+        },
+        {
+            "ua_id": 574,
+            "region_id": 92,
+            "city_id": 48,
+            "name": "Burg Giebichenstein University of Art and Design Halle"
+        },
+        {
+            "ua_id": 110,
+            "region_id": 79,
+            "city_id": 94,
+            "name": "Carl von Ossietzky University of Oldenburg"
+        },
+        {
+            "ua_id": 44,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "Charité - Universitätsmedizin Berlin"
+        },
+        {
+            "ua_id": 155,
+            "region_id": 91,
+            "city_id": 18,
+            "name": "Chemnitz University of Technology (TU Chemnitz)"
+        },
+        {
+            "ua_id": 21,
+            "region_id": 81,
+            "city_id": 19,
+            "name": "Coburg University of Applied Sciences and Arts"
+        },
+        {
+            "ua_id": 122,
+            "region_id": 88,
+            "city_id": 24,
+            "name": "Dortmund University of Applied Sciences and Arts"
+        },
+        {
+            "ua_id": 157,
+            "region_id": 91,
+            "city_id": 25,
+            "name": "Dresden University of Applied Sciences (HTW Dresden)"
+        },
+        {
+            "ua_id": 65,
+            "region_id": 83,
+            "city_id": 36,
+            "name": "European University Viadrina Frankfurt (Oder)"
+        },
+        {
+            "ua_id": 779,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "Evangelische Hochschule Berlin (EHB)"
+        },
+        {
+            "ua_id": 34,
+            "region_id": 81,
+            "city_id": 92,
+            "name": "Evangelische Hochschule Nürnberg - University of Applied Sciences"
+        },
+        {
+            "ua_id": 119,
+            "region_id": 88,
+            "city_id": 11,
+            "name": "EvH Bochum"
+        },
+        {
+            "ua_id": 113,
+            "region_id": 88,
+            "city_id": 0,
+            "name": "Fachhochschule Aachen - University of Applied Sciences (FH Aachen)"
+        },
+        {
+            "ua_id": 60,
+            "region_id": 83,
+            "city_id": 99,
+            "name": "Film University Babelsberg Konrad Wolf"
+        },
+        {
+            "ua_id": 170,
+            "region_id": 93,
+            "city_id": 35,
+            "name": "Flensburg University of Applied Sciences (FUAS)"
+        },
+        {
+            "ua_id": 83,
+            "region_id": 86,
+            "city_id": 37,
+            "name": "Frankfurt University of Applied Sciences (Frankfurt UAS)"
+        },
+        {
+            "ua_id": 551,
+            "region_id": 80,
+            "city_id": 39,
+            "name": "Freiburg University of Education"
+        },
+        {
+            "ua_id": 48,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "Freie Universität Berlin (FU Berlin)"
+        },
+        {
+            "ua_id": 86,
+            "region_id": 86,
+            "city_id": 41,
+            "name": "Fulda University of Applied Sciences"
+        },
+        {
+            "ua_id": 87,
+            "region_id": 86,
+            "city_id": 42,
+            "name": "Geisenheim University (HGU)"
+        },
+        {
+            "ua_id": 126,
+            "region_id": 88,
+            "city_id": 43,
+            "name": "Gelsenkirchen University of Applied Sciences"
+        },
+        {
+            "ua_id": 85,
+            "region_id": 86,
+            "city_id": 37,
+            "name": "Goethe University Frankfurt"
+        },
+        {
+            "ua_id": 75,
+            "region_id": 85,
+            "city_id": 49,
+            "name": "HafenCity University Hamburg (HCU Hamburg)"
+        },
+        {
+            "ua_id": 77,
+            "region_id": 85,
+            "city_id": 49,
+            "name": "Hamburg University of Applied Sciences"
+        },
+        {
+            "ua_id": 104,
+            "region_id": 79,
+            "city_id": 51,
+            "name": "Hannover Medical School (MHH)"
+        },
+        {
+            "ua_id": 424,
+            "region_id": 92,
+            "city_id": 47,
+            "name": "Harz University of Applied Sciences (Campus Halberstadt)"
+        },
+        {
+            "ua_id": 166,
+            "region_id": 92,
+            "city_id": 118,
+            "name": "Harz University of Applied Sciences (Campus Wernigerode)"
+        },
+        {
+            "ua_id": 2,
+            "region_id": 80,
+            "city_id": 52,
+            "name": "Heidelberg University of Education (PH Heidelberg)"
+        },
+        {
+            "ua_id": 123,
+            "region_id": 88,
+            "city_id": 27,
+            "name": "Heinrich Heine University Düsseldorf (HHU)"
+        },
+        {
+            "ua_id": 785,
+            "region_id": 94,
+            "city_id": 33,
+            "name": "HMU Health and Medical University Erfurt"
+        },
+        {
+            "ua_id": 734,
+            "region_id": 83,
+            "city_id": 99,
+            "name": "HMU Health and Medical University Potsdam"
+        },
+        {
+            "ua_id": 102,
+            "region_id": 79,
+            "city_id": 17,
+            "name": "Hochschule 21"
+        },
+        {
+            "ua_id": 794,
+            "region_id": 80,
+            "city_id": 1,
+            "name": "Hochschule Aalen"
+        },
+        {
+            "ua_id": 115,
+            "region_id": 88,
+            "city_id": 9,
+            "name": "Hochschule Bielefeld - University of Applied Sciences and Arts (HSBI)"
+        },
+        {
+            "ua_id": 789,
+            "region_id": 88,
+            "city_id": 106,
+            "name": "Hochschule Bonn-Rhein-Sieg"
+        },
+        {
+            "ua_id": 82,
+            "region_id": 86,
+            "city_id": 21,
+            "name": "Hochschule Darmstadt (h_da) – University of Applied Sciences"
+        },
+        {
+            "ua_id": 655,
+            "region_id": 90,
+            "city_id": 105,
+            "name": "Hochschule der Bildenden Künste Saar"
+        },
+        {
+            "ua_id": 124,
+            "region_id": 88,
+            "city_id": 27,
+            "name": "Hochschule Düsseldorf - University of Applied Sciences (HSD)"
+        },
+        {
+            "ua_id": 108,
+            "region_id": 79,
+            "city_id": 32,
+            "name": "Hochschule Emden\/Leer - University of Applied Sciences (Campus Emden)"
+        },
+        {
+            "ua_id": 428,
+            "region_id": 79,
+            "city_id": 75,
+            "name": "Hochschule Emden\/Leer - University of Applied Sciences (Campus Leer)"
+        },
+        {
+            "ua_id": 727,
+            "region_id": 88,
+            "city_id": 50,
+            "name": "Hochschule Hamm-Lippstadt"
+        },
+        {
+            "ua_id": 103,
+            "region_id": 79,
+            "city_id": 51,
+            "name": "Hochschule Hannover – University of Applied Sciences and Arts"
+        },
+        {
+            "ua_id": 803,
+            "region_id": 80,
+            "city_id": 53,
+            "name": "Hochschule Heilbronn - Bildungscampus"
+        },
+        {
+            "ua_id": 808,
+            "region_id": 80,
+            "city_id": 72,
+            "name": "Hochschule Heilbronn - Standort Künzelsau"
+        },
+        {
+            "ua_id": 810,
+            "region_id": 80,
+            "city_id": 107,
+            "name": "Hochschule Heilbronn - Standort Schwäbisch Hall"
+        },
+        {
+            "ua_id": 806,
+            "region_id": 80,
+            "city_id": 53,
+            "name": "Hochschule Heilbronn - TechCampus"
+        },
+        {
+            "ua_id": 147,
+            "region_id": 89,
+            "city_id": 62,
+            "name": "Hochschule Kaiserslautern - University of Applied Sciences (Campus Kaiserslautern)"
+        },
+        {
+            "ua_id": 386,
+            "region_id": 89,
+            "city_id": 98,
+            "name": "Hochschule Kaiserslautern - University of Applied Sciences (Campus Pirmasens)"
+        },
+        {
+            "ua_id": 388,
+            "region_id": 89,
+            "city_id": 128,
+            "name": "Hochschule Kaiserslautern - University of Applied Sciences (Campus Zweibrücken)"
+        },
+        {
+            "ua_id": 151,
+            "region_id": 89,
+            "city_id": 81,
+            "name": "Hochschule Mainz - University of Applied Sciences (School of Business)"
+        },
+        {
+            "ua_id": 408,
+            "region_id": 89,
+            "city_id": 81,
+            "name": "Hochschule Mainz - University of Applied Sciences (School of Design)"
+        },
+        {
+            "ua_id": 406,
+            "region_id": 89,
+            "city_id": 81,
+            "name": "Hochschule Mainz - University of Applied Sciences (School of Engineering)"
+        },
+        {
+            "ua_id": 133,
+            "region_id": 88,
+            "city_id": 69,
+            "name": "Hochschule Niederrhein - University of Applied Sciences (Campus Krefeld)"
+        },
+        {
+            "ua_id": 420,
+            "region_id": 88,
+            "city_id": 85,
+            "name": "Hochschule Niederrhein - University of Applied Sciences (Campus Mönchengladbach)"
+        },
+        {
+            "ua_id": 95,
+            "region_id": 86,
+            "city_id": 119,
+            "name": "Hochschule RheinMain – University of Applied Sciences and Arts"
+        },
+        {
+            "ua_id": 100,
+            "region_id": 87,
+            "city_id": 111,
+            "name": "Hochschule Stralsund - University of Applied Sciences"
+        },
+        {
+            "ua_id": 25,
+            "region_id": 81,
+            "city_id": 55,
+            "name": "Hof University of Applied Sciences (Campus Hof)"
+        },
+        {
+            "ua_id": 169,
+            "region_id": 92,
+            "city_id": 83,
+            "name": "HoMe — Merseburg University of Applied Sciences"
+        },
+        {
+            "ua_id": 50,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "HTW Berlin - University of Applied Sciences (Campus Treskowallee)"
+        },
+        {
+            "ua_id": 418,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "HTW Berlin - University of Applied Sciences (Campus Wilhelminenhof)"
+        },
+        {
+            "ua_id": 153,
+            "region_id": 90,
+            "city_id": 105,
+            "name": "htw saar - University of Applied Sciences"
+        },
+        {
+            "ua_id": 53,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "Humboldt-Universität zu Berlin (HU Berlin)"
+        },
+        {
+            "ua_id": 54,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "International Psychoanalytic University Berlin (IPU)"
+        },
+        {
+            "ua_id": 799,
+            "region_id": 81,
+            "city_id": 87,
+            "name": "International University SDI München"
+        },
+        {
+            "ua_id": 781,
+            "region_id": 88,
+            "city_id": 70,
+            "name": "INU Innovative University of Applied Sciences Cologne"
+        },
+        {
+            "ua_id": 539,
+            "region_id": 88,
+            "city_id": 27,
+            "name": "IST-Hochschule für Management GmbH"
+        },
+        {
+            "ua_id": 398,
+            "region_id": 79,
+            "city_id": 31,
+            "name": "Jade University of Applied Sciences (Campus Elsfleth)"
+        },
+        {
+            "ua_id": 396,
+            "region_id": 79,
+            "city_id": 94,
+            "name": "Jade University of Applied Sciences (Campus Oldenburg)"
+        },
+        {
+            "ua_id": 109,
+            "region_id": 79,
+            "city_id": 121,
+            "name": "Jade University of Applied Sciences (Campus Wilhelmshaven)"
+        },
+        {
+            "ua_id": 568,
+            "region_id": 81,
+            "city_id": 126,
+            "name": "Julius-Maximilians-Universität Würzburg"
+        },
+        {
+            "ua_id": 89,
+            "region_id": 86,
+            "city_id": 44,
+            "name": "Justus Liebig University (JLU Gießen)"
+        },
+        {
+            "ua_id": 31,
+            "region_id": 81,
+            "city_id": 87,
+            "name": "Katholische Stiftungsfachhochschule München - University of Applied Sciences (KSH)"
+        },
+        {
+            "ua_id": 773,
+            "region_id": 81,
+            "city_id": 29,
+            "name": "Katholische Universität Eichstätt-Ingolstadt"
+        },
+        {
+            "ua_id": 27,
+            "region_id": 81,
+            "city_id": 65,
+            "name": "Kempten University of Applied Sciences"
+        },
+        {
+            "ua_id": 173,
+            "region_id": 93,
+            "city_id": 66,
+            "name": "Kiel University (CAU)"
+        },
+        {
+            "ua_id": 171,
+            "region_id": 93,
+            "city_id": 66,
+            "name": "Kiel University of Applied Sciences"
+        },
+        {
+            "ua_id": 390,
+            "region_id": 89,
+            "city_id": 57,
+            "name": "Koblenz University of Applied Sciences (Campus Höhr-Grenzhausen)"
+        },
+        {
+            "ua_id": 148,
+            "region_id": 89,
+            "city_id": 68,
+            "name": "Koblenz University of Applied Sciences (Campus Koblenz)"
+        },
+        {
+            "ua_id": 392,
+            "region_id": 89,
+            "city_id": 101,
+            "name": "Koblenz University of Applied Sciences (Campus Remagen)"
+        },
+        {
+            "ua_id": 28,
+            "region_id": 81,
+            "city_id": 74,
+            "name": "Landshut University of Applied Sciences"
+        },
+        {
+            "ua_id": 105,
+            "region_id": 79,
+            "city_id": 51,
+            "name": "Leibniz Universität Hannover"
+        },
+        {
+            "ua_id": 162,
+            "region_id": 91,
+            "city_id": 76,
+            "name": "Leipzig University"
+        },
+        {
+            "ua_id": 161,
+            "region_id": 91,
+            "city_id": 76,
+            "name": "Leipzig University of Applied Sciences (HTWK Leipzig)"
+        },
+        {
+            "ua_id": 107,
+            "region_id": 79,
+            "city_id": 79,
+            "name": "Leuphana University of Lüneburg"
+        },
+        {
+            "ua_id": 167,
+            "region_id": 92,
+            "city_id": 80,
+            "name": "Magdeburg-Stendal University of Applied Sciences (Campus Magdeburg)"
+        },
+        {
+            "ua_id": 404,
+            "region_id": 92,
+            "city_id": 110,
+            "name": "Magdeburg-Stendal University of Applied Sciences (Campus Stendal)"
+        },
+        {
+            "ua_id": 328,
+            "region_id": 89,
+            "city_id": 81,
+            "name": "Mainz Catholic University of Applied Sciences"
+        },
+        {
+            "ua_id": 165,
+            "region_id": 92,
+            "city_id": 48,
+            "name": "Martin-Luther-University Halle-Wittenberg"
+        },
+        {
+            "ua_id": 55,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "Media Design University for Design and Computer Science (MD.H Campus Berlin)"
+        },
+        {
+            "ua_id": 378,
+            "region_id": 81,
+            "city_id": 87,
+            "name": "Media Design University for Design and Computer Science (MD.H Campus Munich)"
+        },
+        {
+            "ua_id": 49,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "Media University of Applied Sciences (Campus Berlin)"
+        },
+        {
+            "ua_id": 400,
+            "region_id": 88,
+            "city_id": 70,
+            "name": "Media University of Applied Sciences (Campus Cologne)"
+        },
+        {
+            "ua_id": 683,
+            "region_id": 88,
+            "city_id": 27,
+            "name": "Mediadesign University for Design and Computer Science (MD.H Campus Düsseldorf)"
+        },
+        {
+            "ua_id": 668,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "Medical School Berlin"
+        },
+        {
+            "ua_id": 674,
+            "region_id": 85,
+            "city_id": 49,
+            "name": "MSH Medical School Hamburg (University of Applied Sciences and Medical University)"
+        },
+        {
+            "ua_id": 29,
+            "region_id": 81,
+            "city_id": 87,
+            "name": "Munich University of Applied Sciences"
+        },
+        {
+            "ua_id": 172,
+            "region_id": 93,
+            "city_id": 66,
+            "name": "Muthesius University of Fine Arts and Design"
+        },
+        {
+            "ua_id": 33,
+            "region_id": 81,
+            "city_id": 88,
+            "name": "Neu-Ulm University of Applied Sciences (HNU)"
+        },
+        {
+            "ua_id": 98,
+            "region_id": 87,
+            "city_id": 89,
+            "name": "Neubrandenburg University of Applied Sciences"
+        },
+        {
+            "ua_id": 787,
+            "region_id": 93,
+            "city_id": 30,
+            "name": "Nordakademie - Hochschule der Wirtschaft"
+        },
+        {
+            "ua_id": 179,
+            "region_id": 94,
+            "city_id": 90,
+            "name": "Nordhausen University of Applied Sciences"
+        },
+        {
+            "ua_id": 818,
+            "region_id": 80,
+            "city_id": 93,
+            "name": "Offenburg University of Applied Sciences"
+        },
+        {
+            "ua_id": 112,
+            "region_id": 79,
+            "city_id": 95,
+            "name": "Osnabrück University"
+        },
+        {
+            "ua_id": 111,
+            "region_id": 79,
+            "city_id": 95,
+            "name": "Osnabrück University of Applied Sciences"
+        },
+        {
+            "ua_id": 36,
+            "region_id": 81,
+            "city_id": 100,
+            "name": "Ostbayerische Technische Hochschule Regensburg (OTH Regensburg)"
+        },
+        {
+            "ua_id": 101,
+            "region_id": 79,
+            "city_id": 123,
+            "name": "Ostfalia University of Applied Sciences"
+        },
+        {
+            "ua_id": 524,
+            "region_id": 88,
+            "city_id": 23,
+            "name": "Ostwestfalen-Lippe University of Applied Sciences and Arts (Campus Detmold)"
+        },
+        {
+            "ua_id": 533,
+            "region_id": 88,
+            "city_id": 58,
+            "name": "Ostwestfalen-Lippe University of Applied Sciences and Arts (Campus Höxter)"
+        },
+        {
+            "ua_id": 134,
+            "region_id": 88,
+            "city_id": 77,
+            "name": "Ostwestfalen-Lippe University of Applied Sciences and Arts (Campus Lemgo)"
+        },
+        {
+            "ua_id": 20,
+            "region_id": 81,
+            "city_id": 2,
+            "name": "OTH Amberg-Weiden– Technical University of Applied Sciences"
+        },
+        {
+            "ua_id": 168,
+            "region_id": 92,
+            "city_id": 80,
+            "name": "Otto von Guericke University Magdeburg (OVGU Magdeburg)"
+        },
+        {
+            "ua_id": 137,
+            "region_id": 88,
+            "city_id": 96,
+            "name": "Paderborn University"
+        },
+        {
+            "ua_id": 93,
+            "region_id": 86,
+            "city_id": 82,
+            "name": "Philipps-Universität Marburg"
+        },
+        {
+            "ua_id": 129,
+            "region_id": 88,
+            "city_id": 70,
+            "name": "Rheinische Hochschule Cologne (RH Köln)"
+        },
+        {
+            "ua_id": 769,
+            "region_id": 89,
+            "city_id": 73,
+            "name": "Rheinland-Pfälzische Technische Universität Kaiserslautern-Landau"
+        },
+        {
+            "ua_id": 412,
+            "region_id": 86,
+            "city_id": 104,
+            "name": "Rhine-Main University (Campus Rüsselsheim)"
+        },
+        {
+            "ua_id": 430,
+            "region_id": 88,
+            "city_id": 63,
+            "name": "Rhine-Waal University of Applied Sciences (Campus Kamp-Lintfort)"
+        },
+        {
+            "ua_id": 127,
+            "region_id": 88,
+            "city_id": 67,
+            "name": "Rhine-Waal University of Applied Sciences (Campus Kleve)"
+        },
+        {
+            "ua_id": 426,
+            "region_id": 88,
+            "city_id": 12,
+            "name": "Ruhr West University of Applied Sciences (HRW Campus Bottrop)"
+        },
+        {
+            "ua_id": 135,
+            "region_id": 88,
+            "city_id": 86,
+            "name": "Ruhr West University of Applied Sciences (HRW Campus Mülheim)"
+        },
+        {
+            "ua_id": 154,
+            "region_id": 90,
+            "city_id": 105,
+            "name": "Saarland University"
+        },
+        {
+            "ua_id": 380,
+            "region_id": 88,
+            "city_id": 46,
+            "name": "South Westphalia University of Applied Sciences (Campus Hagen)"
+        },
+        {
+            "ua_id": 138,
+            "region_id": 88,
+            "city_id": 61,
+            "name": "South Westphalia University of Applied Sciences (Campus Iserlohn)"
+        },
+        {
+            "ua_id": 382,
+            "region_id": 88,
+            "city_id": 84,
+            "name": "South Westphalia University of Applied Sciences (Campus Meschede)"
+        },
+        {
+            "ua_id": 384,
+            "region_id": 88,
+            "city_id": 109,
+            "name": "South Westphalia University of Applied Sciences (Campus Soest)"
+        },
+        {
+            "ua_id": 18,
+            "region_id": 81,
+            "city_id": 5,
+            "name": "Technical University of Applied Sciences Augsburg"
+        },
+        {
+            "ua_id": 68,
+            "region_id": 83,
+            "city_id": 120,
+            "name": "Technical University of Applied Sciences Wildau (TH Wildau)"
+        },
+        {
+            "ua_id": 38,
+            "region_id": 81,
+            "city_id": 126,
+            "name": "Technical University of Applied Sciences Würzburg-Schweinfurt"
+        },
+        {
+            "ua_id": 32,
+            "region_id": 81,
+            "city_id": 87,
+            "name": "Technical University of Munich (TUM)"
+        },
+        {
+            "ua_id": 777,
+            "region_id": 89,
+            "city_id": 10,
+            "name": "Technische Hochschule Bingen"
+        },
+        {
+            "ua_id": 26,
+            "region_id": 81,
+            "city_id": 60,
+            "name": "Technische Hochschule Ingolstadt (THI) - University of Applied Sciences"
+        },
+        {
+            "ua_id": 749,
+            "region_id": 81,
+            "city_id": 102,
+            "name": "Technische Hochschule Rosenheim"
+        },
+        {
+            "ua_id": 58,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "Technische Universität Berlin (TU Berlin)"
+        },
+        {
+            "ua_id": 158,
+            "region_id": 91,
+            "city_id": 25,
+            "name": "Technische Universität Dresden (TU Dresden)"
+        },
+        {
+            "ua_id": 130,
+            "region_id": 88,
+            "city_id": 70,
+            "name": "TH Köln - University of Applied Sciences"
+        },
+        {
+            "ua_id": 174,
+            "region_id": 93,
+            "city_id": 78,
+            "name": "TH Lübeck - University of Applied Sciences"
+        },
+        {
+            "ua_id": 410,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "The Berlin School of Economics and Law (BSEL Campus Lichtenberg)"
+        },
+        {
+            "ua_id": 51,
+            "region_id": 82,
+            "city_id": 7,
+            "name": "The Berlin School of Economics and Law (BSEL Campus Schöneberg)"
+        },
+        {
+            "ua_id": 90,
+            "region_id": 86,
+            "city_id": 44,
+            "name": "THM - University of Applied Sciences"
+        },
+        {
+            "ua_id": 145,
+            "region_id": 89,
+            "city_id": 112,
+            "name": "Trier University of Applied Sciences (Campus Trier)"
+        },
+        {
+            "ua_id": 436,
+            "region_id": 89,
+            "city_id": 56,
+            "name": "Trier University of Applied Sciences (Environmental Campus Birkenfeld)"
+        },
+        {
+            "ua_id": 159,
+            "region_id": 91,
+            "city_id": 38,
+            "name": "TU Bergakademie Freiberg - University of Resources"
+        },
+        {
+            "ua_id": 316,
+            "region_id": 88,
+            "city_id": 24,
+            "name": "TU Dortmund University"
+        },
+        {
+            "ua_id": 820,
+            "region_id": 94,
+            "city_id": 59,
+            "name": "TU Ilmenau"
+        },
+        {
+            "ua_id": 10,
+            "region_id": 80,
+            "city_id": 113,
+            "name": "Ulm University (Ulm)"
+        },
+        {
+            "ua_id": 449,
+            "region_id": 81,
+            "city_id": 6,
+            "name": "Universität Bayreuth"
+        },
+        {
+            "ua_id": 791,
+            "region_id": 81,
+            "city_id": 100,
+            "name": "Universität Regensburg"
+        },
+        {
+            "ua_id": 175,
+            "region_id": 93,
+            "city_id": 78,
+            "name": "Universität zu Lübeck"
+        },
+        {
+            "ua_id": 73,
+            "region_id": 84,
+            "city_id": 16,
+            "name": "University of Applied Sciences Bremerhaven"
+        },
+        {
+            "ua_id": 438,
+            "region_id": 94,
+            "city_id": 33,
+            "name": "University of Applied Sciences Erfurt (UAS Erfurt)"
+        },
+        {
+            "ua_id": 63,
+            "region_id": 83,
+            "city_id": 28,
+            "name": "University of Applied Sciences for Sustainable Development Eberswalde (HNE Eberswalde)"
+        },
+        {
+            "ua_id": 66,
+            "region_id": 83,
+            "city_id": 99,
+            "name": "University of Applied Sciences Potsdam (FH;P)"
+        },
+        {
+            "ua_id": 176,
+            "region_id": 93,
+            "city_id": 114,
+            "name": "University of Applied Sciences, Wedel"
+        },
+        {
+            "ua_id": 19,
+            "region_id": 81,
+            "city_id": 5,
+            "name": "University of Augsburg"
+        },
+        {
+            "ua_id": 72,
+            "region_id": 84,
+            "city_id": 15,
+            "name": "University of Bremen"
+        },
+        {
+            "ua_id": 131,
+            "region_id": 88,
+            "city_id": 70,
+            "name": "University of Cologne"
+        },
+        {
+            "ua_id": 661,
+            "region_id": 88,
+            "city_id": 70,
+            "name": "University of Cologne - VPD"
+        },
+        {
+            "ua_id": 125,
+            "region_id": 88,
+            "city_id": 26,
+            "name": "University of Duisburg-Essen (UDE Campus Duisburg)"
+        },
+        {
+            "ua_id": 416,
+            "region_id": 88,
+            "city_id": 34,
+            "name": "University of Duisburg-Essen (UDE Campus Essen)"
+        },
+        {
+            "ua_id": 11,
+            "region_id": 80,
+            "city_id": 117,
+            "name": "University of Education Weingarten"
+        },
+        {
+            "ua_id": 97,
+            "region_id": 87,
+            "city_id": 45,
+            "name": "University of Greifswald"
+        },
+        {
+            "ua_id": 106,
+            "region_id": 79,
+            "city_id": 54,
+            "name": "University of Hildesheim Foundation"
+        },
+        {
+            "ua_id": 92,
+            "region_id": 86,
+            "city_id": 64,
+            "name": "University of Kassel"
+        },
+        {
+            "ua_id": 812,
+            "region_id": 89,
+            "city_id": 68,
+            "name": "University of Koblenz"
+        },
+        {
+            "ua_id": 35,
+            "region_id": 81,
+            "city_id": 97,
+            "name": "University of Passau"
+        },
+        {
+            "ua_id": 67,
+            "region_id": 83,
+            "city_id": 99,
+            "name": "University of Potsdam"
+        },
+        {
+            "ua_id": 99,
+            "region_id": 87,
+            "city_id": 103,
+            "name": "University of Rostock"
+        },
+        {
+            "ua_id": 775,
+            "region_id": 81,
+            "city_id": 91,
+            "name": "University of Technology Nuremberg"
+        },
+        {
+            "ua_id": 30,
+            "region_id": 81,
+            "city_id": 87,
+            "name": "University of Television and Film Munich (HFF München)"
+        },
+        {
+            "ua_id": 455,
+            "region_id": 79,
+            "city_id": 51,
+            "name": "University of Veterinary Medicine Hannover, Foundation"
+        },
+        {
+            "ua_id": 139,
+            "region_id": 88,
+            "city_id": 125,
+            "name": "University of Wuppertal (BUW)"
+        },
+        {
+            "ua_id": 710,
+            "region_id": 83,
+            "city_id": 99,
+            "name": "University Potsdam-VPD"
+        },
+        {
+            "ua_id": 37,
+            "region_id": 81,
+            "city_id": 40,
+            "name": "Weihenstephan-Triesdorf University of Applied Sciences - Campus Weihenstephan"
+        },
+        {
+            "ua_id": 796,
+            "region_id": 81,
+            "city_id": 115,
+            "name": "Weihenstephan-Triesdorf University of Applied Sciences - Weidenbach"
+        },
+        {
+            "ua_id": 163,
+            "region_id": 91,
+            "city_id": 129,
+            "name": "Westsächsische Hochschule Zwickau - University of Applied Sciences Zwickau (WHZ)"
+        },
+        {
+            "ua_id": 783,
+            "region_id": 87,
+            "city_id": 122,
+            "name": "Wismar University of Applied Sciences"
+        },
+        {
+            "ua_id": 822,
+            "region_id": 89,
+            "city_id": 124,
+            "name": "Worms University of Applied Sciences"
+        },
+        {
+            "ua_id": 824,
+            "region_id": 91,
+            "city_id": 127,
+            "name": "Zittau\/Görlitz University of Applied Sciences"
+        }
+    ]
+}

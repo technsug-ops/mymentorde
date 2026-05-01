@@ -65,6 +65,13 @@
                 @if(! empty($rec['duration_semesters']))
                     <span style="background: #f4f2ee; color: #1a1a1a; padding: 4px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600;">{{ $rec['duration_semesters'] }} sömestr</span>
                 @endif
+                @if(! empty($rec['is_uni_assist_member']))
+                    <span title="uni-assist üzerinden başvuru — VPD + apostille gerekli, ~14 belge"
+                          style="background: rgba(217,119,6,0.12); color: #92400e; padding: 4px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600;">📨 uni-assist başvuru</span>
+                @else
+                    <span title="Üniversite kendi portali — daha az belge"
+                          style="background: rgba(5,150,105,0.12); color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600;">✅ Direkt başvuru</span>
+                @endif
             </div>
 
             @if(! empty($rec['reasons']))

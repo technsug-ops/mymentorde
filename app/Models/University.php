@@ -25,6 +25,7 @@ class University extends Model
     protected $fillable = [
         'id', 'name', 'city', 'state', 'type', 'is_public',
         'image_path', 'metadata', 'is_manually_curated', 'is_active',
+        'is_uni_assist_member', 'uni_assist_id',
     ];
 
     protected $casts = [
@@ -32,6 +33,8 @@ class University extends Model
         'is_public'            => 'boolean',
         'is_manually_curated'  => 'boolean',
         'is_active'            => 'boolean',
+        'is_uni_assist_member' => 'boolean',
+        'uni_assist_id'        => 'integer',
     ];
 
     public function programs(): HasMany

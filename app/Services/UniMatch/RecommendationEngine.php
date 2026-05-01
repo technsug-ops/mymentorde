@@ -24,7 +24,7 @@ class RecommendationEngine
         $a = is_array($response->answers) ? $response->answers : [];
 
         // ── Hard filters — aday'ın cevaplarına aykırı programları çıkar ──
-        $query = Program::query()->active();
+        $query = Program::query()->active()->with(['university:id,name,is_uni_assist_member,uni_assist_id']);
 
         // Degree filter
         if (! empty($a['target_degree'])) {
@@ -153,17 +153,18 @@ class RecommendationEngine
             $score = max(0, min(100, $score));
 
             return [
-                'program_id'           => $p->id,
-                'course_name'          => $p->course_name,
-                'university_name'      => $p->university_name_cached,
-                'degree_specification' => $p->degree_specification,
-                'language'             => $p->language,
-                'languages_raw'        => $p->languages_raw,
-                'location'             => $p->location,
-                'tuition_eur'          => $p->tuition_eur_per_semester,
-                'duration_semesters'   => $p->duration_semesters,
-                'match_score'          => $score,
-                'reasons'              => array_slice($reasons, 0, 4), // İlk 4 sebep yeter
+                'program_id'             => $p->id,
+                'course_name'            => $p->course_name,
+                'university_name'        => $p->university_name_cached,
+                'is_uni_assist_member'   => (bool) ($p->university->is_uni_assist_member ?? false),
+                'degree_specification'   => $p->degree_specification,
+                'language'               => $p->language,
+                'languages_raw'          => $p->languages_raw,
+                'location'               => $p->location,
+                'tuition_eur'            => $p->tuition_eur_per_semester,
+                'duration_semesters'     => $p->duration_semesters,
+                'match_score'            => $score,
+                'reasons'                => array_slice($reasons, 0, 4),
             ];
         });
 

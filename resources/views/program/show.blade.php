@@ -259,7 +259,7 @@
 <div class="sb-card" style="margin-bottom: 14px;">
     <h2 style="font-size: 17px; color: #7e58bf; font-weight: 700; margin-bottom: 12px;">🏛 Üniversite</h2>
     <div style="font-size: 16px; color: #1a1a1a; font-weight: 700; margin-bottom: 8px;">{{ $program->university->name }}</div>
-    <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: #6b5894;">
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: #6b5894; margin-bottom: 12px;">
         @if($program->university->city) <span>📍 {{ $program->university->city }}</span> @endif
         @if($program->university->state) <span>🗺 {{ $program->university->state }}</span> @endif
         @if($program->university->type) <span>🏛 {{ $program->university->type }}</span> @endif
@@ -267,6 +267,23 @@
             <span>{{ $program->university->is_public ? '🏛 Devlet üniversitesi' : '💼 Özel üniversite' }}</span>
         @endif
     </div>
+
+    {{-- Başvuru tipi rozeti: uni-assist üye mi? --}}
+    @if($program->university->is_uni_assist_member)
+        <div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 10px; border-left: 4px solid #d97706;">
+            <span style="font-size: 18px; line-height: 1.2;">📨</span>
+            <div style="font-size: 12.5px; color: #78350f; line-height: 1.5;">
+                <strong style="color: #92400e;">uni-assist üzerinden başvuru</strong> — bu üniversite için VPD (Vorprüfungsdokumentation) gerekli, başvuru ücreti ~75 € ilk + 30 € her ek başvuru. Belge listesi: apostille + yeminli tercüme zorunlu, ~14 belge.
+            </div>
+        </div>
+    @else
+        <div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: linear-gradient(135deg, #d1fae5, #a7f3d0); border-radius: 10px; border-left: 4px solid #059669;">
+            <span style="font-size: 18px; line-height: 1.2;">✅</span>
+            <div style="font-size: 12.5px; color: #064e3b; line-height: 1.5;">
+                <strong style="color: #065f46;">Direkt başvuru</strong> — üniversite kendi başvuru portalini kullanıyor. Belge listesi daha kısa, uni-assist'e ek ücret yok. Üniversitenin başvuru sayfasından detay kontrol edilmeli.
+            </div>
+        </div>
+    @endif
 </div>
 @endif
 
