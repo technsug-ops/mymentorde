@@ -26,7 +26,8 @@ class TranslatePopularPrograms extends Command
     protected $signature = 'programs:translate-popular
         {--limit=100 : Maksimum kaç program çevrilsin}
         {--throttle=2 : Çağrılar arası bekleme (saniye)}
-        {--company-id=1 : Hangi company API key\'i kullanılsın}';
+        {--company-id=1 : Hangi company API key\'i kullanılsın}
+        {--field= : Öncelikli alan filtresi (engineering, computer-science, business, all). engineering = Engineering + Computer Science (TR adaylar genelde mühendislik istiyor)}';
 
     protected $description = 'En popüler canonical programları toplu olarak Türkçeye çevirir';
 
@@ -37,13 +38,31 @@ class TranslatePopularPrograms extends Command
         $companyId = (int) $this->option('company-id');
 
         $bigCities = ['Berlin', 'Munich', 'München', 'Hamburg', 'Cologne', 'Köln', 'Frankfurt', 'Stuttgart', 'Düsseldorf'];
+        $field = strtolower((string) $this->option('field'));
 
         // Kriterleri uygula — büyük şehirler + dolu description + henüz TR yok + quality high
-        $candidates = Program::query()
+        $query = Program::query()
             ->active()
             ->whereNotNull('description')
             ->where('description', '!=', '')
-            ->whereNull('description_tr')
+            ->whereNull('description_tr');
+
+        // Alan filtresi — TR aday öğrencilerin ağırlıkla istediği alanlar öncelik
+        if ($field === 'engineering' || $field === 'eng' || $field === 'muhendislik') {
+            $query->where(function ($q) {
+                $q->where('study_fields', 'LIKE', '%Engineering%')
+                  ->orWhere('study_fields', 'LIKE', '%Computer Science%');
+            });
+            $this->info('Filtre: Engineering + Computer Science öncelikli.');
+        } elseif ($field === 'computer-science' || $field === 'cs') {
+            $query->where('study_fields', 'LIKE', '%Computer Science%');
+            $this->info('Filtre: Computer Science only.');
+        } elseif ($field === 'business' || $field === 'isletme') {
+            $query->where('study_fields', 'LIKE', '%Business%');
+            $this->info('Filtre: Business Management and Economics.');
+        }
+
+        $candidates = $query
             ->orderByRaw("CASE WHEN location IN ('" . implode("','", $bigCities) . "') THEN 0 ELSE 1 END")
             ->orderByDesc('quality_score')
             ->orderBy('course_name')
