@@ -76,8 +76,14 @@ class TagUniAssistMembers extends Command
 
             // 0) Manuel override (en yüksek öncelik)
             $uaIdStr = (string) $m['ua_id'];
-            if (isset($manualMatches[$uaIdStr])) {
-                $hit = University::query()->where('name', $manualMatches[$uaIdStr])->first();
+            if (array_key_exists($uaIdStr, $manualMatches)) {
+                $manualName = $manualMatches[$uaIdStr];
+                if ($manualName === null) {
+                    // null = bu ua_id'yi skip et (canonical'da yok, fuzzy match yanıltıcı)
+                    $unmatched[] = $m;
+                    continue;
+                }
+                $hit = University::query()->where('name', $manualName)->first();
                 if ($hit) {
                     $matched[] = ['member' => $m, 'university' => $hit, 'method' => 'manual'];
                     continue;
@@ -128,18 +134,44 @@ class TagUniAssistMembers extends Command
         $this->info("Eşleşmeyen: " . count($unmatched));
 
         if (! $this->option('dry-run')) {
-            // Önce hepsini false'a çek (re-run için)
-            University::query()->update(['is_uni_assist_member' => false, 'uni_assist_id' => null]);
+            // Önce hepsini false'a çek (re-run için, tek SQL — hızlı)
+            \DB::table('universities')->update(['is_uni_assist_member' => false, 'uni_assist_id' => null]);
 
-            $updated = 0;
+            // Aynı canonical uni'ye işaret eden farklı ua_id'leri tek girişte tut
+            // (örn. Hochschule Anhalt 3 farklı kampus için 3 ua_id; biz son seen'i tutarız)
+            $idToUaId = [];
             foreach ($matched as $pair) {
-                $pair['university']->update([
-                    'is_uni_assist_member' => true,
-                    'uni_assist_id'        => $pair['member']['ua_id'],
-                ]);
-                $updated++;
+                $idToUaId[$pair['university']->id] = (int) $pair['member']['ua_id'];
             }
-            $this->info("DB'ye yazıldı: {$updated} üniversite işaretlendi.");
+
+            // Batch CASE WHEN update — 50'lik chunk'lar (KAS shared hosting'de
+            // tek tek update timeout yapıyordu; bu 1-2 SQL ile bitiyor)
+            $totalWritten = 0;
+            foreach (array_chunk($idToUaId, 50, true) as $chunk) {
+                $cases = [];
+                $ids = [];
+                $caseBindings = [];
+                foreach ($chunk as $id => $uaId) {
+                    $cases[] = 'WHEN ? THEN ?';
+                    $caseBindings[] = $id;
+                    $caseBindings[] = $uaId;
+                    $ids[] = $id;
+                }
+                $idPlaceholders = implode(',', array_fill(0, count($ids), '?'));
+                $caseStmt = implode(' ', $cases);
+                $bindings = array_merge($caseBindings, $ids);
+
+                \DB::statement(
+                    "UPDATE universities
+                     SET is_uni_assist_member = 1,
+                         uni_assist_id = CASE id {$caseStmt} END
+                     WHERE id IN ({$idPlaceholders})",
+                    $bindings
+                );
+                $totalWritten += count($chunk);
+            }
+
+            $this->info("DB'ye yazıldı: {$totalWritten} unique canonical üniversite işaretlendi (eşleşen üye: " . count($matched) . ").");
         } else {
             $this->warn('--dry-run: DB güncellenmedi.');
         }

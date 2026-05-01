@@ -1,11 +1,13 @@
 {
   "_meta": {
     "purpose": "uni-assist üye → canonical university name manuel mapping. Fuzzy match'in karıştırdığı veya kaçırdığı durumlarda kullanılır.",
-    "format": "ua_id (uni-assist iç ID) → canonical_name (exact match, universities.name kolonuna where = ile sorgulanır)",
+    "format": "ua_id (uni-assist iç ID) → canonical_name (exact match, universities.name kolonuna where = ile sorgulanır). null = bu ua_id için fuzzy match yapma (canonical'da yok ya da yanlış üniyle karıştırılıyor).",
     "review_date": "2026-05-01",
     "note": "Yeni mapping eklemek için önce DB'den canonical name'i doğrula: Universität::where('name', 'X')->exists()"
   },
   "matches": {
+    "2":   null,
+
     "70":  "Hochschule Bremen",
     "72":  "Universität Bremen",
     "77":  "Hochschule für Angewandte Wissenschaften Hamburg",
