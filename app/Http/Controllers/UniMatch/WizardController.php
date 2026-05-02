@@ -466,9 +466,33 @@ class WizardController extends Controller
                 ->count()
         );
 
+        // study_fields + description'ı her program için DB'den çek (Bachelorsportal tarzı zengin card için)
+        $recs = $response->recommendations ?? [];
+        if (! empty($recs)) {
+            $programIds = array_column($recs, 'program_id');
+            $details = \DB::table('programs')
+                ->whereIn('id', $programIds)
+                ->select('id', 'study_fields', 'description_tr', 'description')
+                ->get()
+                ->keyBy('id');
+
+            $recs = array_map(function ($rec) use ($details) {
+                $d = $details->get($rec['program_id'] ?? 0);
+                $fields = [];
+                $desc = '';
+                if ($d) {
+                    $fields = json_decode($d->study_fields ?? '[]', true) ?: [];
+                    $desc = (string) ($d->description_tr ?: $d->description ?: '');
+                }
+                $rec['study_fields'] = $fields;
+                $rec['description']  = $desc;
+                return $rec;
+            }, $recs);
+        }
+
         return view('uni-match.result', [
             'response'        => $response,
-            'recommendations' => $response->recommendations ?? [],
+            'recommendations' => $recs,
             'socialProof'     => $socialProof,
         ]);
     }
