@@ -2,6 +2,12 @@
 
 @section('title', $stepDef['title'] . ' — UniMatch')
 
+@push('head')
+<script nonce="{{ $cspNonce ?? '' }}">
+    document.documentElement.classList.add('sb-wizard-active');
+</script>
+@endpush
+
 @section('back-link')
     @if($currentStep > 1)
         <a href="{{ route('uni-match.step', ['n' => $currentStep - 1]) }}" class="sb-back">← Geri</a>
@@ -16,15 +22,25 @@
     $remainingMin = $remainingSec >= 60 ? ceil($remainingSec / 60) : null;
     $remainingLabel = $remainingMin ? "~{$remainingMin} dk kaldı" : ($remainingSteps > 0 ? '<1 dk kaldı' : 'Sonuç sayfasına geçiyorsun!');
 @endphp
-<div class="sb-progress-wrap">
-    <div class="sb-progress-meta">
-        <span>Adım {{ $currentStep }} / {{ $totalSteps }}</span>
-        <span style="color:#7e58bf;font-weight:600;">⏱ {{ $remainingLabel }}</span>
-        <span>%{{ $progress }}</span>
-    </div>
-    <div class="sb-progress-bar" role="progressbar" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100" aria-label="Wizard ilerlemesi: %{{ $progress }}">
-        <div class="sb-progress-fill" style="width: {{ $progress }}%;"></div>
-    </div>
+
+{{-- Floating animated gradient blobs (background) --}}
+<div class="sb-bg-blobs" aria-hidden="true">
+    <span class="sb-blob sb-blob-1"></span>
+    <span class="sb-blob sb-blob-2"></span>
+    <span class="sb-blob sb-blob-3"></span>
+</div>
+
+{{-- Pill segmented progress --}}
+<div class="sb-pill-meta">
+    <span>Adım <span class="sb-pill-step">{{ $currentStep }}</span> / {{ $totalSteps }}</span>
+    <span style="color:#7e58bf;">⏱ {{ $remainingLabel }}</span>
+    <span>%{{ $progress }}</span>
+</div>
+<div class="sb-pill-progress" role="progressbar" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100" aria-label="Wizard ilerlemesi: %{{ $progress }}">
+    @for($i = 1; $i <= $totalSteps; $i++)
+        @php $cls = $i < $currentStep ? 'is-done' : ($i === $currentStep ? 'is-active' : ''); @endphp
+        <span class="sb-pill {{ $cls }}"></span>
+    @endfor
 </div>
 
 <div class="sb-card" role="region" aria-labelledby="sb-step-title-{{ $currentStep }}">
@@ -160,17 +176,19 @@
         @endif
 
         <div class="sb-nav">
-            @if($currentStep > 1)
-                <a href="{{ route('uni-match.step', ['n' => $currentStep - 1]) }}" class="sb-btn sb-btn-ghost">
-                    <span style="font-size:16px;">←</span> Geri
-                </a>
-            @else
-                <a href="{{ route('uni-match.landing') }}" class="sb-btn sb-btn-ghost">Vazgeç</a>
-            @endif
-            <button type="submit" class="sb-btn sb-btn-primary" id="nextBtn">
-                {{ $currentStep >= $totalSteps ? 'Sonuçları Göster' : 'Devam Et' }}
-                <span style="font-size: 16px;">→</span>
-            </button>
+            <div class="sb-nav-inner">
+                @if($currentStep > 1)
+                    <a href="{{ route('uni-match.step', ['n' => $currentStep - 1]) }}" class="sb-btn sb-btn-ghost">
+                        <span style="font-size:16px;">←</span> Geri
+                    </a>
+                @else
+                    <a href="{{ route('uni-match.landing') }}" class="sb-btn sb-btn-ghost">Vazgeç</a>
+                @endif
+                <button type="submit" class="sb-btn sb-btn-primary" id="nextBtn">
+                    {{ $currentStep >= $totalSteps ? 'Sonuçları Göster' : 'Devam Et' }}
+                    <span style="font-size: 16px;">→</span>
+                </button>
+            </div>
         </div>
     </form>
 </div>

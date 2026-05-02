@@ -277,10 +277,177 @@
         @media (prefers-reduced-motion: reduce) {
             * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
         }
+
+        /* ════════════════════════════════════════════════════════════════
+           Studyportals tarzı premium wizard mode (body.sb-wizard-mode ile aktif)
+           - Floating gradient blobs (animated)
+           - Pill segmented progress
+           - Bigger typography (32px+ desktop)
+           - Larger option cards
+           - Sticky bottom nav bar
+        ════════════════════════════════════════════════════════════════ */
+        body.sb-wizard-mode {
+            background: linear-gradient(140deg, #f7f3ff 0%, #faf9f5 50%, #efe9fb 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 96px; /* sticky CTA için boşluk */
+        }
+        body.sb-wizard-mode .sb-container { max-width: 880px; padding: 24px 20px 48px; position: relative; z-index: 1; }
+
+        /* Floating animated gradient blobs (background) */
+        .sb-bg-blobs { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+        .sb-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: .55;
+            will-change: transform;
+        }
+        .sb-blob-1 {
+            width: 480px; height: 480px;
+            background: radial-gradient(circle, #c4a5ff 0%, transparent 70%);
+            top: -160px; left: -120px;
+            animation: sb-blob-drift-1 22s cubic-bezier(.4,0,.6,1) infinite;
+        }
+        .sb-blob-2 {
+            width: 540px; height: 540px;
+            background: radial-gradient(circle, #f3e0ff 0%, transparent 70%);
+            top: 30%; right: -200px;
+            animation: sb-blob-drift-2 28s cubic-bezier(.4,0,.6,1) infinite;
+        }
+        .sb-blob-3 {
+            width: 360px; height: 360px;
+            background: radial-gradient(circle, #d8c5f5 0%, transparent 70%);
+            bottom: -120px; left: 35%;
+            animation: sb-blob-drift-3 26s cubic-bezier(.4,0,.6,1) infinite;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            @keyframes sb-blob-drift-1 {
+                0%, 100% { transform: translate(0, 0) scale(1); }
+                50%      { transform: translate(60px, 80px) scale(1.1); }
+            }
+            @keyframes sb-blob-drift-2 {
+                0%, 100% { transform: translate(0, 0) scale(1); }
+                50%      { transform: translate(-90px, -50px) scale(1.08); }
+            }
+            @keyframes sb-blob-drift-3 {
+                0%, 100% { transform: translate(0, 0) scale(1); }
+                50%      { transform: translate(40px, -60px) scale(1.12); }
+            }
+        }
+
+        /* Pill segmented progress */
+        .sb-pill-progress {
+            display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+            margin-bottom: 36px;
+        }
+        .sb-pill {
+            flex: 1; min-width: 14px; max-width: 36px;
+            height: 6px; border-radius: 999px;
+            background: rgba(126, 88, 191, .15);
+            transition: background .3s cubic-bezier(.4,0,.2,1), transform .3s cubic-bezier(.4,0,.2,1);
+        }
+        .sb-pill.is-done { background: linear-gradient(90deg, #7e58bf, #a07ed9); }
+        .sb-pill.is-active {
+            background: linear-gradient(90deg, #7e58bf, #a07ed9);
+            transform: scaleY(1.6);
+            box-shadow: 0 2px 8px rgba(126,88,191,.4);
+        }
+        .sb-pill-meta {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 12.5px; color: #6b5894; font-weight: 600;
+            margin-bottom: 14px;
+        }
+        .sb-pill-meta .sb-pill-step { color: #7e58bf; font-weight: 700; }
+
+        /* Wizard mode card — daha büyük, daha az glass */
+        body.sb-wizard-mode .sb-card {
+            background: rgba(255, 255, 255, .96);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(126, 88, 191, .12);
+            box-shadow: 0 12px 48px rgba(126, 88, 191, .12);
+            padding: 48px 40px;
+            border-radius: 24px;
+        }
+        body.sb-wizard-mode .sb-title {
+            font-size: 32px; line-height: 1.2; letter-spacing: -.8px;
+            margin-bottom: 12px;
+        }
+        body.sb-wizard-mode .sb-subtitle {
+            font-size: 16px; line-height: 1.6; margin-bottom: 32px;
+        }
+
+        /* Wizard mode option cards — daha büyük, ikon önde, hover daha dramatik */
+        body.sb-wizard-mode .sb-options { gap: 14px; }
+        body.sb-wizard-mode .sb-options:not(.cols-1):not(.cols-2) { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+        body.sb-wizard-mode .sb-option {
+            padding: 22px 20px;
+            border-width: 2px;
+            border-radius: 16px;
+            min-height: 80px;
+            gap: 16px;
+        }
+        body.sb-wizard-mode .sb-option:hover {
+            transform: translateY(-3px) scale(1.015);
+            box-shadow: 0 14px 32px rgba(126, 88, 191, .18);
+            border-color: #b79ae9;
+        }
+        body.sb-wizard-mode .sb-option.selected {
+            box-shadow: 0 8px 24px rgba(126, 88, 191, .22);
+        }
+        body.sb-wizard-mode .sb-option-icon {
+            width: 48px; height: 48px;
+            background: rgba(126, 88, 191, .1);
+            border-radius: 12px;
+            transition: background .25s cubic-bezier(.4,0,.2,1);
+        }
+        body.sb-wizard-mode .sb-option-icon .lucide-icon { width: 26px; height: 26px; }
+        body.sb-wizard-mode .sb-option:hover .sb-option-icon { background: rgba(126, 88, 191, .18); }
+        body.sb-wizard-mode .sb-option.selected .sb-option-icon {
+            background: linear-gradient(135deg, #7e58bf, #a07ed9);
+        }
+        body.sb-wizard-mode .sb-option.selected .sb-option-icon .lucide-icon { color: #fff; }
+        body.sb-wizard-mode .sb-option-label { font-size: 15.5px; font-weight: 700; }
+        body.sb-wizard-mode .sb-option-desc { font-size: 12.5px; }
+
+        /* Sticky bottom nav bar — Studyportals tarzı CTA her zaman görünür */
+        body.sb-wizard-mode .sb-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, .92);
+            backdrop-filter: blur(14px);
+            border-top: 1px solid rgba(126, 88, 191, .12);
+            padding: 14px 20px;
+            margin-top: 0;
+            box-shadow: 0 -8px 24px rgba(126, 88, 191, .08);
+        }
+        body.sb-wizard-mode .sb-nav-inner {
+            max-width: 880px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center; gap: 12px;
+        }
+        body.sb-wizard-mode .sb-btn-primary {
+            padding: 14px 32px; font-size: 15px;
+        }
+
+        @media (max-width: 600px) {
+            body.sb-wizard-mode .sb-card { padding: 32px 22px; }
+            body.sb-wizard-mode .sb-title { font-size: 24px; }
+            body.sb-wizard-mode .sb-subtitle { font-size: 14.5px; }
+            body.sb-wizard-mode .sb-option { padding: 18px 16px; min-height: 72px; }
+            body.sb-wizard-mode .sb-option-icon { width: 42px; height: 42px; }
+        }
     </style>
     @stack('head')
 </head>
 <body>
+    {{-- Wizard step pages için body class (head'de @push'lanan flag) --}}
+    <script nonce="{{ $cspNonce ?? '' }}">
+        if (document.documentElement.classList.contains('sb-wizard-active')) {
+            document.body.classList.add('sb-wizard-mode');
+        }
+    </script>
+
     {{-- Toast: session flash mesajları (success/info/error) --}}
     @if(session('success') || session('info') || session('error'))
         @php
