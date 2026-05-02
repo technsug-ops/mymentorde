@@ -394,6 +394,33 @@ class WizardController extends Controller
     }
 
     /**
+     * Sonuç sayfasını PDF olarak indir — lead magnet.
+     * Email yoksa landing'e dön; varsa direkt PDF stream.
+     */
+    public function resultPdf(Request $request)
+    {
+        $response = $this->resolveSession($request);
+        if (! $response || ! $response->isCompleted()) {
+            return redirect()->route('uni-match.start');
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('uni-match.result-pdf', [
+            'response'        => $response,
+            'recommendations' => $response->recommendations ?? [],
+            'firstName'       => $response->lead_first_name ?: 'Aday Öğrenci',
+            'generatedAt'     => now(),
+            'brand'           => config('brand.name', 'MentorDE'),
+        ])->setPaper('a4', 'portrait');
+
+        $this->captureFunnelEvent('unimatch_pdf_downloaded', $response, [
+            'recommendations_count' => count($response->recommendations ?? []),
+        ]);
+
+        $filename = 'UniMatch-Sonuclarim-' . now()->format('Y-m-d') . '.pdf';
+        return $pdf->download($filename);
+    }
+
+    /**
      * Wizard cevaplarını guest_application'a aktar.
      * Form pre-fill ile MentorDE kayıt akışına yönlendirir.
      */

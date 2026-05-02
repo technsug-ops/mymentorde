@@ -34,6 +34,9 @@ Route::middleware('company.context')->group(function (): void {
     Route::post('/uni-match/lead-capture',          [$um, 'leadCaptureSubmit'])->middleware('throttle:10,1')->name('uni-match.lead-capture.submit');
     Route::get('/uni-match/lead-capture/skip',      [$um, 'leadCaptureSkip'])->name('uni-match.lead-capture.skip');
 
+    // PDF export — sonuç sayfasından, lead magnet (email opsiyonel)
+    Route::get('/uni-match/result/pdf',             [$um, 'resultPdf'])->middleware('throttle:5,1')->name('uni-match.result.pdf');
+
     // Canonical Program detay (public, throttle korumalı)
     Route::get('/program/{program}',               [\App\Http\Controllers\ProgramController::class, 'show'])
         ->middleware('throttle:60,1')->name('program.show');
