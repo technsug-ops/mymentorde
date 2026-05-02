@@ -1,6 +1,6 @@
 @extends('uni-match.layout')
 
-@section('title', 'MentorDE UniMatch — Sana özel Almanya programı bul')
+@section('title', config('brand.name') . ' UniMatch — Sana özel Almanya programı bul')
 
 @section('content')
 @if(! empty($resume))
@@ -62,7 +62,7 @@
         </li>
         <li style="position: relative; padding-left: 36px; counter-increment: step-counter; font-size: 14px; color: #1a1a1a;">
             <span style="position: absolute; left: 0; top: 0; background: rgba(126, 88, 191, 0.12); color: #7e58bf; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">4</span>
-            Hazır olduğunda <strong>tek tıkla MentorDE'ye kayıt</strong> ol — danışmanın yönlendirsin
+            Hazır olduğunda <strong>tek tıkla {{ config('brand.name') }}'ye kayıt</strong> ol — danışmanın yönlendirsin
         </li>
     </ol>
 </div>

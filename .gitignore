@@ -49,3 +49,7 @@ DEV_LOGIN_CREDENTIALS.md
 /public/_kasserver_init.php
 /public/_setup*.php
 .env z
+
+# Manuel sync script'leri (prod credentials gömülü)
+/scripts/sync_translations_to_prod.php
+/scripts/sync_*_to_prod.php

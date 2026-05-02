@@ -35,7 +35,7 @@
     </p>
 
     <p style="margin-top:18px;font-size:13px;color:#6b5894;">
-      MentorDE'de bir danışman bu 5 maddeyi seninle ücretsiz inceler, sana özel 12 aylık takvim hazırlar.
+      {{ config('brand.name') }}'de bir danışman bu 5 maddeyi seninle ücretsiz inceler, sana özel 12 aylık takvim hazırlar.
     </p>
   </div>
   <div style="background:#f9f6fc;padding:18px 32px;font-size:11.5px;color:#9c8bb9;text-align:center;border-top:1px solid #ede5f7;">

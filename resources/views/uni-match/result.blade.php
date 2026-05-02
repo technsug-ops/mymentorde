@@ -1,7 +1,7 @@
 @extends('uni-match.layout')
 
 @section('og_title', 'UniMatch ile sana özel ' . count($recommendations) . ' Almanya programı seçtim')
-@section('og_description', 'MentorDE UniMatch sihirbazı, 13.000+ program arasından profil ve hedeflerime en uygun olanları sıraladı. Sen de dene → /uni-match')
+@section('og_description', config('brand.name') . ' UniMatch sihirbazı, 13.000+ program arasından profil ve hedeflerime en uygun olanları sıraladı. Sen de dene → /uni-match')
 
 @push('scripts')
 <style>
@@ -211,7 +211,7 @@
 
     {{-- Sosyal paylaşım --}}
     @php
-        $shareText = "🎯 MentorDE UniMatch sihirbazı bana özel " . count($recommendations) . " Almanya programı seçti! Sen de dene:";
+        $shareText = "🎯 " . config('brand.name') . " UniMatch sihirbazı bana özel " . count($recommendations) . " Almanya programı seçti! Sen de dene:";
         $shareUrl = url('/uni-match');
     @endphp
     <div style="margin: 20px 0; padding: 14px 18px; background: #f9f6fc; border-radius: 10px; border-left: 4px solid #7e58bf;">
@@ -271,7 +271,7 @@
     <div class="sb-card" style="margin-top: 24px; text-align: center; background: linear-gradient(135deg, rgba(126, 88, 191, 0.06), rgba(167, 126, 217, 0.03));">
         <div style="font-size: 32px; margin-bottom: 8px;">🚀</div>
         <h2 class="sb-title">Hadi adım atalım</h2>
-        <p class="sb-subtitle">MentorDE'ye kayıt ol, danışmanın bu programlardan hangisinin sana en uygun olduğunu birlikte değerlendirin. Cevapların form'a otomatik aktarılacak — sadece kalan bilgileri tamamlarsın.</p>
+        <p class="sb-subtitle">{{ config('brand.name') }}'ye kayıt ol, danışmanın bu programlardan hangisinin sana en uygun olduğunu birlikte değerlendirin. Cevapların form'a otomatik aktarılacak — sadece kalan bilgileri tamamlarsın.</p>
         <form method="POST" action="{{ route('uni-match.convert') }}">
             @csrf
             <button type="submit" class="sb-btn sb-btn-primary" style="padding: 16px 36px; font-size: 16px; font-weight: 700;">

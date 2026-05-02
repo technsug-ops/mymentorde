@@ -204,7 +204,7 @@
 
 <div class="cta">
     <strong>Hadi adım atalım!</strong><br>
-    {{ config('app.url') }} adresinden MentorDE'ye kayıt ol — danışmanın seninle ücretsiz görüşür ve bu programlar arasından sana en uygun olanını birlikte değerlendirin.
+    {{ config('app.url') }} adresinden {{ $brand }}'ye kayıt ol — danışmanın seninle ücretsiz görüşür ve bu programlar arasından sana en uygun olanını birlikte değerlendirin.
 </div>
 
 <div class="footer">

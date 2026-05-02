@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'MentorDE UniMatch — Sana Özel Almanya Üniversite Rehberi')</title>
+    @php $brand = config('brand.name', 'MentorDE'); @endphp
+    <title>@yield('title', $brand . ' UniMatch — Sana Özel Almanya Üniversite Rehberi')</title>
 
     {{-- Sosyal medya / paylaşım meta tag'leri (OG + Twitter) --}}
     <meta name="description" content="@yield('og_description', 'Almanya\'da sana en uygun programı bul. 5 dakikalık akıllı sihirbaz, 15.000+ Almanya programı arasından profil ve hedeflerine en uygun olanları sıralar.')">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="{{ config('brand.name', 'MentorDE') }}">
+    <meta property="og:site_name" content="{{ $brand }}">
     <meta property="og:title" content="@yield('og_title', 'UniMatch — Almanya\'da Sana Uygun Programı Bul')">
     <meta property="og:description" content="@yield('og_description', '15.000+ Almanya programı, 9-faktör akıllı eşleştirme, 5 dakikada sana özel öneriler. Ücretsiz, login gerekmez.')">
     <meta property="og:url" content="{{ url()->current() }}">
@@ -40,11 +41,12 @@
         /* Header */
         .sb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
         .sb-logo {
-            font-size: 22px; font-weight: 700; color: #7e58bf;
+            font-size: 26px; font-weight: 700; color: #7e58bf;
             text-decoration: none; letter-spacing: -0.5px;
+            display: inline-flex; align-items: center; gap: 8px; line-height: 1;
         }
-        .sb-logo-mark { display: inline-block; width: 32px; height: 32px; background: #7e58bf; border-radius: 8px; vertical-align: middle; margin-right: 8px; position: relative; }
-        .sb-logo-mark::after { content: '🎓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 16px; }
+        .sb-logo span { color: #a07ed9; font-style: italic; font-weight: 600; }
+        .sb-logo img { height: 36px; width: auto; max-width: 180px; display: block; }
         .sb-back { color: #7e58bf; text-decoration: none; font-size: 14px; font-weight: 500; }
         .sb-back:hover { text-decoration: underline; }
 
@@ -190,9 +192,16 @@
         </script>
     @endif
 
+    @php $logoUrl = config('brand.logo_url') ?: null; @endphp
     <div class="sb-container">
         <header class="sb-header">
-            <a href="/" class="sb-logo"><span class="sb-logo-mark"></span>MentorDE</a>
+            <a href="/" class="sb-logo" aria-label="{{ $brand }}">
+                @if($logoUrl)
+                    <img src="{{ $logoUrl }}" alt="{{ $brand }}">
+                @else
+                    mentor<span>de</span>
+                @endif
+            </a>
             @hasSection('back-link')
                 @yield('back-link')
             @endif

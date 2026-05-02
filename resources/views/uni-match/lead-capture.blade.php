@@ -59,7 +59,7 @@
         <label style="display: flex; align-items: flex-start; gap: 10px; margin-top: 18px; cursor: pointer; padding: 10px 12px; background: #f9f6fc; border-radius: 8px; border: 1px solid #ede5f7;">
             <input type="checkbox" name="consent" value="1" style="margin-top: 3px; width: 16px; height: 16px; accent-color: #7e58bf;">
             <span style="font-size: 12px; color: #6b5894; line-height: 1.5;">
-                MentorDE'nin Almanya eğitim danışmanlığı ile ilgili bilgilendirme e-postaları göndermesini kabul ediyorum.
+                {{ config('brand.name') }}'nin Almanya eğitim danışmanlığı ile ilgili bilgilendirme e-postaları göndermesini kabul ediyorum.
                 İstediğim zaman çıkarabilirim. <a href="/privacy" target="_blank" style="color: #7e58bf;">Gizlilik politikası</a>
             </span>
         </label>

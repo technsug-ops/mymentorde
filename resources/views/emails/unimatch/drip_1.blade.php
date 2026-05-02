@@ -13,7 +13,7 @@
   </div>
   <div style="padding:28px 32px;color:#1a1a1a;font-size:15px;line-height:1.7;">
     <p>Merhaba {{ $firstName }},</p>
-    <p>3 gün önce <strong>MentorDE UniMatch</strong> sihirbazını tamamladın. Sana en uygun 10 Almanya programını seçtik ama henüz incelemedin.</p>
+    <p>3 gün önce <strong>{{ config('brand.name') }} UniMatch</strong> sihirbazını tamamladın. Sana en uygun 10 Almanya programını seçtik ama henüz incelemedin.</p>
 
     @if(! empty($recommendations))
       <p style="margin:24px 0 12px;font-weight:700;color:#6b5894;">İlk 3 önerin:</p>
@@ -35,7 +35,7 @@
     </p>
 
     <p style="margin-top:24px;font-size:13px;color:#6b5894;">
-      İstersen MentorDE'ye kayıt ol, danışmanın bu programlar arasından sana en uygun olanını birlikte değerlendirin.<br>
+      İstersen {{ config('brand.name') }}'ye kayıt ol, danışmanın bu programlar arasından sana en uygun olanını birlikte değerlendirin.<br>
       <strong>%100 ücretsiz</strong> ilk görüşme.
     </p>
   </div>
