@@ -156,7 +156,81 @@ class WizardController extends Controller
         if ($n >= $total) {
             return redirect()->route('uni-match.complete');
         }
+
+        // Mid-funnel lead capture: step 12 (yaşam masrafı seçimi) sonrası soft gate
+        // Sadece henüz email/phone yoksa ve atlamadıysa
+        if ($n === 12 && empty($response->lead_email) && empty($response->lead_phone) && empty($response->getAnswer('_lead_capture_skipped'))) {
+            return redirect()->route('uni-match.lead-capture.form');
+        }
+
         return redirect()->route('uni-match.step', ['n' => $n + 1]);
+    }
+
+    /** Mid-funnel lead capture formu (step 12 sonrası). */
+    public function leadCaptureForm(Request $request): View|RedirectResponse
+    {
+        $response = $this->resolveSession($request);
+        if (! $response) return redirect()->route('uni-match.start');
+        if (! empty($response->lead_email) || ! empty($response->lead_phone)) {
+            return redirect()->route('uni-match.step', ['n' => 13]);
+        }
+
+        $this->captureFunnelEvent('unimatch_lead_gate_shown', $response);
+
+        return view('uni-match.lead-capture', [
+            'response' => $response,
+            'progress' => 63, // 12/19
+        ]);
+    }
+
+    /** Lead bilgisini kaydet, step 13'e geç. */
+    public function leadCaptureSubmit(Request $request): RedirectResponse
+    {
+        $response = $this->resolveSession($request);
+        if (! $response) return redirect()->route('uni-match.start');
+
+        $data = $request->validate([
+            'first_name' => ['nullable', 'string', 'max:80'],
+            'email'      => ['nullable', 'email', 'max:200'],
+            'phone'      => ['nullable', 'string', 'max:30'],
+            'consent'    => ['nullable', 'boolean'],
+        ]);
+
+        // Email VEYA phone zorunlu (ikisi de boşsa skip'e yönlendir)
+        if (empty($data['email']) && empty($data['phone'])) {
+            return redirect()->route('uni-match.lead-capture.skip');
+        }
+
+        $response->fill([
+            'lead_first_name'        => $data['first_name'] ?? null,
+            'lead_email'             => $data['email'] ?? null,
+            'lead_phone'             => $data['phone'] ?? null,
+            'lead_consent_marketing' => (bool) ($data['consent'] ?? false),
+            'lead_captured_at'       => now(),
+        ])->save();
+
+        $this->captureFunnelEvent('unimatch_lead_captured', $response, [
+            'method'   => $data['email'] ? 'email' : 'phone',
+            'consent'  => (bool) ($data['consent'] ?? false),
+        ]);
+
+        return redirect()->route('uni-match.step', ['n' => 13])
+            ->with('success', 'Bilgilerin kaydedildi — sonuçları sana ileteceğiz.');
+    }
+
+    /** Skip — lead'i atla, devam et. */
+    public function leadCaptureSkip(Request $request): RedirectResponse
+    {
+        $response = $this->resolveSession($request);
+        if (! $response) return redirect()->route('uni-match.start');
+
+        // Skip'i answer'a işaretle (tekrar göstermemek için)
+        $response->setAnswer('_lead_capture_skipped', true);
+        $response->save();
+
+        $this->captureFunnelEvent('unimatch_lead_gate_skipped', $response);
+
+        return redirect()->route('uni-match.step', ['n' => 13]);
     }
 
     /** PostHog'a wizard funnel event'i gönder (anonim funnel — distinctId = session_token). */

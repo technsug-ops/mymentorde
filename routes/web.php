@@ -29,6 +29,11 @@ Route::middleware('company.context')->group(function (): void {
     // GET fallback: F5/back tuşundan gelen kullanıcılar 405 görmesin, result'a dön
     Route::get('/uni-match/convert', fn() => redirect()->route('uni-match.result'));
 
+    // Mid-funnel lead capture (step 12 sonrası soft gate — atlanabilir)
+    Route::get('/uni-match/lead-capture',           [$um, 'leadCaptureForm'])->name('uni-match.lead-capture.form');
+    Route::post('/uni-match/lead-capture',          [$um, 'leadCaptureSubmit'])->middleware('throttle:10,1')->name('uni-match.lead-capture.submit');
+    Route::get('/uni-match/lead-capture/skip',      [$um, 'leadCaptureSkip'])->name('uni-match.lead-capture.skip');
+
     // Canonical Program detay (public, throttle korumalı)
     Route::get('/program/{program}',               [\App\Http\Controllers\ProgramController::class, 'show'])
         ->middleware('throttle:60,1')->name('program.show');
