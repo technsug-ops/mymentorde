@@ -350,20 +350,32 @@ class WizardController extends Controller
         return redirect()->route('uni-match.step', ['n' => $n + 1]);
     }
 
-    /** Mid-funnel lead capture formu (step 12 sonrası). */
+    /** Mid-funnel lead capture formu (step 12 sonrası) VEYA wizard tamamlandıktan sonra PDF gate. */
     public function leadCaptureForm(Request $request): View|RedirectResponse
     {
         $response = $this->resolveSession($request);
         if (! $response) return redirect()->route('uni-match.start');
         if (! empty($response->lead_email) || ! empty($response->lead_phone)) {
-            return redirect()->route('uni-match.step', ['n' => 13]);
+            // Bilgi zaten var, akışa devam et
+            return $response->isCompleted()
+                ? redirect()->route('uni-match.result')
+                : redirect()->route('uni-match.step', ['n' => 13]);
         }
 
         $this->captureFunnelEvent('unimatch_lead_gate_shown', $response);
 
+        $isCompleted   = $response->isCompleted();
+        $pdfRequested  = (bool) $response->getAnswer('_pdf_requested');
+        // current_step 19'u aşmasın görsel olarak (saveStep n+1 atadığı için 20 olabilir)
+        $effectiveStep = min((int) $response->current_step, 19);
+        $progress      = (int) min(100, round(($effectiveStep / 19) * 100));
+
         return view('uni-match.lead-capture', [
-            'response' => $response,
-            'progress' => (int) round(($response->current_step / 19) * 100),
+            'response'      => $response,
+            'progress'      => $progress,
+            'effectiveStep' => $effectiveStep,
+            'isCompleted'   => $isCompleted,
+            'pdfRequested'  => $pdfRequested,
         ]);
     }
 
@@ -410,6 +422,13 @@ class WizardController extends Controller
             return redirect()->route('uni-match.result.pdf');
         }
 
+        // Wizard tamamlanmışsa result sayfasına dön (mid-funnel değil, post-result PDF/email isteği)
+        if ($response->isCompleted()) {
+            return redirect()->route('uni-match.result')
+                ->with('success', 'Bilgilerin kaydedildi — sonuçlarını mail/WhatsApp ile de göndereceğiz.');
+        }
+
+        // Mid-funnel akış: step 13'ten devam et
         return redirect()->route('uni-match.step', ['n' => 13])
             ->with('success', 'Bilgilerin kaydedildi — sonuçları sana ileteceğiz.');
     }
@@ -497,7 +516,10 @@ class WizardController extends Controller
 
         $this->captureFunnelEvent('unimatch_lead_gate_skipped', $response);
 
-        return redirect()->route('uni-match.step', ['n' => 13]);
+        // Wizard zaten tamamlanmışsa result'a dön; değilse step 13'ten devam et
+        return $response->isCompleted()
+            ? redirect()->route('uni-match.result')
+            : redirect()->route('uni-match.step', ['n' => 13]);
     }
 
     /** PostHog'a wizard funnel event'i gönder (anonim funnel — distinctId = session_token). */
