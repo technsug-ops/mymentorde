@@ -21,30 +21,110 @@
     $remainingMin = $remainingSec >= 60 ? ceil($remainingSec / 60) : null;
     $remainingLabel = $remainingMin ? "~{$remainingMin} dk kaldı" : ($remainingSteps > 0 ? '<1 dk kaldı' : 'Sonuç sayfasına geçiyorsun!');
 
-    // Step bağlamına göre sağ panel görseli (her adım için tematik gradient + emoji + alt başlık)
+    // Step bağlamına göre sağ panel görseli — her adım için Unsplash gerçek fotoğraf URL'i
+    // (DEV: hot-link, production'da self-host önerilir)
     $stepKey = $stepDef['key'] ?? '';
     $rightPanelMap = [
-        'target_degree'        => ['emoji' => '🎓', 'tag' => 'Akademik hedefin', 'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #5e3f9c 100%)'],
-        'target_field'         => ['emoji' => '🧬', 'tag' => 'İlgi alanın',       'gradient' => 'linear-gradient(135deg, #6c47a8 0%, #a07ed9 100%)'],
-        'study_language'       => ['emoji' => '🌍', 'tag' => 'Eğitim dili',       'gradient' => 'linear-gradient(135deg, #5e3f9c 0%, #b79ae9 100%)'],
-        'germany_motivation'   => ['emoji' => '✨', 'tag' => 'Motivasyon',        'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #c4a5ff 100%)'],
-        'start_term'           => ['emoji' => '📅', 'tag' => 'Başlangıç dönemi',  'gradient' => 'linear-gradient(135deg, #6a47a8 0%, #a07ed9 100%)'],
-        'current_education_level' => ['emoji' => '📚', 'tag' => 'Mevcut eğitim',   'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #6a47a8 100%)'],
-        'high_school_type'     => ['emoji' => '🏫', 'tag' => 'Lise türü',         'gradient' => 'linear-gradient(135deg, #5e3f9c 0%, #7e58bf 100%)'],
-        'gpa_range'            => ['emoji' => '📊', 'tag' => 'Akademik başarı',   'gradient' => 'linear-gradient(135deg, #6a47a8 0%, #b79ae9 100%)'],
-        'german_level'         => ['emoji' => '🇩🇪', 'tag' => 'Almanca seviyesi',  'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #a07ed9 100%)'],
-        'english_level'        => ['emoji' => '🇬🇧', 'tag' => 'İngilizce seviyesi','gradient' => 'linear-gradient(135deg, #6c47a8 0%, #c4a5ff 100%)'],
-        'language_certificate' => ['emoji' => '📜', 'tag' => 'Dil sertifikası',   'gradient' => 'linear-gradient(135deg, #5e3f9c 0%, #a07ed9 100%)'],
-        'finance_method'       => ['emoji' => '💰', 'tag' => 'Finansman',         'gradient' => 'linear-gradient(135deg, #6a47a8 0%, #b79ae9 100%)'],
-        'monthly_budget'       => ['emoji' => '💶', 'tag' => 'Aylık bütçe',       'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #5e3f9c 100%)'],
-        'tuition_tolerance'    => ['emoji' => '🎟️', 'tag' => 'Öğrenim ücreti',    'gradient' => 'linear-gradient(135deg, #6a47a8 0%, #a07ed9 100%)'],
-        'preferred_cities'     => ['emoji' => '🏙️', 'tag' => 'Tercih şehirler',   'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #c4a5ff 100%)'],
-        'living_priority'      => ['emoji' => '🏡', 'tag' => 'Yaşam tarzı',       'gradient' => 'linear-gradient(135deg, #5e3f9c 0%, #b79ae9 100%)'],
-        'has_aps'              => ['emoji' => '📋', 'tag' => 'APS durumu',         'gradient' => 'linear-gradient(135deg, #6c47a8 0%, #a07ed9 100%)'],
-        'visa_readiness'       => ['emoji' => '✈️', 'tag' => 'Vize hazırlığı',    'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #6a47a8 100%)'],
-        'mentorde_help_areas'  => ['emoji' => '🤝', 'tag' => 'Destek alanları',   'gradient' => 'linear-gradient(135deg, #5e3f9c 0%, #c4a5ff 100%)'],
+        'target_degree' => [
+            'tag' => 'Akademik hedefin',
+            // graduation ceremony
+            'image' => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'target_field' => [
+            'tag' => 'İlgi alanın',
+            // students collaborating with laptop
+            'image' => 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'study_language' => [
+            'tag' => 'Eğitim dili',
+            // library/books
+            'image' => 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'germany_motivation' => [
+            'tag' => 'Motivasyon',
+            // Berlin Brandenburger Tor
+            'image' => 'https://images.unsplash.com/photo-1587330979470-3016b6702d89?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'start_term' => [
+            'tag' => 'Başlangıç dönemi',
+            // calendar planner
+            'image' => 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'current_education_level' => [
+            'tag' => 'Mevcut eğitim',
+            // lecture hall
+            'image' => 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'high_school_type' => [
+            'tag' => 'Lise türü',
+            // school building / classroom
+            'image' => 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'gpa_range' => [
+            'tag' => 'Akademik başarı',
+            // student writing notes
+            'image' => 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'german_level' => [
+            'tag' => 'Almanca seviyesi',
+            // German flag / Reichstag
+            'image' => 'https://images.unsplash.com/photo-1599982327237-2ce40b6e6c3a?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'english_level' => [
+            'tag' => 'İngilizce seviyesi',
+            // open books English
+            'image' => 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'language_certificate' => [
+            'tag' => 'Dil sertifikası',
+            // certificate / diploma
+            'image' => 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'finance_method' => [
+            'tag' => 'Finansman',
+            // euro / money planning
+            'image' => 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'monthly_budget' => [
+            'tag' => 'Aylık bütçe',
+            // calculator + money
+            'image' => 'https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'tuition_tolerance' => [
+            'tag' => 'Öğrenim ücreti',
+            // university building
+            'image' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'living_priority' => [
+            'tag' => 'Yaşam tarzı',
+            // cozy German town
+            'image' => 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'preferred_cities' => [
+            'tag' => 'Tercih şehirler',
+            // German city aerial
+            'image' => 'https://images.unsplash.com/photo-1560969184-10fe8719e047?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'has_aps' => [
+            'tag' => 'APS durumu',
+            // documents/paperwork
+            'image' => 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'visa_readiness' => [
+            'tag' => 'Vize hazırlığı',
+            // passport
+            'image' => 'https://images.unsplash.com/photo-1569949381669-ecf31ae8e613?auto=format&fit=crop&w=1200&q=80',
+        ],
+        'mentorde_help_areas' => [
+            'tag' => 'Destek alanları',
+            // mentoring/handshake
+            'image' => 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
+        ],
     ];
-    $rightPanel = $rightPanelMap[$stepKey] ?? ['emoji' => '🎯', 'tag' => 'UniMatch', 'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #a07ed9 100%)'];
+    $rightPanel = $rightPanelMap[$stepKey] ?? [
+        'tag'   => 'UniMatch',
+        'image' => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
+    ];
 
     // Filter sayısı azalma hissi (öncekiyle karşılaştırma için)
     $totalPrograms = $totalPrograms ?? 13000;
@@ -216,17 +296,18 @@
     </form>
 </div>
 
-{{-- Sağ panel: bağlamsal görsel + canlı filter count --}}
-<aside class="sb-split-right" style="background: {{ $rightPanel['gradient'] }};" aria-label="Filtreleme görseli">
-    <div class="sb-rp-bg" aria-hidden="true">
-        <span class="sb-rp-shape sb-rp-shape-1"></span>
-        <span class="sb-rp-shape sb-rp-shape-2"></span>
-        <span class="sb-rp-shape sb-rp-shape-3"></span>
-    </div>
+{{-- Sağ panel: gerçek fotoğraf + canlı filter count overlay --}}
+<aside class="sb-split-right" aria-label="Filtreleme görseli">
+    <img class="sb-rp-image"
+         src="{{ $rightPanel['image'] }}"
+         alt=""
+         aria-hidden="true"
+         loading="lazy"
+         decoding="async">
+    <div class="sb-rp-overlay" aria-hidden="true"></div>
 
     <div class="sb-rp-content">
         <div class="sb-rp-tag">{{ $rightPanel['tag'] }}</div>
-        <div class="sb-rp-emoji" aria-hidden="true">{{ $rightPanel['emoji'] }}</div>
 
         {{-- Canlı filter count card --}}
         <div class="sb-rp-counter" data-live-counter>
