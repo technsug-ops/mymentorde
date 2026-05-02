@@ -378,6 +378,40 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
 
 <div id="dash-main-content">
 
+{{-- UniMatch Quick Stats (son 7 gün) --}}
+@if(isset($unimatchStats) && $unimatchStats['started'] > 0)
+<a href="{{ route('manager.unimatch-funnel.index') }}"
+   style="display:block;background:linear-gradient(135deg,#7e58bf,#a07ed9);border-radius:10px;padding:14px 18px;margin-bottom:12px;text-decoration:none;color:#fff;box-shadow:0 4px 12px rgba(126,88,191,0.18);">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <div style="font-size:30px;line-height:1;">🎯</div>
+            <div>
+                <div style="font-size:13.5px;font-weight:700;letter-spacing:.2px;">UniMatch Wizard · Son 7 gün</div>
+                <div style="font-size:11.5px;opacity:.85;margin-top:2px;">Detay funnel için tıkla →</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:18px;flex-wrap:wrap;">
+            <div style="text-align:center;min-width:60px;">
+                <div style="font-size:22px;font-weight:800;line-height:1;">{{ number_format($unimatchStats['started']) }}</div>
+                <div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;">Başlatan</div>
+            </div>
+            <div style="text-align:center;min-width:60px;border-left:1px solid rgba(255,255,255,.25);padding-left:18px;">
+                <div style="font-size:22px;font-weight:800;line-height:1;">{{ number_format($unimatchStats['leads']) }}</div>
+                <div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;">Lead %{{ $unimatchStats['lead_pct'] }}</div>
+            </div>
+            <div style="text-align:center;min-width:60px;border-left:1px solid rgba(255,255,255,.25);padding-left:18px;">
+                <div style="font-size:22px;font-weight:800;line-height:1;">{{ number_format($unimatchStats['completed']) }}</div>
+                <div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;">Bitiren</div>
+            </div>
+            <div style="text-align:center;min-width:60px;border-left:1px solid rgba(255,255,255,.25);padding-left:18px;">
+                <div style="font-size:22px;font-weight:800;line-height:1;">{{ number_format($unimatchStats['converted']) }}</div>
+                <div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;">Kayıt %{{ $unimatchStats['convert_pct'] }}</div>
+            </div>
+        </div>
+    </div>
+</a>
+@endif
+
 {{-- Filtre + Preset tek bar --}}
 <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:10px 14px;margin-bottom:12px;">
     <form method="GET" action="/manager/dashboard">

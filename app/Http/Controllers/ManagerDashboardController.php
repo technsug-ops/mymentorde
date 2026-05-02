@@ -23,7 +23,35 @@ class ManagerDashboardController extends Controller
         // Intervention widget — manager'ın müdahale etmesi gereken vakalar
         $data['interventions'] = $this->computeInterventionKpis();
 
+        // UniMatch funnel quick stats (son 7 gün)
+        $data['unimatchStats'] = $this->computeUniMatchQuickStats();
+
         return view('manager.dashboard', $data);
+    }
+
+    /** UniMatch wizard son 7 gün quick stats — dashboard widget. */
+    private function computeUniMatchQuickStats(): array
+    {
+        try {
+            $since = now()->subDays(7);
+            $base = \App\Models\UniMatchResponse::query()->where('started_at', '>=', $since);
+
+            $started = (clone $base)->count();
+            $leads = (clone $base)->whereNotNull('lead_captured_at')->count();
+            $completed = (clone $base)->whereNotNull('completed_at')->count();
+            $converted = (clone $base)->whereNotNull('converted_at')->count();
+
+            return [
+                'started'      => $started,
+                'leads'        => $leads,
+                'completed'    => $completed,
+                'converted'    => $converted,
+                'lead_pct'     => $started > 0 ? round(($leads / $started) * 100, 1) : 0,
+                'convert_pct'  => $started > 0 ? round(($converted / $started) * 100, 1) : 0,
+            ];
+        } catch (\Throwable $e) {
+            return ['started' => 0, 'leads' => 0, 'completed' => 0, 'converted' => 0, 'lead_pct' => 0, 'convert_pct' => 0];
+        }
     }
 
     /**
