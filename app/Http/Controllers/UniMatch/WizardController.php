@@ -53,7 +53,69 @@ class WizardController extends Controller
             }
         }
 
-        return view('uni-match.landing', ['resume' => $resumeData]);
+        return view('uni-match.landing', [
+            'resume'           => $resumeData,
+            'popularPrograms'  => $this->popularProgramsBlock(),
+        ]);
+    }
+
+    /**
+     * Coursera tarzı 3-kolon "popüler programlar" — landing'de SEO + sosyal proof.
+     * 5 dk cache, kolon başına 3 program.
+     */
+    private function popularProgramsBlock(): array
+    {
+        return \Cache::remember('unimatch:popular_programs:v1', 300, function () {
+            $columns = [
+                'engineering' => [
+                    'title' => 'Mühendislik',
+                    'desc'  => 'Almanya\'nın güçlü olduğu alan',
+                    'icon'  => 'cog',
+                    'field' => 'Engineering',
+                ],
+                'business' => [
+                    'title' => 'İş & Ekonomi',
+                    'desc'  => 'Master için en çok seçilen',
+                    'icon'  => 'briefcase',
+                    'field' => 'Business Management and Economics',
+                ],
+                'cs' => [
+                    'title' => 'Bilgisayar & IT',
+                    'desc'  => 'İngilizce program bolluğu',
+                    'icon'  => 'monitor',
+                    'field' => 'Computer Science and IT',
+                ],
+            ];
+
+            foreach ($columns as $key => &$col) {
+                $col['programs'] = \DB::table('programs')
+                    ->where('is_active', 1)
+                    ->where('language', 'en')
+                    ->whereJsonContains('study_fields', $col['field'])
+                    ->whereNotNull('description_tr')
+                    ->where('quality_score', '>=', 50)
+                    ->orderByDesc('quality_score')
+                    ->orderByRaw('RAND()')
+                    ->limit(3)
+                    ->get([
+                        'id', 'course_name', 'university_name_cached',
+                        'degree_type', 'tuition_eur_per_semester', 'location',
+                    ])
+                    ->map(fn ($p) => [
+                        'id'         => $p->id,
+                        'name'       => $p->course_name,
+                        'uni'        => $p->university_name_cached,
+                        'degree'     => ucfirst($p->degree_type ?? 'master'),
+                        'is_free'    => empty($p->tuition_eur_per_semester) || (int) $p->tuition_eur_per_semester === 0,
+                        'tuition'    => $p->tuition_eur_per_semester ? (int) $p->tuition_eur_per_semester : null,
+                        'location'   => $p->location,
+                    ])
+                    ->all();
+            }
+            unset($col);
+
+            return $columns;
+        });
     }
 
     public function start(Request $request): RedirectResponse
