@@ -223,9 +223,22 @@
             && e.target.tagName !== 'TEXTAREA'
             && !e.target.matches('[data-cities-search]')) {
             e.preventDefault();
-            document.getElementById('stepForm').submit();
+            var form = document.getElementById('stepForm');
+            if (form) form.requestSubmit ? form.requestSubmit() : form.submit();
         }
     });
+
+    // Submit feedback: button spinner + disable (Linear-tarzı micro-interaction)
+    var stepForm = document.getElementById('stepForm');
+    if (stepForm) {
+        stepForm.addEventListener('submit', function(){
+            var btn = document.getElementById('nextBtn');
+            if (btn && !btn.classList.contains('is-loading')) {
+                btn.classList.add('is-loading');
+                btn.disabled = true;
+            }
+        });
+    }
 
     // ────── Searchable Cities Widget ──────
     var citiesStateEl = document.getElementById('citiesState');

@@ -54,7 +54,17 @@
         .sb-progress-wrap { margin-bottom: 28px; }
         .sb-progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: #6b5894; margin-bottom: 6px; font-weight: 600; }
         .sb-progress-bar { height: 6px; background: #d8d2e8; border-radius: 999px; overflow: hidden; }
-        .sb-progress-fill { height: 100%; background: linear-gradient(90deg, #7e58bf, #a07ed9); border-radius: 999px; transition: width .4s ease; }
+        .sb-progress-fill {
+            height: 100%; background: linear-gradient(90deg, #7e58bf, #a07ed9);
+            border-radius: 999px;
+            transition: width .6s cubic-bezier(.4,0,.2,1);
+            position: relative;
+        }
+        .sb-progress-fill::after {
+            content: ''; position: absolute; inset: 0; border-radius: inherit;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
+            transform: translateX(-100%);
+        }
 
         /* Card */
         .sb-card {
@@ -83,13 +93,22 @@
             border-radius: 12px;
             padding: 18px 16px;
             cursor: pointer;
-            transition: all .15s;
+            transition: border-color .2s cubic-bezier(.4,0,.2,1),
+                        transform .25s cubic-bezier(.4,0,.2,1),
+                        box-shadow .25s cubic-bezier(.4,0,.2,1),
+                        background .2s cubic-bezier(.4,0,.2,1);
             text-align: left;
             display: flex; align-items: flex-start; gap: 12px;
             font-family: inherit;
             width: 100%;
+            will-change: transform;
         }
-        .sb-option:hover { border-color: #b79ae9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(126, 88, 191, 0.08); }
+        .sb-option:hover {
+            border-color: #b79ae9;
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 8px 24px rgba(126, 88, 191, 0.14);
+        }
+        .sb-option:active { transform: translateY(0) scale(.99); transition-duration: .08s; }
         .sb-option input[type="radio"] { position: absolute; opacity: 0; }
         .sb-option.selected { border-color: #7e58bf; background: linear-gradient(135deg, rgba(126, 88, 191, 0.08), rgba(167, 126, 217, 0.04)); }
         .sb-option.selected::before {
@@ -129,17 +148,34 @@
             padding: 12px 24px; border: none; border-radius: 10px;
             font-family: inherit; font-size: 14.5px; font-weight: 600; cursor: pointer;
             text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-            transition: all .15s;
+            transition: transform .2s cubic-bezier(.4,0,.2,1),
+                        box-shadow .25s cubic-bezier(.4,0,.2,1),
+                        background .2s cubic-bezier(.4,0,.2,1);
+            will-change: transform;
         }
         .sb-btn-primary {
             background: linear-gradient(135deg, #7e58bf, #6a47a8);
             color: #fff;
             box-shadow: 0 4px 14px rgba(126, 88, 191, 0.25);
+            position: relative;
+            overflow: hidden;
         }
-        .sb-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(126, 88, 191, 0.35); }
+        .sb-btn-primary::after {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
+            transition: left .55s cubic-bezier(.4,0,.2,1);
+        }
+        .sb-btn-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(126, 88, 191, 0.42);
+        }
+        .sb-btn-primary:hover::after { left: 100%; }
+        .sb-btn-primary:active { transform: translateY(0) scale(.99); transition-duration: .08s; }
         .sb-btn-primary:disabled { background: #cdc7d8; cursor: not-allowed; box-shadow: none; transform: none; }
+        .sb-btn-primary:disabled::after { display: none; }
         .sb-btn-ghost { background: transparent; color: #6b5894; }
-        .sb-btn-ghost:hover { background: rgba(126, 88, 191, 0.08); }
+        .sb-btn-ghost:hover { background: rgba(126, 88, 191, 0.08); transform: translateX(-2px); }
 
         /* Hero (landing) */
         .sb-hero { text-align: center; padding: 60px 20px 40px; }
@@ -164,6 +200,82 @@
             .sb-hero-title { font-size: 28px; }
             .sb-card { padding: 24px 18px; }
             .sb-title { font-size: 22px; }
+        }
+
+        /* ── Linear tarzı entry animasyonları (reduced-motion respect) ── */
+        @media (prefers-reduced-motion: no-preference) {
+            .sb-card {
+                animation: sb-card-in .42s cubic-bezier(.4,0,.2,1) both;
+            }
+            @keyframes sb-card-in {
+                0%   { opacity: 0; transform: translateY(14px) scale(.985); }
+                100% { opacity: 1; transform: translateY(0) scale(1); }
+            }
+
+            .sb-progress-fill::after {
+                animation: sb-progress-shimmer 2.6s cubic-bezier(.4,0,.2,1) infinite;
+            }
+            @keyframes sb-progress-shimmer {
+                0%   { transform: translateX(-100%); }
+                60%  { transform: translateX(100%); }
+                100% { transform: translateX(100%); }
+            }
+
+            .sb-options .sb-option {
+                animation: sb-option-in .38s cubic-bezier(.4,0,.2,1) both;
+            }
+            .sb-options .sb-option:nth-child(1) { animation-delay: 70ms; }
+            .sb-options .sb-option:nth-child(2) { animation-delay: 130ms; }
+            .sb-options .sb-option:nth-child(3) { animation-delay: 190ms; }
+            .sb-options .sb-option:nth-child(4) { animation-delay: 250ms; }
+            .sb-options .sb-option:nth-child(5) { animation-delay: 310ms; }
+            .sb-options .sb-option:nth-child(6) { animation-delay: 370ms; }
+            .sb-options .sb-option:nth-child(n+7) { animation-delay: 430ms; }
+            @keyframes sb-option-in {
+                0%   { opacity: 0; transform: translateY(8px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+
+            .sb-title, .sb-subtitle {
+                animation: sb-title-in .5s cubic-bezier(.4,0,.2,1) both;
+            }
+            .sb-subtitle { animation-delay: 80ms; }
+            @keyframes sb-title-in {
+                0%   { opacity: 0; transform: translateY(-6px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+
+            .sb-hero > * {
+                animation: sb-hero-in .55s cubic-bezier(.4,0,.2,1) both;
+            }
+            .sb-hero > *:nth-child(2) { animation-delay: 90ms; }
+            .sb-hero > *:nth-child(3) { animation-delay: 180ms; }
+            .sb-hero > *:nth-child(4) { animation-delay: 270ms; }
+            .sb-hero > *:nth-child(n+5) { animation-delay: 360ms; }
+            @keyframes sb-hero-in {
+                0%   { opacity: 0; transform: translateY(12px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+
+            /* Form submit: button "yükleniyor" feedback */
+            .sb-btn-primary.is-loading {
+                pointer-events: none;
+                opacity: .85;
+            }
+            .sb-btn-primary.is-loading::before {
+                content: '';
+                width: 14px; height: 14px;
+                border: 2px solid rgba(255,255,255,.4);
+                border-top-color: #fff;
+                border-radius: 50%;
+                animation: sb-spin .7s linear infinite;
+                margin-right: 4px;
+            }
+            @keyframes sb-spin { to { transform: rotate(360deg); } }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
         }
     </style>
     @stack('head')
