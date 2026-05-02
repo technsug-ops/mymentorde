@@ -50,6 +50,34 @@
             }).catch(function(){ toast('Bir hata oldu, tekrar dene', true); });
         });
     });
+
+    // Filter buttons
+    var favSet = new Set({!! json_encode((array) ($response->favorite_program_ids ?? [])) !!});
+    document.querySelectorAll('[data-filter]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            document.querySelectorAll('[data-filter]').forEach(function(b){
+                b.style.background = '#fff'; b.style.color = '#6b5894';
+                b.classList.remove('active');
+            });
+            btn.style.background = '#7e58bf'; btn.style.color = '#fff';
+            btn.classList.add('active');
+
+            var f = btn.dataset.filter;
+            var visibleCount = 0;
+            document.querySelectorAll('.sb-rec-card').forEach(function(card){
+                var show = true;
+                if (f === 'uni-assist') show = card.dataset.sourceType === 'uni-assist';
+                else if (f === 'direkt') show = card.dataset.sourceType === 'direkt';
+                else if (f === 'favorite') show = favSet.has(card.dataset.programId);
+                card.style.display = show ? '' : 'none';
+                if (show) visibleCount++;
+            });
+            if (visibleCount === 0 && f === 'favorite') {
+                toast('Henüz favorin yok — bir programa yıldız ekle', true);
+                document.querySelector('[data-filter="all"]').click();
+            }
+        });
+    });
 })();
 </script>
 @endpush
@@ -81,8 +109,24 @@
         </div>
     </div>
 @else
+    {{-- Filter / Sort kontrolleri --}}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 16px;padding:10px 14px;background:#fff;border-radius:10px;border:1px solid #ede5f7;">
+        <span style="font-size:12px;color:#6b5894;font-weight:600;">FİLTRE:</span>
+        <button type="button" data-filter="all" class="sb-filter active"
+                style="padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;border:1px solid #d4c5e8;background:#7e58bf;color:#fff;cursor:pointer;">Tümü ({{ count($recommendations) }})</button>
+        <button type="button" data-filter="uni-assist" class="sb-filter"
+                style="padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;border:1px solid #d4c5e8;background:#fff;color:#6b5894;cursor:pointer;">📨 uni-assist</button>
+        <button type="button" data-filter="direkt" class="sb-filter"
+                style="padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;border:1px solid #d4c5e8;background:#fff;color:#6b5894;cursor:pointer;">✅ Direkt</button>
+        <button type="button" data-filter="favorite" class="sb-filter"
+                style="padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;border:1px solid #d4c5e8;background:#fff;color:#6b5894;cursor:pointer;">⭐ Favorilerim</button>
+    </div>
+
     @foreach($recommendations as $i => $rec)
-        <div class="sb-card" style="margin-bottom: 14px;">
+        <div class="sb-card sb-rec-card"
+             data-source-type="{{ ! empty($rec['is_uni_assist_member']) ? 'uni-assist' : 'direkt' }}"
+             data-program-id="{{ $rec['program_id'] }}"
+             style="margin-bottom: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 12px;">
                 <div style="flex: 1;">
                     <div style="display: inline-block; background: rgba(126, 88, 191, 0.12); color: #7e58bf; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-bottom: 8px; letter-spacing: .3px;">

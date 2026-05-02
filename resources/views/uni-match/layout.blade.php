@@ -100,6 +100,15 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 13px; font-weight: 700;
         }
+        /* Print-friendly: Ctrl+P direkt güzel çıktı */
+        @media print {
+            body { background: #fff !important; }
+            .sb-header, .sb-nav, .sb-back, .fav-btn, [data-favorite-toggle] { display: none !important; }
+            .sb-card { box-shadow: none !important; border: 1px solid #ccc !important; page-break-inside: avoid; }
+            a { color: #1a1a1a !important; text-decoration: none !important; }
+            .sb-btn { display: none !important; }
+        }
+
         /* Accessibility: focus visible (keyboard navigation) */
         .sb-option:focus-within { outline: 3px solid #7e58bf; outline-offset: 2px; box-shadow: 0 0 0 6px rgba(126, 88, 191, 0.18); }
         button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid #7e58bf; outline-offset: 2px; }
