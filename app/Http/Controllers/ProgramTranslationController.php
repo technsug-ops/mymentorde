@@ -34,6 +34,17 @@ class ProgramTranslationController extends Controller
 
         $result = $this->translator->translateProgram($program, force: $force, companyId: $companyId);
 
+        // PostHog: lazy translate triggered (cost ölçümü + popularity sinyali)
+        try {
+            $sessionToken = (string) $request->cookie('uni_match_session', '');
+            app(\App\Services\Analytics\AnalyticsService::class)->capture('program_translate_clicked', [
+                'program_id'        => $program->id,
+                'course_name'       => $program->course_name,
+                'translated_fields' => $result['translated_fields'] ?? 0,
+                'success'           => empty($result['error']),
+            ], $sessionToken !== '' ? $sessionToken : null);
+        } catch (\Throwable $e) { /* asla kırma */ }
+
         if ($result['error']) {
             return response()->json([
                 'success' => false,

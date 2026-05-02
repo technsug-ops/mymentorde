@@ -154,6 +154,17 @@
         </div>
     @endforeach
 
+    {{-- Sosyal proof (son 7 gün) --}}
+    @if(($socialProof ?? 0) >= 5)
+    <div style="text-align:center;margin:20px 0;padding:12px 18px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;">
+        <div style="font-size:13px;color:#166534;font-weight:600;">
+            <span style="display:inline-block;width:8px;height:8px;background:#16a34a;border-radius:50%;animation:pulse 1.5s infinite;margin-right:6px;vertical-align:middle;"></span>
+            Son 7 günde <strong style="color:#15803d;">{{ number_format($socialProof) }}</strong> öğrenci UniMatch'ı tamamladı
+        </div>
+    </div>
+    <style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+    @endif
+
     {{-- Sosyal paylaşım --}}
     @php
         $shareText = "🎯 MentorDE UniMatch sihirbazı bana özel " . count($recommendations) . " Almanya programı seçti! Sen de dene:";

@@ -158,6 +158,29 @@
     @stack('head')
 </head>
 <body>
+    {{-- Toast: session flash mesajları (success/info/error) --}}
+    @if(session('success') || session('info') || session('error'))
+        @php
+            $flashType = session('success') ? 'success' : (session('info') ? 'info' : 'error');
+            $flashMsg = session('success') ?? session('info') ?? session('error');
+            $flashColor = match($flashType) { 'success' => '#16a34a', 'info' => '#7e58bf', 'error' => '#dc2626' };
+            $flashIcon = match($flashType) { 'success' => '✓', 'info' => 'ℹ', 'error' => '⚠' };
+        @endphp
+        <div id="sb-toast"
+             role="status"
+             style="position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:{{ $flashColor }};color:#fff;padding:14px 22px;border-radius:10px;font-size:14px;font-weight:600;z-index:10000;box-shadow:0 8px 28px rgba(0,0,0,.2);opacity:0;transition:all .35s cubic-bezier(.4,0,.2,1);max-width:90%;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:18px;">{!! $flashIcon !!}</span>
+            <span>{{ $flashMsg }}</span>
+        </div>
+        <script nonce="{{ $cspNonce ?? '' }}">
+            (function(){
+                var t = document.getElementById('sb-toast');
+                setTimeout(function(){ t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; }, 80);
+                setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(-20px)'; setTimeout(function(){ t.remove(); }, 400); }, 4000);
+            })();
+        </script>
+    @endif
+
     <div class="sb-container">
         <header class="sb-header">
             <a href="/" class="sb-logo"><span class="sb-logo-mark"></span>MentorDE</a>

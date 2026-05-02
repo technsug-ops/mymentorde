@@ -394,9 +394,20 @@ class WizardController extends Controller
             ]);
         }
 
+        // Sosyal proof — son 7 gün wizard tamamlama sayısı (gerçek veri)
+        $socialProof = \Illuminate\Support\Facades\Cache::remember(
+            'unimatch.social_proof',
+            300, // 5 dk cache
+            fn() => UniMatchResponse::query()
+                ->whereNotNull('completed_at')
+                ->where('completed_at', '>=', now()->subDays(7))
+                ->count()
+        );
+
         return view('uni-match.result', [
             'response'        => $response,
             'recommendations' => $response->recommendations ?? [],
+            'socialProof'     => $socialProof,
         ]);
     }
 

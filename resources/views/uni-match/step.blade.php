@@ -9,12 +9,20 @@
 @endsection
 
 @section('content')
+@php
+    $remainingSteps = max(0, $totalSteps - $currentStep);
+    // Ortalama 15-20 sn/step, biraz koruyucu (20 sn)
+    $remainingSec = $remainingSteps * 20;
+    $remainingMin = $remainingSec >= 60 ? ceil($remainingSec / 60) : null;
+    $remainingLabel = $remainingMin ? "~{$remainingMin} dk kaldı" : ($remainingSteps > 0 ? '<1 dk kaldı' : 'Sonuç sayfasına geçiyorsun!');
+@endphp
 <div class="sb-progress-wrap">
     <div class="sb-progress-meta">
         <span>Adım {{ $currentStep }} / {{ $totalSteps }}</span>
-        <span>%{{ $progress }} tamamlandı</span>
+        <span style="color:#7e58bf;font-weight:600;">⏱ {{ $remainingLabel }}</span>
+        <span>%{{ $progress }}</span>
     </div>
-    <div class="sb-progress-bar">
+    <div class="sb-progress-bar" role="progressbar" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100" aria-label="Wizard ilerlemesi: %{{ $progress }}">
         <div class="sb-progress-fill" style="width: {{ $progress }}%;"></div>
     </div>
 </div>
