@@ -27,7 +27,8 @@ class UniMatchResponse extends Model
         'recommendations',
         'started_at', 'completed_at', 'last_active_at', 'result_viewed_at',
         'converted_to_guest_id', 'converted_at',
-        'source', 'referrer', 'ip', 'user_agent',
+        'source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+        'referrer', 'ip', 'user_agent',
         'lead_email', 'lead_phone', 'lead_first_name',
         'lead_consent_marketing', 'lead_captured_at',
     ];

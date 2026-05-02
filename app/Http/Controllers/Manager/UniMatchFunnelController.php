@@ -65,7 +65,20 @@ class UniMatchFunnelController extends Controller
             ->whereNotNull('lead_captured_at')
             ->orderByDesc('lead_captured_at')
             ->limit(10)
-            ->get(['id', 'lead_first_name', 'lead_email', 'lead_phone', 'lead_consent_marketing', 'lead_captured_at', 'completed_at', 'converted_at', 'current_step', 'recommendations']);
+            ->get(['id', 'lead_first_name', 'lead_email', 'lead_phone', 'lead_consent_marketing', 'lead_captured_at', 'completed_at', 'converted_at', 'current_step', 'recommendations', 'source', 'utm_campaign']);
+
+        // UTM source breakdown — hangi marketing kanalı kaç lead/kayıt getiriyor
+        $utmBreakdown = (clone $base)
+            ->selectRaw("
+                COALESCE(NULLIF(source, ''), 'organic') as channel,
+                COUNT(*) as started,
+                SUM(CASE WHEN lead_captured_at IS NOT NULL THEN 1 ELSE 0 END) as leads,
+                SUM(CASE WHEN converted_at IS NOT NULL THEN 1 ELSE 0 END) as converts
+            ")
+            ->groupBy('channel')
+            ->orderByDesc('started')
+            ->limit(10)
+            ->get();
 
         return view('manager.unimatch-funnel.index', [
             'days'            => $days,
@@ -78,6 +91,7 @@ class UniMatchFunnelController extends Controller
             'leadToConvert'   => $leadToConvert,
             'avgDurationMin'  => $avgDurationMin,
             'recentLeads'     => $recentLeads,
+            'utmBreakdown'    => $utmBreakdown,
         ]);
     }
 }

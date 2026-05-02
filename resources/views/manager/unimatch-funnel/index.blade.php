@@ -97,6 +97,54 @@
     </div>
 </div>
 
+{{-- ── UTM / Marketing Kanal Kırılımı ── --}}
+@if(count($utmBreakdown) > 0)
+<div class="panel" style="margin-bottom:24px;">
+    <h2 style="font-size:15px;font-weight:700;color:#0f172a;margin:0 0 6px;">📣 Marketing Kanal Performansı</h2>
+    <p style="margin:0 0 16px;font-size:12.5px;color:#64748b;">UTM source bazlı funnel — hangi kanalı paraya değer?</p>
+    <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+            <tr style="background:#f1f5f9;">
+                <th style="padding:8px 12px;text-align:left;font-weight:700;color:#475569;font-size:12px;text-transform:uppercase;letter-spacing:.3px;">Kanal</th>
+                <th style="padding:8px 12px;text-align:right;font-weight:700;color:#475569;font-size:12px;text-transform:uppercase;letter-spacing:.3px;">Wizard Açılış</th>
+                <th style="padding:8px 12px;text-align:right;font-weight:700;color:#475569;font-size:12px;text-transform:uppercase;letter-spacing:.3px;">Lead</th>
+                <th style="padding:8px 12px;text-align:right;font-weight:700;color:#475569;font-size:12px;text-transform:uppercase;letter-spacing:.3px;">Convert</th>
+                <th style="padding:8px 12px;text-align:right;font-weight:700;color:#475569;font-size:12px;text-transform:uppercase;letter-spacing:.3px;">Lead %</th>
+                <th style="padding:8px 12px;text-align:right;font-weight:700;color:#475569;font-size:12px;text-transform:uppercase;letter-spacing:.3px;">Convert %</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($utmBreakdown as $row)
+            @php
+                $leadPct = $row->started > 0 ? round(($row->leads / $row->started) * 100, 1) : 0;
+                $convPct = $row->started > 0 ? round(($row->converts / $row->started) * 100, 1) : 0;
+            @endphp
+            <tr style="border-bottom:1px solid #e2e8f0;">
+                <td style="padding:10px 12px;font-weight:600;">
+                    @if($row->channel === 'organic')
+                        <span style="background:rgba(148,163,184,0.12);color:#475569;padding:3px 9px;border-radius:5px;font-size:11.5px;">📍 Organik / Doğrudan</span>
+                    @else
+                        <span style="font-family:monospace;font-size:12px;background:rgba(124,58,237,0.08);color:#7c3aed;padding:3px 9px;border-radius:5px;">{{ $row->channel }}</span>
+                    @endif
+                </td>
+                <td style="padding:10px 12px;text-align:right;font-weight:600;">{{ number_format($row->started) }}</td>
+                <td style="padding:10px 12px;text-align:right;color:#7c3aed;font-weight:600;">{{ number_format($row->leads) }}</td>
+                <td style="padding:10px 12px;text-align:right;color:#16a34a;font-weight:600;">{{ number_format($row->converts) }}</td>
+                <td style="padding:10px 12px;text-align:right;color:#64748b;">%{{ $leadPct }}</td>
+                <td style="padding:10px 12px;text-align:right;color:#64748b;">%{{ $convPct }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    </div>
+    <div style="margin-top:14px;padding:12px 16px;background:#eff6ff;border-left:3px solid #3b82f6;border-radius:6px;font-size:12.5px;color:#1e40af;">
+        <strong>İpucu:</strong> Wizard'ı UTM tracking ile çağır:
+        <code style="background:#fff;padding:2px 6px;border-radius:4px;font-size:11.5px;">/uni-match?utm_source=instagram&utm_campaign=summer_2026</code>
+    </div>
+</div>
+@endif
+
 {{-- ── Son leadler ── --}}
 @if(count($recentLeads) > 0)
 <div class="panel">
