@@ -82,7 +82,10 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 13px; font-weight: 700;
         }
-        .sb-option-icon { font-size: 26px; flex-shrink: 0; }
+        .sb-option-icon { font-size: 26px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+        .sb-option-icon .lucide-icon { width: 28px; height: 28px; color: #7e58bf; transition: color .15s; }
+        .sb-option:hover .sb-option-icon .lucide-icon { color: #5e3f9c; }
+        .sb-option.selected .sb-option-icon .lucide-icon { color: #7e58bf; }
         .sb-option-text { flex: 1; }
         .sb-option-label { font-size: 14.5px; font-weight: 600; color: #1a1a1a; margin-bottom: 2px; }
         .sb-option-desc { font-size: 12px; color: #6b5894; line-height: 1.4; }

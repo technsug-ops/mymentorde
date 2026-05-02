@@ -39,7 +39,7 @@
                         <input type="radio" name="{{ $stepDef['key'] }}" value="{{ $opt['value'] }}"
                                @checked((string)$answer === (string)$opt['value']) required>
                         @if(! empty($opt['icon']))
-                            <span class="sb-option-icon">{!! $opt['icon'] !!}</span>
+                            <span class="sb-option-icon">{!! \App\Support\LucideIcons::renderOrEmoji($opt['icon'] ?? null, 32) !!}</span>
                         @endif
                         <div class="sb-option-text">
                             <div class="sb-option-label">{{ $opt['label'] }}</div>
@@ -67,7 +67,7 @@
                                @checked(in_array((string)$opt['value'], $checked, true))
                                style="position:absolute; opacity:0;">
                         @if(! empty($opt['icon']))
-                            <span class="sb-option-icon">{!! $opt['icon'] !!}</span>
+                            <span class="sb-option-icon">{!! \App\Support\LucideIcons::renderOrEmoji($opt['icon'] ?? null, 32) !!}</span>
                         @endif
                         <div class="sb-option-text">
                             <div class="sb-option-label">{{ $opt['label'] }}</div>
@@ -116,7 +116,7 @@
                     @foreach($popular as $opt)
                         <label class="sb-option" data-city-value="{{ $opt['value'] }}" style="cursor: pointer;">
                             @if(! empty($opt['icon']))
-                                <span class="sb-option-icon">{!! $opt['icon'] !!}</span>
+                                <span class="sb-option-icon">{!! \App\Support\LucideIcons::renderOrEmoji($opt['icon'] ?? null, 32) !!}</span>
                             @endif
                             <div class="sb-option-text">
                                 <div class="sb-option-label">{{ $opt['label'] }}</div>
