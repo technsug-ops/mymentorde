@@ -16,6 +16,40 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/login');
 Route::view('/landing/mentorde', 'landing.mentorde')->name('landing.mentorde');
 
+// ── SEO Sitemap (public_landings.php'den dinamik) ────────────────────────────
+Route::get('/sitemap.xml', function () {
+    $landings = config('public_landings', []);
+    $base = url('/');
+    $urls = [];
+    foreach ($landings as $l) {
+        if (! ($l['is_active'] ?? false)) continue;
+        $path = $l['path'] ?? '';
+        // Dynamic placeholder ({slug}, {token}) içeren path'leri sitemap'e koyma
+        if (str_contains($path, '{')) continue;
+        $priority = match($l['tier'] ?? 'nice') {
+            'critical' => '1.0',
+            'important' => '0.7',
+            default => '0.5',
+        };
+        $urls[] = ['loc' => $base . $path, 'priority' => $priority];
+    }
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    foreach ($urls as $u) {
+        $xml .= '  <url><loc>' . htmlspecialchars($u['loc'], ENT_XML1) . '</loc>'
+              . '<changefreq>weekly</changefreq>'
+              . '<priority>' . $u['priority'] . '</priority></url>' . "\n";
+    }
+    $xml .= '</urlset>';
+    return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+})->name('sitemap');
+
+// ── robots.txt — sitemap referansı + admin path'leri kapat ────────────────
+Route::get('/robots.txt', function () {
+    $content = "User-agent: *\nAllow: /\nDisallow: /manager/\nDisallow: /senior/\nDisallow: /student/\nDisallow: /dealer/\nDisallow: /mktg-admin/\nDisallow: /admin/\nDisallow: /im/\nDisallow: /api/\nDisallow: /apply/onay\n\nSitemap: " . url('/sitemap.xml') . "\n";
+    return response($content, 200, ['Content-Type' => 'text/plain']);
+})->name('robots');
+
 // ── UniMatch Wizard — Public, login gerekmez ────────────────────────────────
 Route::middleware('company.context')->group(function (): void {
     $um = \App\Http\Controllers\UniMatch\WizardController::class;
@@ -36,6 +70,9 @@ Route::middleware('company.context')->group(function (): void {
 
     // PDF export — sonuç sayfasından, lead magnet (email opsiyonel)
     Route::get('/uni-match/result/pdf',             [$um, 'resultPdf'])->middleware('throttle:5,1')->name('uni-match.result.pdf');
+
+    // Favori program toggle (AJAX, max 3)
+    Route::post('/uni-match/favorite/toggle',       [$um, 'toggleFavorite'])->middleware('throttle:60,1')->name('uni-match.favorite.toggle');
 
     // Canonical Program detay (public, throttle korumalı)
     Route::get('/program/{program}',               [\App\Http\Controllers\ProgramController::class, 'show'])

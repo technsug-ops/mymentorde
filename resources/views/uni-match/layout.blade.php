@@ -100,6 +100,10 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 13px; font-weight: 700;
         }
+        /* Accessibility: focus visible (keyboard navigation) */
+        .sb-option:focus-within { outline: 3px solid #7e58bf; outline-offset: 2px; box-shadow: 0 0 0 6px rgba(126, 88, 191, 0.18); }
+        button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid #7e58bf; outline-offset: 2px; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
         .sb-option-icon { font-size: 26px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
         .sb-option-icon .lucide-icon { width: 28px; height: 28px; color: #7e58bf; transition: color .15s; }
         .sb-option:hover .sb-option-icon .lucide-icon { color: #5e3f9c; }

@@ -401,6 +401,50 @@ class WizardController extends Controller
     }
 
     /**
+     * Favori program toggle (AJAX) — max 3 program.
+     */
+    public function toggleFavorite(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $response = $this->resolveSession($request);
+        if (! $response) {
+            return response()->json(['ok' => false, 'error' => 'session_not_found'], 404);
+        }
+
+        $programId = (string) $request->input('program_id', '');
+        if ($programId === '') {
+            return response()->json(['ok' => false, 'error' => 'program_id_required'], 422);
+        }
+
+        $favorites = is_array($response->favorite_program_ids) ? $response->favorite_program_ids : [];
+
+        if (in_array($programId, $favorites, true)) {
+            $favorites = array_values(array_diff($favorites, [$programId]));
+            $action = 'removed';
+        } else {
+            if (count($favorites) >= 3) {
+                return response()->json([
+                    'ok' => false,
+                    'error' => 'max_3_favorites',
+                    'message' => 'En fazla 3 program favorileyebilirsin. Önce birini kaldır.',
+                    'favorites' => $favorites,
+                ], 422);
+            }
+            $favorites[] = $programId;
+            $action = 'added';
+        }
+
+        $response->favorite_program_ids = $favorites;
+        $response->save();
+
+        return response()->json([
+            'ok' => true,
+            'action' => $action,
+            'favorites' => $favorites,
+            'count' => count($favorites),
+        ]);
+    }
+
+    /**
      * Sonuç sayfasını PDF olarak indir — lead magnet.
      * Email yoksa lead capture'a yönlendir, oradan dönünce PDF.
      */

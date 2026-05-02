@@ -31,6 +31,7 @@ class UniMatchResponse extends Model
         'referrer', 'ip', 'user_agent',
         'lead_email', 'lead_phone', 'lead_first_name',
         'lead_consent_marketing', 'lead_captured_at',
+        'favorite_program_ids',
     ];
 
     protected $casts = [
@@ -46,6 +47,7 @@ class UniMatchResponse extends Model
         'converted_at'           => 'datetime',
         'lead_consent_marketing' => 'boolean',
         'lead_captured_at'       => 'datetime',
+        'favorite_program_ids'   => 'array',
     ];
 
     public function convertedGuest(): BelongsTo

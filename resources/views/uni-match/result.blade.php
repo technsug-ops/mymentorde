@@ -3,6 +3,57 @@
 @section('og_title', 'UniMatch ile sana özel ' . count($recommendations) . ' Almanya programı seçtim')
 @section('og_description', 'MentorDE UniMatch sihirbazı, 13.000+ program arasından profil ve hedeflerime en uygun olanları sıraladı. Sen de dene → /uni-match')
 
+@push('scripts')
+<style>
+.fav-btn:hover { color:#a07ed9 !important; transform:scale(1.15); }
+.fav-btn.is-fav { color:#f59e0b !important; }
+.fav-btn.is-fav:hover { color:#d97706 !important; }
+.fav-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#1a1a1a; color:#fff; padding:10px 18px; border-radius:10px; font-size:13px; z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,.25); opacity:0; transition:opacity .3s; pointer-events:none; }
+.fav-toast.show { opacity:1; }
+.fav-toast.error { background:#dc2626; }
+</style>
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    var toast = function(msg, isErr){
+        var el = document.createElement('div');
+        el.className = 'fav-toast' + (isErr ? ' error' : '');
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(function(){ el.classList.add('show'); }, 50);
+        setTimeout(function(){ el.classList.remove('show'); setTimeout(function(){ el.remove(); }, 300); }, 2400);
+    };
+
+    document.querySelectorAll('[data-favorite-toggle]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var pid = btn.dataset.programId;
+            fetch('{{ route("uni-match.favorite.toggle") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ program_id: pid })
+            }).then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+            .then(function(res){
+                if (! res.ok) {
+                    toast(res.data.message || 'Favorilere eklenemedi', true);
+                    return;
+                }
+                if (res.data.action === 'added') {
+                    btn.classList.add('is-fav');
+                    toast('⭐ Favorilere eklendi (' + res.data.count + '/3)');
+                } else {
+                    btn.classList.remove('is-fav');
+                    toast('✓ Favorilerden kaldırıldı');
+                }
+            }).catch(function(){ toast('Bir hata oldu, tekrar dene', true); });
+        });
+    });
+})();
+</script>
+@endpush
+
 @section('title', 'Sana özel program önerileri — UniMatch')
 
 @section('content')
@@ -45,9 +96,17 @@
                         @if(! empty($rec['location'])) · {{ $rec['location'] }} @endif
                     </div>
                 </div>
-                <div style="text-align: center; flex-shrink: 0;">
-                    <div style="font-size: 28px; font-weight: 700; color: #7e58bf; line-height: 1;">{{ $rec['match_score'] }}</div>
-                    <div style="font-size: 10px; color: #8a7baf; margin-top: 2px;">/100 MATCH</div>
+                <div style="text-align: center; flex-shrink: 0; display:flex;flex-direction:column;align-items:center;gap:6px;">
+                    <button type="button"
+                            data-favorite-toggle
+                            data-program-id="{{ $rec['program_id'] }}"
+                            class="fav-btn {{ in_array($rec['program_id'], (array) ($response->favorite_program_ids ?? []), true) ? 'is-fav' : '' }}"
+                            title="Favorile (max 3)"
+                            style="background:none;border:none;cursor:pointer;font-size:22px;line-height:1;padding:0;color:#d4c5e8;transition:transform .15s,color .15s;">★</button>
+                    <div>
+                        <div style="font-size: 28px; font-weight: 700; color: #7e58bf; line-height: 1;">{{ $rec['match_score'] }}</div>
+                        <div style="font-size: 10px; color: #8a7baf; margin-top: 2px;">/100 MATCH</div>
+                    </div>
                 </div>
             </div>
 

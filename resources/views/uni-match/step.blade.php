@@ -19,8 +19,9 @@
     </div>
 </div>
 
-<div class="sb-card">
-    <h1 class="sb-title">{{ $stepDef['title'] }}</h1>
+<div class="sb-card" role="region" aria-labelledby="sb-step-title-{{ $currentStep }}">
+    <h1 class="sb-title" id="sb-step-title-{{ $currentStep }}" tabindex="-1">{{ $stepDef['title'] }}</h1>
+    <span class="sr-only">Adım {{ $currentStep }} / {{ $totalSteps }}. Yön tuşları veya Tab ile gez, Enter ile seç ve devam et.</span>
     @if(! empty($stepDef['subtitle']))
         <p class="sb-subtitle">{{ $stepDef['subtitle'] }}</p>
     @endif
@@ -151,7 +152,13 @@
         @endif
 
         <div class="sb-nav">
-            <a href="{{ route('uni-match.landing') }}" class="sb-btn sb-btn-ghost">Vazgeç</a>
+            @if($currentStep > 1)
+                <a href="{{ route('uni-match.step', ['n' => $currentStep - 1]) }}" class="sb-btn sb-btn-ghost">
+                    <span style="font-size:16px;">←</span> Geri
+                </a>
+            @else
+                <a href="{{ route('uni-match.landing') }}" class="sb-btn sb-btn-ghost">Vazgeç</a>
+            @endif
             <button type="submit" class="sb-btn sb-btn-primary" id="nextBtn">
                 {{ $currentStep >= $totalSteps ? 'Sonuçları Göster' : 'Devam Et' }}
                 <span style="font-size: 16px;">→</span>
