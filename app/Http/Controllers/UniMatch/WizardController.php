@@ -238,8 +238,84 @@ class WizardController extends Controller
             'consent'  => (bool) ($data['consent'] ?? false),
         ]);
 
+        // KVKK opt-in varsa hemen karşılama mesajları (WhatsApp + email kalan adımlarda gönderilir)
+        if (! empty($data['phone']) && ! empty($data['consent'])) {
+            $this->sendWhatsappGreeting($response);
+        }
+
         return redirect()->route('uni-match.step', ['n' => 13])
             ->with('success', 'Bilgilerin kaydedildi — sonuçları sana ileteceğiz.');
+    }
+
+    /**
+     * Manager/dealer'a yeni lead WhatsApp bildirimi.
+     * ENV: UNIMATCH_LEAD_NOTIFY_PHONE setli olmalı.
+     */
+    private function notifyTeamOfNewLead(UniMatchResponse $response, $guest, array $answers): void
+    {
+        $notifyPhone = config('services.whatsapp.unimatch_lead_notify_phone');
+        if (empty($notifyPhone)) return;
+
+        try {
+            $name = $response->lead_first_name ?: '(isim yok)';
+            $contact = $response->lead_email ?: ($response->lead_phone ?: 'iletişim yok');
+            $degree = $answers['target_degree'] ?? '?';
+            $field = $answers['target_field'] ?? '?';
+            $lang = $answers['study_language'] ?? '?';
+            $cities = is_array($answers['preferred_cities'] ?? null)
+                ? implode(', ', array_slice($answers['preferred_cities'], 0, 3))
+                : '?';
+            $brand = config('brand.name', 'MentorDE');
+            $managerUrl = url('/manager/students/' . ($guest->id ?? '?'));
+
+            $body = "🎯 YENİ LEAD — {$brand} UniMatch\n\n"
+                . "👤 {$name}\n"
+                . "📞 {$contact}\n\n"
+                . "📚 {$degree} · {$field} · {$lang}\n"
+                . "📍 {$cities}\n\n"
+                . ($response->source ? "🎯 Kaynak: {$response->source}\n" : '')
+                . "👉 {$managerUrl}";
+
+            app(\App\Services\WhatsAppService::class)->sendText($notifyPhone, $body);
+
+            $this->captureFunnelEvent('unimatch_team_notified', $response, [
+                'guest_id' => $guest->id,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::warning('UniMatch.team_notify_failed', [
+                'session' => $response->session_token,
+                'error'   => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Lead'e anlık WhatsApp karşılama mesajı.
+     * Async hale getirmek için queue'ya atılabilir; şu an sync (~1 sn API çağrısı).
+     */
+    private function sendWhatsappGreeting(UniMatchResponse $response): void
+    {
+        try {
+            $name = $response->lead_first_name ?: 'Merhaba';
+            $brand = config('brand.name', 'MentorDE');
+            $url = url('/uni-match/step/' . $response->current_step . '?t=' . $response->session_token);
+
+            $body = "Merhaba {$name} 👋\n\n"
+                . "{$brand} UniMatch'ı kullandığın için teşekkürler. Bilgilerini kaydettik — sonuçlarını sana en kısa sürede ileteceğiz.\n\n"
+                . "📌 Yarıda kaldıysan kaldığın yerden devam et:\n{$url}\n\n"
+                . "Soruların için bu numaradan yazabilirsin. İyi başvurular!";
+
+            $sent = app(\App\Services\WhatsAppService::class)->sendText($response->lead_phone, $body);
+
+            $this->captureFunnelEvent('unimatch_whatsapp_greeting_sent', $response, [
+                'success' => $sent,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::warning('UniMatch.whatsapp_greeting_failed', [
+                'session' => $response->session_token,
+                'error'   => $e->getMessage(),
+            ]);
+        }
     }
 
     /** Skip — lead'i atla, devam et. */
@@ -376,6 +452,9 @@ class WizardController extends Controller
             'time_to_convert' => $response->started_at && $response->converted_at
                 ? $response->started_at->diffInSeconds($response->converted_at) : null,
         ]);
+
+        // Manager/dealer'a WhatsApp bildirimi — yeni lead convert oldu
+        $this->notifyTeamOfNewLead($response, $guest, $a);
 
         return redirect('/apply')->with('success', 'Wizard cevapların form\'a aktarıldı — sadece kalan bilgileri tamamla.');
     }

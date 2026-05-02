@@ -74,6 +74,9 @@ return [
         'token'           => env('WHATSAPP_ACCESS_TOKEN'),
         'verify_token'    => env('WHATSAPP_VERIFY_TOKEN', 'mentorde_verify'),
         'api_version'     => env('WHATSAPP_API_VERSION', 'v19.0'),
+        // UniMatch yeni lead bildirimi — manager/dealer numarası
+        // Format: +905551234567 (uluslararası formatta, başında +)
+        'unimatch_lead_notify_phone' => env('UNIMATCH_LEAD_NOTIFY_PHONE'),
     ],
 
     'stripe' => [
