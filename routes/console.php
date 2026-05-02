@@ -255,6 +255,12 @@ Schedule::command('unimatch:send-resume-reminder')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/unimatch-resume-reminder.log'));
 
+// UniMatch manager günlük özet — manager + marketing admin'e dünün lead/funnel raporu
+Schedule::command('unimatch:send-manager-digest')
+    ->dailyAt('08:00')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/unimatch-manager-digest.log'));
+
 // ─── Company Bulletins ────────────────────────────────────────────────────────
 
 Schedule::command('bulletin:send-birthday-wishes')

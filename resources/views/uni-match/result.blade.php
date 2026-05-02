@@ -95,6 +95,41 @@
         </div>
     @endforeach
 
+    {{-- Sosyal paylaşım --}}
+    @php
+        $shareText = "🎯 MentorDE UniMatch sihirbazı bana özel " . count($recommendations) . " Almanya programı seçti! Sen de dene:";
+        $shareUrl = url('/uni-match');
+    @endphp
+    <div style="margin: 20px 0; padding: 14px 18px; background: #f9f6fc; border-radius: 10px; border-left: 4px solid #7e58bf;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+            <div style="flex:1;min-width:200px;">
+                <div style="font-size: 14px; font-weight: 700; color: #6b5894;">📢 Bunu paylaş</div>
+                <div style="font-size: 12px; color: #8a7baf; margin-top: 2px;">Almanya'ya gitmek isteyen arkadaşların da denemeli</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <a href="https://wa.me/?text={{ urlencode($shareText . ' ' . $shareUrl) }}"
+                   target="_blank" rel="noopener"
+                   style="background:#25d366;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:12.5px;font-weight:600;">
+                    💬 WhatsApp
+                </a>
+                <a href="https://twitter.com/intent/tweet?text={{ urlencode($shareText) }}&url={{ urlencode($shareUrl) }}"
+                   target="_blank" rel="noopener"
+                   style="background:#000;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:12.5px;font-weight:600;">
+                    𝕏 Twitter
+                </a>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode($shareUrl) }}"
+                   target="_blank" rel="noopener"
+                   style="background:#0a66c2;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:12.5px;font-weight:600;">
+                    💼 LinkedIn
+                </a>
+                <a href="mailto:?subject={{ urlencode('UniMatch — Almanya programı bul') }}&body={{ urlencode($shareText . ' ' . $shareUrl) }}"
+                   style="background:#7e58bf;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:12.5px;font-weight:600;">
+                    ✉️ E-posta
+                </a>
+            </div>
+        </div>
+    </div>
+
     {{-- PDF indirme bandı --}}
     <div style="margin: 20px 0; padding: 14px 18px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 10px; border-left: 4px solid #d97706; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
         <div style="font-size: 26px;">📄</div>
