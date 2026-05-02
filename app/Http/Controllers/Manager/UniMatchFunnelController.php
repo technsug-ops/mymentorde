@@ -94,4 +94,67 @@ class UniMatchFunnelController extends Controller
             'utmBreakdown'    => $utmBreakdown,
         ]);
     }
+
+    /**
+     * Tüm lead'leri CSV olarak export et — marketing ekibi için.
+     * Sadece lead_email/phone bırakanlar (KVKK opt-in olmasa bile manager görebilir).
+     */
+    public function exportLeadsCsv(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $days = (int) $request->query('days', 30);
+        $since = now()->subDays($days);
+
+        $leads = UniMatchResponse::query()
+            ->whereNotNull('lead_captured_at')
+            ->where('started_at', '>=', $since)
+            ->orderByDesc('lead_captured_at')
+            ->get();
+
+        $filename = 'unimatch-leads-' . now()->format('Y-m-d') . '.csv';
+
+        return response()->streamDownload(function () use ($leads) {
+            $out = fopen('php://output', 'w');
+            // BOM for Excel UTF-8 compatibility
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, [
+                'Tarih', 'İsim', 'Email', 'Telefon', 'Marketing Onay',
+                'Adım', 'Durum', 'Convert?', 'Süre (dk)',
+                'Hedef Derece', 'Alan', 'Dil', 'Şehirler',
+                'Bütçe', 'APS Sertifikası',
+                'UTM Source', 'UTM Campaign', 'Referrer',
+            ], ';');
+
+            foreach ($leads as $r) {
+                $a = is_array($r->answers) ? $r->answers : [];
+                $cities = is_array($a['preferred_cities'] ?? null) ? implode(', ', $a['preferred_cities']) : ($a['preferred_cities'] ?? '');
+                $duration = $r->started_at && $r->last_active_at
+                    ? round($r->started_at->diffInMinutes($r->last_active_at), 1)
+                    : '';
+
+                fputcsv($out, [
+                    $r->lead_captured_at?->format('Y-m-d H:i') ?? '',
+                    $r->lead_first_name ?? '',
+                    $r->lead_email ?? '',
+                    $r->lead_phone ?? '',
+                    $r->lead_consent_marketing ? 'Evet' : 'Hayır',
+                    $r->current_step . '/19',
+                    $r->completed_at ? 'Tamamlandı' : 'Yarım',
+                    $r->converted_at ? 'Evet' : 'Hayır',
+                    $duration,
+                    $a['target_degree'] ?? '',
+                    $a['target_field'] ?? '',
+                    $a['study_language'] ?? '',
+                    $cities,
+                    $a['monthly_budget'] ?? '',
+                    $a['has_aps'] ?? '',
+                    $r->source ?? '',
+                    $r->utm_campaign ?? '',
+                    substr((string) $r->referrer, 0, 100),
+                ], ';');
+            }
+            fclose($out);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
 }

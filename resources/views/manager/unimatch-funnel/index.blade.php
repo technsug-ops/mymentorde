@@ -148,7 +148,13 @@
 {{-- ── Son leadler ── --}}
 @if(count($recentLeads) > 0)
 <div class="panel">
-    <h2 style="font-size:15px;font-weight:700;color:#0f172a;margin:0 0 16px;">📬 Son 10 Lead</h2>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <h2 style="font-size:15px;font-weight:700;color:#0f172a;margin:0;">📬 Son 10 Lead</h2>
+        <a href="{{ route('manager.unimatch-funnel.leads-csv', ['days' => $days]) }}"
+           style="background:#16a34a;color:#fff;padding:8px 16px;border-radius:8px;text-decoration:none;font-size:12.5px;font-weight:600;">
+            📥 Tüm Lead'leri CSV İndir
+        </a>
+    </div>
     <div style="overflow-x:auto;">
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
         <thead>

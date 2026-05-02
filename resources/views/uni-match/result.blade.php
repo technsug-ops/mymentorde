@@ -1,5 +1,8 @@
 @extends('uni-match.layout')
 
+@section('og_title', 'UniMatch ile sana özel ' . count($recommendations) . ' Almanya programı seçtim')
+@section('og_description', 'MentorDE UniMatch sihirbazı, 13.000+ program arasından profil ve hedeflerime en uygun olanları sıraladı. Sen de dene → /uni-match')
+
 @section('title', 'Sana özel program önerileri — UniMatch')
 
 @section('content')

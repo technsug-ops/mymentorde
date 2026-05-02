@@ -431,7 +431,8 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
     // ── UniMatch Wizard Funnel Analytics ──
     {
         $umf = \App\Http\Controllers\Manager\UniMatchFunnelController::class;
-        Route::get('/manager/unimatch-funnel',  [$umf, 'index'])->name('manager.unimatch-funnel.index');
+        Route::get('/manager/unimatch-funnel',          [$umf, 'index'])->name('manager.unimatch-funnel.index');
+        Route::get('/manager/unimatch-funnel/leads.csv', [$umf, 'exportLeadsCsv'])->name('manager.unimatch-funnel.leads-csv');
     }
 
     // ── Application Guides — student altında (Uni-Assist + Vize) ──────────────

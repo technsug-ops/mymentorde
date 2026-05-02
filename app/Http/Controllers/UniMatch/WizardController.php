@@ -243,6 +243,13 @@ class WizardController extends Controller
             $this->sendWhatsappGreeting($response);
         }
 
+        // PDF indirmek isterken yönlendirildi → şimdi PDF'i ver
+        if ($response->getAnswer('_pdf_requested') && $response->isCompleted()) {
+            $response->setAnswer('_pdf_requested', false); // Reset
+            $response->save();
+            return redirect()->route('uni-match.result.pdf');
+        }
+
         return redirect()->route('uni-match.step', ['n' => 13])
             ->with('success', 'Bilgilerin kaydedildi — sonuçları sana ileteceğiz.');
     }
@@ -395,13 +402,25 @@ class WizardController extends Controller
 
     /**
      * Sonuç sayfasını PDF olarak indir — lead magnet.
-     * Email yoksa landing'e dön; varsa direkt PDF stream.
+     * Email yoksa lead capture'a yönlendir, oradan dönünce PDF.
      */
     public function resultPdf(Request $request)
     {
         $response = $this->resolveSession($request);
         if (! $response || ! $response->isCompleted()) {
             return redirect()->route('uni-match.start');
+        }
+
+        // Lead magnet gate: email yoksa lead capture sayfasına yönlendir
+        // (PDF indirme için iletişim bilgisi şart — yumuşak gate)
+        if (empty($response->lead_email) && empty($response->lead_phone)) {
+            $response->setAnswer('_pdf_requested', true);
+            $response->save();
+
+            $this->captureFunnelEvent('unimatch_pdf_gated', $response);
+
+            return redirect()->route('uni-match.lead-capture.form')
+                ->with('info', '📄 PDF indirebilmek için iletişim bilginizi bırakın — sonuçlarınız kaydedilecek.');
         }
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('uni-match.result-pdf', [
