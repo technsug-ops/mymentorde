@@ -476,6 +476,21 @@
         <form method="POST" action="{{ route('apply.store') }}" data-apply-form="1">
             @csrf
 
+            @if(! empty($interestedProgram['id']))
+                {{-- Program detay sayfasından geliyorsa: bilgi banner + meta hidden --}}
+                <input type="hidden" name="interested_program_id" value="{{ $interestedProgram['id'] }}">
+                <input type="hidden" name="interested_program" value="{{ $interestedProgram['name'] ?? '' }}">
+                <div style="margin-bottom: 18px; padding: 14px 18px; background: linear-gradient(135deg, rgba(126, 88, 191, 0.08), rgba(167, 126, 217, 0.04)); border-radius: 10px; border-left: 4px solid #7e58bf; display: flex; align-items: flex-start; gap: 12px;">
+                    <div style="font-size: 22px; line-height: 1.2;">📍</div>
+                    <div style="flex: 1; font-size: 13.5px; color: #1a1a1a; line-height: 1.5;">
+                        <strong style="color: #6c47a8;">{{ $interestedProgram['name'] ?: '#' . $interestedProgram['id'] }}</strong> programı için danışmana sor.
+                        <div style="font-size: 12px; color: #6b5894; margin-top: 2px;">
+                            Bilgilerini doldur — danışmanın bu program için seninle yol haritası oluştursun.
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             {{-- Ad / Soyad --}}
             <div class="section-label">Kişisel Bilgiler</div>
             <div class="grid2" style="margin-bottom:10px;">

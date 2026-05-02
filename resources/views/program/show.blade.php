@@ -287,15 +287,21 @@
 </div>
 @endif
 
-{{-- CTA: MentorDE'ye yönlendir --}}
+{{-- CTA: MentorDE'ye yönlendir — bu spesifik program için danışmana yönlendirme --}}
 <div class="sb-card" style="text-align: center; background: linear-gradient(135deg, rgba(126, 88, 191, 0.06), rgba(167, 126, 217, 0.03));">
     <div style="font-size: 36px; margin-bottom: 8px;">🎯</div>
     <h2 class="sb-title" style="font-size: 22px;">Bu programa başvurmaya hazır mısın?</h2>
-    <p class="sb-subtitle" style="font-size: 14px;">Danışmanın bu programı senin profilinle birlikte değerlendirip yol haritası hazırlasın.</p>
-    <a href="/uni-match/start" class="sb-btn sb-btn-primary" style="padding: 14px 32px; font-size: 15px; font-weight: 700;">
-        Sihirbazla Başla
+    <p class="sb-subtitle" style="font-size: 14px;">
+        Danışmanın bu programı senin profilinle birlikte değerlendirip yol haritası hazırlasın.
+    </p>
+    <a href="{{ route('apply.create') }}?interested_program_id={{ $program->id }}&interested_program={{ urlencode($program->course_name ?? '') }}"
+       class="sb-btn sb-btn-primary" style="padding: 14px 32px; font-size: 15px; font-weight: 700;">
+        Danışmana Sor
         <span style="font-size: 18px;">→</span>
     </a>
+    <div style="margin-top: 12px; font-size: 12px; color: #8a7baf;">
+        Profilini hızlıca tanı, kalan süreci birlikte planlayalım — ücretsiz ilk görüşme.
+    </div>
 </div>
 
 @push('scripts')

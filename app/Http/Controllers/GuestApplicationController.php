@@ -30,9 +30,25 @@ class GuestApplicationController extends Controller
     {
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        return $this->renderApplyForm();
+        // Program detay sayfasından geliyor olabilir — interested_program_id ile
+        // hangi programa ilgi gösterdiğini takip et, application_meta'ya yazılacak
+        $interestedProgramId = (int) $request->query('interested_program_id', 0) ?: null;
+        $interestedProgramName = $request->query('interested_program') ?: null;
+        if ($interestedProgramName !== null) {
+            $interestedProgramName = mb_substr((string) $interestedProgramName, 0, 200);
+        }
+
+        $extra = [];
+        if ($interestedProgramId) {
+            $extra['interestedProgram'] = [
+                'id'   => $interestedProgramId,
+                'name' => $interestedProgramName,
+            ];
+        }
+
+        return $this->renderApplyForm($extra);
     }
 
     public function createForPartner(string $code)
@@ -81,6 +97,7 @@ class GuestApplicationController extends Controller
             'kvkkText' => $this->getApplyKvkkText(),
             'partner' => null,
             'prefill' => [],
+            'interestedProgram' => null,
         ], $extra));
     }
 
@@ -129,6 +146,8 @@ class GuestApplicationController extends Controller
             'notes' => ['nullable', 'string', 'max:3000'],
             'kvkk_consent' => ['required', 'accepted'],
             'docs_ready' => ['nullable', 'boolean'],
+            'interested_program_id' => ['nullable', 'integer'],
+            'interested_program' => ['nullable', 'string', 'max:200'],
         ]);
 
         // Aynı e-postayla aktif başvuru varsa yeni kayıt oluşturma
@@ -208,6 +227,18 @@ class GuestApplicationController extends Controller
                 ? 'Basvuru alindi. Danisman atandi: '.$assignedSeniorEmail
                 : 'Basvuru alindi. Danisman atamasi bekleniyor.',
             ]);
+
+            // Program detay sayfasından geliyorsa: hangi programa ilgi gösterdiğini meta'ya yaz
+            if (! empty($data['interested_program_id'])) {
+                $meta = is_array($row->application_meta) ? $row->application_meta : [];
+                $meta['interested_program'] = [
+                    'id'   => (int) $data['interested_program_id'],
+                    'name' => isset($data['interested_program']) ? (string) $data['interested_program'] : null,
+                    'source' => 'program_detail_cta',
+                ];
+                $row->application_meta = $meta;
+                $row->save();
+            }
 
             return [$guestUser, $generatedPassword, $row];
         });
