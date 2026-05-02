@@ -509,6 +509,10 @@
                    class="nav-link">
                     <span class="nav-icon">🎯</span> UniMatch
                 </a>
+                <a href="{{ route('manager.unimatch-funnel.index') }}"
+                   class="nav-link {{ request()->is('manager/unimatch-funnel*') ? 'active' : '' }}">
+                    <span class="nav-icon">📊</span> UniMatch Funnel
+                </a>
                 <a href="/manager/system/security"
                    class="nav-link {{ request()->is('manager/system/security*') ? 'active' : '' }}">
                     <span class="nav-icon">🛡</span> Güvenlik Paneli

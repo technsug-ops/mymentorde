@@ -241,6 +241,13 @@ Schedule::command('guest:inactivity-reminder --days=7')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/guest-inactivity-reminder.log'));
 
+// UniMatch lead drip — wizard'da lead bırakıp convert etmemiş kullanıcılara
+// 3, 7 ve 14 günlük 3 kademeli mail kampanyası
+Schedule::command('unimatch:send-lead-drip')
+    ->dailyAt('09:30')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/unimatch-lead-drip.log'));
+
 // ─── Company Bulletins ────────────────────────────────────────────────────────
 
 Schedule::command('bulletin:send-birthday-wishes')

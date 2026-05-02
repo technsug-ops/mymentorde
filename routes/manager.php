@@ -428,6 +428,12 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::post('/manager/program-catalog/changes/{log}/review',    [$pcc, 'review'])->middleware('throttle:60,1')->name('manager.program-catalog.changes.review');
     }
 
+    // ── UniMatch Wizard Funnel Analytics ──
+    {
+        $umf = \App\Http\Controllers\Manager\UniMatchFunnelController::class;
+        Route::get('/manager/unimatch-funnel',  [$umf, 'index'])->name('manager.unimatch-funnel.index');
+    }
+
     // ── Application Guides — student altında (Uni-Assist + Vize) ──────────────
     // Uni-Assist sözleşme+ödeme sonrası (öğrenci aşamasında) yapılır.
     // Guest URL legacy backward-compat için tutuldu.
