@@ -201,16 +201,27 @@
     </div>
 
     {{-- PDF indirme bandı --}}
-    <div style="margin: 20px 0; padding: 14px 18px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 10px; border-left: 4px solid #d97706; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-        <div style="font-size: 26px;">📄</div>
-        <div style="flex: 1; min-width: 200px;">
-            <div style="font-size: 14px; font-weight: 700; color: #78350f;">Sonuçlarımı PDF olarak indir</div>
-            <div style="font-size: 12px; color: #92400e; margin-top: 2px;">Tüm 10 program + profilin + neden uyduğu — paylaşıma hazır PDF</div>
+    @php $favCount = count((array) ($response->favorite_program_ids ?? [])); @endphp
+    <div style="margin: 20px 0; padding: 14px 18px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 10px; border-left: 4px solid #d97706;">
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <div style="font-size: 26px;">📄</div>
+            <div style="flex: 1; min-width: 200px;">
+                <div style="font-size: 14px; font-weight: 700; color: #78350f;">Sonuçlarımı PDF olarak indir</div>
+                <div style="font-size: 12px; color: #92400e; margin-top: 2px;">Tüm {{ count($recommendations) }} program + profilin — paylaşıma hazır</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <a href="{{ route('uni-match.result.pdf') }}"
+                   style="background: #92400e; color: #fff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 13px;">
+                    Tümünü İndir →
+                </a>
+                @if($favCount > 0)
+                <a href="{{ route('uni-match.result.pdf') }}?favorites=1"
+                   style="background: #f59e0b; color: #fff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 13px;">
+                    ⭐ {{ $favCount }} Favorimi İndir
+                </a>
+                @endif
+            </div>
         </div>
-        <a href="{{ route('uni-match.result.pdf') }}"
-           style="background: #92400e; color: #fff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 13px;">
-            PDF İndir →
-        </a>
     </div>
 
     <div class="sb-card" style="margin-top: 24px; text-align: center; background: linear-gradient(135deg, rgba(126, 88, 191, 0.06), rgba(167, 126, 217, 0.03));">

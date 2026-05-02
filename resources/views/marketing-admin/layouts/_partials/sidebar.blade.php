@@ -132,6 +132,9 @@
                 <a class="{{ request()->is('mktg-admin/tracking-links*') ? 'active' : '' }}" href="/mktg-admin/tracking-links">Tracking Linkler</a>
                 @endif
                 <a href="{{ route('uni-match.landing') }}" target="_blank" rel="noopener">🎯 UniMatch (Public Wizard)</a>
+                @can('manager.access')
+                <a href="{{ route('manager.unimatch-funnel.index') }}" class="{{ request()->is('manager/unimatch-funnel*') ? 'active' : '' }}">📊 UniMatch Funnel + CSV</a>
+                @endcan
                 @if($canSeeEvents)
                 <a class="{{ request()->is('mktg-admin/events*') ? 'active' : '' }}" href="/mktg-admin/events">Etkinlikler</a>
                 @endif

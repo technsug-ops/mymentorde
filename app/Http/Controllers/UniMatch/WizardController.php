@@ -203,7 +203,7 @@ class WizardController extends Controller
 
         return view('uni-match.lead-capture', [
             'response' => $response,
-            'progress' => 63, // 12/19
+            'progress' => (int) round(($response->current_step / 19) * 100),
         ]);
     }
 
@@ -478,19 +478,35 @@ class WizardController extends Controller
                 ->with('info', '📄 PDF indirebilmek için iletişim bilginizi bırakın — sonuçlarınız kaydedilecek.');
         }
 
+        // Favori-only mode: ?favorites=1 ile sadece yıldızlanan programları göster
+        $favoritesOnly = (bool) $request->query('favorites');
+        $recommendations = $response->recommendations ?? [];
+        if ($favoritesOnly) {
+            $favIds = (array) ($response->favorite_program_ids ?? []);
+            if (! empty($favIds)) {
+                $recommendations = array_values(array_filter(
+                    $recommendations,
+                    fn ($r) => in_array($r['program_id'] ?? null, $favIds, true)
+                ));
+            }
+        }
+
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('uni-match.result-pdf', [
             'response'        => $response,
-            'recommendations' => $response->recommendations ?? [],
+            'recommendations' => $recommendations,
             'firstName'       => $response->lead_first_name ?: 'Aday Öğrenci',
             'generatedAt'     => now(),
             'brand'           => config('brand.name', 'MentorDE'),
+            'favoritesOnly'   => $favoritesOnly,
         ])->setPaper('a4', 'portrait');
 
         $this->captureFunnelEvent('unimatch_pdf_downloaded', $response, [
-            'recommendations_count' => count($response->recommendations ?? []),
+            'recommendations_count' => count($recommendations),
+            'favorites_only'        => $favoritesOnly,
         ]);
 
-        $filename = 'UniMatch-Sonuclarim-' . now()->format('Y-m-d') . '.pdf';
+        $suffix = $favoritesOnly ? '-Favorilerim' : '';
+        $filename = 'UniMatch-Sonuclarim' . $suffix . '-' . now()->format('Y-m-d') . '.pdf';
         return $pdf->download($filename);
     }
 

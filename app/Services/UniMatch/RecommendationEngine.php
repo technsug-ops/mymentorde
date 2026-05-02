@@ -145,9 +145,16 @@ class RecommendationEngine
                 $score += 3;
             }
 
-            // 9) Quality penalty (eksik veriler)
-            if (($p->quality_score ?? 50) < 40) $score -= 5;
-            elseif (($p->quality_score ?? 50) >= 80) $score += 3;
+            // 9) Quality penalty/bonus (eksik veriler / detaylı veriler)
+            $quality = $p->quality_score ?? 50;
+            if ($quality < 40) $score -= 5;
+            elseif ($quality >= 80) $score += 3;
+
+            // 9b) Description doluysa küçük bonus (kullanıcının değerlendirmesi kolay)
+            if (! empty($p->description) && mb_strlen($p->description) > 200) $score += 2;
+
+            // 9c) TR çevirisi varsa +1 (TR aday için daha rahat okuma)
+            if (! empty($p->description_tr)) $score += 1;
 
             // Cap 0-100
             $score = max(0, min(100, $score));
