@@ -422,6 +422,13 @@ class WizardController extends Controller
             return redirect()->route('uni-match.result.pdf');
         }
 
+        // Convert tıklamasından lead-capture'a yönlenmiş → şimdi convert'i tamamla
+        if ($response->getAnswer('_convert_after_lead') && $response->isCompleted()) {
+            $response->setAnswer('_convert_after_lead', false);
+            $response->save();
+            return $this->performConvert($response);
+        }
+
         // Wizard tamamlanmışsa result sayfasına dön (mid-funnel değil, post-result PDF/email isteği)
         if ($response->isCompleted()) {
             return redirect()->route('uni-match.result')
@@ -728,10 +735,27 @@ class WizardController extends Controller
         }
 
         if ($response->converted_to_guest_id) {
-            // Daha önce dönüşmüş — public başvuru formuna yönlendir
             return redirect('/apply')->with('info', 'Daha önce kayıt başlatmıştın, kaldığın yerden devam ediyorsun.');
         }
 
+        // İletişim bilgisi yoksa lead-capture'a yönlendir — guest_applications.first_name
+        // NOT NULL olduğu için en az bir bilgi şart. Submit'te flag tekrar convert'e döner.
+        if (empty($response->lead_email) && empty($response->lead_phone)) {
+            $response->setAnswer('_convert_after_lead', true);
+            $response->save();
+            return redirect()->route('uni-match.lead-capture.form')
+                ->with('info', 'Kayıt için iletişim bilgini bırak — danışmanın seninle hızlıca iletişime geçer.');
+        }
+
+        return $this->performConvert($response);
+    }
+
+    /**
+     * Convert mantığının core'u — hem POST /convert handler'ı hem leadCaptureSubmit
+     * (_convert_after_lead flag'i set ise) tarafından çağrılır.
+     */
+    private function performConvert(UniMatchResponse $response): RedirectResponse
+    {
         $a = is_array($response->answers) ? $response->answers : [];
         $cities = is_array($a['preferred_cities'] ?? null) ? $a['preferred_cities'] : [];
 
@@ -739,19 +763,21 @@ class WizardController extends Controller
         $draft = [
             'application_country' => 'de',
             'application_type'    => $this->mapDegreeToApplicationType($a['target_degree'] ?? null),
-            'application_city'    => $cities[0] ?? null, // İlk tercih şehir
+            'application_city'    => $cities[0] ?? null,
             'german_level'        => $a['german_level'] ?? null,
             'english_level'       => $a['english_level'] ?? null,
             'finance_method'      => $a['finance_method'] ?? null,
             'high_school_type'    => $a['high_school_type'] ?? null,
             'high_school_grade'   => $this->mapGpaRangeToGrade($a['gpa_range'] ?? null),
             'higher_education_status' => $this->mapEducationLevelToStatus($a['current_education_level'] ?? null),
-            // Wizard'a özel: meta wizard.* alanlarına saklanabilir (ileride)
         ];
         $draft = array_filter($draft, fn ($v) => $v !== null && $v !== '');
 
-        // Cevapların TAMAMI'nı meta'ya yedekle — manager tüm wizard cevaplarına ulaşabilsin
         $meta = ['wizard' => $a];
+
+        // first_name/last_name DB'de NOT NULL — lead bilgisinden üret veya placeholder
+        $firstName = $response->lead_first_name ?: 'Aday';
+        $lastName  = ''; // empty string NOT NULL constraint'i geçer
 
         $guest = GuestApplication::query()->create([
             'company_id'              => $response->company_id,
@@ -760,9 +786,10 @@ class WizardController extends Controller
             'application_type'        => $this->mapDegreeToApplicationType($a['target_degree'] ?? null),
             'registration_form_draft' => $draft,
             'application_meta'        => $meta,
-            'first_name'              => null,
-            'last_name'               => null,
-            'email'                   => null,
+            'first_name'              => $firstName,
+            'last_name'               => $lastName,
+            'email'                   => $response->lead_email,
+            'phone'                   => $response->lead_phone,
         ]);
 
         $response->converted_to_guest_id = $guest->id;

@@ -21,109 +21,46 @@
     $remainingMin = $remainingSec >= 60 ? ceil($remainingSec / 60) : null;
     $remainingLabel = $remainingMin ? "~{$remainingMin} dk kaldı" : ($remainingSteps > 0 ? '<1 dk kaldı' : 'Sonuç sayfasına geçiyorsun!');
 
-    // Step bağlamına göre sağ panel görseli — her adım için Unsplash gerçek fotoğraf URL'i
-    // (DEV: hot-link, production'da self-host önerilir)
+    // Step bağlamına göre sağ panel görseli — Unsplash CDN (smoke test ile valid edilmiş ID'ler).
+    // 8 tema fotoğrafı 19 adıma map edilir (academic / language / germany / planning / docs /
+    // mentoring / general). Production'da self-host (DSGVO + perf) önerilir.
     $stepKey = $stepDef['key'] ?? '';
+    $img = fn ($id) => 'https://images.unsplash.com/' . $id . '?auto=format&fit=crop&w=1200&q=80';
+    // Validated photo IDs (8 unique)
+    $imgPool = [
+        'academic'   => 'photo-1523240795612-9a054b0db644', // graduation/study
+        'students'   => 'photo-1497633762265-9d179a990aa6', // students collaborating
+        'language'   => 'photo-1571260899304-425eee4c7efc', // books / library
+        'germany'    => 'photo-1588072432836-e10032774350', // city / landmark
+        'planning'   => 'photo-1541339907198-e08756dedf3f', // calendar / notebook
+        'docs'       => 'photo-1543076447-215ad9ba6923',    // documents / paper
+        'mentoring'  => 'photo-1517048676732-d65bc937f952', // people / collaboration
+        'general'    => 'photo-1519389950473-47ba0277781c', // mixed (laptops / tech)
+    ];
     $rightPanelMap = [
-        'target_degree' => [
-            'tag' => 'Akademik hedefin',
-            // graduation ceremony
-            'image' => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'target_field' => [
-            'tag' => 'İlgi alanın',
-            // students collaborating with laptop
-            'image' => 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'study_language' => [
-            'tag' => 'Eğitim dili',
-            // library/books
-            'image' => 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'germany_motivation' => [
-            'tag' => 'Motivasyon',
-            // Berlin Brandenburger Tor
-            'image' => 'https://images.unsplash.com/photo-1587330979470-3016b6702d89?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'start_term' => [
-            'tag' => 'Başlangıç dönemi',
-            // calendar planner
-            'image' => 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'current_education_level' => [
-            'tag' => 'Mevcut eğitim',
-            // lecture hall
-            'image' => 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'high_school_type' => [
-            'tag' => 'Lise türü',
-            // school building / classroom
-            'image' => 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'gpa_range' => [
-            'tag' => 'Akademik başarı',
-            // student writing notes
-            'image' => 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'german_level' => [
-            'tag' => 'Almanca seviyesi',
-            // German flag / Reichstag
-            'image' => 'https://images.unsplash.com/photo-1599982327237-2ce40b6e6c3a?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'english_level' => [
-            'tag' => 'İngilizce seviyesi',
-            // open books English
-            'image' => 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'language_certificate' => [
-            'tag' => 'Dil sertifikası',
-            // certificate / diploma
-            'image' => 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'finance_method' => [
-            'tag' => 'Finansman',
-            // euro / money planning
-            'image' => 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'monthly_budget' => [
-            'tag' => 'Aylık bütçe',
-            // calculator + money
-            'image' => 'https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'tuition_tolerance' => [
-            'tag' => 'Öğrenim ücreti',
-            // university building
-            'image' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'living_priority' => [
-            'tag' => 'Yaşam tarzı',
-            // cozy German town
-            'image' => 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'preferred_cities' => [
-            'tag' => 'Tercih şehirler',
-            // German city aerial
-            'image' => 'https://images.unsplash.com/photo-1560969184-10fe8719e047?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'has_aps' => [
-            'tag' => 'APS durumu',
-            // documents/paperwork
-            'image' => 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'visa_readiness' => [
-            'tag' => 'Vize hazırlığı',
-            // passport
-            'image' => 'https://images.unsplash.com/photo-1569949381669-ecf31ae8e613?auto=format&fit=crop&w=1200&q=80',
-        ],
-        'mentorde_help_areas' => [
-            'tag' => 'Destek alanları',
-            // mentoring/handshake
-            'image' => 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
-        ],
+        'target_degree'           => ['tag' => 'Akademik hedefin',     'image' => $img($imgPool['academic'])],
+        'target_field'            => ['tag' => 'İlgi alanın',          'image' => $img($imgPool['students'])],
+        'study_language'          => ['tag' => 'Eğitim dili',          'image' => $img($imgPool['language'])],
+        'germany_motivation'      => ['tag' => 'Motivasyon',           'image' => $img($imgPool['germany'])],
+        'start_term'              => ['tag' => 'Başlangıç dönemi',     'image' => $img($imgPool['planning'])],
+        'current_education_level' => ['tag' => 'Mevcut eğitim',        'image' => $img($imgPool['academic'])],
+        'high_school_type'        => ['tag' => 'Lise türü',            'image' => $img($imgPool['students'])],
+        'gpa_range'               => ['tag' => 'Akademik başarı',      'image' => $img($imgPool['general'])],
+        'german_level'            => ['tag' => 'Almanca seviyesi',     'image' => $img($imgPool['language'])],
+        'english_level'           => ['tag' => 'İngilizce seviyesi',   'image' => $img($imgPool['language'])],
+        'language_certificate'    => ['tag' => 'Dil sertifikası',      'image' => $img($imgPool['docs'])],
+        'finance_method'          => ['tag' => 'Finansman',            'image' => $img($imgPool['docs'])],
+        'monthly_budget'          => ['tag' => 'Aylık bütçe',          'image' => $img($imgPool['planning'])],
+        'tuition_tolerance'       => ['tag' => 'Öğrenim ücreti',       'image' => $img($imgPool['academic'])],
+        'living_priority'         => ['tag' => 'Yaşam tarzı',          'image' => $img($imgPool['general'])],
+        'preferred_cities'        => ['tag' => 'Tercih şehirler',      'image' => $img($imgPool['germany'])],
+        'has_aps'                 => ['tag' => 'APS durumu',           'image' => $img($imgPool['docs'])],
+        'visa_readiness'          => ['tag' => 'Vize hazırlığı',       'image' => $img($imgPool['docs'])],
+        'mentorde_help_areas'     => ['tag' => 'Destek alanları',      'image' => $img($imgPool['mentoring'])],
     ];
     $rightPanel = $rightPanelMap[$stepKey] ?? [
         'tag'   => 'UniMatch',
-        'image' => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
+        'image' => $img($imgPool['academic']),
     ];
 
     // Filter sayısı azalma hissi (öncekiyle karşılaştırma için)
