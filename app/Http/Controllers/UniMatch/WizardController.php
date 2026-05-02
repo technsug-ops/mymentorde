@@ -172,6 +172,32 @@ class WizardController extends Controller
                     ->values()
                     ->all();
             });
+
+            // popular listesini living_priority cevabına göre filtrele
+            // (örn. küçük/orta şehir tercih edenlere Berlin/München gösterilmesin)
+            $livingPriority = $response->getAnswer('living_priority');
+            if ($livingPriority && $livingPriority !== 'flexible' && ! empty($stepDef['popular'])) {
+                $tierMap = [
+                    'big_city'  => ['big'],            // sadece büyük şehirler
+                    'uni_town'  => ['uni'],            // sadece üniversite kasabaları
+                    'mid_city'  => ['mid', 'uni'],     // orta + uni kasabası (uni de orta sayılır)
+                ];
+                $allowedTiers = $tierMap[$livingPriority] ?? null;
+                if ($allowedTiers !== null) {
+                    $stepDef['popular'] = array_values(array_filter(
+                        $stepDef['popular'],
+                        fn ($c) => in_array(($c['tier'] ?? 'mid'), $allowedTiers, true)
+                    ));
+                    // Subtitle'a kullanıcıya hangi filtreleme yapıldığını söyleyen satır ekle
+                    $tierLabel = match ($livingPriority) {
+                        'big_city' => 'büyük şehirler',
+                        'uni_town' => 'üniversite kasabaları',
+                        'mid_city' => 'orta ölçekli şehirler ve uni kasabaları',
+                        default    => 'şehirler',
+                    };
+                    $stepDef['subtitle'] = 'Önceki cevabına göre ' . $tierLabel . ' listelendi. Yukarıdan başka şehir aratabilir veya filtreyi atlamak için boş bırakabilirsin.';
+                }
+            }
         }
 
         // Canlı filter count: bu adıma kadar verilen cevaplar kaç programa karşılık geliyor

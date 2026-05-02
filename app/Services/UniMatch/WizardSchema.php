@@ -258,52 +258,13 @@ class WizardSchema
             ],
 
             // ── BÖLÜM 6: ŞEHİR & YAŞAM ────────────────────────────
-            [
-                'key'         => 'preferred_cities',
-                'type'        => 'searchable_cities',
-                'title'       => 'Hangi şehirlerde okumak istersin?',
-                'subtitle'    => 'En fazla 5 şehir seçebilirsin. Aşağıdaki popüler şehirlere tıkla veya yukarıdan ara. Boş bırakırsan tüm Almanya görüntülenir.',
-                'max'         => 5,
-                'popular'     => [
-                    ['value' => 'Berlin',               'label' => 'Berlin',         'icon' => '🏙'],
-                    ['value' => 'Munich',               'label' => 'Münih',          'icon' => '🍻'],
-                    ['value' => 'Hamburg',              'label' => 'Hamburg',        'icon' => '⚓'],
-                    ['value' => 'Cologne',              'label' => 'Köln',           'icon' => '⛪'],
-                    ['value' => 'Frankfurt am Main',    'label' => 'Frankfurt',      'icon' => '🏦'],
-                    ['value' => 'Stuttgart',            'label' => 'Stuttgart',      'icon' => '🚗'],
-                    ['value' => 'Düsseldorf',           'label' => 'Düsseldorf',     'icon' => '🌆'],
-                    ['value' => 'Leipzig',              'label' => 'Leipzig',        'icon' => '🎼'],
-                    ['value' => 'Dresden',              'label' => 'Dresden',        'icon' => '🎨'],
-                    ['value' => 'Hanover',              'label' => 'Hannover',       'icon' => '🏘'],
-                    ['value' => 'Bremen',               'label' => 'Bremen',         'icon' => '🐦'],
-                    ['value' => 'Heidelberg',           'label' => 'Heidelberg',     'icon' => '🏰'],
-                    ['value' => 'Halle',                'label' => 'Halle (Saale)',  'icon' => '🎓'],
-                    ['value' => 'Mainz',                'label' => 'Mainz',          'icon' => '🍇'],
-                    ['value' => 'Freiburg im Breisgau', 'label' => 'Freiburg',       'icon' => '🌲'],
-                    ['value' => 'Bonn',                 'label' => 'Bonn',           'icon' => '🎼'],
-                    ['value' => 'Bochum',               'label' => 'Bochum',         'icon' => '⚙️'],
-                    ['value' => 'Karlsruhe',            'label' => 'Karlsruhe',      'icon' => '⚖️'],
-                    ['value' => 'Münster',              'label' => 'Münster',        'icon' => '🚲'],
-                    ['value' => 'Nuremberg',            'label' => 'Nürnberg',       'icon' => '🏯'],
-                    ['value' => 'Erlangen',             'label' => 'Erlangen',       'icon' => '🔬'],
-                    ['value' => 'Göttingen',            'label' => 'Göttingen',      'icon' => '📚'],
-                    ['value' => 'Würzburg',             'label' => 'Würzburg',       'icon' => '🏰'],
-                    ['value' => 'Marburg',              'label' => 'Marburg',        'icon' => '⛪'],
-                    ['value' => 'Jena',                 'label' => 'Jena',           'icon' => '🔭'],
-                    ['value' => 'Tübingen',             'label' => 'Tübingen',       'icon' => '🎓'],
-                    ['value' => 'Aachen',               'label' => 'Aachen',         'icon' => '⚙️'],
-                    ['value' => 'Darmstadt',            'label' => 'Darmstadt',      'icon' => '🚀'],
-                    ['value' => 'Kiel',                 'label' => 'Kiel',           'icon' => '⛵'],
-                    ['value' => 'Mannheim',             'label' => 'Mannheim',       'icon' => '🎼'],
-                ],
-                'validation'  => ['nullable', 'array', 'max:5'],
-            ],
-
+            // Önce yaşam tarzı sorulur, sonra preferred_cities listesi buna göre filtrelenir
+            // (örn. küçük şehir tercih edenlere Berlin/München önerilmez).
             [
                 'key'      => 'living_priority',
                 'type'     => 'cards',
                 'title'    => 'Yaşam tarzın için ideal şehir?',
-                'subtitle' => 'Şehir karakteri program önerilerini ince ayarlayalım.',
+                'subtitle' => 'Şehir karakteri program önerilerini ince ayarlayalım. Sonraki adımda şehir önerilerin buna göre filtrelenir.',
                 'options'  => [
                     ['value' => 'big_city',  'label' => 'Büyük şehir',          'icon' => '🌆', 'desc' => 'Berlin, Münih, Hamburg'],
                     ['value' => 'uni_town',  'label' => 'Üniversite kasabası',  'icon' => '🎓', 'desc' => 'Heidelberg, Tübingen'],
@@ -311,6 +272,56 @@ class WizardSchema
                     ['value' => 'flexible',  'label' => 'Esnek',                'icon' => '🌍', 'desc' => 'Önemsiz'],
                 ],
                 'validation' => ['required', 'in:big_city,uni_town,mid_city,flexible'],
+            ],
+
+            [
+                'key'         => 'preferred_cities',
+                'type'        => 'searchable_cities',
+                'title'       => 'Hangi şehirlerde okumak istersin?',
+                'subtitle'    => 'En fazla 5 şehir seçebilirsin. Aşağıdaki popüler şehirlere tıkla veya yukarıdan ara. Boş bırakırsan tüm Almanya görüntülenir.',
+                'max'         => 5,
+                // ÖNEMLİ: 'popular' array'i WizardController->step() içinde living_priority
+                // cevabına göre filtrelenip view'a geçirilir. Aşağıdaki taksonomi:
+                //   tier=big   → big_city
+                //   tier=mid   → mid_city + diğer büyük şehirler (alternatif)
+                //   tier=uni   → uni_town
+                //   tier=any   → genel (her zaman göster, küçük popüler şehir)
+                'popular'     => [
+                    // Büyük şehirler (big_city)
+                    ['value' => 'Berlin',               'label' => 'Berlin',         'icon' => '🏙', 'tier' => 'big'],
+                    ['value' => 'Munich',               'label' => 'Münih',          'icon' => '🍻', 'tier' => 'big'],
+                    ['value' => 'Hamburg',              'label' => 'Hamburg',        'icon' => '⚓', 'tier' => 'big'],
+                    ['value' => 'Cologne',              'label' => 'Köln',           'icon' => '⛪', 'tier' => 'big'],
+                    ['value' => 'Frankfurt am Main',    'label' => 'Frankfurt',      'icon' => '🏦', 'tier' => 'big'],
+                    ['value' => 'Stuttgart',            'label' => 'Stuttgart',      'icon' => '🚗', 'tier' => 'big'],
+                    ['value' => 'Düsseldorf',           'label' => 'Düsseldorf',     'icon' => '🌆', 'tier' => 'big'],
+                    // Orta ölçekli şehirler (mid_city)
+                    ['value' => 'Leipzig',              'label' => 'Leipzig',        'icon' => '🎼', 'tier' => 'mid'],
+                    ['value' => 'Dresden',              'label' => 'Dresden',        'icon' => '🎨', 'tier' => 'mid'],
+                    ['value' => 'Hanover',              'label' => 'Hannover',       'icon' => '🏘', 'tier' => 'mid'],
+                    ['value' => 'Bremen',               'label' => 'Bremen',         'icon' => '🐦', 'tier' => 'mid'],
+                    ['value' => 'Mainz',                'label' => 'Mainz',          'icon' => '🍇', 'tier' => 'mid'],
+                    ['value' => 'Bonn',                 'label' => 'Bonn',           'icon' => '🎼', 'tier' => 'mid'],
+                    ['value' => 'Bochum',               'label' => 'Bochum',         'icon' => '⚙️', 'tier' => 'mid'],
+                    ['value' => 'Münster',              'label' => 'Münster',        'icon' => '🚲', 'tier' => 'mid'],
+                    ['value' => 'Nuremberg',            'label' => 'Nürnberg',       'icon' => '🏯', 'tier' => 'mid'],
+                    ['value' => 'Mannheim',             'label' => 'Mannheim',       'icon' => '🎼', 'tier' => 'mid'],
+                    ['value' => 'Aachen',               'label' => 'Aachen',         'icon' => '⚙️', 'tier' => 'mid'],
+                    ['value' => 'Karlsruhe',            'label' => 'Karlsruhe',      'icon' => '⚖️', 'tier' => 'mid'],
+                    ['value' => 'Kiel',                 'label' => 'Kiel',           'icon' => '⛵', 'tier' => 'mid'],
+                    // Üniversite kasabaları (uni_town)
+                    ['value' => 'Heidelberg',           'label' => 'Heidelberg',     'icon' => '🏰', 'tier' => 'uni'],
+                    ['value' => 'Freiburg im Breisgau', 'label' => 'Freiburg',       'icon' => '🌲', 'tier' => 'uni'],
+                    ['value' => 'Erlangen',             'label' => 'Erlangen',       'icon' => '🔬', 'tier' => 'uni'],
+                    ['value' => 'Göttingen',            'label' => 'Göttingen',      'icon' => '📚', 'tier' => 'uni'],
+                    ['value' => 'Würzburg',             'label' => 'Würzburg',       'icon' => '🏰', 'tier' => 'uni'],
+                    ['value' => 'Marburg',              'label' => 'Marburg',        'icon' => '⛪', 'tier' => 'uni'],
+                    ['value' => 'Jena',                 'label' => 'Jena',           'icon' => '🔭', 'tier' => 'uni'],
+                    ['value' => 'Tübingen',             'label' => 'Tübingen',       'icon' => '🎓', 'tier' => 'uni'],
+                    ['value' => 'Darmstadt',            'label' => 'Darmstadt',      'icon' => '🚀', 'tier' => 'uni'],
+                    ['value' => 'Halle',                'label' => 'Halle (Saale)',  'icon' => '🎓', 'tier' => 'uni'],
+                ],
+                'validation'  => ['nullable', 'array', 'max:5'],
             ],
 
             // ── BÖLÜM 7: TR-SPESİFİK + MENTORDE ───────────────────
