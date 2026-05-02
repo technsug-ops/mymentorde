@@ -248,6 +248,13 @@ Schedule::command('unimatch:send-lead-drip')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/unimatch-lead-drip.log'));
 
+// UniMatch resume reminder — wizard yarıda kalan lead'lere geri dönüş maili
+// Save & Resume Later pattern (HubSpot/Typeform): %20-30 conversion artışı
+Schedule::command('unimatch:send-resume-reminder')
+    ->dailyAt('11:00')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/unimatch-resume-reminder.log'));
+
 // ─── Company Bulletins ────────────────────────────────────────────────────────
 
 Schedule::command('bulletin:send-birthday-wishes')

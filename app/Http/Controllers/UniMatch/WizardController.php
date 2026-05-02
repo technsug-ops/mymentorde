@@ -33,7 +33,27 @@ class WizardController extends Controller
 
     public function landing(Request $request): View
     {
-        return view('uni-match.landing');
+        // Cookie'de oturum varsa yarıda kalan wizard'a devam linki göster
+        $resumeData = null;
+        $token = (string) $request->cookie('uni_match_session', '');
+        if ($token !== '') {
+            $companyId = (int) ($request->attributes->get('company_id') ?? 1);
+            $existing = UniMatchResponse::query()
+                ->where('session_token', $token)
+                ->where('company_id', $companyId)
+                ->whereNull('completed_at')
+                ->where('current_step', '>', 1)
+                ->first();
+            if ($existing) {
+                $resumeData = [
+                    'step'         => $existing->current_step,
+                    'progress_pct' => (int) round(($existing->current_step / 19) * 100),
+                    'started_at'   => $existing->started_at?->diffForHumans(),
+                ];
+            }
+        }
+
+        return view('uni-match.landing', ['resume' => $resumeData]);
     }
 
     public function start(Request $request): RedirectResponse

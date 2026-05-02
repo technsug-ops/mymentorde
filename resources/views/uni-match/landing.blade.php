@@ -3,6 +3,20 @@
 @section('title', 'MentorDE UniMatch — Sana özel Almanya programı bul')
 
 @section('content')
+@if(! empty($resume))
+<div style="max-width:600px;margin:0 auto 24px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:12px;padding:18px 22px;border-left:4px solid #d97706;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <div style="font-size:28px;flex-shrink:0;">⏸️</div>
+    <div style="flex:1;min-width:180px;">
+        <div style="font-size:14.5px;font-weight:700;color:#78350f;margin-bottom:2px;">Wizard'da yarıda kalmıştın</div>
+        <div style="font-size:12.5px;color:#92400e;">{{ $resume['step'] }}/19 adım · %{{ $resume['progress_pct'] }} tamamlandı{{ $resume['started_at'] ? ' · ' . $resume['started_at'] : '' }}</div>
+    </div>
+    <a href="{{ route('uni-match.step', ['n' => $resume['step']]) }}"
+       style="background:#92400e;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;">
+        Devam et →
+    </a>
+</div>
+@endif
+
 <div class="sb-hero">
     <span class="sb-hero-badge">✨ AKILLI EŞLEŞTIRME</span>
     <h1 class="sb-hero-title">Almanya'da sana en uygun programı bul</h1>
