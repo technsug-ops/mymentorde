@@ -23,22 +23,24 @@ class UniMatchResponse extends Model
 
     protected $fillable = [
         'company_id', 'session_token',
-        'answers', 'current_step', 'total_steps',
+        'answers', 'step_timestamps', 'current_step', 'total_steps',
         'recommendations',
-        'started_at', 'completed_at', 'last_active_at',
+        'started_at', 'completed_at', 'last_active_at', 'result_viewed_at',
         'converted_to_guest_id', 'converted_at',
         'source', 'referrer', 'ip', 'user_agent',
     ];
 
     protected $casts = [
-        'answers'         => 'array',
-        'recommendations' => 'array',
-        'current_step'    => 'integer',
-        'total_steps'     => 'integer',
-        'started_at'      => 'datetime',
-        'completed_at'    => 'datetime',
-        'last_active_at'  => 'datetime',
-        'converted_at'    => 'datetime',
+        'answers'          => 'array',
+        'step_timestamps'  => 'array',
+        'recommendations'  => 'array',
+        'current_step'     => 'integer',
+        'total_steps'      => 'integer',
+        'started_at'       => 'datetime',
+        'completed_at'     => 'datetime',
+        'last_active_at'   => 'datetime',
+        'result_viewed_at' => 'datetime',
+        'converted_at'     => 'datetime',
     ];
 
     public function convertedGuest(): BelongsTo

@@ -134,12 +134,49 @@ class WizardController extends Controller
 
         $response->setAnswer($key, $value);
         $response->current_step = max($response->current_step, $n + 1);
+
+        // Step timestamp — drop-off analizi için
+        $stamps = is_array($response->step_timestamps) ? $response->step_timestamps : [];
+        $stamps['step_' . $n] = now()->toIso8601String();
+        $response->step_timestamps = $stamps;
+
         $response->save();
+
+        // Critical step events (PostHog) — funnel drop-off detection
+        // Step 6: eğitim seviyesi (Bachelor/Master karar noktası)
+        // Step 13: aylık bütçe (finansal commitment noktası)
+        // Step 17: APS sertifikası (TR-spesifik kritik)
+        if (in_array($n, [6, 13, 17], true)) {
+            $this->captureFunnelEvent("unimatch_step_{$n}_completed", $response, [
+                'step_key'   => $key,
+                'step_value' => is_array($value) ? $value : (string) $value,
+            ]);
+        }
 
         if ($n >= $total) {
             return redirect()->route('uni-match.complete');
         }
         return redirect()->route('uni-match.step', ['n' => $n + 1]);
+    }
+
+    /** PostHog'a wizard funnel event'i gönder (anonim funnel — distinctId = session_token). */
+    private function captureFunnelEvent(string $event, UniMatchResponse $response, array $extra = []): void
+    {
+        try {
+            app(\App\Services\Analytics\AnalyticsService::class)->capture(
+                $event,
+                array_merge([
+                    'session_token' => $response->session_token,
+                    'company_id'    => $response->company_id,
+                    'current_step'  => $response->current_step,
+                    'source'        => $response->source,
+                    'referrer'      => $response->referrer,
+                ], $extra),
+                $response->session_token
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('UniMatch.event_failed', ['event' => $event, 'error' => $e->getMessage()]);
+        }
     }
 
     public function complete(Request $request): RedirectResponse
@@ -163,6 +200,17 @@ class WizardController extends Controller
         $response = $this->resolveSession($request);
         if (! $response || ! $response->isCompleted()) {
             return redirect()->route('uni-match.start');
+        }
+
+        // PostHog event — sadece ilk görüntülemede
+        if ($response->result_viewed_at === null) {
+            $response->result_viewed_at = now();
+            $response->save();
+
+            $this->captureFunnelEvent('unimatch_result_reached', $response, [
+                'recommendations_count' => count($response->recommendations ?? []),
+                'top_score'             => ($response->recommendations[0]['match_score'] ?? null),
+            ]);
         }
 
         return view('uni-match.result', [
@@ -223,6 +271,13 @@ class WizardController extends Controller
         $response->converted_to_guest_id = $guest->id;
         $response->converted_at = now();
         $response->save();
+
+        $this->captureFunnelEvent('unimatch_converted', $response, [
+            'guest_id'        => $guest->id,
+            'tracking_token'  => $guest->tracking_token,
+            'time_to_convert' => $response->started_at && $response->converted_at
+                ? $response->started_at->diffInSeconds($response->converted_at) : null,
+        ]);
 
         return redirect('/apply')->with('success', 'Wizard cevapların form\'a aktarıldı — sadece kalan bilgileri tamamla.');
     }
