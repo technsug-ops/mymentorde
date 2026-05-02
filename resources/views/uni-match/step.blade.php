@@ -17,20 +17,42 @@
 @section('content')
 @php
     $remainingSteps = max(0, $totalSteps - $currentStep);
-    // Ortalama 15-20 sn/step, biraz koruyucu (20 sn)
     $remainingSec = $remainingSteps * 20;
     $remainingMin = $remainingSec >= 60 ? ceil($remainingSec / 60) : null;
     $remainingLabel = $remainingMin ? "~{$remainingMin} dk kaldı" : ($remainingSteps > 0 ? '<1 dk kaldı' : 'Sonuç sayfasına geçiyorsun!');
+
+    // Step bağlamına göre sağ panel görseli (her adım için tematik gradient + emoji + alt başlık)
+    $stepKey = $stepDef['key'] ?? '';
+    $rightPanelMap = [
+        'target_degree'        => ['emoji' => '🎓', 'tag' => 'Akademik hedefin', 'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #5e3f9c 100%)'],
+        'target_field'         => ['emoji' => '🧬', 'tag' => 'İlgi alanın',       'gradient' => 'linear-gradient(135deg, #6c47a8 0%, #a07ed9 100%)'],
+        'study_language'       => ['emoji' => '🌍', 'tag' => 'Eğitim dili',       'gradient' => 'linear-gradient(135deg, #5e3f9c 0%, #b79ae9 100%)'],
+        'germany_motivation'   => ['emoji' => '✨', 'tag' => 'Motivasyon',        'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #c4a5ff 100%)'],
+        'start_term'           => ['emoji' => '📅', 'tag' => 'Başlangıç dönemi',  'gradient' => 'linear-gradient(135deg, #6a47a8 0%, #a07ed9 100%)'],
+        'current_education_level' => ['emoji' => '📚', 'tag' => 'Mevcut eğitim',   'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #6a47a8 100%)'],
+        'high_school_type'     => ['emoji' => '🏫', 'tag' => 'Lise türü',         'gradient' => 'linear-gradient(135deg, #5e3f9c 0%, #7e58bf 100%)'],
+        'gpa_range'            => ['emoji' => '📊', 'tag' => 'Akademik başarı',   'gradient' => 'linear-gradient(135deg, #6a47a8 0%, #b79ae9 100%)'],
+        'german_level'         => ['emoji' => '🇩🇪', 'tag' => 'Almanca seviyesi',  'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #a07ed9 100%)'],
+        'english_level'        => ['emoji' => '🇬🇧', 'tag' => 'İngilizce seviyesi','gradient' => 'linear-gradient(135deg, #6c47a8 0%, #c4a5ff 100%)'],
+        'language_certificate' => ['emoji' => '📜', 'tag' => 'Dil sertifikası',   'gradient' => 'linear-gradient(135deg, #5e3f9c 0%, #a07ed9 100%)'],
+        'finance_method'       => ['emoji' => '💰', 'tag' => 'Finansman',         'gradient' => 'linear-gradient(135deg, #6a47a8 0%, #b79ae9 100%)'],
+        'monthly_budget'       => ['emoji' => '💶', 'tag' => 'Aylık bütçe',       'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #5e3f9c 100%)'],
+        'tuition_tolerance'    => ['emoji' => '🎟️', 'tag' => 'Öğrenim ücreti',    'gradient' => 'linear-gradient(135deg, #6a47a8 0%, #a07ed9 100%)'],
+        'preferred_cities'     => ['emoji' => '🏙️', 'tag' => 'Tercih şehirler',   'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #c4a5ff 100%)'],
+        'living_priority'      => ['emoji' => '🏡', 'tag' => 'Yaşam tarzı',       'gradient' => 'linear-gradient(135deg, #5e3f9c 0%, #b79ae9 100%)'],
+        'has_aps'              => ['emoji' => '📋', 'tag' => 'APS durumu',         'gradient' => 'linear-gradient(135deg, #6c47a8 0%, #a07ed9 100%)'],
+        'visa_readiness'       => ['emoji' => '✈️', 'tag' => 'Vize hazırlığı',    'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #6a47a8 100%)'],
+        'mentorde_help_areas'  => ['emoji' => '🤝', 'tag' => 'Destek alanları',   'gradient' => 'linear-gradient(135deg, #5e3f9c 0%, #c4a5ff 100%)'],
+    ];
+    $rightPanel = $rightPanelMap[$stepKey] ?? ['emoji' => '🎯', 'tag' => 'UniMatch', 'gradient' => 'linear-gradient(135deg, #7e58bf 0%, #a07ed9 100%)'];
+
+    // Filter sayısı azalma hissi (öncekiyle karşılaştırma için)
+    $totalPrograms = $totalPrograms ?? 13000;
+    $liveCount = $liveCount ?? $totalPrograms;
+    $filterPct = $totalPrograms > 0 ? min(100, max(0, (int) round(100 - ($liveCount / $totalPrograms * 100)))) : 0;
 @endphp
 
-{{-- Floating animated gradient blobs (background) --}}
-<div class="sb-bg-blobs" aria-hidden="true">
-    <span class="sb-blob sb-blob-1"></span>
-    <span class="sb-blob sb-blob-2"></span>
-    <span class="sb-blob sb-blob-3"></span>
-</div>
-
-{{-- Pill segmented progress --}}
+{{-- Pill segmented progress (sağ panel görsel anchor olduğu için bg-blobs gereksiz) --}}
 <div class="sb-pill-meta">
     <span>Adım <span class="sb-pill-step">{{ $currentStep }}</span> / {{ $totalSteps }}</span>
     <span style="color:#7e58bf;">⏱ {{ $remainingLabel }}</span>
@@ -43,7 +65,8 @@
     @endfor
 </div>
 
-<div class="sb-card" role="region" aria-labelledby="sb-step-title-{{ $currentStep }}">
+<div class="sb-split">
+<div class="sb-card sb-split-left" role="region" aria-labelledby="sb-step-title-{{ $currentStep }}">
     <h1 class="sb-title" id="sb-step-title-{{ $currentStep }}" tabindex="-1">{{ $stepDef['title'] }}</h1>
     <span class="sr-only">Adım {{ $currentStep }} / {{ $totalSteps }}. Yön tuşları veya Tab ile gez, Enter ile seç ve devam et.</span>
     @if(! empty($stepDef['subtitle']))
@@ -191,6 +214,62 @@
             </div>
         </div>
     </form>
+</div>
+
+{{-- Sağ panel: bağlamsal görsel + canlı filter count --}}
+<aside class="sb-split-right" style="background: {{ $rightPanel['gradient'] }};" aria-label="Filtreleme görseli">
+    <div class="sb-rp-bg" aria-hidden="true">
+        <span class="sb-rp-shape sb-rp-shape-1"></span>
+        <span class="sb-rp-shape sb-rp-shape-2"></span>
+        <span class="sb-rp-shape sb-rp-shape-3"></span>
+    </div>
+
+    <div class="sb-rp-content">
+        <div class="sb-rp-tag">{{ $rightPanel['tag'] }}</div>
+        <div class="sb-rp-emoji" aria-hidden="true">{{ $rightPanel['emoji'] }}</div>
+
+        {{-- Canlı filter count card --}}
+        <div class="sb-rp-counter" data-live-counter>
+            <div class="sb-rp-counter-label">📊 Cevaplarınla uyumlu</div>
+            <div class="sb-rp-counter-num">
+                <span data-count-target="{{ $liveCount }}">{{ number_format($liveCount, 0, ',', '.') }}</span>
+                <span class="sb-rp-counter-suffix">program</span>
+            </div>
+            <div class="sb-rp-counter-meta">
+                {{ number_format($totalPrograms, 0, ',', '.') }} toplam programdan
+                @if($filterPct > 0)
+                    · <strong>%{{ $filterPct }}</strong> daraltıldı
+                @endif
+            </div>
+            <div class="sb-rp-counter-bar" aria-hidden="true">
+                <div class="sb-rp-counter-bar-fill" style="width: {{ max(8, 100 - $filterPct) }}%;"></div>
+            </div>
+            <div class="sb-rp-counter-hint">
+                @if($currentStep < $totalSteps)
+                    Sonraki cevaplar bu sayıyı daha da daraltacak.
+                @else
+                    Sıralı 10 öneri için son adım!
+                @endif
+            </div>
+        </div>
+
+        <div class="sb-rp-trust">
+            <div class="sb-rp-trust-item">
+                <strong>13K+</strong>
+                <span>program kataloğu</span>
+            </div>
+            <div class="sb-rp-trust-item">
+                <strong>331</strong>
+                <span>üniversite</span>
+            </div>
+            <div class="sb-rp-trust-item">
+                <strong>9</strong>
+                <span>faktör skor</span>
+            </div>
+        </div>
+    </div>
+</aside>
+
 </div>
 
 @push('scripts')

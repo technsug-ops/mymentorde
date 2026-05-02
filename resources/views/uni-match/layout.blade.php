@@ -292,7 +292,130 @@
             overflow-x: hidden;
             padding-bottom: 96px; /* sticky CTA için boşluk */
         }
-        body.sb-wizard-mode .sb-container { max-width: 880px; padding: 24px 20px 48px; position: relative; z-index: 1; }
+        body.sb-wizard-mode .sb-container { max-width: 1180px; padding: 24px 20px 48px; position: relative; z-index: 1; }
+
+        /* ── Split layout: sol wizard, sağ görsel + canlı counter ─── */
+        .sb-split {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 24px;
+            align-items: stretch;
+            min-height: 540px;
+        }
+        @media (max-width: 880px) {
+            .sb-split { grid-template-columns: 1fr; }
+            .sb-split-right { min-height: 280px; }
+        }
+        .sb-split-left { width: 100%; }
+
+        .sb-split-right {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            color: #fff;
+            display: flex; flex-direction: column;
+            justify-content: center;
+            padding: 40px 36px;
+            box-shadow: 0 12px 48px rgba(126, 88, 191, .25);
+            isolation: isolate;
+        }
+
+        /* Sağ panel'de animasyonlu floating shape'ler */
+        .sb-rp-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+        .sb-rp-shape {
+            position: absolute; border-radius: 50%;
+            background: rgba(255,255,255,.12);
+            filter: blur(40px);
+        }
+        .sb-rp-shape-1 { width: 280px; height: 280px; top: -80px; right: -60px; }
+        .sb-rp-shape-2 { width: 220px; height: 220px; bottom: -40px; left: -40px; background: rgba(255,255,255,.08); }
+        .sb-rp-shape-3 { width: 160px; height: 160px; top: 40%; left: 20%; background: rgba(255,255,255,.06); }
+        @media (prefers-reduced-motion: no-preference) {
+            .sb-rp-shape-1 { animation: sb-rp-float-1 18s cubic-bezier(.4,0,.6,1) infinite; }
+            .sb-rp-shape-2 { animation: sb-rp-float-2 22s cubic-bezier(.4,0,.6,1) infinite; }
+            .sb-rp-shape-3 { animation: sb-rp-float-3 26s cubic-bezier(.4,0,.6,1) infinite; }
+            @keyframes sb-rp-float-1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-20px, 30px); } }
+            @keyframes sb-rp-float-2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px, -20px); } }
+            @keyframes sb-rp-float-3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px, 20px) scale(1.15); } }
+        }
+
+        .sb-rp-content { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 20px; height: 100%; }
+        .sb-rp-tag {
+            display: inline-block; align-self: flex-start;
+            padding: 6px 14px; background: rgba(255,255,255,.18);
+            border-radius: 999px; font-size: 11.5px; font-weight: 700;
+            letter-spacing: .8px; text-transform: uppercase;
+            backdrop-filter: blur(8px);
+        }
+        .sb-rp-emoji {
+            font-size: 92px; line-height: 1;
+            filter: drop-shadow(0 8px 24px rgba(0,0,0,.25));
+            margin: 8px 0;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            .sb-rp-emoji { animation: sb-rp-emoji-bob 5s cubic-bezier(.4,0,.6,1) infinite; }
+            @keyframes sb-rp-emoji-bob {
+                0%,100% { transform: translateY(0) rotate(0); }
+                50%     { transform: translateY(-8px) rotate(-3deg); }
+            }
+        }
+
+        /* Canlı counter card */
+        .sb-rp-counter {
+            background: rgba(255,255,255,.14);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,.22);
+            border-radius: 18px;
+            padding: 22px 22px;
+        }
+        .sb-rp-counter-label {
+            font-size: 12px; font-weight: 700; opacity: .9;
+            text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px;
+        }
+        .sb-rp-counter-num {
+            display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+        .sb-rp-counter-num span:first-child {
+            font-size: 42px; font-weight: 800;
+            letter-spacing: -1.5px; line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+        .sb-rp-counter-suffix { font-size: 16px; font-weight: 600; opacity: .85; }
+        .sb-rp-counter-meta { font-size: 12px; opacity: .8; margin-bottom: 12px; }
+        .sb-rp-counter-meta strong { font-weight: 700; }
+
+        .sb-rp-counter-bar {
+            height: 6px; background: rgba(255,255,255,.18);
+            border-radius: 999px; overflow: hidden; margin-bottom: 12px;
+        }
+        .sb-rp-counter-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #fff, rgba(255,255,255,.6));
+            border-radius: 999px;
+            transition: width .8s cubic-bezier(.4,0,.2,1);
+            animation: sb-rp-bar-fill .8s cubic-bezier(.4,0,.2,1) both;
+        }
+        @keyframes sb-rp-bar-fill {
+            0%   { width: 100%; }
+        }
+        .sb-rp-counter-hint {
+            font-size: 11.5px; font-style: italic; opacity: .85;
+        }
+
+        /* Trust row */
+        .sb-rp-trust {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            border-top: 1px solid rgba(255,255,255,.18);
+            padding-top: 18px; margin-top: auto;
+        }
+        .sb-rp-trust-item { text-align: center; }
+        .sb-rp-trust-item strong {
+            display: block; font-size: 22px; font-weight: 800; letter-spacing: -.5px;
+            margin-bottom: 2px; line-height: 1;
+        }
+        .sb-rp-trust-item span { font-size: 10.5px; opacity: .85; font-weight: 600; }
 
         /* Floating animated gradient blobs (background) */
         .sb-bg-blobs { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }

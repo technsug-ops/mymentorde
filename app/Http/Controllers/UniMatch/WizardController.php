@@ -174,15 +174,87 @@ class WizardController extends Controller
             });
         }
 
+        // Canlı filter count: bu adıma kadar verilen cevaplar kaç programa karşılık geliyor
+        $liveCount = $this->liveMatchCount((array) ($response->answers ?? []));
+        $totalPrograms = \Illuminate\Support\Facades\Cache::remember(
+            'unimatch.total_programs',
+            3600,
+            fn () => (int) \DB::table('programs')->where('is_active', 1)->count()
+        );
+
         return view('uni-match.step', [
-            'response'   => $response,
-            'stepDef'    => $stepDef,
-            'currentStep'=> $n,
-            'totalSteps' => $total,
-            'progress'   => (int) round(($n / $total) * 100),
-            'answer'     => $response->getAnswer($stepDef['key']),
-            'allCities'  => $allCities,
+            'response'      => $response,
+            'stepDef'       => $stepDef,
+            'currentStep'   => $n,
+            'totalSteps'    => $total,
+            'progress'      => (int) round(($n / $total) * 100),
+            'answer'        => $response->getAnswer($stepDef['key']),
+            'allCities'     => $allCities,
+            'liveCount'     => $liveCount,
+            'totalPrograms' => $totalPrograms,
         ]);
+    }
+
+    /**
+     * Wizard cevaplarını DB filter'larına çevirip eşleşen program sayısını döner.
+     * Adım atlandıkça count daralır — kullanıcı gerçek filtrelemeyi görür ("kafadan
+     * sallamadığımızı" anlar). Cache ile aynı answer kombinasyonu tekrar hesaplanmaz.
+     */
+    private function liveMatchCount(array $answers): int
+    {
+        $cacheKey = 'unimatch.live_count.' . md5(json_encode($answers));
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 600, function () use ($answers) {
+            $q = \DB::table('programs')->where('is_active', 1);
+
+            // target_degree → degree_type
+            if (! empty($answers['target_degree'])) {
+                $q->where('degree_type', $answers['target_degree']);
+            }
+
+            // study_language → language (de/en/flexible)
+            if (! empty($answers['study_language']) && $answers['study_language'] !== 'flexible') {
+                $q->where('language', $answers['study_language']);
+            }
+
+            // target_field → study_fields JSON contains
+            if (! empty($answers['target_field'])) {
+                // WizardSchema değerleri tam DB değerleri ile eşleşmeyebilir (örn "Computer Science"
+                // DB'de "Computer Science and IT"). LIKE eşleştirme daha esnek.
+                $field = (string) $answers['target_field'];
+                $q->whereRaw("JSON_SEARCH(study_fields, 'one', ?) IS NOT NULL", ['%' . $field . '%']);
+            }
+
+            // tuition_tolerance → tuition_eur_per_semester filtre
+            if (! empty($answers['tuition_tolerance'])) {
+                $tol = (string) $answers['tuition_tolerance'];
+                if ($tol === 'free_only') {
+                    $q->where(function ($qq) {
+                        $qq->whereNull('tuition_eur_per_semester')->orWhere('tuition_eur_per_semester', 0);
+                    });
+                } elseif ($tol === 'low') {
+                    $q->where(function ($qq) {
+                        $qq->whereNull('tuition_eur_per_semester')->orWhere('tuition_eur_per_semester', '<', 1000);
+                    });
+                } elseif ($tol === 'mid') {
+                    $q->where('tuition_eur_per_semester', '<', 3000);
+                }
+                // 'high' / 'flexible' → filter yok
+            }
+
+            // preferred_cities → location IN
+            if (! empty($answers['preferred_cities']) && is_array($answers['preferred_cities'])) {
+                $cities = array_filter(array_map('strval', $answers['preferred_cities']));
+                if (! empty($cities)) {
+                    $q->where(function ($qq) use ($cities) {
+                        foreach ($cities as $c) {
+                            $qq->orWhere('location', 'LIKE', "%{$c}%");
+                        }
+                    });
+                }
+            }
+
+            return (int) $q->count();
+        });
     }
 
     public function saveStep(Request $request, int $n): RedirectResponse
