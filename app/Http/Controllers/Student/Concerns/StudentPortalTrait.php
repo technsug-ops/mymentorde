@@ -35,19 +35,15 @@ trait StudentPortalTrait
         $notificationCount = 0;
         $progressPercent   = 0;
 
-        if ($studentId !== '') {
-            $assignment = Cache::remember("student_assignment_{$studentId}", 300, fn () =>
-                StudentAssignment::query()->where('student_id', $studentId)->first()
-            );
-            $revenue = Cache::remember("student_revenue_{$studentId}", 300, fn () =>
-                StudentRevenue::query()->where('student_id', $studentId)->first()
-            );
-
-            $ownerIds = $guestApplication
-                ? $this->resolveDocumentOwnerIds($guestApplication)
-                : collect([$studentId])->filter()->values();
-
-            $ownerKey  = implode('_', $ownerIds->sort()->values()->all());
+        // Required documents checklist guestApplication varsa her durumda hesaplanir
+        // (studentId bos da olsa kullanici belge sayilarini gormeli — eski kod
+        // studentId boyken docSummary'i sifir birakiyordu, profil sayfasi 0/0 gosteriyordu).
+        $requiredTotal = 0;
+        $requiredDone  = 0;
+        $documents = collect();
+        if ($guestApplication) {
+            $ownerIds = $this->resolveDocumentOwnerIds($guestApplication);
+            $ownerKey = implode('_', $ownerIds->sort()->values()->all());
             $documents = Cache::remember("student_docs_{$ownerKey}", 60, fn () =>
                 Document::query()
                     ->whereIn('student_id', $ownerIds)
@@ -55,24 +51,13 @@ trait StudentPortalTrait
                     ->get(['id', 'status', 'category_id'])
             );
 
-            $requiredTotal = 0;
-            $requiredDone  = 0;
-            if ($guestApplication) {
-                $checklist = collect($this->requiredDocumentsByApplicationType(
-                    (string) ($guestApplication->application_type ?? 'bachelor'),
-                    $this->uploadedCategoryCodes($guestApplication),
-                    'student'
-                ));
-                $requiredTotal = (int) $checklist->filter(fn (array $i) => (bool) ($i['is_required'] ?? false))->count();
-                $requiredDone  = (int) $checklist->filter(fn (array $i) => (bool) ($i['is_required'] ?? false) && (bool) ($i['uploaded'] ?? false))->count();
-            }
-
-            $outcomeCount      = (int) Cache::remember("student_outcome_cnt_{$studentId}", 60, fn () =>
-                ProcessOutcome::query()->where('student_id', $studentId)->count()
-            );
-            $notificationCount = (int) Cache::remember("student_notif_cnt_{$studentId}", 60, fn () =>
-                NotificationDispatch::query()->where('student_id', $studentId)->count()
-            );
+            $checklist = collect($this->requiredDocumentsByApplicationType(
+                (string) ($guestApplication->application_type ?? 'bachelor'),
+                $this->uploadedCategoryCodes($guestApplication),
+                'student'
+            ));
+            $requiredTotal = (int) $checklist->filter(fn (array $i) => (bool) ($i['is_required'] ?? false))->count();
+            $requiredDone  = (int) $checklist->filter(fn (array $i) => (bool) ($i['is_required'] ?? false) && (bool) ($i['uploaded'] ?? false))->count();
 
             $docSummary = [
                 'total'          => (int) $documents->count(),
@@ -82,6 +67,22 @@ trait StudentPortalTrait
                 'required_done'  => $requiredDone,
                 'required_total' => $requiredTotal,
             ];
+        }
+
+        if ($studentId !== '') {
+            $assignment = Cache::remember("student_assignment_{$studentId}", 300, fn () =>
+                StudentAssignment::query()->where('student_id', $studentId)->first()
+            );
+            $revenue = Cache::remember("student_revenue_{$studentId}", 300, fn () =>
+                StudentRevenue::query()->where('student_id', $studentId)->first()
+            );
+
+            $outcomeCount      = (int) Cache::remember("student_outcome_cnt_{$studentId}", 60, fn () =>
+                ProcessOutcome::query()->where('student_id', $studentId)->count()
+            );
+            $notificationCount = (int) Cache::remember("student_notif_cnt_{$studentId}", 60, fn () =>
+                NotificationDispatch::query()->where('student_id', $studentId)->count()
+            );
 
             $scoreParts      = [
                 $requiredTotal > 0 ? (int) round(($requiredDone / $requiredTotal) * 100) : 0,
