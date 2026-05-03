@@ -629,3 +629,50 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
 
     return response($output, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
 })->middleware('throttle:5,10')->name('deploy.run-pending');
+
+// ── Log tail — prod 500 hatalarını tespit etmek için son N satır laravel.log
+// Kullanım: curl '.../_deploy/tail-log?secret=XXX&lines=200&date=2026-05-03'
+// date opsiyonel (default bugün), lines max 1000.
+Route::get('/_deploy/tail-log', function (\Illuminate\Http\Request $request) {
+    $expected = (string) env('DEPLOY_MIGRATE_SECRET', '');
+    $given    = (string) $request->query('secret', '');
+    if ($expected === '' || ! hash_equals($expected, $given)) {
+        abort(404);
+    }
+
+    $date = $request->query('date', now()->format('Y-m-d'));
+    if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) abort(400, 'invalid date');
+    $lines = max(10, min(1000, (int) $request->query('lines', 200)));
+
+    $logFile = storage_path("logs/laravel-{$date}.log");
+    if (! file_exists($logFile)) {
+        // Fallback: tek dosya log
+        $alt = storage_path('logs/laravel.log');
+        if (file_exists($alt)) $logFile = $alt;
+        else return response("Log dosyası yok: {$date}", 404, ['Content-Type' => 'text/plain']);
+    }
+
+    // Son N satır (büyük dosyalar için stream)
+    $size = filesize($logFile);
+    $f = fopen($logFile, 'r');
+    if (! $f) abort(500, 'cannot open log');
+
+    $chunk = 65536;
+    $tail = '';
+    $count = 0;
+    $pos = $size;
+    while ($pos > 0 && $count <= $lines) {
+        $read = min($chunk, $pos);
+        $pos -= $read;
+        fseek($f, $pos);
+        $tail = fread($f, $read) . $tail;
+        $count = substr_count($tail, "\n");
+    }
+    fclose($f);
+    $rows = explode("\n", $tail);
+    $rows = array_slice($rows, -$lines);
+
+    $out = "═══ {$logFile} (last {$lines} lines) ═══\n\n";
+    $out .= implode("\n", $rows);
+    return response($out, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
+})->middleware('throttle:5,10')->name('deploy.tail-log');
