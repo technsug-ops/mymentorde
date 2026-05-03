@@ -304,10 +304,9 @@
             <div class="gst-field">
                 <label>Tercih Edilen Dil</label>
                 <select name="preferred_locale">
-                    <option value="tr" @selected($pref==='tr')>🇹🇷 Türkçe</option>
-                    <option value="de" @selected($pref==='de')>🇩🇪 Almanca</option>
-                    <option value="en" @selected($pref==='en')>🇬🇧 İngilizce</option>
+                    <option value="tr" selected>🇹🇷 Türkçe</option>
                 </select>
+                <small style="color:var(--muted);font-size:12px;display:block;margin-top:4px;">İngilizce ve Almanca yakında eklenecek.</small>
             </div>
 
             <button class="btn ok" type="submit" style="padding:9px 24px;">Kaydet</button>

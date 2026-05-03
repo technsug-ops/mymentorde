@@ -191,10 +191,9 @@
                 <div class="set-field">
                     <label>Arayüz Dili</label>
                     <select name="preferred_locale" onchange="updateClockPreview()">
-                        <option value="tr" @selected($locale==='tr')>🇹🇷 Türkçe</option>
-                        <option value="de" @selected($locale==='de')>🇩🇪 Deutsch</option>
-                        <option value="en" @selected($locale==='en')>🇬🇧 English</option>
+                        <option value="tr" selected>🇹🇷 Türkçe</option>
                     </select>
+                    <small style="color:#94a3b8;font-size:12px;display:block;margin-top:4px;">İngilizce ve Almanca yakında eklenecek.</small>
                 </div>
 
                 <div class="set-field">

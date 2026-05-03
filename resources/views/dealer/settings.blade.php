@@ -128,11 +128,9 @@
             <div class="set-field" style="margin-bottom:0;">
                 <label>Arayüz Dili</label>
                 <select name="preferred_locale">
-                    <option value="tr" @selected(($s['preferred_locale']??'tr')==='tr')>🇹🇷 Türkçe</option>
-                    <option value="de" @selected(($s['preferred_locale']??'')==='de')>🇩🇪 Deutsch</option>
-                    <option value="en" @selected(($s['preferred_locale']??'')==='en')>🇬🇧 English</option>
+                    <option value="tr" selected>🇹🇷 Türkçe</option>
                 </select>
-                <div class="set-hint">Arayüz dilini belirler (MVP: kısmi etki).</div>
+                <div class="set-hint">İngilizce ve Almanca yakında eklenecek.</div>
             </div>
             <div>
                 <div style="font-size:var(--tx-xs);font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#64748b);margin-bottom:8px;">Bildirim Kanalları</div>
