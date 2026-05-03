@@ -94,10 +94,18 @@ class EmailDripController extends Controller
         $data = $request->validate([
             'step_order'      => 'required|integer|min:1',
             'delay_hours'     => 'required|integer|min:0',
-            'template_id'     => 'required|integer|exists:email_templates,id',
+            'template_id'     => 'nullable|integer|exists:email_templates,id',
+            'view_path'       => 'nullable|string|max:200',
             'subject_override'=> 'nullable|string|max:191',
             'is_active'       => 'boolean',
         ]);
+
+        // En az biri zorunlu — template_id veya view_path
+        if (empty($data['template_id']) && empty($data['view_path'])) {
+            return back()->withErrors([
+                'template_id' => 'Template ID veya View Path en az biri zorunlu.',
+            ])->withInput();
+        }
 
         EmailDripStep::create(['drip_sequence_id' => $sequence->id, ...$data]);
         return back()->with('success', 'Adım eklendi.');
@@ -112,10 +120,19 @@ class EmailDripController extends Controller
         $data = $request->validate([
             'step_order'      => 'sometimes|integer|min:1',
             'delay_hours'     => 'sometimes|integer|min:0',
-            'template_id'     => 'sometimes|integer|exists:email_templates,id',
+            'template_id'     => 'sometimes|nullable|integer|exists:email_templates,id',
+            'view_path'       => 'sometimes|nullable|string|max:200',
             'subject_override'=> 'nullable|string|max:191',
             'is_active'       => 'sometimes|boolean',
         ]);
+
+        // template_id ve view_path ikisi de boşsa update'i reddet
+        $finalTemplateId = array_key_exists('template_id', $data) ? $data['template_id'] : $step->template_id;
+        $finalViewPath   = array_key_exists('view_path', $data) ? $data['view_path'] : $step->view_path;
+        if (empty($finalTemplateId) && empty($finalViewPath)) {
+            return response()->json(['ok' => false, 'error' => 'template_id veya view_path en az biri zorunlu'], 422);
+        }
+
         $step->update($data);
         return response()->json(['ok' => true]);
     }
@@ -136,7 +153,7 @@ class EmailDripController extends Controller
     {
         $sequence    = EmailDripSequence::findOrFail($id);
         $enrollments = EmailDripEnrollment::where('drip_sequence_id', $id)
-            ->with('guest')
+            ->with(['guest', 'uniMatchResponse']) // guest yoksa UniMatch lead fallback için
             ->latest('enrolled_at')
             ->paginate(30);
 

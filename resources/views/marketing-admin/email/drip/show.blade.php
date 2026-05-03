@@ -26,7 +26,16 @@
         <div class="item">
             <span class="badge info" style="min-width:28px;text-align:center;">{{ $step->step_order }}</span>
             <div style="flex:1;margin-left:8px;">
-                <div>Template ID: {{ $step->template_id }}{{ $step->subject_override ? ' — '.$step->subject_override : '' }}</div>
+                <div>
+                    @if($step->view_path)
+                        <code style="background:#f4f2ee;padding:2px 6px;border-radius:4px;font-size:11.5px;">{{ $step->view_path }}</code>
+                    @elseif($step->template_id)
+                        Template ID: {{ $step->template_id }}
+                    @else
+                        <span class="u-muted">⚠ template/view yok</span>
+                    @endif
+                    {{ $step->subject_override ? ' — '.$step->subject_override : '' }}
+                </div>
                 <div class="u-muted" style="font-size:var(--tx-xs);">{{ $step->delay_hours }} saat sonra</div>
             </div>
             <span class="badge {{ $step->is_active ? 'ok' : 'pending' }}">{{ $step->is_active ? 'Aktif' : 'Pasif' }}</span>
@@ -41,10 +50,17 @@
         <div class="grid3">
             <div class="field"><label>Sıra No *</label><input name="step_order" type="number" min="1" required value="{{ $sequence->steps->count() + 1 }}"></div>
             <div class="field"><label>Gecikme (saat) *</label><input name="delay_hours" type="number" min="0" required value="24"></div>
-            <div class="field"><label>Template ID *</label><input name="template_id" type="number" min="1" required></div>
+            <div class="field"><label>Template ID</label><input name="template_id" type="number" min="1" placeholder="opsiyonel — view_path varsa boş bırak"></div>
+            <div class="field" style="grid-column:1/-1"><label>View Path (Blade view)</label><input name="view_path" type="text" placeholder="örn: emails.unimatch.drip_1"></div>
             <div class="field" style="grid-column:1/-1"><label>Konu (opsiyonel)</label><input name="subject_override" type="text"></div>
         </div>
-        <button type="submit" class="btn ok">Adım Ekle</button>
+        <p class="u-muted" style="font-size:var(--tx-xs);margin-top:6px;">Template ID <strong>VEYA</strong> View Path en az birini doldur. View Path Blade dosya yolu (örn <code>emails.unimatch.drip_1</code>) — context değişkenleriyle render edilir.</p>
+        @if(isset($errors) && $errors->any())
+            <div style="background:#fee2e2;border-left:4px solid #dc2626;padding:8px 12px;border-radius:6px;color:#7f1d1d;font-size:var(--tx-xs);margin-top:8px;">
+                @foreach($errors->all() as $err)<div>{{ $err }}</div>@endforeach
+            </div>
+        @endif
+        <button type="submit" class="btn ok" style="margin-top:8px;">Adım Ekle</button>
     </form>
 </div>
 
@@ -55,6 +71,7 @@
     </summary>
     <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;padding-top:12px;">
         <li><strong>Gecikme (saat):</strong> Önceki adımdan bu adıma kadar bekleme süresi (0 = hemen)</li>
+        <li><strong>Template ID veya View Path:</strong> İkisinden biri zorunlu. View Path daha güçlü (Blade context değişkenleriyle render — örn. <code>emails.unimatch.drip_1</code> içinde <code>{{'$'}}firstName</code>, <code>{{'$'}}recommendations</code>, <code>{{'$'}}returnUrl</code> kullanılabilir)</li>
         <li><strong>Template ID:</strong> E-posta Şablonları menüsünden şablon ID'sini al</li>
         <li>Konu override boş bırakılırsa şablondaki varsayılan konu kullanılır</li>
         <li>Adımları sıralı oluştur — ilk adım (gecikme 0) tetikleyici sonrası hemen gönderilir</li>
