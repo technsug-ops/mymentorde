@@ -486,25 +486,89 @@
         }
         .sb-pill-meta .sb-pill-step { color: #7e58bf; font-weight: 700; }
 
-        /* Wizard mode card — büyük, ferah */
+        /* Wizard mode card — büyük, ferah, mor gradient bg + decorative blob'lar */
         body.sb-wizard-mode .sb-card {
-            background: #fff;
-            border: 1px solid rgba(126, 88, 191, .10);
-            box-shadow: 0 16px 56px rgba(126, 88, 191, .10);
+            background:
+                radial-gradient(circle at 100% 0%, rgba(126,88,191,.08) 0%, transparent 55%),
+                radial-gradient(circle at 0% 100%, rgba(167,126,217,.06) 0%, transparent 55%),
+                linear-gradient(180deg, #fff 0%, #fbf8ff 100%);
+            border: 1px solid rgba(126, 88, 191, .12);
+            box-shadow:
+                0 20px 64px rgba(126, 88, 191, .12),
+                0 0 0 1px rgba(126, 88, 191, .04),
+                inset 0 1px 0 rgba(255, 255, 255, .6);
             padding: 56px 48px;
             border-radius: 28px;
             min-height: 100%;
             display: flex; flex-direction: column;
+            position: relative;
+            overflow: hidden;
         }
+        /* Dekoratif floating blob — kartın sağ üst köşesinde */
+        body.sb-wizard-mode .sb-card::before {
+            content: '';
+            position: absolute;
+            top: -120px; right: -120px;
+            width: 320px; height: 320px;
+            background: radial-gradient(circle, rgba(126,88,191,.14) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        body.sb-wizard-mode .sb-card::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; left: -80px;
+            width: 240px; height: 240px;
+            background: radial-gradient(circle, rgba(167,126,217,.10) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            body.sb-wizard-mode .sb-card::before {
+                animation: sb-card-blob-1 18s cubic-bezier(.4,0,.6,1) infinite alternate;
+            }
+            body.sb-wizard-mode .sb-card::after {
+                animation: sb-card-blob-2 22s cubic-bezier(.4,0,.6,1) infinite alternate;
+            }
+            @keyframes sb-card-blob-1 {
+                0%   { transform: translate(0, 0) scale(1); }
+                100% { transform: translate(-30px, 40px) scale(1.1); }
+            }
+            @keyframes sb-card-blob-2 {
+                0%   { transform: translate(0, 0) scale(1); }
+                100% { transform: translate(40px, -30px) scale(1.08); }
+            }
+        }
+        /* İçerik dekorasyonun üzerinde kalsın */
+        body.sb-wizard-mode .sb-card > * { position: relative; z-index: 1; }
+
+        /* Title — mor accent bar ile vurgulu */
         body.sb-wizard-mode .sb-title {
             font-size: 36px; line-height: 1.18; letter-spacing: -.9px;
             margin-bottom: 14px;
+            padding-left: 20px;
+            position: relative;
+        }
+        body.sb-wizard-mode .sb-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 6px;
+            bottom: 14px;
+            width: 5px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #7e58bf 0%, #a07ed9 100%);
+            box-shadow: 0 2px 8px rgba(126, 88, 191, .35);
         }
         body.sb-wizard-mode .sb-subtitle {
             font-size: 16.5px; line-height: 1.6; margin-bottom: 36px;
+            padding-left: 20px;
         }
         @media (max-width: 1024px) {
-            body.sb-wizard-mode .sb-title { font-size: 28px; }
+            body.sb-wizard-mode .sb-title { font-size: 28px; padding-left: 16px; }
+            body.sb-wizard-mode .sb-subtitle { padding-left: 16px; }
             body.sb-wizard-mode .sb-card { padding: 40px 28px; }
             body.sb-wizard-mode .sb-container { padding: 14px 18px 32px; }
         }
@@ -519,31 +583,65 @@
             min-height: 96px;
             gap: 18px;
         }
+        body.sb-wizard-mode .sb-option {
+            background: #fff;
+        }
         body.sb-wizard-mode .sb-option:hover {
             transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 18px 40px rgba(126, 88, 191, .20);
+            box-shadow: 0 18px 40px rgba(126, 88, 191, .22);
             border-color: #b79ae9;
+            background: linear-gradient(135deg, #fff 0%, #faf7fd 100%);
         }
         body.sb-wizard-mode .sb-option.selected {
-            box-shadow: 0 10px 28px rgba(126, 88, 191, .26);
+            box-shadow:
+                0 14px 36px rgba(126, 88, 191, .32),
+                0 0 0 4px rgba(126, 88, 191, .15);
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(126, 88, 191, .08) 0%, rgba(167, 126, 217, .04) 100%);
         }
+        /* Selected check — pop animation */
+        body.sb-wizard-mode .sb-option.selected::before {
+            top: 14px; right: 14px;
+            width: 26px; height: 26px;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(126, 88, 191, .35);
+            background: linear-gradient(135deg, #7e58bf, #6a47a8);
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            body.sb-wizard-mode .sb-option.selected::before {
+                animation: sb-check-pop .42s cubic-bezier(.34,1.56,.64,1) both;
+            }
+            @keyframes sb-check-pop {
+                0%   { transform: scale(0) rotate(-90deg); opacity: 0; }
+                60%  { transform: scale(1.2) rotate(5deg); opacity: 1; }
+                100% { transform: scale(1) rotate(0); opacity: 1; }
+            }
+        }
+
         body.sb-wizard-mode .sb-option-icon {
             width: 56px; height: 56px;
-            background: rgba(126, 88, 191, .1);
+            background: linear-gradient(135deg, rgba(126, 88, 191, .10) 0%, rgba(167, 126, 217, .14) 100%);
             border-radius: 14px;
-            transition: background .25s cubic-bezier(.4,0,.2,1), transform .25s cubic-bezier(.4,0,.2,1);
+            transition: background .25s cubic-bezier(.4,0,.2,1),
+                        transform .25s cubic-bezier(.4,0,.2,1),
+                        box-shadow .25s cubic-bezier(.4,0,.2,1);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.4);
         }
         body.sb-wizard-mode .sb-option-icon .lucide-icon { width: 30px; height: 30px; }
         body.sb-wizard-mode .sb-option:hover .sb-option-icon {
-            background: rgba(126, 88, 191, .18);
-            transform: scale(1.08);
+            background: linear-gradient(135deg, rgba(126, 88, 191, .18) 0%, rgba(167, 126, 217, .24) 100%);
+            transform: scale(1.10) rotate(-3deg);
+            box-shadow: 0 6px 16px rgba(126, 88, 191, .20);
         }
         body.sb-wizard-mode .sb-option.selected .sb-option-icon {
             background: linear-gradient(135deg, #7e58bf, #a07ed9);
+            box-shadow: 0 8px 20px rgba(126, 88, 191, .35);
+            transform: scale(1.05);
         }
         body.sb-wizard-mode .sb-option.selected .sb-option-icon .lucide-icon { color: #fff; }
         body.sb-wizard-mode .sb-option-label { font-size: 16.5px; font-weight: 700; line-height: 1.3; }
         body.sb-wizard-mode .sb-option-desc { font-size: 13px; line-height: 1.45; margin-top: 2px; }
+        body.sb-wizard-mode .sb-option.selected .sb-option-label { color: #6c47a8; }
 
         /* Sticky bottom nav bar — Studyportals tarzı CTA her zaman görünür */
         body.sb-wizard-mode .sb-nav {
