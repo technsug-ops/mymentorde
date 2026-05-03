@@ -391,10 +391,10 @@
            - Sticky bottom nav bar
         ════════════════════════════════════════════════════════════════ */
         body.sb-wizard-mode {
-            background: #faf9f5;
+            background: linear-gradient(180deg, #faf9f5 0%, #f7f3ff 50%, #faf9f5 100%);
             min-height: 100vh;
             overflow-x: hidden;
-            padding-bottom: 96px; /* sticky CTA için boşluk */
+            padding-bottom: 32px; /* sticky CTA kaldırıldı, normal akış için yeter */
         }
         /* Wizard mode'da container max-width kalkar, full viewport kullanır.
            Side padding clamp() ile: mobilde 20px, desktopta 96px (~2.5cm) — kartlar
@@ -406,13 +406,14 @@
         }
         body.sb-wizard-mode .sb-header { max-width: none; padding: 0; }
 
-        /* ── Split layout: sol wizard, sağ büyük foto + counter ─── */
+        /* ── Split layout: sol wizard, sağ büyük foto + counter ───
+           min-height YOK — kart içeriği boyutuyla doğal büyür, kesilme olmaz.
+           align-items: start — sol kart içeriğine göre, sağ panel ayrı bağımsız. */
         .sb-split {
             display: grid;
             grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
             gap: 32px;
-            align-items: stretch;
-            min-height: calc(100vh - 220px);
+            align-items: start;
         }
         @media (max-width: 1024px) {
             .sb-split { grid-template-columns: 1fr; gap: 24px; }
@@ -421,7 +422,8 @@
         .sb-split-left { width: 100%; min-width: 0; }
 
         .sb-split-right {
-            position: relative;
+            position: sticky;
+            top: 24px; /* scroll'da görünür kalsın */
             border-radius: 28px;
             overflow: hidden;
             color: #fff;
@@ -430,7 +432,8 @@
             padding: 40px 40px;
             box-shadow: 0 20px 60px rgba(126, 88, 191, .28);
             isolation: isolate;
-            min-height: 100%;
+            min-height: 540px;
+            max-height: calc(100vh - 48px); /* viewport-bound, taşmasın */
         }
 
         /* Gerçek fotoğraf + okunabilirlik için karartma overlay */
@@ -592,7 +595,10 @@
         }
         .sb-pill-meta .sb-pill-step { color: #7e58bf; font-weight: 700; }
 
-        /* Wizard mode card — büyük, ferah, mor gradient bg + decorative blob'lar */
+        /* Wizard mode card — büyük, ferah, mor gradient bg + decorative blob'lar
+           min-height YOK — içeriğine göre büyür, alt kesilme olmaz.
+           overflow: visible — decorative blob'lar dışa taşsa da içerik kesilmesin
+           (clipping ::before/::after için ayrı kapsayıcı yapıyoruz). */
         body.sb-wizard-mode .sb-card {
             background:
                 radial-gradient(circle at 100% 0%, rgba(126,88,191,.08) 0%, transparent 55%),
@@ -600,34 +606,32 @@
                 linear-gradient(180deg, #fff 0%, #fbf8ff 100%);
             border: 1px solid rgba(126, 88, 191, .12);
             box-shadow:
-                0 20px 64px rgba(126, 88, 191, .12),
-                0 0 0 1px rgba(126, 88, 191, .04),
-                inset 0 1px 0 rgba(255, 255, 255, .6);
-            padding: 56px 48px;
+                0 24px 72px rgba(126, 88, 191, .14),
+                0 4px 16px rgba(126, 88, 191, .06),
+                inset 0 1px 0 rgba(255, 255, 255, .8);
+            padding: 56px 48px 40px;
             border-radius: 28px;
-            min-height: 100%;
             display: flex; flex-direction: column;
             position: relative;
-            overflow: hidden;
         }
-        /* Dekoratif floating blob — kartın sağ üst köşesinde */
+        /* Dekoratif floating blob — kartın iç sağ üst köşesinde (taşmaz) */
         body.sb-wizard-mode .sb-card::before {
             content: '';
             position: absolute;
-            top: -120px; right: -120px;
-            width: 320px; height: 320px;
-            background: radial-gradient(circle, rgba(126,88,191,.14) 0%, transparent 70%);
-            border-radius: 50%;
+            top: 0; right: 0;
+            width: 280px; height: 280px;
+            background: radial-gradient(circle at top right, rgba(126,88,191,.14) 0%, transparent 60%);
+            border-top-right-radius: 28px;
             pointer-events: none;
             z-index: 0;
         }
         body.sb-wizard-mode .sb-card::after {
             content: '';
             position: absolute;
-            bottom: -80px; left: -80px;
-            width: 240px; height: 240px;
-            background: radial-gradient(circle, rgba(167,126,217,.10) 0%, transparent 70%);
-            border-radius: 50%;
+            bottom: 0; left: 0;
+            width: 220px; height: 220px;
+            background: radial-gradient(circle at bottom left, rgba(167,126,217,.10) 0%, transparent 60%);
+            border-bottom-left-radius: 28px;
             pointer-events: none;
             z-index: 0;
         }
@@ -786,25 +790,21 @@
         body.sb-wizard-mode .sb-option-desc { font-size: 13px; line-height: 1.45; margin-top: 2px; }
         body.sb-wizard-mode .sb-option.selected .sb-option-label { color: #6c47a8; }
 
-        /* Sticky bottom nav bar — Studyportals tarzı CTA her zaman görünür */
+        /* Wizard nav — kart içinde doğal akışta (sticky/fixed YOK, kesilme önlemek için) */
         body.sb-wizard-mode .sb-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            z-index: 50;
-            background: rgba(255, 255, 255, .92);
-            backdrop-filter: blur(14px);
-            border-top: 1px solid rgba(126, 88, 191, .12);
-            padding: 14px 20px;
-            margin-top: 0;
-            box-shadow: 0 -8px 24px rgba(126, 88, 191, .08);
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(126, 88, 191, .10);
+            background: transparent;
+            position: relative;
+            z-index: 2;
         }
         body.sb-wizard-mode .sb-nav-inner {
-            max-width: none; margin: 0 auto;
-            padding: 0 clamp(20px, 5vw, 96px);
             display: flex; justify-content: space-between; align-items: center; gap: 12px;
+            width: 100%;
         }
         body.sb-wizard-mode .sb-btn-primary {
-            padding: 14px 32px; font-size: 15px;
+            padding: 14px 36px; font-size: 15px;
         }
 
         @media (max-width: 600px) {
