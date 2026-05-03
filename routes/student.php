@@ -45,7 +45,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'student.role', 'throt
 
     // ── Süreç Takibi ─────────────────────────────────────────────────────────
     Route::get('/student/process-tracking', [StudentProgressController::class, 'processTracking'])->name('student.process-tracking');
-    Route::post('/student/workflow/request-next-step', [StudentWorkflowController::class, 'requestNextStep'])->middleware('throttle:5,1')->name('student.workflow.request-next-step');
+    Route::post('/student/workflow/request-next-step', [StudentWorkflowController::class, 'requestNextStep'])->middleware('throttle:30,1')->name('student.workflow.request-next-step');
 
     // ── Doküman Oluşturucu ───────────────────────────────────────────────────
     Route::get('/student/document-builder', [StudentPortalController::class, 'documentBuilder'])->name('student.document-builder');
@@ -60,10 +60,10 @@ Route::middleware(['company.context', 'auth', 'verified', 'student.role', 'throt
 
     // ── Ticket / Destek ──────────────────────────────────────────────────────
     Route::get('/student/tickets',                           [StudentPortalController::class,  'tickets'])->name('student.tickets');
-    Route::post('/student/tickets',                          [StudentTicketController::class, 'store'])->middleware('throttle:10,1')->name('student.tickets.store');
-    Route::post('/student/tickets/{ticket}/reply',           [StudentTicketController::class, 'reply'])->middleware('throttle:20,1')->name('student.tickets.reply');
-    Route::post('/student/tickets/{ticket}/close',           [StudentTicketController::class, 'close'])->middleware('throttle:10,1')->name('student.tickets.close');
-    Route::post('/student/tickets/{ticket}/reopen',          [StudentTicketController::class, 'reopen'])->middleware('throttle:10,1')->name('student.tickets.reopen');
+    Route::post('/student/tickets',                          [StudentTicketController::class, 'store'])->middleware('throttle:30,1')->name('student.tickets.store');
+    Route::post('/student/tickets/{ticket}/reply',           [StudentTicketController::class, 'reply'])->middleware('throttle:60,1')->name('student.tickets.reply');
+    Route::post('/student/tickets/{ticket}/close',           [StudentTicketController::class, 'close'])->middleware('throttle:30,1')->name('student.tickets.close');
+    Route::post('/student/tickets/{ticket}/reopen',          [StudentTicketController::class, 'reopen'])->middleware('throttle:30,1')->name('student.tickets.reopen');
 
     // ── Materyaller ──────────────────────────────────────────────────────────
     Route::get('/student/materials',                         [StudentContentController::class,  'materials'])->name('student.materials');
@@ -79,9 +79,9 @@ Route::middleware(['company.context', 'auth', 'verified', 'student.role', 'throt
 
     // ── Servisler & Paket ────────────────────────────────────────────────────
     Route::get('/student/services',                                          [StudentPortalController::class,  'services'])->name('student.services');
-    Route::post('/student/services/select-package',                          [StudentServiceController::class, 'selectPackage'])->middleware('throttle:10,1')->name('student.services.select-package');
-    Route::post('/student/services/add-extra',                               [StudentServiceController::class, 'addExtra'])->middleware('throttle:20,1')->name('student.services.add-extra');
-    Route::delete('/student/services/remove-extra/{extraCode}',              [StudentServiceController::class, 'removeExtra'])->middleware('throttle:20,1')->name('student.services.remove-extra');
+    Route::post('/student/services/select-package',                          [StudentServiceController::class, 'selectPackage'])->middleware('throttle:30,1')->name('student.services.select-package');
+    Route::post('/student/services/add-extra',                               [StudentServiceController::class, 'addExtra'])->middleware('throttle:60,1')->name('student.services.add-extra');
+    Route::delete('/student/services/remove-extra/{extraCode}',              [StudentServiceController::class, 'removeExtra'])->middleware('throttle:60,1')->name('student.services.remove-extra');
 
     // ── Profil & Ayarlar ─────────────────────────────────────────────────────
     Route::get('/student/profile',                           [StudentPortalController::class,  'profile'])->name('student.profile');
@@ -111,8 +111,8 @@ Route::middleware(['company.context', 'auth', 'verified', 'student.role', 'throt
     Route::get('/student/vault/{vault}/reveal',    [StudentPortalController::class, 'revealVault'])->middleware('throttle:20,1')->name('student.vault.reveal');
 
     // ── GDPR ─────────────────────────────────────────────────────────────────
-    Route::get('/student/gdpr/export',   [GdprController::class, 'exportStudentData'])->middleware('throttle:5,60')->name('student.gdpr.export');
-    Route::post('/student/gdpr/erasure', [GdprController::class, 'requestStudentErasure'])->middleware('throttle:3,60')->name('student.gdpr.erasure');
+    Route::get('/student/gdpr/export',   [GdprController::class, 'exportStudentData'])->middleware('throttle:10,30')->name('student.gdpr.export');
+    Route::post('/student/gdpr/erasure', [GdprController::class, 'requestStudentErasure'])->middleware('throttle:5,60')->name('student.gdpr.erasure');
 
     // ── Takip Sayfaları ──────────────────────────────────────────────────────
     Route::get('/student/institution-documents',  [StudentProgressController::class, 'institutionDocuments'])->name('student.institution-documents');
