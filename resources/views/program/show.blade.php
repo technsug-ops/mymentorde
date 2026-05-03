@@ -13,6 +13,103 @@
 @endsection
 
 @section('content')
+@php
+    // Üniversite hero image — uni'nin kendi image_path'i varsa o, yoksa hash'e
+    // göre 5 generic university campus fotoğrafından deterministic seçim
+    // (aynı uni her zaman aynı foto'yu görür).
+    $uniName = $program->university_name_cached ?? '';
+    $heroImage = $program->university?->image_path
+        ? (str_starts_with($program->university->image_path, 'http')
+            ? $program->university->image_path
+            : asset($program->university->image_path))
+        : null;
+    if (! $heroImage) {
+        // Validated Unsplash photo IDs — university/campus tema
+        $fallbackPool = [
+            'photo-1523240795612-9a054b0db644', // academic study
+            'photo-1497633762265-9d179a990aa6', // students collaborating
+            'photo-1571260899304-425eee4c7efc', // library books
+            'photo-1588072432836-e10032774350', // city landmark
+            'photo-1517048676732-d65bc937f952', // people collaboration
+        ];
+        $idx = abs(crc32($uniName)) % count($fallbackPool);
+        $heroImage = 'https://images.unsplash.com/' . $fallbackPool[$idx] . '?auto=format&fit=crop&w=1600&q=80';
+    }
+@endphp
+
+{{-- Hero banner — üniversite görseli + isim overlay --}}
+<div class="prog-hero" aria-hidden="false">
+    <img class="prog-hero-img"
+         src="{{ $heroImage }}"
+         alt="{{ $uniName ?: 'Üniversite görseli' }}"
+         loading="eager" decoding="async">
+    <div class="prog-hero-overlay"></div>
+    <div class="prog-hero-content">
+        <div class="prog-hero-tag">📍 {{ $program->location ?? 'Almanya' }}</div>
+        <div class="prog-hero-uni">{{ $uniName }}</div>
+    </div>
+</div>
+
+<style nonce="{{ $cspNonce ?? '' }}">
+.prog-hero {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 18px;
+    height: 260px;
+    box-shadow: 0 14px 40px rgba(126,88,191,.18);
+    isolation: isolate;
+}
+.prog-hero-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    transition: transform 14s cubic-bezier(.4,0,.6,1);
+}
+.prog-hero-overlay {
+    position: absolute; inset: 0;
+    z-index: 1;
+    background:
+        linear-gradient(180deg, rgba(126, 88, 191, .25) 0%, rgba(94, 63, 156, .55) 60%, rgba(58, 34, 100, .80) 100%);
+}
+.prog-hero-content {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    z-index: 2;
+    padding: 28px 32px 24px;
+    color: #fff;
+}
+.prog-hero-tag {
+    display: inline-block;
+    padding: 5px 12px;
+    background: rgba(255,255,255,.22);
+    border: 1px solid rgba(255,255,255,.3);
+    backdrop-filter: blur(10px);
+    border-radius: 999px;
+    font-size: 11.5px; font-weight: 700;
+    letter-spacing: .5px;
+    margin-bottom: 10px;
+}
+.prog-hero-uni {
+    font-size: 26px; font-weight: 700;
+    line-height: 1.2; letter-spacing: -.5px;
+    text-shadow: 0 2px 12px rgba(0,0,0,.4);
+}
+@media (prefers-reduced-motion: no-preference) {
+    .prog-hero-img { animation: prog-hero-zoom 24s cubic-bezier(.4,0,.6,1) infinite alternate; }
+    @keyframes prog-hero-zoom {
+        0%   { transform: scale(1); }
+        100% { transform: scale(1.06); }
+    }
+}
+@media (max-width: 600px) {
+    .prog-hero { height: 200px; }
+    .prog-hero-content { padding: 20px 22px 18px; }
+    .prog-hero-uni { font-size: 21px; }
+}
+</style>
+
 <div class="sb-card" style="padding: 32px 28px; margin-bottom: 18px;">
     {{-- Header --}}
     <div style="display: flex; gap: 18px; align-items: flex-start; margin-bottom: 18px;">
