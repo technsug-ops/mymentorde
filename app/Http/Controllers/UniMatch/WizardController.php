@@ -539,7 +539,12 @@ class WizardController extends Controller
                     'session_token' => $response->session_token,
                     'company_id'    => $response->company_id,
                     'current_step'  => $response->current_step,
-                    'source'        => $response->source,
+                    // Tam UTM attribution — granular kampanya analizi için kritik
+                    'source'        => $response->source,        // utm_source
+                    'utm_medium'    => $response->utm_medium,
+                    'utm_campaign'  => $response->utm_campaign,
+                    'utm_content'   => $response->utm_content,
+                    'utm_term'      => $response->utm_term,
                     'referrer'      => $response->referrer,
                 ], $extra),
                 $response->session_token
