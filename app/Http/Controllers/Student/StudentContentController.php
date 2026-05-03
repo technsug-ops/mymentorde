@@ -259,10 +259,17 @@ class StudentContentController extends Controller
 
     public function savedList(Request $request)
     {
-        $userId   = auth()->id();
+        $userId = auth()->id();
+        // Hem 'Kaydet' (UserSavedContent) hem 'Begen' (UserContentReaction)
+        // ile isaretlenen icerikler Favorilerim'de gozuksun. Kullanici iki butonu
+        // ayri ayri dusunmek zorunda kalmasin (UX birlestirme).
         $savedIds = $userId ? UserSavedContent::where('user_id', $userId)->pluck('cms_content_id') : collect();
-        $items    = CmsContent::whereIn('id', $savedIds)->where('status', 'published')->orderByDesc('id')->paginate(12);
-        $base     = $this->baseData($request, 'saved', 'Favorilerim', '');
+        $likedIds = $userId
+            ? UserContentReaction::where('user_id', $userId)->where('type', 'like')->pluck('cms_content_id')
+            : collect();
+        $allIds = $savedIds->merge($likedIds)->unique();
+        $items  = CmsContent::whereIn('id', $allIds)->where('status', 'published')->orderByDesc('id')->paginate(12);
+        $base   = $this->baseData($request, 'saved', 'Favorilerim', '');
         $base['items'] = $items;
 
         return view('student.saved', $base);
