@@ -36,20 +36,41 @@ class RecommendationEngine
             $query->whereIn('language', [$a['study_language'], 'both']);
         }
 
-        // Public-only filtresi (tuition_tolerance)
-        if (($a['tuition_tolerance'] ?? null) === 'public_only') {
-            $query->where(function ($q) {
-                $q->whereNull('tuition_eur_per_semester')
-                  ->orWhere('tuition_eur_per_semester', '<=', 500);
+        // Tuition tolerance hard filter (liveMatchCount ile uyumlu — kullanıcı strict eşleşme görsün)
+        if (! empty($a['tuition_tolerance'])) {
+            $tol = (string) $a['tuition_tolerance'];
+            if ($tol === 'free_only' || $tol === 'public_only') {
+                $query->where(function ($q) {
+                    $q->whereNull('tuition_eur_per_semester')->orWhere('tuition_eur_per_semester', 0);
+                });
+            } elseif ($tol === 'low') {
+                $query->where(function ($q) {
+                    $q->whereNull('tuition_eur_per_semester')->orWhere('tuition_eur_per_semester', '<', 1000);
+                });
+            } elseif ($tol === 'mid') {
+                $query->where('tuition_eur_per_semester', '<', 3000);
+            }
+        }
+
+        // Target field hard filter (JSON_SEARCH LIKE — liveMatchCount ile aynı mantık)
+        if (! empty($a['target_field'])) {
+            $query->whereRaw("JSON_SEARCH(study_fields, 'one', ?) IS NOT NULL", ['%' . (string) $a['target_field'] . '%']);
+        }
+
+        // Preferred cities hard filter (location LIKE OR — kullanıcı dolu bırakırsa strict)
+        $preferredCities = is_array($a['preferred_cities'] ?? null) ? $a['preferred_cities'] : [];
+        $preferredCities = array_filter(array_map('strval', $preferredCities));
+        if (! empty($preferredCities)) {
+            $query->where(function ($q) use ($preferredCities) {
+                foreach ($preferredCities as $c) {
+                    $q->orWhere('location', 'LIKE', "%{$c}%");
+                }
             });
         }
 
-        // Şehir filtresi (preferred_cities — array)
-        $preferredCities = is_array($a['preferred_cities'] ?? null) ? $a['preferred_cities'] : [];
-        // Burada hard filter YERİNE soft scoring kullanıyoruz — kullanıcı "boş bırakırsam tümü" demişti
-
-        // Stochastic limit — top-N seç
-        $candidates = $query->limit(max(300, $limit * 40))->get();
+        // Strict match — liveMatchCount ile aynı candidate pool
+        // Limit: kullanıcının istediği kadar (default 10), strict eşleşen kaç tane varsa o kadar dönecek
+        $candidates = $query->limit(max($limit, 50))->get();
 
         // ── Scoring ──
         $scored = $candidates->map(function (Program $p) use ($a, $preferredCities) {
