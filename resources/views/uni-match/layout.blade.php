@@ -288,7 +288,7 @@
             min-height: 100vh;
             position: relative;
         }
-        /* Filigran — üniversite görseli, fixed full-page, low opacity + blur */
+        /* Filigran — üniversite görseli, fixed full-page, çok düşük opacity + blur */
         body.sb-detail-mode::before {
             content: '';
             position: fixed;
@@ -296,8 +296,8 @@
             background-position: center;
             background-size: cover;
             background-repeat: no-repeat;
-            opacity: .12;
-            filter: blur(2px) saturate(.85);
+            opacity: .06;
+            filter: blur(3px) saturate(.7);
             z-index: 0;
             pointer-events: none;
         }
