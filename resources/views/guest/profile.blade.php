@@ -263,23 +263,24 @@
     $extraLangs = max(0, $skillsSummary->count() - 1);
     $snapshots = $registrationSnapshots ?? collect();
 
-    // Profil tamamlama oranı (basit heuristic)
+    // Profil tamamlama oranı — hangi alan boş kullanıcıya açıkça gösterilir
     $fields = [
-        !empty($guest?->first_name),
-        !empty($guest?->last_name),
-        !empty($guest?->email),
-        !empty($guest?->phone),
-        !empty($guest?->gender),
-        !empty($guest?->communication_language),
-        !empty($guest?->application_country),
-        !empty($guest?->target_city),
-        !empty($guest?->target_term),
-        !empty($guest?->application_type),
-        $photoUrl !== '',
-        $skillsSummary->isNotEmpty() || !empty($guest?->language_level),
+        'Ad'                => !empty($guest?->first_name),
+        'Soyad'             => !empty($guest?->last_name),
+        'E-posta'           => !empty($guest?->email),
+        'Telefon'           => !empty($guest?->phone),
+        'Cinsiyet'          => !empty($guest?->gender),
+        'İletişim Dili'     => !empty($guest?->communication_language),
+        'Başvuru Ülkesi'    => !empty($guest?->application_country),
+        'Hedef Şehir'       => !empty($guest?->target_city),
+        'Hedef Dönem'       => !empty($guest?->target_term),
+        'Başvuru Türü'      => !empty($guest?->application_type),
+        'Profil Fotoğrafı'  => $photoUrl !== '',
+        'Dil Becerileri'    => $skillsSummary->isNotEmpty() || !empty($guest?->language_level),
     ];
     $filled = count(array_filter($fields));
     $total = count($fields);
+    $missingFields = array_keys(array_filter($fields, fn($v) => !$v));
     $completion = $total > 0 ? (int) round(($filled / $total) * 100) : 0;
 @endphp
 
@@ -344,6 +345,11 @@
             <div class="gp-progress-bar">
                 <div class="gp-progress-fill" style="width:{{ $completion }}%"></div>
             </div>
+            @if(!empty($missingFields))
+            <div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,.78);line-height:1.5;">
+                Eksik: {{ implode(', ', $missingFields) }}
+            </div>
+            @endif
         </div>
     </div>
 </div>
