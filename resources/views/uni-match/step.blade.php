@@ -22,31 +22,32 @@
     $remainingLabel = $remainingMin ? "~{$remainingMin} dk kaldı" : ($remainingSteps > 0 ? '<1 dk kaldı' : 'Sonuç sayfasına geçiyorsun!');
 
     $stepKey = $stepDef['key'] ?? '';
-    $img = fn ($theme) => '/img/uni-match/' . $theme . '.jpg';
+    // Her step için unique + bağlamsal foto (public/img/uni-match-steps/{stepKey}.jpg)
+    $img = fn ($key) => '/img/uni-match-steps/' . $key . '.jpg';
     $rightPanelMap = [
-        'target_degree'           => ['tag' => 'Akademik hedefin',     'image' => $img('academic')],
-        'target_field'            => ['tag' => 'İlgi alanın',          'image' => $img('students')],
-        'study_language'          => ['tag' => 'Eğitim dili',          'image' => $img('language')],
-        'germany_motivation'      => ['tag' => 'Motivasyon',           'image' => $img('germany')],
-        'start_term'              => ['tag' => 'Başlangıç dönemi',     'image' => $img('planning')],
-        'current_education_level' => ['tag' => 'Mevcut eğitim',        'image' => $img('academic')],
-        'high_school_type'        => ['tag' => 'Lise türü',            'image' => $img('students')],
-        'gpa_range'               => ['tag' => 'Akademik başarı',      'image' => $img('general')],
-        'german_level'            => ['tag' => 'Almanca seviyesi',     'image' => $img('language')],
-        'english_level'           => ['tag' => 'İngilizce seviyesi',   'image' => $img('language')],
-        'language_certificate'    => ['tag' => 'Dil sertifikası',      'image' => $img('docs')],
-        'finance_method'          => ['tag' => 'Finansman',            'image' => $img('docs')],
-        'monthly_budget'          => ['tag' => 'Aylık bütçe',          'image' => $img('planning')],
-        'tuition_tolerance'       => ['tag' => 'Öğrenim ücreti',       'image' => $img('academic')],
-        'living_priority'         => ['tag' => 'Yaşam tarzı',          'image' => $img('general')],
-        'preferred_cities'        => ['tag' => 'Tercih şehirler',      'image' => $img('germany')],
-        'has_aps'                 => ['tag' => 'APS durumu',           'image' => $img('docs')],
-        'visa_readiness'          => ['tag' => 'Vize hazırlığı',       'image' => $img('docs')],
-        'mentorde_help_areas'     => ['tag' => 'Destek alanları',      'image' => $img('mentoring')],
+        'target_degree'           => ['tag' => 'Akademik hedefin',     'image' => $img('target_degree')],            // graduation cap
+        'target_field'            => ['tag' => 'İlgi alanın',          'image' => $img('target_field')],             // microscope/lab
+        'study_language'          => ['tag' => 'Eğitim dili',          'image' => $img('study_language')],           // open books
+        'germany_motivation'      => ['tag' => 'Motivasyon',           'image' => $img('germany_motivation')],       // Brandenburg
+        'start_term'              => ['tag' => 'Başlangıç dönemi',     'image' => $img('start_term')],               // calendar
+        'current_education_level' => ['tag' => 'Mevcut eğitim',        'image' => $img('current_education_level')],  // lecture hall
+        'high_school_type'        => ['tag' => 'Lise türü',            'image' => $img('high_school_type')],         // students backpack
+        'gpa_range'               => ['tag' => 'Akademik başarı',      'image' => $img('gpa_range')],                // writing notes
+        'german_level'            => ['tag' => 'Almanca seviyesi',     'image' => $img('german_level')],             // Reichstag
+        'english_level'           => ['tag' => 'İngilizce seviyesi',   'image' => $img('english_level')],            // English books
+        'language_certificate'    => ['tag' => 'Dil sertifikası',      'image' => $img('language_certificate')],     // certificate
+        'finance_method'          => ['tag' => 'Finansman',            'image' => $img('finance_method')],           // euro money
+        'monthly_budget'          => ['tag' => 'Aylık bütçe',          'image' => $img('monthly_budget')],           // calculator
+        'tuition_tolerance'       => ['tag' => 'Öğrenim ücreti',       'image' => $img('tuition_tolerance')],        // uni building
+        'living_priority'         => ['tag' => 'Yaşam tarzı',          'image' => $img('living_priority')],          // cozy German town
+        'preferred_cities'        => ['tag' => 'Tercih şehirler',      'image' => $img('preferred_cities')],         // German city aerial
+        'has_aps'                 => ['tag' => 'APS durumu',           'image' => $img('has_aps')],                  // documents
+        'visa_readiness'          => ['tag' => 'Vize hazırlığı',       'image' => $img('visa_readiness')],           // passport
+        'mentorde_help_areas'     => ['tag' => 'Destek alanları',      'image' => $img('mentorde_help_areas')],      // mentoring handshake
     ];
     $rightPanel = $rightPanelMap[$stepKey] ?? [
         'tag'   => 'UniMatch',
-        'image' => $img('academic'),
+        'image' => $img('target_degree'),
     ];
 
     // Filter sayısı azalma hissi (öncekiyle karşılaştırma için)
