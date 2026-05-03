@@ -435,6 +435,14 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::get('/manager/unimatch-funnel/leads.csv', [$umf, 'exportLeadsCsv'])->name('manager.unimatch-funnel.leads-csv');
     }
 
+    // ── Üniversite görsel yönetimi (image_path doldurma) ──
+    {
+        $uc = \App\Http\Controllers\Manager\UniversityController::class;
+        Route::get('/manager/universities',                                [$uc, 'index'])->name('manager.universities.index');
+        Route::post('/manager/universities/{university}/image',            [$uc, 'uploadImage'])->middleware('throttle:30,1')->name('manager.universities.image.upload');
+        Route::delete('/manager/universities/{university}/image',          [$uc, 'deleteImage'])->middleware('throttle:30,1')->name('manager.universities.image.delete');
+    }
+
     // ── Application Guides — student altında (Uni-Assist + Vize) ──────────────
     // Uni-Assist sözleşme+ödeme sonrası (öğrenci aşamasında) yapılır.
     // Guest URL legacy backward-compat için tutuldu.
