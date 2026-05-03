@@ -929,7 +929,13 @@
                         </div>
                         <div class="doc-actions">
                             @php $rejFid = 'rej-' . preg_replace('/[^a-z0-9]/', '-', strtolower((string)($rd->category->code ?? 'x'))); @endphp
-                            <form method="post" action="{{ route('student.registration.documents.upload') }}" enctype="multipart/form-data" style="display:flex;align-items:center;gap:6px;margin:0;">@csrf<input type="hidden" name="category_code" value="{{ $rd->category->code ?? '' }}"><label class="doc-btn small" for="{{ $rejFid }}" style="cursor:pointer;">Dosya Seç</label><input type="file" name="file" id="{{ $rejFid }}" required style="display:none;" data-fname-target="sf-{{ $rejFid }}"><span id="sf-{{ $rejFid }}" style="font-size:11px;color:var(--muted);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span><button class="doc-btn danger" type="submit">🔄 Yeniden Yükle</button></form>
+                            <form method="post" action="{{ route('student.registration.documents.upload') }}" enctype="multipart/form-data" style="display:flex;align-items:center;gap:6px;margin:0;" data-reupload-form="{{ $rejFid }}">
+                                @csrf
+                                <input type="hidden" name="category_code" value="{{ $rd->category->code ?? '' }}">
+                                {{-- Tek tiklamali: butona basinca file picker acilir, dosya secince form otomatik submit --}}
+                                <input type="file" name="file" id="{{ $rejFid }}" required style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" data-reupload-input>
+                                <label class="doc-btn danger" for="{{ $rejFid }}" style="cursor:pointer;margin:0;">🔄 Yeniden Yükle</label>
+                            </form>
                         </div>
                     </div>
                 @endforeach
@@ -1270,6 +1276,16 @@
         inp.addEventListener('change', function(){
             var tgt = document.getElementById(this.dataset.fnameTarget);
             if(tgt){ tgt.classList.add('show'); var n=tgt.querySelector('.sf-name'); if(n) n.textContent=this.files[0]?this.files[0].name:''; }
+        });
+    });
+
+    // Reddedilen belge "Yeniden Yükle" — dosya secilince form auto-submit
+    document.querySelectorAll('input[type="file"][data-reupload-input]').forEach(function(inp){
+        inp.addEventListener('change', function(){
+            if(this.files && this.files.length > 0){
+                var form = this.closest('form[data-reupload-form]');
+                if(form) form.submit();
+            }
         });
     });
 
