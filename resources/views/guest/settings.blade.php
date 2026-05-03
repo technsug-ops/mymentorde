@@ -280,6 +280,9 @@
     <div class="gst-section-body">
         <form method="POST" action="{{ route('guest.settings.update') }}">
             @csrf
+            {{-- notifications_enabled mevcut deger ile tasi, locale form'u submit
+                 edilince bildirim wipe edilmesin --}}
+            <input type="hidden" name="notifications_enabled" value="{{ $notif ? 1 : 0 }}">
 
             {{-- Account info tiles --}}
             <div class="gst-info-grid" style="margin-bottom:18px;">
@@ -326,10 +329,9 @@
     <div class="gst-section-body">
         <form method="POST" action="{{ route('guest.settings.update') }}">
             @csrf
-            @php
-                $notifChannels = $guest?->notification_channels ?? [];
-                $hasChannel = fn($ch) => in_array($ch, (array)$notifChannels) || $notif;
-            @endphp
+            {{-- preferred_locale validation icin hidden field — bu form sadece bildirim
+                 toggle'i ama controller validate('preferred_locale required') ister --}}
+            <input type="hidden" name="preferred_locale" value="{{ $pref }}">
 
             <label class="gst-notif-row">
                 <input type="checkbox" name="notifications_enabled" value="1" @checked($notif)>
@@ -340,25 +342,11 @@
                 </div>
             </label>
 
-            @php
-                $notifTypes = [
-                    ['icon'=>'💬', 'label'=>'Yeni Mesaj',         'sub'=>'Danışmanınızdan yeni mesaj geldiğinde',         'key'=>'new_message'],
-                    ['icon'=>'📄', 'label'=>'Belge Hatırlatıcı',  'sub'=>'Eksik veya yaklaşan belge son tarihleri',       'key'=>'document_reminder'],
-                    ['icon'=>'📅', 'label'=>'Randevu Bildirimi',  'sub'=>'Randevu oluşturulduğunda veya değiştiğinde',    'key'=>'appointment'],
-                    ['icon'=>'✍️', 'label'=>'Sözleşme Güncelleme','sub'=>'Sözleşme durumu değiştiğinde',                 'key'=>'contract_update'],
-                ];
-            @endphp
-            @foreach($notifTypes as $nt)
-            <label class="gst-notif-row">
-                <input type="checkbox" name="notif_{{ $nt['key'] }}" value="1"
-                       @checked(in_array($nt['key'], (array)($guest?->notification_channels ?? [])) || $notif)>
-                <span class="gst-notif-icon">{{ $nt['icon'] }}</span>
-                <div style="flex:1">
-                    <div class="gst-notif-label">{{ $nt['label'] }}</div>
-                    <div class="gst-notif-sub">{{ $nt['sub'] }}</div>
-                </div>
-            </label>
-            @endforeach
+            {{-- Granular bildirim tercihleri (yeni mesaj, belge hatirlatici, vb.)
+                 ileriki release'de eklenecek. Su an persistence yok, fake UI olmasin diye gizli. --}}
+            <div style="margin-top:10px;font-size:12px;color:var(--muted);">
+                Daha detayli bildirim secenekleri yakinda eklenecek (yeni mesaj, belge, randevu).
+            </div>
 
             <div style="margin-top:14px;">
                 <button class="btn ok" type="submit" style="padding:9px 24px;">Bildirimleri Kaydet</button>

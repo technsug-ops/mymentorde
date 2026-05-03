@@ -178,11 +178,12 @@
     {{-- ── Dil ── --}}
     <form method="POST" action="{{ route('student.settings.update') }}" id="form-general">
         @csrf
-        {{-- hidden notif fields so this form also saves them --}}
-        <input type="hidden" name="notifications_enabled" value="0">
-        <input type="hidden" name="notify_email"    value="0">
-        <input type="hidden" name="notify_whatsapp" value="0">
-        <input type="hidden" name="notify_inapp"    value="0">
+        {{-- hidden notif fields — locale form'u submit edince notif tercihleri
+             override edilmesin diye mevcut degerler korunur --}}
+        <input type="hidden" name="notifications_enabled" value="{{ $notifEnabled ? 1 : 0 }}">
+        <input type="hidden" name="notify_email"    value="{{ $notifyEmail ? 1 : 0 }}">
+        <input type="hidden" name="notify_whatsapp" value="{{ $notifyWhatsapp ? 1 : 0 }}">
+        <input type="hidden" name="notify_inapp"    value="{{ $notifyInapp ? 1 : 0 }}">
 
         <div class="set-card">
             <div class="set-card-title">🌐 Dil ve Görünüm</div>
@@ -246,6 +247,11 @@
     {{-- ── Bildirimler ── --}}
     <form method="POST" action="{{ route('student.settings.update') }}" id="form-notif">
         @csrf
+        {{-- preferred_locale validation gerekli — bu form sadece bildirim icin
+             ama controller tek endpoint, validation locale ister --}}
+        <input type="hidden" name="preferred_locale" value="{{ $locale }}">
+        <input type="hidden" name="preferred_timezone" value="{{ $timezone }}">
+        <input type="hidden" name="preferred_date_format" value="{{ $dateFmt }}">
         <div class="set-card">
             <div class="set-card-title">🔔 Bildirim Tercihleri</div>
 
