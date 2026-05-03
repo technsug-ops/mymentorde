@@ -2,6 +2,12 @@
 
 @section('title', $program->course_name . ' — ' . $program->university_name_cached)
 
+@push('head')
+<script nonce="{{ $cspNonce ?? '' }}">
+    document.documentElement.classList.add('sb-detail-active');
+</script>
+@endpush
+
 @section('back-link')
     <a href="javascript:history.back()" class="sb-back">← Geri</a>
 @endsection

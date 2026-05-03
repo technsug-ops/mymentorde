@@ -279,6 +279,86 @@
         }
 
         /* ════════════════════════════════════════════════════════════════
+           sb-detail-mode — program detay (uni-match.layout extend ederek)
+           Wizard'in visual dilini (mor wash, decorative blob, accent bar) okumayi
+           bozmadan kullanir. Wizard gibi full-screen degil, 960px readable width.
+        ════════════════════════════════════════════════════════════════ */
+        body.sb-detail-mode {
+            background: linear-gradient(180deg, #faf9f5 0%, #f7f3ff 100%);
+            min-height: 100vh;
+        }
+        body.sb-detail-mode .sb-container {
+            max-width: 960px;
+            padding: 24px clamp(20px, 4vw, 64px) 64px;
+        }
+
+        body.sb-detail-mode .sb-card {
+            background:
+                radial-gradient(circle at 100% 0%, rgba(126,88,191,.06) 0%, transparent 55%),
+                radial-gradient(circle at 0% 100%, rgba(167,126,217,.04) 0%, transparent 55%),
+                #fff;
+            border: 1px solid rgba(126, 88, 191, .10);
+            box-shadow:
+                0 12px 36px rgba(126, 88, 191, .08),
+                inset 0 1px 0 rgba(255, 255, 255, .6);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        body.sb-detail-mode .sb-card::before {
+            content: '';
+            position: absolute;
+            top: -100px; right: -100px;
+            width: 240px; height: 240px;
+            background: radial-gradient(circle, rgba(126,88,191,.10) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        body.sb-detail-mode .sb-card > * { position: relative; z-index: 1; }
+
+        /* Section title (h2) — sol mor accent bar, mevcut "📋 Program Hakkinda" gibi */
+        body.sb-detail-mode .sb-card h2 {
+            position: relative;
+            padding-left: 14px;
+        }
+        body.sb-detail-mode .sb-card h2::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 4px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #7e58bf 0%, #a07ed9 100%);
+            box-shadow: 0 1px 4px rgba(126, 88, 191, .25);
+        }
+
+        /* Hero card (uni logo + program name) — biraz daha büyük accent */
+        body.sb-detail-mode .sb-card:first-of-type {
+            box-shadow:
+                0 16px 48px rgba(126, 88, 191, .12),
+                inset 0 1px 0 rgba(255, 255, 255, .6);
+        }
+
+        /* Card entry stagger */
+        @media (prefers-reduced-motion: no-preference) {
+            body.sb-detail-mode .sb-card {
+                animation: sb-detail-card-in .42s cubic-bezier(.4,0,.2,1) both;
+            }
+            body.sb-detail-mode .sb-card:nth-of-type(1) { animation-delay: 40ms; }
+            body.sb-detail-mode .sb-card:nth-of-type(2) { animation-delay: 100ms; }
+            body.sb-detail-mode .sb-card:nth-of-type(3) { animation-delay: 160ms; }
+            body.sb-detail-mode .sb-card:nth-of-type(4) { animation-delay: 220ms; }
+            body.sb-detail-mode .sb-card:nth-of-type(5) { animation-delay: 280ms; }
+            body.sb-detail-mode .sb-card:nth-of-type(n+6) { animation-delay: 340ms; }
+            @keyframes sb-detail-card-in {
+                0%   { opacity: 0; transform: translateY(12px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+        }
+
+        /* ════════════════════════════════════════════════════════════════
            Studyportals tarzı premium wizard mode (body.sb-wizard-mode ile aktif)
            - Floating gradient blobs (animated)
            - Pill segmented progress
@@ -714,10 +794,13 @@
     @stack('head')
 </head>
 <body>
-    {{-- Wizard step pages için body class (head'de @push'lanan flag) --}}
+    {{-- Wizard / detail pages için body class (head'de @push'lanan flag) --}}
     <script nonce="{{ $cspNonce ?? '' }}">
         if (document.documentElement.classList.contains('sb-wizard-active')) {
             document.body.classList.add('sb-wizard-mode');
+        }
+        if (document.documentElement.classList.contains('sb-detail-active')) {
+            document.body.classList.add('sb-detail-mode');
         }
     </script>
 
