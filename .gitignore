@@ -53,3 +53,4 @@ DEV_LOGIN_CREDENTIALS.md
 # Manuel sync script'leri (prod credentials gömülü)
 /scripts/sync_translations_to_prod.php
 /scripts/sync_*_to_prod.php
+scripts/inspect_*.php

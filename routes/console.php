@@ -13,6 +13,16 @@ Artisan::command('inspire', function () {
 // Business logic lives in app/Console/Commands/
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Queue worker — KAS shared hosting'de daemon process tutamayız, her dakika
+// 55sn'lik bir worker burst'ü çalıştırırız. notifications:dispatch komutu
+// queue'ya job push ediyor; bu worker onları çekip Mail::send tetikler.
+// Olmadan: NotificationDispatch'lar 'queued' status'ta sonsuza kadar kalır
+// (3 Mayıs incelemesinde tespit edildi — 30 Nisan'dan beri 3 mail birikmişti).
+Schedule::command('queue:work --queue=notifications,default --once --max-time=55 --tries=3 --backoff=60 --stop-when-empty')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/queue-worker.log'));
+
 Schedule::command('manager:report-snapshot --type=weekly')->mondays()->at('08:00');
 Schedule::command('manager:report-snapshot --type=monthly')->monthlyOn(1, '08:10');
 Schedule::command('notifications:dispatch --limit=100')->everyMinute();
