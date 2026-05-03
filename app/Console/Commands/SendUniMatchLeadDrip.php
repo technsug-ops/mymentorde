@@ -71,8 +71,8 @@ class SendUniMatchLeadDrip extends Command
             foreach ($candidates as $response) {
                 // Bu lead'e bu stage daha önce gönderildi mi?
                 $alreadySent = NotificationDispatch::query()
-                    ->where('template_key', $templateKey)
-                    ->where('email_to', $response->lead_email)
+                    ->where('source_type', $templateKey)
+                    ->where('source_id', $response->id)
                     ->exists();
 
                 if ($alreadySent) {
@@ -97,13 +97,17 @@ class SendUniMatchLeadDrip extends Command
                     });
 
                     NotificationDispatch::create([
-                        'user_id'      => null,
-                        'template_key' => $templateKey,
-                        'channel'      => 'email',
-                        'email_to'     => $response->lead_email,
-                        'subject'      => $cfg['subject'],
-                        'status'       => 'sent',
-                        'sent_at'      => now(),
+                        'user_id'         => null,
+                        'company_id'      => $response->company_id,
+                        'source_type'     => $templateKey,
+                        'source_id'       => $response->id,
+                        'channel'         => 'email',
+                        'category'        => 'unimatch',
+                        'recipient_email' => $response->lead_email,
+                        'recipient_name'  => $response->lead_first_name,
+                        'subject'         => $cfg['subject'],
+                        'status'          => 'sent',
+                        'sent_at'         => now(),
                     ]);
 
                     $totalSent++;

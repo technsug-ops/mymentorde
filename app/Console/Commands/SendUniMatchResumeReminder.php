@@ -57,8 +57,8 @@ class SendUniMatchResumeReminder extends Command
 
         foreach ($candidates as $response) {
             $alreadySent = NotificationDispatch::query()
-                ->where('template_key', self::TEMPLATE_KEY)
-                ->where('email_to', $response->lead_email)
+                ->where('source_type', self::TEMPLATE_KEY)
+                ->where('source_id', $response->id)
                 ->exists();
 
             if ($alreadySent) {
@@ -86,13 +86,17 @@ class SendUniMatchResumeReminder extends Command
                 });
 
                 NotificationDispatch::create([
-                    'user_id'      => null,
-                    'template_key' => self::TEMPLATE_KEY,
-                    'channel'      => 'email',
-                    'email_to'     => $response->lead_email,
-                    'subject'      => "%{$progressPct} doldurmuştun — UniMatch'a devam et",
-                    'status'       => 'sent',
-                    'sent_at'      => now(),
+                    'user_id'         => null,
+                    'company_id'      => $response->company_id,
+                    'source_type'     => self::TEMPLATE_KEY,
+                    'source_id'       => $response->id,
+                    'channel'         => 'email',
+                    'category'        => 'unimatch',
+                    'recipient_email' => $response->lead_email,
+                    'recipient_name'  => $response->lead_first_name,
+                    'subject'         => "%{$progressPct} doldurmuştun — UniMatch'a devam et",
+                    'status'          => 'sent',
+                    'sent_at'         => now(),
                 ]);
 
                 $sent++;

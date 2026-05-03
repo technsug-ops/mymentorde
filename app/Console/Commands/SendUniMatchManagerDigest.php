@@ -69,11 +69,12 @@ class SendUniMatchManagerDigest extends Command
         $this->info("Hedef alıcı: {$recipients->count()} (manager/marketing/system)");
 
         $sent = 0;
+        $digestSourceId = (int) $yesterday->format('Ymd'); // 20260502 gibi int
         foreach ($recipients as $user) {
-            $templateKey = 'unimatch_manager_digest_' . $yesterday->format('Y_m_d');
             $alreadySent = NotificationDispatch::query()
                 ->where('user_id', $user->id)
-                ->where('template_key', $templateKey)
+                ->where('source_type', 'unimatch_digest')
+                ->where('source_id', $digestSourceId)
                 ->exists();
 
             if ($alreadySent) continue;
@@ -95,13 +96,17 @@ class SendUniMatchManagerDigest extends Command
                 });
 
                 NotificationDispatch::create([
-                    'user_id'      => $user->id,
-                    'template_key' => $templateKey,
-                    'channel'      => 'email',
-                    'email_to'     => $user->email,
-                    'subject'      => "UniMatch Özet {$stats['date']}",
-                    'status'       => 'sent',
-                    'sent_at'      => now(),
+                    'user_id'         => $user->id,
+                    'company_id'      => $user->company_id ?? 1,
+                    'source_type'     => 'unimatch_digest',
+                    'source_id'       => $digestSourceId,
+                    'channel'         => 'email',
+                    'category'        => 'unimatch',
+                    'recipient_email' => $user->email,
+                    'recipient_name'  => $user->name,
+                    'subject'         => "UniMatch Özet {$stats['date']}",
+                    'status'          => 'sent',
+                    'sent_at'         => now(),
                 ]);
 
                 $sent++;
