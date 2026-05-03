@@ -520,6 +520,13 @@ Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToGoo
 Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])
     ->middleware('throttle:20,1')
     ->name('auth.google.callback');
+// Yeni Google kullanıcısı için rol seçici (Aday Öğrenci vs Partner Bayi)
+Route::get('/auth/google/choose-role', [SocialAuthController::class, 'showRoleChoice'])
+    ->middleware('throttle:30,1')
+    ->name('auth.google.choose-role');
+Route::post('/auth/google/choose-role', [SocialAuthController::class, 'submitRoleChoice'])
+    ->middleware('throttle:10,1')
+    ->name('auth.google.choose-role.submit');
 
 // ── Google Calendar Integration (ayrı scope, login'den bağımsız) ─────────────
 Route::middleware(['auth'])->group(function (): void {

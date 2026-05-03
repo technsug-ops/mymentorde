@@ -240,12 +240,12 @@ a { color:var(--primary); text-decoration:none; }
                 <div class="wz-grid2">
                     <div class="wz-field">
                         <label>Ad <span class="req">*</span></label>
-                        <input type="text" name="first_name" data-required value="{{ old('first_name') }}" autocomplete="given-name">
+                        <input type="text" name="first_name" data-required value="{{ old('first_name', $prefillIdentity['first_name'] ?? '') }}" autocomplete="given-name">
                         <div class="wz-field-error">Ad gerekli.</div>
                     </div>
                     <div class="wz-field">
                         <label>Soyad <span class="req">*</span></label>
-                        <input type="text" name="last_name" data-required value="{{ old('last_name') }}" autocomplete="family-name">
+                        <input type="text" name="last_name" data-required value="{{ old('last_name', $prefillIdentity['last_name'] ?? '') }}" autocomplete="family-name">
                         <div class="wz-field-error">Soyad gerekli.</div>
                     </div>
                 </div>
@@ -253,7 +253,7 @@ a { color:var(--primary); text-decoration:none; }
                 <div class="wz-grid2">
                     <div class="wz-field">
                         <label>Email <span class="req">*</span></label>
-                        <input type="email" name="email" data-required data-email value="{{ old('email') }}" autocomplete="email">
+                        <input type="email" name="email" data-required data-email value="{{ old('email', $prefillIdentity['email'] ?? '') }}" autocomplete="email">
                         <div class="wz-field-error">Geçerli email girin.</div>
                     </div>
                     <div class="wz-field">

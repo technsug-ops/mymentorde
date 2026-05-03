@@ -19,11 +19,19 @@ class DealerApplicationController extends Controller
     public function create(Request $request): View
     {
         // UTM prefill — landing'den gelirken query string'te gelir
+        // Identity prefill — Google OAuth role-choice'dan gelirken session flash'te gelir
+        $identity = (array) ($request->session()->get('dealer_prefill') ?? []);
+
         return view('public.dealer-application', [
             'prefillUtm' => [
                 'utm_source'   => $request->query('utm_source'),
                 'utm_medium'   => $request->query('utm_medium'),
                 'utm_campaign' => $request->query('utm_campaign'),
+            ],
+            'prefillIdentity' => [
+                'first_name' => (string) ($identity['first_name'] ?? ''),
+                'last_name'  => (string) ($identity['last_name'] ?? ''),
+                'email'      => (string) ($identity['email'] ?? ''),
             ],
         ]);
     }
