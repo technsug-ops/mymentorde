@@ -250,21 +250,13 @@ class WizardController extends Controller
                 $q->whereRaw("JSON_SEARCH(study_fields, 'one', ?) IS NOT NULL", ['%' . $field . '%']);
             }
 
-            // tuition_tolerance → tuition_eur_per_semester filtre
-            if (! empty($answers['tuition_tolerance'])) {
-                $tol = (string) $answers['tuition_tolerance'];
-                if ($tol === 'free_only') {
-                    $q->where(function ($qq) {
-                        $qq->whereNull('tuition_eur_per_semester')->orWhere('tuition_eur_per_semester', 0);
-                    });
-                } elseif ($tol === 'low') {
-                    $q->where(function ($qq) {
-                        $qq->whereNull('tuition_eur_per_semester')->orWhere('tuition_eur_per_semester', '<', 1000);
-                    });
-                } elseif ($tol === 'mid') {
-                    $q->where('tuition_eur_per_semester', '<', 3000);
-                }
-                // 'high' / 'flexible' → filter yok
+            // tuition_tolerance → schema değerleri: public_only / both / private_ok
+            // public_only: sadece ücretsiz devlet üni (tuition NULL veya 0)
+            // both / private_ok: filtre yok (kullanıcı her tip uniyi kabul ediyor)
+            if (($answers['tuition_tolerance'] ?? null) === 'public_only') {
+                $q->where(function ($qq) {
+                    $qq->whereNull('tuition_eur_per_semester')->orWhere('tuition_eur_per_semester', 0);
+                });
             }
 
             // preferred_cities → location IN

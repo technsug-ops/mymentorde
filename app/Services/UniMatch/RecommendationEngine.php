@@ -36,20 +36,12 @@ class RecommendationEngine
             $query->whereIn('language', [$a['study_language'], 'both']);
         }
 
-        // Tuition tolerance hard filter (liveMatchCount ile uyumlu — kullanıcı strict eşleşme görsün)
-        if (! empty($a['tuition_tolerance'])) {
-            $tol = (string) $a['tuition_tolerance'];
-            if ($tol === 'free_only' || $tol === 'public_only') {
-                $query->where(function ($q) {
-                    $q->whereNull('tuition_eur_per_semester')->orWhere('tuition_eur_per_semester', 0);
-                });
-            } elseif ($tol === 'low') {
-                $query->where(function ($q) {
-                    $q->whereNull('tuition_eur_per_semester')->orWhere('tuition_eur_per_semester', '<', 1000);
-                });
-            } elseif ($tol === 'mid') {
-                $query->where('tuition_eur_per_semester', '<', 3000);
-            }
+        // Tuition tolerance — schema değerleri: public_only / both / private_ok
+        // Sadece public_only hard filter; diğerleri kullanıcı her tip uniyi kabul ediyor
+        if (($a['tuition_tolerance'] ?? null) === 'public_only') {
+            $query->where(function ($q) {
+                $q->whereNull('tuition_eur_per_semester')->orWhere('tuition_eur_per_semester', 0);
+            });
         }
 
         // Target field hard filter (JSON_SEARCH LIKE — liveMatchCount ile aynı mantık)
