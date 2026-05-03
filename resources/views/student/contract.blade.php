@@ -584,23 +584,10 @@
             </div>
         @endif
 
-        {{-- Contract inconsistency warnings --}}
-        @if($contractInconsistencies->isNotEmpty())
-        <div class="ct-action-card">
-            <div class="ct-action-head">⚠️ Uyarılar</div>
-            <div class="ct-action-body">
-                <div class="ct-notice warn">
-                    <span class="ct-notice-icon">⚠️</span>
-                    <div>
-                        <strong style="display:block;margin-bottom:4px;">Tutarsızlık uyarısı:</strong>
-                        <ul style="margin:0;padding-left:16px;">
-                            @foreach($contractInconsistencies as $msg)<li style="font-size:var(--tx-xs);">{{ $msg }}</li>@endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
+        {{-- Contract inconsistency uyarilari developer-facing teknik mesaj.
+             Kullanici icin actionable degil ve "not_requested" gibi internal
+             status string'leri sizdiriyor. Manager dashboard'da gosterilebilir
+             ama student/guest sayfalarinda gizli tutulur. --}}
 
         {{-- Contract text (collapsible) --}}
         @if($showSnapshotPanel)

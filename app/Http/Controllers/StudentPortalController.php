@@ -442,6 +442,13 @@ class StudentPortalController extends Controller
             ->values()->all();
         $docsCompleted = collect($missingRequiredDocuments)->isEmpty();
 
+        // Reddedilen belgeler de "tamam degil" sayilir — kullanici "tamam" gorup sasirmasin
+        $ownerIds = $this->resolveDocumentOwnerIds($guest);
+        $rejectedCount = \App\Models\Document::query()
+            ->whereIn('student_id', $ownerIds)
+            ->where('status', 'rejected')
+            ->count();
+
         $missing = [];
         if (!$formSubmitted) {
             $missing[] = $formDraftComplete
@@ -451,6 +458,10 @@ class StudentPortalController extends Controller
         if (!$docsCompleted) {
             $codes     = collect($missingRequiredDocuments)->pluck('document_code')->filter()->implode(', ');
             $missing[] = 'Zorunlu belgeler eksik' . ($codes !== '' ? ": {$codes}" : '.');
+        }
+        if ($rejectedCount > 0) {
+            $missing[] = "{$rejectedCount} belge reddedildi — yeniden yüklenmeli.";
+            $docsCompleted = false;
         }
         if (!$packageSelected) {
             $missing[] = 'Hizmet paketi seçilmemiş.';
