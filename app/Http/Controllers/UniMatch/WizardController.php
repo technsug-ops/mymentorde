@@ -801,6 +801,11 @@ class WizardController extends Controller
         $response->converted_at = now();
         $response->save();
 
+        // ── Marketing-Admin Attribution bridge ──
+        // UniMatch UTM verisini lead_source_data'ya yazarak marketing-admin'in
+        // Attribution dashboard'ı UniMatch lead'lerini de görebilsin (tek source of truth).
+        $this->writeLeadSourceAttribution($response, $guest);
+
         $this->captureFunnelEvent('unimatch_converted', $response, [
             'guest_id'        => $guest->id,
             'tracking_token'  => $guest->tracking_token,
@@ -812,6 +817,51 @@ class WizardController extends Controller
         $this->notifyTeamOfNewLead($response, $guest, $a);
 
         return redirect('/apply')->with('success', 'Wizard cevapların form\'a aktarıldı — sadece kalan bilgileri tamamla.');
+    }
+
+    /**
+     * UniMatch UTM verisini Marketing-Admin'in lead_source_data tablosuna yaz.
+     * Marketing dashboard tek source'tan UniMatch + diğer lead kanallarını görür.
+     */
+    private function writeLeadSourceAttribution(UniMatchResponse $response, GuestApplication $guest): void
+    {
+        try {
+            $utmParams = array_filter([
+                'utm_source'   => $response->source,
+                'utm_medium'   => $response->utm_medium,
+                'utm_campaign' => $response->utm_campaign,
+                'utm_term'     => $response->utm_term,
+                'utm_content'  => $response->utm_content,
+            ], fn ($v) => $v !== null && $v !== '');
+
+            \App\Models\LeadSourceDatum::query()->updateOrCreate(
+                ['guest_id' => $guest->id],
+                [
+                    'company_id'              => $response->company_id,
+                    'initial_source'          => $response->source ?: 'unimatch_wizard',
+                    'initial_source_detail'   => $response->utm_campaign ?: 'unimatch_organic',
+                    'initial_source_platform' => $response->source ?: null,
+                    'utm_source'              => $response->source,
+                    'utm_medium'              => $response->utm_medium,
+                    'utm_campaign'            => $response->utm_campaign,
+                    'utm_term'                => $response->utm_term,
+                    'utm_content'             => $response->utm_content,
+                    'utm_params'              => $utmParams ?: null,
+                    'funnel_registered'       => true,
+                    'funnel_registered_at'    => $response->started_at ?: now(),
+                    'funnel_form_completed'   => $response->isCompleted(),
+                    'funnel_form_completed_at'=> $response->completed_at,
+                    'funnel_converted'        => true,
+                    'funnel_converted_at'     => $response->converted_at ?: now(),
+                ]
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('UniMatch.lead_source_write_failed', [
+                'guest_id' => $guest->id,
+                'session'  => $response->session_token,
+                'error'    => $e->getMessage(),
+            ]);
+        }
     }
 
     /** Wizard target_degree → form application_type. */
