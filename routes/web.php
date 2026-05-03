@@ -632,6 +632,22 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
         if (file_exists($rc)) @unlink($rc);
         $output .= ">>> view:clear + config:clear + route:clear OK\n";
 
+        // KAS opcache + composer classmap stale fix:
+        // FTP upload sonrası opcache eski autoload_classmap.php'yi serve etmeye devam
+        // ediyor → "Failed to open stream" / "Class not found" 500'leri çıkıyor.
+        // Reset ile tüm cache pencereleri sıfırlanır.
+        if (function_exists('opcache_reset')) {
+            $reset = @opcache_reset();
+            $output .= ">>> opcache_reset: " . ($reset ? 'OK' : 'no-op (disabled)') . "\n";
+        } else {
+            $output .= ">>> opcache_reset: function not available\n";
+        }
+        // Realpath cache da invalidate olsun (file_exists/include yolları için)
+        if (function_exists('clearstatcache')) {
+            clearstatcache(true);
+            $output .= ">>> clearstatcache OK\n";
+        }
+
         // Opsiyonel inline log tail — ?tail=200 ile tetikle (route cache'siz fallback)
         $tail = (int) $request->query('tail', 0);
         if ($tail > 0) {
