@@ -296,8 +296,8 @@
             background-position: center;
             background-size: cover;
             background-repeat: no-repeat;
-            opacity: .06;
-            filter: blur(3px) saturate(.7);
+            opacity: .09;
+            filter: blur(2.5px) saturate(.78);
             z-index: 0;
             pointer-events: none;
         }
