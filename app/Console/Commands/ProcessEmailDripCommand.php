@@ -55,10 +55,29 @@ class ProcessEmailDripCommand extends Command
 
             // Body'yi render et — view_path varsa Blade view, yoksa template body, yoksa marker
             $context = $enrollment->getTemplateContext();
+
+            // ── A/B test variant assignment + override ──
+            // step.ab_test_id varsa: variant assign et, subject + view_path override'la
+            $variantSubject = null;
+            $variantViewPath = null;
+            $variantCode = null;
+            if (! empty($step->ab_test_id)) {
+                $variant = $this->assignVariantForEnrollment($step->ab_test_id, $enrollment);
+                if ($variant) {
+                    $variantCode = $variant->variant_code;
+                    $cfg = is_array($variant->variant_config) ? $variant->variant_config : [];
+                    $variantSubject = $cfg['subject'] ?? null;
+                    $variantViewPath = $cfg['view_path'] ?? null;
+                }
+            }
+
+            $finalSubject = $variantSubject ?: $step->subject_override;
+            $finalViewPath = $variantViewPath ?: $step->view_path;
+
             $body = '';
             try {
-                if (! empty($step->view_path) && view()->exists($step->view_path)) {
-                    $body = view($step->view_path, $context)->render();
+                if (! empty($finalViewPath) && view()->exists($finalViewPath)) {
+                    $body = view($finalViewPath, $context)->render();
                 } elseif ($step->template_id) {
                     $template = \App\Models\Marketing\EmailTemplate::find($step->template_id);
                     $body = (string) ($template?->body_tr ?? $template?->body_en ?? '');
@@ -76,12 +95,14 @@ class ProcessEmailDripCommand extends Command
                 'student_id'      => null,
                 'recipient_email' => $recipientEmail,
                 'recipient_name'  => $recipientName,
-                'subject'         => $step->subject_override ?? null,
+                'subject'         => $finalSubject,
                 'body'            => $body,
                 'variables'       => [
                     'drip_sequence_id' => $enrollment->drip_sequence_id,
                     'step_order'       => $step->step_order,
-                    'view_path'        => $step->view_path,
+                    'view_path'        => $finalViewPath,
+                    'ab_test_id'       => $step->ab_test_id,
+                    'variant_code'     => $variantCode,
                 ],
                 'status'          => 'queued',
                 'queued_at'       => now(),
@@ -89,6 +110,14 @@ class ProcessEmailDripCommand extends Command
                 'source_id'       => (string) $enrollment->id,
                 'triggered_by'    => 'system',
             ]);
+
+            // Variant impressions++ (gerçekten dispatch'a kondu)
+            if ($variantCode) {
+                \App\Models\ABTestVariant::query()
+                    ->where('ab_test_id', $step->ab_test_id)
+                    ->where('variant_code', $variantCode)
+                    ->increment('impressions');
+            }
 
             // Sonraki adımı hesapla
             $nextStep = $enrollment->sequence->steps
@@ -108,5 +137,70 @@ class ProcessEmailDripCommand extends Command
 
         $this->info("Drip işlendi: {$processed} enrollment.");
         return 0;
+    }
+
+    /**
+     * Enrollment için A/B test variant assignment yap, ABTestVariant döner.
+     * - Idempotent: aynı enrollment+test için tekrar assign etmez
+     * - traffic_split JSON varsa weighted random, yoksa eşit dağıtım
+     * - Test durumu 'running' değilse null döner (impression sayma)
+     */
+    private function assignVariantForEnrollment(int $abTestId, EmailDripEnrollment $enrollment): ?\App\Models\ABTestVariant
+    {
+        $test = \App\Models\ABTest::find($abTestId);
+        if (! $test || $test->status !== 'running') {
+            return null;
+        }
+
+        $variants = \App\Models\ABTestVariant::where('ab_test_id', $abTestId)->get();
+        if ($variants->isEmpty()) return null;
+
+        // Mevcut atama var mı? (idempotent)
+        $existingQ = \App\Models\ABTestAssignment::where('ab_test_id', $abTestId);
+        if ($enrollment->uni_match_response_id) {
+            $existingQ->where('uni_match_response_id', $enrollment->uni_match_response_id);
+        } elseif ($enrollment->guest_application_id) {
+            $existingQ->where('guest_application_id', $enrollment->guest_application_id);
+        } else {
+            return null;
+        }
+        $existing = $existingQ->first();
+
+        if ($existing) {
+            return $variants->firstWhere('variant_code', $existing->variant_code);
+        }
+
+        // Yeni assignment — weighted random
+        $picked = $this->pickWeightedVariant($variants, $test->traffic_split);
+
+        \App\Models\ABTestAssignment::create([
+            'ab_test_id'            => $abTestId,
+            'guest_application_id'  => $enrollment->guest_application_id,
+            'uni_match_response_id' => $enrollment->uni_match_response_id,
+            'variant_code'          => $picked->variant_code,
+            'converted'             => false,
+            'assigned_at'           => now(),
+        ]);
+
+        return $picked;
+    }
+
+    /**
+     * Weighted random variant seçimi.
+     * traffic_split: ['A' => 50, 'B' => 50] formatında. Boşsa eşit dağıtım.
+     */
+    private function pickWeightedVariant($variants, $trafficSplit): \App\Models\ABTestVariant
+    {
+        $weights = is_array($trafficSplit) && ! empty($trafficSplit) ? $trafficSplit : null;
+        if ($weights === null) {
+            return $variants->random();
+        }
+
+        $weighted = [];
+        foreach ($variants as $v) {
+            $w = (int) ($weights[$v->variant_code] ?? 0);
+            for ($i = 0; $i < max(1, $w); $i++) $weighted[] = $v;
+        }
+        return $weighted[array_rand($weighted)] ?? $variants->random();
     }
 }

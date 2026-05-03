@@ -35,6 +35,9 @@
                         <span class="u-muted">⚠ template/view yok</span>
                     @endif
                     {{ $step->subject_override ? ' — '.$step->subject_override : '' }}
+                    @if($step->ab_test_id)
+                        <span class="badge info" style="font-size:10px;margin-left:6px;">🧪 A/B #{{ $step->ab_test_id }}</span>
+                    @endif
                 </div>
                 <div class="u-muted" style="font-size:var(--tx-xs);">{{ $step->delay_hours }} saat sonra</div>
             </div>
@@ -52,9 +55,18 @@
             <div class="field"><label>Gecikme (saat) *</label><input name="delay_hours" type="number" min="0" required value="24"></div>
             <div class="field"><label>Template ID</label><input name="template_id" type="number" min="1" placeholder="opsiyonel — view_path varsa boş bırak"></div>
             <div class="field" style="grid-column:1/-1"><label>View Path (Blade view)</label><input name="view_path" type="text" placeholder="örn: emails.unimatch.drip_1"></div>
+            <div class="field" style="grid-column:1/-1">
+                <label>A/B Test (opsiyonel)</label>
+                <select name="ab_test_id">
+                    <option value="">— A/B test yok —</option>
+                    @foreach($abTests ?? [] as $abt)
+                        <option value="{{ $abt->id }}">[{{ strtoupper($abt->status) }}] #{{ $abt->id }} {{ $abt->name }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="field" style="grid-column:1/-1"><label>Konu (opsiyonel)</label><input name="subject_override" type="text"></div>
         </div>
-        <p class="u-muted" style="font-size:var(--tx-xs);margin-top:6px;">Template ID <strong>VEYA</strong> View Path en az birini doldur. View Path Blade dosya yolu (örn <code>emails.unimatch.drip_1</code>) — context değişkenleriyle render edilir.</p>
+        <p class="u-muted" style="font-size:var(--tx-xs);margin-top:6px;">Template ID <strong>VEYA</strong> View Path en az birini doldur. View Path Blade dosya yolu (örn <code>emails.unimatch.drip_1</code>) — context değişkenleriyle render edilir. A/B test seçilirse step variant'larıyla yayınlanır (variant_config: <code>{"subject":"..."}</code> veya <code>{"view_path":"..."}</code>).</p>
         @if(isset($errors) && $errors->any())
             <div style="background:#fee2e2;border-left:4px solid #dc2626;padding:8px 12px;border-radius:6px;color:#7f1d1d;font-size:var(--tx-xs);margin-top:8px;">
                 @foreach($errors->all() as $err)<div>{{ $err }}</div>@endforeach

@@ -17,6 +17,7 @@ class EmailDripStep extends Model
         'delay_hours',
         'template_id',
         'view_path',
+        'ab_test_id',
         'subject_override',
         'is_active',
     ];

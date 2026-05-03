@@ -817,6 +817,41 @@ class WizardController extends Controller
             ->where('status', 'active')
             ->update(['status' => 'converted', 'completed_at' => now()]);
 
+        // A/B test variant'lara conversion event işle (converted=true)
+        \App\Models\ABTestAssignment::query()
+            ->where('uni_match_response_id', $response->id)
+            ->where('converted', false)
+            ->update(['converted' => true, 'converted_at' => now()]);
+
+        // Variant.conversions++ ve conversion_rate recalculate (her variant için)
+        // NOT: foreach değişkeni $a kullanma — `$a` outer scope'ta wizard answers array'i
+        try {
+            $assignments = \App\Models\ABTestAssignment::query()
+                ->where('uni_match_response_id', $response->id)
+                ->get();
+            foreach ($assignments as $assignment) {
+                \App\Models\ABTestVariant::query()
+                    ->where('ab_test_id', $assignment->ab_test_id)
+                    ->where('variant_code', $assignment->variant_code)
+                    ->increment('conversions');
+            }
+            // Conversion_rate recalc — basit: conversions / impressions
+            $variants = \App\Models\ABTestVariant::query()
+                ->whereIn('ab_test_id', $assignments->pluck('ab_test_id')->unique())
+                ->get();
+            foreach ($variants as $variant) {
+                $variant->conversion_rate = $variant->impressions > 0
+                    ? round($variant->conversions / $variant->impressions * 100, 2)
+                    : 0;
+                $variant->save();
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('UniMatch.ab_test_conversion_failed', [
+                'response' => $response->id,
+                'error'    => $e->getMessage(),
+            ]);
+        }
+
         $this->captureFunnelEvent('unimatch_converted', $response, [
             'guest_id'        => $guest->id,
             'tracking_token'  => $guest->tracking_token,

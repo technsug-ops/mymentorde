@@ -56,7 +56,13 @@ class EmailDripController extends Controller
             'unsubscribed'=> EmailDripEnrollment::where('drip_sequence_id', $id)->where('status', 'unsubscribed')->count(),
         ];
 
-        return view('marketing-admin.email.drip.show', compact('sequence', 'enrollmentCounts'));
+        // Aktif/draft A/B test'leri (step formunda dropdown için)
+        $abTests = \App\Models\ABTest::query()
+            ->whereIn('status', ['running', 'draft'])
+            ->orderBy('name')
+            ->get(['id', 'name', 'status']);
+
+        return view('marketing-admin.email.drip.show', compact('sequence', 'enrollmentCounts', 'abTests'));
     }
 
     /**
@@ -96,6 +102,7 @@ class EmailDripController extends Controller
             'delay_hours'     => 'required|integer|min:0',
             'template_id'     => 'nullable|integer|exists:email_templates,id',
             'view_path'       => 'nullable|string|max:200',
+            'ab_test_id'      => 'nullable|integer|exists:ab_tests,id',
             'subject_override'=> 'nullable|string|max:191',
             'is_active'       => 'boolean',
         ]);

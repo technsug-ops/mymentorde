@@ -12,7 +12,7 @@ class ABTestAssignment extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'ab_test_id', 'guest_application_id', 'variant_code',
+        'ab_test_id', 'guest_application_id', 'uni_match_response_id', 'variant_code',
         'converted', 'assigned_at', 'converted_at',
     ];
 
