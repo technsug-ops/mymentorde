@@ -181,7 +181,9 @@
 
 @section('content')
 @php
-    $pref  = old('preferred_locale', $guest?->preferred_locale ?? $guest?->communication_language ?? 'tr');
+    // i18n henuz hazir degil — TR'ye override (eski DB 'de'/'en' kayitlari arayuzde TR gostersin
+    // ve sonraki save'de DB'ye 'tr' yazilsin). EN/DE eklendiginde bu override kalkar.
+    $pref  = 'tr';
     $notif = (bool)old('notifications_enabled', $guest?->notifications_enabled ?? true);
     $createdAt = $user?->created_at ? \Carbon\Carbon::parse($user->created_at)->format('d.m.Y') : '-';
     $lastLogin = $user?->updated_at ? \Carbon\Carbon::parse($user->updated_at)->diffForHumans() : '-';

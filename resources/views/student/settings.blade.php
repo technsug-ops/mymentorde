@@ -134,7 +134,10 @@
 @section('content')
 @php
     $g = $guestApplication;
-    $locale         = old('preferred_locale',      $g?->preferred_locale ?? 'tr');
+    // i18n henuz hazir degil — sadece TR destekleniyor. Eski DB kayitlari
+    // 'de'/'en' icerse bile arayuz Turkce, locale chip TR gosterilmeli ve
+    // sonraki save'de DB'ye 'tr' yazilmali. EN/DE gelince bu override kalkar.
+    $locale         = 'tr';
     $timezone       = old('preferred_timezone',    $preferredTimezone ?? 'Europe/Berlin');
     $dateFmt        = old('preferred_date_format', $preferredDateFmt  ?? 'DD.MM.YYYY');
     $notifEnabled   = (bool) old('notifications_enabled', $g?->notifications_enabled ?? true);

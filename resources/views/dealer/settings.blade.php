@@ -85,10 +85,9 @@
 <div class="set-stat-strip">
     <div class="set-stat c-lang">
         <div class="set-stat-label">Arayüz Dili</div>
-        <div class="set-stat-val">{{ strtoupper((string)($s['preferred_locale'] ?? 'TR')) }}</div>
-        <div class="set-stat-sub" style="color:#6366f1;">
-            {{ match($s['preferred_locale']??'tr') { 'de'=>'Deutsch', 'en'=>'English', default=>'Türkçe' } }}
-        </div>
+        {{-- i18n henuz hazir degil - DB'de 'de'/'en' kayitli olsa bile arayuz TR --}}
+        <div class="set-stat-val">TR</div>
+        <div class="set-stat-sub" style="color:#6366f1;">Türkçe</div>
     </div>
     <div class="set-stat c-email">
         <div class="set-stat-label">E-posta</div>
