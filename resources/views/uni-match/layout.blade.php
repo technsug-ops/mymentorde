@@ -292,10 +292,12 @@
             overflow-x: hidden;
             padding-bottom: 96px; /* sticky CTA için boşluk */
         }
-        /* Wizard mode'da container max-width kalkar, full viewport kullanır */
+        /* Wizard mode'da container max-width kalkar, full viewport kullanır.
+           Side padding clamp() ile: mobilde 20px, desktopta 96px (~2.5cm) — kartlar
+           kenardan içerden başlasın, okunabilirlik artsın. */
         body.sb-wizard-mode .sb-container {
             max-width: none;
-            padding: 18px 32px 40px;
+            padding: 18px clamp(20px, 5vw, 96px) 40px;
             position: relative; z-index: 1;
         }
         body.sb-wizard-mode .sb-header { max-width: none; padding: 0; }
@@ -570,7 +572,7 @@
             body.sb-wizard-mode .sb-title { font-size: 28px; padding-left: 16px; }
             body.sb-wizard-mode .sb-subtitle { padding-left: 16px; }
             body.sb-wizard-mode .sb-card { padding: 40px 28px; }
-            body.sb-wizard-mode .sb-container { padding: 14px 18px 32px; }
+            /* Container padding clamp() ile responsive — override gerekmez */
         }
 
         /* Wizard mode option cards — büyük, sade, dramatik hover */
@@ -694,11 +696,8 @@
         }
         body.sb-wizard-mode .sb-nav-inner {
             max-width: none; margin: 0 auto;
-            padding: 0 32px;
+            padding: 0 clamp(20px, 5vw, 96px);
             display: flex; justify-content: space-between; align-items: center; gap: 12px;
-        }
-        @media (max-width: 1024px) {
-            body.sb-wizard-mode .sb-nav-inner { padding: 0 18px; }
         }
         body.sb-wizard-mode .sb-btn-primary {
             padding: 14px 32px; font-size: 15px;
