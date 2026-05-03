@@ -591,3 +591,41 @@ require __DIR__.'/dealer.php';
 require __DIR__.'/tasks.php';
 require __DIR__.'/common.php';
 require __DIR__.'/marketing-admin.php';
+
+// ── Deploy post-hook (KAS shared hosting'de SSH yok, web ile tetikleme) ──────
+// Kullanım: curl 'https://panel.mentorde.com/_deploy/run-pending?secret=XXX'
+// Çalıştırır: php artisan migrate --force + UniMatchDripSequencesSeeder
+// Secret .env'de DEPLOY_MIGRATE_SECRET — boşsa endpoint 404 döner.
+Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) {
+    $expected = (string) env('DEPLOY_MIGRATE_SECRET', '');
+    $given    = (string) $request->query('secret', '');
+
+    if ($expected === '' || ! hash_equals($expected, $given)) {
+        abort(404);
+    }
+
+    $output = "═══ Deploy post-hook " . now()->toIso8601String() . " ═══\n\n";
+
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $output .= ">>> migrate --force\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+
+        \Illuminate\Support\Facades\Artisan::call('db:seed', [
+            '--class' => 'UniMatchDripSequencesSeeder',
+            '--force' => true,
+        ]);
+        $output .= ">>> db:seed UniMatchDripSequencesSeeder\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+
+        // Cache temizle (yeni route/config görsün)
+        \Illuminate\Support\Facades\Artisan::call('view:clear');
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
+        $output .= ">>> view:clear + config:clear OK\n";
+
+        $output .= "\n═══ TAMAM ═══\n";
+    } catch (\Throwable $e) {
+        $output .= "\n!!! HATA: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+        return response($output, 500, ['Content-Type' => 'text/plain; charset=utf-8']);
+    }
+
+    return response($output, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
+})->middleware('throttle:5,10')->name('deploy.run-pending');
