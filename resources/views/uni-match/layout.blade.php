@@ -585,10 +585,10 @@
         }
         /* Pastel cycle — her 5'te bir tekrar (brandbook gold yasaklı, 5 renk yeterli) */
         body.sb-wizard-mode .sb-options .sb-option:nth-child(5n+1) {
-            --pastel-bg: #fff0f6;        /* soft pink */
-            --pastel-bg-strong: #ffd6e7;
-            --pastel-dark: #be185d;
-            --pastel-border: #fbcfe8;
+            --pastel-bg: #fef2f2;        /* coral */
+            --pastel-bg-strong: #fecaca;
+            --pastel-dark: #dc2626;
+            --pastel-border: #fca5a5;
         }
         body.sb-wizard-mode .sb-options .sb-option:nth-child(5n+2) {
             --pastel-bg: #ecfdf5;        /* mint */
