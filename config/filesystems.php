@@ -38,6 +38,16 @@ return [
             'report' => false,
         ],
 
+        // GuestTicket / InternalMessaging gibi modüller Storage::disk('private')
+        // çağırıyor — local ile aynı fiziksel root, ayrı isim altında alias.
+        'private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            'serve' => false,
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
