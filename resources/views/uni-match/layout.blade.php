@@ -286,10 +286,34 @@
         body.sb-detail-mode {
             background: linear-gradient(180deg, #faf9f5 0%, #f7f3ff 100%);
             min-height: 100vh;
+            position: relative;
         }
+        /* Filigran — üniversite görseli, fixed full-page, low opacity + blur */
+        body.sb-detail-mode::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            opacity: .12;
+            filter: blur(2px) saturate(.85);
+            z-index: 0;
+            pointer-events: none;
+        }
+        /* İçeriği filigranın üzerine taşı */
+        body.sb-detail-mode .sb-container { position: relative; z-index: 1; }
         body.sb-detail-mode .sb-container {
             max-width: 960px;
             padding: 24px clamp(20px, 4vw, 64px) 64px;
+        }
+        /* Cards: filigran arka planı görünür kalsın diye hafif daha opak */
+        body.sb-detail-mode .sb-card {
+            background:
+                radial-gradient(circle at 100% 0%, rgba(126,88,191,.06) 0%, transparent 55%),
+                radial-gradient(circle at 0% 100%, rgba(167,126,217,.04) 0%, transparent 55%),
+                rgba(255, 255, 255, .96) !important;
+            backdrop-filter: blur(6px);
         }
 
         body.sb-detail-mode .sb-card {
