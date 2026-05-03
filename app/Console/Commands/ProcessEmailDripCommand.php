@@ -15,7 +15,7 @@ class ProcessEmailDripCommand extends Command
     {
         $due = EmailDripEnrollment::where('status', 'active')
             ->where('next_send_at', '<=', now())
-            ->with(['sequence.steps', 'guest'])
+            ->with(['sequence.steps', 'guest', 'uniMatchResponse'])
             ->limit(100)
             ->get();
 
@@ -27,9 +27,19 @@ class ProcessEmailDripCommand extends Command
         $processed = 0;
 
         foreach ($due as $enrollment) {
-            if (! $enrollment->sequence || ! $enrollment->guest) {
+            // Sequence yoksa veya hem guest hem unimatch_response NULL ise skip
+            if (! $enrollment->sequence) continue;
+            if (! $enrollment->guest_application_id && ! $enrollment->uni_match_response_id) continue;
+
+            // UniMatch response convert oldu mu? Eğer evetse cancel
+            if ($enrollment->uni_match_response_id && $enrollment->uniMatchResponse?->converted_to_guest_id) {
+                $enrollment->update(['status' => 'converted', 'completed_at' => now()]);
                 continue;
             }
+
+            $recipientEmail = $enrollment->getRecipientEmail();
+            $recipientName  = $enrollment->getRecipientName();
+            if (empty($recipientEmail)) continue;
 
             $nextStepOrder = $enrollment->current_step + 1;
             $step = $enrollment->sequence->steps
@@ -43,17 +53,36 @@ class ProcessEmailDripCommand extends Command
                 continue;
             }
 
-            // NotificationDispatch kuyruğuna al
+            // Body'yi render et — view_path varsa Blade view, yoksa template body, yoksa marker
+            $context = $enrollment->getTemplateContext();
+            $body = '';
+            try {
+                if (! empty($step->view_path) && view()->exists($step->view_path)) {
+                    $body = view($step->view_path, $context)->render();
+                } elseif ($step->template_id) {
+                    $template = \App\Models\Marketing\EmailTemplate::find($step->template_id);
+                    $body = (string) ($template?->body_tr ?? $template?->body_en ?? '');
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('Drip body render failed', ['enrollment' => $enrollment->id, 'step' => $step->id, 'error' => $e->getMessage()]);
+                $body = '';
+            }
+
+            // NotificationDispatch kuyruğuna al — body rendered HTML
             NotificationDispatch::create([
                 'template_id'     => $step->template_id,
                 'channel'         => 'email',
                 'category'        => 'drip_campaign',
                 'student_id'      => null,
-                'recipient_email' => $enrollment->guest->email ?? null,
-                'recipient_name'  => trim(($enrollment->guest->first_name ?? '') . ' ' . ($enrollment->guest->last_name ?? '')),
+                'recipient_email' => $recipientEmail,
+                'recipient_name'  => $recipientName,
                 'subject'         => $step->subject_override ?? null,
-                'body'            => "drip_step:{$step->id}",
-                'variables'       => ['drip_sequence_id' => $enrollment->drip_sequence_id, 'step_order' => $step->step_order],
+                'body'            => $body,
+                'variables'       => [
+                    'drip_sequence_id' => $enrollment->drip_sequence_id,
+                    'step_order'       => $step->step_order,
+                    'view_path'        => $step->view_path,
+                ],
                 'status'          => 'queued',
                 'queued_at'       => now(),
                 'source_type'     => 'email_drip',

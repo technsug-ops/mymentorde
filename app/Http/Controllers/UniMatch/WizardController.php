@@ -410,6 +410,11 @@ class WizardController extends Controller
             'consent'  => (bool) ($data['consent'] ?? false),
         ]);
 
+        // Drip framework enrollment — KVKK opt-in + email gerek
+        if (! empty($data['email']) && ! empty($data['consent'])) {
+            $this->enrollInDripSequence($response, 'unimatch_lead_captured');
+        }
+
         // KVKK opt-in varsa hemen karşılama mesajları (WhatsApp + email kalan adımlarda gönderilir)
         if (! empty($data['phone']) && ! empty($data['consent'])) {
             $this->sendWhatsappGreeting($response);
@@ -806,6 +811,12 @@ class WizardController extends Controller
         // Attribution dashboard'ı UniMatch lead'lerini de görebilsin (tek source of truth).
         $this->writeLeadSourceAttribution($response, $guest);
 
+        // Drip enrollment'ları cancel et — kullanıcı convert oldu, drip mail gerekmez
+        \App\Models\Marketing\EmailDripEnrollment::query()
+            ->where('uni_match_response_id', $response->id)
+            ->where('status', 'active')
+            ->update(['status' => 'converted', 'completed_at' => now()]);
+
         $this->captureFunnelEvent('unimatch_converted', $response, [
             'guest_id'        => $guest->id,
             'tracking_token'  => $guest->tracking_token,
@@ -817,6 +828,51 @@ class WizardController extends Controller
         $this->notifyTeamOfNewLead($response, $guest, $a);
 
         return redirect('/apply')->with('success', 'Wizard cevapların form\'a aktarıldı — sadece kalan bilgileri tamamla.');
+    }
+
+    /**
+     * Drip framework'üne enrollment — Marketing-Admin EmailDripSequence kullanarak.
+     * trigger_event ile sequence'i bul (örn 'unimatch_lead_captured').
+     * Idempotent — aynı response için aynı sequence'e tekrar enroll etmez.
+     */
+    private function enrollInDripSequence(UniMatchResponse $response, string $triggerEvent): void
+    {
+        try {
+            $sequence = \App\Models\Marketing\EmailDripSequence::query()
+                ->where('trigger_event', $triggerEvent)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $sequence) return;
+
+            $firstStep = \App\Models\Marketing\EmailDripStep::query()
+                ->where('drip_sequence_id', $sequence->id)
+                ->where('step_order', 1)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $firstStep) return;
+
+            \App\Models\Marketing\EmailDripEnrollment::query()->firstOrCreate(
+                [
+                    'drip_sequence_id'      => $sequence->id,
+                    'uni_match_response_id' => $response->id,
+                ],
+                [
+                    'guest_application_id' => null,
+                    'current_step'         => 0,
+                    'status'               => 'active',
+                    'next_send_at'         => now()->addHours($firstStep->delay_hours),
+                    'enrolled_at'          => now(),
+                ]
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('UniMatch.drip_enroll_failed', [
+                'response' => $response->id,
+                'trigger'  => $triggerEvent,
+                'error'    => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

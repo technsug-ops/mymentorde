@@ -241,21 +241,16 @@ Schedule::command('guest:inactivity-reminder --days=7')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/guest-inactivity-reminder.log'));
 
-// UniMatch lead drip — wizard'da lead bırakıp convert etmemiş kullanıcılara
-// 3, 7 ve 14 günlük 3 kademeli mail kampanyası
-Schedule::command('unimatch:send-lead-drip')
-    ->dailyAt('09:30')
-    ->withoutOverlapping()
-    ->appendOutputTo(storage_path('logs/unimatch-lead-drip.log'));
-
-// UniMatch resume reminder — wizard yarıda kalan lead'lere geri dönüş maili
-// Save & Resume Later pattern (HubSpot/Typeform): %20-30 conversion artışı
-Schedule::command('unimatch:send-resume-reminder')
-    ->dailyAt('11:00')
-    ->withoutOverlapping()
-    ->appendOutputTo(storage_path('logs/unimatch-resume-reminder.log'));
+// UniMatch lead drip + resume reminder DEPRECATED — Marketing-Admin email_drip_*
+// framework'üne migrate edildi. Drip tetiklemesi WizardController.leadCaptureSubmit
+// içinde otomatik enrollment, dispatch ise mevcut email:process-drip cron'u (her 15 dk)
+// tarafından handle ediliyor. Eski standalone schedule'lar kaldırıldı (3 Mayıs 2026).
+//
+// Schedule::command('unimatch:send-lead-drip')->dailyAt('09:30');         // KALDIRILDI
+// Schedule::command('unimatch:send-resume-reminder')->dailyAt('11:00');    // KALDIRILDI
 
 // UniMatch manager günlük özet — manager + marketing admin'e dünün lead/funnel raporu
+// (Manager-side digest, drip değil — framework dışında kalır)
 Schedule::command('unimatch:send-manager-digest')
     ->dailyAt('08:00')
     ->withoutOverlapping()
