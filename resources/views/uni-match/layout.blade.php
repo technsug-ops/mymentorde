@@ -583,14 +583,46 @@
             min-height: 96px;
             gap: 18px;
         }
+        /* Pastel cycle — her 5'te bir tekrar (brandbook gold yasaklı, 5 renk yeterli) */
+        body.sb-wizard-mode .sb-options .sb-option:nth-child(5n+1) {
+            --pastel-bg: #fff0f6;        /* soft pink */
+            --pastel-bg-strong: #ffd6e7;
+            --pastel-dark: #be185d;
+            --pastel-border: #fbcfe8;
+        }
+        body.sb-wizard-mode .sb-options .sb-option:nth-child(5n+2) {
+            --pastel-bg: #ecfdf5;        /* mint */
+            --pastel-bg-strong: #bbf7d0;
+            --pastel-dark: #15803d;
+            --pastel-border: #a7f3d0;
+        }
+        body.sb-wizard-mode .sb-options .sb-option:nth-child(5n+3) {
+            --pastel-bg: #eff6ff;        /* sky */
+            --pastel-bg-strong: #bfdbfe;
+            --pastel-dark: #1d4ed8;
+            --pastel-border: #93c5fd;
+        }
+        body.sb-wizard-mode .sb-options .sb-option:nth-child(5n+4) {
+            --pastel-bg: #fff7ed;        /* peach */
+            --pastel-bg-strong: #fed7aa;
+            --pastel-dark: #c2410c;
+            --pastel-border: #fdba74;
+        }
+        body.sb-wizard-mode .sb-options .sb-option:nth-child(5n+5) {
+            --pastel-bg: #f5f3ff;        /* lavender (brand purple soft) */
+            --pastel-bg-strong: #ddd6fe;
+            --pastel-dark: #6d28d9;
+            --pastel-border: #c4b5fd;
+        }
+
         body.sb-wizard-mode .sb-option {
-            background: #fff;
+            background: linear-gradient(135deg, #fff 0%, var(--pastel-bg, #fff) 100%);
         }
         body.sb-wizard-mode .sb-option:hover {
             transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 18px 40px rgba(126, 88, 191, .22);
-            border-color: #b79ae9;
-            background: linear-gradient(135deg, #fff 0%, #faf7fd 100%);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, .08);
+            border-color: var(--pastel-border, #b79ae9);
+            background: linear-gradient(135deg, #fff 0%, var(--pastel-bg-strong, #faf7fd) 100%);
         }
         body.sb-wizard-mode .sb-option.selected {
             box-shadow:
@@ -620,24 +652,29 @@
 
         body.sb-wizard-mode .sb-option-icon {
             width: 56px; height: 56px;
-            background: linear-gradient(135deg, rgba(126, 88, 191, .10) 0%, rgba(167, 126, 217, .14) 100%);
+            background: linear-gradient(135deg, var(--pastel-bg, rgba(126,88,191,.10)) 0%, var(--pastel-bg-strong, rgba(167,126,217,.14)) 100%);
             border-radius: 14px;
             transition: background .25s cubic-bezier(.4,0,.2,1),
                         transform .25s cubic-bezier(.4,0,.2,1),
                         box-shadow .25s cubic-bezier(.4,0,.2,1);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.4);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
         }
-        body.sb-wizard-mode .sb-option-icon .lucide-icon { width: 30px; height: 30px; }
+        body.sb-wizard-mode .sb-option-icon .lucide-icon {
+            width: 30px; height: 30px;
+            color: var(--pastel-dark, #7e58bf) !important;
+        }
         body.sb-wizard-mode .sb-option:hover .sb-option-icon {
-            background: linear-gradient(135deg, rgba(126, 88, 191, .18) 0%, rgba(167, 126, 217, .24) 100%);
+            background: var(--pastel-bg-strong, rgba(126,88,191,.18));
             transform: scale(1.10) rotate(-3deg);
-            box-shadow: 0 6px 16px rgba(126, 88, 191, .20);
+            box-shadow: 0 6px 16px rgba(0,0,0, .10);
         }
+        /* Selected state: pastel bırak, brand purple ile override (tutarli feedback) */
         body.sb-wizard-mode .sb-option.selected .sb-option-icon {
-            background: linear-gradient(135deg, #7e58bf, #a07ed9);
+            background: linear-gradient(135deg, #7e58bf, #a07ed9) !important;
             box-shadow: 0 8px 20px rgba(126, 88, 191, .35);
             transform: scale(1.05);
         }
+        body.sb-wizard-mode .sb-option.selected .sb-option-icon .lucide-icon { color: #fff !important; }
         body.sb-wizard-mode .sb-option.selected .sb-option-icon .lucide-icon { color: #fff; }
         body.sb-wizard-mode .sb-option-label { font-size: 16.5px; font-weight: 700; line-height: 1.3; }
         body.sb-wizard-mode .sb-option-desc { font-size: 13px; line-height: 1.45; margin-top: 2px; }
