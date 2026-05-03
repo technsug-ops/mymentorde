@@ -619,7 +619,36 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
         // Cache temizle (yeni route/config görsün)
         \Illuminate\Support\Facades\Artisan::call('view:clear');
         \Illuminate\Support\Facades\Artisan::call('config:clear');
-        $output .= ">>> view:clear + config:clear OK\n";
+        \Illuminate\Support\Facades\Artisan::call('route:clear');
+        // Sigortalı: route cache dosyası varsa elle de sil (artisan başarısız olursa)
+        $rc = base_path('bootstrap/cache/routes-v7.php');
+        if (file_exists($rc)) @unlink($rc);
+        $output .= ">>> view:clear + config:clear + route:clear OK\n";
+
+        // Opsiyonel inline log tail — ?tail=200 ile tetikle (route cache'siz fallback)
+        $tail = (int) $request->query('tail', 0);
+        if ($tail > 0) {
+            $tail = max(10, min(1000, $tail));
+            $date = now()->format('Y-m-d');
+            $logFile = storage_path("logs/laravel-{$date}.log");
+            if (! file_exists($logFile)) $logFile = storage_path('logs/laravel.log');
+            if (file_exists($logFile)) {
+                $size = filesize($logFile);
+                $f = fopen($logFile, 'r');
+                $chunk = 65536; $buf = ''; $count = 0; $pos = $size;
+                while ($pos > 0 && $count <= $tail) {
+                    $r = min($chunk, $pos); $pos -= $r;
+                    fseek($f, $pos);
+                    $buf = fread($f, $r) . $buf;
+                    $count = substr_count($buf, "\n");
+                }
+                fclose($f);
+                $rows = array_slice(explode("\n", $buf), -$tail);
+                $output .= "\n═══ TAIL {$logFile} (last {$tail}) ═══\n" . implode("\n", $rows) . "\n";
+            } else {
+                $output .= "\n[tail] log dosyası yok: {$logFile}\n";
+            }
+        }
 
         $output .= "\n═══ TAMAM ═══\n";
     } catch (\Throwable $e) {
