@@ -18,21 +18,21 @@
             : asset($program->university->image_path);
     }
 
-    // 2) Keyword bazlı spesifik eşleşme
+    // 2) Keyword bazlı spesifik eşleşme — local self-hosted (DSGVO uyum)
     if (! $heroImage) {
         $specific = [
-            'heidelberg'                  => 'https://supstranger.com/media/userfiles/images/University-of-Heidelberg-Almanya.jpg',
-            'leipzig'                     => 'https://supstranger.com/media/userfiles/images/University-of-Leipzig-Almanya.jpg',
-            'lmu'                         => 'https://supstranger.com/media/userfiles/images/Ludwig-Maximillian-University-Almanya.jpg',
-            'ludwig-maximilian'           => 'https://supstranger.com/media/userfiles/images/Ludwig-Maximillian-University-Almanya.jpg',
-            'ludwig maximilian'           => 'https://supstranger.com/media/userfiles/images/Ludwig-Maximillian-University-Almanya.jpg',
-            'münchen'                     => 'https://supstranger.com/media/userfiles/images/Ludwig-Maximillian-University-Almanya.jpg',
-            'munich'                      => 'https://supstranger.com/media/userfiles/images/Ludwig-Maximillian-University-Almanya.jpg',
-            'freiburg'                    => 'https://supstranger.com/media/userfiles/images/University-of-Freiburg-Almanya.jpg',
-            'freie universität berlin'    => 'https://supstranger.com/media/userfiles/images/Free-University-of-Berlin-Almanya.jpg',
-            'free university of berlin'   => 'https://supstranger.com/media/userfiles/images/Free-University-of-Berlin-Almanya.jpg',
-            'berlin international'        => 'https://supstranger.com/media/userfiles/images/Berlin-International-University-of-Applied-Sciences-Almanya.jpg',
-            'schiller'                    => 'https://supstranger.com/media/userfiles/images/Schiller-International-University-Almanya.jpg',
+            'heidelberg'                  => '/img/uni-watermarks/heidelberg.jpg',
+            'leipzig'                     => '/img/uni-watermarks/leipzig.jpg',
+            'lmu'                         => '/img/uni-watermarks/lmu.jpg',
+            'ludwig-maximilian'           => '/img/uni-watermarks/lmu.jpg',
+            'ludwig maximilian'           => '/img/uni-watermarks/lmu.jpg',
+            'münchen'                     => '/img/uni-watermarks/lmu.jpg',
+            'munich'                      => '/img/uni-watermarks/lmu.jpg',
+            'freiburg'                    => '/img/uni-watermarks/freiburg.jpg',
+            'freie universität berlin'    => '/img/uni-watermarks/free-berlin.jpg',
+            'free university of berlin'   => '/img/uni-watermarks/free-berlin.jpg',
+            'berlin international'        => '/img/uni-watermarks/berlin-int.jpg',
+            'schiller'                    => '/img/uni-watermarks/schiller.jpg',
         ];
         foreach ($specific as $kw => $url) {
             if ($uniLow !== '' && str_contains($uniLow, $kw)) {
@@ -45,11 +45,11 @@
     // 3) Generic fallback — hash mod havuz boyutu (aynı uni hep aynı foto)
     if (! $heroImage) {
         $generalPool = [
-            'https://supstranger.com/media/blog/almanya-yuksek-kabul-oranli-universiteler.jpg',
-            'https://supstranger.com/media/blog/Alman%C3%9Cniversiteleri_%C3%9Ccretsiz.jpg',
-            'https://maylaabroad.com/storage/1-276.png',
-            'https://maylaabroad.com/storage/1-277.png',
-            'https://ankastudy.com/wp-content/uploads/2020/12/almanyada-universite-okumak-01.jpg',
+            '/img/uni-watermarks/generic-1.jpg',
+            '/img/uni-watermarks/generic-2.jpg',
+            '/img/uni-watermarks/generic-3.png',
+            '/img/uni-watermarks/generic-4.png',
+            '/img/uni-watermarks/generic-5.jpg',
         ];
         $idx = abs(crc32($uniName)) % count($generalPool);
         $heroImage = $generalPool[$idx];
