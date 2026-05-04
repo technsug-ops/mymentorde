@@ -250,9 +250,9 @@ class WizardSchema
                 'title'    => 'Üniversite ücreti konusunda nasıl bakıyorsun?',
                 'subtitle' => 'Devlet üniversiteleri çoğu programda ücretsizdir (sadece sömestr katkı payı ~300 €).',
                 'options'  => [
-                    ['value' => 'public_only', 'label' => 'Sadece ücretsiz devlet üni',  'icon' => '🏛', 'desc' => 'Ücretsiz programlara odakla'],
-                    ['value' => 'both',        'label' => 'Özel üni de olabilir',        'icon' => '🎓', 'desc' => 'Daha geniş seçenek'],
-                    ['value' => 'private_ok',  'label' => 'Özel ünide olur — kalite öncelikli', 'icon' => '⭐', 'desc' => 'Bütçem var'],
+                    ['value' => 'public_only', 'label' => 'Sadece ücretsiz devlet üniversitesi',  'icon' => '🏛', 'desc' => 'Ücretsiz programlara odakla'],
+                    ['value' => 'both',        'label' => 'Özel üniversite de olabilir',        'icon' => '🎓', 'desc' => 'Daha geniş seçenek'],
+                    ['value' => 'private_ok',  'label' => 'Özel üniversitede olur — kalite öncelikli', 'icon' => '⭐', 'desc' => 'Bütçem var'],
                 ],
                 'validation' => ['required', 'in:public_only,both,private_ok'],
             ],
@@ -342,7 +342,7 @@ class WizardSchema
             [
                 'key'      => 'visa_readiness',
                 'type'     => 'cards',
-                'title'    => 'Vize hazırlığında neredeysin?',
+                'title'    => 'Vize hazırlığında neredesin?',
                 'subtitle' => 'Sperrkonto, sigorta, belge hazırlığı durumun.',
                 'options'  => [
                     ['value' => 'not_started',     'label' => 'Henüz başlamadım',           'icon' => '○',  'desc' => 'İlk adımları öğrenmek istiyorum'],
