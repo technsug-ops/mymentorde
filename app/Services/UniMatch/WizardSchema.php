@@ -202,10 +202,10 @@ class WizardSchema
                 'key'      => 'language_certificate',
                 'type'     => 'cards',
                 'title'    => 'Resmi dil sertifikan var mı?',
-                'subtitle' => 'TestDaF / DSH / IELTS / TOEFL — çoğu üni başvurusunda zorunlu.',
+                'subtitle' => 'TestDaF / DSH / IELTS / TOEFL — çoğu üniversite başvurusunda zorunlu.',
                 'options'  => [
-                    ['value' => 'have_de_high', 'label' => 'TestDaF / DSH var (B2+)',   'icon' => '🇩🇪', 'desc' => 'Almanca için yeterli'],
-                    ['value' => 'have_en_high', 'label' => 'IELTS / TOEFL var (B2+)',   'icon' => '🇬🇧', 'desc' => 'İngilizce için yeterli'],
+                    ['value' => 'have_de_high', 'label' => 'Almanca Var (B2+)',  'icon' => '🇩🇪', 'desc' => 'Almanca için yeterli'],
+                    ['value' => 'have_en_high', 'label' => 'ENG Var (B2+)',      'icon' => '🇬🇧', 'desc' => 'İngilizce için yeterli'],
                     ['value' => 'have_both',    'label' => 'Hem Almanca hem İngilizce', 'icon' => '🌍', 'desc' => 'Çift sertifika'],
                     ['value' => 'preparing',    'label' => 'Hazırlanıyorum',            'icon' => '📚', 'desc' => 'Henüz almadım'],
                     ['value' => 'no',           'label' => 'Yok / başlamadım',          'icon' => '○'],
