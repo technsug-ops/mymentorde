@@ -350,10 +350,6 @@
                    class="nav-link {{ request()->is('manager/conversion-funnel*') ? 'active' : '' }}">
                     <span class="nav-icon">🎯</span> Dönüşüm Hunisi
                 </a>
-                <a href="/manager/telegram-analytics"
-                   class="nav-link {{ request()->is('manager/telegram-analytics*') ? 'active' : '' }}">
-                    <span class="nav-icon">📊</span> Telegram Analytics
-                </a>
                 <a href="/manager/senior-performance"
                    class="nav-link {{ request()->is('manager/senior-performance*') ? 'active' : '' }}">
                     <span class="nav-icon">👤</span> Danışman Performansı

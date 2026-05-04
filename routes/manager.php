@@ -330,12 +330,6 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
 
     // ─── Digital Asset Management (DAM) — macro tanımı AppServiceProvider'da ──
     Route::dam('manager/digital-assets', 'manager.dam.');
-
-    // ─── Telegram Analytics — anonim chat analiz arayüzü ──
-    Route::get('/manager/telegram-analytics',         [\App\Http\Controllers\Manager\TelegramAnalyticsController::class, 'index'])->name('manager.telegram-analytics.index');
-    Route::get('/manager/telegram-analytics/stats',   [\App\Http\Controllers\Manager\TelegramAnalyticsController::class, 'stats'])->name('manager.telegram-analytics.stats');
-    Route::get('/manager/telegram-analytics/search',  [\App\Http\Controllers\Manager\TelegramAnalyticsController::class, 'search'])->name('manager.telegram-analytics.search');
-    Route::post('/manager/telegram-analytics/upload', [\App\Http\Controllers\Manager\TelegramAnalyticsController::class, 'upload'])->name('manager.telegram-analytics.upload');
 });
 
 Route::middleware(['company.context', 'auth', 'manager.or.permission:student.assignment.manage'])->group(function (): void {
