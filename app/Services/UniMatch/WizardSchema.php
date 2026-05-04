@@ -31,6 +31,24 @@ class WizardSchema
     public function steps(): array
     {
         return [
+            // ── BÖLÜM 0: KISA TANITIM ─────────────────────────────
+            // Yas en basta — kullaniciyi segmentle (Bachelor adayi vs profesyonel)
+            // ve sonraki adimlari yas profilinde yumusak filtrelemek icin
+            [
+                'key'      => 'age_range',
+                'type'     => 'cards',
+                'title'    => 'Yaş aralığın?',
+                'subtitle' => 'Sana en uygun program tipini sıralamamız için (Bachelor / Master / Ausbildung farklı yaş profilleri çeker).',
+                'options'  => [
+                    ['value' => '18_21', 'label' => '18–21',  'icon' => '🎓', 'desc' => 'Lise sonrası lisans adayı'],
+                    ['value' => '22_25', 'label' => '22–25',  'icon' => '📚', 'desc' => 'Master / yeni mezun'],
+                    ['value' => '26_30', 'label' => '26–30',  'icon' => '💼', 'desc' => 'İş deneyimi + master/PhD'],
+                    ['value' => '31_35', 'label' => '31–35',  'icon' => '🚀', 'desc' => 'Kariyer değişimi / ileri uzmanlık'],
+                    ['value' => '36_plus', 'label' => '36+',  'icon' => '🌟', 'desc' => 'İleri seviye / araştırma'],
+                ],
+                'validation' => ['required', 'in:18_21,22_25,26_30,31_35,36_plus'],
+            ],
+
             // ── BÖLÜM 1: HEDEF ─────────────────────────────────────
             [
                 'key'      => 'target_degree',
@@ -108,21 +126,6 @@ class WizardSchema
                     ['value' => 'flexible',    'label' => 'Henüz belli değil', 'icon' => '🤔', 'desc' => 'Karar vereceğim'],
                 ],
                 'validation' => ['required', 'in:winter_2026,summer_2027,winter_2027,summer_2028,flexible'],
-            ],
-
-            [
-                'key'      => 'age_range',
-                'type'     => 'cards',
-                'title'    => 'Yaş aralığın?',
-                'subtitle' => 'Kişisel bilgi değil — aradığın programları daha doğru sıralamamız için (Bachelor / Master / Ausbildung farklı yaş profilleri çeker).',
-                'options'  => [
-                    ['value' => '18_21', 'label' => '18–21',  'icon' => '🎓', 'desc' => 'Lise sonrası lisans adayı'],
-                    ['value' => '22_25', 'label' => '22–25',  'icon' => '📚', 'desc' => 'Master / yeni mezun'],
-                    ['value' => '26_30', 'label' => '26–30',  'icon' => '💼', 'desc' => 'İş deneyimi + master/PhD'],
-                    ['value' => '31_35', 'label' => '31–35',  'icon' => '🚀', 'desc' => 'Kariyer değişimi / ileri uzmanlık'],
-                    ['value' => '36_plus', 'label' => '36+',  'icon' => '🌟', 'desc' => 'İleri seviye / araştırma'],
-                ],
-                'validation' => ['required', 'in:18_21,22_25,26_30,31_35,36_plus'],
             ],
 
             // ── BÖLÜM 3: AKADEMİK PROFİL ───────────────────────────
