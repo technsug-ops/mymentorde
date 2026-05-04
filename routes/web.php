@@ -648,6 +648,19 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             $output .= ">>> clearstatcache OK\n";
         }
 
+        // Opsiyonel: junk DAM klasor cleanup — ?cleanup=junk-folders
+        // Test sirasinda yaratilmis 'tt'/'dd' gibi 1-2 karakterlik
+        // is_system=false klasorleri soft-delete eder. Idempotent.
+        if ($request->query('cleanup') === 'junk-folders') {
+            $junkNames = ['tt', 'dd', 'TT', 'DD', 'aa', 'bb', 'cc', 'test', 'sample'];
+            $deleted = \DB::table('digital_asset_folders')
+                ->whereIn('name', $junkNames)
+                ->where('is_system', false)
+                ->whereNull('deleted_at')
+                ->update(['deleted_at' => now()]);
+            $output .= ">>> cleanup junk-folders: {$deleted} folder soft-deleted\n";
+        }
+
         // Opsiyonel inline log tail — ?tail=200 ile tetikle (route cache'siz fallback)
         $tail = (int) $request->query('tail', 0);
         if ($tail > 0) {
