@@ -40,14 +40,24 @@
             align-items: center;
         }
         .logo {
+            /* Brandbook orijinal logo stili — platform-landing ile birebir hizalı */
             font-family: "Space Grotesk", -apple-system, sans-serif;
             color: var(--primary);
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 700;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.5px;
+            line-height: 1;
             text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        .logo span { color: var(--primary-3); }
+        .logo span {
+            color: var(--primary-3);
+            font-style: italic;
+            font-weight: 600;
+        }
+        .logo img { height: 36px; width: auto; max-width: 200px; display: block; }
         .nav-links { display: flex; gap: 18px; align-items: center; }
         .nav-links a {
             color: var(--muted);
@@ -153,7 +163,14 @@
 <body>
     <header class="wrap-top">
         <nav class="nav">
-            <a href="/" class="logo">Mentor<span>DE</span></a>
+            @php $logoUrl = config('brand.logo_url') ?: null; @endphp
+            <a href="/" class="logo">
+                @if($logoUrl)
+                    <img src="{{ $logoUrl }}" alt="{{ config('brand.name', 'MentorDE') }}">
+                @else
+                    mentor<span>de</span>
+                @endif
+            </a>
             <div class="nav-links">
                 <a href="{{ route('legal.privacy') }}" class="desktop-only {{ request()->routeIs('legal.privacy') || request()->routeIs('legal.datenschutz') ? 'active' : '' }}">Gizlilik</a>
                 <a href="{{ route('legal.terms') }}" class="desktop-only {{ request()->routeIs('legal.terms') || request()->routeIs('legal.agb') ? 'active' : '' }}">Kullanım Koşulları</a>
