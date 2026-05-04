@@ -540,7 +540,7 @@
                 <span style="display:inline-block; background:rgba(255,255,255,.22); font-size:10px; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle;">YENİ</span>
             </div>
             <div style="font-size:12.5px; opacity:.92; margin-top:2px;">
-                19 sorulu kısa anket · 13.000+ program · senin profiline özel ilk 5 öneri (~3 dk)
+                19 sorulu kısa anket · {{ config('brand.catalog.program_count_full') }} program · senin profiline özel ilk 5 öneri (~3 dk)
             </div>
         </div>
     </div>

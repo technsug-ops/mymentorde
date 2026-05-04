@@ -214,7 +214,7 @@ class GuestRegistrationFormCatalog
                     // Faz 1 sonrası: target_program_id artık CANONICAL UUID
                     // (programs tablosu, kaynak-bağımsız). Source linkleri
                     // program_source_links üzerinden tutuluyor.
-                    self::f('target_program_id', 'Hedef program (kataloğundan ara)', 'canonical_program', false, 36, placeholder: 'Örn: Informatik, Wirtschaft, ...', help_text: 'Yazmaya başlayın, 13.000+ program arasından seçim yapın. İsteğe bağlı.'),
+                    self::f('target_program_id', 'Hedef program (kataloğundan ara)', 'canonical_program', false, 36, placeholder: 'Örn: Informatik, Wirtschaft, ...', help_text: 'Yazmaya başlayın, ' . config('brand.catalog.program_count_full') . ' program arasından seçim yapın. İsteğe bağlı.'),
                     self::f('target_program_source', '', 'hidden', false, 20),
                     // Sadece Level 2
                     self::f('university_start_target_date', 'Üniversite başlangıç tarihi hedefiniz *', 'date', true, 20),

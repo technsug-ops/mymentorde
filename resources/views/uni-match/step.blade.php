@@ -260,11 +260,11 @@
 
         <div class="sb-rp-trust">
             <div class="sb-rp-trust-item">
-                <strong>13K+</strong>
+                <strong>{{ config('brand.catalog.program_count_label') }}</strong>
                 <span>program kataloğu</span>
             </div>
             <div class="sb-rp-trust-item">
-                <strong>331</strong>
+                <strong>{{ config('brand.catalog.university_count') }}</strong>
                 <span>üniversite</span>
             </div>
             <div class="sb-rp-trust-item">

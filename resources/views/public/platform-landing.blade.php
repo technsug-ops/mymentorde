@@ -8,7 +8,7 @@
     $brand = $brandName ?? config('brand.name', 'MentorDE');
 @endphp
 <title>{{ $brand }} Platform — Almanya Eğitim Danışmanlığı için End-to-End SaaS</title>
-<meta name="description" content="6 portal · 28+ modül · AI asistan · 13K+ Almanya programı · entegre CRM, vize, ödeme & analytics. Yurt dışı eğitim danışmanlığı firmaları için profesyonel SaaS çözümü.">
+<meta name="description" content="6 portal · 28+ modül · AI asistan · {{ config('brand.catalog.program_count_label') }} Almanya programı · entegre CRM, vize, ödeme & analytics. Yurt dışı eğitim danışmanlığı firmaları için profesyonel SaaS çözümü.">
 <meta name="robots" content="index, follow">
 <meta property="og:title" content="{{ $brand }} Platform — Yurt Dışı Eğitim Danışmanlığı SaaS">
 <meta property="og:description" content="Tek panel, sınırsız ölçek. Almanya odaklı, çok-portal, AI destekli end-to-end danışmanlık platformu.">
@@ -1156,7 +1156,7 @@ footer a:hover { color:#fff; }
             <div class="hl-module" style="border-left:3px solid var(--primary);">
                 <div class="hl-module-icon">🎯</div>
                 <h4>UniMatch — Akıllı Program Bulucu <span style="font-size:10px; background:var(--primary); color:#fff; padding:2px 6px; border-radius:4px; vertical-align:middle; margin-left:4px;">YENİ</span></h4>
-                <p>13.000+ Almanya programı canonical katalog · 19 adımlık UniMatch wizard · 9-faktör akıllı öneri motoru · TR↔EN otomatik çeviri (Gemini). Aday tek tıkla en uygun 5 programı görür — danışman ön elemeyi atlar.</p>
+                <p>{{ config('brand.catalog.program_count_full') }} Almanya programı canonical katalog · 19 adımlık UniMatch wizard · 9-faktör akıllı öneri motoru · TR↔EN otomatik çeviri (Gemini). Aday tek tıkla en uygun 5 programı görür — danışman ön elemeyi atlar.</p>
                 <a href="{{ route('uni-match.landing') }}"
                    target="_blank"
                    style="display:inline-block; margin-top:10px; font-size:12px; color:var(--primary); font-weight:600; text-decoration:none; border-bottom:1px solid var(--primary);"

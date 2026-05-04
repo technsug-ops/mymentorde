@@ -20,7 +20,7 @@
 <div class="sb-hero">
     <span class="sb-hero-badge">✨ AKILLI EŞLEŞTIRME</span>
     <h1 class="sb-hero-title">Almanya'da sana en uygun programı bul</h1>
-    <p class="sb-hero-subtitle">5 dakikalık akıllı sihirbazımız 13.000+ Almanya programı arasından profil ve hedeflerine en uygun olanları sıralar.</p>
+    <p class="sb-hero-subtitle">5 dakikalık akıllı sihirbazımız {{ config('brand.catalog.program_count_full') }} Almanya programı arasından profil ve hedeflerine en uygun olanları sıralar.</p>
 
     <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;">
         <a href="{{ route('uni-match.start') }}" class="sb-btn sb-btn-primary sb-hero-cta"
@@ -42,11 +42,11 @@
 
     <div class="sb-stats">
         <div class="sb-stat">
-            <div class="sb-stat-num">13K+</div>
+            <div class="sb-stat-num">{{ config('brand.catalog.program_count_label') }}</div>
             <div class="sb-stat-label">Almanya Programı</div>
         </div>
         <div class="sb-stat">
-            <div class="sb-stat-num">331</div>
+            <div class="sb-stat-num">{{ config('brand.catalog.university_count') }}</div>
             <div class="sb-stat-label">Üniversite</div>
         </div>
         <div class="sb-stat">
@@ -65,7 +65,7 @@
         </li>
         <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step-counter; font-size: 14px; color: #1a1a1a;">
             <span style="position: absolute; left: 0; top: 0; background: rgba(126, 88, 191, 0.12); color: #7e58bf; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">2</span>
-            Akıllı motorumuz cevaplarını <strong>13.000+ programla eşleştirir</strong>
+            Akıllı motorumuz cevaplarını <strong>{{ config('brand.catalog.program_count_full') }} programla eşleştirir</strong>
         </li>
         <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step-counter; font-size: 14px; color: #1a1a1a;">
             <span style="position: absolute; left: 0; top: 0; background: rgba(126, 88, 191, 0.12); color: #7e58bf; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">3</span>

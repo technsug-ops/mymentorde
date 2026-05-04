@@ -21,6 +21,16 @@ return [
     'tagline'      => env('BRAND_TAGLINE', 'Almanya Eğitim Danışmanlığı'),
     'accent'       => env('BRAND_ACCENT', 'DE'),
 
+    // ── Katalog istatistikleri (UniMatch + landing'de tek kaynak) ────────
+    // Yeni programlar eklendikçe sadece bu degerleri guncelle (veya env override).
+    // Format ornegi: '15K+' rozet, '15.000+' tam yazi.
+    'catalog' => [
+        'program_count'        => env('BRAND_PROGRAM_COUNT', 15000),
+        'program_count_label'  => env('BRAND_PROGRAM_COUNT_LABEL', '15K+'),
+        'program_count_full'   => env('BRAND_PROGRAM_COUNT_FULL', '15.000+'),
+        'university_count'     => env('BRAND_UNIVERSITY_COUNT', 331),
+    ],
+
     // ── Logo & görsel ────────────────────────────────────────────────
     'logo_url'     => env('BRAND_LOGO_URL', ''),
     'logo_path'    => env('BRAND_LOGO_PATH', ''),

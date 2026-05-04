@@ -139,7 +139,7 @@
 
 <div class="intro">
     <strong>Merhaba {{ $firstName }},</strong> Almanya'da sana en uygun {{ count($recommendations) }} programı seçtik.
-    13.000+ program arasından profil ve hedeflerine göre <strong>9-faktör akıllı eşleştirme</strong> ile sıraladık.
+    {{ config('brand.catalog.program_count_full') }} program arasından profil ve hedeflerine göre <strong>9-faktör akıllı eşleştirme</strong> ile sıraladık.
     Her programın yanında "neden uyduğu" ve başvuru tipi (uni-assist veya direkt) belirtilmiştir.
 </div>
 

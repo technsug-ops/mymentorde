@@ -420,7 +420,7 @@
                 <span style="display:inline-block; background:rgba(255,255,255,.22); font-size:9px; padding:2px 7px; border-radius:8px; margin-left:4px; vertical-align:middle;">YENİ</span>
             </div>
             <div style="font-size:11.5px; opacity:.92; margin-top:1px;">
-                13.000+ Almanya programı arasından profiline uyanları gör — Master/yedek/transfer için ideal
+                {{ config('brand.catalog.program_count_full') }} Almanya programı arasından profiline uyanları gör — Master/yedek/transfer için ideal
             </div>
         </div>
     </div>
