@@ -325,6 +325,13 @@ class DealerLeadController extends Controller
             'follow_up_date'       => $validated['follow_up_date'] ?? null,
         ], fn ($v) => $v !== null);
 
+        // converted_to_student boolean'i lead_status ile senkron tut — performans
+        // raporu (DealerPerformanceController) ve dashboard sayaclari farkli kolonlar
+        // okuyordu, ikisi cakistiriyordu ('lead_status=converted' ama 'converted_to_student=false')
+        if (isset($validated['lead_status'])) {
+            $updates['converted_to_student'] = $validated['lead_status'] === 'converted';
+        }
+
         if (!empty($updates)) {
             $lead->forceFill($updates)->save();
 
