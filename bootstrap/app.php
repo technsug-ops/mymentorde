@@ -64,6 +64,30 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // PostHog Error Tracking — backend exception capture (Sentry alternatifi)
+        // Sadece 500+ ve unexpected exception'lar (HTTP 4xx, validation, auth gibi
+        // beklenen exception'lar gonderilmez — gurultu olmasin diye).
+        $exceptions->report(function (\Throwable $e): void {
+            if ($e instanceof ValidationException
+                || $e instanceof AuthenticationException
+                || $e instanceof TokenMismatchException
+                || $e instanceof HttpResponseException) {
+                return;
+            }
+            if ($e instanceof HttpExceptionInterface && $e->getStatusCode() < 500) {
+                return; // 404/403/422 gibi beklenen hatalari capture etme
+            }
+            try {
+                app(\App\Services\Analytics\AnalyticsService::class)->captureException($e);
+            } catch (\Throwable $inner) {
+                // PostHog cokerse log'a yaz — ana exception flow'unu bozma
+                \Illuminate\Support\Facades\Log::warning('PostHog exception capture failed', [
+                    'original' => $e->getMessage(),
+                    'inner'    => $inner->getMessage(),
+                ]);
+            }
+        });
+
         $mapErrorCode = static function (int $status): string {
             return match ($status) {
                 400 => 'ERR_BAD_REQUEST',

@@ -84,6 +84,32 @@ class GuestApplicationAnalyticsObserver
             ], $this->distinctIdFor($lead));
         }
 
+        // lead_status manuel guncellendi (manager/dealer formundan)
+        // Mevcut tier-based lead_qualified'a ek olarak — manager 'Nitelikli' isaretlerse de fire eder.
+        if ($lead->wasChanged('lead_status')) {
+            $newStatus = (string) $lead->lead_status;
+            $oldStatus = (string) $lead->getOriginal('lead_status');
+            $base = [
+                'lead_id'    => $lead->id,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'tier'       => $lead->lead_score_tier ?? null,
+                'score'      => (int) ($lead->lead_score ?? 0),
+                'company_id' => $lead->company_id ?? null,
+            ];
+            if ($newStatus === 'qualified') {
+                $this->analytics->capture('lead_qualified', $base + ['source' => 'manual_status'], $this->distinctIdFor($lead));
+            } elseif ($newStatus === 'contacted') {
+                $this->analytics->capture('lead_contacted', $base + ['source' => 'manual_status'], $this->distinctIdFor($lead));
+            } elseif ($newStatus === 'lost') {
+                $this->analytics->capture('lead_lost', $base + [
+                    'lost_reason'        => $lead->lost_reason ?? null,
+                    'lost_note'          => $lead->lost_note ? mb_substr((string) $lead->lost_note, 0, 200) : null,
+                    'days_since_created' => $lead->created_at ? (int) $lead->created_at->diffInDays(now()) : null,
+                ], $this->distinctIdFor($lead));
+            }
+        }
+
         // lead_converted (ilk kez student oldu)
         if ($lead->wasChanged('converted_to_student') && (bool) $lead->converted_to_student === true) {
             // Guest → Student dönüşümünde phone'u User tablosuna propagate et

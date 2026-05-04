@@ -161,6 +161,58 @@ class AnalyticsService
     }
 
     /**
+     * PostHog Error Tracking — backend exception capture.
+     *
+     * Laravel exception handler'dan otomatik cagrilir (bootstrap/app.php).
+     * Ayni istisna grubu PostHog tarafinda otomatik gruplandirilir; manager
+     * Sentry ihtiyaci olmadan trend gorur.
+     */
+    public function captureException(\Throwable $e, array $extra = []): void
+    {
+        if (!$this->enabled) {
+            return;
+        }
+
+        try {
+            $distinctId = Auth::id() ? (string) Auth::id() : 'anonymous';
+
+            // PostHog SDK'da $exception event tipi otomatik error grouping yapar
+            PostHog::capture([
+                'distinctId' => $distinctId,
+                'event'      => '$exception',
+                'properties' => array_merge($this->baseProperties(), [
+                    '$exception_type'        => get_class($e),
+                    '$exception_message'     => mb_substr((string) $e->getMessage(), 0, 500),
+                    '$exception_personURL'   => request()?->fullUrl(),
+                    '$exception_list'        => [[
+                        'type'       => get_class($e),
+                        'value'      => mb_substr((string) $e->getMessage(), 0, 500),
+                        'stacktrace' => [
+                            'frames' => array_map(fn ($f) => [
+                                'filename' => (string) ($f['file'] ?? ''),
+                                'lineno'   => (int) ($f['line'] ?? 0),
+                                'function' => (string) ($f['function'] ?? ''),
+                            ], array_slice($e->getTrace(), 0, 20)),
+                        ],
+                    ]],
+                    'http_method'   => request()?->method(),
+                    'http_url'      => request()?->fullUrl(),
+                    'http_referrer' => request()?->headers->get('referer'),
+                    'user_agent'    => mb_substr((string) request()?->userAgent(), 0, 200),
+                    'user_role'     => Auth::check() ? (string) (Auth::user()->role ?? '') : null,
+                    'company_id'    => app()->bound('current_company_id') ? (int) app('current_company_id') : null,
+                ] + $extra),
+            ]);
+        } catch (\Throwable $inner) {
+            // PostHog kendisi cokerse mevcut log'u bozma
+            Log::warning('PostHog captureException failed', [
+                'original_error' => $e->getMessage(),
+                'posthog_error'  => $inner->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * Her event'e otomatik eklenen base property'ler.
      */
     private function baseProperties(): array

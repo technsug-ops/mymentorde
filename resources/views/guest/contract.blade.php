@@ -420,7 +420,7 @@
             <div class="gc-hero-sub">Aşağıdaki butona basınca danışmanın sözleşmeni hazırlayacak ve sana iletecek. Birkaç dakika sürebilir.</div>
             <form method="POST" action="{{ route('guest.contract.request') }}" id="contractRequestForm" style="display:inline;">
                 @csrf
-                <button type="submit" class="gc-hero-btn" id="contractRequestButton">📄 Sözleşmemi Hazırla</button>
+                <button type="submit" class="gc-hero-btn" id="contractRequestButton" data-track="cta_clicked" data-ph-cta-name="guest_contract_request">📄 Sözleşmemi Hazırla</button>
             </form>
             <div class="gc-hero-meta">
                 <span>⏱️ Hazırlanma süresi: ~1 iş günü</span>

@@ -20,6 +20,7 @@ posthog.init('{{ $__posthogKey }}', {
     api_host: '{{ $__posthogHost }}',
     capture_pageview: true,
     capture_pageleave: true,
+    capture_exceptions: true, // Frontend uncaught exception → PostHog Error Tracking
     person_profiles: 'identified_only',
     disable_session_recording: false,
     autocapture: {

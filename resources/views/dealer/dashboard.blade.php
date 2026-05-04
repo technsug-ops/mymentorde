@@ -303,7 +303,7 @@
     <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:14px;padding:20px 22px;">
         <div style="font-size:13px;font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;margin-bottom:14px;">Hızlı Erişim</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <a href="/dealer/lead-create" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border,#e2e8f0);border-radius:10px;text-decoration:none;color:var(--text,#111);transition:border-color .2s;">
+            <a href="/dealer/lead-create" data-track="cta_clicked" data-ph-cta-name="dealer_dashboard_lead_create" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border,#e2e8f0);border-radius:10px;text-decoration:none;color:var(--text,#111);transition:border-color .2s;">
                 <span style="font-size:20px;">➕</span>
                 <span style="font-size:12px;font-weight:600;">Öğrenci Yönlendir</span>
             </a>

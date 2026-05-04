@@ -26,7 +26,73 @@ class ManagerDashboardController extends Controller
         // UniMatch funnel quick stats (son 7 gün)
         $data['unimatchStats'] = $this->computeUniMatchQuickStats();
 
+        // D9: doc_request widget — manager'a belge talebi takibi
+        $data['docRequestStats'] = $this->computeDocRequestStats();
+
         return view('manager.dashboard', $data);
+    }
+
+    /**
+     * D9: Manager dashboard'unda doc_request modulu icin 4 metrik + son 5 talep.
+     */
+    private function computeDocRequestStats(): array
+    {
+        try {
+            $cid = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
+            $weekStart = now()->startOfWeek();
+            $now = now();
+
+            $base = \App\Models\DocumentUploadToken::query()
+                ->when($cid > 0, fn ($q) => $q->where('company_id', $cid));
+
+            $sentThisWeek     = (clone $base)->where('created_at', '>=', $weekStart)->count();
+            $usedThisWeek     = (clone $base)->where('created_at', '>=', $weekStart)->where('used_count', '>', 0)->count();
+            $pendingTotal     = (clone $base)->where('used_count', 0)
+                ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', $now))
+                ->count();
+            // 24+ saat once gonderildi, hala tiklanmamis — "kirmizi"
+            $pendingOverdue   = (clone $base)->where('used_count', 0)
+                ->where('created_at', '<', $now->copy()->subDay())
+                ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', $now))
+                ->count();
+            $conversionRate   = $sentThisWeek > 0 ? round(($usedThisWeek / $sentThisWeek) * 100, 1) : 0;
+
+            // Son 5 talep durumlari ile
+            $recent = (clone $base)
+                ->latest('created_at')
+                ->limit(5)
+                ->get(['id', 'target_display_name', 'category_name', 'created_at', 'expires_at', 'used_count', 'recipient_email'])
+                ->map(function ($t) use ($now) {
+                    $status = 'pending';
+                    if ($t->used_count > 0) {
+                        $status = 'uploaded';
+                    } elseif ($t->expires_at && $t->expires_at->lt($now)) {
+                        $status = 'expired';
+                    }
+                    return [
+                        'id'           => $t->id,
+                        'target_name'  => $t->target_display_name ?: '-',
+                        'category'     => $t->category_name ?: '-',
+                        'created_at'   => $t->created_at,
+                        'status'       => $status,
+                        'has_email'    => !empty($t->recipient_email),
+                    ];
+                });
+
+            return [
+                'sent_week'         => $sentThisWeek,
+                'used_week'         => $usedThisWeek,
+                'pending_total'     => $pendingTotal,
+                'pending_overdue'   => $pendingOverdue,
+                'conversion_rate'   => $conversionRate,
+                'recent'            => $recent,
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'sent_week' => 0, 'used_week' => 0, 'pending_total' => 0,
+                'pending_overdue' => 0, 'conversion_rate' => 0, 'recent' => collect(),
+            ];
+        }
     }
 
     /** UniMatch wizard son 7 gün quick stats — dashboard widget. */

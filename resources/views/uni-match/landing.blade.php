@@ -22,7 +22,8 @@
     <h1 class="sb-hero-title">Almanya'da sana en uygun programı bul</h1>
     <p class="sb-hero-subtitle">5 dakikalık akıllı sihirbazımız 13.000+ Almanya programı arasından profil ve hedeflerine en uygun olanları sıralar.</p>
 
-    <a href="{{ route('uni-match.start') }}" class="sb-btn sb-btn-primary sb-hero-cta">
+    <a href="{{ route('uni-match.start') }}" class="sb-btn sb-btn-primary sb-hero-cta"
+       data-track="cta_clicked" data-ph-cta-name="unimatch_landing_start">
         Hadi başlayalım
         <span style="font-size: 18px;">→</span>
     </a>

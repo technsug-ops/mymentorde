@@ -412,6 +412,69 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
 </a>
 @endif
 
+{{-- D9: doc_request (Belge Talep Linki) widget --}}
+@if(isset($docRequestStats) && ($docRequestStats['sent_week'] > 0 || $docRequestStats['pending_total'] > 0))
+@php $dr = $docRequestStats; @endphp
+<div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:14px 18px;margin-bottom:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:22px;">📲</span>
+            <div>
+                <div style="font-size:13.5px;font-weight:700;color:var(--text,#0f172a);">Belge Talep Linki Aktivitesi</div>
+                <div style="font-size:11px;color:var(--muted,#64748b);">Bu hafta + bekleyen toplam</div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">
+        <div style="background:#f8fafc;border-radius:8px;padding:10px 12px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;color:#1e40af;">{{ $dr['sent_week'] }}</div>
+            <div style="font-size:10.5px;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.4px;margin-top:2px;">Bu Hafta Gönderildi</div>
+        </div>
+        <div style="background:#f0fdf4;border-radius:8px;padding:10px 12px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;color:#15803d;">{{ $dr['used_week'] }}</div>
+            <div style="font-size:10.5px;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.4px;margin-top:2px;">Yüklendi</div>
+        </div>
+        <div style="background:{{ $dr['pending_overdue'] > 0 ? '#fef2f2' : '#fefce8' }};border-radius:8px;padding:10px 12px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;color:{{ $dr['pending_overdue'] > 0 ? '#dc2626' : '#ca8a04' }};">{{ $dr['pending_total'] }}</div>
+            <div style="font-size:10.5px;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.4px;margin-top:2px;">
+                Bekliyor
+                @if($dr['pending_overdue'] > 0)
+                    <span style="color:#dc2626;">({{ $dr['pending_overdue'] }} 24h+)</span>
+                @endif
+            </div>
+        </div>
+        <div style="background:#faf5ff;border-radius:8px;padding:10px 12px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;color:#7e58bf;">%{{ $dr['conversion_rate'] }}</div>
+            <div style="font-size:10.5px;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.4px;margin-top:2px;">Conversion</div>
+        </div>
+    </div>
+
+    @if($dr['recent']->isNotEmpty())
+    <div style="font-size:11px;font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">Son 5 Talep</div>
+    <div style="display:flex;flex-direction:column;gap:4px;">
+        @foreach($dr['recent'] as $item)
+            @php
+                $sm = ['uploaded'=>['icon'=>'✅','color'=>'#15803d','bg'=>'#dcfce7','label'=>'Yüklendi'],
+                       'pending' =>['icon'=>'⏳','color'=>'#ca8a04','bg'=>'#fefce8','label'=>'Bekliyor'],
+                       'expired' =>['icon'=>'❌','color'=>'#dc2626','bg'=>'#fee2e2','label'=>'Süresi Doldu']];
+                $s = $sm[$item['status']] ?? $sm['pending'];
+            @endphp
+            <div style="display:flex;align-items:center;gap:10px;padding:6px 10px;background:#f8fafc;border-radius:6px;font-size:12px;">
+                <span style="background:{{ $s['bg'] }};color:{{ $s['color'] }};padding:2px 8px;border-radius:999px;font-weight:600;font-size:10.5px;flex-shrink:0;">{{ $s['icon'] }} {{ $s['label'] }}</span>
+                <span style="flex:1;color:var(--text,#0f172a);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    <strong>{{ $item['target_name'] }}</strong>
+                    <span style="color:var(--muted,#64748b);"> · {{ $item['category'] }}</span>
+                    @if($item['has_email'])<span title="Hatırlatma maili aktif" style="color:#3b82f6;margin-left:4px;">📧</span>@endif
+                </span>
+                <span style="color:var(--muted,#64748b);font-size:10.5px;flex-shrink:0;">{{ $item['created_at']?->diffForHumans() ?? '' }}</span>
+            </div>
+        @endforeach
+    </div>
+    @endif
+</div>
+@endif
+
 {{-- Filtre + Preset tek bar --}}
 <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:10px 14px;margin-bottom:12px;">
     <form method="GET" action="/manager/dashboard">

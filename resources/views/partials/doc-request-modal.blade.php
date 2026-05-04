@@ -78,7 +78,7 @@
                     </span>
                 </label>
             </div>
-            <button type="button" data-dr-gen
+            <button type="button" data-dr-gen data-track="cta_clicked" data-ph-cta-name="doc_request_create_link"
                     style="margin-top:16px;width:100%;padding:12px 18px;border:none;border-radius:10px;background:linear-gradient(135deg,#1e40af,#3b5fcc);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">
                 🔗 Linki Oluştur
             </button>
