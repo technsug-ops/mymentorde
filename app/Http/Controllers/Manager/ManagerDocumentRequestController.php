@@ -246,9 +246,11 @@ class ManagerDocumentRequestController extends Controller
         $this->assertTargetType($targetType);
 
         $data = $request->validate([
-            'category_code'  => 'required|string|max:64|regex:/^[A-Za-z0-9_-]+$/',
-            'expires_hours'  => 'nullable|integer|min:1|max:168', // max 7 gün
-            'custom_message' => 'nullable|string|max:500',
+            'category_code'   => 'required|string|max:64|regex:/^[A-Za-z0-9_-]+$/',
+            'expires_hours'   => 'nullable|integer|min:1|max:168', // max 7 gün
+            'custom_message'  => 'nullable|string|max:500',
+            'recipient_email' => 'nullable|email|max:180', // D7: hatirlatma icin alici
+            'recipient_phone' => 'nullable|string|max:50',  // D6/SMS gelecek
         ]);
 
         $category = DocumentCategory::where('code', $data['category_code'])->first();
@@ -266,6 +268,8 @@ class ManagerDocumentRequestController extends Controller
             'category_name'       => $category->name_tr ?? $data['category_code'],
             'document_name_de'    => $category->name_de ?? null,
             'custom_message'      => $data['custom_message'] ?? null,
+            'recipient_email'     => $data['recipient_email'] ?? null,
+            'recipient_phone'     => $data['recipient_phone'] ?? null,
             'created_by_user_id'  => $request->user()?->id,
             'max_uses'            => 1,
             'used_count'          => 0,

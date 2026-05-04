@@ -27,6 +27,13 @@ Schedule::command('manager:report-snapshot --type=weekly')->mondays()->at('08:00
 Schedule::command('manager:report-snapshot --type=monthly')->monthlyOn(1, '08:10');
 Schedule::command('notifications:dispatch --limit=100')->everyMinute();
 Schedule::command('escalations:process --limit=100')->hourly();
+
+// D7: Belge talep linki hatirlatmasi — saatlik tarar
+// 24-30h aralik (first reminder) + expires_at - 1h aralik (final reminder)
+Schedule::command('doc-request:send-reminders')
+    ->hourlyAt(15)
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/doc-request-reminders.log'));
 Schedule::command('risk-scores:calculate --limit=500')->dailyAt('01:15');
 Schedule::command('archive:inactive-records --guest-days=180')->dailyAt('01:30');
 Schedule::command('marketing:sync-external-metrics --days=7')

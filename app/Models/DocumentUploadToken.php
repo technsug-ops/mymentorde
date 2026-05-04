@@ -49,6 +49,10 @@ class DocumentUploadToken extends Model
         'custom_message',
         // Lifecycle
         'created_by_user_id',
+        'recipient_email',
+        'recipient_phone',
+        'reminder_first_sent_at',
+        'reminder_final_sent_at',
         'max_uses',
         'used_count',
         'expires_at',
@@ -59,10 +63,12 @@ class DocumentUploadToken extends Model
     ];
 
     protected $casts = [
-        'expires_at'   => 'datetime',
-        'last_used_at' => 'datetime',
-        'max_uses'     => 'integer',
-        'used_count'   => 'integer',
+        'expires_at'             => 'datetime',
+        'last_used_at'           => 'datetime',
+        'reminder_first_sent_at' => 'datetime',
+        'reminder_final_sent_at' => 'datetime',
+        'max_uses'               => 'integer',
+        'used_count'             => 'integer',
     ];
 
     /**

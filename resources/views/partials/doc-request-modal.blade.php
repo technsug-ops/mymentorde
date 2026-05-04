@@ -65,6 +65,18 @@
                         style="padding:9px 11px;border-radius:8px;border:1px solid #cbd5e1;font-size:13px;font-family:inherit;resize:vertical;"
                         placeholder="Örn: Pasaportunuzu net çekin."></textarea>
                 </label>
+                {{-- D7: Hatirlatma destegi — email girilirse 24h ve final hatirlatma otomatik --}}
+                <label style="display:flex;flex-direction:column;gap:4px;">
+                    <span style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;">
+                        Alıcı E-posta <span style="color:#94a3b8;font-weight:500;text-transform:none;letter-spacing:0;">(opsiyonel — hatırlatma için)</span>
+                    </span>
+                    <input type="email" data-dr-email maxlength="180"
+                           placeholder="aday@example.com"
+                           style="padding:9px 11px;border-radius:8px;border:1px solid #cbd5e1;font-size:13px;">
+                    <span style="font-size:11px;color:#64748b;line-height:1.4;">
+                        ✉ Girersen 24 saat içinde tıklanmazsa hatırlatma, süre dolmadan 1 saat önce son uyarı maili gider.
+                    </span>
+                </label>
             </div>
             <button type="button" data-dr-gen
                     style="margin-top:16px;width:100%;padding:12px 18px;border:none;border-radius:10px;background:linear-gradient(135deg,#1e40af,#3b5fcc);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">
@@ -108,6 +120,7 @@
     var catSelect    = modal.querySelector('[data-dr-cat]');
     var expirySelect = modal.querySelector('[data-dr-expiry]');
     var msgInput     = modal.querySelector('[data-dr-msg]');
+    var emailInput   = modal.querySelector('[data-dr-email]');
     var genBtn       = modal.querySelector('[data-dr-gen]');
     var resultBox    = modal.querySelector('[data-dr-result]');
     var urlInput     = modal.querySelector('[data-dr-url]');
@@ -142,7 +155,7 @@
             })
             .catch(() => { catSelect.innerHTML = '<option value="">Yükleme hatası</option>'; });
     }
-    function openModal(){ modal.style.display='flex'; resultBox.style.display='none'; msgInput.value=''; loadCategories(); }
+    function openModal(){ modal.style.display='flex'; resultBox.style.display='none'; msgInput.value=''; if (emailInput) emailInput.value=''; loadCategories(); }
     function closeModal(){ modal.style.display='none'; }
 
     btn.addEventListener('click', openModal);
@@ -160,6 +173,7 @@
                 category_code: cat,
                 expires_hours: parseInt(expirySelect.value, 10) || 48,
                 custom_message: msgInput.value || null,
+                recipient_email: (emailInput && emailInput.value) ? emailInput.value.trim() : null,
             })
         })
         .then(r => r.json().then(d => ({ ok:r.ok, data:d })))
