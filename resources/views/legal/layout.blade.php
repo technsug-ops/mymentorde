@@ -9,22 +9,25 @@
     <link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">
     <style>
         :root {
-            --bg: #f9fafd;
+            /* Brandbook (29 Nisan): #7e58bf primary + Space Grotesk + cream — eski purple+gold KULLANILMAZ */
+            --bg: #f4f2ee;
             --surface: #ffffff;
-            --text: #12233a;
-            --muted: #5e7187;
-            --primary: #5b2e91;
-            --primary-2: #4a1d7a;
+            --text: #1a1a1a;
+            --muted: #6b5894;
+            --primary: #7e58bf;
+            --primary-2: #6a47a8;
+            --primary-3: #a07ed9;
             --primary-soft: #f1e8fb;
-            --accent: #e8b931;
-            --line: #d9e2ee;
+            --primary-soft-2: #ede9fe;
+            --line: #e8dffa;
+            --line-soft: #f0ecf6;
         }
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+            font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
             color: var(--text);
-            background: linear-gradient(140deg, #f7f3ff 0%, #f9fafd 42%, #fff8e8 100%);
+            background: linear-gradient(135deg, #e9e7e2 0%, #f4f2ee 100%);
             line-height: 1.65;
             min-height: 100vh;
             display: flex;
@@ -37,12 +40,14 @@
             align-items: center;
         }
         .logo {
-            font-family: "DM Serif Display", serif;
+            font-family: "Space Grotesk", -apple-system, sans-serif;
             color: var(--primary);
-            font-size: 28px;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
             text-decoration: none;
         }
-        .logo span { color: var(--accent); }
+        .logo span { color: var(--primary-3); }
         .nav-links { display: flex; gap: 18px; align-items: center; }
         .nav-links a {
             color: var(--muted);
@@ -75,14 +80,15 @@
             border: 1px solid var(--line);
             border-radius: 16px;
             padding: 36px 42px;
-            box-shadow: 0 4px 20px rgba(91,46,145,.06);
+            box-shadow: 0 4px 20px rgba(126,88,191,.08);
         }
         .doc h1 {
             margin: 0 0 6px;
-            font-family: "DM Serif Display", serif;
-            font-size: 32px;
-            font-weight: 400;
-            line-height: 1.2;
+            font-family: "Space Grotesk", -apple-system, sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.25;
             color: var(--text);
         }
         .doc h2 {

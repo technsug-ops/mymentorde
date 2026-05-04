@@ -47,7 +47,7 @@
     padding: 56px 24px;
     text-align: center;
     color: var(--muted);
-    background: linear-gradient(140deg, #faf6ff 0%, #fffaf0 100%);
+    background: linear-gradient(135deg, var(--primary-soft) 0%, #f4f2ee 100%);
     border: 2px dashed var(--line);
     border-radius: 14px;
 }

@@ -22,11 +22,21 @@
     <h1 class="sb-hero-title">Almanya'da sana en uygun programı bul</h1>
     <p class="sb-hero-subtitle">5 dakikalık akıllı sihirbazımız 13.000+ Almanya programı arasından profil ve hedeflerine en uygun olanları sıralar.</p>
 
-    <a href="{{ route('uni-match.start') }}" class="sb-btn sb-btn-primary sb-hero-cta"
-       data-track="cta_clicked" data-ph-cta-name="unimatch_landing_start">
-        Hadi başlayalım
-        <span style="font-size: 18px;">→</span>
-    </a>
+    <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;">
+        <a href="{{ route('uni-match.start') }}" class="sb-btn sb-btn-primary sb-hero-cta"
+           data-track="cta_clicked" data-ph-cta-name="unimatch_landing_start">
+            Hadi başlayalım
+            <span style="font-size: 18px;">→</span>
+        </a>
+        @if(! empty($popularPrograms))
+        <a href="#popular" class="sb-hero-secondary"
+           data-track="cta_clicked" data-ph-cta-name="unimatch_landing_browse_popular"
+           style="display:inline-flex;align-items:center;gap:6px;padding:14px 22px;border:1.5px solid #d8d2e8;background:#fff;color:#7e58bf;border-radius:10px;text-decoration:none;font-size:14px;font-weight:600;transition:all .15s;">
+            👀 Önce popüler programlara bak
+            <span style="font-size:14px;">↓</span>
+        </a>
+        @endif
+    </div>
 
     <div class="sb-hero-meta">Ücretsiz · Login gerekmiyor · İstediğin zaman bırakabilirsin</div>
 
@@ -73,9 +83,10 @@
      Sosyal proof + SEO + sihirbaza girmeden de "ne var burada?" cevabı
 ═══════════════════════════════════════════════════════════════════ --}}
 @if(! empty($popularPrograms))
-<section class="popular-section" aria-label="Popüler Almanya programları">
+<section id="popular" class="popular-section" aria-label="Popüler Almanya programları">
     <div class="popular-inner">
         <div class="popular-head">
+            <span style="display:inline-block;background:#7e58bf;color:#fff;padding:5px 14px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">⭐ Vitrin</span>
             <h2 class="popular-title">Almanya'da en çok tercih edilen programlar</h2>
             <p class="popular-subtitle">Türk öğrencilerin yoğun olarak başvurduğu alanlardan örnekler — daha fazlasını sihirbaz sıralasın</p>
         </div>
@@ -139,10 +150,13 @@
 .popular-section {
     margin: 64px calc(-1 * (50vw - 50%)) 24px;
     padding: 56px 20px;
-    background: linear-gradient(180deg, #f7f3ff 0%, #faf9f5 100%);
-    border-top: 1px solid rgba(126, 88, 191, 0.08);
-    border-bottom: 1px solid rgba(126, 88, 191, 0.08);
+    /* Daha belirgin vitrin hissi — kullanici scroll'da goz attiginda 'devamini gor' diyebilsin */
+    background: linear-gradient(180deg, #ede9fe 0%, #f4f2ee 100%);
+    border-top: 2px solid rgba(126, 88, 191, 0.18);
+    border-bottom: 2px solid rgba(126, 88, 191, 0.18);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
 }
+.sb-hero-secondary:hover { border-color: #7e58bf !important; background: rgba(126,88,191,.04) !important; }
 .popular-inner { max-width: 1100px; margin: 0 auto; }
 .popular-head { text-align: center; margin-bottom: 36px; }
 .popular-title {
