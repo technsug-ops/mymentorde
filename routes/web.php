@@ -661,6 +661,18 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             $output .= ">>> cleanup junk-folders: {$deleted} folder soft-deleted\n";
         }
 
+        // Safety net: deploy maintenance mode FTP-rm fail ettiyse manuel cikis
+        // Kullanim: /_deploy/run-pending?cleanup=clear-maintenance
+        if ($request->query('cleanup') === 'clear-maintenance') {
+            $maint = storage_path('framework/maintenance.php');
+            if (file_exists($maint)) {
+                @unlink($maint);
+                $output .= ">>> maintenance.php deleted — site live again\n";
+            } else {
+                $output .= ">>> maintenance.php zaten yok (site normalde)\n";
+            }
+        }
+
         // Opsiyonel inline log tail — ?tail=200 ile tetikle (route cache'siz fallback)
         $tail = (int) $request->query('tail', 0);
         if ($tail > 0) {

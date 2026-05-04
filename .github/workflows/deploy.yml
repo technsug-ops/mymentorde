@@ -89,6 +89,41 @@ jobs:
       - name: Install lftp
         run: sudo apt-get install -y lftp
 
+      # ── Maintenance mode ON (FTP race window'unda 500 yerine 503) ────────
+      # storage/framework/maintenance.php var iken Laravel her isteği 503 döner.
+      # Mirror bittikten sonra siliyoruz; aradaki ~30-60 sn pencerede gelen
+      # request'ler "Class not found" / "Failed to open stream" yerine retry'lı
+      # 503 alır.
+      - name: Maintenance mode ON
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
+        run: |
+          cat > /tmp/maintenance.php <<'EOF'
+          <?php return [
+              // _deploy/* maintenance icinde de erisilebilir — admin stuck-503'ten
+              // cikis icin /_deploy/run-pending?cleanup=clear-maintenance cagirabilir
+              'except'   => ['_deploy/*'],
+              'redirect' => null,
+              'retry'    => 30,
+              'refresh'  => 30,
+              'secret'   => null,
+              'status'   => 503,
+              'template' => null,
+          ];
+          EOF
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "ftp://$FTP_HOST" -e "
+            set ftp:ssl-force yes
+            set ssl:verify-certificate no
+            set ftp:passive-mode true
+            set cmd:fail-exit yes
+            cd '$FTP_SERVER_DIR/storage/framework'
+            put /tmp/maintenance.php
+            bye
+          " || echo "::warning::Maintenance ON failed — continuing with deploy"
+
       - name: Deploy via lftp (FTPS)
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
@@ -101,6 +136,25 @@ jobs:
           CHANGED_COMPOSER: ${{ steps.changes.outputs.composer }}
           CHANGED_FRONTEND: ${{ steps.changes.outputs.frontend }}
         run: python3 scripts/lftp-deploy.py
+
+      # ── Maintenance mode OFF — KRİTİK: deploy başarısız bile olsa çalışmalı
+      # Aksi halde site 503'te takılır. if: always() garanti eder.
+      - name: Maintenance mode OFF
+        if: always()
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
+        run: |
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "ftp://$FTP_HOST" -e "
+            set ftp:ssl-force yes
+            set ssl:verify-certificate no
+            set ftp:passive-mode true
+            cd '$FTP_SERVER_DIR/storage/framework'
+            rm -f maintenance.php
+            bye
+          " || echo "::warning::Maintenance OFF failed — site may be stuck in 503 mode!"
 
       - name: Deploy summary
         if: always()
