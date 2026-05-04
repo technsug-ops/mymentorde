@@ -217,29 +217,36 @@
                    class="nav-link {{ request()->routeIs('guest.contract') ? 'active' : '' }}">
                     <span class="nav-icon">📜</span> Sözleşme Sürecim
                 </a>
+                @pageVisible('process_tracking')
                 <a href="{{ route('guest.timeline') }}"
                    class="nav-link {{ request()->routeIs('guest.timeline') ? 'active' : '' }}">
                     <span class="nav-icon">📅</span> Süreç Takvimi
                 </a>
+                @endpageVisible
                 <a href="{{ route('guest.cost-calculator') }}"
                    class="nav-link {{ request()->routeIs('guest.cost-calculator') ? 'active' : '' }}">
                     <span class="nav-icon">💰</span> Maliyet Hesabı
                 </a>
+                @pageVisible('ai_assistant')
                 <a href="{{ route('guest.ai-assistant') }}"
                    class="nav-link {{ request()->routeIs('guest.ai-assistant*') ? 'active' : '' }}">
                     <span class="nav-icon">🤖</span> AI Asistan
                     <span style="margin-left:auto;font-size:9px;font-weight:600;background:var(--accent-soft,rgba(0,0,0,.05));color:var(--text,#1a1a1a);padding:1px 6px;border-radius:4px;">Yeni</span>
                 </a>
+                @endpageVisible
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-label">İletişim</div>
                 @module('booking')
+                @pageVisible('appointments')
                 <a href="{{ route('guest.booking') }}"
                    class="nav-link {{ request()->is('guest/randevu','randevu','book*') ? 'active' : '' }}">
                     <span class="nav-icon">📅</span> Randevu Al
                 </a>
+                @endpageVisible
                 @endmodule
+                @pageVisible('messages')
                 <a href="{{ route('guest.messages') }}"
                    class="nav-link {{ request()->routeIs('guest.messages') ? 'active' : '' }}">
                     <span class="nav-icon">💬</span> Mesajlar
@@ -247,10 +254,13 @@
                         <span class="nav-badge" style="background:var(--c-info,#2678bd);">{{ (int)$guestDmUnread }}</span>
                     @endif
                 </a>
+                @endpageVisible
+                @pageVisible('support')
                 <a href="{{ route('guest.tickets') }}"
                    class="nav-link {{ request()->routeIs('guest.tickets') ? 'active' : '' }}">
                     <span class="nav-icon">🎫</span> Destek Talebi
                 </a>
+                @endpageVisible
                 <a href="{{ route('guest.feedback') }}"
                    class="nav-link {{ request()->routeIs('guest.feedback') ? 'active' : '' }}">
                     <span class="nav-icon">💬</span> Geri Bildirim
@@ -263,22 +273,28 @@
                    class="nav-link {{ request()->routeIs('guest.university-guide') ? 'active' : '' }}">
                     <span class="nav-icon">🎓</span> Üniversite Rehberi
                 </a>
+                @pageVisible('document_guide')
                 <a href="{{ route('guest.document-guide') }}"
                    class="nav-link {{ request()->routeIs('guest.document-guide') ? 'active' : '' }}">
                     <span class="nav-icon">📋</span> Belge Hazırlama
                 </a>
+                @endpageVisible
                 <a href="{{ route('guest.success-stories') }}"
                    class="nav-link {{ request()->routeIs('guest.success-stories') ? 'active' : '' }}">
                     <span class="nav-icon">⭐</span> Başarı Hikayeleri
                 </a>
+                @pageVisible('living_guide')
                 <a href="{{ route('guest.living-guide') }}"
                    class="nav-link {{ request()->routeIs('guest.living-guide') ? 'active' : '' }}">
                     <span class="nav-icon">🏠</span> Almanya'da Yaşam
                 </a>
+                @endpageVisible
+                @pageVisible('visa_guide')
                 <a href="{{ route('guest.vize-guide') }}"
                    class="nav-link {{ request()->routeIs('guest.vize-guide') ? 'active' : '' }}">
                     <span class="nav-icon">🛂</span> Vize & Sperrkonto
                 </a>
+                @endpageVisible
                 @pageVisible('discover')
                 <a href="{{ route('guest.discover') }}"
                    class="nav-link {{ request()->routeIs('guest.discover') ? 'active' : '' }}">
