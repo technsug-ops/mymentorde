@@ -245,6 +245,19 @@ class ManagerDocumentRequestController extends Controller
         $this->authorizeUse($request);
         $this->assertTargetType($targetType);
 
+        // D11: Aylik quota kontrol — companies.doc_request_monthly_limit set ise
+        $company = \App\Models\Company::find($companyId);
+        if ($company && $company->isDocRequestQuotaExhausted()) {
+            $limit = (int) $company->doc_request_monthly_limit;
+            $usage = $company->docRequestMonthlyUsage();
+            return response()->json([
+                'error'        => "Aylık belge talep linki limitiniz ({$limit}) doldu — bu ay {$usage} link üretildi. Sonraki ay 1'inden itibaren sıfırlanır veya planınızı Premium'a yükseltin.",
+                'quota_limit'  => $limit,
+                'quota_usage'  => $usage,
+                'quota_reset'  => \Carbon\CarbonImmutable::now()->addMonth()->startOfMonth()->toDateString(),
+            ], 422);
+        }
+
         $data = $request->validate([
             'category_code'   => 'required|string|max:64|regex:/^[A-Za-z0-9_-]+$/',
             'expires_hours'   => 'nullable|integer|min:1|max:168', // max 7 gün

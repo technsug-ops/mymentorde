@@ -38,6 +38,44 @@ class ModuleAccess
         'silence_checkin', // Aday/öğrenci timeline sessizliğinde otomatik "süreç aktif" touchpoint
     ];
 
+    /**
+     * Manager admin UI için modül meta — TR label + grup + açıklama.
+     * Yeni modül eklendiğinde DEFAULT_MODULES + bu array senkron tutulmalı.
+     */
+    public const MODULE_META = [
+        'core'              => ['label' => 'Çekirdek',                'group' => 'core',     'desc' => 'Login, dashboard, profil — kapatılamaz', 'locked' => true],
+        'booking'           => ['label' => 'Booking / Randevu',       'group' => 'gold',     'desc' => 'Calendly-style randevu sistemi (senior + public widget)'],
+        'dam'               => ['label' => 'Marka Kütüphanesi (DAM)', 'group' => 'gold',     'desc' => 'Dijital varlık yönetimi — bayi/öğrenci dosya paylaşımı'],
+        'content_hub'       => ['label' => 'Keşfet / İçerik',         'group' => 'gold',     'desc' => 'CMS içerik havuzu, öğrenci/aday görür'],
+        'multi_provider_ai' => ['label' => 'Çoklu AI Provider',       'group' => 'gold',     'desc' => 'Claude/Gemini/OpenAI birden fazla provider'],
+        'doc_builder_ai'    => ['label' => 'Doküman Oluşturucu AI',   'group' => 'gold',     'desc' => 'AI ile motivation letter / CV üretimi'],
+        'ai_labs'           => ['label' => 'AI Labs / Asistan',       'group' => 'gold',     'desc' => 'NotebookLM-benzeri bilgi havuzu + AI sorgulama'],
+        'contracts_hub'     => ['label' => 'Sözleşmeler Hub',         'group' => 'premium',  'desc' => 'İş sözleşmesi şablonları + dijital imza akışı'],
+        'doc_request'       => ['label' => 'Belge Talep Linki',       'group' => 'premium',  'desc' => 'Tek-kullanımlık link ile aday öğrenciden belge talep'],
+        'page_visibility'   => ['label' => 'Sayfa Görünürlüğü',       'group' => 'premium',  'desc' => 'Rol bazlı sayfa kapatma — manager kontrolünde'],
+        'discount_codes'    => ['label' => 'İndirim Kodları',         'group' => 'premium',  'desc' => 'Hizmet paketlerinde indirim kodu uygulama + paylaşım kartı'],
+        'silence_checkin'   => ['label' => 'Sessizlik Checkin',       'group' => 'premium',  'desc' => 'Aday/öğrenci sessizliğinde otomatik "süreç aktif" mesaj'],
+        'dealer'            => ['label' => 'Bayi / Satış Ortağı',     'group' => 'premium',  'desc' => 'Satış ortakları portali + komisyon takibi'],
+        'marketing_admin'   => ['label' => 'Marketing Admin',         'group' => 'premium',  'desc' => 'Email drip, A/B test, attribution dashboard'],
+        'analytics_hub'     => ['label' => 'Analytics Hub',           'group' => 'premium',  'desc' => 'Platform analytics, performans raporları'],
+    ];
+
+    /** Modül kodlarının kategorize listesini dön (manager UI grupları için). */
+    public static function moduleGroups(): array
+    {
+        return [
+            'core'    => 'Çekirdek (kapatılamaz)',
+            'gold'    => 'Gold paket modülleri',
+            'premium' => 'Premium paket modülleri',
+        ];
+    }
+
+    /** Tüm bilinen modül kodlarını dön (DEFAULT_MODULES). */
+    public static function allModules(): array
+    {
+        return self::DEFAULT_MODULES;
+    }
+
     public static function enabled(string $module, ?int $companyId = null): bool
     {
         $module = strtolower(trim($module));

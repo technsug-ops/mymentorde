@@ -445,6 +445,13 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::delete('/manager/universities/{university}/video',          [$uc, 'deleteVideo'])->middleware('throttle:30,1')->name('manager.universities.video.delete');
     }
 
+    // ── SaaS modül toggle (company × module matrix) ──
+    {
+        $cm = \App\Http\Controllers\Manager\CompanyModulesController::class;
+        Route::get('/manager/companies/modules',                          [$cm, 'index'])->name('manager.companies.modules');
+        Route::post('/manager/companies/{company}/modules',               [$cm, 'update'])->middleware('throttle:30,1')->name('manager.companies.modules.update');
+    }
+
     // ── Application Guides — student altında (Uni-Assist + Vize) ──────────────
     // Uni-Assist sözleşme+ödeme sonrası (öğrenci aşamasında) yapılır.
     // Guest URL legacy backward-compat için tutuldu.

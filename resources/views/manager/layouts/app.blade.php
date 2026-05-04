@@ -517,6 +517,10 @@
                    class="nav-link {{ request()->is('manager/universities*') ? 'active' : '' }}">
                     <span class="nav-icon">🏛️</span> Üniversite Görselleri
                 </a>
+                <a href="{{ route('manager.companies.modules') }}"
+                   class="nav-link {{ request()->is('manager/companies/modules*') ? 'active' : '' }}">
+                    <span class="nav-icon">🧩</span> SaaS Modül Yönetimi
+                </a>
                 <a href="/manager/system/security"
                    class="nav-link {{ request()->is('manager/system/security*') ? 'active' : '' }}">
                     <span class="nav-icon">🛡</span> Güvenlik Paneli
