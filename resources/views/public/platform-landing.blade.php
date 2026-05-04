@@ -1508,7 +1508,11 @@ footer a:hover { color:#fff; }
                     <li class="tier-disabled">— AI Asistan (ek modül)</li>
                     <li class="tier-disabled">— Bayi network</li>
                 </ul>
-                <a href="#cta" class="tier-cta">Solo'yu Seç →</a>
+                <a href="mailto:info@mentorde.com?subject=Demo%20Talebi%20-%20Solo%20Paketi%20({{ urlencode($brand) }})&body=Merhaba,%20Solo%20paketi%20için%20demo%20talep%20ediyorum.%20%E2%82%AC199/ay,%201-3%20kişi,%20%E2%89%A4100%20aday/yıl."
+                   class="tier-cta"
+                   data-track="cta_clicked"
+                   data-ph-cta-name="tier_solo_select"
+                   data-ph-location="platform_pricing">Solo'yu Seç →</a>
             </div>
 
             {{-- BÜYÜYEN — featured --}}
@@ -1533,7 +1537,11 @@ footer a:hover { color:#fff; }
                     <li>Analytics Hub (16+ dashboard)</li>
                     <li>Öncelikli destek (4h SLA)</li>
                 </ul>
-                <a href="#cta" class="tier-cta">Büyüyen'i Seç →</a>
+                <a href="mailto:info@mentorde.com?subject=Demo%20Talebi%20-%20Buyuyen%20Ekip%20Paketi%20({{ urlencode($brand) }})&body=Merhaba,%20Büyüyen%20Ekip%20paketi%20için%20demo%20talep%20ediyorum.%20%E2%82%AC499/ay,%203-10%20kişi,%20100-500%20aday/yıl."
+                   class="tier-cta"
+                   data-track="cta_clicked"
+                   data-ph-cta-name="tier_growing_select"
+                   data-ph-location="platform_pricing">Büyüyen'i Seç →</a>
             </div>
 
             {{-- KURUMSAL --}}
@@ -1557,7 +1565,11 @@ footer a:hover { color:#fff; }
                     <li>API erişim + webhook</li>
                     <li>Dedicated success manager (1h SLA)</li>
                 </ul>
-                <a href="#cta" class="tier-cta">Kurumsal'ı Seç →</a>
+                <a href="mailto:info@mentorde.com?subject=Demo%20Talebi%20-%20Kurumsal%20Paket%20({{ urlencode($brand) }})&body=Merhaba,%20Kurumsal%20paket%20için%20demo%20talep%20ediyorum.%20%E2%82%AC999/ay,%2010%2B%20kişi,%20500%2B%20aday/yıl%2C%20bayi%20ağı%20dahil."
+                   class="tier-cta"
+                   data-track="cta_clicked"
+                   data-ph-cta-name="tier_enterprise_select"
+                   data-ph-location="platform_pricing">Kurumsal'ı Seç →</a>
             </div>
         </div>
 
