@@ -61,6 +61,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'task.access' => \App\Http\Middleware\EnsureTaskAccess::class,
             'require.2fa' => \App\Http\Middleware\Require2FA::class,
             'module' => \App\Http\Middleware\ModuleEnabled::class,
+            'page.visible' => \App\Http\Middleware\EnsurePageVisible::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

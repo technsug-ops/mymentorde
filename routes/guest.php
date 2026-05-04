@@ -24,7 +24,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     Route::get('/services', [GuestPortalController::class, 'services'])->name('guest.services');
 
     // Akıllı randevu yönlendirici — atanmış danışmana direkt götürür, yoksa public listeye
-    Route::get('/randevu', [GuestPortalController::class, 'bookingRedirect'])->name('guest.booking');
+    Route::get('/randevu', [GuestPortalController::class, 'bookingRedirect'])->middleware('page.visible:appointments')->name('guest.booking');
     Route::post('/services/select-package', [GuestWorkflowController::class, 'selectPackage'])->middleware('throttle:60,1')->name('guest.services.select-package');
     Route::post('/services/add-extra', [GuestWorkflowController::class, 'addExtraService'])->middleware('throttle:60,1')->name('guest.services.add-extra');
     Route::delete('/services/remove-extra/{extraCode}', [GuestWorkflowController::class, 'removeExtraService'])->middleware('throttle:60,1')->name('guest.services.remove-extra');
@@ -42,7 +42,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     Route::get('/contract/signed-thanks', [GuestPortalController::class, 'contractSignedThanks'])->name('guest.contract.signed-thanks');
 
     // ── Ticket / Destek ──────────────────────────────────────────────────────
-    Route::get('/tickets', [GuestPortalController::class, 'tickets'])->name('guest.tickets');
+    Route::get('/tickets', [GuestPortalController::class, 'tickets'])->middleware('page.visible:support')->name('guest.tickets');
     Route::post('/tickets', [GuestWorkflowController::class, 'storeTicket'])->middleware('throttle:30,1')->name('guest.tickets.store');
     Route::post('/tickets/{ticket}/reply', [GuestWorkflowController::class, 'replyTicket'])->middleware(['guest.owns.ticket', 'throttle:60,1'])->name('guest.tickets.reply');
     Route::post('/tickets/{ticket}/close', [GuestWorkflowController::class, 'closeTicket'])->middleware(['guest.owns.ticket', 'throttle:60,1'])->name('guest.tickets.close');
@@ -59,7 +59,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     Route::post('/settings/logout-all', [GuestWorkflowController::class, 'logoutAllDevices'])->middleware('throttle:5,1')->name('guest.settings.logout-all');
 
     // ── Mesajlaşma ───────────────────────────────────────────────────────────
-    Route::get('/messages', [ConversationController::class, 'guest'])->name('guest.messages');
+    Route::get('/messages', [ConversationController::class, 'guest'])->middleware('page.visible:messages')->name('guest.messages');
     Route::post('/messages/send', [ConversationController::class, 'guestSend'])->middleware('throttle:60,1')->name('guest.messages.send');
     Route::get('/messages/poll', [GuestWorkflowController::class, 'pollMessages'])->middleware('throttle:120,1')->name('guest.messages.poll');
     Route::post('/messages/typing', [GuestWorkflowController::class, 'markTyping'])->middleware('throttle:120,1')->name('guest.messages.typing');
@@ -89,13 +89,13 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     Route::get('/help-center', [GuestInfoController::class, 'helpCenter'])->name('guest.help-center');
 
     // ── AI Asistanı ──────────────────────────────────────────────────────────
-    Route::get('/ai-assistant', [GuestEngagementController::class, 'aiAssistantPage'])->name('guest.ai-assistant');
+    Route::get('/ai-assistant', [GuestEngagementController::class, 'aiAssistantPage'])->middleware('page.visible:ai_assistant')->name('guest.ai-assistant');
     Route::post('/ai-assistant/ask', [GuestEngagementController::class, 'aiAssistantAsk'])->middleware('throttle:30,1')->name('guest.ai-assistant.ask');
     Route::get('/ai-assistant/history', [GuestEngagementController::class, 'aiAssistantHistory'])->name('guest.ai-assistant.history');
     Route::get('/ai-assistant/remaining', [GuestEngagementController::class, 'aiAssistantRemaining'])->name('guest.ai-assistant.remaining');
 
     // ── Başvuru Takvimi ──────────────────────────────────────────────────────
-    Route::get('/timeline', [GuestEngagementController::class, 'timeline'])->name('guest.timeline');
+    Route::get('/timeline', [GuestEngagementController::class, 'timeline'])->middleware('page.visible:process_tracking')->name('guest.timeline');
     Route::get('/timeline/export.ics', [GuestEngagementController::class, 'timelineExport'])->name('guest.timeline.export');
 
     // ── Maliyet Hesaplama ────────────────────────────────────────────────────
@@ -104,16 +104,16 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     // ── İçerik Sayfaları ─────────────────────────────────────────────────────
     Route::get('/university-guide',  [GuestInfoController::class, 'universityGuidePage'])->name('guest.university-guide');
     Route::get('/success-stories',   [GuestInfoController::class, 'successStoriesPage'])->name('guest.success-stories');
-    Route::get('/living-guide',      [GuestInfoController::class, 'livingGuidePage'])->name('guest.living-guide');
-    Route::get('/vize-guide',        [GuestInfoController::class, 'vizeGuidePage'])->name('guest.vize-guide');
+    Route::get('/living-guide',      [GuestInfoController::class, 'livingGuidePage'])->middleware('page.visible:living_guide')->name('guest.living-guide');
+    Route::get('/vize-guide',        [GuestInfoController::class, 'vizeGuidePage'])->middleware('page.visible:visa_guide')->name('guest.vize-guide');
     Route::get('/city/{slug}',       [GuestInfoController::class, 'cityDetail'])->name('guest.city-detail')->where('slug', '[a-z-]+');
-    Route::get('/document-guide',    [GuestInfoController::class, 'documentGuidePage'])->name('guest.document-guide');
+    Route::get('/document-guide',    [GuestInfoController::class, 'documentGuidePage'])->middleware('page.visible:document_guide')->name('guest.document-guide');
 
     // ── Global Arama ─────────────────────────────────────────────────────────
     Route::get('/search', [GuestContentController::class, 'globalSearch'])->middleware('throttle:60,1')->name('guest.search');
 
     // ── Content Hub (Keşfet) ─────────────────────────────────────────────────
-    Route::get('/discover',                      [GuestContentController::class, 'discoverPage'])->name('guest.discover');
+    Route::get('/discover',                      [GuestContentController::class, 'discoverPage'])->middleware('page.visible:discover')->name('guest.discover');
     Route::get('/discover/more',                 [GuestContentController::class, 'discoverMore'])->name('guest.discover.more');
     Route::get('/content/{slug}',                [GuestContentController::class, 'contentDetail'])->name('guest.content-detail')->where('slug', '[^/]+');
     Route::get('/saved',                         [GuestContentController::class, 'savedList'])->name('guest.saved');
