@@ -211,27 +211,41 @@
     @endforeach
 
 @else
-{{-- İskelet: içerik yokken --}}
+{{-- İskelet: içerik yokken — açıkça "Yakında" mesajı ile kullanıcı
+     interaktif bekleyişte kalmasın --}}
+<div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #fbbf24;border-radius:12px;padding:18px 22px;margin-bottom:18px;color:#92400e;">
+    <div style="display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;margin-bottom:6px;">
+        <span style="font-size:20px;">⏳</span>
+        Eğitim materyalleri hazırlanıyor
+    </div>
+    <div style="font-size:13px;color:#854d0e;line-height:1.5;">
+        Aşağıda gelecek olan modüllerin önizlemesini görüyorsun. Materyaller yayınlandığında buradan
+        ulaşabileceksin; şu an için içerik henüz hazır değil.
+    </div>
+</div>
 <div class="tr-skeleton-grid">
-    <div class="tr-skel-card">
+    <div class="tr-skel-card" style="opacity:.78;position:relative;">
+        <span style="position:absolute;top:10px;right:12px;font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:999px;">Yakında</span>
         <div class="tr-skel-icon">🚀</div>
         <div class="tr-skel-title">Onboarding</div>
         <div class="tr-skel-desc">{{ config('brand.name', 'MentorDE') }} süreç tanıtımı, lead kalite kriterleri.</div>
     </div>
-    <div class="tr-skel-card">
+    <div class="tr-skel-card" style="opacity:.78;position:relative;">
+        <span style="position:absolute;top:10px;right:12px;font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:999px;">Yakında</span>
         <div class="tr-skel-icon">🔗</div>
         <div class="tr-skel-title">Satış & Yönlendirme</div>
         <div class="tr-skel-desc">Referans link kullanımı, kampanya paylaşım örnekleri.</div>
     </div>
-    <div class="tr-skel-card">
+    <div class="tr-skel-card" style="opacity:.78;position:relative;">
+        <span style="position:absolute;top:10px;right:12px;font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:999px;">Yakında</span>
         <div class="tr-skel-icon">📋</div>
         <div class="tr-skel-title">Süreç Rehberi</div>
         <div class="tr-skel-desc">Aday Öğrenci → Öğrenci dönüşüm adımları ve komisyon milestone mantığı.</div>
     </div>
 </div>
 
-<div class="tr-topic-card">
-    <div class="tr-topic-head"><h3>Yaklaşan Eğitim Konuları</h3></div>
+<div class="tr-topic-card" style="opacity:.78;">
+    <div class="tr-topic-head"><h3>Yaklaşan Eğitim Konuları <span style="font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:999px;margin-left:6px;">Yakında</span></h3></div>
     @foreach([
         ['Lead Kalitesi', 'Hangi profillerde dönüşüm daha yüksek, minimum bilgi standardı.'],
         ['Referans Link Kullanımı', 'UTM/ref kodlu paylaşım, kanal ayrımı ve takip mantığı.'],
