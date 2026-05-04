@@ -86,7 +86,7 @@ class SecurityHeaders
             "font-src 'self' data:",
             "img-src 'self' data: https: blob:",
             "connect-src 'self' https:" . $posthogConnect . $viteConnect,
-            "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://docs.google.com https://www.canva.com",
+            "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://open.spotify.com https://docs.google.com https://www.canva.com",
             "worker-src 'self' blob:",
             "object-src 'none'",
             "base-uri 'self'",

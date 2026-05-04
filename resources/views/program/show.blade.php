@@ -112,6 +112,31 @@ body.sb-detail-mode::before {
     </div>
 </div>
 
+{{-- Üniversite tanıtım videosu — varsa embed, yoksa header'daki body filigrani gosterilir --}}
+@php $videoEmbedUrl = $program->university?->video_embed_url; @endphp
+@if($videoEmbedUrl)
+<div class="sb-card" style="margin-bottom: 14px; padding: 18px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-size:20px;">🎬</span>
+        <h2 style="font-size: 16px; color: #7e58bf; font-weight: 700; margin: 0;">
+            Üniversite Tanıtım Videosu
+        </h2>
+        @if($program->university?->video_caption)
+            <span style="font-size:12px;color:#6b5894;font-style:italic;">— {{ $program->university->video_caption }}</span>
+        @endif
+    </div>
+    <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;background:#000;">
+        <iframe src="{{ $videoEmbedUrl }}"
+                style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                referrerpolicy="strict-origin-when-cross-origin"
+                loading="lazy"
+                title="{{ $program->university->name }} tanıtım videosu"></iframe>
+    </div>
+</div>
+@endif
+
 {{-- Translation banner — eğer TR yoksa --}}
 @php
     $hasOriginalText = ! empty($program->description) || ! empty($program->qualification_requirements);

@@ -102,4 +102,40 @@ class UniversityController extends Controller
 
         return back()->with('success', "✓ {$name} görseli kaldırıldı");
     }
+
+    /**
+     * Tanitim videosu URL'sini guncelle. YouTube/Vimeo/diger embed URL.
+     * Bos string gonderilirse silinir (deleteVideo ile aynisi).
+     */
+    public function updateVideo(Request $request, University $university): RedirectResponse
+    {
+        $data = $request->validate([
+            'video_url'     => ['nullable', 'url', 'max:500'],
+            'video_caption' => ['nullable', 'string', 'max:200'],
+        ]);
+
+        $url = trim((string) ($data['video_url'] ?? ''));
+        $cap = trim((string) ($data['video_caption'] ?? ''));
+
+        $university->video_url     = $url !== '' ? $url : null;
+        $university->video_caption = $cap !== '' ? $cap : null;
+        $university->save();
+
+        $msg = $url === ''
+            ? "✓ {$university->name} videosu kaldırıldı"
+            : "✓ {$university->name} videosu güncellendi";
+        return back()->with('success', $msg);
+    }
+
+    public function deleteVideo(University $university): RedirectResponse
+    {
+        if (empty($university->video_url)) {
+            return back()->with('info', 'Bu üniversitenin videosu zaten yok.');
+        }
+        $name = $university->name;
+        $university->video_url     = null;
+        $university->video_caption = null;
+        $university->save();
+        return back()->with('success', "✓ {$name} videosu kaldırıldı");
+    }
 }

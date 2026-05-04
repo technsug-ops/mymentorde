@@ -163,6 +163,37 @@
                     </form>
                     @endif
                 </div>
+
+                {{-- Video URL formu — YouTube/Vimeo --}}
+                <details style="margin-top:10px;border-top:1px dashed #e5e5e5;padding-top:10px;">
+                    <summary style="cursor:pointer;font-size:12px;color:#7e58bf;font-weight:600;">
+                        🎬 Tanıtım Videosu @if(!empty($uni->video_url))<span style="color:#059669;">(✓ var)</span>@else<span style="color:#9ca3af;">(yok)</span>@endif
+                    </summary>
+                    <form action="{{ route('manager.universities.video.update', $uni) }}" method="POST" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">
+                        @csrf
+                        <input type="url" name="video_url" placeholder="https://youtu.be/... veya https://vimeo.com/..."
+                               value="{{ $uni->video_url }}"
+                               style="width:100%;padding:7px 10px;border:1px solid #d4c5e8;border-radius:6px;font-size:12px;">
+                        <input type="text" name="video_caption" placeholder="Kısa altyazı (opsiyonel)"
+                               value="{{ $uni->video_caption }}" maxlength="200"
+                               style="width:100%;padding:7px 10px;border:1px solid #d4c5e8;border-radius:6px;font-size:12px;">
+                        <div style="display:flex;gap:6px;">
+                            <button type="submit" class="upload" style="flex:1;">{{ !empty($uni->video_url) ? '🔁 Güncelle' : '💾 Kaydet' }}</button>
+                            @if(!empty($uni->video_url))
+                            <button type="submit" formaction="{{ route('manager.universities.video.delete', $uni) }}"
+                                    formmethod="POST" class="delete" title="Videoyu kaldır"
+                                    onclick="return confirm('Videoyu kaldırmak istediğinizden emin misiniz?');">
+                                ×
+                            </button>
+                            @endif
+                        </div>
+                    </form>
+                    @if(!empty($uni->video_url) && $uni->video_embed_url)
+                    <div style="margin-top:8px;font-size:11px;color:#6b7280;">
+                        Önizleme: <a href="{{ $uni->video_url }}" target="_blank" style="color:#7e58bf;">{{ Str::limit($uni->video_url, 50) }}</a>
+                    </div>
+                    @endif
+                </details>
             </div>
         </div>
     @endforeach

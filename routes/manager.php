@@ -435,12 +435,14 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::get('/manager/unimatch-funnel/leads.csv', [$umf, 'exportLeadsCsv'])->name('manager.unimatch-funnel.leads-csv');
     }
 
-    // ── Üniversite görsel yönetimi (image_path doldurma) ──
+    // ── Üniversite görsel + video yönetimi ──
     {
         $uc = \App\Http\Controllers\Manager\UniversityController::class;
         Route::get('/manager/universities',                                [$uc, 'index'])->name('manager.universities.index');
         Route::post('/manager/universities/{university}/image',            [$uc, 'uploadImage'])->middleware('throttle:30,1')->name('manager.universities.image.upload');
         Route::delete('/manager/universities/{university}/image',          [$uc, 'deleteImage'])->middleware('throttle:30,1')->name('manager.universities.image.delete');
+        Route::post('/manager/universities/{university}/video',            [$uc, 'updateVideo'])->middleware('throttle:30,1')->name('manager.universities.video.update');
+        Route::delete('/manager/universities/{university}/video',          [$uc, 'deleteVideo'])->middleware('throttle:30,1')->name('manager.universities.video.delete');
     }
 
     // ── Application Guides — student altında (Uni-Assist + Vize) ──────────────
