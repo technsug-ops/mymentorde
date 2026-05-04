@@ -623,6 +623,14 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
         ]);
         $output .= ">>> db:seed UniMatchDripSequencesSeeder\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
 
+        // Yasal metinleri her deploy'da senkron tut — seed-content/policy/*.txt
+        // dosyalari kaynaktir, DB updateOrCreate ile guncellenir (idempotent).
+        \Illuminate\Support\Facades\Artisan::call('db:seed', [
+            '--class' => 'DefaultPolicyTemplatesSeeder',
+            '--force' => true,
+        ]);
+        $output .= ">>> db:seed DefaultPolicyTemplatesSeeder\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+
         // Cache temizle (yeni route/config görsün)
         \Illuminate\Support\Facades\Artisan::call('view:clear');
         \Illuminate\Support\Facades\Artisan::call('config:clear');
