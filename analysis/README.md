@@ -60,6 +60,14 @@ streamlit run analysis/telegram_analyzer_app.py
 
 Browser otomatik açılır → http://localhost:8501
 
+**Windows'da `streamlit` komutu bulunamazsa** (PATH sorunu — `--user` install'da yaygın):
+
+```
+python -m streamlit run analysis/telegram_analyzer_app.py
+```
+
+Aynı işi yapar, Scripts/ klasörünü PATH'a eklemeye gerek kalmaz.
+
 **Tab'ler:**
 - 📈 Zaman Serisi — aylık hacim + top 6 konu trendi
 - 🏷 Konu Analizi — frekans bar + konu-ay heatmap
