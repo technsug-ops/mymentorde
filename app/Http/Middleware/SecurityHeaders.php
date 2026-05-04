@@ -78,15 +78,18 @@ class SecurityHeaders
         $posthogScript  = ' https://eu-assets.i.posthog.com https://eu.i.posthog.com https://eu.posthog.com https://*.posthog.com';
         $posthogConnect = ' https://eu-assets.i.posthog.com https://eu.i.posthog.com https://eu.posthog.com https://*.posthog.com wss://*.posthog.com';
 
+        // Cloudflare Turnstile (CAPTCHA) — script + iframe domain'leri
+        $turnstile = ' https://challenges.cloudflare.com';
+
         $csp = implode('; ', [
             "default-src 'self'",
             // Production: nonce kaldırıldı — unsafe-inline aktif. Tüm view'lar nonce'a geçirildiğinde geri eklenecek.
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.qrserver.com" . $posthogScript . $viteScript,
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.qrserver.com" . $posthogScript . $turnstile . $viteScript,
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net" . $viteStyle,
             "font-src 'self' data:",
             "img-src 'self' data: https: blob:",
             "connect-src 'self' https:" . $posthogConnect . $viteConnect,
-            "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://open.spotify.com https://docs.google.com https://www.canva.com",
+            "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://open.spotify.com https://docs.google.com https://www.canva.com" . $turnstile,
             "worker-src 'self' blob:",
             "object-src 'none'",
             "base-uri 'self'",

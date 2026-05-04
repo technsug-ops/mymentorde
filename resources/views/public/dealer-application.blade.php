@@ -411,6 +411,9 @@ a { color:var(--primary); text-decoration:none; }
                     </label>
                     <div class="wz-field-error" id="consent-error">Devam etmek için onay gerekli.</div>
                 </div>
+
+                {{-- Bot/spam koruma --}}
+                <x-turnstile action="dealer_application" />
             </div>
 
             {{-- Navigation --}}

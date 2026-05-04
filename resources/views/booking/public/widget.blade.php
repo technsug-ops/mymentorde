@@ -107,6 +107,9 @@
                     <input type="text" name="notes" maxlength="500" placeholder="Görüşmek istediğiniz konu">
                 </div>
             </div>
+            {{-- Bot/spam koruma --}}
+            <x-turnstile action="booking_confirm" />
+
             <div style="display:flex;gap:10px;margin-top:10px;">
                 <button type="submit" class="bw-btn bw-btn-primary" id="bw-submit">✅ Randevuyu Onayla</button>
                 <button type="button" class="bw-btn bw-btn-ghost" id="bw-back">← Vazgeç</button>

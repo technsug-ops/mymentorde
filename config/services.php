@@ -92,4 +92,17 @@ return [
         'enabled'    => (bool) env('POSTHOG_ENABLED', true),
     ],
 
+    /**
+     * Cloudflare Turnstile (reCAPTCHA alternatifi, GDPR-friendly).
+     * Setup: https://dash.cloudflare.com → Turnstile → Add Site
+     * - site_key: public, frontend widget icin
+     * - secret_key: backend dogrulama icin (private, env)
+     * Boşsa CAPTCHA tamamen bypass — geliştirme/local için kullanışlı.
+     */
+    'turnstile' => [
+        'site_key'   => env('TURNSTILE_SITE_KEY'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+        'enabled'    => (bool) env('TURNSTILE_ENABLED', false),
+    ],
+
 ];

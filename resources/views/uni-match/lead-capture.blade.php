@@ -93,6 +93,9 @@
             </span>
         </label>
 
+        {{-- Bot/spam koruma — Cloudflare Turnstile --}}
+        <x-turnstile action="lead_capture" />
+
         <div class="sb-nav" style="margin-top: 24px;">
             <a href="{{ route('uni-match.lead-capture.skip') }}"
                style="font-size: 13px; color: #9c8bb9; text-decoration: none; padding: 10px 14px;">

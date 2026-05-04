@@ -84,6 +84,7 @@ class PublicBookingController extends Controller
             'invitee_email' => 'required|email|max:180',
             'invitee_phone' => 'nullable|string|max:64',
             'notes'         => 'nullable|string|max:2000',
+            'cf_turnstile_response' => ['nullable', 'string', new \App\Rules\TurnstileToken()],
         ]);
 
         $user = $request->user();

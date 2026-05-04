@@ -646,6 +646,9 @@
                 <a href="{{ route('legal.terms') }}" target="_blank" style="color:#2563eb;">Kullanım Koşulları</a>'nı kabul etmiş olursunuz.
             </div>
 
+            {{-- Bot/spam koruma --}}
+            <x-turnstile action="apply_submit" />
+
             <button type="submit" class="submit-btn" id="applySubmitBtn"
                     data-track="cta_clicked"
                     data-ph-cta-name="apply_form_submit"
