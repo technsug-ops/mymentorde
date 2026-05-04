@@ -301,3 +301,10 @@ Schedule::command('calendar:pull-google')
     ->everyFifteenMinutes()
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/calendar-pull-google.log'));
+
+// ─── UniMatch: Üni Logo Backfill (Wikipedia) ─────────────────────────────────
+// 547 üni / 50 = ~11 hafta içinde tamamlanır. image_path dolu olanları atlar (idempotent).
+Schedule::command('unimatch:fetch-uni-logos --limit=50 --lang=en')
+    ->weeklyOn(1, '03:00') // Pazartesi 03:00
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/uni-logos-fetch.log'));

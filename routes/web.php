@@ -753,3 +753,31 @@ Route::get('/_deploy/tail-log', function (\Illuminate\Http\Request $request) {
     $out .= implode("\n", $rows);
     return response($out, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
 })->middleware('throttle:5,10')->name('deploy.tail-log');
+
+// ── Üni logo fetcher — Wikipedia API ile toplu logo indirme (idempotent)
+// Kullanım: curl '.../_deploy/fetch-uni-logos?secret=XXX&limit=30&lang=en'
+// dry=1 ile önce test: limit=2&dry=1
+// Secret .env'de DEPLOY_MIGRATE_SECRET — boşsa 404 döner.
+Route::get('/_deploy/fetch-uni-logos', function (\Illuminate\Http\Request $request) {
+    $expected = (string) env('DEPLOY_MIGRATE_SECRET', '');
+    $given    = (string) $request->query('secret', '');
+    if ($expected === '' || ! hash_equals($expected, $given)) {
+        abort(404);
+    }
+
+    $limit = max(1, min(100, (int) $request->query('limit', 30)));
+    $lang  = $request->query('lang', 'en');
+    $dry   = (bool) $request->query('dry', false);
+
+    \Illuminate\Support\Facades\Artisan::call('unimatch:fetch-uni-logos', [
+        '--limit'   => $limit,
+        '--lang'    => $lang,
+        '--dry-run' => $dry,
+    ]);
+
+    return response(
+        \Illuminate\Support\Facades\Artisan::output(),
+        200,
+        ['Content-Type' => 'text/plain; charset=utf-8']
+    );
+})->middleware('throttle:5,10')->name('deploy.fetch-uni-logos');
