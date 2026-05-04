@@ -556,8 +556,8 @@ class WizardController extends Controller
         $response = $this->resolveSession($request);
         if (! $response) return redirect()->route('uni-match.start');
 
-        // Recommendation engine çalıştır
-        $recs = $this->engine->recommend($response, 10);
+        // Recommendation engine çalıştır — 30 program (ilk 10 görünür, devamı 'daha fazla göster' ile)
+        $recs = $this->engine->recommend($response, 30);
 
         $response->recommendations = $recs;
         $response->completed_at = now();

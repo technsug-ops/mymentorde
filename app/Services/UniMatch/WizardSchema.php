@@ -110,6 +110,21 @@ class WizardSchema
                 'validation' => ['required', 'in:winter_2026,summer_2027,winter_2027,summer_2028,flexible'],
             ],
 
+            [
+                'key'      => 'age_range',
+                'type'     => 'cards',
+                'title'    => 'Yaş aralığın?',
+                'subtitle' => 'Kişisel bilgi değil — aradığın programları daha doğru sıralamamız için (Bachelor / Master / Ausbildung farklı yaş profilleri çeker).',
+                'options'  => [
+                    ['value' => '18_21', 'label' => '18–21',  'icon' => '🎓', 'desc' => 'Lise sonrası lisans adayı'],
+                    ['value' => '22_25', 'label' => '22–25',  'icon' => '📚', 'desc' => 'Master / yeni mezun'],
+                    ['value' => '26_30', 'label' => '26–30',  'icon' => '💼', 'desc' => 'İş deneyimi + master/PhD'],
+                    ['value' => '31_35', 'label' => '31–35',  'icon' => '🚀', 'desc' => 'Kariyer değişimi / ileri uzmanlık'],
+                    ['value' => '36_plus', 'label' => '36+',  'icon' => '🌟', 'desc' => 'İleri seviye / araştırma'],
+                ],
+                'validation' => ['required', 'in:18_21,22_25,26_30,31_35,36_plus'],
+            ],
+
             // ── BÖLÜM 3: AKADEMİK PROFİL ───────────────────────────
             [
                 'key'      => 'current_education_level',

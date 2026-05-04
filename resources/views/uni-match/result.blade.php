@@ -725,8 +725,11 @@
                             $durTier = $du && $du <= 2 ? 'short' : ($du && $du <= 4 ? 'mid' : ($du > 4 ? 'long' : ''));
                             $isFav = in_array($rec['program_id'], $favList, true);
                             $uniInitial = mb_substr($rec['university_name'] ?? '?', 0, 1);
+                            // İlk 10 görünür, 11+ pagination ile açılır (kullanıcı isterse)
+                            $isHiddenInitially = $i >= 10;
                         @endphp
-                        <article class="bp-card"
+                        <article class="bp-card{{ $isHiddenInitially ? ' bp-card-extra' : '' }}"
+                                 @if($isHiddenInitially) style="display:none;" @endif
                                  data-program-id="{{ $rec['program_id'] }}"
                                  data-rank="{{ $i + 1 }}"
                                  data-tuition="{{ $tuitionVal }}"
@@ -804,11 +807,35 @@
                             </div>
                         </article>
                     @endforeach
+
+                    {{-- Pagination — 11+ programlar başlangıçta gizli, kullanıcı tıklayınca açılır --}}
+                    @if(count($recommendations) > 10)
+                        @php $extraCount = count($recommendations) - 10; @endphp
+                        <button type="button" id="bp-show-more-btn" data-track="cta_clicked" data-ph-cta-name="result_show_more"
+                                style="margin:24px auto;display:flex;align-items:center;gap:8px;padding:13px 28px;background:#fff;color:#7e58bf;border:2px solid #7e58bf;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;">
+                            ↓ Daha fazla program göster (<span id="bp-extra-count">{{ $extraCount }}</span> tane daha)
+                        </button>
+                    @endif
                 </main>
             </div>
         @endif
     </div>
 </div>
+
+@if(count($recommendations) > 10)
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    var btn = document.getElementById('bp-show-more-btn');
+    if (!btn) return;
+    btn.addEventListener('click', function(){
+        document.querySelectorAll('.bp-card-extra').forEach(function(card){
+            card.style.display = '';
+        });
+        btn.style.display = 'none';
+    });
+})();
+</script>
+@endif
 
 {{-- Sosyal proof + share + PDF magnet + CTA korunuyor (eski hâliyle) --}}
 @if(count($recommendations) > 0)
