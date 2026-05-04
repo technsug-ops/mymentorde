@@ -408,6 +408,13 @@ Route::middleware(['company.context'])->group(function () {
     Route::get('/faq', [\App\Http\Controllers\AiLabs\PublicFaqController::class, 'index'])
         ->middleware('throttle:120,1'); // /faq de aynı sayfa (İngilizce slug)
 
+    // Topluluk SSS Arşivi — anonim toplulu forumlarından derlenmiş 374 soru, 15 konu
+    Route::get('/sss/topluluk', [\App\Http\Controllers\Public\CommunityFaqController::class, 'index'])
+        ->middleware('throttle:120,1')->name('public.community-faq');
+    Route::get('/sss/topluluk/{topic}', [\App\Http\Controllers\Public\CommunityFaqController::class, 'topic'])
+        ->where('topic', '[a-z_]{2,32}')
+        ->middleware('throttle:120,1')->name('public.community-faq.topic');
+
     Route::get('/apply', [GuestApplicationController::class, 'create'])->name('apply.create');
     Route::post('/apply', [GuestApplicationController::class, 'store'])
         ->middleware(['field.rule.validator:student_registration,application_type', 'throttle:30,1'])

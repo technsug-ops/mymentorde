@@ -54,3 +54,12 @@ DEV_LOGIN_CREDENTIALS.md
 /scripts/sync_translations_to_prod.php
 /scripts/sync_*_to_prod.php
 scripts/inspect_*.php
+
+# Analiz dump'lari — PII icerir veya Telegram turevi cikti, repo'ya girmemeli
+/analysis/telegram_dump.json
+/analysis/telegram_messages.csv
+/analysis/telegram_*.md
+/analysis/faq_seeds.md
+/analysis/charts/
+/analysis/*.csv
+/analysis/*.json

@@ -183,8 +183,9 @@
 
         <div class="cta">
             <h3>Aradığın cevabı bulamadın mı?</h3>
-            <p>Danışmanlarımız seninle tanışmak istiyor. Ücretsiz randevu al.</p>
+            <p>Danışmanlarımız seninle tanışmak istiyor. Ya da topluluk forumlarından derlediğimiz {{ 374 }} soruluk arşive göz at.</p>
             <a href="/randevu" class="cta-btn">📅 Randevu Al</a>
+            <a href="{{ route('public.community-faq') }}" class="cta-btn" style="background:#fff;color:{{ $primary }};border:2px solid {{ $primary }};margin-left:10px;">📚 Topluluk Arşivi</a>
         </div>
     @endif
 </div>
