@@ -678,6 +678,19 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             $output .= ">>> cleanup junk-folders: {$deleted} folder soft-deleted\n";
         }
 
+        // public/storage → storage/app/public symbolic link.
+        // Profile foto, doc preview vb. icin gerekli. Prod'da bir kez calistirildiktan
+        // sonra kalici (idempotent — link zaten varsa --force ile yeniden olusturur).
+        // Kullanim: /_deploy/run-pending?cleanup=storage-link
+        if ($request->query('cleanup') === 'storage-link') {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('storage:link', ['--force' => true]);
+                $output .= ">>> storage:link --force\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+            } catch (\Throwable $e) {
+                $output .= ">>> storage:link FAILED: " . $e->getMessage() . "\n";
+            }
+        }
+
         // KAS shared hosting'de bazen view:clear artisan komutu file'lari
         // gercekten silemiyor (permission / opcache lock). Manuel temizlik:
         // Kullanim: /_deploy/run-pending?cleanup=clear-views
