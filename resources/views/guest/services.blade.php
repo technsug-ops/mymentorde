@@ -465,7 +465,7 @@
                 <form method="POST" action="{{ route('guest.services.confirm') }}" style="display:inline;">
                     @csrf
                     <button type="submit" style="padding:12px 32px;border-radius:10px;background:#fff;color:#134e4a;font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:all .15s;">
-                        ✅ Paket Secimini Kesinlestir
+                        ✅ Paket Seçimini Kesinleştir
                     </button>
                 </form>
             </div>
@@ -567,8 +567,8 @@
             </div>
         </div>
 
-        {{-- Ödeme Talebi --}}
-        @if($selectedPackageTitle)
+        {{-- Ödeme Talebi — sadece paket kesinleştirildikten sonra görünür --}}
+        @if($selectedPackageTitle && !empty($packageSelectedAt))
         <div class="card" style="margin:0;border-color:var(--u-brand);border-width:2px;">
             <div class="card-head" style="padding:12px 16px;background:linear-gradient(135deg,#eff6ff,#dbeafe);">
                 <div class="card-title" style="font-size:var(--tx-sm);color:var(--u-brand);">💳 Ödeme Talebi Oluştur</div>
