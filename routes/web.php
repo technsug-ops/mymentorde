@@ -678,6 +678,36 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             $output .= ">>> cleanup junk-folders: {$deleted} folder soft-deleted\n";
         }
 
+        // role_page_visibility tablosunda guest icin kayitli false satirlari listele
+        // (debug — manager kayit sonrasi ne yazilmis gormek icin)
+        // Kullanim: /_deploy/run-pending?cleanup=audit-page-visibility
+        if ($request->query('cleanup') === 'audit-page-visibility') {
+            $rows = DB::table('role_page_visibility')
+                ->orderBy('company_id')->orderBy('role')->orderBy('page_key')
+                ->get(['company_id', 'role', 'page_key', 'is_visible', 'updated_at']);
+            $output .= "\n>>> role_page_visibility full dump (" . $rows->count() . " row):\n";
+            foreach ($rows as $r) {
+                $vis = $r->is_visible ? 'visible' : 'HIDDEN';
+                $output .= sprintf("  cid=%d role=%-15s page=%-20s %s @ %s\n",
+                    $r->company_id, $r->role, $r->page_key, $vis, $r->updated_at);
+            }
+        }
+
+        // SOS: tum role_page_visibility kayitlarini sil (manager UI'sinden yanlis kayit
+        // yazildiginda default-true mantigina geri don). Bu YIKICI — manager'in
+        // kasten kapattigi sayfalar da acilir.
+        // Kullanim: /_deploy/run-pending?cleanup=reset-page-visibility
+        if ($request->query('cleanup') === 'reset-page-visibility') {
+            $deleted = DB::table('role_page_visibility')->delete();
+            $output .= ">>> reset-page-visibility: {$deleted} satir silindi (default-true mantigina dondu)\n";
+            // Cache temizle tum company icin
+            if (Schema::hasTable('companies')) {
+                DB::table('companies')->select('id')->get()->each(function ($c) {
+                    \Illuminate\Support\Facades\Cache::forget("page_visibility:{$c->id}");
+                });
+            }
+        }
+
         // public/storage → storage/app/public symbolic link.
         // Profile foto, doc preview vb. icin gerekli. Prod'da bir kez calistirildiktan
         // sonra kalici (idempotent — link zaten varsa --force ile yeniden olusturur).
