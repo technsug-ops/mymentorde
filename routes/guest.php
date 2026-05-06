@@ -66,7 +66,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
 
     // ── Banner & GDPR ────────────────────────────────────────────────────────
     Route::post('/banner/{id}/click', [GuestEngagementController::class, 'bannerClick'])->middleware('throttle:60,1')->name('guest.banner.click');
-    Route::get('/gdpr/export', [GdprController::class, 'exportGuestData'])->middleware('throttle:10,30')->name('guest.gdpr.export');
+    Route::get('/gdpr/export', [GdprController::class, 'exportGuestData'])->middleware('throttle:20,60')->name('guest.gdpr.export');
     Route::post('/gdpr/erasure', [GdprController::class, 'requestGuestErasure'])->middleware('throttle:5,60')->name('guest.gdpr.erasure');
 
     // ── Belge Önizleme ───────────────────────────────────────────────────────
