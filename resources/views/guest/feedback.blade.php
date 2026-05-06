@@ -435,7 +435,7 @@ function initFeedbackBindings() {
 }
 
 // DOM hazırsa hemen çalıştır, değilse DOMContentLoaded bekle
-// (script @push ile sayfa altına eklendiğinde DOMContentLoaded çoktan tetiklenmiş olabilir → handler hiç bağlanmaz)
+// (script gec yuklenirse DOMContentLoaded coktan tetiklenmis olabilir, handler hic baglanmaz)
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initFeedbackBindings);
 } else {
