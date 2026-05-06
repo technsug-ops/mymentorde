@@ -242,7 +242,7 @@
             <textarea id="nps-comment" rows="3" placeholder="İsterseniz açıklayın..."></textarea>
         </div>
 
-        <button class="fb-submit" id="nps-submit" type="button">📊 NPS Gönder</button>
+        <button class="fb-submit" id="nps-submit" type="button" disabled>📊 NPS Gönder</button>
         <div id="nps-msg" style="display:none;margin-top:10px;padding:10px 14px;
              background:#f0fdf4;border:1px solid #86efac;border-radius:8px;
              color:#16a34a;font-size:13px;font-weight:700;">
@@ -382,24 +382,44 @@ function setNps(val) {
         var base = v <= 6 ? 'det' : v <= 8 ? 'pas' : 'pro';
         el.className = 'fb-nps-btn ' + base + (v === val ? ' selected' : '');
     });
+    // 0-10 secildiginde NPS Gonder butonu enable edilir (varsa)
+    var btn = document.getElementById('nps-submit');
+    if (btn && !btn.dataset.done) btn.disabled = false;
 }
 
 async function submitNps() {
-    if (selectedNps === null) { alert('Lütfen bir puan seçin.'); return; }
-    var comment = document.getElementById('nps-comment').value;
-    var res = await fetch('{{ route("guest.nps.store") }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
-        body: JSON.stringify({ nps_score: selectedNps, comment })
-    });
-    if (res.ok) {
-        document.getElementById('nps-msg').style.display = 'block';
-        document.querySelectorAll('#nps-row .fb-nps-btn').forEach(el => el.disabled = true);
-        document.getElementById('nps-comment').disabled = true;
+    if (selectedNps === null) { alert('Lütfen önce 0-10 arasında bir puan seçin.'); return; }
+    var btn = document.getElementById('nps-submit');
+    if (!btn || btn.disabled) return;
+    var origLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Gönderiliyor...';
+    try {
+        var comment = document.getElementById('nps-comment').value;
+        var res = await fetch('{{ route("guest.nps.store") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ nps_score: selectedNps, comment })
+        });
+        if (res.ok) {
+            document.getElementById('nps-msg').style.display = 'block';
+            document.querySelectorAll('#nps-row .fb-nps-btn').forEach(el => el.disabled = true);
+            document.getElementById('nps-comment').disabled = true;
+            btn.textContent = '✓ Teşekkürler!';
+            btn.dataset.done = '1'; // submitted — setNps re-enable etmesin
+        } else {
+            btn.disabled = false;
+            btn.textContent = origLabel;
+            alert('Gönderilemedi (HTTP ' + res.status + '). Lütfen tekrar deneyin.');
+        }
+    } catch (err) {
+        btn.disabled = false;
+        btn.textContent = origLabel;
+        alert('Bağlantı hatası. İnternet bağlantınızı kontrol edip tekrar deneyin.');
     }
 }
 
