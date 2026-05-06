@@ -505,7 +505,8 @@ class WorkflowController extends Controller
             'first_name' => ['required', 'string', 'max:80'],
             'last_name' => ['required', 'string', 'max:80'],
             'phone' => ['nullable', 'string', 'max:40'],
-            'gender' => ['nullable', 'in:kadin,erkek,belirtmek_istemiyorum'],
+            // Yeni canonical (male/female/diverse/unspecified) + eski değerler (kadin/erkek/...) tolere edilir
+            'gender' => ['nullable', 'in:male,female,diverse,unspecified,kadin,erkek,belirtmek_istemiyorum'],
             'application_country' => ['nullable', 'string', 'max:80'],
             'communication_language' => ['nullable', 'string', 'max:16'],
             'target_city' => ['nullable', 'string', 'max:100'],
@@ -515,7 +516,17 @@ class WorkflowController extends Controller
             'language_skills.*.lang' => ['required', 'string', 'max:20'],
             'language_skills.*.level' => ['required', 'string', 'max:20'],
             'language_skills.*.custom' => ['nullable', 'string', 'max:60'],
+        ], [
+            'first_name.required' => 'Ad zorunlu.',
+            'last_name.required'  => 'Soyad zorunlu.',
+            'gender.in'           => 'Geçerli bir cinsiyet seçin.',
         ]);
+
+        // Backward-compat: eski 'kadin'/'erkek' değerlerini canonical'e normalize et
+        $genderMap = ['kadin' => 'female', 'erkek' => 'male', 'belirtmek_istemiyorum' => 'unspecified'];
+        if (!empty($data['gender']) && isset($genderMap[$data['gender']])) {
+            $data['gender'] = $genderMap[$data['gender']];
+        }
 
         // Temizle: boş veya geçersiz satırları filtrele
         $validLangs = ['tr', 'de', 'en', 'fr', 'es', 'it', 'ar', 'other'];
