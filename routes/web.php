@@ -678,6 +678,20 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             $output .= ">>> cleanup junk-folders: {$deleted} folder soft-deleted\n";
         }
 
+        // KAS shared hosting'de bazen view:clear artisan komutu file'lari
+        // gercekten silemiyor (permission / opcache lock). Manuel temizlik:
+        // Kullanim: /_deploy/run-pending?cleanup=clear-views
+        if ($request->query('cleanup') === 'clear-views') {
+            $viewsPath = storage_path('framework/views');
+            $deletedCount = 0;
+            if (is_dir($viewsPath)) {
+                foreach (glob($viewsPath . '/*.php') ?: [] as $f) {
+                    if (@unlink($f)) $deletedCount++;
+                }
+            }
+            $output .= ">>> cleanup clear-views: {$deletedCount} compiled view dosyasi silindi\n";
+        }
+
         // Safety net: deploy maintenance mode FTP-rm fail ettiyse manuel cikis
         // Kullanim: /_deploy/run-pending?cleanup=clear-maintenance
         if ($request->query('cleanup') === 'clear-maintenance') {
