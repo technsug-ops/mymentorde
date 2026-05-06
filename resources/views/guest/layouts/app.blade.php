@@ -273,20 +273,24 @@
 
             <div class="nav-section">
                 <div class="nav-section-label">Keşfet</div>
+                @pageVisible('university_guide')
                 <a href="{{ route('guest.university-guide') }}"
                    class="nav-link {{ request()->routeIs('guest.university-guide') ? 'active' : '' }}">
                     <span class="nav-icon">🎓</span> Üniversite Rehberi
                 </a>
+                @endpageVisible
                 @pageVisible('document_guide')
                 <a href="{{ route('guest.document-guide') }}"
                    class="nav-link {{ request()->routeIs('guest.document-guide') ? 'active' : '' }}">
                     <span class="nav-icon">📋</span> Belge Hazırlama
                 </a>
                 @endpageVisible
+                @pageVisible('success_stories')
                 <a href="{{ route('guest.success-stories') }}"
                    class="nav-link {{ request()->routeIs('guest.success-stories') ? 'active' : '' }}">
                     <span class="nav-icon">⭐</span> Başarı Hikayeleri
                 </a>
+                @endpageVisible
                 @pageVisible('living_guide')
                 <a href="{{ route('guest.living-guide') }}"
                    class="nav-link {{ request()->routeIs('guest.living-guide') ? 'active' : '' }}">
@@ -305,10 +309,12 @@
                     <span class="nav-icon">📚</span> Tüm İçerikler
                 </a>
                 @endpageVisible
+                @pageVisible('saved')
                 <a href="{{ route('guest.saved') }}"
                    class="nav-link {{ request()->routeIs('guest.saved') ? 'active' : '' }}">
                     <span class="nav-icon">🔖</span> Favorilerim
                 </a>
+                @endpageVisible
             </div>
 
             <div class="nav-section">

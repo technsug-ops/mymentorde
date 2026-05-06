@@ -39,7 +39,10 @@ class PageAccess
      */
     public const PAGES = [
         // ── İçerik ──
-        'discover'         => ['label' => 'Keşfet',                'group' => 'İçerik', 'roles' => ['guest', 'student', 'dealer', 'senior']],
+        'discover'         => ['label' => 'Tüm İçerikler',         'group' => 'İçerik', 'roles' => ['guest', 'student', 'dealer', 'senior']],
+        'university_guide' => ['label' => 'Üniversite Rehberi',    'group' => 'İçerik', 'roles' => ['guest', 'student']],
+        'success_stories'  => ['label' => 'Başarı Hikayeleri',     'group' => 'İçerik', 'roles' => ['guest', 'student']],
+        'saved'            => ['label' => 'Favorilerim',           'group' => 'İçerik', 'roles' => ['guest', 'student']],
         'marketplace'      => ['label' => 'Marketplace',           'group' => 'İçerik', 'roles' => ['guest', 'student']],
         'living_guide'     => ['label' => 'Yaşam Rehberi',         'group' => 'İçerik', 'roles' => ['guest', 'student']],
         'document_guide'   => ['label' => 'Belge Rehberi',         'group' => 'İçerik', 'roles' => ['guest', 'student']],
