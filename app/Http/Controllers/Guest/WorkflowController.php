@@ -323,9 +323,12 @@ class WorkflowController extends Controller
             'selected_package_title'  => (string) ($pkg['title'] ?? ''),
             'selected_package_price'  => (string) ($pkg['price'] ?? ''),
             'selected_extra_services' => $currentExtras,
-            'package_selected_at'     => now(),
+            // package_selected_at SADECE confirmPackage()'da set edilir.
+            // Paket degistirildiginde onceki kesinlestirme sifirlanir; kullanici
+            // yeni paket icin tekrar "Kesinlestir" butonuna basmali.
+            'package_selected_at'     => null,
         ]);
-        $guest->status_message = 'Hizmet paketi seçildi. Sözleşme aşaması bekleniyor.'; // @internal
+        $guest->status_message = 'Hizmet paketi seçildi. Lütfen seçimi kesinleştirin.'; // @internal
         $guest->save();
 
         // Timeline: "Paket Seç" milestone'unu otomatik işaretle

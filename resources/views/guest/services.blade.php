@@ -248,8 +248,10 @@
     </div>
 </div>
 
-{{-- Paket seçilmiş + sözleşme henüz istenmemişse → kalıcı CTA banner --}}
-@if($selectedPackageTitle && empty($contractRequested))
+{{-- Paket KESINLESTIRILMIS + sözleşme henüz istenmemişse → kalıcı CTA banner.
+     package_selected_at sadece "Kesinlestir" butonu sonrasi dolar; sadece secim
+     yapmis kullanici banner gormez, once Kesinlestir'e basmasi gerekir. --}}
+@if($selectedPackageTitle && !empty($packageSelectedAt) && empty($contractRequested))
 <div style="background:linear-gradient(135deg,#0d9488,#14b8a6);color:#fff;border-radius:12px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 4px 14px rgba(13,148,136,.25);">
     <div style="font-size:28px;flex-shrink:0;">📋</div>
     <div style="flex:1;min-width:200px;">

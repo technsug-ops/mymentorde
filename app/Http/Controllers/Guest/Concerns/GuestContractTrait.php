@@ -27,6 +27,13 @@ trait GuestContractTrait
                 ->route('guest.contract')
                 ->withErrors(['contract' => 'Sözleşme talebinden önce hizmet paketi seçimi gereklidir.']);
         }
+        // Server-side defansif: paket secimi kesinlestirilmemisse reject et.
+        // Frontend banner zaten gizli, ama URL'i bilen kullanici direct POST yapmasin.
+        if (empty($guest->package_selected_at)) {
+            return redirect()
+                ->route('guest.services')
+                ->withErrors(['contract' => 'Sözleşme talebinden önce paket seçimini kesinleştirmeniz gerekir.']);
+        }
         $formSubmitted = (bool) $guest->registration_form_submitted_at;
         if (!$formSubmitted && $this->isRegistrationDraftComplete($guest)) {
             $guest->forceFill([
