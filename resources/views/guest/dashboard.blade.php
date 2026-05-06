@@ -665,32 +665,8 @@
     </div>
 </div>
 
-{{-- ── Advisor Sticky Card (fixed right) ── --}}
-@if(!empty($seniorCard))
-<div class="gdb-advisor" id="gdbAdvisor">
-    <button class="gdb-advisor-close" id="gdbAdvisorClose" type="button">✕</button>
-    <div class="gdb-advisor-top">
-        <div class="gdb-advisor-av">{{ strtoupper(mb_substr($seniorCard['name'] ?? 'D', 0, 2)) }}</div>
-        <div>
-            <div class="gdb-advisor-name">{{ $seniorCard['name'] ?? '' }}</div>
-            <div class="gdb-advisor-role">{{ $seniorCard['title'] ?? 'Eğitim Danışmanı' }}</div>
-            <div class="gdb-advisor-status"><span class="gdb-advisor-status-dot"></span> Çevrimiçi</div>
-        </div>
-    </div>
-    <div class="gdb-advisor-msg">{{ $seniorCard['message'] ?? '' }}</div>
-    <a href="{{ route('guest.messages') }}" class="gdb-advisor-cta">Danışmana Yaz →</a>
-</div>
-@push('scripts')
-<script nonce="{{ $cspNonce ?? '' }}">
-(function(){
-    var card = document.getElementById('gdbAdvisor');
-    var btn = document.getElementById('gdbAdvisorClose');
-    if(!card || !btn) return;
-    btn.addEventListener('click', function(){ card.style.display = 'none'; });
-})();
-</script>
-@endpush
-@endif
+{{-- ── Advisor Sticky Card kaldırıldı —
+     Layout'taki küçük 💬 FAB widget aynı işi görüyor, çift gösterim oluyordu. --}}
 
 @if($stateKey === 'done')
 {{-- ── Quick Links ── --}}

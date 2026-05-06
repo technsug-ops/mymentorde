@@ -637,12 +637,17 @@ document.addEventListener('alpine:init',function(){
             }).catch(function(){});
     }
     send.addEventListener('click',function(){
-        var txt=input.value.trim();if(!txt)return;input.value='';
+        if(send.disabled)return; // double-click guard
+        var txt=input.value.trim();if(!txt)return;
+        send.disabled=true; input.value='';
         fetch('/guest/messages/send',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},body:JSON.stringify({message:txt})})
-            .then(function(){poll();}).catch(function(){});
-        appendMsg({sender_role:'guest',message:txt,created_at:new Date().toISOString()});
+            .then(function(){poll();})
+            .catch(function(){ input.value=txt; }) // hata olursa metni geri yükle
+            .finally(function(){send.disabled=false;});
+        // NOT: optimistic appendMsg KALDIRILDI — poll() server'dan döndüğünde mesaj gelir,
+        // çift görünme bug'ı çözüldü. UI 100-300ms gecikmeli ama tutarlı.
     });
-    input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send.click();}});
+    input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!send.disabled)send.click();}});
     setInterval(function(){
         if(isOpen)poll();
         else fetch('/guest/messages/poll?after='+lastId,{headers:{'Accept':'application/json'}})

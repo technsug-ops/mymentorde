@@ -502,12 +502,14 @@ Route::post('/u/{token}', [\App\Http\Controllers\PublicDocumentUploadController:
 // ── Auth ──────────────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+    // Throttle: 1 dakikada 15 deneme (Turnstile + bcrypt + IP-based zaten korur).
+    // 5 çok dar — yeni kullanıcı yanlış şifre + 2-3 deneme = 429
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:15,1');
 
     Route::get('/forgot-password', [ForgotPasswordController::class, 'show'])->name('password.request');
     Route::post('/forgot-password', [ForgotPasswordController::class, 'send'])
         ->name('password.email')
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:10,1');
 });
 
 // ── Password reset: auth'lu kullanıcılar da erişebilsin ──────────────────────
