@@ -578,6 +578,39 @@
                                             </div>
                                         @elseif($type === 'textarea')
                                             <textarea class="{{ $required ? 'final-required' : '' }}" name="{{ $key }}" rows="4" maxlength="{{ $max }}" placeholder="{{ $placeholder }}" data-required="{{ $required ? '1' : '0' }}">{{ $value }}</textarea>
+                                        @elseif($key === 'phone')
+                                            @php
+                                                $oldPhone = (string) $value;
+                                                $dialOptions = [
+                                                    ['dial' => '+90', 'label' => 'TR'], ['dial' => '+49', 'label' => 'DE'],
+                                                    ['dial' => '+43', 'label' => 'AT'], ['dial' => '+41', 'label' => 'CH'],
+                                                    ['dial' => '+31', 'label' => 'NL'], ['dial' => '+32', 'label' => 'BE'],
+                                                    ['dial' => '+33', 'label' => 'FR'], ['dial' => '+39', 'label' => 'IT'],
+                                                    ['dial' => '+34', 'label' => 'ES'], ['dial' => '+44', 'label' => 'UK'],
+                                                    ['dial' => '+1',  'label' => 'US'], ['dial' => '+971','label' => 'AE'],
+                                                ];
+                                                $selectedDial = '+90';
+                                                foreach ($dialOptions as $dialOpt) {
+                                                    if ($oldPhone !== '' && str_starts_with($oldPhone, $dialOpt['dial'])) {
+                                                        $selectedDial = $dialOpt['dial'];
+                                                        break;
+                                                    }
+                                                }
+                                                $phoneLocal = trim(preg_replace('/^\+' . preg_quote(ltrim($selectedDial, '+'), '/') . '\s*/', '', $oldPhone));
+                                            @endphp
+                                            <div style="display:flex;gap:6px;" data-phone-wrap>
+                                                <select aria-label="Ülke kodu" data-phone-dial style="flex:0 0 96px;padding:8px;border:1px solid var(--u-line);border-radius:6px;background:var(--u-bg);color:var(--u-text);font-size:14px;">
+                                                    @foreach($dialOptions as $dialOpt)
+                                                        <option value="{{ $dialOpt['dial'] }}" @selected($selectedDial === $dialOpt['dial'])>{{ $dialOpt['dial'] }} {{ $dialOpt['label'] }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <input type="tel" inputmode="tel" autocomplete="tel" data-phone-local
+                                                       placeholder="{{ $placeholder ?: '5XX XXX XXXX' }}"
+                                                       value="{{ $phoneLocal }}" maxlength="{{ $max }}"
+                                                       style="flex:1;min-width:0;"
+                                                       data-required="{{ $required ? '1' : '0' }}">
+                                                <input type="hidden" name="{{ $key }}" value="{{ $oldPhone }}" data-phone-combined>
+                                            </div>
                                         @elseif($type === 'date')
                                             @php
                                                 // Tarih validasyonu — alan tipine göre min/max kısıtları
@@ -1847,6 +1880,26 @@
             this.textContent = hidden ? 'Gizle' : 'Göster';
         });
     }
+})();
+</script>
+
+{{-- Telefon dial picker — ulke kodu + local numara birlestirme --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function bindPhoneDialPickers(){
+    document.querySelectorAll('[data-phone-wrap]').forEach(function(wrap){
+        var dial   = wrap.querySelector('[data-phone-dial]');
+        var local  = wrap.querySelector('[data-phone-local]');
+        var hidden = wrap.querySelector('[data-phone-combined]');
+        if (!dial || !local || !hidden) return;
+        function update(){
+            var d = (dial.value || '').trim();
+            var l = (local.value || '').trim();
+            hidden.value = l ? (d + ' ' + l) : '';
+        }
+        dial.addEventListener('change', update);
+        local.addEventListener('input', update);
+        update();
+    });
 })();
 </script>
 @endsection

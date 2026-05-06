@@ -393,7 +393,36 @@
             </div>
             <div class="gp-field">
                 <label>Telefon</label>
-                <input name="phone" value="{{ old('phone', $guest?->phone ?? '') }}" placeholder="+49 123 456 7890">
+                @php
+                    $oldPhone = (string) old('phone', $guest?->phone ?? '');
+                    $dialOptions = [
+                        ['dial' => '+90', 'label' => 'TR'], ['dial' => '+49', 'label' => 'DE'],
+                        ['dial' => '+43', 'label' => 'AT'], ['dial' => '+41', 'label' => 'CH'],
+                        ['dial' => '+31', 'label' => 'NL'], ['dial' => '+32', 'label' => 'BE'],
+                        ['dial' => '+33', 'label' => 'FR'], ['dial' => '+39', 'label' => 'IT'],
+                        ['dial' => '+34', 'label' => 'ES'], ['dial' => '+44', 'label' => 'UK'],
+                        ['dial' => '+1',  'label' => 'US'], ['dial' => '+971','label' => 'AE'],
+                    ];
+                    $selectedDial = '+90';
+                    foreach ($dialOptions as $dialOpt) {
+                        if ($oldPhone !== '' && str_starts_with($oldPhone, $dialOpt['dial'])) {
+                            $selectedDial = $dialOpt['dial'];
+                            break;
+                        }
+                    }
+                    $phoneLocal = trim(preg_replace('/^\+' . preg_quote(ltrim($selectedDial, '+'), '/') . '\s*/', '', $oldPhone));
+                @endphp
+                <div style="display:flex;gap:6px;" data-phone-wrap>
+                    <select aria-label="Ülke kodu" data-phone-dial style="flex:0 0 96px;padding:8px;border:1px solid var(--u-line);border-radius:6px;background:var(--u-bg);color:var(--u-text);font-size:14px;">
+                        @foreach($dialOptions as $dialOpt)
+                            <option value="{{ $dialOpt['dial'] }}" @selected($selectedDial === $dialOpt['dial'])>{{ $dialOpt['dial'] }} {{ $dialOpt['label'] }}</option>
+                        @endforeach
+                    </select>
+                    <input type="tel" inputmode="tel" autocomplete="tel" data-phone-local
+                           placeholder="5XX XXX XXXX" value="{{ $phoneLocal }}"
+                           style="flex:1;min-width:0;">
+                    <input type="hidden" name="phone" value="{{ $oldPhone }}" data-phone-combined>
+                </div>
             </div>
             <div class="gp-field">
                 <label>Cinsiyet</label>
@@ -535,6 +564,24 @@
     var target = fill.style.width;
     fill.style.width = '0';
     setTimeout(function(){ fill.style.width = target; }, 100);
+})();
+
+// Telefon dial picker — ulke kodu + local numara birlestirme
+(function bindPhoneDialPickers(){
+    document.querySelectorAll('[data-phone-wrap]').forEach(function(wrap){
+        var dial   = wrap.querySelector('[data-phone-dial]');
+        var local  = wrap.querySelector('[data-phone-local]');
+        var hidden = wrap.querySelector('[data-phone-combined]');
+        if (!dial || !local || !hidden) return;
+        function update(){
+            var d = (dial.value || '').trim();
+            var l = (local.value || '').trim();
+            hidden.value = l ? (d + ' ' + l) : '';
+        }
+        dial.addEventListener('change', update);
+        local.addEventListener('input', update);
+        update();
+    });
 })();
 </script>
 <script defer src="{{ Vite::asset('resources/js/guest-language-skills.js') }}"></script>
