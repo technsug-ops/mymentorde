@@ -77,10 +77,20 @@
     transform: scale(1.08);
     box-shadow: 0 2px 8px rgba(0,0,0,.08);
 }
-.fb-nps-btn.selected { background: var(--theme-accent-guest); border-color: var(--theme-accent-guest); color: #fff; }
 .fb-nps-btn.det { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
 .fb-nps-btn.pas { background: #fefce8; border-color: #fde68a; color: #ca8a04; }
 .fb-nps-btn.pro { background: #f0fdf4; border-color: #86efac; color: #16a34a; }
+.fb-nps-btn.selected {
+    background: var(--theme-accent-guest, #2563eb) !important;
+    border-color: var(--theme-accent-guest, #2563eb) !important;
+    color: #fff !important;
+    transform: scale(1.18);
+    box-shadow: 0 4px 14px rgba(0,0,0,.28);
+    outline: 3px solid rgba(0,0,0,.12);
+    outline-offset: 2px;
+    font-weight: 800;
+    position: relative; z-index: 2;
+}
 .fb-nps-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--u-muted); margin-bottom: 10px; }
 
 .fb-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
@@ -248,6 +258,11 @@
              color:#16a34a;font-size:13px;font-weight:700;">
             ✓ Teşekkürler! Görüşünüz kaydedildi.
         </div>
+        <button id="nps-edit" type="button" style="display:none;margin-top:10px;padding:9px 14px;
+                background:transparent;border:1px solid var(--u-line);border-radius:8px;
+                color:var(--u-muted);font-size:12.5px;font-weight:600;cursor:pointer;width:100%;">
+            ✏️ Yanıtı Güncelle
+        </button>
 
         <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--u-line);
                     display:flex;flex-direction:column;gap:8px;">
@@ -411,6 +426,9 @@ async function submitNps() {
             document.getElementById('nps-comment').disabled = true;
             btn.textContent = '✓ Teşekkürler!';
             btn.dataset.done = '1'; // submitted — setNps re-enable etmesin
+            // Guncelle butonu — kullanici fikri degisirse yeniden duzenlemesini sagla
+            var editBtn = document.getElementById('nps-edit');
+            if (editBtn) editBtn.style.display = '';
         } else {
             btn.disabled = false;
             btn.textContent = origLabel;
@@ -452,6 +470,20 @@ function initFeedbackBindings() {
     });
     // NPS Gönder
     document.getElementById('nps-submit')?.addEventListener('click', submitNps);
+    // Yaniti Guncelle — submit edildikten sonra fikri degisirse yeniden acar
+    document.getElementById('nps-edit')?.addEventListener('click', function(){
+        document.querySelectorAll('#nps-row .fb-nps-btn').forEach(el => el.disabled = false);
+        var cmt = document.getElementById('nps-comment');
+        if (cmt) cmt.disabled = false;
+        var sb = document.getElementById('nps-submit');
+        if (sb) {
+            delete sb.dataset.done;
+            sb.disabled = (selectedNps === null);
+            sb.textContent = '📊 Güncellemeyi Gönder';
+        }
+        document.getElementById('nps-msg').style.display = 'none';
+        this.style.display = 'none';
+    });
 }
 
 // DOM hazırsa hemen çalıştır, değilse DOMContentLoaded bekle
