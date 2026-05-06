@@ -343,7 +343,9 @@
 </div>
 @endif
 
-@push('scripts')
+{{-- Inline script — @push('scripts') yerine: prod'da compile cache bug'i
+     "Undefined property: Factory::$startPush" hatasi veriyordu. Inline script
+     ayni sonucu veriyor (DOMContentLoaded fallback ile timing problemi yok). --}}
 <script nonce="{{ $cspNonce ?? '' }}">
 var selectedStar = 0, selectedNps = null;
 var starLabels = ['', 'Çok Kötü 😞', 'Kötü 😕', 'Orta 😐', 'İyi 😊', 'Mükemmel 😄'];
@@ -440,5 +442,4 @@ if (document.readyState === 'loading') {
     initFeedbackBindings();
 }
 </script>
-@endpush
 @endsection
