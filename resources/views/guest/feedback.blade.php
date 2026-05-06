@@ -55,8 +55,11 @@
 .fb-star {
     font-size: 30px; cursor: pointer; color: var(--u-line);
     transition: color .15s, transform .1s; line-height: 1;
+    user-select: none;
 }
 .fb-star:hover { transform: scale(1.15); }
+/* Hover preview: fareyle bir yıldızın üzerine gelince ondan önceki tüm yıldızlar parlar */
+.fb-star.lit-hover { color: #fbbf24; }
 .fb-star.lit { color: #f59e0b; }
 
 .fb-star-label { font-size: 12px; font-weight: 700; color: var(--u-muted); margin-bottom: 10px; }
@@ -68,7 +71,12 @@
     color: var(--u-muted); transition: all .15s; display: flex;
     align-items: center; justify-content: center;
 }
-.fb-nps-btn:hover { border-color: var(--theme-accent-guest); color: var(--theme-accent-guest); }
+.fb-nps-btn:hover {
+    border-color: var(--theme-accent-guest);
+    color: var(--theme-accent-guest);
+    transform: scale(1.08);
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
 .fb-nps-btn.selected { background: var(--theme-accent-guest); border-color: var(--theme-accent-guest); color: #fff; }
 .fb-nps-btn.det { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
 .fb-nps-btn.pas { background: #fefce8; border-color: #fde68a; color: #ca8a04; }
@@ -113,7 +121,9 @@
 .fb-meter-face {
     flex: 1; padding: 10px 6px; border-radius: 10px; border: 2px solid var(--u-line);
     text-align: center; cursor: pointer; transition: all .15s; background: var(--u-bg);
+    user-select: none;
 }
+.fb-meter-face:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,.08); border-color: var(--theme-accent-guest); }
 .fb-meter-face .face-emoji { font-size: 22px; display: block; }
 .fb-meter-face .face-lbl   { font-size: 10px; font-weight: 700; color: var(--u-muted); margin-top: 4px; display: block; }
 .fb-meter-face.active-1 { border-color: #dc2626; background: #fef2f2; }
@@ -392,7 +402,7 @@ async function submitNps() {
 }
 
 // CSP-safe event bindings — inline onclick yerine addEventListener
-window.addEventListener('DOMContentLoaded', () => {
+function initFeedbackBindings() {
     document.querySelectorAll('#star-row .fb-star').forEach(el => el.classList.remove('lit'));
 
     // Type tabs (Genel / Süreç / Danışman / Portal)
@@ -403,9 +413,16 @@ window.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#meter-row .fb-meter-face').forEach(btn => {
         btn.addEventListener('click', () => setMeter(parseInt(btn.dataset.val, 10)));
     });
-    // Star (1-5)
-    document.querySelectorAll('#star-row .fb-star').forEach(btn => {
+    // Star (1-5) — click + hover preview (fareyle gelince önceki yıldızlar parlasın)
+    var stars = document.querySelectorAll('#star-row .fb-star');
+    stars.forEach((btn, idx) => {
         btn.addEventListener('click', () => setStar(parseInt(btn.dataset.val, 10)));
+        btn.addEventListener('mouseenter', () => {
+            stars.forEach((el, i) => el.classList.toggle('lit-hover', i <= idx));
+        });
+        btn.addEventListener('mouseleave', () => {
+            stars.forEach(el => el.classList.remove('lit-hover'));
+        });
     });
     // NPS (0-10)
     document.querySelectorAll('#nps-row .fb-nps-btn').forEach(btn => {
@@ -413,7 +430,15 @@ window.addEventListener('DOMContentLoaded', () => {
     });
     // NPS Gönder
     document.getElementById('nps-submit')?.addEventListener('click', submitNps);
-});
+}
+
+// DOM hazırsa hemen çalıştır, değilse DOMContentLoaded bekle
+// (script @push ile sayfa altına eklendiğinde DOMContentLoaded çoktan tetiklenmiş olabilir → handler hiç bağlanmaz)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFeedbackBindings);
+} else {
+    initFeedbackBindings();
+}
 </script>
 @endpush
 @endsection
