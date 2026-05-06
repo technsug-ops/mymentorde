@@ -542,6 +542,11 @@ class WorkflowController extends Controller
                 'level'  => (string) $row['level'],
                 'custom' => ($row['lang'] === 'other') ? trim((string) ($row['custom'] ?? '')) : null,
             ])
+            // Ayni dil icin tek satir tut. "other" icin custom ad ile dedup yapilir
+            // (boylece kullanici "İspanyolca" ve "Italyanca"yi her ikisi de "other" diye eklerse karismaz).
+            ->unique(fn ($row) => $row['lang'] === 'other'
+                ? 'other:' . mb_strtolower((string) ($row['custom'] ?? ''))
+                : $row['lang'])
             ->values()
             ->all();
 
