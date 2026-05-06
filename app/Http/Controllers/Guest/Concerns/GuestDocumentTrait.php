@@ -121,6 +121,14 @@ trait GuestDocumentTrait
         $ownerId = $this->resolveDocumentOwnerId($guest);
         abort_if((string) $document->student_id !== $ownerId, 403, 'Bu belge size ait degil.');
 
+        // Onaylanmis belge silinemez — danisman incelemis ve gecmis. Yeniden yuklemek icin once
+        // danismana iletisim acilmasi gerekir, kullanici tek tarafli sileamez.
+        if ((string) $document->status === 'approved') {
+            return redirect()
+                ->route('guest.registration.documents')
+                ->withErrors(['document' => 'Onaylanmis belge silinemez. Degisiklik icin danismaninizla iletisime gecin.']);
+        }
+
         $path = trim((string) ($document->storage_path ?? ''));
         if ($path !== '' && Storage::disk('local')->exists($path)) {
             Storage::disk('local')->delete($path);
