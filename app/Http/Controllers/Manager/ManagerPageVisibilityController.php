@@ -22,14 +22,20 @@ class ManagerPageVisibilityController extends Controller
 
         $companyId = $this->companyId($request);
 
-        // Mevcut visibility map'i çek (eksik kombinasyonlar default TRUE)
-        $rows = DB::table('role_page_visibility')
-            ->where('company_id', $companyId)
-            ->get(['role', 'page_key', 'is_visible']);
+        // Mevcut visibility map'i + audit (kim/ne zaman) cek (eksik kombinasyonlar default TRUE)
+        $rows = DB::table('role_page_visibility as rpv')
+            ->leftJoin('users as u', 'u.id', '=', 'rpv.updated_by_user_id')
+            ->where('rpv.company_id', $companyId)
+            ->get(['rpv.role', 'rpv.page_key', 'rpv.is_visible', 'rpv.updated_at', 'u.name as updated_by_name']);
 
         $map = [];
+        $audit = [];
         foreach ($rows as $r) {
             $map[$r->role][$r->page_key] = (bool) $r->is_visible;
+            $audit[$r->role][$r->page_key] = [
+                'by' => (string) ($r->updated_by_name ?? '—'),
+                'at' => (string) ($r->updated_at ?? ''),
+            ];
         }
 
         return view('manager.page-visibility.index', [
@@ -37,6 +43,99 @@ class ManagerPageVisibilityController extends Controller
             'coreRoles'   => PageAccess::coreRoles(),
             'staffRoles'  => PageAccess::staffRoles(),
             'visibility'  => $map,
+            'audit'       => $audit,
+        ]);
+    }
+
+    /**
+     * AJAX: tek bir role+page toggle — anlik kayit, JSON response.
+     */
+    public function toggle(Request $request)
+    {
+        ModuleAccess::assertEnabled('page_visibility');
+
+        $data = $request->validate([
+            'role'       => ['required', 'string', 'max:32'],
+            'page_key'   => ['required', 'string', 'max:64'],
+            'is_visible' => ['required', 'boolean'],
+        ]);
+
+        // Page key + role kataloga uygun mu (URL manipulasyonuna karsi)
+        if (!array_key_exists($data['page_key'], PageAccess::PAGES)) {
+            return response()->json(['ok' => false, 'error' => 'Bilinmeyen page_key'], 422);
+        }
+        $allRoles = array_merge(array_keys(PageAccess::coreRoles()), array_keys(PageAccess::staffRoles()));
+        if (!in_array($data['role'], $allRoles, true)) {
+            return response()->json(['ok' => false, 'error' => 'Bilinmeyen rol'], 422);
+        }
+
+        $companyId = $this->companyId($request);
+        $userId    = (int) ($request->user()?->id ?? 0);
+
+        PageAccess::setVisibility(
+            $companyId,
+            (string) $data['role'],
+            (string) $data['page_key'],
+            (bool) $data['is_visible'],
+            $userId ?: null
+        );
+
+        return response()->json([
+            'ok' => true,
+            'audit' => [
+                'by' => (string) ($request->user()?->name ?? '—'),
+                'at' => now()->format('Y-m-d H:i'),
+            ],
+        ]);
+    }
+
+    /**
+     * Bulk preset: bir rol icin tum sayfalari ac/kapat veya tum matrix'i reset et.
+     * Action degerleri:
+     *   - 'role-all-on' / 'role-all-off' (rol parametresi gerekli)
+     *   - 'reset-all' (tum row sil → default-true)
+     */
+    public function bulkSet(Request $request)
+    {
+        ModuleAccess::assertEnabled('page_visibility');
+
+        $data = $request->validate([
+            'action' => ['required', 'string', 'in:role-all-on,role-all-off,reset-all'],
+            'role'   => ['nullable', 'string', 'max:32'],
+        ]);
+
+        $companyId = $this->companyId($request);
+        $userId    = (int) ($request->user()?->id ?? 0);
+
+        if ($data['action'] === 'reset-all') {
+            DB::table('role_page_visibility')->where('company_id', $companyId)->delete();
+            PageAccess::flushCache($companyId);
+            return response()->json([
+                'ok'      => true,
+                'message' => 'Tüm matrix sıfırlandı (default-true).',
+                'reload'  => true,
+            ]);
+        }
+
+        $allRoles = array_merge(array_keys(PageAccess::coreRoles()), array_keys(PageAccess::staffRoles()));
+        if (empty($data['role']) || !in_array($data['role'], $allRoles, true)) {
+            return response()->json(['ok' => false, 'error' => 'Geçerli rol gönderin.'], 422);
+        }
+
+        $isVisible = ($data['action'] === 'role-all-on');
+        $rows = [];
+        foreach (PageAccess::PAGES as $pageKey => $meta) {
+            $applicable = in_array($data['role'], (array) ($meta['roles'] ?? []), true)
+                || array_key_exists($data['role'], PageAccess::staffRoles());
+            if (!$applicable) continue;
+            $rows[] = ['role' => $data['role'], 'page_key' => $pageKey, 'is_visible' => $isVisible];
+        }
+        PageAccess::setBulk($companyId, $rows, $userId ?: null);
+
+        return response()->json([
+            'ok'      => true,
+            'message' => $isVisible ? 'Tümü açıldı.' : 'Tümü kapatıldı.',
+            'reload'  => true,
         ]);
     }
 

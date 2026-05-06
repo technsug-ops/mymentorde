@@ -92,6 +92,43 @@
 .pv-staff-section { display:none; }
 .pv-staff-section.show { display:block; }
 
+/* AJAX toast — sag altta */
+#pv-toast {
+    position:fixed; bottom:20px; right:20px; z-index:9999;
+    background:#0f172a; color:#fff; padding:10px 16px; border-radius:8px;
+    font-size:13px; font-weight:600; box-shadow:0 6px 20px rgba(0,0,0,.25);
+    opacity:0; transform:translateY(8px); transition:.2s;
+    pointer-events:none; max-width:340px;
+}
+#pv-toast.show { opacity:1; transform:translateY(0); }
+#pv-toast.error { background:#dc2626; }
+#pv-toast.success { background:#16a34a; }
+
+/* Bulk preset bar */
+.pv-bulk-bar {
+    display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+    padding:12px 18px; background:#fefce8; border-bottom:1px solid #fde68a;
+}
+.pv-bulk-bar .lbl {
+    font-size:12px; font-weight:700; color:#854d0e; margin-right:6px;
+}
+.pv-bulk-btn {
+    padding:7px 14px; border:1px solid #d4d4d8; border-radius:7px;
+    background:#fff; font-size:12px; font-weight:600; color:#374151;
+    cursor:pointer; transition:.15s;
+}
+.pv-bulk-btn:hover { background:#f3f4f6; transform:translateY(-1px); }
+.pv-bulk-btn.danger { color:#dc2626; border-color:#fecaca; }
+.pv-bulk-btn.danger:hover { background:#fef2f2; }
+
+/* Audit hover tooltip */
+.pv-toggle[data-audit-by]:hover::after {
+    content: "👤 " attr(data-audit-by) " · " attr(data-audit-at);
+    position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%);
+    background:#0f172a; color:#fff; font-size:10.5px; padding:5px 9px; border-radius:5px;
+    white-space:nowrap; pointer-events:none; z-index:10;
+}
+
 @media (max-width:740px) {
     .pv-wrap { padding:0 12px 32px; }
     .pv-table thead th:first-child { min-width:150px; }
@@ -112,13 +149,22 @@
         <div class="pv-flash">{{ session('flash_success') }}</div>
     @endif
 
-    <form method="post" action="{{ route('manager.page-visibility.update') }}">
-        @csrf
+    <div data-pv-root>
+        <meta name="pv-csrf" content="{{ csrf_token() }}">
 
         <div class="pv-card">
             <div class="pv-tabs">
                 <button type="button" class="pv-tab active" data-pv-tab="core">👥 Kullanıcı Rolleri</button>
                 <button type="button" class="pv-tab" data-pv-tab="staff">🏢 Yönetici / Staff Rolleri</button>
+            </div>
+
+            <div class="pv-bulk-bar">
+                <span class="lbl">⚡ Hızlı eylemler:</span>
+                @foreach($coreRoles as $rc => $rl)
+                    <button type="button" class="pv-bulk-btn" data-pv-bulk="role-all-on" data-pv-role="{{ $rc }}">{{ $rl }} → Tümü Aç</button>
+                    <button type="button" class="pv-bulk-btn" data-pv-bulk="role-all-off" data-pv-role="{{ $rc }}">{{ $rl }} → Tümü Kapat</button>
+                @endforeach
+                <button type="button" class="pv-bulk-btn danger" data-pv-bulk="reset-all">⚠ Matrix'i Sıfırla (Default)</button>
             </div>
 
             {{-- Core Roller (Aday Öğrenci, Öğrenci, Bayi, Senior) --}}
@@ -147,11 +193,15 @@
                                             @php
                                                 $applicable = in_array($roleCode, (array) ($page['roles'] ?? []), true);
                                                 $checked    = $applicable ? ($visibility[$roleCode][$pageKey] ?? true) : false;
+                                                $auditInfo  = $audit[$roleCode][$pageKey] ?? null;
                                             @endphp
                                             <td>
-                                                <label class="pv-toggle {{ $applicable ? '' : 'na' }}">
+                                                <label class="pv-toggle {{ $applicable ? '' : 'na' }}"
+                                                    @if($auditInfo) data-audit-by="{{ $auditInfo['by'] }}" data-audit-at="{{ \Illuminate\Support\Carbon::parse($auditInfo['at'])->format('d M Y H:i') }}" @endif>
                                                     <input type="checkbox"
-                                                           name="visible[{{ $roleCode }}][{{ $pageKey }}]"
+                                                           data-pv-toggle
+                                                           data-role="{{ $roleCode }}"
+                                                           data-page="{{ $pageKey }}"
                                                            value="1"
                                                            @checked($applicable && $checked)
                                                            @disabled(!$applicable)>
@@ -189,11 +239,15 @@
                                     @foreach($staffRoles as $roleCode => $roleLabel)
                                         @php
                                             $checked = $visibility[$roleCode][$pageKey] ?? true;
+                                            $auditInfo = $audit[$roleCode][$pageKey] ?? null;
                                         @endphp
                                         <td class="cell-staff">
-                                            <label class="pv-toggle">
+                                            <label class="pv-toggle"
+                                                @if($auditInfo) data-audit-by="{{ $auditInfo['by'] }}" data-audit-at="{{ \Illuminate\Support\Carbon::parse($auditInfo['at'])->format('d M Y H:i') }}" @endif>
                                                 <input type="checkbox"
-                                                       name="visible[{{ $roleCode }}][{{ $pageKey }}]"
+                                                       data-pv-toggle
+                                                       data-role="{{ $roleCode }}"
+                                                       data-page="{{ $pageKey }}"
                                                        value="1"
                                                        @checked($checked)>
                                                 <span class="slider"></span>
@@ -213,25 +267,108 @@
 
         <div class="pv-actions">
             <div class="info">
-                💾 Değişiklikler kaydedildikten sonra anında geçerli olur. Cache otomatik temizlenir.
+                ⚡ <strong>Anlık kayıt:</strong> Her toggle değişimi otomatik kaydedilir. Cache otomatik temizlenir. Audit için toggle'ın üzerine gel.
             </div>
-            <button type="submit" class="btn-save">💾 Değişiklikleri Kaydet</button>
         </div>
-    </form>
+    </div>
 </div>
+<div id="pv-toast"></div>
 
 <script nonce="{{ $cspNonce ?? '' }}">
 (function(){
+    var csrf = document.querySelector('meta[name="pv-csrf"]')?.content || '';
+    var toggleUrl = "{{ route('manager.page-visibility.toggle') }}";
+    var bulkUrl   = "{{ route('manager.page-visibility.bulk-set') }}";
+    var toast = document.getElementById('pv-toast');
+
+    function showToast(msg, type){
+        if (!toast) return;
+        toast.textContent = msg;
+        toast.className = '';
+        toast.classList.add(type || 'success', 'show');
+        clearTimeout(toast._t);
+        toast._t = setTimeout(function(){ toast.classList.remove('show'); }, 2400);
+    }
+
+    // Tab switch
     document.querySelectorAll('[data-pv-tab]').forEach(function(btn){
         btn.addEventListener('click', function(){
             var key = this.dataset.pvTab;
             document.querySelectorAll('[data-pv-tab]').forEach(function(b){ b.classList.remove('active'); });
             this.classList.add('active');
             document.querySelectorAll('[data-pv-section]').forEach(function(s){
-                s.classList.toggle('show', s.dataset.pvSection === key);
                 if (s.dataset.pvSection === 'core') s.style.display = (key === 'core') ? 'block' : 'none';
                 else s.classList.toggle('show', key === 'staff');
             });
+        });
+    });
+
+    // AJAX toggle — her checkbox change'inde anlik save
+    document.querySelectorAll('[data-pv-toggle]').forEach(function(input){
+        input.addEventListener('change', function(){
+            var role = this.dataset.role;
+            var page = this.dataset.page;
+            var isOn = this.checked;
+            var label = this.closest('.pv-toggle');
+            input.disabled = true;
+            fetch(toggleUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ role: role, page_key: page, is_visible: isOn ? 1 : 0 })
+            }).then(function(r){ return r.json().then(function(j){ return { ok: r.ok, body: j }; }); })
+              .then(function(res){
+                if (!res.ok || !res.body.ok) {
+                    input.checked = !isOn; // revert
+                    showToast('Kaydedilemedi: ' + (res.body.error || 'Sunucu hatası'), 'error');
+                } else {
+                    showToast(role + ' / ' + page + ' → ' + (isOn ? 'AÇIK' : 'KAPALI'), 'success');
+                    if (label && res.body.audit) {
+                        label.dataset.auditBy = res.body.audit.by;
+                        label.dataset.auditAt = res.body.audit.at;
+                    }
+                }
+              })
+              .catch(function(){
+                input.checked = !isOn;
+                showToast('Bağlantı hatası', 'error');
+              })
+              .finally(function(){ input.disabled = false; });
+        });
+    });
+
+    // Bulk preset butonlari
+    document.querySelectorAll('[data-pv-bulk]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var action = this.dataset.pvBulk;
+            var role = this.dataset.pvRole || '';
+            var confirmMsg = action === 'reset-all'
+                ? 'TÜM matrix sıfırlanacak (default-true). Manuel kapattığın sayfalar açılır. Devam?'
+                : (action === 'role-all-off'
+                    ? '"' + (role || 'rol') + '" için tüm sayfalar KAPATILACAK. Devam?'
+                    : '"' + (role || 'rol') + '" için tüm sayfalar AÇILACAK. Devam?');
+            if (!confirm(confirmMsg)) return;
+            fetch(bulkUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ action: action, role: role })
+            }).then(function(r){ return r.json().then(function(j){ return { ok: r.ok, body: j }; }); })
+              .then(function(res){
+                if (!res.ok || !res.body.ok) {
+                    showToast('Hata: ' + (res.body.error || 'Sunucu hatası'), 'error');
+                } else {
+                    showToast(res.body.message || 'OK', 'success');
+                    if (res.body.reload) setTimeout(function(){ window.location.reload(); }, 700);
+                }
+              })
+              .catch(function(){ showToast('Bağlantı hatası', 'error'); });
         });
     });
 })();

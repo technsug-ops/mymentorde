@@ -153,6 +153,9 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     // ─── Sayfa Görünürlüğü Kontrol Paneli (Premium: page_visibility) ────────
     Route::get('/manager/page-visibility',  [\App\Http\Controllers\Manager\ManagerPageVisibilityController::class, 'index'])->name('manager.page-visibility.index');
     Route::post('/manager/page-visibility', [\App\Http\Controllers\Manager\ManagerPageVisibilityController::class, 'update'])->name('manager.page-visibility.update');
+    // AJAX toggle (her checkbox change'inde anlik save) + bulk preset
+    Route::post('/manager/page-visibility/toggle',   [\App\Http\Controllers\Manager\ManagerPageVisibilityController::class, 'toggle'])->name('manager.page-visibility.toggle');
+    Route::post('/manager/page-visibility/bulk-set', [\App\Http\Controllers\Manager\ManagerPageVisibilityController::class, 'bulkSet'])->name('manager.page-visibility.bulk-set');
 
     // ─── Belge Talep Linki (Premium: doc_request mod.) ──────────────────────
     // Manager aday öğrenciden belirli bir belgeyi tek-kullanımlık link ile ister.
