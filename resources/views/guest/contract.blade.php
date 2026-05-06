@@ -751,7 +751,7 @@
 {{-- ── Help Card (always visible) ── --}}
 <div class="gc-help">
     <div style="font-size:24px;">💬</div>
-    <div><strong>Sorunuz mu var?</strong><p>Sözleşme hakkinda herhangi bir sorunuz varsa danışmaninizla gorusebilirsiniz.</p></div>
+    <div><strong>Sorunuz mu var?</strong><p>Sözleşme hakkında herhangi bir sorunuz varsa danışmanınızla görüşebilirsiniz.</p></div>
     <a href="{{ route('guest.messages') }}" class="gc-help-btn">Danışmana Sor</a>
 </div>
 
