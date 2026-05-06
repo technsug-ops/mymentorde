@@ -686,10 +686,10 @@ class GuestRegistrationFormCatalog
         // Uni-Assist + VIDEX'in tanıdığı 4 cinsiyet seçeneği. Form'daki value
         // küçük harfli; mapper Almanca karşılıklarına dönüştürür (männlich/weiblich/divers/unbestimmt).
         return [
-            ['value' => 'male', 'label' => 'Erkek (männlich)'],
-            ['value' => 'female', 'label' => 'Kadın (weiblich)'],
-            ['value' => 'diverse', 'label' => 'Diğer cinsiyet (divers)'],
-            ['value' => 'unspecified', 'label' => 'Belirtmek istemiyorum (unbestimmt)'],
+            ['value' => 'male', 'label' => 'Erkek'],
+            ['value' => 'female', 'label' => 'Kadın'],
+            ['value' => 'diverse', 'label' => 'Diğer'],
+            ['value' => 'unspecified', 'label' => 'Belirtmek istemiyorum'],
         ];
     }
 

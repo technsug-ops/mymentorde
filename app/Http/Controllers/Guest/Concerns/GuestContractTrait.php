@@ -200,6 +200,11 @@ trait GuestContractTrait
 
         $data = $request->validate([
             'signed_contract' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240', new ValidFileMagicBytes()],
+        ], [
+            'signed_contract.required' => 'Lütfen imzalı sözleşmeyi seçin.',
+            'signed_contract.file'     => 'Geçerli bir dosya yükleyin.',
+            'signed_contract.mimes'    => 'Sadece PDF, JPG veya PNG dosyaları yüklenebilir.',
+            'signed_contract.max'      => 'Dosya boyutu 10 MB\'dan büyük olamaz.',
         ]);
 
         $file = $request->file('signed_contract');

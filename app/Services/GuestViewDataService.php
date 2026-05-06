@@ -96,9 +96,10 @@ class GuestViewDataService
             $formMissingItems = [];
         }
 
-        // Form tamamlandı sayılması için: gönderilmiş + zorunlu alanlar dolu + genel doluluk >= %80
+        // Form tamamlandı sayılması için: gönderilmiş + tüm zorunlu alanlar dolu yeterli.
+        // Opsiyonel alanlar tamamlanma kriteri değil — formAllPct sadece görsel ilerleme göstergesi.
         $formAllPct    = $formAllTotal > 0 ? (int) round($formAllFilled / $formAllTotal * 100) : 0;
-        $formCompleted = $formSubmitted && $formDraftComplete && $formAllPct >= 80;
+        $formCompleted = $formSubmitted && $formDraftComplete;
 
         $docsCompleted   = (bool) ($guest?->docs_ready ?? false);
         $packageSelected = trim((string) ($guest?->selected_package_code ?? '')) !== '';

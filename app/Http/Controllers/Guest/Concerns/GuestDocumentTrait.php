@@ -31,6 +31,11 @@ trait GuestDocumentTrait
         $data = $request->validate([
             'category_code' => ['required', 'string', 'max:64'],
             'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx,webp', 'max:10240', new ValidFileMagicBytes()],
+        ], [
+            'file.required' => 'Lütfen bir dosya seçin.',
+            'file.file'     => 'Geçerli bir dosya yükleyin.',
+            'file.mimes'    => 'Sadece PDF, JPG, PNG, DOC, DOCX veya WEBP dosyaları yüklenebilir.',
+            'file.max'      => 'Dosya boyutu 10 MB\'dan büyük olamaz.',
         ]);
 
         $category = DocumentCategory::query()->where('code', $data['category_code'])->first();

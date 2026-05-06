@@ -140,9 +140,9 @@ class StudentProfileController extends Controller
 
         $guest->forceFill([
             'profile_photo_path' => $path,
-            'status_message'     => 'Profil fotografi guncellendi.',
+            'status_message'     => 'Profil fotoğrafı güncellendi.',
         ])->save();
 
-        return redirect()->route('student.profile')->with('status', 'Profil fotografi yuklendi.');
+        return redirect()->route('student.profile')->with('status', 'Profil fotoğrafı yüklendi.');
     }
 }

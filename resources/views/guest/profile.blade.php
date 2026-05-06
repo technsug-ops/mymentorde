@@ -397,12 +397,18 @@
             </div>
             <div class="gp-field">
                 <label>Cinsiyet</label>
-                @php $genderVal = old('gender', $guest?->gender ?? ''); @endphp
+                @php
+                    $genderRaw = old('gender', $guest?->gender ?? '');
+                    // Backward-compat: kayıt formu 'male'/'female' kaydeder, eski 'kadin'/'erkek' değerleri normalize edilsin
+                    $genderMap = ['kadin' => 'female', 'erkek' => 'male', 'belirtmek_istemiyorum' => 'unspecified'];
+                    $genderVal = $genderMap[$genderRaw] ?? $genderRaw;
+                @endphp
                 <select name="gender">
                     <option value="">Seçiniz</option>
-                    <option value="kadin" @selected($genderVal==='kadin')>Kadın</option>
-                    <option value="erkek" @selected($genderVal==='erkek')>Erkek</option>
-                    <option value="belirtmek_istemiyorum" @selected($genderVal==='belirtmek_istemiyorum')>Belirtmek istemiyorum</option>
+                    <option value="male"        @selected($genderVal==='male')>Erkek</option>
+                    <option value="female"      @selected($genderVal==='female')>Kadın</option>
+                    <option value="diverse"     @selected($genderVal==='diverse')>Diğer</option>
+                    <option value="unspecified" @selected($genderVal==='unspecified')>Belirtmek istemiyorum</option>
                 </select>
             </div>
             <div class="gp-field">

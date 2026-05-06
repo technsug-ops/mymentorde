@@ -130,6 +130,10 @@
         {{-- Sidebar Header (merged brand + user) --}}
         @php
             $sidePhoto    = trim((string) ($guest?->profile_photo_path ?? ''));
+            // File yoksa fallback'e düşsün (eski path veya bozuk upload)
+            if ($sidePhoto !== '' && !\Illuminate\Support\Facades\Storage::disk('public')->exists($sidePhoto)) {
+                $sidePhoto = '';
+            }
             $sideInitials = strtoupper(substr(trim(($guest?->first_name ?? 'G').' '.($guest?->last_name ?? 'U')), 0, 2));
             $isGuestComm  = request()->routeIs('guest.messages', 'guest.tickets');
             $isGuestKayit = request()->routeIs('guest.registration.form', 'guest.registration.documents', 'guest.contract', 'guest.services');
@@ -169,7 +173,7 @@
             <div style="display:flex;align-items:center;gap:10px;">
                 <div class="avatar" style="width:42px;height:42px;font-size:15px;flex-shrink:0;">
                     @if ($sidePhoto !== '')
-                        <img src="{{ asset('storage/'.$sidePhoto) }}" alt="Profil" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                        <img src="{{ asset('storage/'.$sidePhoto) }}?v={{ filemtime(storage_path('app/public/'.$sidePhoto)) ?: time() }}" alt="{{ $sideInitials }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
                     @else
                         {{ $sideInitials }}
                     @endif

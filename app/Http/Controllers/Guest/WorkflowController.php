@@ -490,10 +490,10 @@ class WorkflowController extends Controller
             ->optimizeProfilePhoto($file, "guest-profile/{$guest->id}", $baseName);
 
         $guest->fill(['profile_photo_path' => $path]);
-        $guest->status_message = 'Profil fotografi guncellendi.'; // @internal
+        $guest->status_message = 'Profil fotoğrafı güncellendi.';
         $guest->save();
 
-        return redirect()->route('guest.profile')->with('status', 'Profil fotografi yuklendi.');
+        return redirect()->route('guest.profile')->with('status', 'Profil fotoğrafı yüklendi.');
     }
 
     public function updateProfile(Request $request)

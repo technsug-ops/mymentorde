@@ -139,8 +139,21 @@ body {
   padding: 0 20px; position: sticky; top: 0; z-index: 50;
 }
 .topbar-left { display: flex; align-items: center; gap: 10px; }
-.topbar-title { font-size: var(--tx-lg); font-weight: 600; }
+.topbar-title { font-size: var(--tx-lg); font-weight: 600; color: var(--text); }
 .topbar-sub   { font-size: var(--tx-sm); color: var(--muted); }
+
+/* Minimalist mode'da inline color:#fff (premium tema kalıntısı) override —
+   beyaz arka planda beyaz yazı okunmuyor sorununu çöz. */
+.jm-minimalist .topbar [style*="color:#fff"],
+.jm-minimalist .topbar [style*="color: #fff"],
+.jm-minimalist .topbar [style*="color:white"],
+.jm-minimalist .topbar [style*="color: white"],
+.jm-minimalist .topbar [style*="color:#FFF"],
+.jm-minimalist .topbar [style*="color: #FFF"] {
+  color: var(--text) !important;
+}
+.jm-minimalist .topbar a { color: var(--text); }
+.jm-minimalist .topbar a:hover { color: var(--c-brand, #2563eb); }
 .topbar-right { display: flex; align-items: center; gap: 6px; }
 .icon-btn {
   width: 32px; height: 32px; border-radius: var(--r-sm);
