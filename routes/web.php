@@ -861,7 +861,7 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
     }
 
     return response($output, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
-})->middleware('throttle:5,10')->name('deploy.run-pending');
+})->middleware('throttle:60,10')->name('deploy.run-pending');
 
 // ── Log tail — prod 500 hatalarını tespit etmek için son N satır laravel.log
 // Kullanım: curl '.../_deploy/tail-log?secret=XXX&lines=200&date=2026-05-03'
@@ -908,4 +908,4 @@ Route::get('/_deploy/tail-log', function (\Illuminate\Http\Request $request) {
     $out = "═══ {$logFile} (last {$lines} lines) ═══\n\n";
     $out .= implode("\n", $rows);
     return response($out, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
-})->middleware('throttle:5,10')->name('deploy.tail-log');
+})->middleware('throttle:60,10')->name('deploy.tail-log');

@@ -35,23 +35,23 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     Route::get('/contract/request', fn () => redirect()->route('guest.contract'))->name('guest.contract.request.get');
     Route::post('/contract/request', [GuestWorkflowController::class, 'requestContract'])->middleware('throttle:60,1')->name('guest.contract.request');
     Route::post('/contract/withdraw', [GuestWorkflowController::class, 'withdrawContractRequest'])->middleware('throttle:60,1')->name('guest.contract.withdraw');
-    Route::post('/contract/reopen-request', [GuestWorkflowController::class, 'requestReopen'])->middleware('throttle:30,1')->name('guest.contract.reopen-request');
+    Route::post('/contract/reopen-request', [GuestWorkflowController::class, 'requestReopen'])->middleware('throttle:60,1')->name('guest.contract.reopen-request');
     Route::post('/contract/update-request', [GuestWorkflowController::class, 'requestContractUpdate'])->middleware('throttle:60,1')->name('guest.contract.update-request');
     Route::post('/contract/upload-signed', [GuestWorkflowController::class, 'uploadSignedContract'])->middleware('throttle:60,1')->name('guest.contract.upload-signed');
-    Route::post('/contract/digital-sign', [GuestWorkflowController::class, 'digitalSign'])->middleware('throttle:30,1')->name('guest.contract.digital-sign');
+    Route::post('/contract/digital-sign', [GuestWorkflowController::class, 'digitalSign'])->middleware('throttle:60,1')->name('guest.contract.digital-sign');
     Route::get('/contract/signed-thanks', [GuestPortalController::class, 'contractSignedThanks'])->name('guest.contract.signed-thanks');
 
     // ── Ticket / Destek ──────────────────────────────────────────────────────
     Route::get('/tickets', [GuestPortalController::class, 'tickets'])->middleware('page.visible:support')->name('guest.tickets');
-    Route::post('/tickets', [GuestWorkflowController::class, 'storeTicket'])->middleware('throttle:30,1')->name('guest.tickets.store');
+    Route::post('/tickets', [GuestWorkflowController::class, 'storeTicket'])->middleware('throttle:60,1')->name('guest.tickets.store');
     Route::post('/tickets/{ticket}/reply', [GuestWorkflowController::class, 'replyTicket'])->middleware(['guest.owns.ticket', 'throttle:60,1'])->name('guest.tickets.reply');
     Route::post('/tickets/{ticket}/close', [GuestWorkflowController::class, 'closeTicket'])->middleware(['guest.owns.ticket', 'throttle:60,1'])->name('guest.tickets.close');
     Route::post('/tickets/{ticket}/reopen', [GuestWorkflowController::class, 'reopenTicket'])->middleware(['guest.owns.ticket', 'throttle:60,1'])->name('guest.tickets.reopen');
-    Route::get('/tickets/{ticket}/attachment', [GuestWorkflowController::class, 'downloadTicketAttachment'])->middleware(['guest.owns.ticket', 'throttle:30,1'])->name('guest.tickets.attachment');
+    Route::get('/tickets/{ticket}/attachment', [GuestWorkflowController::class, 'downloadTicketAttachment'])->middleware(['guest.owns.ticket', 'throttle:60,1'])->name('guest.tickets.attachment');
 
     // ── Profil & Ayarlar ─────────────────────────────────────────────────────
     Route::get('/profile', [GuestPortalController::class, 'profile'])->name('guest.profile');
-    Route::post('/profile/photo', [GuestWorkflowController::class, 'uploadProfilePhoto'])->middleware('throttle:30,1')->name('guest.profile.photo');
+    Route::post('/profile/photo', [GuestWorkflowController::class, 'uploadProfilePhoto'])->middleware('throttle:60,1')->name('guest.profile.photo');
     Route::post('/profile', [GuestWorkflowController::class, 'updateProfile'])->middleware('throttle:60,1')->name('guest.profile.update');
     Route::get('/settings', [GuestPortalController::class, 'settings'])->name('guest.settings');
     Route::post('/settings', [GuestWorkflowController::class, 'updateSettings'])->middleware('throttle:60,1')->name('guest.settings.update');

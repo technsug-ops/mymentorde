@@ -254,7 +254,7 @@
         @php $waitingDocs = $docs->filter(fn($d) => !in_array($d->status, ['approved','rejected']))->values(); @endphp
         @if($waitingDocs->count() > 0)
         <div class="section-card"><div class="section-header"><h4>⏳ İnceleme Bekleyen ({{ $waitingDocs->count() }})</h4></div><div class="doc-list">
-            @foreach($waitingDocs->take(5) as $wd)
+            @foreach($waitingDocs as $wd)
                 @php $wdCatLabel = ''; foreach ($check as $ci) { if (($ci['category_code'] ?? '') === (string)($wd->category->code ?? '')) { $wdCatLabel = $documentTopCategoryLabels[$ci['top_category_code'] ?? ''] ?? ''; break; } } @endphp
                 <div class="doc-card"><div class="doc-icon-wrap uploaded">⏳</div><div class="doc-info"><div class="doc-name">{{ $wd->title ?: ($wd->category->name_tr ?? $wd->document_id) }}</div><div class="doc-meta"><span class="chip wait">İnceleniyor</span>@if($wdCatLabel)<span>{{ $wdCatLabel }}</span>@endif<span>{{ $wd->updated_at?->format('d M Y') ?? '' }}</span></div></div><div class="doc-actions"><button class="doc-btn small" type="button" data-preview="{{ $wd->id }}" title="Önizle">👁</button><form method="POST" action="{{ route('guest.registration.documents.delete', $wd->id) }}" data-delete-form style="display:inline;margin:0;">@csrf @method('DELETE')<button class="doc-btn small" type="button" data-delete-doc title="Sil ve yeniden yükle" style="color:#dc2626;">🗑</button></form></div></div>
             @endforeach
