@@ -678,6 +678,88 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             $output .= ">>> cleanup junk-folders: {$deleted} folder soft-deleted\n";
         }
 
+        // guest_required_documents tablosunda kayitli zorunlu belgeleri listele
+        // Kullanim: /_deploy/run-pending?cleanup=audit-required-docs
+        if ($request->query('cleanup') === 'audit-required-docs') {
+            $rows = DB::table('guest_required_documents')
+                ->orderBy('application_type')->orderBy('sort_order')
+                ->get(['application_type', 'document_code', 'name', 'is_required', 'is_active', 'company_id']);
+            $output .= "\n>>> guest_required_documents (" . $rows->count() . " row):\n";
+            $byType = [];
+            foreach ($rows as $r) {
+                $byType[$r->application_type][] = $r;
+            }
+            foreach ($byType as $type => $list) {
+                $output .= "\n  [" . $type . "] (" . count($list) . " belge):\n";
+                foreach ($list as $r) {
+                    $req = $r->is_required ? 'REQ' : 'opt';
+                    $act = $r->is_active ? 'active' : 'INACTIVE';
+                    $output .= sprintf("    - %s | %s | cid=%s | %s | %s\n",
+                        $r->document_code, $r->name, $r->company_id ?? 'NULL', $req, $act);
+                }
+            }
+        }
+
+        // Eksik zorunlu belgeleri seeder'dan yeniden insert et (varsa atlar)
+        // Kullanim: /_deploy/run-pending?cleanup=reseed-required-docs
+        if ($request->query('cleanup') === 'reseed-required-docs') {
+            $companyId = Schema::hasTable('companies')
+                ? (int) DB::table('companies')->where('is_active', true)->orderBy('id')->value('id')
+                : 0;
+            $companyId = $companyId > 0 ? $companyId : null;
+            $now = now();
+
+            $catalog = [
+                'bachelor' => [
+                    ['DOC-DIPL', 'Lise Diploması',                    10],
+                    ['DOC-TRNS', 'Transkript',                         20],
+                    ['DOC-UNWN', 'Üniversite Kazandı Belgesi',         30],
+                    ['DOC-YKSP', 'YKS Yerleştirme Belgesi',            40],
+                    ['DOC-IDCR', 'Kimlik Ön-Arka Fotoğrafı',           50],
+                    ['DOC-PASS', 'Pasaport İlk 2 Sayfa',               60],
+                ],
+                'master' => [
+                    ['DOC-DIPL', 'Üniversite Diploması + yeminli tercüme', 10],
+                    ['DOC-TRNS', 'Üniversite Transkript + yeminli tercüme', 20],
+                    ['DOC-UNWN', 'Üniversite Kabul/Referans Belgesi',  30],
+                    ['DOC-YKSP', 'Ek Akademik Yerleştirme Belgesi',    40],
+                    ['DOC-IDCR', 'Kimlik Ön-Arka Fotoğrafı',           50],
+                    ['DOC-PASS', 'Pasaport İlk 2 Sayfa',               60],
+                ],
+                'dil_kursu' => [
+                    ['DOC-PASS', 'Pasaport İlk 2 Sayfa',               10],
+                    ['DOC-IDCR', 'Kimlik Ön-Arka Fotoğrafı',           20],
+                ],
+            ];
+            $inserted = 0; $existed = 0;
+            foreach ($catalog as $type => $docs) {
+                foreach ($docs as [$code, $name, $sort]) {
+                    $exists = DB::table('guest_required_documents')
+                        ->where('application_type', $type)
+                        ->where('document_code', $code)
+                        ->exists();
+                    if ($exists) { $existed++; continue; }
+                    DB::table('guest_required_documents')->insert([
+                        'company_id' => $companyId,
+                        'application_type' => $type,
+                        'document_code' => $code,
+                        'category_code' => $code,
+                        'name' => $name,
+                        'description' => $type . ' için zorunlu',
+                        'is_required' => 1,
+                        'accepted' => 'pdf,jpg,png',
+                        'max_mb' => 10,
+                        'sort_order' => $sort,
+                        'is_active' => 1,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ]);
+                    $inserted++;
+                }
+            }
+            $output .= ">>> reseed-required-docs: {$inserted} insert, {$existed} zaten vardi\n";
+        }
+
         // role_page_visibility tablosunda guest icin kayitli false satirlari listele
         // (debug — manager kayit sonrasi ne yazilmis gormek icin)
         // Kullanim: /_deploy/run-pending?cleanup=audit-page-visibility
