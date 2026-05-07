@@ -62,11 +62,22 @@ class ManagerPageVisibilityController extends Controller
 
         // Page key + role kataloga uygun mu (URL manipulasyonuna karsi)
         if (!array_key_exists($data['page_key'], PageAccess::PAGES)) {
-            return response()->json(['ok' => false, 'error' => 'Bilinmeyen page_key'], 422);
+            \Illuminate\Support\Facades\Log::warning('PV toggle unknown page_key', [
+                'received' => $data['page_key'],
+                'role'     => $data['role'],
+                'catalog'  => array_keys(PageAccess::PAGES),
+            ]);
+            return response()->json([
+                'ok'    => false,
+                'error' => 'Bilinmeyen page_key: "' . $data['page_key'] . '". Tarayıcı cache temizleyip yenileyin.',
+            ], 422);
         }
         $allRoles = array_merge(array_keys(PageAccess::coreRoles()), array_keys(PageAccess::staffRoles()));
         if (!in_array($data['role'], $allRoles, true)) {
-            return response()->json(['ok' => false, 'error' => 'Bilinmeyen rol'], 422);
+            return response()->json([
+                'ok'    => false,
+                'error' => 'Bilinmeyen rol: "' . $data['role'] . '"',
+            ], 422);
         }
 
         $companyId = $this->companyId($request);
