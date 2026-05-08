@@ -227,11 +227,11 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
         data-saved="{{ $isSaved ? '1' : '0' }}"
         data-url="{{ route('guest.content.save', $item->slug) }}"
         style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1.5px solid {{ $isSaved ? 'var(--u-brand,#1f6fd9)' : 'var(--u-line,#d6e1ef)' }};background:{{ $isSaved ? 'var(--u-bg,#eaf1fb)' : 'var(--u-card,#fff)' }};color:{{ $isSaved ? 'var(--u-brand,#1f6fd9)' : 'var(--u-muted,#4f6787)' }};font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s;">
-        <span id="save-icon">{{ $isSaved ? '🔖' : '🔖' }}</span>
-        <span id="save-label">{{ $isSaved ? 'Kaydedildi' : 'Kaydet' }}</span>
+        <span id="save-icon">{{ $isSaved ? '⭐' : '☆' }}</span>
+        <span id="save-label">{{ $isSaved ? 'Favoride ✓' : 'Favoriye Ekle' }}</span>
     </button>
 
-    <a href="{{ route('guest.saved') }}" style="font-size:.8rem;color:var(--u-muted,#4f6787);text-decoration:none;margin-left:auto;">📋 Kayıtlarım →</a>
+    <a href="{{ route('guest.saved') }}" style="font-size:.8rem;color:var(--u-muted,#4f6787);text-decoration:none;margin-left:auto;">⭐ Favorilerim →</a>
 </div>
 
 {{-- City CTA --}}
@@ -468,7 +468,8 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
             if(!data.ok) return;
             var saved = data.saved;
             btn.setAttribute('data-saved', saved ? '1' : '0');
-            document.getElementById('save-label').textContent = saved ? 'Kaydedildi' : 'Kaydet';
+            document.getElementById('save-label').textContent = saved ? 'Favoride ✓' : 'Favoriye Ekle';
+            document.getElementById('save-icon').textContent  = saved ? '⭐' : '☆';
             btn.style.borderColor = saved ? 'var(--u-brand,#1f6fd9)' : 'var(--u-line,#d6e1ef)';
             btn.style.background  = saved ? 'var(--u-bg,#eaf1fb)' : 'var(--u-card,#fff)';
             btn.style.color       = saved ? 'var(--u-brand,#1f6fd9)' : 'var(--u-muted,#4f6787)';

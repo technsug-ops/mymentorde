@@ -48,6 +48,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     Route::post('/tickets/{ticket}/close', [GuestWorkflowController::class, 'closeTicket'])->middleware(['guest.owns.ticket', 'throttle:60,1'])->name('guest.tickets.close');
     Route::post('/tickets/{ticket}/reopen', [GuestWorkflowController::class, 'reopenTicket'])->middleware(['guest.owns.ticket', 'throttle:60,1'])->name('guest.tickets.reopen');
     Route::get('/tickets/{ticket}/attachment', [GuestWorkflowController::class, 'downloadTicketAttachment'])->middleware(['guest.owns.ticket', 'throttle:60,1'])->name('guest.tickets.attachment');
+    Route::get('/tickets/{ticket}/replies/{reply}/attachment', [GuestWorkflowController::class, 'downloadTicketReplyAttachment'])->middleware(['guest.owns.ticket', 'throttle:60,1'])->name('guest.tickets.reply.attachment');
 
     // ── Profil & Ayarlar ─────────────────────────────────────────────────────
     Route::get('/profile', [GuestPortalController::class, 'profile'])->name('guest.profile');

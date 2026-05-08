@@ -176,6 +176,19 @@ trait GuestTicketTrait
         );
     }
 
+    public function downloadTicketReplyAttachment(GuestTicket $ticket, \App\Models\GuestTicketReply $reply): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        // Reply'in dogru ticket'a ait olmasi (URL manipulasyonuna karsi)
+        abort_if((int) $reply->guest_ticket_id !== (int) $ticket->id, 404);
+        abort_if(!$reply->attachment_path, 404, 'Bu yanitta ek bulunamadi.');
+        abort_if(!Storage::disk('private')->exists((string) $reply->attachment_path), 404);
+
+        return Storage::disk('private')->download(
+            (string) $reply->attachment_path,
+            (string) ($reply->attachment_name ?? 'attachment')
+        );
+    }
+
     private function suggestTicketDepartment(string $subject, string $message): string
     {
         $txt = mb_strtolower(trim($subject.' '.$message));

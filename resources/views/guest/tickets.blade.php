@@ -432,7 +432,7 @@
                                         <div class="gt-reply-bubble">{{ $reply->message }}</div>
                                         @if($reply->attachment_name && !$isStaff)
                                         <div style="margin-top:4px;">
-                                            <a href="{{ route('guest.tickets.attachment', $ticket->id) }}"
+                                            <a href="{{ route('guest.tickets.reply.attachment', ['ticket' => $ticket->id, 'reply' => $reply->id]) }}"
                                                class="badge info" style="font-size:var(--tx-xs);text-decoration:none;">
                                                 📎 {{ $reply->attachment_name }}
                                             </a>
