@@ -451,8 +451,7 @@
                         {{-- Actions + Reply --}}
                         <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
                             @if($isOpen)
-                                <form method="POST" action="{{ route('guest.tickets.close', $ticket->id) }}" style="display:inline;"
-                                      x-data @submit.prevent="$store.modal.confirm('Ticket kapatılsın mı?','Bu ticket kapatılacak.',()=>$el.submit())">
+                                <form method="POST" action="{{ route('guest.tickets.close', $ticket->id) }}" style="display:inline;" data-confirm-form data-confirm-msg="Ticket kapatılsın mı?">
                                     @csrf
                                     <button class="btn warn" type="submit" style="font-size:var(--tx-xs);padding:5px 12px;">Kapat</button>
                                 </form>
@@ -555,5 +554,13 @@ function gtSlaUpdate() {
         setTimeout(function(){ document.documentElement.classList.toggle('jm-minimalist', d==='minimalist'); }, 50);
     };
 })();
+
+// data-confirm-form pattern — Alpine.js bagimligini kaldirir, plain JS confirm
+document.querySelectorAll('[data-confirm-form]').forEach(function(f){
+    f.addEventListener('submit', function(e){
+        var msg = f.dataset.confirmMsg || 'Devam etmek istediğinize emin misiniz?';
+        if (!confirm(msg)) { e.preventDefault(); return false; }
+    });
+});
 </script>
 @endsection

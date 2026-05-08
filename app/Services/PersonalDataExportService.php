@@ -35,7 +35,8 @@ class PersonalDataExportService
 
         $documents = Document::query()
             ->where('student_id', $studentId)
-            ->get(['id', 'document_category_code', 'original_filename', 'status', 'created_at']);
+            ->with('category:id,code')
+            ->get(['id', 'category_id', 'original_file_name', 'status', 'created_at']);
 
         $appointments = StudentAppointment::query()
             ->where('student_id', $studentId)
@@ -75,8 +76,8 @@ class PersonalDataExportService
             ] : null,
             'original_application' => $guestApp ? $this->mapGuestApp($guestApp) : null,
             'documents' => $documents->map(fn ($d) => [
-                'category'       => $d->document_category_code,
-                'filename'       => $d->original_filename,
+                'category'       => $d->category?->code ?? '-',
+                'filename'       => $d->original_file_name,
                 'status'         => $d->status,
                 'uploaded_at'    => $d->created_at?->toIso8601String(),
             ])->values()->all(),
@@ -103,9 +104,14 @@ class PersonalDataExportService
             ->where('guest_application_id', $app->id)
             ->get(['id', 'subject', 'status', 'priority', 'created_at']);
 
+        // Guest belgeleri student_id uzerinden tutuluyor (converted_student_id veya guest mock id)
+        $ownerId = trim((string) ($app->converted_student_id ?? '')) !== ''
+            ? (string) $app->converted_student_id
+            : 'GUEST-' . $app->id;
         $documents = Document::query()
-            ->where('guest_application_id', $app->id)
-            ->get(['id', 'document_category_code', 'original_filename', 'status', 'created_at']);
+            ->where('student_id', $ownerId)
+            ->with('category:id,code')
+            ->get(['id', 'category_id', 'original_file_name', 'status', 'created_at']);
 
         $consents = ConsentRecord::query()
             ->where(fn ($q) => $q->where('user_id', $user->id)->orWhere('application_id', $app->id))
@@ -128,8 +134,8 @@ class PersonalDataExportService
             ],
             'application' => $this->mapGuestApp($app),
             'documents' => $documents->map(fn ($d) => [
-                'category'    => $d->document_category_code,
-                'filename'    => $d->original_filename,
+                'category'    => $d->category?->code ?? '-',
+                'filename'    => $d->original_file_name,
                 'status'      => $d->status,
                 'uploaded_at' => $d->created_at?->toIso8601String(),
             ])->values()->all(),

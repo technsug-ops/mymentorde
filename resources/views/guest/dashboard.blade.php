@@ -628,11 +628,11 @@
         @php $missingDocs = $missingRequiredDocuments ?? []; @endphp
         @if(!empty($missingDocs))
             @foreach(array_slice($missingDocs, 0, 4) as $doc)
-                <div class="gdb-cl-item active">
+                <a href="{{ route('guest.registration.documents') }}" class="gdb-cl-item active" style="text-decoration:none;color:inherit;cursor:pointer;">
                     <div class="gdb-cl-check">📄</div>
                     <div class="gdb-cl-text">{{ $doc['name'] ?? 'Belge' }}</div>
-                    <span class="gdb-cl-tag active">Yükle</span>
-                </div>
+                    <span class="gdb-cl-tag active">Yükle →</span>
+                </a>
             @endforeach
         @else
             <div class="gdb-cl-item done">
