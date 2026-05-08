@@ -213,11 +213,15 @@ class GeminiProvider
         $genConfig = [
             'temperature'     => (float) ($options['temperature'] ?? 0.3),
             'maxOutputTokens' => (int) ($options['max_output_tokens'] ?? 2048),
-            // Gemini 2.5 thinking mode'u kapat — thinking tokens tüm output budget'ını yiyor
-            // Açık bırakılırsa maxOutputTokens=2048 → ~1800 thinking + ~200 candidates kalır
-            // ve cevap boş/kesik döner.
-            'thinkingConfig' => ['thinkingBudget' => (int) ($options['thinking_budget'] ?? 0)],
         ];
+        // Gemini 2.5+ thinking mode'u kapat — thinking tokens tüm output budget'ını yiyor.
+        // Acik birakilirsa maxOutputTokens=2048 → ~1800 thinking + ~200 candidates kalir
+        // ve cevap bos/kesik doner.
+        // ÖNEMLI: thinkingConfig sadece 2.5+ modellerde destekleniyor; 1.5/2.0'da
+        // gonderilirse Gemini API "Unknown name 'thinkingConfig'" → 400 Bad Request doner.
+        if (preg_match('/-2\.5|-2-5/', $model)) {
+            $genConfig['thinkingConfig'] = ['thinkingBudget' => (int) ($options['thinking_budget'] ?? 0)];
+        }
         // Gemini 2.5 structured output — JSON zorunluluğu
         if (!empty($options['response_mime_type'])) {
             $genConfig['responseMimeType'] = (string) $options['response_mime_type'];
@@ -320,15 +324,19 @@ class GeminiProvider
         $userParts[] = ['text' => $userMessage];
         $contents[] = ['role' => 'user', 'parts' => $userParts];
 
+        $genConfig = [
+            'temperature'     => (float) ($options['temperature'] ?? 0.3),
+            'maxOutputTokens' => (int) ($options['max_output_tokens'] ?? 2048),
+        ];
+        // thinkingConfig sadece 2.5+ modellerde destekleniyor; 1.5/2.0 modelinde
+        // gonderilirse 400 Bad Request doner (Unknown name).
+        if (preg_match('/-2\.5|-2-5/', $model)) {
+            $genConfig['thinkingConfig'] = ['thinkingBudget' => (int) ($options['thinking_budget'] ?? 0)];
+        }
         $payload = [
             'system_instruction' => ['parts' => [['text' => $systemPrompt]]],
             'contents' => $contents,
-            'generationConfig' => [
-                'temperature'     => (float) ($options['temperature'] ?? 0.3),
-                'maxOutputTokens' => (int) ($options['max_output_tokens'] ?? 2048),
-                // Thinking mode kapat — output budget'ını candidates'a ayır
-                'thinkingConfig'  => ['thinkingBudget' => (int) ($options['thinking_budget'] ?? 0)],
-            ],
+            'generationConfig' => $genConfig,
         ];
 
         $url = "{$base}/models/{$model}:streamGenerateContent?alt=sse&key={$apiKey}";

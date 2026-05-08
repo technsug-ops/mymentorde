@@ -100,12 +100,10 @@ def main() -> int:
     # Normalize server_dir — avoid double slashes when concatenating build path
     build_dir = server_dir.rstrip("/") + "/public/build/"
 
-    # GECICI (08 Mayis 2026): KAS odeme sorunu sonrasi prod'da pek cok class
-    # dosyasi eksik kalmisti (DigitalAsset, UsesRequiredDocuments, vb).
-    # lftp'nin size+time comparison'i bu dosyalari yanlislikla skip ediyor.
-    # Bu deploy'da default --transfer-all aktif → tum dosyalar zorla upload.
-    # Sonraki deploy'da bu satir geri alinacak.
-    force_rebuild = True
+    # force_rebuild=true ise --transfer-all flag'i ekle: lftp'nin size/time
+    # comparison'i bazi dosyalari yanlislikla skip ediyor (KAS partial transfer).
+    # Workflow_dispatch input'u FORCE_REBUILD env ile gelir.
+    force_rebuild = os.environ.get("FORCE_REBUILD", "").lower() in ("true", "1", "yes")
     transfer_all_flag = "--transfer-all " if force_rebuild else ""
     if force_rebuild:
         print("=== FORCE_REBUILD aktif — tum dosyalar zorla yeniden upload ===")
@@ -115,17 +113,21 @@ def main() -> int:
         "set ftp:ssl-protect-data true",
         "set ftp:ssl-allow true",
         "set ssl:verify-certificate no",
-        "set net:timeout 30",
-        "set net:max-retries 3",
-        "set net:reconnect-interval-base 5",
+        # Daha cömert timeout — KAS bazen yavas response veriyor
+        "set net:timeout 60",
+        "set net:max-retries 5",
+        "set net:reconnect-interval-base 10",
+        "set net:reconnect-interval-multiplier 1",
         "set ftp:passive-mode true",
-        "set mirror:parallel-transfer-count 3",
+        # Sequential upload (parallel=1) — paralel timeout fail'lerini onler.
+        # Daha yavas ama ZAMAN kazaniyoruz cunku transfer-all rerun gerek olmuyor.
+        "set mirror:parallel-transfer-count 1",
         "set cmd:fail-exit no",
         # Main mirror — ana repo (vendor, app, routes, etc.).
         # Default davranış: size+time karşılaştır, farklı olanları upload et.
         # force_rebuild ise --transfer-all ile her şey zorla yeniden upload.
         (
-            f"mirror -R --parallel=3 --verbose --no-perms {transfer_all_flag}"
+            f"mirror -R --parallel=1 --verbose --no-perms {transfer_all_flag}"
             f"--exclude-rx-from={exclude_path} "
             f'./ "{server_dir}"'
         ),
