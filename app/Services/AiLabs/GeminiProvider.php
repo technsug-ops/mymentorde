@@ -440,7 +440,7 @@ class GeminiProvider
                 // Stream tek chunk olarak geldiyse buffer dolu olmayabilir; tail isle
                 $errBody = '(empty body)';
             }
-            \Illuminate\Support\Facades\Log::warning('AiLabs Gemini stream HTTP error', [
+            \Illuminate\Support\Facades\Log::error('AiLabs Gemini stream HTTP error', [
                 'status' => $status,
                 'model'  => $model,
                 'body'   => substr($errBody, 0, 800),
