@@ -100,10 +100,12 @@ def main() -> int:
     # Normalize server_dir — avoid double slashes when concatenating build path
     build_dir = server_dir.rstrip("/") + "/public/build/"
 
-    # force_rebuild=true ise --transfer-all flag'i ekle: lftp'nin size/time
-    # comparison'i bazi dosyalari yanlislikla skip ediyordu (KAS partial transfer
-    # veya mtime mismatch). force_rebuild ile her dosya zorla upload edilir.
-    force_rebuild = os.environ.get("FORCE_REBUILD", "").lower() in ("true", "1", "yes")
+    # GECICI (08 Mayis 2026): KAS odeme sorunu sonrasi prod'da pek cok class
+    # dosyasi eksik kalmisti (DigitalAsset, UsesRequiredDocuments, vb).
+    # lftp'nin size+time comparison'i bu dosyalari yanlislikla skip ediyor.
+    # Bu deploy'da default --transfer-all aktif → tum dosyalar zorla upload.
+    # Sonraki deploy'da bu satir geri alinacak.
+    force_rebuild = True
     transfer_all_flag = "--transfer-all " if force_rebuild else ""
     if force_rebuild:
         print("=== FORCE_REBUILD aktif — tum dosyalar zorla yeniden upload ===")
