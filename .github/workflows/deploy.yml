@@ -132,6 +132,9 @@ jobs:
           FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
           # Vite build çalışmadıysa public/build upload adımını atla
           SKIP_BUILD_UPLOAD: ${{ (steps.changes.outputs.frontend != 'true' && inputs.force_rebuild != 'true') && 'true' || 'false' }}
+          # force_rebuild=true → lftp --transfer-all ile her dosyayi zorla upload
+          # (KAS partial transfer / mtime mismatch fix'i icin)
+          FORCE_REBUILD: ${{ inputs.force_rebuild == 'true' && 'true' || 'false' }}
           # Telemetri: hangi step'ler skip edildi log'da görünsün
           CHANGED_COMPOSER: ${{ steps.changes.outputs.composer }}
           CHANGED_FRONTEND: ${{ steps.changes.outputs.frontend }}

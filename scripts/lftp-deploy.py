@@ -100,6 +100,14 @@ def main() -> int:
     # Normalize server_dir — avoid double slashes when concatenating build path
     build_dir = server_dir.rstrip("/") + "/public/build/"
 
+    # force_rebuild=true ise --transfer-all flag'i ekle: lftp'nin size/time
+    # comparison'i bazi dosyalari yanlislikla skip ediyordu (KAS partial transfer
+    # veya mtime mismatch). force_rebuild ile her dosya zorla upload edilir.
+    force_rebuild = os.environ.get("FORCE_REBUILD", "").lower() in ("true", "1", "yes")
+    transfer_all_flag = "--transfer-all " if force_rebuild else ""
+    if force_rebuild:
+        print("=== FORCE_REBUILD aktif — tum dosyalar zorla yeniden upload ===")
+
     lftp_commands = [
         "set ftp:ssl-force true",
         "set ftp:ssl-protect-data true",
@@ -113,8 +121,9 @@ def main() -> int:
         "set cmd:fail-exit no",
         # Main mirror — ana repo (vendor, app, routes, etc.).
         # Default davranış: size+time karşılaştır, farklı olanları upload et.
+        # force_rebuild ise --transfer-all ile her şey zorla yeniden upload.
         (
-            "mirror -R --parallel=3 --verbose --no-perms "
+            f"mirror -R --parallel=3 --verbose --no-perms {transfer_all_flag}"
             f"--exclude-rx-from={exclude_path} "
             f'./ "{server_dir}"'
         ),
