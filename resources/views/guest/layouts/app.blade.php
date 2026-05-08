@@ -390,7 +390,7 @@
         <div class="content">
             {{-- Social proof bar --}}
             @if(!empty($socialProof))
-            <div class="sp-bar" style="background:var(--hero-gradient);border-radius:10px;padding:10px 16px;display:flex;gap:12px 20px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+            <div class="sp-bar" style="background:var(--hero-gradient, linear-gradient(135deg, #2563eb 0%, #6d28d9 100%));border-radius:10px;padding:10px 16px;display:flex;gap:12px 20px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
                 <span style="font-size:13px;font-weight:700;color:#fff;letter-spacing:.01em;">🎓 {{ number_format((int)($socialProof['total_students'] ?? 0)) }}+ öğrenci Almanya'da</span>
                 <span class="sp-sep" style="font-size:14px;color:rgba(255,255,255,.4);font-weight:300;">|</span>
                 <span style="font-size:13px;font-weight:700;color:#fff;letter-spacing:.01em;">🏛️ {{ (int)($socialProof['total_unis'] ?? 50) }}+ üniversite kabulü</span>
