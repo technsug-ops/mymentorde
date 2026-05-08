@@ -678,6 +678,34 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             $output .= ">>> cleanup junk-folders: {$deleted} folder soft-deleted\n";
         }
 
+        // optimize:clear — config/route/view/event/compiled cache'leri temizler.
+        // Plus bootstrap/cache/*.php manuel sil (artisan komutu KAS'ta bazen
+        // sessizce skip ediyor).
+        // Kullanim: /_deploy/run-pending?cleanup=optimize-clear
+        if ($request->query('cleanup') === 'optimize-clear') {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+                $output .= ">>> optimize:clear\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+            } catch (\Throwable $e) {
+                $output .= ">>> optimize:clear FAILED: " . $e->getMessage() . "\n";
+            }
+            // Manuel bootstrap/cache temizligi (services.php, packages.php, config.php, routes-v7.php)
+            $bootCache = base_path('bootstrap/cache');
+            $deleted = 0;
+            if (is_dir($bootCache)) {
+                foreach (glob($bootCache . '/*.php') ?: [] as $f) {
+                    if (basename($f) === '.gitignore') continue;
+                    if (@unlink($f)) $deleted++;
+                }
+            }
+            $output .= ">>> bootstrap/cache temizlendi: {$deleted} dosya silindi\n";
+            // realpath/stat cache (file_exists icin)
+            if (function_exists('clearstatcache')) {
+                clearstatcache(true);
+                $output .= ">>> clearstatcache OK\n";
+            }
+        }
+
         // guest_required_documents tablosunda kayitli zorunlu belgeleri listele
         // Kullanim: /_deploy/run-pending?cleanup=audit-required-docs
         if ($request->query('cleanup') === 'audit-required-docs') {
