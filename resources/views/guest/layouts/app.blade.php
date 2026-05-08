@@ -154,7 +154,7 @@
         @endphp
         <div style="padding:14px 14px 0;">
             {{-- Brand logo block --}}
-            <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(255,255,255,.05);border-radius:10px;margin-bottom:12px;" title="{{ $glBrandName }}">
+            <div class="gl-brand-block" style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(255,255,255,.05);border-radius:10px;margin-bottom:12px;" title="{{ $glBrandName }}">
                 @if(!empty($glBrandLogo))
                     <div style="height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;{{ $glLogoBgStyle }}border-radius:8px;padding:4px 6px;">
                         <img src="{{ $glBrandLogo }}" alt="{{ $glBrandName }}" style="height:100%;width:auto;max-width:80px;object-fit:contain;display:block;" onerror="this.parentElement.style.display='none';this.parentElement.nextElementSibling.style.display='flex';">
@@ -164,7 +164,7 @@
                     <span style="display:flex;width:44px;height:44px;align-items:center;justify-content:center;background:#fff;color:var(--u-brand,#2563eb);font-weight:800;border-radius:10px;font-size:18px;flex-shrink:0;">{{ $glBrandInitial }}</span>
                 @endif
                 <div style="flex:1;min-width:0;">
-                    <div style="font-size:15px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $glBrandName }}</div>
+                    <div class="gl-brand-name" style="font-size:15px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $glBrandName }}</div>
                     <div style="font-size:11px;color:var(--muted);font-weight:600;">Aday Öğrenci Portalı</div>
                 </div>
             </div>

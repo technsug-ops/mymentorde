@@ -445,3 +445,80 @@ body {
 .mt-4 { margin-top: 16px; }
 .mb-4 { margin-bottom: 16px; }
 .mb-6 { margin-bottom: 24px; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   MINIMALIST MODE — sidebar logo darliği için override
+   220px sidebar'da "MentorDE" + "Aday Öğrenci Portalı" tıkışıyordu;
+   font biraz küçültülüp container padding'i azaltıldı.
+   ─────────────────────────────────────────────────────────────────── */
+.jm-minimalist .gl-brand-block { padding: 8px 10px !important; gap: 10px !important; }
+.jm-minimalist .gl-brand-name  { font-size: 13px !important; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK + MINIMALIST KOMBİNASYONU
+   Bazı sayfalardaki hardcoded color'lar dark zeminle eşleşip metni
+   görünmez kılıyordu. Genel text override + spesifik bileşen fix'leri:
+   ─────────────────────────────────────────────────────────────────── */
+.jm-minimalist[data-theme="dark"] {
+  /* Ana metin rengi — body inherit edilince çoğu yere yayılır */
+  color: var(--text);
+}
+
+/* Hero kartları (gp-hero, şehir hero, etc.) gradient zemin üzerinde
+   metin daima beyaz — dark mode'da da öyle kalmalı */
+.jm-minimalist[data-theme="dark"] .gp-hero,
+.jm-minimalist[data-theme="dark"] .gp-hero * {
+  color: #fff !important;
+}
+
+.jm-minimalist[data-theme="dark"] [class*="city-hero"],
+.jm-minimalist[data-theme="dark"] [class*="city-hero"] *,
+.jm-minimalist[data-theme="dark"] [class*="cd-city"],
+.jm-minimalist[data-theme="dark"] .ug-city-hero,
+.jm-minimalist[data-theme="dark"] .ug-city-hero *,
+.jm-minimalist[data-theme="dark"] .ug-hero,
+.jm-minimalist[data-theme="dark"] .ug-hero * {
+  color: #fff !important;
+}
+
+/* Form input/select/textarea — default browser color dark zeminde siyah
+   kalıyor, var(--text) ile beyaza çekilir */
+.jm-minimalist[data-theme="dark"] input,
+.jm-minimalist[data-theme="dark"] select,
+.jm-minimalist[data-theme="dark"] textarea {
+  color: var(--text) !important;
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+.jm-minimalist[data-theme="dark"] input::placeholder,
+.jm-minimalist[data-theme="dark"] textarea::placeholder {
+  color: var(--muted) !important;
+}
+
+/* Profil section kartları — başlık + alt metin */
+.jm-minimalist[data-theme="dark"] .gp-section-title,
+.jm-minimalist[data-theme="dark"] .gp-section-sub,
+.jm-minimalist[data-theme="dark"] .gp-section,
+.jm-minimalist[data-theme="dark"] .form-group label,
+.jm-minimalist[data-theme="dark"] .gp-field label {
+  color: var(--text);
+}
+.jm-minimalist[data-theme="dark"] .gp-section-sub {
+  color: var(--muted);
+}
+
+/* Form container başlıkları (Kişisel Bilgiler, Dil Becerileri vb.) */
+.jm-minimalist[data-theme="dark"] h1,
+.jm-minimalist[data-theme="dark"] h2,
+.jm-minimalist[data-theme="dark"] h3,
+.jm-minimalist[data-theme="dark"] h4,
+.jm-minimalist[data-theme="dark"] h5 {
+  color: var(--text);
+}
+
+/* Kart bg — beyaz hardcoded olabilir, dark için surface */
+.jm-minimalist[data-theme="dark"] .gp-section,
+.jm-minimalist[data-theme="dark"] [style*="background:#fff"],
+.jm-minimalist[data-theme="dark"] [style*="background: #fff"] {
+  background: var(--surface) !important;
+}
