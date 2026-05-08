@@ -706,6 +706,21 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // Gemini File API uri'lerini sifirla → bir sonraki "Kaynakları Senkronize Et"
+        // butonu re-upload tetikler. Yeni Gemini API key'i farkli projede ise eski
+        // file_uri'ler 403 (PERMISSION_DENIED) doner cunku File API proje-bazli.
+        // Kullanim: /_deploy/run-pending?cleanup=reset-gemini-files
+        if ($request->query('cleanup') === 'reset-gemini-files') {
+            if (Schema::hasTable('knowledge_sources')) {
+                $count = DB::table('knowledge_sources')
+                    ->whereNotNull('gemini_file_uri')
+                    ->orWhereNotNull('gemini_file_id')
+                    ->update(['gemini_file_uri' => null, 'gemini_file_id' => null]);
+                $output .= ">>> reset-gemini-files: {$count} knowledge_sources file_uri/id sifirlandi\n";
+                $output .= "    Manager → AI Labs → Ayarlar → 'Kaynakları Şimdi Senkronize Et' butonuna basarak re-upload tetikleyin.\n";
+            }
+        }
+
         // guest_required_documents tablosunda kayitli zorunlu belgeleri listele
         // Kullanim: /_deploy/run-pending?cleanup=audit-required-docs
         if ($request->query('cleanup') === 'audit-required-docs') {
