@@ -200,10 +200,11 @@ class GeminiProvider
             if (empty($ref['file_uri']) || empty($ref['mime_type'])) {
                 continue;
             }
+            // Gemini API yeni versiyonu camelCase strict — snake_case 400/403 doner
             $userParts[] = [
-                'file_data' => [
-                    'mime_type' => $ref['mime_type'],
-                    'file_uri'  => $ref['file_uri'],
+                'fileData' => [
+                    'mimeType' => $ref['mime_type'],
+                    'fileUri'  => $ref['file_uri'],
                 ],
             ];
         }
@@ -228,7 +229,7 @@ class GeminiProvider
         }
 
         $payload = [
-            'system_instruction' => ['parts' => [['text' => $systemPrompt]]],
+            'systemInstruction' => ['parts' => [['text' => $systemPrompt]]],
             'contents' => $contents,
             'generationConfig' => $genConfig,
         ];
@@ -319,7 +320,8 @@ class GeminiProvider
         $userParts = [];
         foreach ($fileRefs as $ref) {
             if (empty($ref['file_uri']) || empty($ref['mime_type'])) continue;
-            $userParts[] = ['file_data' => ['mime_type' => $ref['mime_type'], 'file_uri' => $ref['file_uri']]];
+            // camelCase — yeni Gemini API'nin strict format gereksinimi
+            $userParts[] = ['fileData' => ['mimeType' => $ref['mime_type'], 'fileUri' => $ref['file_uri']]];
         }
         $userParts[] = ['text' => $userMessage];
         $contents[] = ['role' => 'user', 'parts' => $userParts];
@@ -334,7 +336,7 @@ class GeminiProvider
             $genConfig['thinkingConfig'] = ['thinkingBudget' => (int) ($options['thinking_budget'] ?? 0)];
         }
         $payload = [
-            'system_instruction' => ['parts' => [['text' => $systemPrompt]]],
+            'systemInstruction' => ['parts' => [['text' => $systemPrompt]]],
             'contents' => $contents,
             'generationConfig' => $genConfig,
         ];
@@ -431,7 +433,19 @@ class GeminiProvider
             return;
         }
         if ($status >= 400) {
-            yield ['error' => 'http_' . $status];
+            // Body icin gercek error gosterimi — sessiz "API key gecersiz" yerine
+            // Google'dan gelen detayli mesaji frontend'e ilet (yetki/quota/payload tani icin)
+            $errBody = trim($buffer);
+            if ($errBody === '') {
+                // Stream tek chunk olarak geldiyse buffer dolu olmayabilir; tail isle
+                $errBody = '(empty body)';
+            }
+            \Illuminate\Support\Facades\Log::warning('AiLabs Gemini stream HTTP error', [
+                'status' => $status,
+                'model'  => $model,
+                'body'   => substr($errBody, 0, 800),
+            ]);
+            yield ['error' => 'http_' . $status . ': ' . substr($errBody, 0, 300)];
             return;
         }
 
