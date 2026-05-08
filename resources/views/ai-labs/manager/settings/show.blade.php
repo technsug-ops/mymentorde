@@ -167,7 +167,7 @@
                 <label>Birincil Provider</label>
                 <select name="primary_provider">
                     <option value="gemini" {{ $settings->primary_provider === 'gemini' ? 'selected' : '' }}>
-                        Google Gemini 1.5 Flash (önerilen — ucuz, hızlı, uzun context)
+                        Google Gemini (model: {{ config('services.ai_labs.gemini.model', 'gemini-2.5-flash') }} — önerilen)
                     </option>
                     <option value="claude" {{ $settings->primary_provider === 'claude' ? 'selected' : '' }}>
                         Anthropic Claude (alternatif)
@@ -176,6 +176,10 @@
                         OpenAI GPT (alternatif)
                     </option>
                 </select>
+                <p class="hint" style="margin-top:6px;font-size:12px;">
+                    Model adı <code>.env → GEMINI_MODEL</code> üzerinden gelir. Geçerli değer:
+                    <strong>{{ config('services.ai_labs.gemini.model', 'gemini-2.5-flash') }}</strong>
+                </p>
             </div>
         </div>
 
