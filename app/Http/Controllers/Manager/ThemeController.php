@@ -24,12 +24,36 @@ class ThemeController extends Controller
             'logo_url' => config('brand.logo_url', ''),
             'logo_height' => (int) config('brand.logo_height', 40),
         ];
+        $modes = $tableReady ? [
+            'dark_allowed'        => \App\Support\ThemeFeatures::darkAllowed(),
+            'minimalist_allowed'  => \App\Support\ThemeFeatures::minimalistAllowed(),
+        ] : ['dark_allowed' => true, 'minimalist_allowed' => true];
+
         return view('manager.theme', [
             'pageTitle'  => 'Theme Management',
             'theme'      => PortalTheme::resolve(),
             'tableReady' => $tableReady,
             'brand'      => $brand,
+            'modes'      => $modes,
         ]);
+    }
+
+    public function updateModes(Request $request)
+    {
+        if (!SchemaCache::hasTable('marketing_admin_settings')) {
+            return redirect('/manager/theme')->withErrors(['Ayar tablosu bulunamadi.']);
+        }
+
+        $data = $request->validate([
+            'dark_mode_allowed'   => 'nullable|boolean',
+            'minimalist_allowed'  => 'nullable|boolean',
+        ]);
+
+        $uid = $request->user()?->id;
+        \App\Models\MarketingAdminSetting::setValue('theme_dark_mode_allowed',  !empty($data['dark_mode_allowed']) ? '1' : '0', $uid);
+        \App\Models\MarketingAdminSetting::setValue('theme_minimalist_allowed', !empty($data['minimalist_allowed']) ? '1' : '0', $uid);
+
+        return redirect('/manager/theme')->with('status', 'Tema modu izinleri kaydedildi.');
     }
 
     public function update(Request $request)

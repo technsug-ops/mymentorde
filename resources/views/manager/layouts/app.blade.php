@@ -797,5 +797,6 @@ document.getElementById('sozlesme-btn')?.addEventListener('click', function() {
 <x-analytics.posthog-snippet :portal="'manager'" />
 <x-analytics.consent-banner />
 @include('partials.cookie-consent')
+@include('partials.theme-mode-guard')
 </body>
 </html>

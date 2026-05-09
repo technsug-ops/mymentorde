@@ -213,5 +213,6 @@ document.addEventListener('alpine:init', () => {
 
 @yield('portal-widgets')
 @stack('scripts')
+@include('partials.theme-mode-guard')
 </body>
 </html>

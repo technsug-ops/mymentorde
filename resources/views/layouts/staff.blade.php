@@ -387,5 +387,6 @@ document.addEventListener('alpine:init',function(){
 </script>
 
 @stack('scripts')
+@include('partials.theme-mode-guard')
 </body>
 </html>

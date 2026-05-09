@@ -462,5 +462,6 @@ document.addEventListener('alpine:init',function(){
 <x-analytics.posthog-snippet :portal="'dealer'" />
 <x-analytics.consent-banner />
 @include('partials.cookie-consent')
+@include('partials.theme-mode-guard')
 </body>
 </html>

@@ -124,6 +124,33 @@ input[type="range"] { width:100%; accent-color:#1e40af; }
 
 <div class="th-wrap">
 
+    {{-- ══ Tema Modu İzinleri (manager onayı ile aç/kapat) ══ --}}
+    <form method="POST" action="{{ route('manager.theme.modes') }}" style="margin-bottom:18px;">
+        @csrf
+        <div class="th-card" style="padding:18px 22px;">
+            <h3 style="margin:0 0 4px;font-size:15px;">🌗 Tema Modu İzinleri</h3>
+            <div class="muted" style="font-size:12px;margin-bottom:14px;">
+                Kullanıcılar (öğrenci, aday, bayi, danışman) bu modları kendi profilinde seçebilir mi?
+                Kapatırsan o portal için toggle butonu gizlenir, mevcut tercihler de standart moda döner.
+            </div>
+            <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;">
+                    <input type="checkbox" name="dark_mode_allowed" value="1"
+                        @checked(($modes['dark_allowed'] ?? true))
+                        style="width:18px;height:18px;cursor:pointer;">
+                    <span>🌙 <strong>Karanlık Mod</strong> aktif olsun</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;">
+                    <input type="checkbox" name="minimalist_allowed" value="1"
+                        @checked(($modes['minimalist_allowed'] ?? true))
+                        style="width:18px;height:18px;cursor:pointer;">
+                    <span>✨ <strong>Minimalist Mod</strong> aktif olsun</span>
+                </label>
+                <button type="submit" class="btn ok" style="margin-left:auto;">💾 İzinleri Kaydet</button>
+            </div>
+        </div>
+    </form>
+
     {{-- ══ SOL: FORM ══ --}}
     <form method="POST" action="{{ route('manager.theme.update') }}" id="theme-form">
         @csrf

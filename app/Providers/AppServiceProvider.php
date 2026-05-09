@@ -225,6 +225,9 @@ class AppServiceProvider extends ServiceProvider
             $theme = PortalTheme::resolve();
             $view->with('uiTheme', $theme);
             $view->with('uiThemeCssVars', PortalTheme::toCssVars($theme));
+            // Tema modu izinleri (manager kontrolünde) — layout'larda toggle gizleme + localStorage clean
+            $view->with('themeDarkAllowed', \App\Support\ThemeFeatures::darkAllowed());
+            $view->with('themeMinimalistAllowed', \App\Support\ThemeFeatures::minimalistAllowed());
         });
 
         // Public sayfalar (login, /apply, /randevu) için ortak tema —

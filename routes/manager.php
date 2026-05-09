@@ -53,6 +53,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/theme', [ThemeController::class, 'show'])->name('manager.theme.show');
     Route::post('/manager/theme', [ThemeController::class, 'update'])->name('manager.theme.update');
     Route::post('/manager/theme/brand', [ThemeController::class, 'updateBrand'])->name('manager.theme.brand');
+    Route::post('/manager/theme/modes', [ThemeController::class, 'updateModes'])->name('manager.theme.modes');
     Route::get('/manager/preview/student/{studentId}', [ManagerPortalPreviewController::class, 'student'])->name('manager.preview.student');
     Route::get('/manager/preview/dealer/{dealerCode}', [ManagerPortalPreviewController::class, 'dealer'])->name('manager.preview.dealer');
     Route::get('/manager/preview/senior/{email}', [ManagerPortalPreviewController::class, 'senior'])->name('manager.preview.senior');
