@@ -121,12 +121,28 @@ class GdprController extends Controller
             $user->email,
         );
 
-        $filename = 'mentorde-kisisel-verilerim-' . now()->format('Ymd') . '.json';
+        // Format secimi: ?format=html (default — kullanici dostu)  veya ?format=json (raw)
+        $format = strtolower((string) $request->query('format', 'html'));
+        $today = now()->format('Y-m-d');
+        $stamp = now()->format('Ymd');
+
+        if ($format === 'json') {
+            $filename = "mentorde-kisisel-verilerim-{$stamp}.json";
+            return response()->streamDownload(
+                fn () => print(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)),
+                $filename,
+                ['Content-Type' => 'application/json'],
+            );
+        }
+
+        // HTML rapor — browser'da direkt acilir, yazdirilabilir
+        $filename = "mentorde-kisisel-verilerim-{$stamp}.html";
+        $html = view('guest.gdpr-export', ['data' => $data, 'today' => $today])->render();
 
         return response()->streamDownload(
-            fn () => print(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)),
+            fn () => print($html),
             $filename,
-            ['Content-Type' => 'application/json'],
+            ['Content-Type' => 'text/html; charset=UTF-8'],
         );
     }
 

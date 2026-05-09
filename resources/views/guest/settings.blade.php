@@ -398,7 +398,7 @@
                     <button type="button" class="gst-pw-eye" onclick="gstTogglePw('pw2',this)">👁</button>
                 </div>
             </div>
-            <button class="btn" type="submit" style="padding:9px 24px;margin-bottom:10px;">Şifreyi Güncelle</button>
+            <button type="submit" style="padding:12px 28px;margin-bottom:10px;background:linear-gradient(135deg,#1e40af,#3b5fcc);color:#fff;font-weight:700;border:none;border-radius:8px;font-size:14px;box-shadow:0 4px 12px rgba(30,64,175,.25);cursor:pointer;display:inline-flex;align-items:center;gap:8px;">🔐 Şifreyi Güncelle</button>
             <div class="gst-security-note">
                 <span style="flex-shrink:0;font-size:var(--tx-base);">⚠️</span>
                 <span>Şifreniz en az 8 karakter olmalı, büyük/küçük harf ve rakam içermesi önerilir.</span>
@@ -420,9 +420,12 @@
         <div class="gst-privacy-row">
             <div>
                 <div class="gst-privacy-label">📥 Verilerimi İndir</div>
-                <div class="gst-privacy-sub">Hesabınızdaki tüm kişisel veriyi JSON olarak indirin</div>
+                <div class="gst-privacy-sub">Hesabınızdaki tüm kişisel veriyi okunabilir HTML rapor olarak indirin (yazdırılabilir / PDF kaydedilir)</div>
             </div>
-            <a href="{{ route('guest.gdpr.export') }}" class="btn alt" style="font-size:var(--tx-xs);padding:7px 14px;flex-shrink:0;">İndir</a>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;">
+                <a href="{{ route('guest.gdpr.export') }}" class="btn alt" style="font-size:var(--tx-xs);padding:7px 14px;" title="Tarayıcıda açılır rapor — yazdırılabilir / PDF olarak kaydedilebilir">📄 HTML</a>
+                <a href="{{ route('guest.gdpr.export') }}?format=json" class="btn alt" style="font-size:var(--tx-xs);padding:7px 14px;background:#f1f5f9;" title="Geliştirici / başka servise aktarım için ham JSON">{ } JSON</a>
+            </div>
         </div>
         <div class="gst-privacy-row">
             <div>

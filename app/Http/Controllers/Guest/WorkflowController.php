@@ -457,6 +457,11 @@ class WorkflowController extends Controller
             return redirect()->route('guest.settings')->withErrors(['current_password' => 'Mevcut sifre hatali.']);
         }
 
+        // Yeni sifre eskisiyle ayni olmamali
+        if (Hash::check((string) $data['new_password'], (string) $user->password)) {
+            return redirect()->route('guest.settings')->withErrors(['new_password' => 'Yeni şifre mevcut şifrenizden farklı olmalı.']);
+        }
+
         $user->password = Hash::make((string) $data['new_password']);
         $user->save();
 

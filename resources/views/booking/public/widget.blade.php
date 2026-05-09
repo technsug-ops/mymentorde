@@ -283,7 +283,20 @@
                 document.getElementById('bw-cancel-link').textContent = res.body.cancel_url;
                 $success.style.display = '';
             } else {
-                $errBox.innerHTML = '<div class="bw-msg-err">' + (res.body.error || 'Bir hata oluştu.') + '</div>';
+                // Laravel validation 422 → { message, errors: { field: [msg1, msg2] } }
+                // Tek mesaj olabilir: { error: "..." } veya { message: "..." }
+                var msg = '';
+                if (res.body.errors && typeof res.body.errors === 'object') {
+                    var lines = [];
+                    Object.keys(res.body.errors).forEach(function(field){
+                        var arr = res.body.errors[field];
+                        if (Array.isArray(arr)) lines = lines.concat(arr);
+                        else if (typeof arr === 'string') lines.push(arr);
+                    });
+                    msg = lines.join('<br>');
+                }
+                if (!msg) msg = res.body.error || res.body.message || 'Bir hata oluştu (HTTP ' + res.status + ').';
+                $errBox.innerHTML = '<div class="bw-msg-err">' + msg + '</div>';
                 $btn.disabled = false;
                 $btn.textContent = '✅ Randevuyu Onayla';
             }
