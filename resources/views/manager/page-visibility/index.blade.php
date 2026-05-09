@@ -170,7 +170,10 @@
             {{-- Core Roller (Aday Öğrenci, Öğrenci, Bayi, Senior) --}}
             <div class="pv-section" data-pv-section="core">
                 @php
-                    $groups = collect($pages)->groupBy(fn ($p) => $p['group'] ?? 'Diğer');
+                    // preserveKeys=true zorunlu — aksi halde Collection groupBy string
+                    // page_key'leri 0,1,2... numeric index'e cevirir, AJAX toggle'da
+                    // backend "Bilinmeyen page_key: '8'" 422 doner.
+                    $groups = collect($pages)->groupBy(fn ($p) => $p['group'] ?? 'Diğer', preserveKeys: true);
                 @endphp
 
                 @foreach($groups as $groupName => $groupPages)
