@@ -358,14 +358,22 @@
             @php $bulkCanDelete = in_array(auth()->user()?->role, \App\Models\User::ADMIN_PANEL_ROLES, true); @endphp
             <select name="action" id="bulk-action">
                 <option value="">— İşlem seç —</option>
-                <option value="add_role">➕ Rol ekle</option>
-                <option value="remove_role">➖ Rol çıkar</option>
-                <option value="replace_roles">🔄 Rolleri yenile (sıfırla + ekle)</option>
-                <option value="activate">✅ Aktifleştir</option>
-                <option value="deactivate">⏸ Pasifleştir</option>
-                @if ($bulkCanDelete)
-                    <option value="delete">🗑 Sil</option>
-                @endif
+                <optgroup label="Kaynak Türü">
+                    <option value="set_tier_institutional">🏛️ Kurumsal yap</option>
+                    <option value="set_tier_web">🌐 Web Tabanlı yap</option>
+                </optgroup>
+                <optgroup label="Roller">
+                    <option value="add_role">➕ Rol ekle</option>
+                    <option value="remove_role">➖ Rol çıkar</option>
+                    <option value="replace_roles">🔄 Rolleri yenile (sıfırla + ekle)</option>
+                </optgroup>
+                <optgroup label="Durum">
+                    <option value="activate">✅ Aktifleştir</option>
+                    <option value="deactivate">⏸ Pasifleştir</option>
+                    @if ($bulkCanDelete)
+                        <option value="delete">🗑 Sil</option>
+                    @endif
+                </optgroup>
             </select>
 
             <div class="als-bulk-roles" id="bulk-roles" style="display:none;">
@@ -398,6 +406,7 @@
                     <th style="width:30px;"><input type="checkbox" id="select-all" title="Hepsini seç"></th>
                     <th>Başlık</th>
                     <th>Tip</th>
+                    <th>Tür</th>
                     <th>Kategori</th>
                     <th>Görünürlük</th>
                     <th>Durum</th>
@@ -438,6 +447,13 @@
                                 @endif
                             @elseif ($s->type === 'url')     <span class="als-badge purple">🌐 URL</span>
                             @else                            <span class="als-badge gray">✏️ Metin</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if (($s->source_tier ?? 'institutional') === 'web')
+                                <span class="als-badge" style="background:#fef3c7; color:#92400e;" title="Web kaynaklar AI cevabında 'MentorDE Kütüphanesi' olarak grupplanır">🌐 Web</span>
+                            @else
+                                <span class="als-badge" style="background:#dbeafe; color:#1e40af;" title="Kurumsal kaynaklar AI cevabında gerçek isim+URL ile gösterilir">🏛️ Kurumsal</span>
                             @endif
                         </td>
                         <td style="font-size:12px; color:#64748b;">{{ $s->category ?: '—' }}</td>

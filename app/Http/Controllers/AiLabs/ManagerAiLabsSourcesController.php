@@ -178,7 +178,7 @@ class ManagerAiLabsSourcesController extends Controller
     {
         $cid = $this->companyId();
         $data = $request->validate([
-            'action'        => 'required|in:add_role,remove_role,replace_roles,activate,deactivate,delete',
+            'action'        => 'required|in:add_role,remove_role,replace_roles,activate,deactivate,delete,set_tier_institutional,set_tier_web',
             'ids'           => 'required|array|min:1',
             'ids.*'         => 'integer',
             'roles'         => 'nullable|array',
@@ -192,6 +192,14 @@ class ManagerAiLabsSourcesController extends Controller
 
         $action = $data['action'];
         $affected = 0;
+
+        // Toplu tier düzeltme — kurumsal/web bulk update
+        if ($action === 'set_tier_institutional' || $action === 'set_tier_web') {
+            $newTier = $action === 'set_tier_institutional' ? 'institutional' : 'web';
+            $affected = $query->update(['source_tier' => $newTier]);
+            $label = $newTier === 'institutional' ? '🏛️ Kurumsal' : '🌐 Web Tabanlı';
+            return back()->with('status', "✅ {$affected} kaynak {$label} olarak işaretlendi.");
+        }
 
         if ($action === 'delete') {
             // Toplu silme sadece yöneticilere
