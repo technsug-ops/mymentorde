@@ -228,6 +228,8 @@ class AppServiceProvider extends ServiceProvider
             // Tema modu izinleri (manager kontrolünde) — layout'larda toggle gizleme + localStorage clean
             $view->with('themeDarkAllowed', \App\Support\ThemeFeatures::darkAllowed());
             $view->with('themeMinimalistAllowed', \App\Support\ThemeFeatures::minimalistAllowed());
+            // Dil seçici default KAPALI — EN/DE çevirileri tam olunca manager AÇABİLİR
+            $view->with('themeLangSwitcherAllowed', \App\Support\ThemeFeatures::langSwitcherAllowed());
         });
 
         // Public sayfalar (login, /apply, /randevu) için ortak tema —

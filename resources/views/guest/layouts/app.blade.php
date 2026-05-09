@@ -365,6 +365,7 @@
 
             <div class="topbar-right">
                 @yield('topbar-actions')
+                @if($themeLangSwitcherAllowed ?? false)
                 <form method="POST" action="/language" style="display:inline-flex;align-items:center;gap:6px;">
                     @csrf
                     <select name="locale" onchange="this.form.submit()"
@@ -374,6 +375,7 @@
                         <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>EN</option>
                     </select>
                 </form>
+                @endif
                 <button class="icon-btn" id="dm-btn" title="Tema">🌙</button>
                 <button class="icon-btn" id="design-btn" title="Tasarım Teması">🎨</button>
                 <a href="{{ route('guest.messages') }}" class="icon-btn" title="Mesajlar">

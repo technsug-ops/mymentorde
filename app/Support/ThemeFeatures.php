@@ -30,4 +30,17 @@ class ThemeFeatures
             return true;
         }
     }
+
+    /**
+     * Dil seçici (TR/EN/DE dropdown) — default KAPALI çünkü EN/DE çevirileri henüz tam değil.
+     * Manager AÇARSA topbar'da dropdown görünür, kullanıcılar dil değiştirebilir.
+     */
+    public static function langSwitcherAllowed(): bool
+    {
+        try {
+            return MarketingAdminSetting::getValue('theme_lang_switcher_allowed', '0') === '1';
+        } catch (\Throwable) {
+            return false; // çeviri eksik iken fail-closed
+        }
+    }
 }

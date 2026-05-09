@@ -25,9 +25,10 @@ class ThemeController extends Controller
             'logo_height' => (int) config('brand.logo_height', 40),
         ];
         $modes = $tableReady ? [
-            'dark_allowed'        => \App\Support\ThemeFeatures::darkAllowed(),
-            'minimalist_allowed'  => \App\Support\ThemeFeatures::minimalistAllowed(),
-        ] : ['dark_allowed' => true, 'minimalist_allowed' => true];
+            'dark_allowed'         => \App\Support\ThemeFeatures::darkAllowed(),
+            'minimalist_allowed'   => \App\Support\ThemeFeatures::minimalistAllowed(),
+            'lang_switcher_allowed'=> \App\Support\ThemeFeatures::langSwitcherAllowed(),
+        ] : ['dark_allowed' => true, 'minimalist_allowed' => true, 'lang_switcher_allowed' => false];
 
         return view('manager.theme', [
             'pageTitle'  => 'Theme Management',
@@ -45,13 +46,15 @@ class ThemeController extends Controller
         }
 
         $data = $request->validate([
-            'dark_mode_allowed'   => 'nullable|boolean',
-            'minimalist_allowed'  => 'nullable|boolean',
+            'dark_mode_allowed'    => 'nullable|boolean',
+            'minimalist_allowed'   => 'nullable|boolean',
+            'lang_switcher_allowed'=> 'nullable|boolean',
         ]);
 
         $uid = $request->user()?->id;
-        \App\Models\MarketingAdminSetting::setValue('theme_dark_mode_allowed',  !empty($data['dark_mode_allowed']) ? '1' : '0', $uid);
-        \App\Models\MarketingAdminSetting::setValue('theme_minimalist_allowed', !empty($data['minimalist_allowed']) ? '1' : '0', $uid);
+        \App\Models\MarketingAdminSetting::setValue('theme_dark_mode_allowed',     !empty($data['dark_mode_allowed'])    ? '1' : '0', $uid);
+        \App\Models\MarketingAdminSetting::setValue('theme_minimalist_allowed',    !empty($data['minimalist_allowed'])   ? '1' : '0', $uid);
+        \App\Models\MarketingAdminSetting::setValue('theme_lang_switcher_allowed', !empty($data['lang_switcher_allowed']) ? '1' : '0', $uid);
 
         return redirect('/manager/theme')->with('status', 'Tema modu izinleri kaydedildi.');
     }

@@ -146,6 +146,12 @@ input[type="range"] { width:100%; accent-color:#1e40af; }
                         style="width:18px;height:18px;cursor:pointer;">
                     <span>✨ <strong>Minimalist Mod</strong> aktif olsun</span>
                 </label>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;" title="EN/DE çevirileri tamamlanana kadar kapalı tutulması önerilir">
+                    <input type="checkbox" name="lang_switcher_allowed" value="1"
+                        @checked(($modes['lang_switcher_allowed'] ?? false))
+                        style="width:18px;height:18px;cursor:pointer;">
+                    <span>🌐 <strong>Dil Seçici</strong> (TR/EN/DE) gözüksün</span>
+                </label>
                 <button type="submit" class="btn ok" style="margin-left:auto;">💾 İzinleri Kaydet</button>
             </div>
         </div>
