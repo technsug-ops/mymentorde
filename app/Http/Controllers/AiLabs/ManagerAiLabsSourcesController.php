@@ -43,6 +43,7 @@ class ManagerAiLabsSourcesController extends Controller
             'title'              => 'required|string|max:200',
             'type'               => 'required|in:file,url,text',
             'category'           => 'nullable|string|max:80',
+            'source_tier'        => 'required|in:institutional,web',
             'visible_to_roles'   => 'required|array|min:1',
             'visible_to_roles.*' => 'in:guest,student,senior,manager,admin_staff',
             'url'                => 'nullable|url|max:500|required_if:type,url',
@@ -108,6 +109,7 @@ class ManagerAiLabsSourcesController extends Controller
             'title'              => $data['title'],
             'type'               => $storedType,
             'category'           => $data['category'] ?: null,
+            'source_tier'        => $data['source_tier'],
             'target_audience'    => $targetAudience,
             'visible_to_roles'   => $roles,
             'url'                => $data['type'] === 'url' ? $data['url'] : null,
@@ -143,6 +145,7 @@ class ManagerAiLabsSourcesController extends Controller
         $data = $request->validate([
             'title'              => 'required|string|max:200',
             'category'           => 'nullable|string|max:80',
+            'source_tier'        => 'required|in:institutional,web',
             'visible_to_roles'   => 'required|array|min:1',
             'visible_to_roles.*' => 'in:guest,student,senior,manager,admin_staff',
         ]);
@@ -160,6 +163,7 @@ class ManagerAiLabsSourcesController extends Controller
         $row->update([
             'title'            => $data['title'],
             'category'         => $data['category'] ?: null,
+            'source_tier'      => $data['source_tier'],
             'target_audience'  => $targetAudience,
             'visible_to_roles' => $roles,
         ]);
@@ -266,6 +270,7 @@ class ManagerAiLabsSourcesController extends Controller
         $data = $request->validate([
             'urls_text'          => 'required|string|max:10000',
             'category'           => 'nullable|string|max:80',
+            'source_tier'        => 'required|in:institutional,web',
             'visible_to_roles'   => 'required|array|min:1',
             'visible_to_roles.*' => 'in:guest,student,senior,manager,admin_staff',
         ]);
@@ -324,6 +329,7 @@ class ManagerAiLabsSourcesController extends Controller
                 'title'              => $autoTitle,
                 'type'               => 'url',
                 'category'           => $category,
+                'source_tier'        => $data['source_tier'],
                 'target_audience'    => $targetAudience,
                 'visible_to_roles'   => $roles,
                 'url'                => $url,
@@ -363,6 +369,7 @@ class ManagerAiLabsSourcesController extends Controller
             'doc_files'           => 'required|array|min:1|max:20',
             'doc_files.*'         => 'file|mimes:pdf,docx,xlsx,xls,txt,md,jpg,jpeg,png,gif,webp|max:15360', // 15 MB her dosya
             'category'            => 'nullable|string|max:80',
+            'source_tier'         => 'required|in:institutional,web',
             'visible_to_roles'    => 'required|array|min:1',
             'visible_to_roles.*'  => 'in:guest,student,senior,manager,admin_staff',
         ]);
@@ -425,6 +432,7 @@ class ManagerAiLabsSourcesController extends Controller
                     'title'              => $title,
                     'type'               => $storedType,
                     'category'           => $category,
+                    'source_tier'        => $data['source_tier'],
                     'target_audience'    => $targetAudience,
                     'visible_to_roles'   => $roles,
                     'file_path'          => $filePath,

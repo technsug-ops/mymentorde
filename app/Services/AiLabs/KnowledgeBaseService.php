@@ -202,19 +202,25 @@ class KnowledgeBaseService
      */
     public function prepareContext(int $companyId, string $role): array
     {
+        // Önce kurumsal (institutional) sonra web — orderByRaw ile tier önceliği,
+        // ardından id ile deterministik. AI prompt'ta da bu sırayla yer alır,
+        // citation'da kurumsal kaynaklar baskın olur.
         $sources = KnowledgeSource::withoutGlobalScopes()
             ->where('company_id', $companyId)
             ->where('is_active', true)
             ->whereJsonContains('visible_to_roles', $role)
+            ->orderByRaw("CASE WHEN source_tier = 'institutional' THEN 0 ELSE 1 END")
             ->orderBy('id')
             ->get();
 
         $fileRefs = [];
-        $textBlocks = [];
+        $institutionalBlocks = [];
+        $webBlocks           = [];
         $sourceIds = [];
 
         foreach ($sources as $s) {
             $sourceIds[] = $s->id;
+            $isWeb = ($s->source_tier ?? 'institutional') === 'web';
 
             if (in_array($s->type, ['pdf', 'image'], true) && $s->gemini_file_uri) {
                 $ext = strtolower(pathinfo($s->file_path ?? '', PATHINFO_EXTENSION));
@@ -230,17 +236,35 @@ class KnowledgeBaseService
                     'file_uri'  => $s->gemini_file_uri,
                     'mime_type' => $mimeType,
                 ];
-            } elseif (in_array($s->type, ['text', 'document'], true) && $s->content_markdown) {
-                $textBlocks[] = "### Kaynak #{$s->id} — {$s->title}\n" . $s->content_markdown;
+                continue;
+            }
+
+            $block = null;
+            if (in_array($s->type, ['text', 'document'], true) && $s->content_markdown) {
+                $block = "### Kaynak #{$s->id} — {$s->title}\n" . $s->content_markdown;
             } elseif ($s->type === 'url' && $s->url) {
-                $textBlocks[] = "### Kaynak #{$s->id} — {$s->title}\nReferans: {$s->url}"
+                $block = "### Kaynak #{$s->id} — {$s->title}\nReferans: {$s->url}"
                     . ($s->content_markdown ? "\n" . $s->content_markdown : '');
+            }
+
+            if ($block !== null) {
+                if ($isWeb) {
+                    $webBlocks[] = $block;
+                } else {
+                    $institutionalBlocks[] = $block;
+                }
             }
         }
 
         $systemContext = '';
-        if (!empty($textBlocks)) {
-            $systemContext = "## Bilgi Havuzu (metin kaynakları)\n\n" . implode("\n\n---\n\n", $textBlocks);
+        if (!empty($institutionalBlocks)) {
+            $systemContext .= "## Kurumsal Kaynaklar (öncelikli — uni-assist, DAAD, resmi kurumlar)\n\n"
+                . implode("\n\n---\n\n", $institutionalBlocks);
+        }
+        if (!empty($webBlocks)) {
+            if ($systemContext !== '') $systemContext .= "\n\n";
+            $systemContext .= "## Web Tabanlı Kaynaklar (kurumsal yetersiz kaldıysa kullan — citation'da 'MentorDE Kütüphanesi' olarak grup la, dış marka adı SIZDIRMA)\n\n"
+                . implode("\n\n---\n\n", $webBlocks);
         }
 
         return [

@@ -152,6 +152,20 @@
             </div>
 
             <div class="als-field" style="margin-bottom:14px;">
+                <label>Kaynak Türü * <span style="font-weight:normal;font-size:11px;color:#64748b;">(AI yanıtında kurumsal kaynaklar isimle, web kaynaklar "MentorDE Kütüphanesi" olarak gösterilir)</span></label>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <label style="display:flex;align-items:center;gap:8px;padding:10px 14px;border:1.5px solid #d4d4d8;border-radius:8px;cursor:pointer;flex:1;min-width:240px;">
+                        <input type="radio" name="source_tier" value="institutional" checked required>
+                        <span>🏛️ <strong>Kurumsal</strong> (uni-assist, DAAD, resmi kurumlar)</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:8px;padding:10px 14px;border:1.5px solid #d4d4d8;border-radius:8px;cursor:pointer;flex:1;min-width:240px;">
+                        <input type="radio" name="source_tier" value="web" required>
+                        <span>🌐 <strong>Web Tabanlı</strong> (blog, danışmanlık firma, influencer)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="als-field" style="margin-bottom:14px;">
                 <label>Görünürlük — Hangi rollere açık olacak? *</label>
                 <div class="als-role-presets">
                     <button type="button" class="als-role-preset" data-preset="external">👥 Dış roller (Aday + Öğrenci)</button>
@@ -219,6 +233,20 @@
                 </div>
 
                 <div class="als-field" style="margin-bottom:14px;">
+                    <label>Kaynak Türü * <span style="font-weight:normal;font-size:11px;color:#64748b;">(hepsine uygulanır)</span></label>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid #d4d4d8;border-radius:8px;cursor:pointer;flex:1;min-width:200px;font-size:13px;">
+                            <input type="radio" name="source_tier" value="institutional" checked required>
+                            <span>🏛️ Kurumsal</span>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid #d4d4d8;border-radius:8px;cursor:pointer;flex:1;min-width:200px;font-size:13px;">
+                            <input type="radio" name="source_tier" value="web" required>
+                            <span>🌐 Web Tabanlı</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="als-field" style="margin-bottom:14px;">
                     <label>Görünürlük — Hangi rollere açık olacak? *</label>
                     <div class="als-role-presets">
                         <button type="button" class="als-role-preset" data-bulk-files-preset="external">👥 Dış roller</button>
@@ -266,6 +294,20 @@
                     <div class="als-field">
                         <label>Kategori (hepsine uygulanır)</label>
                         <input type="text" name="category" maxlength="80" placeholder="örn: eğitim, konaklama, vize">
+                    </div>
+                </div>
+
+                <div class="als-field" style="margin-bottom:14px;">
+                    <label>Kaynak Türü * <span style="font-weight:normal;font-size:11px;color:#64748b;">(genelde URL'ler "Web Tabanlı" olur)</span></label>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid #d4d4d8;border-radius:8px;cursor:pointer;flex:1;min-width:200px;font-size:13px;">
+                            <input type="radio" name="source_tier" value="institutional" required>
+                            <span>🏛️ Kurumsal</span>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid #d4d4d8;border-radius:8px;cursor:pointer;flex:1;min-width:200px;font-size:13px;">
+                            <input type="radio" name="source_tier" value="web" checked required>
+                            <span>🌐 Web Tabanlı</span>
+                        </label>
                     </div>
                 </div>
 
@@ -369,6 +411,7 @@
                     <tr data-source-id="{{ $s->id }}"
                         data-title="{{ e($s->title) }}"
                         data-category="{{ e($s->category ?? '') }}"
+                        data-tier="{{ $s->source_tier ?? 'institutional' }}"
                         data-roles="{{ implode(',', $s->visible_to_roles ?? []) }}">
                         <td>
                             <input type="checkbox" class="row-check" value="{{ $s->id }}">
@@ -487,6 +530,19 @@
             <div class="als-field">
                 <label>Kategori</label>
                 <input type="text" name="category" id="edit-category" maxlength="80">
+            </div>
+            <div class="als-field">
+                <label>Kaynak Türü *</label>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid #d4d4d8;border-radius:8px;cursor:pointer;flex:1;min-width:180px;font-size:13px;">
+                        <input type="radio" name="source_tier" id="edit-tier-institutional" value="institutional" required>
+                        <span>🏛️ Kurumsal</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid #d4d4d8;border-radius:8px;cursor:pointer;flex:1;min-width:180px;font-size:13px;">
+                        <input type="radio" name="source_tier" id="edit-tier-web" value="web" required>
+                        <span>🌐 Web Tabanlı</span>
+                    </label>
+                </div>
             </div>
             <div class="als-field">
                 <label>Görünürlük — Hangi roller bu kaynağı görsün?</label>
@@ -669,11 +725,17 @@
         const id = row.dataset.sourceId;
         const title = row.dataset.title || '';
         const cat = row.dataset.category || '';
+        const tier = row.dataset.tier || 'institutional';
         const roles = (row.dataset.roles || '').split(',').filter(Boolean);
 
         editForm.action = '/manager/ai-labs/sources/' + id;
         editTitle.value = title;
         editCategory.value = cat;
+        // Tier radio set
+        var tierInst = document.getElementById('edit-tier-institutional');
+        var tierWeb  = document.getElementById('edit-tier-web');
+        if (tierInst) tierInst.checked = (tier !== 'web');
+        if (tierWeb)  tierWeb.checked  = (tier === 'web');
         editGrid.querySelectorAll('input[type=checkbox]').forEach(cb => {
             cb.checked = roles.includes(cb.value);
         });

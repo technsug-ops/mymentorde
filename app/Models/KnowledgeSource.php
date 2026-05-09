@@ -17,6 +17,7 @@ class KnowledgeSource extends Model
         'title',
         'type',
         'category',
+        'source_tier',
         'file_path',
         'url',
         'content_markdown',
@@ -42,6 +43,16 @@ class KnowledgeSource extends Model
 
     public const TYPES = ['pdf', 'url', 'text'];
     public const AUDIENCES = ['student', 'guest', 'both'];
+
+    /** 2-tier kategori — AI yanıtında kurumsal isimle, web "MentorDE Kütüphanesi" olarak gösterilir. */
+    public const TIER_INSTITUTIONAL = 'institutional';
+    public const TIER_WEB           = 'web';
+    public const TIERS              = [self::TIER_INSTITUTIONAL, self::TIER_WEB];
+
+    public const TIER_LABELS = [
+        self::TIER_INSTITUTIONAL => '🏛️ Kurumsal (uni-assist, DAAD, resmi kurumlar)',
+        self::TIER_WEB           => '🌐 Web Tabanlı (blog, danışmanlık firmaları, influencer)',
+    ];
 
     /** AI Labs bilgi havuzunu görebilen roller. */
     public const ROLES = ['guest', 'student', 'senior', 'manager', 'admin_staff'];

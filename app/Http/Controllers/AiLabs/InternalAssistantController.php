@@ -126,16 +126,53 @@ class InternalAssistantController extends Controller
                 $meta['mode'] = 'external';
             }
 
-            // Sources metadata
+            // Sources metadata — tier'a göre citation rendering:
+            // - institutional: gerçek başlık + URL göster (guest/student dahil)
+            // - web: guest/student'ta "MentorDE Kütüphanesi" olarak gruppla, dış marka SIZDIRMA;
+            //         staff (manager/senior/admin_staff) gerçek başlığı görür (debug)
             $sourcesMeta = [];
+            $endUserRole = in_array($role, ['guest', 'student'], true);
             if (!empty($meta['source_ids'])) {
-                $sourcesMeta = \App\Models\KnowledgeSource::query()
+                $rawSources = \App\Models\KnowledgeSource::query()
                     ->withoutGlobalScopes()
                     ->where('company_id', $companyId)
                     ->whereIn('id', $meta['source_ids'])
-                    ->get(['id', 'title', 'type', 'url'])
-                    ->map(fn ($s) => ['id' => (int)$s->id, 'title' => (string)$s->title, 'type' => (string)$s->type, 'url' => $s->url])
-                    ->all();
+                    ->get(['id', 'title', 'type', 'url', 'source_tier']);
+
+                if ($endUserRole) {
+                    $institutional = $rawSources->where('source_tier', '!=', 'web');
+                    $webCount      = $rawSources->where('source_tier', 'web')->count();
+
+                    foreach ($institutional as $s) {
+                        $sourcesMeta[] = [
+                            'id'    => (int) $s->id,
+                            'title' => (string) $s->title,
+                            'type'  => (string) $s->type,
+                            'url'   => $s->url,
+                            'tier'  => 'institutional',
+                        ];
+                    }
+                    if ($webCount > 0) {
+                        $sourcesMeta[] = [
+                            'id'    => 0,
+                            'title' => 'MentorDE Kütüphanesi',
+                            'type'  => 'curated',
+                            'url'   => null,
+                            'tier'  => 'web',
+                            'count' => $webCount,
+                        ];
+                    }
+                } else {
+                    foreach ($rawSources as $s) {
+                        $sourcesMeta[] = [
+                            'id'    => (int) $s->id,
+                            'title' => (string) $s->title,
+                            'type'  => (string) $s->type,
+                            'url'   => $s->url,
+                            'tier'  => (string) ($s->source_tier ?? 'institutional'),
+                        ];
+                    }
+                }
 
                 \App\Models\KnowledgeSource::query()
                     ->withoutGlobalScopes()
