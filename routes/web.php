@@ -706,6 +706,34 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // Prod DB'deki Gemini API key'in son 6 karakterini ve uzunlugunu raporla.
+        // Yapıştırma sirasinda gizli karakter (NBSP, ZWNJ) eklenmiş veya kayit
+        // kismi yazilmis olabilir; direkt karşilaştirma icin.
+        // Kullanim: /_deploy/run-pending?cleanup=show-gemini-key
+        if ($request->query('cleanup') === 'show-gemini-key') {
+            $row = DB::table('marketing_admin_settings')
+                ->where('setting_key', 'ai_labs_gemini_key')
+                ->orderBy('updated_at', 'desc')
+                ->first();
+            if (!$row) {
+                $output .= ">>> show-gemini-key: marketing_admin_settings'te ai_labs_gemini_key satiri yok\n";
+            } else {
+                $val = (string) $row->setting_value;
+                $len = strlen($val);
+                $tail = $len > 0 ? substr($val, max(0, $len - 6)) : '';
+                $head = $len > 0 ? substr($val, 0, 6) : '';
+                $hasInvisible = preg_match('/[\x00-\x1F\x7F\xA0]|[\xE2\x80\x80-\xE2\x80\x8F]/u', $val) ? 'EVET' : 'hayir';
+                $output .= ">>> show-gemini-key:\n";
+                $output .= "    company_id: " . ($row->company_id ?? 'NULL') . "\n";
+                $output .= "    length: {$len} (beklenen: 39)\n";
+                $output .= "    head: '{$head}...' (beklenen: 'AIzaSy')\n";
+                $output .= "    tail: '...{$tail}' (yapistirilan key sonu ile karsilastir)\n";
+                $output .= "    invisible_char: {$hasInvisible}\n";
+                $output .= "    updated_at: " . ($row->updated_at ?? 'NULL') . "\n";
+                $output .= "    updated_by: " . ($row->updated_by_user_id ?? 'NULL') . "\n";
+            }
+        }
+
         // Gemini File API uri'lerini sifirla → bir sonraki "Kaynakları Senkronize Et"
         // butonu re-upload tetikler. Yeni Gemini API key'i farkli projede ise eski
         // file_uri'ler 403 (PERMISSION_DENIED) doner cunku File API proje-bazli.
