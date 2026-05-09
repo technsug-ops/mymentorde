@@ -347,7 +347,8 @@ body {
 
 /* ─── Dark Toggle ─── */
 .dark-toggle {
-  position: fixed; bottom: 16px; right: 16px;
+  /* bottom 16px → 84px: gchat-fab ile cakisma onlenir */
+  position: fixed; bottom: 84px; right: 16px;
   width: 36px; height: 36px; border-radius: 50%;
   background: var(--surface); border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
@@ -479,6 +480,36 @@ body {
 .jm-minimalist[data-theme="dark"] .ug-hero,
 .jm-minimalist[data-theme="dark"] .ug-hero * {
   color: #fff !important;
+}
+
+/* Settings (gst-hero), AI Labs (als-hero), Tickets (gt-hero) hero kartlari —
+   manager'in tema rengi soluk olabilir → dark+minimalist'te SABIT koyu gradient
+   zorla, metin daima okunsun */
+.jm-minimalist[data-theme="dark"] .gst-hero,
+.jm-minimalist[data-theme="dark"] .als-hero,
+.jm-minimalist[data-theme="dark"] .gt-hero,
+.jm-minimalist[data-theme="dark"] .gdb-hero,
+.jm-minimalist[data-theme="dark"] [class$="-hero"] {
+  background: linear-gradient(135deg, #1e293b 0%, #312e81 100%) !important;
+  color: #fff !important;
+}
+.jm-minimalist[data-theme="dark"] .gst-hero *,
+.jm-minimalist[data-theme="dark"] .als-hero *,
+.jm-minimalist[data-theme="dark"] .gt-hero *,
+.jm-minimalist[data-theme="dark"] .gdb-hero *,
+.jm-minimalist[data-theme="dark"] [class$="-hero"] * {
+  color: #fff !important;
+}
+
+/* Settings sayfasındaki section başlıkları */
+.jm-minimalist[data-theme="dark"] .gst-section-title,
+.jm-minimalist[data-theme="dark"] .gst-privacy-label,
+.jm-minimalist[data-theme="dark"] .gst-section label {
+  color: var(--text) !important;
+}
+.jm-minimalist[data-theme="dark"] .gst-section-sub,
+.jm-minimalist[data-theme="dark"] .gst-privacy-sub {
+  color: var(--muted) !important;
 }
 
 /* Form input/select/textarea — default browser color dark zeminde siyah

@@ -333,6 +333,14 @@
                 <span class="gt-list-title">📂 Mevcut Destek Taleplerim</span>
                 <span class="gt-list-sub">Açtığın talepleri buradan takip edebilir, yanıt ekleyebilirsin</span>
             </div>
+
+            {{-- Filter tabs — kapatılan ticket'ları default gizle --}}
+            <div class="gt-filter-tabs" style="display:flex;gap:8px;margin-bottom:14px;border-bottom:1px solid var(--u-line);padding-bottom:10px;">
+                <button type="button" class="gt-filter-btn active" data-filter="open" style="padding:6px 14px;border:1px solid var(--u-brand,#2563eb);background:var(--u-brand,#2563eb);color:#fff;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;">📂 Açık ({{ $open }})</button>
+                <button type="button" class="gt-filter-btn" data-filter="closed" style="padding:6px 14px;border:1px solid var(--u-line);background:transparent;color:var(--u-text);border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;">📁 Kapalı ({{ $closed }})</button>
+                <button type="button" class="gt-filter-btn" data-filter="all" style="padding:6px 14px;border:1px solid var(--u-line);background:transparent;color:var(--u-text);border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;">📋 Hepsi ({{ $tickets->count() }})</button>
+            </div>
+
             <div class="gt-list">
             @foreach($tickets as $ticket)
                 @php
@@ -372,6 +380,7 @@
                     };
                 @endphp
                 <div class="gt-card {{ $cardClass }}" id="ticket-{{ $ticket->id }}"
+                     data-ticket-status="{{ $isOpen ? 'open' : 'closed' }}"
                      @if($dueAt && $isOpen) data-sla-due="{{ $dueAt->toIso8601String() }}" @endif>
 
                     {{-- Clickable header --}}
@@ -562,5 +571,37 @@ document.querySelectorAll('[data-confirm-form]').forEach(function(f){
         if (!confirm(msg)) { e.preventDefault(); return false; }
     });
 });
+
+// Ticket filter tabs — Açık (default) / Kapalı / Hepsi
+(function(){
+    var btns = document.querySelectorAll('.gt-filter-btn');
+    var cards = document.querySelectorAll('[data-ticket-status]');
+    function applyFilter(filter){
+        cards.forEach(function(c){
+            var status = c.dataset.ticketStatus;
+            var visible = filter === 'all' || status === filter;
+            c.style.display = visible ? '' : 'none';
+        });
+        btns.forEach(function(b){
+            var active = b.dataset.filter === filter;
+            b.classList.toggle('active', active);
+            // Inline style toggle
+            if (active) {
+                b.style.background = 'var(--u-brand, #2563eb)';
+                b.style.color = '#fff';
+                b.style.borderColor = 'var(--u-brand, #2563eb)';
+            } else {
+                b.style.background = 'transparent';
+                b.style.color = 'var(--u-text)';
+                b.style.borderColor = 'var(--u-line)';
+            }
+        });
+    }
+    btns.forEach(function(b){
+        b.addEventListener('click', function(){ applyFilter(b.dataset.filter); });
+    });
+    // Default: sadece açık ticket'lar
+    applyFilter('open');
+})();
 </script>
 @endsection
