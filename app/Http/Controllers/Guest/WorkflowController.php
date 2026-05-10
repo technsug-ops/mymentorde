@@ -440,17 +440,18 @@ class WorkflowController extends Controller
             'current_password' => ['required', 'string'],
             'new_password' => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()->max(128)],
         ], [
-            'current_password.required' => 'Mevcut şifrenizi girin.',
-            'new_password.required'     => 'Yeni şifre zorunludur.',
-            'new_password.confirmed'    => 'Yeni şifre tekrarı eşleşmiyor.',
-            'new_password.min'          => 'Şifre en az 8 karakter olmalı.',
-            'new_password.max'          => 'Şifre en fazla 128 karakter olabilir.',
-            'new_password.letters'      => 'Şifre en az bir harf içermeli.',
-            'new_password.mixed_case'   => 'Şifre hem büyük hem küçük harf içermeli.',
-            'new_password.mixed'        => 'Şifre hem büyük hem küçük harf içermeli.',
-            'new_password.numbers'      => 'Şifre en az bir rakam içermeli.',
-            'new_password.symbols'      => 'Şifre en az bir özel karakter içermeli (!@#$%& vb.).',
-            'new_password.uncompromised'=> 'Bu şifre veri sızıntılarında geçmiş, lütfen farklı bir şifre seçin.',
+            // Laravel Password rule sub-key formati: <field>.password.<rule>
+            // (NOT <field>.<rule> — bu generic rule'lar icin)
+            'current_password.required'         => 'Mevcut şifrenizi girin.',
+            'new_password.required'             => 'Yeni şifre zorunludur.',
+            'new_password.confirmed'            => 'Yeni şifre tekrarı eşleşmiyor.',
+            'new_password.password.min'         => 'Şifre en az 8 karakter olmalı.',
+            'new_password.password.max'         => 'Şifre en fazla 128 karakter olabilir.',
+            'new_password.password.letters'     => 'Şifre en az bir harf içermeli.',
+            'new_password.password.mixed'       => 'Şifre hem büyük hem küçük harf içermeli.',
+            'new_password.password.numbers'     => 'Şifre en az bir rakam içermeli.',
+            'new_password.password.symbols'     => 'Şifre en az bir özel karakter içermeli (!@#$%& vb.).',
+            'new_password.password.uncompromised'=> 'Bu şifre veri sızıntılarında geçmiş, lütfen farklı bir şifre seçin.',
         ]);
 
         if (!Hash::check((string) $data['current_password'], (string) $user->password)) {
