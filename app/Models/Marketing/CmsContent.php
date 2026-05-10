@@ -66,6 +66,18 @@ class CmsContent extends Model
         return $q->where('is_featured', true)->orderBy('featured_order');
     }
 
+    /**
+     * "Yeni içerik" eşiği — son 14 gün içinde yayınlananlar listede öne çıkar +
+     * card'da "🆕 Yeni" rozeti gösterilir. Tek yerde değiştir, her yer otomatik uyar.
+     */
+    public const NEW_WINDOW_DAYS = 14;
+
+    public function getIsNewAttribute(): bool
+    {
+        if (!$this->published_at) return false;
+        return $this->published_at->gte(now()->subDays(self::NEW_WINDOW_DAYS));
+    }
+
     public function scopeForAudience(Builder $q, string $audience): Builder
     {
         return $q->whereIn('target_audience', ['all', $audience]);

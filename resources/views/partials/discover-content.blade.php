@@ -117,8 +117,10 @@
     padding:3px 8px; border-radius:12px; z-index:3;
     box-shadow:0 2px 6px rgba(0,0,0,.12);
 }
-.dc-feat-img { height:180px; position:relative; overflow:hidden; }
-.dc-feat-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
+.dc-feat-img { aspect-ratio:1/1; height:auto; width:100%; position:relative; overflow:hidden; }
+.dc-feat-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s; display:block; position:relative; z-index:1; }
+.dc-feat-img:has(img) .dc-feat-img-placeholder,
+.dc-feat-img:has(img) .dc-icon-bubble { display:none !important; }
 .dc-feat-card:hover .dc-feat-img img { transform:scale(1.04); }
 .dc-feat-img-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
 .dc-feat-img::after {
@@ -126,25 +128,48 @@
     background:linear-gradient(to bottom, rgba(0,0,0,0) 55%, rgba(0,0,0,.3));
     pointer-events:none;
 }
-.dc-feat-body { padding:14px 16px; flex:1; display:flex; flex-direction:column; gap:7px; }
+.dc-feat-body { padding:14px 16px; min-height:130px; display:flex; flex-direction:column; gap:7px; }
 .dc-feat-badges { display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
 .dc-feat-title { font-size:15px; font-weight:700; color:var(--u-text); line-height:1.35; }
-.dc-feat-summary { font-size:12.5px; color:var(--u-muted); flex:1; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.dc-feat-summary {
+    font-size:14px; color:var(--u-muted); line-height:1.5; overflow:hidden;
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical;
+    text-overflow:ellipsis;
+}
 
 .dc-icon-bubble {
-    width:68px; height:68px; background:rgba(255,255,255,.22);
-    backdrop-filter:blur(8px); border-radius:18px;
+    min-width:68px; padding:14px 18px; background:rgba(255,255,255,.22);
+    backdrop-filter:blur(8px); border-radius:14px;
     border:1.5px solid rgba(255,255,255,.4);
     display:flex; align-items:center; justify-content:center;
-    font-size:2rem; box-shadow:0 4px 20px rgba(0,0,0,.18);
+    font-size:13px; font-weight:700; color:#fff; letter-spacing:.5px;
+    line-height:1.2; box-shadow:0 4px 20px rgba(0,0,0,.18);
+    text-transform:uppercase;
 }
 .dc-type-ribbon {
     position:absolute; bottom:10px; right:10px; z-index:2;
     background:rgba(0,0,0,.65); backdrop-filter:blur(6px);
     border-radius:6px; padding:3px 9px;
     font-size:10px; font-weight:700; color:#fff;
-    letter-spacing:.3px;
+    letter-spacing:.3px; line-height:1.4;
     display:inline-flex; align-items:center; gap:4px;
+    font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',system-ui,sans-serif;
+}
+.dc-new-ribbon {
+    position:absolute; top:8px; right:8px; z-index:3;
+    background:linear-gradient(135deg,#ef4444,#f97316);
+    border-radius:6px; padding:3px 8px;
+    font-size:10px; font-weight:800; color:#fff;
+    letter-spacing:.6px; text-transform:uppercase;
+    box-shadow:0 2px 8px rgba(239,68,68,.45);
+    animation:dc-new-pulse 2s ease-in-out infinite;
+    line-height:1;
+    /* Font family explicit — emoji fallback'i engelle (Windows Segoe UI Emoji büyük render eder) */
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+}
+@keyframes dc-new-pulse {
+    0%, 100% { transform:scale(1); box-shadow:0 2px 8px rgba(239,68,68,.45); }
+    50%      { transform:scale(1.08); box-shadow:0 3px 12px rgba(239,68,68,.7); }
 }
 .dc-play-btn {
     position:absolute; top:50%; left:50%;
@@ -176,8 +201,11 @@
     box-shadow:0 10px 24px rgba(0,0,0,.1);
     border-color:color-mix(in srgb, var(--u-brand,#2563eb) 22%, var(--u-line));
 }
-.dc-card-img { height:150px; position:relative; overflow:hidden; }
-.dc-card-img img { width:100%; height:100%; object-fit:cover; transition:transform .35s; }
+.dc-card-img { aspect-ratio:1/1; height:auto; width:100%; position:relative; overflow:hidden; }
+.dc-card-img img { width:100%; height:100%; object-fit:cover; transition:transform .35s; display:block; position:relative; z-index:1; }
+/* Defansive: img varsa içerideki ph/bubble overlay'leri kesin gizle (cache veya extension nedeniyle yanlış render'a karşı) */
+.dc-card-img:has(img) .dc-card-img-ph,
+.dc-card-img:has(img) .dc-icon-bubble { display:none !important; }
 .dc-card:hover .dc-card-img img { transform:scale(1.04); }
 .dc-card-img-ph { width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
 .dc-card-img::after {
@@ -186,16 +214,18 @@
     pointer-events:none;
 }
 .dc-card .dc-play-btn { width:42px; height:42px; font-size:14px; }
-.dc-card-body { padding:12px 14px; flex:1; display:flex; flex-direction:column; gap:6px; }
+.dc-card-body { padding:12px 14px; min-height:120px; display:flex; flex-direction:column; gap:6px; }
 .dc-card-badges { display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
 .dc-card-title {
     font-size:13.5px; font-weight:700; color:var(--u-text); line-height:1.35;
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
 .dc-card-summary {
-    font-size:12px; color:var(--u-muted); flex:1; line-height:1.5; overflow:hidden;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    font-size:13.5px; color:var(--u-muted); line-height:1.5; overflow:hidden;
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical;
+    text-overflow:ellipsis;
 }
+.dc-card-meta { margin-top:auto; padding-top:4px; }
 .dc-card-meta {
     font-size:11px; color:var(--u-muted);
     display:flex; gap:12px; align-items:center;
@@ -301,6 +331,7 @@ $dcContentRoute = function ($slug) use ($dcIsStudent) {
 $typeLabels = [
     'blog' => 'Blog', 'video_feature' => 'Video', 'podcast' => 'Podcast',
     'presentation' => 'Sunum', 'experience' => 'Deneyim', 'career_guide' => 'Rehber', 'tip' => 'İpucu',
+    'guide' => 'Rehber', 'faq' => 'SSS', 'event' => 'Etkinlik',
 ];
 $catLabels = [
     'student-life'    => '🎓 Öğrenci Hayatı',
@@ -418,17 +449,24 @@ $totalCount = $items->total();
                 <div class="dc-play-btn">▶</div>
             @else
                 <div class="dc-feat-img-placeholder">
-                    <div class="dc-icon-bubble">{{ $typeIcons[$f->type] ?? '📄' }}</div>
+                    <div class="dc-icon-bubble">{{ $typeLabels[$f->type] ?? $f->type }}</div>
                 </div>
             @endif
-            <div class="dc-type-ribbon">{{ $typeIcons[$f->type] ?? '📄' }} {{ $typeLabels[$f->type] ?? $f->type }}</div>
+            <div class="dc-type-ribbon">{{ $typeLabels[$f->type] ?? $f->type }}</div>
+            @if($f->is_new)<div class="dc-new-ribbon">Yeni</div>@endif
         </div>
         <div class="dc-feat-body">
             <div class="dc-feat-badges">
                 @if($f->category)<span class="badge cat-{{ $f->category }}" style="font-size:10.5px;">{{ $catLabels[$f->category] ?? $f->category }}</span>@endif
             </div>
             <div class="dc-feat-title">{{ $f->title_tr }}</div>
-            <div class="dc-feat-summary">{{ Str::limit($f->summary_tr, 110) }}</div>
+            @php
+                $featText = trim((string) ($f->summary_tr ?? ''));
+                if ($featText === '' && !empty($f->content_tr)) {
+                    $featText = trim(preg_replace('/\s+/', ' ', strip_tags($f->content_tr)));
+                }
+            @endphp
+            <div class="dc-feat-summary">{{ $featText }}</div>
         </div>
     </a>
     @endforeach
@@ -476,17 +514,24 @@ $totalCount = $items->total();
                         <div class="dc-play-btn">▶</div>
                     @else
                         <div class="dc-card-img-ph">
-                            <div class="dc-icon-bubble">{{ $typeIcons[$item->type] ?? '📄' }}</div>
+                            <div class="dc-icon-bubble">{{ $typeLabels[$item->type] ?? $item->type }}</div>
                         </div>
                     @endif
-                    <div class="dc-type-ribbon">{{ $typeIcons[$item->type] ?? '📄' }} {{ $typeLabels[$item->type] ?? $item->type }}</div>
+                    <div class="dc-type-ribbon">{{ $typeLabels[$item->type] ?? $item->type }}</div>
+                    @if($item->is_new)<div class="dc-new-ribbon">Yeni</div>@endif
                 </div>
                 <div class="dc-card-body">
                     <div class="dc-card-badges">
                         @if($item->category)<span class="badge cat-{{ $item->category }}" style="font-size:10px;">{{ $catLabels[$item->category] ?? $item->category }}</span>@endif
                     </div>
                     <div class="dc-card-title">{{ $item->title_tr }}</div>
-                    <div class="dc-card-summary">{{ $item->summary_tr }}</div>
+                    @php
+                        $cardText = trim((string) ($item->summary_tr ?? ''));
+                        if ($cardText === '' && !empty($item->content_tr)) {
+                            $cardText = trim(preg_replace('/\s+/', ' ', strip_tags($item->content_tr)));
+                        }
+                    @endphp
+                    <div class="dc-card-summary">{{ $cardText }}</div>
                     <div class="dc-card-meta">
                         @if($item->metric_total_views)<span>👁 {{ number_format($item->metric_total_views) }}</span>@endif
                         @php $rtMins = $item->metric_avg_read_time_seconds ? intdiv($item->metric_avg_read_time_seconds, 60) : 0; @endphp

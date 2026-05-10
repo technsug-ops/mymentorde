@@ -180,6 +180,9 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
                     <input name="summary_tr" placeholder="Kısa özet" value="{{ old('summary_tr', $editing->summary_tr ?? '') }}">
                     <input id="cms-cover-url-input" name="cover_image_url" placeholder="Görsel URL (https://... veya aşağıdan yükle)" value="{{ old('cover_image_url', $editing->cover_image_url ?? '') }}">
                 </div>
+                <div class="fm-row">
+                    <input id="cms-cover-alt-input" name="cover_image_alt" placeholder="Görsel açıklaması / atıf (alt text)" value="{{ old('cover_image_alt', $editing->cover_image_alt ?? '') }}">
+                </div>
                 {{-- Görsel yükleme + önizleme — gerçek müşteri foto'ları için --}}
                 <div class="fm-row-1" style="margin-top:6px;">
                     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px;border:1px dashed var(--u-line,#cbd5e1);border-radius:8px;background:var(--u-bg,#f8fafc);">
@@ -188,11 +191,21 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
                         <div style="flex:1;min-width:200px;">
                             <label style="display:inline-block;padding:8px 14px;background:var(--u-brand,#2563eb);color:#fff;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;">
                                 📤 Görsel Yükle
-                                <input type="file" id="cms-cover-file" accept="image/jpeg,image/png,image/webp" style="display:none;" data-upload-url="{{ url('/marketing-admin/content/upload-cover') }}">
+                                <input type="file" id="cms-cover-file" accept="image/jpeg,image/png,image/webp" style="display:none;" data-upload-url="{{ url('/mktg-admin/content/upload-cover') }}">
                             </label>
                             <span id="cms-cover-status" style="margin-left:10px;font-size:11px;color:var(--u-muted,#64748b);"></span>
                             <div style="font-size:11px;color:var(--u-muted,#64748b);margin-top:4px;">JPG / PNG / WebP, max 5 MB. Yüklenen görsel otomatik URL'e yazılır.</div>
                         </div>
+                    </div>
+                </div>
+                {{-- Wikipedia'dan üniversite görseli çek — üniversite blog yazıları için kapak resmi --}}
+                <div class="fm-row-1" style="margin-top:6px;">
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px;border:1px dashed var(--u-line,#cbd5e1);border-radius:8px;background:var(--u-bg,#f8fafc);">
+                        <span style="font-size:18px;">🏛️</span>
+                        <input id="cms-wiki-uni-input" type="text" placeholder="Üniversite adı (örn: Technische Universität München)" style="flex:1;min-width:240px;padding:7px 10px;border:1px solid var(--u-line,#cbd5e1);border-radius:6px;font-size:12px;">
+                        <button type="button" id="cms-wiki-fetch-btn" data-fetch-url="{{ url('/mktg-admin/content/fetch-university-image') }}" style="padding:8px 14px;background:#7e58bf;color:#fff;border:0;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;">📷 Wikipedia'dan Çek</button>
+                        <span id="cms-wiki-status" style="font-size:11px;color:var(--u-muted,#64748b);"></span>
+                        <div style="flex-basis:100%;font-size:11px;color:var(--u-muted,#64748b);">DE → TR → EN sırasıyla aranır. Görsel otomatik indirilir + atıf bilgisi alt yazıya yazılır (CC-BY-SA gereği).</div>
                     </div>
                 </div>
                 <div class="fm-row-1">
@@ -430,6 +443,63 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
     // URL input değişirse önizlemeyi güncelle
     urlInput.addEventListener('change', function(){
         preview.style.backgroundImage = 'url("' + (urlInput.value || '') + '")';
+    });
+})();
+
+// Wikipedia'dan üniversite görseli çek — MediaWiki API → indir → cover URL + alt'a yaz
+(function(){
+    var btn       = document.getElementById('cms-wiki-fetch-btn');
+    var input     = document.getElementById('cms-wiki-uni-input');
+    var status    = document.getElementById('cms-wiki-status');
+    var urlInput  = document.getElementById('cms-cover-url-input');
+    var altInput  = document.getElementById('cms-cover-alt-input');
+    var preview   = document.getElementById('cms-cover-preview');
+    if (!btn || !input || !urlInput) return;
+
+    function setStatus(msg, color){
+        status.textContent = msg;
+        status.style.color = color || '#64748b';
+    }
+
+    function run(){
+        var name = (input.value || '').trim();
+        if (!name) {
+            setStatus('⚠️ Üniversite adı gerekli', '#dc2626');
+            return;
+        }
+        setStatus('Wikipedia\'da aranıyor...', '#64748b');
+        btn.disabled = true;
+        var token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        var fd = new FormData();
+        fd.append('university_name', name);
+        fetch(btn.dataset.fetchUrl, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
+            body: fd
+        })
+        .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, data: j }; }); })
+        .then(function(res){
+            btn.disabled = false;
+            if (res.ok && res.data && res.data.ok && res.data.url) {
+                urlInput.value = res.data.url;
+                if (altInput && res.data.attribution && !altInput.value) {
+                    altInput.value = res.data.attribution;
+                }
+                if (preview) preview.style.backgroundImage = 'url("' + res.data.url + '")';
+                setStatus('✓ ' + (res.data.lang || '').toUpperCase() + ' wiki — ' + (res.data.page_title || 'çekildi'), '#16a34a');
+            } else {
+                setStatus('⚠️ ' + ((res.data && res.data.message) || 'Bulunamadı'), '#dc2626');
+            }
+        })
+        .catch(function(){
+            btn.disabled = false;
+            setStatus('⚠️ Bağlantı hatası', '#dc2626');
+        });
+    }
+
+    btn.addEventListener('click', run);
+    input.addEventListener('keydown', function(e){
+        if (e.key === 'Enter') { e.preventDefault(); run(); }
     });
 })();
 </script>

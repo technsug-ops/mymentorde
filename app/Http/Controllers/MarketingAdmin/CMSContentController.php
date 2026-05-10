@@ -92,6 +92,21 @@ class CMSContentController extends Controller
         ]);
     }
 
+    /**
+     * Wikipedia'dan üniversite kapak görseli çek — DE wiki öncelikli, TR/EN fallback.
+     * Atıf zorunluluğu (CC-BY-SA): cover_image_alt input'una yazılan atfı manager
+     * gerekirse manuel düzenleyebilir.
+     */
+    public function fetchUniversityImage(Request $request, \App\Services\Marketing\WikipediaImageFetcher $fetcher): \Illuminate\Http\JsonResponse
+    {
+        $data = $request->validate([
+            'university_name' => ['required', 'string', 'max:200'],
+        ]);
+        $result = $fetcher->fetch(trim((string) $data['university_name']));
+        $status = $result['ok'] ? Response::HTTP_OK : (str_contains($result['message'] ?? '', 'indirilemedi') ? Response::HTTP_BAD_GATEWAY : Response::HTTP_NOT_FOUND);
+        return response()->json($result, $status);
+    }
+
     private function sanitizeBody(string $body): string
     {
         // Script tag'larini ve inline event handler'lari temizle (HTML korunsun)

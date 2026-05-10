@@ -67,6 +67,7 @@ Route::middleware(['company.context', 'auth', 'marketing.access', 'module:market
 
             Route::resource('/content', CMSContentController::class);
             Route::post('/content/upload-cover', [CMSContentController::class, 'uploadCover'])->name('content.upload-cover');
+            Route::post('/content/fetch-university-image', [CMSContentController::class, 'fetchUniversityImage'])->name('content.fetch-university-image');
             Route::put('/content/{id}/publish', [CMSContentController::class, 'publish']);
             Route::put('/content/{id}/unpublish', [CMSContentController::class, 'unpublish']);
             Route::put('/content/{id}/schedule', [CMSContentController::class, 'schedule']);

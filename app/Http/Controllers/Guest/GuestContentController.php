@@ -30,12 +30,14 @@ class GuestContentController extends Controller
         $type     = $request->get('type');
         $search   = trim((string) $request->get('q', ''));
 
+        $newCutoff = now()->subDays(CmsContent::NEW_WINDOW_DAYS);
         $query = CmsContent::query()
             ->where('status', 'published')
             ->where(function ($q) {
                 $q->where('target_audience', 'all')->orWhere('target_audience', 'guests');
             })
             ->orderByDesc('is_featured')
+            ->orderByRaw('CASE WHEN published_at >= ? THEN 1 ELSE 0 END DESC', [$newCutoff])
             ->orderByDesc('featured_order')
             ->orderByDesc('published_at');
 
@@ -66,8 +68,10 @@ class GuestContentController extends Controller
         $category = $request->get('cat');
         $type     = $request->get('type');
 
+        $newCutoff = now()->subDays(CmsContent::NEW_WINDOW_DAYS);
         $query = CmsContent::query()->where('status', 'published')
             ->where(fn ($q) => $q->where('target_audience', 'all')->orWhere('target_audience', 'guests'))
+            ->orderByRaw('CASE WHEN published_at >= ? THEN 1 ELSE 0 END DESC', [$newCutoff])
             ->orderByDesc('published_at');
 
         if ($category) $query->where('category', $category);
