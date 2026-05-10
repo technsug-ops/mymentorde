@@ -66,6 +66,7 @@ Route::middleware(['company.context', 'auth', 'marketing.access', 'module:market
             Route::delete('/campaigns/{id}/channel-plan/{planId}', [CampaignController::class, 'channelPlanDelete']);
 
             Route::resource('/content', CMSContentController::class);
+            Route::post('/content/upload-cover', [CMSContentController::class, 'uploadCover'])->name('content.upload-cover');
             Route::put('/content/{id}/publish', [CMSContentController::class, 'publish']);
             Route::put('/content/{id}/unpublish', [CMSContentController::class, 'unpublish']);
             Route::put('/content/{id}/schedule', [CMSContentController::class, 'schedule']);

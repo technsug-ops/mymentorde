@@ -69,6 +69,29 @@ class CMSContentController extends Controller
         return redirect('/mktg-admin/content');
     }
 
+    /**
+     * Cover image upload — başarı hikayeleri vb. için gerçek müşteri foto'sunu
+     * yükler, public/storage'a kaydedilir, URL JSON olarak döner.
+     * Frontend bu URL'i cover_image_url input'una yazar.
+     */
+    public function uploadCover(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'], // 5 MB
+        ]);
+
+        $file = $request->file('image');
+        $ext = strtolower($file->getClientOriginalExtension());
+        $name = 'cms-cover-' . now()->format('Ymd-His') . '-' . \Illuminate\Support\Str::random(6) . '.' . $ext;
+        $path = $file->storeAs('cms-covers', $name, 'public');
+
+        return response()->json([
+            'ok'  => true,
+            'url' => asset('storage/' . $path),
+            'path' => $path,
+        ]);
+    }
+
     private function sanitizeBody(string $body): string
     {
         // Script tag'larini ve inline event handler'lari temizle (HTML korunsun)

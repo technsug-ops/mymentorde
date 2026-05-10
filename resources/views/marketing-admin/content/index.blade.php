@@ -178,7 +178,22 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
                 </div>
                 <div class="fm-row">
                     <input name="summary_tr" placeholder="Kısa özet" value="{{ old('summary_tr', $editing->summary_tr ?? '') }}">
-                    <input name="cover_image_url" placeholder="Cover image URL" value="{{ old('cover_image_url', $editing->cover_image_url ?? '') }}">
+                    <input id="cms-cover-url-input" name="cover_image_url" placeholder="Görsel URL (https://... veya aşağıdan yükle)" value="{{ old('cover_image_url', $editing->cover_image_url ?? '') }}">
+                </div>
+                {{-- Görsel yükleme + önizleme — gerçek müşteri foto'ları için --}}
+                <div class="fm-row-1" style="margin-top:6px;">
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px;border:1px dashed var(--u-line,#cbd5e1);border-radius:8px;background:var(--u-bg,#f8fafc);">
+                        @php $coverUrl = old('cover_image_url', $editing->cover_image_url ?? ''); @endphp
+                        <div id="cms-cover-preview" style="width:90px;height:60px;border-radius:6px;background:#e2e8f0 url('{{ $coverUrl }}') center/cover;border:1px solid var(--u-line,#cbd5e1);flex-shrink:0;"></div>
+                        <div style="flex:1;min-width:200px;">
+                            <label style="display:inline-block;padding:8px 14px;background:var(--u-brand,#2563eb);color:#fff;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;">
+                                📤 Görsel Yükle
+                                <input type="file" id="cms-cover-file" accept="image/jpeg,image/png,image/webp" style="display:none;" data-upload-url="{{ url('/marketing-admin/content/upload-cover') }}">
+                            </label>
+                            <span id="cms-cover-status" style="margin-left:10px;font-size:11px;color:var(--u-muted,#64748b);"></span>
+                            <div style="font-size:11px;color:var(--u-muted,#64748b);margin-top:4px;">JPG / PNG / WebP, max 5 MB. Yüklenen görsel otomatik URL'e yazılır.</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="fm-row-1">
                     {{-- Gizli textarea (form submit için) --}}
@@ -366,6 +381,56 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
             hiddenEl.value = quill.root.innerHTML;
         });
     }
+})();
+
+// Cover image upload — gerçek müşteri foto'sunu seç, fetch upload, URL'i input'a yaz
+(function(){
+    var fileInput = document.getElementById('cms-cover-file');
+    var urlInput  = document.getElementById('cms-cover-url-input');
+    var preview   = document.getElementById('cms-cover-preview');
+    var status    = document.getElementById('cms-cover-status');
+    if (!fileInput || !urlInput || !preview) return;
+
+    fileInput.addEventListener('change', function(){
+        var f = fileInput.files && fileInput.files[0];
+        if (!f) return;
+        if (f.size > 5 * 1024 * 1024) {
+            status.textContent = '⚠️ Dosya 5 MB\'dan büyük olamaz';
+            status.style.color = '#dc2626';
+            return;
+        }
+        status.textContent = 'Yükleniyor...';
+        status.style.color = '#64748b';
+        var fd = new FormData();
+        fd.append('image', f);
+        var token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        fetch(fileInput.dataset.uploadUrl, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
+            body: fd
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(res){
+            if (res.ok && res.url) {
+                urlInput.value = res.url;
+                preview.style.backgroundImage = 'url("' + res.url + '")';
+                status.textContent = '✓ Yüklendi';
+                status.style.color = '#16a34a';
+            } else {
+                status.textContent = '⚠️ ' + (res.message || 'Yükleme başarısız');
+                status.style.color = '#dc2626';
+            }
+        })
+        .catch(function(){
+            status.textContent = '⚠️ Bağlantı hatası';
+            status.style.color = '#dc2626';
+        });
+    });
+
+    // URL input değişirse önizlemeyi güncelle
+    urlInput.addEventListener('change', function(){
+        preview.style.backgroundImage = 'url("' + (urlInput.value || '') + '")';
+    });
 })();
 </script>
 @endpush
