@@ -575,11 +575,15 @@
 </div>
 @endforeach
 
-<div class="jm-ics-row">
+<div class="jm-ics-row" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
     <a href="{{ route('guest.timeline.export') }}" class="jm-ics-btn">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v4M11 1v4M1 7h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         Takvime Aktar (.ics)
     </a>
+    <div style="font-size:11px;color:var(--u-muted,#64748b);max-width:280px;text-align:right;line-height:1.45;">
+        💡 .ics dosyası — Outlook / Apple Calendar otomatik açar.
+        <br>Google Calendar için: <a href="https://calendar.google.com/calendar/u/0/r/settings/export" target="_blank" rel="noopener" style="color:var(--u-brand,#2563eb);">İçe Aktar →</a> sonra indirilen .ics'i seç.
+    </div>
 </div>
 @endsection
 

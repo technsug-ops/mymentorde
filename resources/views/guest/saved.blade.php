@@ -50,9 +50,15 @@ $typeLabels = ['blog'=>'Blog','video_feature'=>'Video','podcast'=>'Podcast','pre
 
 @if($items->isEmpty())
 <div style="text-align:center;padding:60px 24px;background:var(--u-card,#fff);border:1px solid var(--u-line,#e5e7eb);border-radius:12px;">
-    <div style="font-size:3rem;margin-bottom:12px;">🔖</div>
-    <div style="font-size:1rem;font-weight:600;margin-bottom:8px;">Henüz kaydettiğiniz içerik yok</div>
-    <div style="font-size:.88rem;color:var(--u-muted,#888);margin-bottom:20px;">İçerik okurken 🔖 Kaydet butonuna basın.</div>
+    <div style="font-size:3rem;margin-bottom:12px;">⭐</div>
+    <div style="font-size:1rem;font-weight:600;margin-bottom:8px;">Henüz favorin yok</div>
+    <div style="font-size:.88rem;color:var(--u-muted,#888);margin-bottom:8px;line-height:1.6;">
+        Favoriye eklemek için içeriği aç → sayfanın altındaki <strong>"☆ Favoriye Ekle"</strong> butonuna bas.
+    </div>
+    <div style="font-size:.78rem;color:var(--u-muted,#888);margin-bottom:20px;background:#fef3c7;border:1px solid #fde68a;color:#92400e;padding:10px 14px;border-radius:8px;display:inline-block;">
+        ⚠️ Dikkat: <strong>"Beğen"</strong> (kalp) butonu farklıdır — sadece istatistik. Favorilere düşürmek için <strong>"☆ Favoriye Ekle"</strong> kullan.
+    </div>
+    <br>
     <a href="{{ route('guest.discover') }}" class="btn">🧭 İçeriklere Göz At</a>
 </div>
 @else

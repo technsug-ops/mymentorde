@@ -512,6 +512,24 @@ body {
   color: var(--muted) !important;
 }
 
+/* Üniversite rehberi / şehir kartları — inline gradient style + child elements
+   var(--u-muted) ile gri kalıyordu, dark zeminde görünmüyor */
+.jm-minimalist[data-theme="dark"] .card[style*="gradient"],
+.jm-minimalist[data-theme="dark"] .card[style*="gradient"] *,
+.jm-minimalist[data-theme="dark"] [style*="background:linear-gradient(135deg,#2563eb"],
+.jm-minimalist[data-theme="dark"] [style*="background:linear-gradient(135deg,#2563eb"] * {
+  color: #fff !important;
+}
+/* Card gri muted text override — okunabilir tutar */
+.jm-minimalist[data-theme="dark"] .card,
+.jm-minimalist[data-theme="dark"] .card * {
+  color: var(--text) !important;
+}
+.jm-minimalist[data-theme="dark"] .card [style*="color:var(--u-muted"],
+.jm-minimalist[data-theme="dark"] .card [style*="color: var(--u-muted"] {
+  color: var(--muted) !important;
+}
+
 /* Form input/select/textarea — default browser color dark zeminde siyah
    kalıyor, var(--text) ile beyaza çekilir */
 .jm-minimalist[data-theme="dark"] input,
