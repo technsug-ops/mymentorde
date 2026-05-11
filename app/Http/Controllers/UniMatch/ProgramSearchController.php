@@ -94,10 +94,9 @@ class ProgramSearchController extends Controller
         }
 
         if ($f['language'] !== '') {
-            // 'both' programlar her iki dil sorgusunda da gelir
-            $q->where(function ($sub) use ($f) {
-                $sub->where('language', $f['language'])->orWhere('language', 'both');
-            });
+            // Exact match — kullanıcı seçtiği değeri net görür.
+            // 'both' programlar için explicit 3. seçenek var (uni-assist tarzı).
+            $q->where('language', $f['language']);
         }
 
         if ($f['subject'] !== '') {

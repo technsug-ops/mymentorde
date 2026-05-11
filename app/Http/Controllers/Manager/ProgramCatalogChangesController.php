@@ -56,7 +56,7 @@ class ProgramCatalogChangesController extends Controller
             'critical_unreviewed'   => ProgramChangeLog::query()->whereNull('reviewed_at')->where('severity', 'critical')->count(),
             'warning_unreviewed'    => ProgramChangeLog::query()->whereNull('reviewed_at')->where('severity', 'warning')->count(),
             'recent_7days'          => ProgramChangeLog::query()->where('detected_at', '>=', now()->subDays(7))->count(),
-            'total_programs'        => Program::count(),
+            'total_programs'        => Program::active()->count(),
             'total_source_links'    => ProgramSourceLink::count(),
         ];
 
