@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Internal;
+namespace App\Http\Controllers\UniMatch;
 
 use App\Http\Controllers\Controller;
 use App\Models\Program;

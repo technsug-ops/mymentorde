@@ -80,7 +80,7 @@ Route::middleware('company.context')->group(function (): void {
 
     // Internal user'lar için program arama sayfası — wizard bypass
     // (manager/senior/mentor/admin_staff/operations_*). Auth + role check controller'da.
-    Route::get('/program-search', [\App\Http\Controllers\Internal\ProgramSearchController::class, 'index'])
+    Route::get('/program-search', [\App\Http\Controllers\UniMatch\ProgramSearchController::class, 'index'])
         ->middleware(['auth', 'throttle:120,1'])->name('program-search');
 
     // EN→TR çeviri (lazy on-demand, Gemini, 10/dk per IP)
