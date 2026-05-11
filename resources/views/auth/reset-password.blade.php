@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('brand.name', 'MentorDE') }} — Şifre Sıfırla</title>
+    @include('partials.favicon')
     <style>
         :root {
             --bg: #eef3fb; --panel: #ffffff; --line: #d8e2f0;

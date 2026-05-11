@@ -37,9 +37,10 @@ class AiLabsAssistantService
      */
     public function ask(int $companyId, string $role, int $userId, ?int $guestApplicationId, string $question, array $context = []): array
     {
-        // Limit kontrolü
+        // Premium paket → unlimited daily limit
+        $packageType = $this->resolvePackageType($guestApplicationId);
         $dailyUsed = $this->dailyCount($role, $userId, $guestApplicationId);
-        $limit = $this->dailyLimit($companyId, $role);
+        $limit = $this->dailyLimit($companyId, $role, $packageType);
 
         if ($limit > 0 && $dailyUsed >= $limit) {
             return [
@@ -111,8 +112,14 @@ class AiLabsAssistantService
         };
     }
 
-    public function dailyLimit(int $companyId, string $role): int
+    public function dailyLimit(int $companyId, string $role, ?string $packageType = null): int
     {
+        // Premium paket → sınırsız (UI'da "Premium: Sınırsız" gözüküyor).
+        // Aşağıdaki $limit === 0 kontrolü çağrı yerlerinde unlimited davranışı sağlar.
+        if ($packageType === 'premium') {
+            return 0;
+        }
+
         $settings = AiLabsSettings::forCompany($companyId);
 
         return match ($role) {
@@ -122,9 +129,23 @@ class AiLabsAssistantService
         };
     }
 
+    /**
+     * Guest/student için selected_package_code çek. Premium ise unlimited
+     * daily limit uygulanır.
+     */
+    public function resolvePackageType(?int $guestApplicationId): ?string
+    {
+        if (!$guestApplicationId) return null;
+        $code = \App\Models\GuestApplication::query()
+            ->where('id', $guestApplicationId)
+            ->value('selected_package_code');
+        return $code ? strtolower((string) $code) : null;
+    }
+
     public function remainingToday(int $companyId, string $role, int $userId, ?int $guestApplicationId = null): int
     {
-        $limit = $this->dailyLimit($companyId, $role);
+        $packageType = $this->resolvePackageType($guestApplicationId);
+        $limit = $this->dailyLimit($companyId, $role, $packageType);
         if ($limit === 0) {
             return 999; // unlimited
         }

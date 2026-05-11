@@ -8,6 +8,7 @@
     $brand = $brandName ?? config('brand.name', 'MentorDE');
 @endphp
 <title>Satış Ortaklığı Başvurusu — {{ $brand }}</title>
+@include('partials.favicon')
 <meta name="robots" content="noindex, follow">
 
 <link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">

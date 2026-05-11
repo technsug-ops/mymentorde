@@ -25,6 +25,7 @@
         html, body, .app, .main, .content { background: var(--bg, #f1f5f9) !important; }
     </style>
     <title>@yield('title', config('brand.name', 'MentorDE') . ' — Öğrenci Portalı')</title>
+    @include('partials.favicon')
 
     {{-- Preconnect: CDN (twemoji, chart.js) + Tenor GIF --}}
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -626,6 +627,9 @@ document.addEventListener('alpine:init',function(){
     var lastId=0,isOpen=false;
     if(!fab)return;
     fab.addEventListener('click',function(){isOpen=!isOpen;panel.classList.toggle('open',isOpen);if(isOpen){poll();input.focus();}});
+    // Kapat butonu — paneli kapatır, badge etkilenmez
+    var closeBtn=document.getElementById('gchatClose');
+    if(closeBtn){closeBtn.addEventListener('click',function(e){e.stopPropagation();isOpen=false;panel.classList.remove('open');});}
     function appendMsg(m){
         var isOut=m.sender_role==='guest';
         var div=document.createElement('div');

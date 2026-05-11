@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1e40af">
 <title>Belge Yükleme — MentorDE</title>
+@include('partials.favicon')
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {

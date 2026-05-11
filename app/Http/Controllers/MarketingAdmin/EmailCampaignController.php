@@ -311,8 +311,14 @@ class EmailCampaignController extends Controller
             return [];
         }
 
+        // Marketing kampanya alıcıları — sadece verified email + aktif user'lar.
+        // Verified olmayan adresler (kayıt sonrası mail linkine tıklamamış veya
+        // bounce yaşamış) ve pasif user'lar filtre dışı kalır. Bu hem hard bounce
+        // riskini düşürür hem Resend reputation'ı korur.
         return User::query()
             ->whereIn('id', $userIds)
+            ->whereNotNull('email_verified_at')
+            ->where('is_active', true)
             ->get(['id', 'name', 'email'])
             ->map(fn ($u) => [
                 'user_id' => (int) $u->id,

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Topluluk Soru Arşivi — Almanya Eğitim & Vize | {{ config('brand.name', 'MentorDE') }}</title>
+@include('partials.favicon')
     <meta name="description" content="Almanya'da eğitim, vize, dil sertifikası, denklik, Sperrkonto ve daha fazlası — toplulukta en çok sorulan {{ $totalQuestions }} soru, 15 ana konu altında derlendi.">
     <meta property="og:title" content="Topluluk Soru Arşivi — {{ config('brand.name', 'MentorDE') }}">
     <meta property="og:description" content="{{ $totalQuestions }} anonim soru — Almanya eğitim sürecinde toplulukta en çok merak edilenler.">

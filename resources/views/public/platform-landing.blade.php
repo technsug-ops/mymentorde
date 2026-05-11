@@ -8,6 +8,7 @@
     $brand = $brandName ?? config('brand.name', 'MentorDE');
 @endphp
 <title>{{ $brand }} Platform — Almanya Eğitim Danışmanlığı için End-to-End SaaS</title>
+@include('partials.favicon')
 <meta name="description" content="6 portal · 28+ modül · AI asistan · {{ config('brand.catalog.program_count_label') }} Almanya programı · entegre CRM, vize, ödeme & analytics. Yurt dışı eğitim danışmanlığı firmaları için profesyonel SaaS çözümü.">
 <meta name="robots" content="index, follow">
 <meta property="og:title" content="{{ $brand }} Platform — Yurt Dışı Eğitim Danışmanlığı SaaS">

@@ -379,7 +379,7 @@ class WizardController extends Controller
 
         $data = $request->validate([
             'first_name'            => ['nullable', 'string', 'max:80'],
-            'email'                 => ['nullable', 'email', 'max:200'],
+            'email'                 => ['nullable', 'email:rfc,dns', 'max:200'],
             'phone'                 => ['nullable', 'string', 'max:30'],
             'consent'               => ['nullable', 'boolean'],
             'cf_turnstile_response' => ['nullable', 'string', new \App\Rules\TurnstileToken()],

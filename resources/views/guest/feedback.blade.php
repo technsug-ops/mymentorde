@@ -323,7 +323,7 @@
             $typeIcons  = ['general'=>'💬','process'=>'📋','advisor'=>'👤','portal'=>'🖥️','nps'=>'📊'];
             $typeLabels = ['general'=>'Genel','process'=>'Süreç','advisor'=>'Danışman','portal'=>'Portal','nps'=>'NPS'];
         @endphp
-        <div class="fb-hist-item">
+        <div class="fb-hist-item" data-feedback-id="{{ $fb->id }}">
             <div class="fb-hist-icon">{{ $typeIcons[$fb->feedback_type] ?? '💬' }}</div>
             <div style="flex:1;min-width:0;">
                 <div style="font-size:var(--tx-sm);font-weight:700;color:var(--u-text);">
@@ -364,6 +364,11 @@
 <script nonce="{{ $cspNonce ?? '' }}">
 var selectedStar = 0, selectedNps = null;
 var starLabels = ['', 'Çok Kötü 😞', 'Kötü 😕', 'Orta 😐', 'İyi 😊', 'Mükemmel 😄'];
+
+// Kullanıcının daha önce gönderdiği son NPS kaydı varsa — "Yanıtı Güncelle"
+// akışı bu ID'yi update'e gönderir, duplicate kayıt önlenir.
+@php $lastNps = $existing->where('feedback_type', 'nps')->sortByDesc('created_at')->first(); @endphp
+var lastNpsFeedbackId = @json($lastNps?->id);
 
 function setStar(val) {
     selectedStar = val;
@@ -411,6 +416,9 @@ async function submitNps() {
     btn.textContent = 'Gönderiliyor...';
     try {
         var comment = document.getElementById('nps-comment').value;
+        var body = { nps_score: selectedNps, comment };
+        if (lastNpsFeedbackId) body.feedback_id = lastNpsFeedbackId;
+
         var res = await fetch('{{ route("guest.nps.store") }}', {
             method: 'POST',
             headers: {
@@ -418,17 +426,24 @@ async function submitNps() {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
-            body: JSON.stringify({ nps_score: selectedNps, comment })
+            body: JSON.stringify(body)
         });
         if (res.ok) {
+            var data = await res.json();
+            lastNpsFeedbackId = data.feedback_id || null;
             document.getElementById('nps-msg').style.display = 'block';
             document.querySelectorAll('#nps-row .fb-nps-btn').forEach(el => el.disabled = true);
             document.getElementById('nps-comment').disabled = true;
             btn.textContent = '✓ Teşekkürler!';
-            btn.dataset.done = '1'; // submitted — setNps re-enable etmesin
-            // Guncelle butonu — kullanici fikri degisirse yeniden duzenlemesini sagla
+            btn.dataset.done = '1';
             var editBtn = document.getElementById('nps-edit');
             if (editBtn) editBtn.style.display = '';
+            // Geçmiş Değerlendirmelerim listesini hemen güncelle (sayfa reload gerekmez)
+            updateNpsInHistoryList(data);
+        } else if (res.status === 429) {
+            btn.disabled = false;
+            btn.textContent = origLabel;
+            alert('Çok fazla deneme. Lütfen bir dakika sonra tekrar deneyin.');
         } else {
             btn.disabled = false;
             btn.textContent = origLabel;
@@ -438,6 +453,41 @@ async function submitNps() {
         btn.disabled = false;
         btn.textContent = origLabel;
         alert('Bağlantı hatası. İnternet bağlantınızı kontrol edip tekrar deneyin.');
+    }
+}
+
+// Submit/update sonrası "Geçmiş Değerlendirmelerim" panelini canlı güncelle
+function updateNpsInHistoryList(data){
+    if (!data || !data.feedback_id) return;
+    // Mevcut item varsa (update) — güncelle; yoksa (create) — listenin başına ekle
+    var listContainer = document.querySelector('.fb-card .fb-hist-item')?.parentElement;
+    if (!listContainer) {
+        // Boş state — sayfa reload ile geçmiş bölüm görünür
+        setTimeout(function(){ window.location.reload(); }, 800);
+        return;
+    }
+    var existing = listContainer.querySelector('[data-feedback-id="' + data.feedback_id + '"]');
+    var html = '<div class="fb-hist-icon">📊</div>' +
+        '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:var(--tx-sm);font-weight:700;color:var(--u-text);">NPS</div>' +
+            '<div style="font-size:var(--tx-xs);color:var(--u-muted);">NPS: <strong>' + data.nps_score + '</strong>/10</div>' +
+            (data.comment ? '<div style="font-size:var(--tx-xs);color:var(--u-muted);margin-top:3px;line-height:1.4;">' + data.comment.replace(/[<>&"]/g, function(c){return ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'})[c];}) + '</div>' : '') +
+        '</div>' +
+        '<div class="fb-hist-date">' + (data.created_at || '') + '</div>';
+    if (existing) {
+        existing.innerHTML = html;
+    } else {
+        var newItem = document.createElement('div');
+        newItem.className = 'fb-hist-item';
+        newItem.dataset.feedbackId = data.feedback_id;
+        newItem.innerHTML = html;
+        // Başlığın HEMEN ALTINA ekle
+        var titleEl = listContainer.querySelector('.fb-card-title');
+        if (titleEl && titleEl.nextSibling) {
+            listContainer.insertBefore(newItem, titleEl.nextSibling);
+        } else {
+            listContainer.prepend(newItem);
+        }
     }
 }
 

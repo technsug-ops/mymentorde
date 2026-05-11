@@ -534,13 +534,17 @@ class WorkflowController extends Controller
             'target_term' => ['nullable', 'string', 'max:60'],
             'language_level' => ['nullable', 'string', 'max:32'],
             'language_skills' => ['nullable', 'array', 'max:10'],
-            'language_skills.*.lang' => ['required', 'string', 'max:20'],
-            'language_skills.*.level' => ['required', 'string', 'max:20'],
+            'language_skills.*.lang' => ['required', 'string', 'in:tr,de,en,fr,es,it,ar,other'],
+            'language_skills.*.level' => ['required', 'string', 'in:A1,A2,B1,B2,C1,C2,native'],
             'language_skills.*.custom' => ['nullable', 'string', 'max:60'],
         ], [
             'first_name.required' => 'Ad zorunlu.',
             'last_name.required'  => 'Soyad zorunlu.',
             'gender.in'           => 'Geçerli bir cinsiyet seçin.',
+            'language_skills.*.lang.required' => 'Eklediğiniz her dil için "Dil" alanını seçin (boş satır olamaz).',
+            'language_skills.*.lang.in'       => 'Geçersiz dil seçimi.',
+            'language_skills.*.level.required' => 'Her dil için seviye seçimi yapın.',
+            'language_skills.*.level.in'      => 'Geçersiz seviye.',
         ]);
 
         // Backward-compat: eski 'kadin'/'erkek' değerlerini canonical'e normalize et
@@ -1076,21 +1080,49 @@ class WorkflowController extends Controller
     public function storeNps(Request $request): \Illuminate\Http\JsonResponse
     {
         $data = $request->validate([
-            'nps_score' => ['required', 'integer', 'min:0', 'max:10'],
-            'comment'   => ['nullable', 'string', 'max:1000'],
+            'nps_score'   => ['required', 'integer', 'min:0', 'max:10'],
+            'comment'     => ['nullable', 'string', 'max:1000'],
+            'feedback_id' => ['nullable', 'integer', 'exists:guest_feedbacks,id'],
         ]);
 
         $guest = $this->resolveGuest($request);
         abort_if(!$guest, 422);
 
-        GuestFeedback::create([
-            'guest_application_id' => $guest->id,
-            'company_id'           => (int) ($guest->company_id ?: 0),
-            'feedback_type'        => 'nps',
-            'nps_score'            => (int) $data['nps_score'],
-            'comment'              => $data['comment'] ?? null,
-        ]);
+        // "Yanıtı Güncelle" akışı: mevcut kayıt update, yoksa yeni create.
+        // Bu sayede tek bir guest aynı NPS soru için duplicate kayıt yaratmıyor.
+        $payload = [
+            'feedback_type' => 'nps',
+            'nps_score'     => (int) $data['nps_score'],
+            'comment'       => $data['comment'] ?? null,
+        ];
 
-        return response()->json(['ok' => true]);
+        if (!empty($data['feedback_id'])) {
+            $row = GuestFeedback::query()
+                ->where('id', $data['feedback_id'])
+                ->where('guest_application_id', $guest->id)
+                ->where('feedback_type', 'nps')
+                ->first();
+            if ($row) {
+                $row->update($payload);
+            } else {
+                $row = GuestFeedback::create($payload + [
+                    'guest_application_id' => $guest->id,
+                    'company_id'           => (int) ($guest->company_id ?: 0),
+                ]);
+            }
+        } else {
+            $row = GuestFeedback::create($payload + [
+                'guest_application_id' => $guest->id,
+                'company_id'           => (int) ($guest->company_id ?: 0),
+            ]);
+        }
+
+        return response()->json([
+            'ok'          => true,
+            'feedback_id' => $row->id,
+            'nps_score'   => (int) $row->nps_score,
+            'comment'     => $row->comment,
+            'created_at'  => optional($row->created_at)->format('d.m.Y'),
+        ]);
     }
 }

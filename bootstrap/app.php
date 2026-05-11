@@ -140,6 +140,25 @@ return Application::configure(basePath: dirname(__DIR__))
             ], $status);
         });
 
+        // 429 Too Many Requests → Türkçe mesaj (web + API). Laravel default "Too Many
+        // Attempts." mesajını override eder. Booking/NPS/login gibi throttle'lı
+        // endpoint'lerde kullanıcıya net Türkçe geri bildirim sağlar.
+        $exceptions->render(function (\Illuminate\Http\Exceptions\ThrottleRequestsException $e, Request $request) use ($mapErrorCode) {
+            $retry = (int) ($e->getHeaders()['Retry-After'] ?? 60);
+            $msg = $retry > 1
+                ? "Çok fazla deneme yapıldı. Lütfen {$retry} saniye sonra tekrar deneyin."
+                : 'Çok fazla deneme yapıldı. Lütfen biraz bekleyip tekrar deneyin.';
+            if ($request->expectsJson() || $request->hasHeader('X-Requested-With') || $request->is('api/*')) {
+                return response()->json([
+                    'message' => $msg,
+                    'error_code' => $mapErrorCode(429),
+                    'status' => 429,
+                    'retry_after' => $retry,
+                ], 429, $e->getHeaders());
+            }
+            return response($msg, 429, $e->getHeaders() + ['Content-Type' => 'text/plain; charset=utf-8']);
+        });
+
         $exceptions->render(function (\Throwable $e, Request $request) use ($mapErrorCode) {
             if (!$request->is('api/*')) {
                 return null;

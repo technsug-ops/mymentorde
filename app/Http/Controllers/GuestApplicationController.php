@@ -121,7 +121,7 @@ class GuestApplicationController extends Controller
         $data = $request->validate([
             'first_name' => ['required', 'string', 'max:120'],
             'last_name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'max:190'],
+            'email' => ['required', 'email:rfc,dns', 'max:190'],
             'phone' => ['nullable', 'string', 'max:60', 'regex:/^\+\d{1,4}\s\d{3,15}$/'],
             'gender' => ['nullable', 'in:male,female,not_specified'],
             'application_country' => ['nullable', 'string', 'max:120'],

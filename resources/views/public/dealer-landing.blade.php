@@ -8,6 +8,7 @@
     $hdrBrand = $brandName ?? config('brand.name', 'MentorDE');
 @endphp
 <title>Satış Ortaklığı Programı — {{ $hdrBrand }} · Birlikte Kazanalım</title>
+@include('partials.favicon')
 <meta name="description" content="{{ $hdrBrand }} Satış Ortaklığı Programı 2026. Almanya eğitim sürecine yönlendirdiğiniz her başarılı kayıt için €200-€750 komisyon kazanın. 100€ hoş geldin bonusu + vize reddi güvencesi.">
 <meta name="robots" content="index, follow">
 <meta property="og:title" content="{{ $hdrBrand }} Satış Ortaklığı Programı — Birlikte Kazanalım">

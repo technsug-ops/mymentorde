@@ -25,6 +25,7 @@
         html, body, .app, .main, .content { background: var(--bg, #f1f5f9) !important; }
     </style>
     <title>@yield('title', config('brand.name', 'MentorDE') . ' — Öğrenci Portalı')</title>
+    @include('partials.favicon')
 
     {{-- Preconnect: CDN (chart.js, fullcalendar) + Tenor GIF --}}
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>

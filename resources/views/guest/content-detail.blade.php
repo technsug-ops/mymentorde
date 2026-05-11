@@ -219,7 +219,7 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
         data-url="{{ route('guest.content.react', $item->slug) }}"
         style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1.5px solid {{ $isLiked ? 'var(--u-brand,#1f6fd9)' : 'var(--u-line,#d6e1ef)' }};background:{{ $isLiked ? 'var(--u-bg,#eaf1fb)' : 'var(--u-card,#fff)' }};color:{{ $isLiked ? 'var(--u-brand,#1f6fd9)' : 'var(--u-muted,#4f6787)' }};font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s;">
         👍 <span id="like-label">{{ $isLiked ? 'Beğenildi' : 'Beğen' }}</span>
-        @if($likeCount > 0)<span id="like-count" style="margin-left:4px;opacity:.7;">{{ $likeCount }}</span>@else<span id="like-count" style="margin-left:4px;opacity:.7;display:none;">0</span>@endif
+        @if($likeCount > 0)<span id="like-count" title="{{ $likeCount }} kişi bu içeriği beğendi" style="margin-left:4px;opacity:.7;">({{ $likeCount }})</span>@else<span id="like-count" title="Henüz kimse beğenmedi" style="margin-left:4px;opacity:.7;display:none;">(0)</span>@endif
     </button>
 
     <button id="btn-save"
@@ -447,7 +447,7 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
             btn.setAttribute('data-reacted', nowReacted ? '1' : '0');
             document.getElementById('like-label').textContent = nowReacted ? 'Beğenildi' : 'Beğen';
             var countEl = document.getElementById('like-count');
-            if(data.count > 0){ countEl.textContent = data.count; countEl.style.display=''; }
+            if(data.count > 0){ countEl.textContent = '(' + data.count + ')'; countEl.title = data.count + ' kişi bu içeriği beğendi'; countEl.style.display=''; }
             else { countEl.style.display='none'; }
             btn.style.borderColor = nowReacted ? 'var(--u-brand,#1f6fd9)' : 'var(--u-line,#d6e1ef)';
             btn.style.background  = nowReacted ? 'var(--u-bg,#eaf1fb)' : 'var(--u-card,#fff)';

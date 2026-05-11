@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('brand.name', 'MentorDE') }} - Almanya Başvuru Süreci</title>
+    @include('partials.favicon')
     <link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">
     <style>
         :root {

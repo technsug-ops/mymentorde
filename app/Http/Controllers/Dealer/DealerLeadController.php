@@ -42,7 +42,7 @@ class DealerLeadController extends Controller
             'first_name'         => ['required', 'string', 'max:120'],
             'last_name'          => ['required', 'string', 'max:120'],
             'phone'              => ['required', 'string', 'max:60'],
-            'email'              => ['nullable', 'email', 'max:190'],
+            'email'              => ['nullable', 'email:rfc,dns', 'max:190'],
             'application_type'   => ['required', 'string', 'max:64'],
             'application_country'=> ['nullable', 'string', 'max:120'],
             'referral_type'      => ['required', 'in:recommendation,confirmed_referral'],

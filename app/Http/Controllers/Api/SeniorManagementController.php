@@ -67,7 +67,7 @@ class SeniorManagementController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'email:rfc,dns', 'max:255', 'unique:users,email'],
             'role' => ['nullable', 'string', 'in:senior,mentor'],
             'password' => ['nullable', 'string', 'min:8', 'max:255'],
             'senior_type' => ['nullable', 'string', 'max:100'],
@@ -130,7 +130,7 @@ class SeniorManagementController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'email' => ['required', 'email:rfc,dns', 'max:255', 'unique:users,email,'.$user->id],
             'role' => ['nullable', 'string', 'in:senior,mentor'],
             'password' => ['nullable', 'string', 'min:8', 'max:255'],
             'senior_type' => ['nullable', 'string', 'max:100'],

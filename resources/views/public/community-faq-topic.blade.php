@@ -10,6 +10,7 @@
         $count = count($questions);
     @endphp
     <title>{{ $title }} — Topluluk Soru Arşivi | {{ config('brand.name', 'MentorDE') }}</title>
+@include('partials.favicon')
     <meta name="description" content="{{ $title }}: {{ Str::limit($desc, 140) }} — toplulukta sık sorulan {{ $count }} soru.">
     <link rel="canonical" href="{{ url('/sss/topluluk/' . $topicKey) }}">
 

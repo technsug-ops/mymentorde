@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Rol Seç — {{ config('brand.name', 'MentorDE') }}</title>
+    @include('partials.favicon')
     @php $pt = $publicTheme ?? \App\Support\PublicTheme::resolve(); @endphp
     <style>
         :root {

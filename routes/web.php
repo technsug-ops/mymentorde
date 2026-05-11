@@ -313,7 +313,7 @@ Route::middleware(['company.context', 'module:booking'])->group(function (): voi
         ->middleware('throttle:5,1')->name('booking.waitlist.join');
     Route::get('/book/{slug}',                       [$bc, 'show'])->middleware('throttle:60,1')->name('booking.public.show');
     Route::post('/book/{slug}/slots',                [$bc, 'slots'])->middleware('throttle:120,1')->name('booking.public.slots');
-    Route::post('/book/{slug}/confirm',              [$bc, 'confirm'])->middleware('throttle:10,1')->name('booking.public.confirm');
+    Route::post('/book/{slug}/confirm',              [$bc, 'confirm'])->middleware('throttle:30,1')->name('booking.public.confirm');
     Route::get('/book/cancel/{token}',               [$bc, 'cancelShow'])->middleware('throttle:60,1')->name('booking.public.cancel.show');
     Route::post('/book/cancel/{token}',              [$bc, 'cancel'])->middleware('throttle:10,1')->name('booking.public.cancel');
 });

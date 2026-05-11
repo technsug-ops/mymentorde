@@ -25,6 +25,7 @@
         html, body, .app, .main, .content { background: var(--bg, #f1f5f9) !important; }
     </style>
     <title>@yield('title', config('brand.name', 'MentorDE') . ' — Bayi Portalı')</title>
+    @include('partials.favicon')
 
     {{-- Premium Design System --}}
     <link id="mentorde-theme-css" rel="stylesheet" href="{{ Vite::asset('resources/css/premium.css') }}">
