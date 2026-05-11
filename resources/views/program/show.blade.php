@@ -461,6 +461,62 @@ body.sb-detail-mode::before {
 </script>
 <style>
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Internal-only blok */
+.pi-internal { max-width: 880px; margin: 30px auto 0; background: #fef3c7; border: 1px solid #fbbf24; border-radius: 12px; padding: 18px 20px; font-family: ui-monospace, monospace; font-size: 12px; line-height: 1.6; }
+.pi-internal-title { font-size: 13px; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+.pi-internal-grid { display: grid; grid-template-columns: 160px 1fr; gap: 6px 14px; }
+.pi-internal-grid dt { color: #92400e; font-weight: 700; }
+.pi-internal-grid dd { color: #1e293b; word-break: break-word; margin: 0; }
+.pi-internal-sources { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fbbf24; }
+.pi-internal-sources a { color: #5b2e91; text-decoration: underline; }
 </style>
 @endpush
+
+{{-- Internal-only blok — sadece manager/senior/mentor/admin_staff/operations_* görür --}}
+@php
+    $internalRoles = ['manager', 'senior', 'mentor', 'admin_staff', 'operations_admin', 'operations_staff', 'system_admin', 'system_staff', 'marketing_admin'];
+    $isInternal = auth()->check() && in_array(auth()->user()->role, $internalRoles, true);
+@endphp
+@if($isInternal)
+    <div class="pi-internal">
+        <div class="pi-internal-title">🔐 Internal Bilgi (sadece staff görür)</div>
+        <dl class="pi-internal-grid">
+            <dt>Program UUID</dt><dd>{{ $program->id }}</dd>
+            <dt>Quality Score</dt><dd>{{ $program->quality_score }}/100 @if($program->is_manually_curated) <span style="background:#16a34a;color:#fff;padding:1px 6px;border-radius:4px;font-size:10px;">✓ Manuel curated</span>@endif</dd>
+            <dt>Active</dt><dd>{{ $program->is_active ? '✓ Aktif' : '✗ Pasif' }}</dd>
+            <dt>University ID</dt><dd>{{ $program->university_id ?: '—' }} @if($program->university?->is_uni_assist_member) <span style="background:#3b82f6;color:#fff;padding:1px 6px;border-radius:4px;font-size:10px;">uni-assist üye</span>@endif</dd>
+            <dt>uni-assist ID</dt><dd>{{ $program->university?->uni_assist_id ?: '—' }}</dd>
+            <dt>Languages (raw)</dt><dd>{{ is_array($program->languages_raw) ? implode(', ', $program->languages_raw) : '—' }}</dd>
+            <dt>Study fields</dt><dd>{{ is_array($program->study_fields) ? implode(', ', $program->study_fields) : '—' }}</dd>
+            <dt>Subjects</dt><dd>{{ is_array($program->subjects) ? implode(', ', $program->subjects) : '—' }}</dd>
+            <dt>Description (TR)</dt><dd>{{ $program->description_tr ? '✓ var (' . mb_strlen($program->description_tr) . ' karakter)' : '✗ yok' }}</dd>
+            <dt>Created</dt><dd>{{ $program->created_at?->format('d.m.Y H:i') }}</dd>
+            <dt>Updated</dt><dd>{{ $program->updated_at?->format('d.m.Y H:i') }}</dd>
+        </dl>
+        @if($sources->isNotEmpty())
+            <div class="pi-internal-sources">
+                <strong style="color:#92400e;">Source Links ({{ $sources->count() }}):</strong>
+                <ul style="margin:6px 0 0 18px; padding:0;">
+                    @foreach($sources as $s)
+                        <li>
+                            <strong>{{ $s->source }}</strong>
+                            (ext_id: {{ $s->external_id ?? '—' }})
+                            @if($s->source_url) — <a href="{{ $s->source_url }}" target="_blank" rel="noopener">{{ Str::limit($s->source_url, 60) }}</a>@endif
+                            @if($s->is_primary) <span style="background:#16a34a;color:#fff;padding:1px 6px;border-radius:4px;font-size:10px;">PRIMARY</span>@endif
+                            <span style="color:#64748b; font-size:11px;">son sync: {{ $s->last_synced_at?->format('d.m.Y') ?? '—' }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        <div style="margin-top:12px; padding-top:10px; border-top:1px dashed #fbbf24; display:flex; gap:8px; flex-wrap:wrap;">
+            <a href="{{ route('program-search') }}" style="padding:6px 12px; background:#5b2e91; color:#fff; text-decoration:none; border-radius:6px; font-size:11.5px; font-weight:600;">← Program Aramaya Dön</a>
+            @if($program->university && $program->university->id)
+                <a href="{{ route('program-search', ['q' => $program->university_name_cached]) }}" style="padding:6px 12px; background:#fff; color:#5b2e91; text-decoration:none; border-radius:6px; font-size:11.5px; font-weight:600; border:1px solid #5b2e91;">🏛 Aynı üniversiteden diğer programlar</a>
+            @endif
+        </div>
+    </div>
+@endif
+
 @endsection

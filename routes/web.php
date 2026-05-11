@@ -78,6 +78,11 @@ Route::middleware('company.context')->group(function (): void {
     Route::get('/program/{program}',               [\App\Http\Controllers\ProgramController::class, 'show'])
         ->middleware('throttle:60,1')->name('program.show');
 
+    // Internal user'lar için program arama sayfası — wizard bypass
+    // (manager/senior/mentor/admin_staff/operations_*). Auth + role check controller'da.
+    Route::get('/program-search', [\App\Http\Controllers\Internal\ProgramSearchController::class, 'index'])
+        ->middleware(['auth', 'throttle:120,1'])->name('program-search');
+
     // EN→TR çeviri (lazy on-demand, Gemini, 10/dk per IP)
     Route::post('/program/{program}/translate',    [\App\Http\Controllers\ProgramTranslationController::class, 'translate'])
         ->middleware('throttle:10,1')->name('program.translate');

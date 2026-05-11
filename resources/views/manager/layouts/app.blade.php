@@ -514,6 +514,10 @@
                    class="nav-link {{ request()->is('manager/unimatch-funnel*') ? 'active' : '' }}">
                     <span class="nav-icon">📊</span> UniMatch Funnel
                 </a>
+                <a href="{{ route('program-search') }}"
+                   class="nav-link {{ request()->is('program-search*') ? 'active' : '' }}">
+                    <span class="nav-icon">🔍</span> Program Arama
+                </a>
                 <a href="{{ route('manager.universities.index') }}"
                    class="nav-link {{ request()->is('manager/universities*') ? 'active' : '' }}">
                     <span class="nav-icon">🏛️</span> Üniversite Görselleri
