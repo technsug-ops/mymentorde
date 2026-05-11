@@ -953,6 +953,24 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // DEBUG: prod'da belirli bir dosyanın son N satırını dump et.
+        // Kullanım: /_deploy/run-pending?secret=...&cleanup=dump-file&path=routes/manager.php&n=15
+        if ($request->query('cleanup') === 'dump-file') {
+            $path = (string) $request->query('path', 'routes/web.php');
+            // Güvenlik: sadece app içindeki .php dosyaları
+            $full = base_path($path);
+            if (!is_file($full) || !str_starts_with(realpath($full), realpath(base_path()))) {
+                $output .= ">>> dump-file: dosya bulunamadi veya kapsam disi: {$path}\n";
+            } else {
+                $n = max(5, min(100, (int) $request->query('n', 20)));
+                $contents = file_get_contents($full);
+                $lines = explode("\n", $contents);
+                $tail = array_slice($lines, -$n);
+                $output .= ">>> dump-file {$path} (last {$n} lines, total " . count($lines) . " lines, " . filesize($full) . " bytes):\n";
+                $output .= implode("\n", $tail) . "\n";
+            }
+        }
+
         // Opsiyonel inline log tail — ?tail=200 ile tetikle (route cache'siz fallback)
         $tail = (int) $request->query('tail', 0);
         if ($tail > 0) {
