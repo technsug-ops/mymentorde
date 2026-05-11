@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MVP Checklist</title>
+    @include('partials.favicon')
     <style>
         :root { --line:#d8e0ea; --text:#132238; --muted:#52657d; --ok:#1a8f4b; --accent:#0f6bdc; }
         * { box-sizing:border-box; }

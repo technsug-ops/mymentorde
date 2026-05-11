@@ -212,41 +212,41 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
 <div>{{-- Sol: İçerik --}}
 @endif
 
-<div class="cd-body" id="cd-body-content">
+<div class="cd-body cd-article" id="cd-body-content">
     @if($item->type === 'video_feature' && $item->video_url)
         <div class="cd-video-wrap">
             <iframe src="{{ $item->video_url }}?rel=0&modestbranding=1"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen></iframe>
         </div>
-        @if($item->content_tr){!! str_replace('\n', '<br>', $item->content_tr) !!}@endif
+        @if($item->content_tr){!! $item->rendered_content_tr !!}@endif
 
     @elseif($item->type === 'podcast' && $item->video_url)
         <div class="cd-embed-wrap">
             <iframe src="{{ $item->video_url }}" style="min-height:152px;"></iframe>
         </div>
-        @if($item->content_tr){!! str_replace('\n', '<br>', $item->content_tr) !!}@endif
+        @if($item->content_tr){!! $item->rendered_content_tr !!}@endif
 
     @elseif($item->type === 'presentation' && $item->video_url)
         <div class="cd-embed-wrap">
             <iframe src="{{ $item->video_url }}" style="min-height:400px;" allowfullscreen></iframe>
         </div>
-        @if($item->content_tr){!! str_replace('\n', '<br>', $item->content_tr) !!}@endif
+        @if($item->content_tr){!! $item->rendered_content_tr !!}@endif
 
     @elseif($item->type === 'experience')
         <div class="cd-experience-card">
-            <div class="cd-experience-body">{!! str_replace('\n', '<br>', $item->content_tr) !!}</div>
+            <div class="cd-experience-body">{!! $item->rendered_content_tr !!}</div>
         </div>
 
     @elseif($item->type === 'tip')
         <div class="cd-tip-card">
             <div class="cd-tip-icon">💡</div>
-            <div class="cd-tip-body">{!! str_replace('\n', '<br>', $item->content_tr) !!}</div>
+            <div class="cd-tip-body">{!! $item->rendered_content_tr !!}</div>
         </div>
 
     @else
         @if($item->content_tr)
-        {!! str_replace('\n', '<br>', $item->content_tr) !!}
+        {!! $item->rendered_content_tr !!}
         @else
         <p style="color:var(--u-muted,#888);font-style:italic;">İçerik yakında eklenecek.</p>
         @endif

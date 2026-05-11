@@ -212,7 +212,8 @@ function printContract() {
     win.document.write(
         '<!DOCTYPE html><html><head>' +
         '<meta charset="UTF-8">' +
-        '<title>' + no + ' \u2014 ' + title + '</title>' +
+        '<title>' + no + ' \u2014 ' + title + '</title>
+    @include('partials.favicon')' +
         '<style>' +
         '* { box-sizing:border-box; margin:0; padding:0; }' +
         'body { font-family:"Times New Roman",Times,serif; font-size:12pt; line-height:1.9; color:#000; background:#fff; padding:2cm 2.5cm; }' +

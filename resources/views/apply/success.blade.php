@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Başvuru Alındı — {{ config('brand.name', 'MentorDE') }}</title>
+    @include('partials.favicon')
     <style>
         :root {
             --bg:      #eef3fb;

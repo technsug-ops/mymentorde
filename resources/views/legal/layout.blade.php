@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $pageTitle ?? 'Yasal' }} — {{ config('brand.name', 'MentorDE') }}</title>
+    @include('partials.favicon')
     <meta name="robots" content="index,follow">
     <link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">
     <style>

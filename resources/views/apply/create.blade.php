@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('brand.name', 'MentorDE') }} Başvuru</title>
+    @include('partials.favicon')
     @php $pt = $publicTheme ?? \App\Support\PublicTheme::resolve(); @endphp
     <style>
         :root {

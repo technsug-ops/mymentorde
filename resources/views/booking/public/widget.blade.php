@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $settings->display_name ?: 'Randevu Al' }} — {{ $brandName ?? 'MentorDE' }}</title>
+    @include('partials.favicon')
     @vite(['resources/css/premium.css'])
     <style>
         :root { --brand:#1e40af; --brand-light:#dbeafe; --text:#0f172a; --muted:#64748b; --border:#e2e8f0; --ok:#10b981; --err:#dc2626; }

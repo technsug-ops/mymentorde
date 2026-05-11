@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paylaşım Linki — {{ config('brand.name', 'MentorDE') }}</title>
+    @include('partials.favicon')
     <style>
         * { box-sizing: border-box; }
         body {

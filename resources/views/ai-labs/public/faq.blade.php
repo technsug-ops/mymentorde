@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sık Sorulan Sorular — {{ $brandName ?? 'MentorDE' }}</title>
+    @include('partials.favicon')
     <meta name="description" content="Yurt dışı eğitim, Almanya üniversite başvurusu, vize, Sperrkonto ve daha fazlası hakkında sık sorulan sorular ve cevapları.">
 
     @php

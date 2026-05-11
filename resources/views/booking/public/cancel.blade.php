@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Randevu İptal — {{ $brandName ?? 'MentorDE' }}</title>
+    @include('partials.favicon')
     @vite(['resources/css/premium.css'])
     <style>
         body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:#f8fafc; color:#0f172a; }

@@ -144,6 +144,45 @@ class CmsContent extends Model
         return $this->published_at->gte(now()->subDays(self::NEW_WINDOW_DAYS));
     }
 
+    /**
+     * content_tr rendered → blog detail sayfasında {!! $item->rendered_content_tr !!}.
+     * - HTML zaten olan içerik (Quill çıktısı: <h2>, <p>, vb.) olduğu gibi gösterilir.
+     * - Markdown olan içerik (**bold**, ## başlık, - liste) HTML'e çevrilir.
+     * - HTML+Markdown karışık içerik için CommonMark default HTML pass-through.
+     */
+    public function getRenderedContentTrAttribute(): string
+    {
+        return $this->renderContent((string) ($this->content_tr ?? ''));
+    }
+
+    public function getRenderedContentDeAttribute(): string
+    {
+        return $this->renderContent((string) ($this->content_de ?? ''));
+    }
+
+    public function getRenderedContentEnAttribute(): string
+    {
+        return $this->renderContent((string) ($this->content_en ?? ''));
+    }
+
+    private function renderContent(string $raw): string
+    {
+        $raw = trim($raw);
+        if ($raw === '') return '';
+        // İçerik zaten HTML ise (<p>, <h2>, <ul>, vb. ile başlıyorsa) doğrudan döndür.
+        if (preg_match('/^\s*<(p|h[1-6]|ul|ol|blockquote|div|article|section|figure)\b/i', $raw)) {
+            return $raw;
+        }
+        // Markdown parse — Laravel built-in Str::markdown (League CommonMark).
+        // HTML pass-through default açık, yani <h2>...</h2> markdown içinde de korunur.
+        try {
+            return \Illuminate\Support\Str::markdown($raw);
+        } catch (\Throwable $e) {
+            // Markdown parser hata verirse en azından \n → <br> ile sun
+            return nl2br(e($raw));
+        }
+    }
+
     public function scopeForAudience(Builder $q, string $audience): Builder
     {
         return $q->whereIn('target_audience', ['all', $audience]);
