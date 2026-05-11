@@ -492,6 +492,12 @@
                                         }
                                         // checkbox_group gibi multi-select field'larda $value array olabilir.
                                         $isFilled    = is_array($value) ? !empty($value) : trim((string)$value) !== '';
+                                        // Defensive: eski draft'larda field type'ı değişmiş olabilir (örn checkbox_group
+                                        // 'dan text'e). Array gelen değer string field'da render edilmeye çalışılırsa
+                                        // htmlspecialchars(): array given → 500. Sadece checkbox_group için array korunur.
+                                        if (is_array($value) && $type !== 'checkbox_group') {
+                                            $value = '';
+                                        }
                                         // help_text varsa otomatik wide YAPMA — kısa help'ler 2-col'da kalır.
                                         // Sadece açıkça uzun help_text (200+ char) ve textarea/email/address/motivation wide.
                                         $hasLongHelp = !empty($field['help_text']) && mb_strlen((string) $field['help_text']) > 200;
