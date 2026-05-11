@@ -1,7 +1,8 @@
 @extends('marketing-admin.layouts.app')
 
 @section('topbar-actions')
-<a class="btn" style="font-size:var(--tx-xs);padding:6px 12px;background:var(--u-brand,#1e40af);color:#fff;border-color:transparent;" href="/mktg-admin/content">İçerik</a>
+<a class="btn" style="font-size:var(--tx-xs);padding:6px 12px;background:var(--u-brand,#1e40af);color:#fff;border-color:transparent;" href="/mktg-admin/content">İçerik Yönetimi</a>
+<a class="btn alt" style="font-size:var(--tx-xs);padding:6px 12px;" href="/mktg-admin/content/overview">İçerik Tablosu</a>
 <a class="btn alt" style="font-size:var(--tx-xs);padding:6px 12px;" href="/mktg-admin/categories">Kategoriler</a>
 <a class="btn alt" style="font-size:var(--tx-xs);padding:6px 12px;" href="/mktg-admin/media">Medya</a>
 @endsection

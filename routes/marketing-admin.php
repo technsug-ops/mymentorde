@@ -65,9 +65,19 @@ Route::middleware(['company.context', 'auth', 'marketing.access', 'module:market
             Route::put('/campaigns/{id}/channel-plan/{planId}', [CampaignController::class, 'channelPlanUpdate']);
             Route::delete('/campaigns/{id}/channel-plan/{planId}', [CampaignController::class, 'channelPlanDelete']);
 
-            Route::resource('/content', CMSContentController::class);
+            // Spesifik content/* route'ları resource'tan ÖNCE — /content/{content} wildcard'ı bunları kaçırmasın
+            Route::get('/content/overview', [CMSContentController::class, 'overview'])->name('content.overview');
+            Route::post('/content/bulk-action', [CMSContentController::class, 'bulkAction'])->name('content.bulk-action');
             Route::post('/content/upload-cover', [CMSContentController::class, 'uploadCover'])->name('content.upload-cover');
             Route::post('/content/fetch-university-image', [CMSContentController::class, 'fetchUniversityImage'])->name('content.fetch-university-image');
+            Route::post('/content/ai-generate', [CMSContentController::class, 'aiGenerate'])->name('content.ai-generate');
+            Route::post('/content/ai-suggest-cover', [CMSContentController::class, 'aiSuggestCover'])->name('content.ai-suggest-cover');
+            Route::post('/content/ai-suggest-seo', [CMSContentController::class, 'aiSuggestSeo'])->name('content.ai-suggest-seo');
+            Route::post('/content/bulk-pdf', [CMSContentController::class, 'exportPdf'])->name('content.bulk-pdf');
+            Route::get('/content/{id}/pdf', [CMSContentController::class, 'exportPdf'])->where('id', '[0-9]+')->name('content.pdf');
+            Route::get('/content/{id}/preview', [CMSContentController::class, 'preview'])->where('id', '[0-9]+')->name('content.preview');
+            Route::patch('/content/{id}/toggle-status', [CMSContentController::class, 'toggleStatus'])->where('id', '[0-9]+')->name('content.toggle-status');
+            Route::resource('/content', CMSContentController::class);
             Route::put('/content/{id}/publish', [CMSContentController::class, 'publish']);
             Route::put('/content/{id}/unpublish', [CMSContentController::class, 'unpublish']);
             Route::put('/content/{id}/schedule', [CMSContentController::class, 'schedule']);
