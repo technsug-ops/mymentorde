@@ -900,6 +900,57 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // ─── CMS Bootstrap Komutları (commit 95fd989 sonrası tek seferlik) ──────
+        //
+        // Kullanım: /_deploy/run-pending?secret=XXX&cleanup=assign-content-codes
+        //   Mevcut cms_contents satırlarına kategori bazlı content_code atar
+        //   (UNI-001, BLOG-014, vb.). Idempotent — zaten kod'u olanlara dokunmaz.
+        if ($request->query('cleanup') === 'assign-content-codes') {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('cms:assign-content-codes');
+                $output .= ">>> cms:assign-content-codes\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+            } catch (\Throwable $e) {
+                $output .= ">>> cms:assign-content-codes FAILED: " . $e->getMessage() . "\n";
+            }
+        }
+
+        // Kullanım: /_deploy/run-pending?secret=XXX&cleanup=cms-fetch-uni-covers
+        //   10 mevcut üni blog'una Wikipedia'dan kapak görseli çek (TUM/LMU/...).
+        if ($request->query('cleanup') === 'cms-fetch-uni-covers') {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('cms:fetch-university-covers');
+                $output .= ">>> cms:fetch-university-covers\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+            } catch (\Throwable $e) {
+                $output .= ">>> cms:fetch-university-covers FAILED: " . $e->getMessage() . "\n";
+            }
+        }
+
+        // Kullanım: /_deploy/run-pending?secret=XXX&cleanup=cms-generate-uni-blogs
+        //   20 yeni üniversite için Gemini ile AI blog draft üretir (Berlin, Köln,
+        //   Münster, Würzburg, Tübingen, vb.). ~25 dk sürer + Gemini API tüketimi.
+        if ($request->query('cleanup') === 'cms-generate-uni-blogs') {
+            try {
+                @set_time_limit(1800); // 30 dk — Gemini call'ları için
+                \Illuminate\Support\Facades\Artisan::call('cms:generate-university-blogs');
+                $output .= ">>> cms:generate-university-blogs\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+            } catch (\Throwable $e) {
+                $output .= ">>> cms:generate-university-blogs FAILED: " . $e->getMessage() . "\n";
+            }
+        }
+
+        // Kullanım: /_deploy/run-pending?secret=XXX&cleanup=cms-fill-missing-covers
+        //   Kapaksız tüm published blog'lara title-bazlı + kategori-default Wiki
+        //   cover atar (~147 blog, 8-10 dk). Idempotent.
+        if ($request->query('cleanup') === 'cms-fill-missing-covers') {
+            try {
+                @set_time_limit(900); // 15 dk
+                \Illuminate\Support\Facades\Artisan::call('cms:fill-missing-covers');
+                $output .= ">>> cms:fill-missing-covers\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+            } catch (\Throwable $e) {
+                $output .= ">>> cms:fill-missing-covers FAILED: " . $e->getMessage() . "\n";
+            }
+        }
+
         // Opsiyonel inline log tail — ?tail=200 ile tetikle (route cache'siz fallback)
         $tail = (int) $request->query('tail', 0);
         if ($tail > 0) {
