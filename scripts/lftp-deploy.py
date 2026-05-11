@@ -100,13 +100,17 @@ def main() -> int:
     # Normalize server_dir — avoid double slashes when concatenating build path
     build_dir = server_dir.rstrip("/") + "/public/build/"
 
-    # force_rebuild=true ise --transfer-all flag'i ekle: lftp'nin size/time
-    # comparison'i bazi dosyalari yanlislikla skip ediyor (KAS partial transfer).
-    # Workflow_dispatch input'u FORCE_REBUILD env ile gelir.
+    # --transfer-all HER ZAMAN aktif: KAS lftp size/time karşılaştırması bazı
+    # dosyaları yanlışlıkla skip ediyor (özellikle yeni dosyalar veya yeni
+    # klasörler — Internal/, public/js/, vb. transfer edilmiyor). Sürekli
+    # partial transfer sorununu kalıcı çözüm: her commit'te tüm değişen dosyalar
+    # zorla upload. Hız kaybı 1-2 dakika ama deploy doğruluğu %100.
+    # FORCE_REBUILD env hala log için izleniyor (workflow_dispatch tetiklenmiş mi).
     force_rebuild = os.environ.get("FORCE_REBUILD", "").lower() in ("true", "1", "yes")
-    transfer_all_flag = "--transfer-all " if force_rebuild else ""
+    transfer_all_flag = "--transfer-all "
+    print("=== --transfer-all HER ZAMAN aktif (KAS partial transfer fix) ===")
     if force_rebuild:
-        print("=== FORCE_REBUILD aktif — tum dosyalar zorla yeniden upload ===")
+        print("=== FORCE_REBUILD workflow_dispatch tetikli ===")
 
     lftp_commands = [
         "set ftp:ssl-force true",
