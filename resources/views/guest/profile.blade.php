@@ -584,5 +584,5 @@
     });
 })();
 </script>
-<script defer src="{{ Vite::asset('resources/js/guest-language-skills.js') }}"></script>
+<script defer src="{{ asset('js/guest-language-skills.js') }}?v={{ @filemtime(public_path('js/guest-language-skills.js')) ?: time() }}"></script>
 @endpush

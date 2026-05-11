@@ -93,7 +93,7 @@
         <div class="ai-card-body">
             <div style="font-size:var(--tx-sm);color:var(--u-muted);line-height:1.7;">
                 <strong style="color:var(--u-text);">Günlük Soru Hakkı</strong><br>
-                Basic: 5 soru/gün &middot; Plus: 10 soru/gün &middot; Premium: Sınırsız
+                Her aday öğrenci için <strong>15 soru/gün</strong> (paket bağımsız)
             </div>
             <a href="{{ route('guest.services') }}"
                class="btn ok"

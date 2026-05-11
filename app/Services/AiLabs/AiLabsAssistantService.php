@@ -37,10 +37,9 @@ class AiLabsAssistantService
      */
     public function ask(int $companyId, string $role, int $userId, ?int $guestApplicationId, string $question, array $context = []): array
     {
-        // Premium paket → unlimited daily limit
-        $packageType = $this->resolvePackageType($guestApplicationId);
+        // Sabit 15 soru/gün (guest+student) — paket-bağımsız
         $dailyUsed = $this->dailyCount($role, $userId, $guestApplicationId);
-        $limit = $this->dailyLimit($companyId, $role, $packageType);
+        $limit = $this->dailyLimit($companyId, $role);
 
         if ($limit > 0 && $dailyUsed >= $limit) {
             return [
@@ -112,43 +111,22 @@ class AiLabsAssistantService
         };
     }
 
+    /**
+     * Tüm guest/student'lar için sabit 15 soru/gün — paket seçiminden bağımsız.
+     * (Eskiden settings'ten geliyordu + premium paket sınırsızdı; bu kaldırıldı.)
+     * İç roller (senior/manager/admin_staff) için sabit 100 korunur.
+     */
     public function dailyLimit(int $companyId, string $role, ?string $packageType = null): int
     {
-        // Premium paket → sınırsız (UI'da "Premium: Sınırsız" gözüküyor).
-        // Aşağıdaki $limit === 0 kontrolü çağrı yerlerinde unlimited davranışı sağlar.
-        if ($packageType === 'premium') {
-            return 0;
-        }
-
-        $settings = AiLabsSettings::forCompany($companyId);
-
         return match ($role) {
-            'guest'       => (int) $settings->daily_limit_guest,
-            'student'     => (int) $settings->daily_limit_student,
-            default       => 100, // iç roller — senior/manager/admin_staff sabit 100
+            'guest', 'student' => 15,
+            default            => 100,
         };
-    }
-
-    /**
-     * Guest/student için selected_package_code çek. Premium ise unlimited
-     * daily limit uygulanır.
-     */
-    public function resolvePackageType(?int $guestApplicationId): ?string
-    {
-        if (!$guestApplicationId) return null;
-        $code = \App\Models\GuestApplication::query()
-            ->where('id', $guestApplicationId)
-            ->value('selected_package_code');
-        return $code ? strtolower((string) $code) : null;
     }
 
     public function remainingToday(int $companyId, string $role, int $userId, ?int $guestApplicationId = null): int
     {
-        $packageType = $this->resolvePackageType($guestApplicationId);
-        $limit = $this->dailyLimit($companyId, $role, $packageType);
-        if ($limit === 0) {
-            return 999; // unlimited
-        }
+        $limit = $this->dailyLimit($companyId, $role);
         $used = $this->dailyCount($role, $userId, $guestApplicationId);
         return max(0, $limit - $used);
     }
