@@ -42,9 +42,10 @@ class ProgramSearchController extends Controller
 
         // Facet sayıları — boş query'de bile gözüksün (filtre dropdown'ları doldur)
         $facets = [
-            'degrees'   => $this->facetCounts('degree_type'),
-            'languages' => $this->facetCounts('language'),
-            'cities'    => $this->topCities(40),
+            'degrees'      => $this->facetCounts('degree_type'),
+            'languages'    => $this->facetCounts('language'),
+            'cities'       => $this->topCities(40),
+            'universities' => $this->topUniversities(600),
         ];
 
         return view('program-search.index', [
@@ -65,6 +66,7 @@ class ProgramSearchController extends Controller
     {
         return [
             'q'           => trim((string) $request->query('q', '')),
+            'university'  => trim((string) $request->query('university', '')),
             'degree'      => (string) $request->query('degree', ''),
             'language'    => (string) $request->query('language', ''),
             'subject'     => trim((string) $request->query('subject', '')),
@@ -77,6 +79,11 @@ class ProgramSearchController extends Controller
     private function buildQuery(array $f): \Illuminate\Database\Eloquent\Builder
     {
         $q = Program::query()->active();
+
+        // Üniversite filtresi — datalist'ten seçilen tam isim. Exact match.
+        if ($f['university'] !== '') {
+            $q->where('university_name_cached', $f['university']);
+        }
 
         if ($f['q'] !== '') {
             $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $f['q']) . '%';
@@ -159,6 +166,26 @@ class ProgramSearchController extends Controller
             ->where('location', '!=', '')
             ->groupBy('location')
             ->orderByDesc('cnt')
+            ->limit($limit)
+            ->pluck('cnt', 'val')
+            ->all();
+    }
+
+    /**
+     * Tüm üniversiteler — datalist autocomplete için.
+     * Alfabetik sıralı (kullanıcı kolay bulsun).
+     *
+     * @return array<string,int>
+     */
+    private function topUniversities(int $limit): array
+    {
+        return Program::query()
+            ->active()
+            ->selectRaw('university_name_cached as val, COUNT(*) as cnt')
+            ->whereNotNull('university_name_cached')
+            ->where('university_name_cached', '!=', '')
+            ->groupBy('university_name_cached')
+            ->orderBy('university_name_cached')
             ->limit($limit)
             ->pluck('cnt', 'val')
             ->all();

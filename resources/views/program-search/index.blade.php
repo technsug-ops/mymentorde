@@ -70,8 +70,17 @@
     <form method="GET" action="{{ route('program-search') }}" class="ps-filters">
         <div class="ps-filters-row">
             <div class="ps-field">
+                <label>🏛️ Üniversite</label>
+                <input type="text" name="university" value="{{ $filters['university'] }}" placeholder="Tüm üniversiteler (547)" list="ps-university-suggestions" autocomplete="off">
+                <datalist id="ps-university-suggestions">
+                    @foreach($facets['universities'] as $name => $cnt)
+                        <option value="{{ $name }}">{{ $cnt }} program</option>
+                    @endforeach
+                </datalist>
+            </div>
+            <div class="ps-field">
                 <label>Genel Arama</label>
-                <input type="text" name="q" value="{{ $filters['q'] }}" placeholder="program adı, üniversite, anahtar kelime…">
+                <input type="text" name="q" value="{{ $filters['q'] }}" placeholder="program adı, anahtar kelime…">
             </div>
             <div class="ps-field">
                 <label>Bölüm / Konu</label>
@@ -150,7 +159,22 @@
         <div class="ps-empty">
             <div class="ps-empty-icon">🔍</div>
             <div class="ps-empty-title">Sonuç bulunamadı</div>
-            <div class="ps-empty-sub">Filtreleri gevşet veya farklı bir bölüm/şehir dene. Tüm 15K+ programı görmek için <a href="{{ route('program-search') }}" style="color:#5b2e91;">filtreleri temizle</a>.</div>
+            @if($filters['university'] !== '')
+                @php
+                    $uniOnlyUrl = route('program-search') . '?' . http_build_query(['university' => $filters['university']]);
+                    $uniProgramCount = $facets['universities'][$filters['university']] ?? 0;
+                @endphp
+                <div class="ps-empty-sub">
+                    Seçili filtreler <strong>{{ $filters['university'] }}</strong> için sonuç vermedi.
+                    Bu üniversitenin toplam <strong>{{ $uniProgramCount }}</strong> programı var
+                    (örn. <em>{{ $filters['city'] ? '"'.$filters['city'].'" şehir filtresi üniversite ile çelişiyor olabilir' : 'diğer filtreleri gevşet' }}</em>).
+                    <br><br>
+                    <a href="{{ $uniOnlyUrl }}" style="color:#5b2e91;font-weight:600;">→ Sadece bu üniversitenin tüm programlarını göster</a><br>
+                    <a href="{{ route('program-search') }}" style="color:#64748b;">Tüm filtreleri temizle</a>
+                </div>
+            @else
+                <div class="ps-empty-sub">Filtreleri gevşet veya farklı bir bölüm/şehir dene. Tüm 15K+ programı görmek için <a href="{{ route('program-search') }}" style="color:#5b2e91;">filtreleri temizle</a>.</div>
+            @endif
         </div>
     @else
         <div class="ps-grid">
