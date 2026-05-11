@@ -588,3 +588,12 @@ Route::middleware(['company.context', 'auth', 'verified', 'analytics.access'])->
     Route::post('/manager/actions/{type}/{id}/update-notes',  [$leadAct, 'updateNotes'])->where(['type' => 'guest|student', 'id' => '[0-9]+'])->middleware('throttle:30,1')->name('manager.actions.update-notes');
     Route::post('/manager/actions/{type}/{id}/log',           [$leadAct, 'logMe'])->where(['type' => 'guest|student', 'id' => '[0-9]+'])->middleware('throttle:60,1')->name('manager.actions.log');
 });
+
+// /program-search — internal kullanıcılar için wizard bypass program arama.
+// Manager grubu dışında — senior/mentor/admin_staff/operations_* de erişebilir.
+// Auth zorunlu, rol kontrolü controller içinde (ALLOWED_ROLES).
+Route::middleware(['company.context', 'auth'])->group(function (): void {
+    Route::get('/program-search', [\App\Http\Controllers\UniMatch\ProgramSearchController::class, 'index'])
+        ->middleware('throttle:120,1')
+        ->name('program-search');
+});
