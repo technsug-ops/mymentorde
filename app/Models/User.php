@@ -18,9 +18,16 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
     protected static function booted(): void
     {
         static::creating(function (User $user): void {
-            // Bu sistemde tüm kullanıcılar admin tarafından veya şifre e-posta
-            // akışıyla oluşturulur — dolayısıyla varsayılan olarak doğrulanmış sayılır.
-            if ($user->email_verified_at === null) {
+            // Mail doğrulama davranışı (Mayıs 2026):
+            // - Admin/system kullanıcı yaratırken email_verified_at attribute'unu
+            //   explicit set ETMEZSE → default now() (otomatik verified).
+            // - Guest self-registration (GuestApplicationController) explicit olarak
+            //   email_verified_at => null verir → null kalır, kullanıcı welcome maildeki
+            //   signed URL'i tıklamadan login akışı EnsureEmailIsVerified middleware
+            //   tarafından /email/verify notice sayfasına yönlendirilir.
+            //
+            // array_key_exists kullanılır (isset null değeri için false döner — ayırt edemez).
+            if (!array_key_exists('email_verified_at', $user->getAttributes())) {
                 $user->email_verified_at = now();
             }
 
@@ -226,6 +233,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         'failed_login_attempts',
         'locked_until',
         'last_failed_login_at',
+        'email_verified_at', // System-only — request input'tan değil, sadece controller'lar set eder
     ];
 
     /**

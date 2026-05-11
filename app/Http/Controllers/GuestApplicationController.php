@@ -579,6 +579,10 @@ class GuestApplicationController extends Controller
             'role' => User::ROLE_GUEST,
             'is_active' => true,
             'password' => $plainPassword, // 'hashed' cast DB'ye yazmadan önce hash'ler
+            // Guest self-registration → mail doğrulama zorunlu.
+            // Welcome maildeki signed URL'e tıklayana kadar EnsureEmailIsVerified
+            // middleware /email/verify notice sayfasına yönlendirir.
+            'email_verified_at' => null,
         ]);
 
         return [$user, $plainPassword];
