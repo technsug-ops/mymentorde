@@ -953,6 +953,22 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // DEBUG: prod'da bir route mevcut mu?
+        // Kullanım: /_deploy/run-pending?secret=...&cleanup=route-exists&route=program-search
+        if ($request->query('cleanup') === 'route-exists') {
+            $needle = (string) $request->query('route', '');
+            $found = [];
+            foreach (\Illuminate\Support\Facades\Route::getRoutes() as $r) {
+                $uri = $r->uri();
+                if ($needle === '' || str_contains($uri, $needle)) {
+                    $found[] = strtoupper(implode('|', $r->methods())) . ' ' . $uri . ' → ' . ($r->getActionName() ?: 'closure');
+                    if (count($found) >= 20) break;
+                }
+            }
+            $output .= ">>> route-exists '{$needle}': " . count($found) . " match\n";
+            $output .= implode("\n", $found) . "\n";
+        }
+
         // DEBUG: prod'da belirli bir dosyanın son N satırını dump et.
         // Kullanım: /_deploy/run-pending?secret=...&cleanup=dump-file&path=routes/manager.php&n=15
         if ($request->query('cleanup') === 'dump-file') {
