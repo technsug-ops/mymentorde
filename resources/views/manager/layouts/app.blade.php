@@ -478,21 +478,7 @@
             @endmodule
 
             <div class="nav-section">
-                <div class="nav-section-label">Sistem</div>
-                <a href="/manager/system"
-                   class="nav-link {{ request()->is('manager/system') ? 'active' : '' }}">
-                    <span class="nav-icon">🖥</span> Sistem Paneli
-                </a>
-                <a href="{{ route('manager.landing-inventory.index') }}"
-                   class="nav-link {{ request()->is('manager/landing-inventory*') ? 'active' : '' }}">
-                    <span class="nav-icon">🌐</span> Landing Envanter
-                </a>
-                @module('silence_checkin')
-                    <a href="{{ route('manager.silence-monitor.index') }}"
-                       class="nav-link {{ request()->is('manager/silence-monitor*') ? 'active' : '' }}">
-                        <span class="nav-icon">📍</span> Sessizlik Monitörü
-                    </a>
-                @endmodule
+                <div class="nav-section-label">UniMatch</div>
                 <a href="{{ route('manager.program-catalog.changes') }}"
                    class="nav-link {{ request()->is('manager/program-catalog*') ? 'active' : '' }}">
                     <span class="nav-icon">📚</span> Program Kataloğu
@@ -522,6 +508,24 @@
                    class="nav-link {{ request()->is('manager/universities*') ? 'active' : '' }}">
                     <span class="nav-icon">🏛️</span> Üniversite Görselleri
                 </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-label">Sistem</div>
+                <a href="/manager/system"
+                   class="nav-link {{ request()->is('manager/system') ? 'active' : '' }}">
+                    <span class="nav-icon">🖥</span> Sistem Paneli
+                </a>
+                <a href="{{ route('manager.landing-inventory.index') }}"
+                   class="nav-link {{ request()->is('manager/landing-inventory*') ? 'active' : '' }}">
+                    <span class="nav-icon">🌐</span> Landing Envanter
+                </a>
+                @module('silence_checkin')
+                    <a href="{{ route('manager.silence-monitor.index') }}"
+                       class="nav-link {{ request()->is('manager/silence-monitor*') ? 'active' : '' }}">
+                        <span class="nav-icon">📍</span> Sessizlik Monitörü
+                    </a>
+                @endmodule
                 <a href="{{ route('manager.companies.modules') }}"
                    class="nav-link {{ request()->is('manager/companies/modules*') ? 'active' : '' }}">
                     <span class="nav-icon">🧩</span> SaaS Modül Yönetimi
