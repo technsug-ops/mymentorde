@@ -40,12 +40,30 @@ class ProgramSearchController extends Controller
         $filters = $this->extractFilters($request);
         $rows = $this->buildQuery($filters)->paginate(30)->withQueryString();
 
+        $geo = config('germany_geo');
+
+        // Şehirleri büyük/küçük diye ayır
+        $allCities = $this->allCities();
+        $bigCitySet = array_flip($geo['big_cities']);
+        $bigCities = [];
+        $smallCities = [];
+        foreach ($allCities as $name => $cnt) {
+            if (isset($bigCitySet[$name])) {
+                $bigCities[$name] = $cnt;
+            } else {
+                $smallCities[$name] = $cnt;
+            }
+        }
+
         // Facet sayıları — boş query'de bile gözüksün (filtre dropdown'ları doldur)
         $facets = [
             'degrees'      => $this->facetCounts('degree_type'),
             'languages'    => $this->facetCounts('language'),
-            'cities'       => $this->allCities(),       // 275 şehir, alfabetik, EN/DE merge edilmiş
+            'cities'       => $allCities,
+            'big_cities'   => $bigCities,
+            'small_cities' => $smallCities,
             'universities' => $this->topUniversities(600),
+            'states'       => $geo['states'],
         ];
 
         return view('program-search.index', [
@@ -66,7 +84,11 @@ class ProgramSearchController extends Controller
     {
         return [
             'q'           => trim((string) $request->query('q', '')),
+            'state'       => (string) $request->query('state', ''),
+            'big_city'    => trim((string) $request->query('big_city', '')),
+            'small_city'  => trim((string) $request->query('small_city', '')),
             'university'  => trim((string) $request->query('university', '')),
+            'top_uni'     => (string) $request->query('top_uni', ''),
             'degree'      => (string) $request->query('degree', ''),
             'language'    => (string) $request->query('language', ''),
             'subject'     => trim((string) $request->query('subject', '')),
@@ -80,9 +102,46 @@ class ProgramSearchController extends Controller
     {
         $q = Program::query()->active();
 
+        // Eyalet filtresi — config'deki city_to_state mapping ile
+        if ($f['state'] !== '') {
+            $cityToState = (array) config('germany_geo.city_to_state', []);
+            $citiesInState = array_keys(array_filter($cityToState, fn ($s) => $s === $f['state']));
+            if ($citiesInState !== []) {
+                $q->whereIn('location', $citiesInState);
+            } else {
+                $q->whereRaw('1=0'); // bilinmeyen eyalet → 0 sonuç
+            }
+        }
+
+        // Büyük şehir filtresi — alias-aware exact match
+        if ($f['big_city'] !== '') {
+            $aliases = self::cityAliases($f['big_city']);
+            $q->whereIn('location', $aliases);
+        }
+
+        // Küçük şehir filtresi — alias-aware exact match
+        if ($f['small_city'] !== '') {
+            $aliases = self::cityAliases($f['small_city']);
+            $q->whereIn('location', $aliases);
+        }
+
         // Üniversite filtresi — datalist'ten seçilen tam isim. Exact match.
         if ($f['university'] !== '') {
             $q->where('university_name_cached', $f['university']);
+        }
+
+        // Top üniversite filtresi — config'deki top_10/20/40 listelerinden whereIn
+        if ($f['top_uni'] !== '') {
+            $topKey = match ($f['top_uni']) {
+                'top10' => 'top_10',
+                'top20' => 'top_20',
+                'top40' => 'top_40',
+                default => null,
+            };
+            if ($topKey) {
+                $topList = (array) config("germany_geo.{$topKey}", []);
+                $q->whereIn('university_name_cached', $topList);
+            }
         }
 
         if ($f['q'] !== '') {

@@ -27,7 +27,10 @@
 
 /* Sticky filter bar */
 .ps-filters { position: sticky; top: 14px; background: var(--u-card,#fff); border: 1px solid var(--u-line,#e2e8f0); border-radius: 12px; padding: 14px; margin-bottom: 14px; z-index: 10; box-shadow: 0 1px 6px rgba(0,0,0,.04); }
-.ps-filters-row { display: grid; grid-template-columns: 1fr 1.5fr 1.2fr 1fr 1fr 1fr; gap: 8px; align-items: end; }
+.ps-filters-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; align-items: end; margin-bottom: 8px; }
+.ps-filters-row:last-of-type { margin-bottom: 0; }
+.ps-filters-group-label { font-size: 10px; font-weight: 800; color: #5b2e91; text-transform: uppercase; letter-spacing: .08em; margin: 8px 0 4px; padding-bottom: 3px; border-bottom: 1px dashed rgba(91,46,145,.2); }
+.ps-filters-group-label:first-child { margin-top: 0; }
 @media (max-width: 980px) { .ps-filters-row { grid-template-columns: 1fr 1fr; } }
 
 /* Info modal trigger + modal */
@@ -100,12 +103,31 @@
 
         {{-- Filtreler --}}
         <div class="ps-filters">
+        <div class="ps-filters-group-label">📍 Lokasyon</div>
         <div class="ps-filters-row">
             <div class="ps-field">
-                <label>🏙️ Şehir</label>
-                <input type="text" name="city" value="{{ $filters['city'] }}" placeholder="Tüm şehirler ({{ count($facets['cities']) }})" list="ps-city-suggestions" autocomplete="off">
-                <datalist id="ps-city-suggestions">
-                    @foreach($facets['cities'] as $name => $cnt)
+                <label>🗺️ Eyalet</label>
+                <select name="state">
+                    <option value="">Tüm eyaletler (16)</option>
+                    @foreach($facets['states'] as $key => $label)
+                        <option value="{{ $key }}" @selected($filters['state'] === $key)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="ps-field">
+                <label>🏙️ Büyük şehir</label>
+                <select name="big_city">
+                    <option value="">Tümü</option>
+                    @foreach($facets['big_cities'] as $name => $cnt)
+                        <option value="{{ $name }}" @selected($filters['big_city'] === $name)>{{ $name }} ({{ $cnt }})</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="ps-field">
+                <label>🏘️ Küçük şehir</label>
+                <input type="text" name="small_city" value="{{ $filters['small_city'] }}" placeholder="{{ count($facets['small_cities']) }} şehir — yaz ve seç" list="ps-small-city-suggestions" autocomplete="off">
+                <datalist id="ps-small-city-suggestions">
+                    @foreach($facets['small_cities'] as $name => $cnt)
                         <option value="{{ $name }}">{{ $cnt }} program</option>
                     @endforeach
                 </datalist>
@@ -118,6 +140,19 @@
                         <option value="{{ $name }}">{{ $cnt }} program</option>
                     @endforeach
                 </datalist>
+            </div>
+        </div>{{-- /Row 1: Lokasyon --}}
+
+        <div class="ps-filters-group-label">🎓 Üniversite Sıralaması & Akademik</div>
+        <div class="ps-filters-row">
+            <div class="ps-field">
+                <label>🏆 Top Üniversiteler</label>
+                <select name="top_uni">
+                    <option value="">Tümü</option>
+                    <option value="top10" @selected($filters['top_uni'] === 'top10')>🥇 Top 10</option>
+                    <option value="top20" @selected($filters['top_uni'] === 'top20')>🥈 Top 20</option>
+                    <option value="top40" @selected($filters['top_uni'] === 'top40')>🥉 Top 40</option>
+                </select>
             </div>
             <div class="ps-field">
                 <label>📚 Bölüm / Konu</label>
@@ -199,6 +234,9 @@
                     @endforeach
                 </select>
             </div>
+        </div>{{-- /Row 2: Akademik --}}
+
+        <div class="ps-filters-row">
             <div class="ps-field">
                 <label>💶 Ücret (üst)</label>
                 <select name="tuition_max">
@@ -209,7 +247,7 @@
                     <option value="5000" @selected($filters['tuition_max'] === '5000')>≤ €5000/dönem</option>
                 </select>
             </div>
-        </div>
+        </div>{{-- /Row 3: Bütçe --}}
         <div class="ps-actions">
             <button type="submit" class="ps-btn-primary">🔍 Filtrele</button>
             <a href="{{ route('program-search') }}" class="ps-btn-ghost">✕ Temizle</a>
