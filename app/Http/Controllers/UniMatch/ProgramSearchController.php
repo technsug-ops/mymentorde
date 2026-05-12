@@ -44,7 +44,7 @@ class ProgramSearchController extends Controller
         $facets = [
             'degrees'      => $this->facetCounts('degree_type'),
             'languages'    => $this->facetCounts('language'),
-            'cities'       => $this->topCities(40),
+            'cities'       => $this->allCities(),       // 275 şehir, alfabetik, EN/DE merge edilmiş
             'universities' => $this->topUniversities(600),
         ];
 
@@ -118,8 +118,10 @@ class ProgramSearchController extends Controller
         }
 
         if ($f['city'] !== '') {
-            $city = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $f['city']) . '%';
-            $q->where('location', 'like', $city);
+            // EN ↔ DE şehir adı eşdeğerleri — kaynakta tutarsız yazım var.
+            // Kullanıcı datalist'ten "München" seçince hem München hem Munich exact-match'lenir.
+            $cityAliases = self::cityAliases($f['city']);
+            $q->whereIn('location', $cityAliases);
         }
 
         if ($f['tuition_max'] !== '') {
@@ -158,19 +160,72 @@ class ProgramSearchController extends Controller
             ->all();
     }
 
-    /** @return array<string,int> */
-    private function topCities(int $limit): array
+    /**
+     * EN/DE şehir adı eşdeğerleri — kaynak veride duplikasyon var.
+     * Kullanıcı "München" seçince hem "München" hem "Munich" kayıtları aransın.
+     */
+    /**
+     * Canonical isim = pair'in SON elemanı (allCities birleştirmesinde tercih).
+     * Şehir alfabetik listede daha yaygın yazımı görmek istiyoruz.
+     */
+    private const CITY_ALIAS_PAIRS = [
+        ['Munich', 'München'],
+        ['Cologne', 'Köln'],
+        ['Hanover', 'Hannover'],
+        ['Brunswick', 'Braunschweig'],
+        ['Nuremberg', 'Nürnberg'],
+        ['Constance', 'Konstanz'],
+        ['Frankfurt/Main', 'Frankfurt a.M.', 'Frankfurt am Main'],
+        ['Aix-la-Chapelle', 'Aachen'],
+        ['Freiburg i. Br.', 'Freiburg', 'Freiburg im Breisgau'],
+    ];
+
+    /** @return list<string> */
+    private static function cityAliases(string $city): array
     {
-        return Program::query()
+        foreach (self::CITY_ALIAS_PAIRS as $pair) {
+            if (in_array($city, $pair, true)) {
+                return $pair;
+            }
+        }
+        return [$city];
+    }
+
+    /**
+     * Tüm şehirler (275) — datalist autocomplete için.
+     * EN/DE duplikasyonları tek satırda birleştirilir (canonical = DE adı).
+     *
+     * @return array<string,int>
+     */
+    private function allCities(): array
+    {
+        $rows = Program::query()
             ->active()
             ->selectRaw('location as val, COUNT(*) as cnt')
             ->whereNotNull('location')
             ->where('location', '!=', '')
             ->groupBy('location')
-            ->orderByDesc('cnt')
-            ->limit($limit)
             ->pluck('cnt', 'val')
             ->all();
+
+        // EN/DE duplikasyonları birleştir — canonical isim = pair'in son elemanı (DE)
+        $merged = [];
+        $seen = [];
+        foreach ($rows as $name => $cnt) {
+            $canonical = $name;
+            foreach (self::CITY_ALIAS_PAIRS as $pair) {
+                if (in_array($name, $pair, true)) {
+                    $canonical = end($pair); // DE adı tercih
+                    break;
+                }
+            }
+            $merged[$canonical] = ($merged[$canonical] ?? 0) + $cnt;
+            $seen[$name] = true;
+        }
+
+        // Alfabetik sırala
+        ksort($merged, SORT_NATURAL | SORT_FLAG_CASE);
+        return $merged;
     }
 
     /**

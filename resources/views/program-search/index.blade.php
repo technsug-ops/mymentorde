@@ -103,12 +103,12 @@
         <div class="ps-filters-row">
             <div class="ps-field">
                 <label>🏙️ Şehir</label>
-                <select name="city">
-                    <option value="">Tüm şehirler</option>
-                    @foreach($facets['cities'] as $val => $cnt)
-                        <option value="{{ $val }}" @selected($filters['city'] === $val)>{{ $val }} ({{ $cnt }})</option>
+                <input type="text" name="city" value="{{ $filters['city'] }}" placeholder="Tüm şehirler ({{ count($facets['cities']) }})" list="ps-city-suggestions" autocomplete="off">
+                <datalist id="ps-city-suggestions">
+                    @foreach($facets['cities'] as $name => $cnt)
+                        <option value="{{ $name }}">{{ $cnt }} program</option>
                     @endforeach
-                </select>
+                </datalist>
             </div>
             <div class="ps-field">
                 <label>🏛️ Üniversite</label>
