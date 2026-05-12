@@ -375,9 +375,6 @@
             <span class="ps-stat">📊 <strong>{{ number_format($rows->total()) }}</strong> sonuç</span>
         </div>
         </div>{{-- /ps-filters --}}
-            </div>{{-- /ps-content --}}
-        </div>{{-- /ps-layout --}}
-    </form>
 
     {{-- Bilgi modalı — derece sayıları açıklaması (CSS-only :target modal, JS yok) --}}
     <div class="ps-modal-overlay" id="ps-info-modal">
@@ -479,5 +476,9 @@
             <div style="margin-top:16px;">{{ $rows->links() }}</div>
         @endif
     @endif
+
+            </div>{{-- /ps-content --}}
+        </div>{{-- /ps-layout --}}
+    </form>
 </div>
 @endsection
