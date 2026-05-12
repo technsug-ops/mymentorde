@@ -84,7 +84,47 @@
 .ps-empty-icon { font-size: 40px; margin-bottom: 12px; }
 .ps-empty-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: var(--u-text); }
 .ps-empty-sub { font-size: 12.5px; color: var(--u-muted,#64748b); }
+
+/* ── 2-sütun layout: sol bölüm sidebar + sağ içerik ── */
+.ps-layout { display: grid; grid-template-columns: 260px 1fr; gap: 14px; align-items: start; }
+@media (max-width: 960px) { .ps-layout { grid-template-columns: 1fr; } }
+
+.ps-sidebar { background: var(--u-card,#fff); border: 1px solid var(--u-line,#e2e8f0); border-radius: 12px; padding: 14px; position: sticky; top: 14px; max-height: calc(100vh - 30px); overflow-y: auto; }
+.ps-sidebar h4 { margin: 0 0 8px; font-size: 12px; font-weight: 800; color: #5b2e91; text-transform: uppercase; letter-spacing: .06em; }
+.ps-sidebar-search { width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 12.5px; border: 1px solid var(--u-line,#cbd5e1); border-radius: 7px; margin-bottom: 10px; background: var(--u-bg,#f8fafc); }
+.ps-sidebar-search:focus { outline: none; border-color: #5b2e91; background: var(--u-card,#fff); }
+.ps-field-list { display: flex; flex-direction: column; gap: 2px; }
+.ps-field-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12.5px; cursor: pointer; transition: background .12s; }
+.ps-field-row:hover { background: var(--u-bg,#f1f5f9); }
+.ps-field-row input { margin: 0; cursor: pointer; accent-color: #5b2e91; }
+.ps-field-row .ps-field-label { flex: 1; color: var(--u-text); line-height: 1.3; }
+.ps-field-row .ps-field-count { font-size: 11px; color: var(--u-muted,#94a3b8); font-weight: 600; }
+.ps-field-row.is-active { background: rgba(91,46,145,.08); }
+.ps-field-row.is-active .ps-field-label { color: #5b2e91; font-weight: 600; }
+.ps-field-empty { padding: 16px 8px; text-align: center; font-size: 11.5px; color: var(--u-muted,#94a3b8); font-style: italic; }
+.ps-sidebar-actions { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--u-line,#e2e8f0); display: flex; gap: 6px; }
+.ps-sidebar-actions button { flex: 1; padding: 6px 8px; font-size: 11px; border: 1px solid var(--u-line,#cbd5e1); background: var(--u-card,#fff); color: var(--u-muted,#64748b); border-radius: 6px; cursor: pointer; font-weight: 600; }
+.ps-sidebar-actions button:hover { border-color: #5b2e91; color: #5b2e91; }
 </style>
+
+@push('scripts')
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    var search = document.getElementById('ps-field-search');
+    var list = document.getElementById('ps-field-list');
+    if (!search || !list) return;
+    var rows = list.querySelectorAll('.ps-field-row');
+    search.addEventListener('input', function(e){
+        var q = (e.target.value || '').toLowerCase().trim();
+        rows.forEach(function(row){
+            var name = (row.getAttribute('data-field-name') || '').toLowerCase();
+            row.style.display = (q === '' || name.indexOf(q) !== -1) ? '' : 'none';
+        });
+    });
+})();
+</script>
+@endpush
+
 
 <div class="ps-wrap">
     <div class="ps-info-bar">
@@ -101,6 +141,30 @@
             <div class="ps-hero-hint">Bu alan filtrelerden bağımsızdır — istediğin terimi gir, aşağıdaki filtrelerle daraltabilirsin</div>
         </div>
 
+        <div class="ps-layout">
+            {{-- Sol sidebar: bölüm kategorileri (uni-assist tarzı) --}}
+            <aside class="ps-sidebar">
+                <h4>📚 Bölüm Kategorisi</h4>
+                <input type="search" id="ps-field-search" class="ps-sidebar-search" placeholder="Bölüm ara... (örn. Engineering)" autocomplete="off">
+                <div class="ps-field-list" id="ps-field-list">
+                    @forelse($facets['fields'] as $field => $cnt)
+                        @php $isActive = in_array($field, $filters['fields'], true); @endphp
+                        <label class="ps-field-row {{ $isActive ? 'is-active' : '' }}" data-field-name="{{ strtolower($field) }}">
+                            <input type="checkbox" name="fields[]" value="{{ $field }}" @checked($isActive)>
+                            <span class="ps-field-label">{{ $field }}</span>
+                            <span class="ps-field-count">{{ number_format($cnt) }}</span>
+                        </label>
+                    @empty
+                        <div class="ps-field-empty">Kategori yok</div>
+                    @endforelse
+                </div>
+                <div class="ps-sidebar-actions">
+                    <button type="submit">✓ Uygula</button>
+                    <a href="{{ route('program-search') }}" style="flex:1;padding:6px 8px;font-size:11px;border:1px solid var(--u-line,#cbd5e1);background:var(--u-card,#fff);color:var(--u-muted,#64748b);border-radius:6px;font-weight:600;text-align:center;text-decoration:none;">Sıfırla</a>
+                </div>
+            </aside>
+
+            <div class="ps-content">
         {{-- Filtreler --}}
         <div class="ps-filters">
         <div class="ps-filters-group-label">📍 Lokasyon</div>
@@ -260,6 +324,8 @@
             <span class="ps-stat">📊 <strong>{{ number_format($rows->total()) }}</strong> sonuç</span>
         </div>
         </div>{{-- /ps-filters --}}
+            </div>{{-- /ps-content --}}
+        </div>{{-- /ps-layout --}}
     </form>
 
     {{-- Bilgi modalı — derece sayıları açıklaması (CSS-only :target modal, JS yok) --}}

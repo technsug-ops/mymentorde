@@ -64,6 +64,7 @@ class ProgramSearchController extends Controller
             'small_cities' => $smallCities,
             'universities' => $this->topUniversities(600),
             'states'       => $geo['states'],
+            'fields'       => $this->topStudyFields(),
         ];
 
         return view('program-search.index', [
@@ -82,6 +83,11 @@ class ProgramSearchController extends Controller
 
     private function extractFilters(Request $request): array
     {
+        $fields = $request->query('fields', []);
+        if (!is_array($fields)) {
+            $fields = [];
+        }
+
         return [
             'q'           => trim((string) $request->query('q', '')),
             'state'       => (string) $request->query('state', ''),
@@ -89,6 +95,7 @@ class ProgramSearchController extends Controller
             'small_city'  => trim((string) $request->query('small_city', '')),
             'university'  => trim((string) $request->query('university', '')),
             'top_uni'     => (string) $request->query('top_uni', ''),
+            'fields'      => array_values(array_filter(array_map('strval', $fields), fn ($v) => $v !== '')),
             'degree'      => (string) $request->query('degree', ''),
             'language'    => (string) $request->query('language', ''),
             'subject'     => trim((string) $request->query('subject', '')),
@@ -142,6 +149,20 @@ class ProgramSearchController extends Controller
                 $topList = (array) config("germany_geo.{$topKey}", []);
                 $q->whereIn('university_name_cached', $topList);
             }
+        }
+
+        // Bölüm kategorisi filtreleri — sol sidebar checkbox'lar (multi-select).
+        // study_fields JSON array, içinde tam-eşleşen entry varsa o program seçilir.
+        // OR mantığı: seçilen kategorilerden HERHANGİ BİRİNDE eşleşen programlar gelir.
+        if (!empty($f['fields'])) {
+            $q->where(function ($sub) use ($f) {
+                foreach ($f['fields'] as $field) {
+                    // JSON array içinde "Engineering" → LIKE '%"Engineering"%' (quote'lu)
+                    $escaped = str_replace(['\\', '"'], ['\\\\', '\\"'], $field);
+                    $like = '%"' . $escaped . '"%';
+                    $sub->orWhere('study_fields', 'like', $like);
+                }
+            });
         }
 
         if ($f['q'] !== '') {
@@ -285,6 +306,28 @@ class ProgramSearchController extends Controller
         // Alfabetik sırala
         ksort($merged, SORT_NATURAL | SORT_FLAG_CASE);
         return $merged;
+    }
+
+    /**
+     * Bölüm kategorileri (study_fields JSON array'inden toplanır).
+     * Boş ve tek-program'lı (gürültü) kategoriler filtrelenir.
+     *
+     * @return array<string,int>
+     */
+    private function topStudyFields(): array
+    {
+        $counts = [];
+        foreach (Program::query()->active()->whereNotNull('study_fields')->pluck('study_fields') as $fields) {
+            foreach ((array) $fields as $f) {
+                $f = trim((string) $f);
+                if ($f === '') continue;
+                $counts[$f] = ($counts[$f] ?? 0) + 1;
+            }
+        }
+        // 2'den az olan duplikasyon/typo kategorileri at
+        $counts = array_filter($counts, fn ($c) => $c >= 2);
+        arsort($counts);
+        return $counts;
     }
 
     /**
