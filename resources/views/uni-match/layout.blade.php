@@ -406,6 +406,18 @@
         }
         body.sb-wizard-mode .sb-header { max-width: none; padding: 0; }
 
+        /* ── Catalog mode: program-search public versiyonu ───
+           Geniş container + nötr arka plan (premium card gradientleri yok). */
+        body.sb-catalog-mode {
+            background: #f7f5fb;
+            min-height: 100vh;
+        }
+        body.sb-catalog-mode .sb-container {
+            max-width: 1320px;
+            padding: 18px clamp(16px, 3vw, 32px) 40px;
+        }
+        body.sb-catalog-mode .sb-header { max-width: 1320px; padding: 12px clamp(16px, 3vw, 32px); }
+
         /* ── Split layout: sol wizard, sağ büyük foto + counter ───
            min-height YOK — kart içeriği boyutuyla doğal büyür, kesilme olmaz.
            align-items: start — sol kart içeriğine göre, sağ panel ayrı bağımsız. */
@@ -825,6 +837,9 @@
         }
         if (document.documentElement.classList.contains('sb-detail-active')) {
             document.body.classList.add('sb-detail-mode');
+        }
+        if (document.documentElement.classList.contains('sb-catalog-active')) {
+            document.body.classList.add('sb-catalog-mode');
         }
     </script>
 

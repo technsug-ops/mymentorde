@@ -18,6 +18,14 @@
 @section('page_title', $publicMode ? 'Almanya Program Kataloğu' : 'Program Arama')
 @section('page_subtitle', $publicMode ? '15.000+ Almanya üniversite programı — bölüm, şehir, eyalet ile filtrele' : 'Almanya üniversite programları — wizard bypass, doğrudan filtrele')
 
+@if($publicMode)
+@push('head')
+<script nonce="{{ $cspNonce ?? '' }}">
+    document.documentElement.classList.add('sb-catalog-active');
+</script>
+@endpush
+@endif
+
 @section('content')
 <style>
 .ps-wrap { max-width: 1280px; margin: 0 auto; padding: 0 4px; }
@@ -110,6 +118,36 @@
 .ps-sidebar-actions { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--u-line,#e2e8f0); display: flex; gap: 6px; }
 .ps-sidebar-actions button { flex: 1; padding: 6px 8px; font-size: 11px; border: 1px solid var(--u-line,#cbd5e1); background: var(--u-card,#fff); color: var(--u-muted,#64748b); border-radius: 6px; cursor: pointer; font-weight: 600; }
 .ps-sidebar-actions button:hover { border-color: #5b2e91; color: #5b2e91; }
+
+@if($publicMode)
+/* ─── Public catalog mode override'ları ─── */
+.ps-wrap { max-width: 100%; padding: 0; }
+.ps-info-bar { padding: 12px 16px; background: linear-gradient(135deg,#faf7ff,#f3edff); border: 1px solid #e6dcfa; border-radius: 12px; }
+
+/* Hero küçültme — catalog'da abartılı gözükmesin */
+.ps-hero { max-width: 640px; margin: 4px auto 16px; }
+.ps-hero-input { padding: 11px 16px; font-size: 14.5px; border-radius: 10px; border-width: 1.5px; border-color: #d8d2e8; }
+.ps-hero-input:focus { border-color: #7e58bf; box-shadow: 0 0 0 3px rgba(126,88,191,.1); }
+.ps-hero-hint { font-size: 11px; }
+
+/* Brand: 5b2e91 yerine #7e58bf (public theme) */
+.ps-filters-group-label { color: #7e58bf; border-bottom-color: rgba(126,88,191,.18); }
+.ps-btn-primary { background: #7e58bf; }
+.ps-btn-primary:hover { background: #6849a8; }
+.ps-field input:focus, .ps-field select:focus { border-color: #7e58bf; box-shadow: 0 0 0 3px rgba(126,88,191,.1); }
+.ps-sidebar h4 { color: #7e58bf; }
+.ps-field-row input { accent-color: #7e58bf; }
+.ps-field-row.is-active { background: rgba(126,88,191,.08); }
+.ps-field-row.is-active .ps-field-label { color: #7e58bf; }
+.ps-card:hover { border-color: #7e58bf; box-shadow: 0 2px 8px rgba(126,88,191,.08); }
+.ps-card-title a:hover { color: #7e58bf; }
+.ps-card-actions .btn-detail { background: #7e58bf; }
+.ps-card-actions .btn-detail:hover { background: #6849a8; }
+.ps-info-btn { background: rgba(126,88,191,.1); color: #7e58bf; }
+.ps-info-btn:hover { background: #7e58bf; color: #fff; }
+.ps-info-bar strong { color: #7e58bf; }
+.ps-sidebar-actions button:hover { border-color: #7e58bf; color: #7e58bf; }
+@endif
 </style>
 
 @push('scripts')
