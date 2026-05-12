@@ -108,10 +108,12 @@ class ProgramSearchController extends Controller
 
         if ($f['subject'] !== '') {
             $sub = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $f['subject']) . '%';
+            // DB'deki bölümler genelde DE/EN — kullanıcı TR yazarsa description_tr'de bulunur.
             $q->where(function ($w) use ($sub) {
                 $w->where('study_fields', 'like', $sub)
                   ->orWhere('subjects', 'like', $sub)
-                  ->orWhere('course_name', 'like', $sub);
+                  ->orWhere('course_name', 'like', $sub)
+                  ->orWhere('description_tr', 'like', $sub);
             });
         }
 

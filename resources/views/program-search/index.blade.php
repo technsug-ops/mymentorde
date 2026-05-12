@@ -19,10 +19,31 @@
 .ps-info-bar { padding: 10px 14px; background: rgba(126,88,191,.06); border: 1px solid rgba(126,88,191,.2); border-radius: 10px; margin-bottom: 14px; font-size: 12.5px; color: #334155; }
 .ps-info-bar strong { color: #5b2e91; }
 
+/* Hero search — büyük ortalanmış genel arama */
+.ps-hero { max-width: 760px; margin: 0 auto 18px; text-align: center; }
+.ps-hero-input { width: 100%; box-sizing: border-box; padding: 14px 20px; font-size: 16px; border: 2px solid var(--u-line,#cbd5e1); border-radius: 12px; background: var(--u-card,#fff); color: var(--u-text); outline: none; font-family: inherit; text-align: center; transition: border-color .15s, box-shadow .15s; }
+.ps-hero-input:focus { border-color: #5b2e91; box-shadow: 0 0 0 4px rgba(91,46,145,.12); }
+.ps-hero-hint { margin-top: 6px; font-size: 11.5px; color: var(--u-muted,#94a3b8); }
+
 /* Sticky filter bar */
 .ps-filters { position: sticky; top: 14px; background: var(--u-card,#fff); border: 1px solid var(--u-line,#e2e8f0); border-radius: 12px; padding: 14px; margin-bottom: 14px; z-index: 10; box-shadow: 0 1px 6px rgba(0,0,0,.04); }
-.ps-filters-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 8px; align-items: end; }
+.ps-filters-row { display: grid; grid-template-columns: 1fr 1.5fr 1.2fr 1fr 1fr 1fr; gap: 8px; align-items: end; }
 @media (max-width: 980px) { .ps-filters-row { grid-template-columns: 1fr 1fr; } }
+
+/* Info modal trigger + modal */
+.ps-info-btn { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: rgba(91,46,145,.1); color: #5b2e91; font-size: 10px; font-weight: 700; border: none; cursor: pointer; vertical-align: middle; margin-left: 4px; text-decoration: none; font-style: italic; font-family: serif; }
+.ps-info-btn:hover { background: #5b2e91; color: #fff; }
+.ps-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.ps-modal-overlay:target { display: flex; }
+.ps-modal { background: var(--u-card,#fff); border-radius: 14px; max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 24px 26px; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+.ps-modal h3 { margin: 0 0 12px; font-size: 17px; color: var(--u-text); }
+.ps-modal p, .ps-modal li { font-size: 13px; line-height: 1.55; color: var(--u-text); }
+.ps-modal ul { padding-left: 20px; margin: 8px 0 14px; }
+.ps-modal-close { float: right; background: none; border: none; font-size: 22px; line-height: 1; color: var(--u-muted,#64748b); cursor: pointer; text-decoration: none; padding: 0 4px; }
+.ps-modal-close:hover { color: #5b2e91; }
+.ps-modal table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 8px 0; }
+.ps-modal th, .ps-modal td { padding: 6px 8px; border-bottom: 1px solid var(--u-line,#e2e8f0); text-align: left; }
+.ps-modal th { background: rgba(91,46,145,.06); color: #5b2e91; font-weight: 700; }
 .ps-field label { display: block; font-size: 10.5px; font-weight: 700; color: var(--u-muted,#64748b); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
 .ps-field input, .ps-field select { width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 13px; border: 1px solid var(--u-line,#cbd5e1); border-radius: 7px; background: var(--u-card,#fff); color: var(--u-text); outline: none; font-family: inherit; }
 .ps-field input:focus, .ps-field select:focus { border-color: #5b2e91; box-shadow: 0 0 0 3px rgba(91,46,145,.1); }
@@ -67,8 +88,28 @@
         🔍 <strong>Internal Program Arama</strong> — UniMatch wizard'ı atlayıp doğrudan filtrele. Toplam <strong>{{ number_format($totalAll) }}</strong> canonical program. Bölüm (Psikoloji, Mühendislik vb.) yazarak ara, üniversite/şehir/ücret/dil ile daralt.
     </div>
 
-    <form method="GET" action="{{ route('program-search') }}" class="ps-filters">
+    <form method="GET" action="{{ route('program-search') }}">
+        {{-- Genel arama: filtreden bağımsız, ortalanmış, büyük --}}
+        <div class="ps-hero">
+            <input type="text" name="q" value="{{ $filters['q'] }}"
+                   class="ps-hero-input"
+                   placeholder="🔍 Program adı, anahtar kelime ile genel arama…"
+                   autocomplete="off">
+            <div class="ps-hero-hint">Bu alan filtrelerden bağımsızdır — istediğin terimi gir, aşağıdaki filtrelerle daraltabilirsin</div>
+        </div>
+
+        {{-- Filtreler --}}
+        <div class="ps-filters">
         <div class="ps-filters-row">
+            <div class="ps-field">
+                <label>🏙️ Şehir</label>
+                <select name="city">
+                    <option value="">Tüm şehirler</option>
+                    @foreach($facets['cities'] as $val => $cnt)
+                        <option value="{{ $val }}" @selected($filters['city'] === $val)>{{ $val }} ({{ $cnt }})</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="ps-field">
                 <label>🏛️ Üniversite</label>
                 <input type="text" name="university" value="{{ $filters['university'] }}" placeholder="Tüm üniversiteler (547)" list="ps-university-suggestions" autocomplete="off">
@@ -79,32 +120,68 @@
                 </datalist>
             </div>
             <div class="ps-field">
-                <label>Genel Arama</label>
-                <input type="text" name="q" value="{{ $filters['q'] }}" placeholder="program adı, anahtar kelime…">
-            </div>
-            <div class="ps-field">
-                <label>Bölüm / Konu</label>
-                <input type="text" name="subject" value="{{ $filters['subject'] }}" placeholder="Psikoloji, Mühendislik…" list="ps-subject-suggestions">
+                <label>📚 Bölüm / Konu</label>
+                <input type="text" name="subject" value="{{ $filters['subject'] }}" placeholder="Psychologie, Medizin…" list="ps-subject-suggestions" autocomplete="off">
                 <datalist id="ps-subject-suggestions">
-                    <option value="Psikoloji">
-                    <option value="Mühendislik">
-                    <option value="Bilgisayar">
-                    <option value="Mimarlık">
-                    <option value="Tıp">
-                    <option value="Hukuk">
-                    <option value="İşletme">
-                    <option value="Ekonomi">
-                    <option value="Pedagoji">
-                    <option value="Felsefe">
-                    <option value="Biyoloji">
-                    <option value="Kimya">
-                    <option value="Fizik">
-                    <option value="Sanat">
-                    <option value="Müzik">
+                    {{-- Almanca/EN değerler — DB'de bölümler bu dilde, Türkçe arandığında bulunmaz --}}
+                    <option value="Psychologie">Psikoloji</option>
+                    <option value="Medizin">Tıp</option>
+                    <option value="Zahnmedizin">Diş Hekimliği</option>
+                    <option value="Pharmazie">Eczacılık</option>
+                    <option value="Tiermedizin">Veteriner</option>
+                    <option value="Ingenieurwesen">Mühendislik (genel)</option>
+                    <option value="Maschinenbau">Makine Mühendisliği</option>
+                    <option value="Elektrotechnik">Elektrik-Elektronik Müh.</option>
+                    <option value="Bauingenieurwesen">İnşaat Mühendisliği</option>
+                    <option value="Informatik">Bilgisayar / Informatik</option>
+                    <option value="Computer Science">Computer Science (EN)</option>
+                    <option value="Wirtschaftsinformatik">Yönetim Bilişim Sistemleri</option>
+                    <option value="Architektur">Mimarlık</option>
+                    <option value="Architecture">Architecture (EN)</option>
+                    <option value="Rechtswissenschaft">Hukuk</option>
+                    <option value="Jura">Hukuk (Jura)</option>
+                    <option value="Betriebswirtschaft">İşletme (BWL)</option>
+                    <option value="Business Administration">Business Administration (EN)</option>
+                    <option value="Wirtschaftswissenschaft">İktisat / Ekonomi</option>
+                    <option value="Economics">Economics (EN)</option>
+                    <option value="Finance">Finans (EN)</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Mathematik">Matematik</option>
+                    <option value="Physik">Fizik</option>
+                    <option value="Chemie">Kimya</option>
+                    <option value="Biologie">Biyoloji</option>
+                    <option value="Biotechnologie">Biyoteknoloji</option>
+                    <option value="Pädagogik">Pedagoji / Eğitim</option>
+                    <option value="Erziehungswissenschaft">Eğitim Bilimleri</option>
+                    <option value="Sozialwissenschaft">Sosyal Bilimler</option>
+                    <option value="Soziale Arbeit">Sosyal Hizmet</option>
+                    <option value="Politikwissenschaft">Siyaset Bilimi</option>
+                    <option value="Geschichte">Tarih</option>
+                    <option value="Philosophie">Felsefe</option>
+                    <option value="Theologie">Teoloji / İlahiyat</option>
+                    <option value="Kunst">Sanat</option>
+                    <option value="Design">Tasarım</option>
+                    <option value="Musik">Müzik</option>
+                    <option value="Sport">Spor Bilimleri</option>
+                    <option value="Anglistik">İngiliz Dili / Edebiyatı</option>
+                    <option value="Germanistik">Alman Dili / Edebiyatı</option>
+                    <option value="Romanistik">Roman Dilleri</option>
+                    <option value="Übersetzen">Çeviribilim</option>
+                    <option value="Data Science">Data Science (EN)</option>
+                    <option value="Artificial Intelligence">Yapay Zeka (EN)</option>
+                    <option value="Robotics">Robotik (EN)</option>
+                    <option value="Renewable Energy">Yenilenebilir Enerji (EN)</option>
+                    <option value="Environmental">Çevre Bilimleri (EN)</option>
+                    <option value="Geographie">Coğrafya</option>
+                    <option value="Geologie">Jeoloji</option>
+                    <option value="Pflege">Hemşirelik / Bakım</option>
                 </datalist>
             </div>
             <div class="ps-field">
-                <label>Derece</label>
+                <label>
+                    🎓 Derece
+                    <a href="#ps-info-modal" class="ps-info-btn" title="Sayılar hakkında bilgi">i</a>
+                </label>
                 <select name="degree">
                     <option value="">Tümü</option>
                     @foreach($facets['degrees'] as $val => $cnt)
@@ -113,26 +190,17 @@
                 </select>
             </div>
             <div class="ps-field">
-                <label>Dil</label>
+                <label>🌐 Dil</label>
                 <select name="language">
                     <option value="">Tümü</option>
                     @foreach($facets['languages'] as $val => $cnt)
-                        @php $label = ['de' => '🇩🇪 Almanca', 'en' => '🇬🇧 İngilizce', 'both' => '🇩🇪🇬🇧 İkisi'][$val] ?? $val; @endphp
-                        <option value="{{ $val }}" @selected($filters['language'] === $val)>{{ $label }} ({{ $cnt }})</option>
+                        @php $label = ['de' => '🇩🇪 Almanca', 'en' => '🇬🇧 İngilizce', 'both' => '🇩🇪🇬🇧 İkisi (DE+EN)'][$val] ?? $val; @endphp
+                        <option value="{{ $val }}" @selected($filters['language'] === $val)>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="ps-field">
-                <label>Şehir</label>
-                <select name="city">
-                    <option value="">Tümü</option>
-                    @foreach($facets['cities'] as $val => $cnt)
-                        <option value="{{ $val }}" @selected($filters['city'] === $val)>{{ $val }} ({{ $cnt }})</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="ps-field">
-                <label>Ücret (üst)</label>
+                <label>💶 Ücret (üst)</label>
                 <select name="tuition_max">
                     <option value="">Tümü</option>
                     <option value="0" @selected($filters['tuition_max'] === '0')>🆓 Ücretsiz</option>
@@ -153,7 +221,41 @@
             </select>
             <span class="ps-stat">📊 <strong>{{ number_format($rows->total()) }}</strong> sonuç</span>
         </div>
+        </div>{{-- /ps-filters --}}
     </form>
+
+    {{-- Bilgi modalı — derece sayıları açıklaması (CSS-only :target modal, JS yok) --}}
+    <div class="ps-modal-overlay" id="ps-info-modal">
+        <a href="#" class="ps-modal-bg-close" aria-hidden="true" style="position:absolute;inset:0;display:block;"></a>
+        <div class="ps-modal" style="position:relative;z-index:1;">
+            <a href="#" class="ps-modal-close" aria-label="Kapat">×</a>
+            <h3>📊 Sayılar Hakkında</h3>
+            <p>Filtre dropdown'larındaki parantez içi sayılar (örn. <strong>Bachelor (6221)</strong>) <strong>tüm aktif kataloğu</strong> esas alır — diğer filtreleri uyguladığında gerçek sonuç sayısı değişir.</p>
+            <p><strong>Örnek dağılımlar:</strong></p>
+            <table>
+                <thead><tr><th>Kategori</th><th>Bachelor</th><th>Master</th><th>PhD</th></tr></thead>
+                <tbody>
+                    <tr><td>🇩🇪 Sadece Almanca</td><td>~4900</td><td>~3200</td><td>~200</td></tr>
+                    <tr><td>🇬🇧 Sadece İngilizce</td><td>~600</td><td>~3300</td><td>~150</td></tr>
+                    <tr><td>🇩🇪🇬🇧 İkisi (DE+EN)</td><td>~700</td><td>~2200</td><td>~40</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Yaygın bölüm kategorileri (DB'de Almanca/İngilizce geçer):</strong></p>
+            <ul>
+                <li><strong>Mühendislik</strong> — Ingenieurwesen / Maschinenbau / Elektrotechnik / Bauingenieurwesen</li>
+                <li><strong>Tıp & sağlık</strong> — Medizin / Zahnmedizin / Pharmazie / Pflege</li>
+                <li><strong>Hukuk</strong> — Rechtswissenschaft / Jura</li>
+                <li><strong>İşletme & ekonomi</strong> — Betriebswirtschaft (BWL) / Wirtschaftswissenschaft / Business / Economics</li>
+                <li><strong>Bilgisayar</strong> — Informatik / Computer Science / Data Science</li>
+                <li><strong>Sosyal bilimler</strong> — Sozialwissenschaft / Pädagogik / Politikwissenschaft / Psychologie</li>
+                <li><strong>Doğa bilimleri</strong> — Mathematik / Physik / Chemie / Biologie</li>
+                <li><strong>Sanat & dil</strong> — Kunst / Musik / Anglistik / Germanistik</li>
+            </ul>
+            <p style="background:rgba(91,46,145,.06);padding:10px;border-radius:8px;font-size:12.5px;">
+                💡 <strong>İpucu:</strong> Bölüm filtresine <em>Türkçe</em> değil <em>Almanca/İngilizce</em> yaz (örn. "Tıp" yerine "Medizin"). Datalist'ten seçince doğru terim otomatik gelir.
+            </p>
+        </div>
+    </div>
 
     @if($rows->isEmpty())
         <div class="ps-empty">
