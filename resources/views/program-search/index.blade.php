@@ -1,17 +1,22 @@
 @php
-    // Layout seçimi role'e göre — internal role + portal layout uyumu
-    $role = auth()->user()->role ?? 'manager';
-    $layout = match ($role) {
-        'senior', 'mentor' => 'senior.layouts.app',
-        default            => 'manager.layouts.app',
-    };
+    // Layout seçimi: public mode (guest) → uni-match layout, internal → role layout
+    $publicMode = $publicMode ?? false;
+    if ($publicMode) {
+        $layout = 'uni-match.layout';
+    } else {
+        $role = auth()->user()->role ?? 'manager';
+        $layout = match ($role) {
+            'senior', 'mentor' => 'senior.layouts.app',
+            default            => 'manager.layouts.app',
+        };
+    }
 @endphp
 
 @extends($layout)
 
-@section('title', 'Program Arama — ' . config('brand.name', 'MentorDE'))
-@section('page_title', 'Program Arama')
-@section('page_subtitle', 'Almanya üniversite programları — wizard bypass, doğrudan filtrele')
+@section('title', ($publicMode ? 'Program Kataloğu' : 'Program Arama') . ' — ' . config('brand.name', 'MentorDE'))
+@section('page_title', $publicMode ? 'Almanya Program Kataloğu' : 'Program Arama')
+@section('page_subtitle', $publicMode ? '15.000+ Almanya üniversite programı — bölüm, şehir, eyalet ile filtrele' : 'Almanya üniversite programları — wizard bypass, doğrudan filtrele')
 
 @section('content')
 <style>
@@ -127,11 +132,19 @@
 
 
 <div class="ps-wrap">
-    <div class="ps-info-bar">
-        🔍 <strong>Internal Program Arama</strong> — UniMatch wizard'ı atlayıp doğrudan filtrele. Toplam <strong>{{ number_format($totalAll) }}</strong> canonical program. Bölüm (Psikoloji, Mühendislik vb.) yazarak ara, üniversite/şehir/ücret/dil ile daralt.
-    </div>
+    @if($publicMode)
+        <div class="ps-info-bar">
+            🎓 <strong>{{ number_format($totalAll) }}+ Almanya programı</strong> — bölüm, şehir, eyalet, dil ile filtrele. Sana en uygun olanı bulmak için <a href="{{ route('uni-match.start') }}" style="color:#5b2e91;font-weight:700;">5 dakikalık UniMatch sihirbazını</a> da deneyebilirsin.
+        </div>
+        @php $formAction = route('uni-match.programs'); @endphp
+    @else
+        <div class="ps-info-bar">
+            🔍 <strong>Internal Program Arama</strong> — UniMatch wizard'ı atlayıp doğrudan filtrele. Toplam <strong>{{ number_format($totalAll) }}</strong> canonical program. Bölüm (Psikoloji, Mühendislik vb.) yazarak ara, üniversite/şehir/ücret/dil ile daralt.
+        </div>
+        @php $formAction = route('program-search'); @endphp
+    @endif
 
-    <form method="GET" action="{{ route('program-search') }}">
+    <form method="GET" action="{{ $formAction }}">
         {{-- Genel arama: filtreden bağımsız, ortalanmış, büyük --}}
         <div class="ps-hero">
             <input type="text" name="q" value="{{ $filters['q'] }}"
@@ -160,7 +173,7 @@
                 </div>
                 <div class="ps-sidebar-actions">
                     <button type="submit">✓ Uygula</button>
-                    <a href="{{ route('program-search') }}" style="flex:1;padding:6px 8px;font-size:11px;border:1px solid var(--u-line,#cbd5e1);background:var(--u-card,#fff);color:var(--u-muted,#64748b);border-radius:6px;font-weight:600;text-align:center;text-decoration:none;">Sıfırla</a>
+                    <a href="{{ $formAction }}" style="flex:1;padding:6px 8px;font-size:11px;border:1px solid var(--u-line,#cbd5e1);background:var(--u-card,#fff);color:var(--u-muted,#64748b);border-radius:6px;font-weight:600;text-align:center;text-decoration:none;">Sıfırla</a>
                 </div>
             </aside>
 
@@ -314,7 +327,7 @@
         </div>{{-- /Row 3: Bütçe --}}
         <div class="ps-actions">
             <button type="submit" class="ps-btn-primary">🔍 Filtrele</button>
-            <a href="{{ route('program-search') }}" class="ps-btn-ghost">✕ Temizle</a>
+            <a href="{{ $formAction }}" class="ps-btn-ghost">✕ Temizle</a>
             <select name="sort" onchange="this.form.submit()" style="padding:7px 10px; font-size:12px; border:1px solid var(--u-line,#cbd5e1); border-radius:6px; background:var(--u-card,#fff);">
                 <option value="relevance" @selected($filters['sort'] === 'relevance')>Sırala: Alaka</option>
                 <option value="quality" @selected($filters['sort'] === 'quality')>Sırala: Kalite skoru</option>
@@ -367,7 +380,7 @@
             <div class="ps-empty-title">Sonuç bulunamadı</div>
             @if($filters['university'] !== '')
                 @php
-                    $uniOnlyUrl = route('program-search') . '?' . http_build_query(['university' => $filters['university']]);
+                    $uniOnlyUrl = $formAction . '?' . http_build_query(['university' => $filters['university']]);
                     $uniProgramCount = $facets['universities'][$filters['university']] ?? 0;
                 @endphp
                 <div class="ps-empty-sub">
@@ -376,10 +389,10 @@
                     (örn. <em>{{ $filters['city'] ? '"'.$filters['city'].'" şehir filtresi üniversite ile çelişiyor olabilir' : 'diğer filtreleri gevşet' }}</em>).
                     <br><br>
                     <a href="{{ $uniOnlyUrl }}" style="color:#5b2e91;font-weight:600;">→ Sadece bu üniversitenin tüm programlarını göster</a><br>
-                    <a href="{{ route('program-search') }}" style="color:#64748b;">Tüm filtreleri temizle</a>
+                    <a href="{{ $formAction }}" style="color:#64748b;">Tüm filtreleri temizle</a>
                 </div>
             @else
-                <div class="ps-empty-sub">Filtreleri gevşet veya farklı bir bölüm/şehir dene. Tüm 15K+ programı görmek için <a href="{{ route('program-search') }}" style="color:#5b2e91;">filtreleri temizle</a>.</div>
+                <div class="ps-empty-sub">Filtreleri gevşet veya farklı bir bölüm/şehir dene. Tüm 15K+ programı görmek için <a href="{{ $formAction }}" style="color:#5b2e91;">filtreleri temizle</a>.</div>
             @endif
         </div>
     @else

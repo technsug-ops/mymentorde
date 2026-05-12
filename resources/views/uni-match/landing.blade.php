@@ -38,6 +38,23 @@
         @endif
     </div>
 
+    {{-- Direkt arama: wizard'sız bölüm/program ara → public catalog --}}
+    <form method="GET" action="{{ route('uni-match.programs') }}"
+          style="max-width:560px;margin:22px auto 0;display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;"
+          data-track="cta_clicked" data-ph-cta-name="unimatch_landing_search">
+        <input type="text" name="q"
+               placeholder="🔍 Bölüm, üniversite veya şehir ara (Engineering, Berlin, TUM…)"
+               style="flex:1;min-width:240px;padding:13px 16px;font-size:14px;border:1.5px solid #d8d2e8;border-radius:10px;background:#fff;color:#1a1a1a;outline:none;"
+               autocomplete="off">
+        <button type="submit"
+                style="padding:13px 22px;background:#fff;color:#7e58bf;border:1.5px solid #7e58bf;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;">
+            Ara →
+        </button>
+    </form>
+    <div style="text-align:center;margin-top:8px;font-size:11.5px;color:#94a3b8;">
+        Wizard'sız direkt katalog · <a href="{{ route('uni-match.programs') }}" style="color:#7e58bf;text-decoration:underline;">tüm programları gör</a>
+    </div>
+
     <div class="sb-hero-meta">Ücretsiz · Login gerekmiyor · İstediğin zaman bırakabilirsin</div>
 
     <div class="sb-stats">

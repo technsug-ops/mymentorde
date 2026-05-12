@@ -54,6 +54,12 @@ Route::get('/robots.txt', function () {
 Route::middleware('company.context')->group(function (): void {
     $um = \App\Http\Controllers\UniMatch\WizardController::class;
     Route::get('/uni-match',                       [$um, 'landing'])->name('uni-match.landing');
+
+    // Public program catalog browse — wizard'sız, doğrudan filtre + arama
+    Route::get('/uni-match/programs', [\App\Http\Controllers\UniMatch\ProgramSearchController::class, 'publicIndex'])
+        ->middleware('throttle:120,1')
+        ->name('uni-match.programs');
+
     Route::get('/uni-match/start',                 [$um, 'start'])->middleware('throttle:30,1')->name('uni-match.start');
     Route::get('/uni-match/step/{n}',              [$um, 'step'])->whereNumber('n')->name('uni-match.step');
     Route::post('/uni-match/step/{n}',             [$um, 'saveStep'])->whereNumber('n')->middleware('throttle:60,1')->name('uni-match.step.save');

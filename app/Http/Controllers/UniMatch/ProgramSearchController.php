@@ -36,7 +36,20 @@ class ProgramSearchController extends Controller
     public function index(Request $request): View
     {
         $this->authorize();
+        return $this->renderSearch($request, publicMode: false);
+    }
 
+    /**
+     * Guest / public versiyonu — auth gerekmez, uni-match.layout kullanır.
+     * Route: GET /uni-match/programs
+     */
+    public function publicIndex(Request $request): View
+    {
+        return $this->renderSearch($request, publicMode: true);
+    }
+
+    private function renderSearch(Request $request, bool $publicMode): View
+    {
         $filters = $this->extractFilters($request);
         $rows = $this->buildQuery($filters)->paginate(30)->withQueryString();
 
@@ -68,10 +81,11 @@ class ProgramSearchController extends Controller
         ];
 
         return view('program-search.index', [
-            'rows'      => $rows,
-            'filters'   => $filters,
-            'facets'    => $facets,
-            'totalAll'  => Program::active()->count(),
+            'rows'       => $rows,
+            'filters'    => $filters,
+            'facets'     => $facets,
+            'totalAll'   => Program::active()->count(),
+            'publicMode' => $publicMode,
         ]);
     }
 
