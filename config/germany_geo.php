@@ -11,6 +11,20 @@
 
 return [
 
+    // ── EN ↔ DE şehir adı eşdeğerleri (kaynak verisinde duplikasyon) ────
+    // Canonical isim = pair'in SON elemanı (daha yaygın yazım).
+    'city_alias_pairs' => [
+        ['Munich', 'München'],
+        ['Cologne', 'Köln'],
+        ['Hanover', 'Hannover'],
+        ['Brunswick', 'Braunschweig'],
+        ['Nuremberg', 'Nürnberg'],
+        ['Constance', 'Konstanz'],
+        ['Frankfurt/Main', 'Frankfurt a.M.', 'Frankfurt am Main'],
+        ['Aix-la-Chapelle', 'Aachen'],
+        ['Freiburg i. Br.', 'Freiburg', 'Freiburg im Breisgau'],
+    ],
+
     // ── 16 Bundesländer ────────────────────────────────────────────
     'states' => [
         'baden_wuerttemberg'    => 'Baden-Württemberg',

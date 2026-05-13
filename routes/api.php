@@ -58,6 +58,20 @@ Route::prefix('v1/public')->middleware(['web', 'company.context', 'throttle:60,1
     Route::get('lead-source-options', [GuestApplicationController::class, 'leadSourceOptions']);
 });
 
+// ── Partner API (kardeş site / iş ortağı entegrasyonu) ────────────────
+// Auth: Authorization: Bearer mtde_live_<key>
+// Rate limit: per-key, default 1000/saat (partner üzerinden ayarlanır)
+// Audit log: her request api_partner_requests'e düşer
+Route::prefix('v1/partner')->middleware(['api.key'])->group(function (): void {
+    Route::get('programs',              [\App\Http\Controllers\Api\Partner\ProgramController::class, 'index']);
+    Route::get('programs/{program}',    [\App\Http\Controllers\Api\Partner\ProgramController::class, 'show']);
+    Route::get('universities',          [\App\Http\Controllers\Api\Partner\UniversityController::class, 'index']);
+    Route::get('universities/{university}', [\App\Http\Controllers\Api\Partner\UniversityController::class, 'show']);
+    Route::get('states',                [\App\Http\Controllers\Api\Partner\ReferenceController::class, 'states']);
+    Route::get('study-fields',          [\App\Http\Controllers\Api\Partner\ReferenceController::class, 'studyFields']);
+    Route::get('meta',                  [\App\Http\Controllers\Api\Partner\ReferenceController::class, 'meta']);
+});
+
 Route::prefix('v1/config')->middleware(['web', 'company.context', 'auth', 'manager.role'])->group(function (): void {
     Route::get('companies', [CompanyContextController::class, 'index'])->middleware('permission:config.view');
     Route::post('companies', [CompanyContextController::class, 'store'])->middleware('permission:config.manage');
