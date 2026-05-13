@@ -508,6 +508,10 @@
                    class="nav-link {{ request()->is('manager/universities*') ? 'active' : '' }}">
                     <span class="nav-icon">🏛️</span> Üniversite Görselleri
                 </a>
+                <a href="{{ route('manager.api-partners.index') }}"
+                   class="nav-link {{ request()->is('manager/api-partners*') ? 'active' : '' }}">
+                    <span class="nav-icon">📡</span> Partner API
+                </a>
             </div>
 
             <div class="nav-section">

@@ -439,6 +439,19 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::get('/manager/unimatch-funnel/leads.csv', [$umf, 'exportLeadsCsv'])->name('manager.unimatch-funnel.leads-csv');
     }
 
+    // ── Partner API Yönetimi ──
+    {
+        $apc = \App\Http\Controllers\Manager\ApiPartnerController::class;
+        Route::get('/manager/api-partners',                       [$apc, 'index'])->name('manager.api-partners.index');
+        Route::get('/manager/api-partners/create',                [$apc, 'create'])->name('manager.api-partners.create');
+        Route::post('/manager/api-partners',                      [$apc, 'store'])->middleware('throttle:10,1')->name('manager.api-partners.store');
+        Route::get('/manager/api-partners/{apiPartner}',          [$apc, 'show'])->name('manager.api-partners.show');
+        Route::put('/manager/api-partners/{apiPartner}',          [$apc, 'update'])->name('manager.api-partners.update');
+        Route::post('/manager/api-partners/{apiPartner}/rotate',  [$apc, 'rotate'])->middleware('throttle:10,1')->name('manager.api-partners.rotate');
+        Route::post('/manager/api-partners/{apiPartner}/toggle',  [$apc, 'toggle'])->name('manager.api-partners.toggle');
+        Route::delete('/manager/api-partners/{apiPartner}',       [$apc, 'destroy'])->name('manager.api-partners.destroy');
+    }
+
     // ── Üniversite görsel + video yönetimi ──
     {
         $uc = \App\Http\Controllers\Manager\UniversityController::class;
