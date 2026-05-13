@@ -62,6 +62,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'require.2fa' => \App\Http\Middleware\Require2FA::class,
             'module' => \App\Http\Middleware\ModuleEnabled::class,
             'page.visible' => \App\Http\Middleware\EnsurePageVisible::class,
+            'api.key' => \App\Http\Middleware\VerifyApiKey::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
