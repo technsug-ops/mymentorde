@@ -53,9 +53,26 @@ class WizardController extends Controller
             }
         }
 
+        // Partner/UTM passthrough — referral_url'den gelen UTM params'ı
+        // "Hadi başlayalım" linkine taşı, böylece start() metodu yakalayabilsin.
+        // Eksiklik: utm_content olarak 'pid_<UUID>' formatında program ID de tutulur.
+        $passKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+        $passthrough = array_filter(
+            $request->only($passKeys),
+            fn ($v) => is_string($v) && $v !== ''
+        );
+        // pid → utm_content (eğer utm_content yoksa)
+        $pid = trim((string) $request->query('pid', ''));
+        if ($pid !== '' && empty($passthrough['utm_content'])) {
+            $passthrough['utm_content'] = 'pid_' . substr($pid, 0, 60);
+        }
+        $passQuery = $passthrough ? http_build_query($passthrough) : '';
+
         return view('uni-match.landing', [
             'resume'           => $resumeData,
             'popularPrograms'  => $this->popularProgramsBlock(),
+            'utmPassQuery'     => $passQuery,
+            'utmPassParams'    => $passthrough,
         ]);
     }
 

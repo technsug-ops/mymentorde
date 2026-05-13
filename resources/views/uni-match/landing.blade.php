@@ -22,9 +22,13 @@
     <h1 class="sb-hero-title">Almanya'da sana en uygun programı bul</h1>
     <p class="sb-hero-subtitle">5 dakikalık akıllı sihirbazımız {{ config('brand.catalog.program_count_full') }} Almanya programı arasından profil ve hedeflerine en uygun olanları sıralar.</p>
 
+    @php
+        $startUrl = route('uni-match.start') . (!empty($utmPassQuery) ? '?' . $utmPassQuery : '');
+    @endphp
     <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;">
-        <a href="{{ route('uni-match.start') }}" class="sb-btn sb-btn-primary sb-hero-cta"
-           data-track="cta_clicked" data-ph-cta-name="unimatch_landing_start">
+        <a href="{{ $startUrl }}" class="sb-btn sb-btn-primary sb-hero-cta"
+           data-track="cta_clicked" data-ph-cta-name="unimatch_landing_start"
+           @if(!empty($utmPassParams['utm_source'])) data-ph-utm-source="{{ $utmPassParams['utm_source'] }}" @endif>
             Hadi başlayalım
             <span style="font-size: 18px;">→</span>
         </a>
@@ -46,6 +50,10 @@
                placeholder="🔍 Bölüm, üniversite veya şehir ara (Engineering, Berlin, TUM…)"
                style="flex:1;min-width:240px;padding:13px 16px;font-size:14px;border:1.5px solid #d8d2e8;border-radius:10px;background:#fff;color:#1a1a1a;outline:none;"
                autocomplete="off">
+        {{-- Partner UTM passthrough — search'den catalog'a, oradan wizard'a taşınır --}}
+        @foreach($utmPassParams as $k => $v)
+            <input type="hidden" name="{{ $k }}" value="{{ $v }}">
+        @endforeach
         <button type="submit"
                 style="padding:13px 22px;background:#fff;color:#7e58bf;border:1.5px solid #7e58bf;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;">
             Ara →
