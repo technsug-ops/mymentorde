@@ -10,13 +10,25 @@
             default            => 'manager.layouts.app',
         };
     }
+
+    // Aktif filtre sayısı (advanced section sayacı için)
+    $advancedFilterCount = 0;
+    if (!empty($filters['university']))      $advancedFilterCount++;
+    if (!empty($filters['big_city']))        $advancedFilterCount++;
+    if (!empty($filters['small_city']))      $advancedFilterCount++;
+    if (!empty($filters['top_uni']))         $advancedFilterCount++;
+    if (!empty($filters['subject']))         $advancedFilterCount++;
+    if (!empty($filters['tuition_max']))     $advancedFilterCount++;
+    if (!empty($filters['fields']))          $advancedFilterCount += count($filters['fields']);
+
+    $hasAdvanced = $advancedFilterCount > 0;
 @endphp
 
 @extends($layout)
 
 @section('title', ($publicMode ? 'Program Kataloğu' : 'Program Arama') . ' — ' . config('brand.name', 'MentorDE'))
 @section('page_title', $publicMode ? 'Almanya Program Kataloğu' : 'Program Arama')
-@section('page_subtitle', $publicMode ? '15.000+ Almanya üniversite programı — bölüm, şehir, eyalet ile filtrele' : 'Almanya üniversite programları — wizard bypass, doğrudan filtrele')
+@section('page_subtitle', $publicMode ? 'Bölüm, şehir, dil ile filtrele' : 'Wizard bypass — doğrudan filtre')
 
 @if($publicMode)
 @push('head')
@@ -28,406 +40,416 @@
 
 @section('content')
 <style>
-.ps-wrap { max-width: 1280px; margin: 0 auto; padding: 0 4px; }
-.ps-info-bar { padding: 10px 14px; background: rgba(126,88,191,.06); border: 1px solid rgba(126,88,191,.2); border-radius: 10px; margin-bottom: 14px; font-size: 12.5px; color: #334155; }
-.ps-info-bar strong { color: #5b2e91; }
+/* ════════════════════════════════════════════════════════════
+   Hochschulkompass-tarzı arama: progressive disclosure + 2-tier
+   ════════════════════════════════════════════════════════════ */
 
-/* Hero search — büyük ortalanmış genel arama */
-.ps-hero { max-width: 760px; margin: 0 auto 18px; text-align: center; }
-.ps-hero-input { width: 100%; box-sizing: border-box; padding: 14px 20px; font-size: 16px; border: 2px solid var(--u-line,#cbd5e1); border-radius: 12px; background: var(--u-card,#fff); color: var(--u-text); outline: none; font-family: inherit; text-align: center; transition: border-color .15s, box-shadow .15s; }
-.ps-hero-input:focus { border-color: #5b2e91; box-shadow: 0 0 0 4px rgba(91,46,145,.12); }
-.ps-hero-hint { margin-top: 6px; font-size: 11.5px; color: var(--u-muted,#94a3b8); }
+:root {
+    --ps-purple: #7e58bf;
+    --ps-purple-dark: #5b2e91;
+    --ps-line: var(--u-line, #e2e8f0);
+    --ps-text: var(--u-text, #1a1a1a);
+    --ps-muted: var(--u-muted, #64748b);
+    --ps-bg: var(--u-bg, #f8fafc);
+    --ps-card: var(--u-card, #fff);
+}
+@if($publicMode)
+:root { --ps-primary: var(--ps-purple); }
+@else
+:root { --ps-primary: var(--ps-purple-dark); }
+@endif
 
-/* Sticky filter bar */
-.ps-filters { position: sticky; top: 14px; background: var(--u-card,#fff); border: 1px solid var(--u-line,#e2e8f0); border-radius: 12px; padding: 14px; margin-bottom: 14px; z-index: 10; box-shadow: 0 1px 6px rgba(0,0,0,.04); }
-.ps-filters-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; align-items: end; margin-bottom: 8px; }
-.ps-filters-row:last-of-type { margin-bottom: 0; }
-.ps-filters-group-label { font-size: 10px; font-weight: 800; color: #5b2e91; text-transform: uppercase; letter-spacing: .08em; margin: 8px 0 4px; padding-bottom: 3px; border-bottom: 1px dashed rgba(91,46,145,.2); }
-.ps-filters-group-label:first-child { margin-top: 0; }
-@media (max-width: 980px) { .ps-filters-row { grid-template-columns: 1fr 1fr; } }
+.ps-wrap { max-width: 1200px; margin: 0 auto; padding: 0 4px; }
 
-/* Info modal trigger + modal */
-.ps-info-btn { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: rgba(91,46,145,.1); color: #5b2e91; font-size: 10px; font-weight: 700; border: none; cursor: pointer; vertical-align: middle; margin-left: 4px; text-decoration: none; font-style: italic; font-family: serif; }
-.ps-info-btn:hover { background: #5b2e91; color: #fff; }
-.ps-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-.ps-modal-overlay:target { display: flex; }
-.ps-modal { background: var(--u-card,#fff); border-radius: 14px; max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 24px 26px; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
-.ps-modal h3 { margin: 0 0 12px; font-size: 17px; color: var(--u-text); }
-.ps-modal p, .ps-modal li { font-size: 13px; line-height: 1.55; color: var(--u-text); }
-.ps-modal ul { padding-left: 20px; margin: 8px 0 14px; }
-.ps-modal-close { float: right; background: none; border: none; font-size: 22px; line-height: 1; color: var(--u-muted,#64748b); cursor: pointer; text-decoration: none; padding: 0 4px; }
-.ps-modal-close:hover { color: #5b2e91; }
-.ps-modal table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 8px 0; }
-.ps-modal th, .ps-modal td { padding: 6px 8px; border-bottom: 1px solid var(--u-line,#e2e8f0); text-align: left; }
-.ps-modal th { background: rgba(91,46,145,.06); color: #5b2e91; font-weight: 700; }
-.ps-field label { display: block; font-size: 10.5px; font-weight: 700; color: var(--u-muted,#64748b); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
-.ps-field input, .ps-field select { width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 13px; border: 1px solid var(--u-line,#cbd5e1); border-radius: 7px; background: var(--u-card,#fff); color: var(--u-text); outline: none; font-family: inherit; }
-.ps-field input:focus, .ps-field select:focus { border-color: #5b2e91; box-shadow: 0 0 0 3px rgba(91,46,145,.1); }
-.ps-actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; flex-wrap: wrap; }
-.ps-btn-primary { padding: 8px 18px; background: #5b2e91; color: #fff; border: none; border-radius: 7px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
-.ps-btn-primary:hover { background: #4a2578; }
-.ps-btn-ghost { padding: 8px 14px; background: transparent; color: var(--u-muted,#64748b); border: 1px solid var(--u-line,#cbd5e1); border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; }
-.ps-stat { margin-left: auto; font-size: 11.5px; color: var(--u-muted,#64748b); padding: 4px 10px; background: var(--u-bg,#f1f5f9); border-radius: 6px; }
+/* ═══ Hero — search + 3 ana select + 2 CTA ═══ */
+.ps-hero { background: var(--ps-card); border: 1px solid var(--ps-line); border-radius: 14px; padding: 22px 24px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(15,23,42,.04); }
+.ps-hero-search { position: relative; margin-bottom: 12px; }
+.ps-hero-search input { width: 100%; box-sizing: border-box; padding: 14px 18px 14px 46px; font-size: 15px; border: 1.5px solid var(--ps-line); border-radius: 10px; background: var(--ps-card); color: var(--ps-text); outline: none; font-family: inherit; transition: border-color .15s, box-shadow .15s; }
+.ps-hero-search input:focus { border-color: var(--ps-primary); box-shadow: 0 0 0 4px rgba(126,88,191,.1); }
+.ps-hero-search::before { content: "🔍"; position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; opacity: .55; }
 
-/* Result cards */
+.ps-hero-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.ps-hero-row .ps-select { position: relative; }
+.ps-hero-row select { width: 100%; box-sizing: border-box; padding: 11px 14px; font-size: 13.5px; border: 1.5px solid var(--ps-line); border-radius: 9px; background: var(--ps-card); color: var(--ps-text); cursor: pointer; appearance: none; -webkit-appearance: none; padding-right: 36px; font-family: inherit; outline: none; transition: border-color .15s; }
+.ps-hero-row select:focus { border-color: var(--ps-primary); }
+.ps-hero-row .ps-select::after { content: "▾"; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--ps-muted); font-size: 11px; }
+
+/* CTA satırı — büyük sonuç butonu + secondary Top 10 */
+.ps-hero-cta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.ps-hero-cta-primary { flex: 1 1 auto; min-width: 240px; padding: 14px 22px; background: var(--ps-primary); color: #fff; border: none; border-radius: 10px; font-size: 14.5px; font-weight: 800; cursor: pointer; transition: transform .12s, box-shadow .12s; letter-spacing: .02em; text-transform: uppercase; }
+.ps-hero-cta-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(126,88,191,.25); }
+.ps-hero-cta-primary strong { font-size: 16px; }
+.ps-hero-cta-secondary { padding: 12px 18px; background: rgba(245,158,11,.1); color: #b45309; border: 1.5px solid rgba(245,158,11,.5); border-radius: 10px; font-size: 12.5px; font-weight: 700; cursor: pointer; text-decoration: none; white-space: nowrap; transition: all .12s; }
+.ps-hero-cta-secondary:hover { background: rgba(245,158,11,.18); border-color: #d97706; }
+.ps-hero-cta-secondary.is-active { background: #d97706; color: #fff; border-color: #d97706; }
+
+/* ═══ Advanced toggle ═══ */
+.ps-advanced-toggle { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; padding: 6px 10px; background: transparent; color: var(--ps-primary); border: none; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; }
+.ps-advanced-toggle:hover { text-decoration: underline; }
+.ps-advanced-toggle .ps-badge { padding: 1px 7px; background: var(--ps-primary); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 800; }
+details.ps-advanced > summary { list-style: none; cursor: pointer; }
+details.ps-advanced > summary::-webkit-details-marker { display: none; }
+details.ps-advanced[open] .ps-advanced-toggle-chevron { transform: rotate(180deg); }
+.ps-advanced-toggle-chevron { display: inline-block; transition: transform .2s; }
+
+/* ═══ Advanced filters ═══ */
+details.ps-advanced { margin-top: 0; }
+.ps-advanced-body { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--ps-line); }
+.ps-advanced-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.ps-group { background: var(--ps-bg); border: 1px solid var(--ps-line); border-radius: 10px; padding: 12px 14px; }
+.ps-group > summary { list-style: none; cursor: pointer; font-size: 11.5px; font-weight: 800; color: var(--ps-primary); text-transform: uppercase; letter-spacing: .06em; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px dashed var(--ps-line); display: flex; align-items: center; justify-content: space-between; }
+.ps-group > summary::-webkit-details-marker { display: none; }
+.ps-group[open] .ps-group-chev { transform: rotate(180deg); }
+.ps-group-chev { transition: transform .2s; font-size: 10px; }
+.ps-group-body { display: flex; flex-direction: column; gap: 9px; }
+.ps-field label { display: block; font-size: 10.5px; font-weight: 700; color: var(--ps-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+.ps-field input, .ps-field select { width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 13px; border: 1px solid var(--ps-line); border-radius: 7px; background: var(--ps-card); color: var(--ps-text); outline: none; font-family: inherit; }
+.ps-field input:focus, .ps-field select:focus { border-color: var(--ps-primary); }
+
+.ps-fieldlist { max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; margin-top: 6px; padding: 4px; background: var(--ps-card); border: 1px solid var(--ps-line); border-radius: 7px; }
+.ps-fieldlist label { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 5px; font-size: 12px; cursor: pointer; transition: background .1s; margin: 0; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--ps-text); }
+.ps-fieldlist label:hover { background: var(--ps-bg); }
+.ps-fieldlist label input { width: auto; padding: 0; margin: 0; accent-color: var(--ps-primary); flex-shrink: 0; }
+.ps-fieldlist label.is-active { background: rgba(126,88,191,.08); color: var(--ps-primary); font-weight: 600; }
+.ps-fieldlist .ps-fl-count { margin-left: auto; font-size: 10.5px; color: var(--ps-muted); font-weight: 600; flex-shrink: 0; }
+
+.ps-advanced-actions { display: flex; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--ps-line); }
+.ps-btn-apply { padding: 9px 16px; background: var(--ps-primary); color: #fff; border: none; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.ps-btn-reset { padding: 9px 14px; background: transparent; color: var(--ps-muted); border: 1px solid var(--ps-line); border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; }
+
+/* ═══ Sonuç sayım header ═══ */
+.ps-results-head { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; flex-wrap: wrap; }
+.ps-results-head h2 { margin: 0; font-size: 16px; color: var(--ps-text); font-weight: 700; }
+.ps-results-head .ps-results-count { color: var(--ps-primary); }
+.ps-results-head select { padding: 7px 11px; font-size: 12px; border: 1px solid var(--ps-line); border-radius: 7px; background: var(--ps-card); color: var(--ps-text); cursor: pointer; margin-left: auto; }
+
+/* ═══ Result cards ═══ */
 .ps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-@media (max-width: 760px) { .ps-grid { grid-template-columns: 1fr; } }
-.ps-card { background: var(--u-card,#fff); border: 1px solid var(--u-line,#e2e8f0); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; transition: border-color .15s, box-shadow .15s; }
-.ps-card:hover { border-color: #5b2e91; box-shadow: 0 2px 8px rgba(91,46,145,.08); }
-.ps-card-uni { font-size: 11.5px; color: var(--u-muted,#64748b); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
-.ps-card-title { font-size: 15px; font-weight: 700; color: var(--u-text); line-height: 1.35; }
+.ps-card { background: var(--ps-card); border: 1px solid var(--ps-line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; transition: border-color .15s, box-shadow .15s; }
+.ps-card:hover { border-color: var(--ps-primary); box-shadow: 0 2px 8px rgba(126,88,191,.08); }
+.ps-card-uni { font-size: 11.5px; color: var(--ps-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.ps-card-title { font-size: 15px; font-weight: 700; color: var(--ps-text); line-height: 1.35; }
 .ps-card-title a { color: inherit; text-decoration: none; }
-.ps-card-title a:hover { color: #5b2e91; }
-.ps-card-meta { display: flex; gap: 6px; flex-wrap: wrap; font-size: 11px; color: var(--u-muted,#64748b); margin-top: 4px; }
-.ps-card-meta .ps-pill { padding: 3px 8px; background: var(--u-bg,#f1f5f9); border-radius: 5px; }
-.ps-card-meta .ps-pill.degree { background: rgba(91,46,145,.1); color: #5b2e91; font-weight: 600; }
+.ps-card-title a:hover { color: var(--ps-primary); }
+.ps-card-meta { display: flex; gap: 6px; flex-wrap: wrap; font-size: 11px; color: var(--ps-muted); margin-top: 4px; }
+.ps-card-meta .ps-pill { padding: 3px 8px; background: var(--ps-bg); border-radius: 5px; }
+.ps-card-meta .ps-pill.degree { background: rgba(126,88,191,.1); color: var(--ps-primary); font-weight: 600; }
 .ps-card-meta .ps-pill.lang { background: rgba(14,165,233,.1); color: #0369a1; font-weight: 600; }
 .ps-card-meta .ps-pill.tuition { background: rgba(16,185,129,.1); color: #047857; font-weight: 600; }
 .ps-card-meta .ps-pill.curated { background: rgba(245,158,11,.15); color: #b45309; font-weight: 700; }
-.ps-card-fields { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; font-size: 11px; color: var(--u-muted,#94a3b8); }
-.ps-card-fields .ps-field-chip { padding: 2px 7px; border: 1px dashed var(--u-line,#cbd5e1); border-radius: 4px; }
-.ps-card-actions { display: flex; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--u-line,#e2e8f0); }
+.ps-card-fields { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; font-size: 11px; color: #94a3b8; }
+.ps-card-fields .ps-field-chip { padding: 2px 7px; border: 1px dashed var(--ps-line); border-radius: 4px; }
+.ps-card-actions { display: flex; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--ps-line); }
 .ps-card-actions a { font-size: 11.5px; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-weight: 600; }
-.ps-card-actions .btn-detail { background: #5b2e91; color: #fff; }
-.ps-card-actions .btn-detail:hover { background: #4a2578; }
-.ps-card-actions .btn-uni { background: var(--u-bg,#f1f5f9); color: var(--u-text); }
-.ps-card-actions .btn-uni:hover { background: var(--u-line,#e2e8f0); }
+.ps-card-actions .btn-detail { background: var(--ps-primary); color: #fff; }
+.ps-card-actions .btn-uni { background: var(--ps-bg); color: var(--ps-text); }
 
-.ps-empty { padding: 60px 20px; text-align: center; background: var(--u-card,#fff); border: 1px dashed var(--u-line,#cbd5e1); border-radius: 12px; }
+.ps-empty { padding: 60px 20px; text-align: center; background: var(--ps-card); border: 1px dashed var(--ps-line); border-radius: 12px; }
 .ps-empty-icon { font-size: 40px; margin-bottom: 12px; }
-.ps-empty-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: var(--u-text); }
-.ps-empty-sub { font-size: 12.5px; color: var(--u-muted,#64748b); }
+.ps-empty-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: var(--ps-text); }
+.ps-empty-sub { font-size: 12.5px; color: var(--ps-muted); }
 
-/* ── 2-sütun layout: sol bölüm sidebar + sağ içerik ── */
-.ps-layout { display: grid; grid-template-columns: 260px 1fr; gap: 14px; align-items: start; }
-@media (max-width: 960px) { .ps-layout { grid-template-columns: 1fr; } }
+/* ═══ Mobile breakpoint ═══ */
+@media (max-width: 760px) {
+    .ps-hero { padding: 16px 14px; border-radius: 12px; }
+    .ps-hero-search input { padding: 12px 14px 12px 40px; font-size: 14px; }
+    .ps-hero-search::before { left: 12px; }
+    .ps-hero-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .ps-hero-row .ps-select:nth-child(3) { grid-column: 1 / -1; }
+    .ps-hero-cta { flex-direction: column; align-items: stretch; gap: 8px; }
+    .ps-hero-cta-primary { width: 100%; min-width: 0; padding: 13px 18px; font-size: 13.5px; }
+    .ps-hero-cta-primary strong { font-size: 15px; }
+    .ps-hero-cta-secondary { width: 100%; text-align: center; }
+    .ps-advanced-grid { grid-template-columns: 1fr; gap: 10px; }
+    .ps-fieldlist { max-height: 200px; }
+    .ps-grid { grid-template-columns: 1fr; }
+    .ps-card { padding: 12px 14px; }
+    .ps-card-title { font-size: 14px; }
+    .ps-results-head select { margin-left: 0; width: 100%; }
+}
 
-.ps-sidebar { background: var(--u-card,#fff); border: 1px solid var(--u-line,#e2e8f0); border-radius: 12px; padding: 14px; position: sticky; top: 14px; max-height: calc(100vh - 30px); overflow-y: auto; }
-.ps-sidebar h4 { margin: 0 0 8px; font-size: 12px; font-weight: 800; color: #5b2e91; text-transform: uppercase; letter-spacing: .06em; }
-.ps-sidebar-search { width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 12.5px; border: 1px solid var(--u-line,#cbd5e1); border-radius: 7px; margin-bottom: 10px; background: var(--u-bg,#f8fafc); }
-.ps-sidebar-search:focus { outline: none; border-color: #5b2e91; background: var(--u-card,#fff); }
-.ps-field-list { display: flex; flex-direction: column; gap: 2px; }
-.ps-field-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12.5px; cursor: pointer; transition: background .12s; }
-.ps-field-row:hover { background: var(--u-bg,#f1f5f9); }
-.ps-field-row input { margin: 0; cursor: pointer; accent-color: #5b2e91; }
-.ps-field-row .ps-field-label { flex: 1; color: var(--u-text); line-height: 1.3; }
-.ps-field-row .ps-field-count { font-size: 11px; color: var(--u-muted,#94a3b8); font-weight: 600; }
-.ps-field-row.is-active { background: rgba(91,46,145,.08); }
-.ps-field-row.is-active .ps-field-label { color: #5b2e91; font-weight: 600; }
-.ps-field-empty { padding: 16px 8px; text-align: center; font-size: 11.5px; color: var(--u-muted,#94a3b8); font-style: italic; }
-.ps-sidebar-actions { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--u-line,#e2e8f0); display: flex; gap: 6px; }
-.ps-sidebar-actions button { flex: 1; padding: 6px 8px; font-size: 11px; border: 1px solid var(--u-line,#cbd5e1); background: var(--u-card,#fff); color: var(--u-muted,#64748b); border-radius: 6px; cursor: pointer; font-weight: 600; }
-.ps-sidebar-actions button:hover { border-color: #5b2e91; color: #5b2e91; }
+/* Info bar (üst) */
+.ps-info-bar { padding: 10px 14px; background: rgba(126,88,191,.06); border: 1px solid rgba(126,88,191,.18); border-radius: 10px; margin-bottom: 14px; font-size: 12.5px; color: var(--ps-text); }
+.ps-info-bar strong { color: var(--ps-primary); }
+@media (max-width: 760px) { .ps-info-bar { font-size: 12px; padding: 8px 12px; } }
 
-@if($publicMode)
-/* ─── Public catalog mode override'ları ─── */
-.ps-wrap { max-width: 100%; padding: 0; }
-.ps-info-bar { padding: 12px 16px; background: linear-gradient(135deg,#faf7ff,#f3edff); border: 1px solid #e6dcfa; border-radius: 12px; }
+/* Modal */
+.ps-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.ps-modal-overlay:target { display: flex; }
+.ps-modal { background: var(--ps-card); border-radius: 14px; max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 24px 26px; box-shadow: 0 20px 60px rgba(0,0,0,.25); position: relative; z-index: 1; }
+.ps-modal h3 { margin: 0 0 12px; font-size: 17px; color: var(--ps-text); }
+.ps-modal p, .ps-modal li { font-size: 13px; line-height: 1.55; color: var(--ps-text); }
+.ps-modal-close { position: absolute; right: 18px; top: 14px; background: none; border: none; font-size: 22px; line-height: 1; color: var(--ps-muted); cursor: pointer; text-decoration: none; }
 
-/* Hero küçültme — catalog'da abartılı gözükmesin */
-.ps-hero { max-width: 640px; margin: 4px auto 16px; }
-.ps-hero-input { padding: 11px 16px; font-size: 14.5px; border-radius: 10px; border-width: 1.5px; border-color: #d8d2e8; }
-.ps-hero-input:focus { border-color: #7e58bf; box-shadow: 0 0 0 3px rgba(126,88,191,.1); }
-.ps-hero-hint { font-size: 11px; }
-
-/* Brand: 5b2e91 yerine #7e58bf (public theme) */
-.ps-filters-group-label { color: #7e58bf; border-bottom-color: rgba(126,88,191,.18); }
-.ps-btn-primary { background: #7e58bf; }
-.ps-btn-primary:hover { background: #6849a8; }
-.ps-field input:focus, .ps-field select:focus { border-color: #7e58bf; box-shadow: 0 0 0 3px rgba(126,88,191,.1); }
-.ps-sidebar h4 { color: #7e58bf; }
-.ps-field-row input { accent-color: #7e58bf; }
-.ps-field-row.is-active { background: rgba(126,88,191,.08); }
-.ps-field-row.is-active .ps-field-label { color: #7e58bf; }
-.ps-card:hover { border-color: #7e58bf; box-shadow: 0 2px 8px rgba(126,88,191,.08); }
-.ps-card-title a:hover { color: #7e58bf; }
-.ps-card-actions .btn-detail { background: #7e58bf; }
-.ps-card-actions .btn-detail:hover { background: #6849a8; }
-.ps-info-btn { background: rgba(126,88,191,.1); color: #7e58bf; }
-.ps-info-btn:hover { background: #7e58bf; color: #fff; }
-.ps-info-bar strong { color: #7e58bf; }
-.ps-sidebar-actions button:hover { border-color: #7e58bf; color: #7e58bf; }
-@endif
+/* Top10 secondary toggle URL builder */
 </style>
 
-@push('scripts')
-<script nonce="{{ $cspNonce ?? '' }}">
-(function(){
-    var search = document.getElementById('ps-field-search');
-    var list = document.getElementById('ps-field-list');
-    if (!search || !list) return;
-    var rows = list.querySelectorAll('.ps-field-row');
-    search.addEventListener('input', function(e){
-        var q = (e.target.value || '').toLowerCase().trim();
-        rows.forEach(function(row){
-            var name = (row.getAttribute('data-field-name') || '').toLowerCase();
-            row.style.display = (q === '' || name.indexOf(q) !== -1) ? '' : 'none';
-        });
-    });
-})();
-</script>
-@endpush
+@php
+    // Top 10 secondary buton için: mevcut top_uni kaldırılmışsa →ekle, varsa →kaldır
+    $top10Active = ($filters['top_uni'] ?? '') === 'top10';
+    $top10Params = $filters;
+    if ($top10Active) {
+        $top10Params['top_uni'] = '';
+    } else {
+        $top10Params['top_uni'] = 'top10';
+    }
+    // İçi boş array'leri temizle
+    $top10Params = array_filter($top10Params, fn ($v) => $v !== '' && $v !== [] && $v !== null);
+    $top10Url = $formAction = $publicMode ? route('uni-match.programs') : route('program-search');
+    $top10Url .= '?' . http_build_query($top10Params);
 
+    // Top 10 toplam sayı (cache-able)
+    $top10Count = \App\Models\Program::query()->active()
+        ->whereIn('university_name_cached', (array) config('germany_geo.top_10', []))
+        ->count();
+@endphp
 
 <div class="ps-wrap">
+
+    {{-- Info banner --}}
     @if($publicMode)
         <div class="ps-info-bar">
-            🎓 <strong>{{ number_format($totalAll) }}+ Almanya programı</strong> — bölüm, şehir, eyalet, dil ile filtrele. Sana en uygun olanı bulmak için <a href="{{ route('uni-match.start') }}" style="color:#5b2e91;font-weight:700;">5 dakikalık UniMatch sihirbazını</a> da deneyebilirsin.
+            🎓 <strong>{{ number_format($totalAll) }}+ Almanya programı</strong> — sana en uygun olanı bulmak için <a href="{{ route('uni-match.start') }}" style="color:var(--ps-primary);font-weight:700;">5 dakikalık UniMatch sihirbazını</a> da deneyebilirsin.
         </div>
-        @php $formAction = route('uni-match.programs'); @endphp
     @else
         <div class="ps-info-bar">
-            🔍 <strong>Internal Program Arama</strong> — UniMatch wizard'ı atlayıp doğrudan filtrele. Toplam <strong>{{ number_format($totalAll) }}</strong> canonical program. Bölüm (Psikoloji, Mühendislik vb.) yazarak ara, üniversite/şehir/ücret/dil ile daralt.
+            🔍 <strong>Internal Arama</strong> — UniMatch wizard'ı atla, doğrudan filtre. Toplam <strong>{{ number_format($totalAll) }}</strong> aktif program.
         </div>
-        @php $formAction = route('program-search'); @endphp
     @endif
 
     <form method="GET" action="{{ $formAction }}">
-        {{-- Genel arama: filtreden bağımsız, ortalanmış, büyük --}}
+
+        {{-- ═══ HERO ═══ --}}
         <div class="ps-hero">
-            <input type="text" name="q" value="{{ $filters['q'] }}"
-                   class="ps-hero-input"
-                   placeholder="🔍 Program adı, anahtar kelime ile genel arama…"
-                   autocomplete="off">
-            <div class="ps-hero-hint">Bu alan filtrelerden bağımsızdır — istediğin terimi gir, aşağıdaki filtrelerle daraltabilirsin</div>
+            {{-- Genel arama --}}
+            <div class="ps-hero-search">
+                <input type="text" name="q" value="{{ $filters['q'] }}"
+                       placeholder="Program adı, üniversite veya anahtar kelime…"
+                       autocomplete="off">
+            </div>
+
+            {{-- 3 ana select: Derece, Dil, Eyalet --}}
+            <div class="ps-hero-row">
+                <div class="ps-select">
+                    <select name="degree" aria-label="Derece">
+                        <option value="">🎓 Tüm Dereceler</option>
+                        @foreach($facets['degrees'] as $val => $cnt)
+                            <option value="{{ $val }}" @selected($filters['degree'] === $val)>{{ ucfirst($val) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="ps-select">
+                    <select name="language" aria-label="Dil">
+                        <option value="">🌐 Tüm Diller</option>
+                        @foreach($facets['languages'] as $val => $cnt)
+                            @php $label = ['de' => '🇩🇪 Almanca', 'en' => '🇬🇧 İngilizce', 'both' => '🇩🇪🇬🇧 İkisi'][$val] ?? $val; @endphp
+                            <option value="{{ $val }}" @selected($filters['language'] === $val)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="ps-select">
+                    <select name="state" aria-label="Eyalet">
+                        <option value="">🗺️ Tüm Eyaletler</option>
+                        @foreach($facets['states'] as $key => $label)
+                            <option value="{{ $key }}" @selected($filters['state'] === $key)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            {{-- CTA satırı --}}
+            <div class="ps-hero-cta">
+                <button type="submit" class="ps-hero-cta-primary">
+                    🔍 <strong>{{ number_format($rows->total()) }}</strong> SONUCU GÖSTER
+                </button>
+                <a href="{{ $top10Url }}" class="ps-hero-cta-secondary {{ $top10Active ? 'is-active' : '' }}">
+                    ⭐ {{ number_format($top10Count) }} TOP 10 ÜNİVERSİTE
+                </a>
+            </div>
+
+            {{-- Gelişmiş Filtreler --}}
+            <details class="ps-advanced" {{ $hasAdvanced ? 'open' : '' }}>
+                <summary>
+                    <span class="ps-advanced-toggle">
+                        <span class="ps-advanced-toggle-chevron">▾</span>
+                        Gelişmiş Filtreler
+                        @if($hasAdvanced)
+                            <span class="ps-badge">{{ $advancedFilterCount }}</span>
+                        @endif
+                    </span>
+                </summary>
+
+                <div class="ps-advanced-body">
+                    <div class="ps-advanced-grid">
+
+                        {{-- ═══ PROGRAM ═══ --}}
+                        <details class="ps-group" open>
+                            <summary>
+                                <span>📚 Program</span>
+                                <span class="ps-group-chev">▾</span>
+                            </summary>
+                            <div class="ps-group-body">
+                                <div class="ps-field">
+                                    <label>🏆 Sıralama</label>
+                                    <select name="top_uni">
+                                        <option value="">Tümü</option>
+                                        <option value="top10" @selected($filters['top_uni'] === 'top10')>🥇 Top 10</option>
+                                        <option value="top20" @selected($filters['top_uni'] === 'top20')>🥈 Top 20</option>
+                                        <option value="top40" @selected($filters['top_uni'] === 'top40')>🥉 Top 40</option>
+                                    </select>
+                                </div>
+                                <div class="ps-field">
+                                    <label>📖 Bölüm / Konu</label>
+                                    <input type="text" name="subject" value="{{ $filters['subject'] }}" placeholder="Medizin, Informatik…" list="ps-subject-suggestions" autocomplete="off">
+                                    <datalist id="ps-subject-suggestions">
+                                        <option value="Psychologie">Psikoloji</option>
+                                        <option value="Medizin">Tıp</option>
+                                        <option value="Zahnmedizin">Diş Hekimliği</option>
+                                        <option value="Pharmazie">Eczacılık</option>
+                                        <option value="Ingenieurwesen">Mühendislik</option>
+                                        <option value="Maschinenbau">Makine Mühendisliği</option>
+                                        <option value="Elektrotechnik">Elektrik-Elektronik</option>
+                                        <option value="Bauingenieurwesen">İnşaat</option>
+                                        <option value="Informatik">Bilgisayar</option>
+                                        <option value="Computer Science">Computer Science (EN)</option>
+                                        <option value="Architektur">Mimarlık</option>
+                                        <option value="Rechtswissenschaft">Hukuk</option>
+                                        <option value="Betriebswirtschaft">İşletme (BWL)</option>
+                                        <option value="Wirtschaftswissenschaft">İktisat</option>
+                                        <option value="Mathematik">Matematik</option>
+                                        <option value="Physik">Fizik</option>
+                                        <option value="Chemie">Kimya</option>
+                                        <option value="Biologie">Biyoloji</option>
+                                        <option value="Pädagogik">Pedagoji</option>
+                                        <option value="Soziale Arbeit">Sosyal Hizmet</option>
+                                        <option value="Data Science">Data Science (EN)</option>
+                                    </datalist>
+                                </div>
+
+                                <div class="ps-field">
+                                    <label>🗂 Bölüm Kategorisi <span style="font-weight:500;color:var(--ps-muted);text-transform:none;letter-spacing:0;">(çoklu)</span></label>
+                                    <div class="ps-fieldlist">
+                                        @foreach($facets['fields'] as $fname => $fcnt)
+                                            @php $fActive = in_array($fname, $filters['fields'] ?? [], true); @endphp
+                                            <label class="{{ $fActive ? 'is-active' : '' }}">
+                                                <input type="checkbox" name="fields[]" value="{{ $fname }}" @checked($fActive)>
+                                                <span>{{ $fname }}</span>
+                                                <span class="ps-fl-count">{{ number_format($fcnt) }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </details>
+
+                        {{-- ═══ ÜNİVERSİTE & ŞEHİR ═══ --}}
+                        <details class="ps-group" {{ ($filters['university'] || $filters['big_city'] || $filters['small_city']) ? 'open' : '' }}>
+                            <summary>
+                                <span>🏛️ Üniversite & Şehir</span>
+                                <span class="ps-group-chev">▾</span>
+                            </summary>
+                            <div class="ps-group-body">
+                                <div class="ps-field">
+                                    <label>🏛️ Üniversite Adı</label>
+                                    <input type="text" name="university" value="{{ $filters['university'] }}" placeholder="Tüm üniversiteler (547)" list="ps-university-suggestions" autocomplete="off">
+                                    <datalist id="ps-university-suggestions">
+                                        @foreach($facets['universities'] as $name => $cnt)
+                                            <option value="{{ $name }}">{{ $cnt }} program</option>
+                                        @endforeach
+                                    </datalist>
+                                </div>
+                                <div class="ps-field">
+                                    <label>🏙️ Büyük Şehir</label>
+                                    <select name="big_city">
+                                        <option value="">Tümü</option>
+                                        @foreach($facets['big_cities'] as $name => $cnt)
+                                            <option value="{{ $name }}" @selected($filters['big_city'] === $name)>{{ $name }} ({{ $cnt }})</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="ps-field">
+                                    <label>🏘️ Küçük Şehir</label>
+                                    <input type="text" name="small_city" value="{{ $filters['small_city'] }}" placeholder="{{ count($facets['small_cities']) }} şehir" list="ps-small-city-suggestions" autocomplete="off">
+                                    <datalist id="ps-small-city-suggestions">
+                                        @foreach($facets['small_cities'] as $name => $cnt)
+                                            <option value="{{ $name }}">{{ $cnt }} program</option>
+                                        @endforeach
+                                    </datalist>
+                                </div>
+                            </div>
+                        </details>
+
+                        {{-- ═══ BÜTÇE ═══ --}}
+                        <details class="ps-group" {{ $filters['tuition_max'] ? 'open' : '' }}>
+                            <summary>
+                                <span>💶 Bütçe</span>
+                                <span class="ps-group-chev">▾</span>
+                            </summary>
+                            <div class="ps-group-body">
+                                <div class="ps-field">
+                                    <label>Dönem Başı Ücret (Üst Sınır)</label>
+                                    <select name="tuition_max">
+                                        <option value="">Tümü</option>
+                                        <option value="0" @selected($filters['tuition_max'] === '0')>🆓 Ücretsiz</option>
+                                        <option value="500" @selected($filters['tuition_max'] === '500')>≤ €500 / dönem</option>
+                                        <option value="1500" @selected($filters['tuition_max'] === '1500')>≤ €1500 / dönem</option>
+                                        <option value="5000" @selected($filters['tuition_max'] === '5000')>≤ €5000 / dönem</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+
+                    <div class="ps-advanced-actions">
+                        <button type="submit" class="ps-btn-apply">✓ Filtreleri Uygula</button>
+                        <a href="{{ $formAction }}" class="ps-btn-reset">↻ Sıfırla</a>
+                    </div>
+                </div>
+            </details>
         </div>
 
-        <div class="ps-layout">
-            {{-- Sol sidebar: bölüm kategorileri (uni-assist tarzı) --}}
-            <aside class="ps-sidebar">
-                <h4>📚 Bölüm Kategorisi</h4>
-                <input type="search" id="ps-field-search" class="ps-sidebar-search" placeholder="Bölüm ara... (örn. Engineering)" autocomplete="off">
-                <div class="ps-field-list" id="ps-field-list">
-                    @forelse($facets['fields'] as $field => $cnt)
-                        @php $isActive = in_array($field, $filters['fields'], true); @endphp
-                        <label class="ps-field-row {{ $isActive ? 'is-active' : '' }}" data-field-name="{{ strtolower($field) }}">
-                            <input type="checkbox" name="fields[]" value="{{ $field }}" @checked($isActive)>
-                            <span class="ps-field-label">{{ $field }}</span>
-                            <span class="ps-field-count">{{ number_format($cnt) }}</span>
-                        </label>
-                    @empty
-                        <div class="ps-field-empty">Kategori yok</div>
-                    @endforelse
-                </div>
-                <div class="ps-sidebar-actions">
-                    <button type="submit">✓ Uygula</button>
-                    <a href="{{ $formAction }}" style="flex:1;padding:6px 8px;font-size:11px;border:1px solid var(--u-line,#cbd5e1);background:var(--u-card,#fff);color:var(--u-muted,#64748b);border-radius:6px;font-weight:600;text-align:center;text-decoration:none;">Sıfırla</a>
-                </div>
-            </aside>
-
-            <div class="ps-content">
-        {{-- Filtreler --}}
-        <div class="ps-filters">
-        <div class="ps-filters-group-label">📍 Lokasyon</div>
-        <div class="ps-filters-row">
-            <div class="ps-field">
-                <label>🗺️ Eyalet</label>
-                <select name="state">
-                    <option value="">Tüm eyaletler (16)</option>
-                    @foreach($facets['states'] as $key => $label)
-                        <option value="{{ $key }}" @selected($filters['state'] === $key)>{{ $label }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="ps-field">
-                <label>🏙️ Büyük şehir</label>
-                <select name="big_city">
-                    <option value="">Tümü</option>
-                    @foreach($facets['big_cities'] as $name => $cnt)
-                        <option value="{{ $name }}" @selected($filters['big_city'] === $name)>{{ $name }} ({{ $cnt }})</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="ps-field">
-                <label>🏘️ Küçük şehir</label>
-                <input type="text" name="small_city" value="{{ $filters['small_city'] }}" placeholder="{{ count($facets['small_cities']) }} şehir — yaz ve seç" list="ps-small-city-suggestions" autocomplete="off">
-                <datalist id="ps-small-city-suggestions">
-                    @foreach($facets['small_cities'] as $name => $cnt)
-                        <option value="{{ $name }}">{{ $cnt }} program</option>
-                    @endforeach
-                </datalist>
-            </div>
-            <div class="ps-field">
-                <label>🏛️ Üniversite</label>
-                <input type="text" name="university" value="{{ $filters['university'] }}" placeholder="Tüm üniversiteler (547)" list="ps-university-suggestions" autocomplete="off">
-                <datalist id="ps-university-suggestions">
-                    @foreach($facets['universities'] as $name => $cnt)
-                        <option value="{{ $name }}">{{ $cnt }} program</option>
-                    @endforeach
-                </datalist>
-            </div>
-        </div>{{-- /Row 1: Lokasyon --}}
-
-        <div class="ps-filters-group-label">🎓 Üniversite Sıralaması & Akademik</div>
-        <div class="ps-filters-row">
-            <div class="ps-field">
-                <label>🏆 Top Üniversiteler</label>
-                <select name="top_uni">
-                    <option value="">Tümü</option>
-                    <option value="top10" @selected($filters['top_uni'] === 'top10')>🥇 Top 10</option>
-                    <option value="top20" @selected($filters['top_uni'] === 'top20')>🥈 Top 20</option>
-                    <option value="top40" @selected($filters['top_uni'] === 'top40')>🥉 Top 40</option>
-                </select>
-            </div>
-            <div class="ps-field">
-                <label>📚 Bölüm / Konu</label>
-                <input type="text" name="subject" value="{{ $filters['subject'] }}" placeholder="Psychologie, Medizin…" list="ps-subject-suggestions" autocomplete="off">
-                <datalist id="ps-subject-suggestions">
-                    {{-- Almanca/EN değerler — DB'de bölümler bu dilde, Türkçe arandığında bulunmaz --}}
-                    <option value="Psychologie">Psikoloji</option>
-                    <option value="Medizin">Tıp</option>
-                    <option value="Zahnmedizin">Diş Hekimliği</option>
-                    <option value="Pharmazie">Eczacılık</option>
-                    <option value="Tiermedizin">Veteriner</option>
-                    <option value="Ingenieurwesen">Mühendislik (genel)</option>
-                    <option value="Maschinenbau">Makine Mühendisliği</option>
-                    <option value="Elektrotechnik">Elektrik-Elektronik Müh.</option>
-                    <option value="Bauingenieurwesen">İnşaat Mühendisliği</option>
-                    <option value="Informatik">Bilgisayar / Informatik</option>
-                    <option value="Computer Science">Computer Science (EN)</option>
-                    <option value="Wirtschaftsinformatik">Yönetim Bilişim Sistemleri</option>
-                    <option value="Architektur">Mimarlık</option>
-                    <option value="Architecture">Architecture (EN)</option>
-                    <option value="Rechtswissenschaft">Hukuk</option>
-                    <option value="Jura">Hukuk (Jura)</option>
-                    <option value="Betriebswirtschaft">İşletme (BWL)</option>
-                    <option value="Business Administration">Business Administration (EN)</option>
-                    <option value="Wirtschaftswissenschaft">İktisat / Ekonomi</option>
-                    <option value="Economics">Economics (EN)</option>
-                    <option value="Finance">Finans (EN)</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Mathematik">Matematik</option>
-                    <option value="Physik">Fizik</option>
-                    <option value="Chemie">Kimya</option>
-                    <option value="Biologie">Biyoloji</option>
-                    <option value="Biotechnologie">Biyoteknoloji</option>
-                    <option value="Pädagogik">Pedagoji / Eğitim</option>
-                    <option value="Erziehungswissenschaft">Eğitim Bilimleri</option>
-                    <option value="Sozialwissenschaft">Sosyal Bilimler</option>
-                    <option value="Soziale Arbeit">Sosyal Hizmet</option>
-                    <option value="Politikwissenschaft">Siyaset Bilimi</option>
-                    <option value="Geschichte">Tarih</option>
-                    <option value="Philosophie">Felsefe</option>
-                    <option value="Theologie">Teoloji / İlahiyat</option>
-                    <option value="Kunst">Sanat</option>
-                    <option value="Design">Tasarım</option>
-                    <option value="Musik">Müzik</option>
-                    <option value="Sport">Spor Bilimleri</option>
-                    <option value="Anglistik">İngiliz Dili / Edebiyatı</option>
-                    <option value="Germanistik">Alman Dili / Edebiyatı</option>
-                    <option value="Romanistik">Roman Dilleri</option>
-                    <option value="Übersetzen">Çeviribilim</option>
-                    <option value="Data Science">Data Science (EN)</option>
-                    <option value="Artificial Intelligence">Yapay Zeka (EN)</option>
-                    <option value="Robotics">Robotik (EN)</option>
-                    <option value="Renewable Energy">Yenilenebilir Enerji (EN)</option>
-                    <option value="Environmental">Çevre Bilimleri (EN)</option>
-                    <option value="Geographie">Coğrafya</option>
-                    <option value="Geologie">Jeoloji</option>
-                    <option value="Pflege">Hemşirelik / Bakım</option>
-                </datalist>
-            </div>
-            <div class="ps-field">
-                <label>
-                    🎓 Derece
-                    <a href="#ps-info-modal" class="ps-info-btn" title="Sayılar hakkında bilgi">i</a>
-                </label>
-                <select name="degree">
-                    <option value="">Tümü</option>
-                    @foreach($facets['degrees'] as $val => $cnt)
-                        <option value="{{ $val }}" @selected($filters['degree'] === $val)>{{ ucfirst($val) }} ({{ $cnt }})</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="ps-field">
-                <label>🌐 Dil</label>
-                <select name="language">
-                    <option value="">Tümü</option>
-                    @foreach($facets['languages'] as $val => $cnt)
-                        @php $label = ['de' => '🇩🇪 Almanca', 'en' => '🇬🇧 İngilizce', 'both' => '🇩🇪🇬🇧 İkisi (DE+EN)'][$val] ?? $val; @endphp
-                        <option value="{{ $val }}" @selected($filters['language'] === $val)>{{ $label }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>{{-- /Row 2: Akademik --}}
-
-        <div class="ps-filters-row">
-            <div class="ps-field">
-                <label>💶 Ücret (üst)</label>
-                <select name="tuition_max">
-                    <option value="">Tümü</option>
-                    <option value="0" @selected($filters['tuition_max'] === '0')>🆓 Ücretsiz</option>
-                    <option value="500" @selected($filters['tuition_max'] === '500')>≤ €500/dönem</option>
-                    <option value="1500" @selected($filters['tuition_max'] === '1500')>≤ €1500/dönem</option>
-                    <option value="5000" @selected($filters['tuition_max'] === '5000')>≤ €5000/dönem</option>
-                </select>
-            </div>
-        </div>{{-- /Row 3: Bütçe --}}
-        <div class="ps-actions">
-            <button type="submit" class="ps-btn-primary">🔍 Filtrele</button>
-            <a href="{{ $formAction }}" class="ps-btn-ghost">✕ Temizle</a>
-            <select name="sort" onchange="this.form.submit()" style="padding:7px 10px; font-size:12px; border:1px solid var(--u-line,#cbd5e1); border-radius:6px; background:var(--u-card,#fff);">
+        {{-- ═══ Sonuç başlığı + sort ═══ --}}
+        <div class="ps-results-head">
+            <h2>📊 <span class="ps-results-count">{{ number_format($rows->total()) }}</span> program bulundu</h2>
+            <select name="sort" onchange="this.form.submit()">
                 <option value="relevance" @selected($filters['sort'] === 'relevance')>Sırala: Alaka</option>
-                <option value="quality" @selected($filters['sort'] === 'quality')>Sırala: Kalite skoru</option>
-                <option value="name" @selected($filters['sort'] === 'name')>Sırala: Ad (A-Z)</option>
-                <option value="recent" @selected($filters['sort'] === 'recent')>Sırala: Son güncellenen</option>
+                <option value="quality" @selected($filters['sort'] === 'quality')>Sırala: Kalite</option>
+                <option value="name" @selected($filters['sort'] === 'name')>Sırala: A-Z</option>
+                <option value="recent" @selected($filters['sort'] === 'recent')>Sırala: Yeni</option>
             </select>
-            <span class="ps-stat">📊 <strong>{{ number_format($rows->total()) }}</strong> sonuç</span>
         </div>
-        </div>{{-- /ps-filters --}}
+    </form>
 
-    {{-- Bilgi modalı — derece sayıları açıklaması (CSS-only :target modal, JS yok) --}}
+    {{-- Modal: derece sayıları açıklaması --}}
     <div class="ps-modal-overlay" id="ps-info-modal">
-        <a href="#" class="ps-modal-bg-close" aria-hidden="true" style="position:absolute;inset:0;display:block;"></a>
-        <div class="ps-modal" style="position:relative;z-index:1;">
-            <a href="#" class="ps-modal-close" aria-label="Kapat">×</a>
-            <h3>📊 Sayılar Hakkında</h3>
-            <p>Filtre dropdown'larındaki parantez içi sayılar (örn. <strong>Bachelor (6221)</strong>) <strong>tüm aktif kataloğu</strong> esas alır — diğer filtreleri uyguladığında gerçek sonuç sayısı değişir.</p>
-            <p><strong>Örnek dağılımlar:</strong></p>
-            <table>
-                <thead><tr><th>Kategori</th><th>Bachelor</th><th>Master</th><th>PhD</th></tr></thead>
-                <tbody>
-                    <tr><td>🇩🇪 Sadece Almanca</td><td>~4900</td><td>~3200</td><td>~200</td></tr>
-                    <tr><td>🇬🇧 Sadece İngilizce</td><td>~600</td><td>~3300</td><td>~150</td></tr>
-                    <tr><td>🇩🇪🇬🇧 İkisi (DE+EN)</td><td>~700</td><td>~2200</td><td>~40</td></tr>
-                </tbody>
-            </table>
-            <p><strong>Yaygın bölüm kategorileri (DB'de Almanca/İngilizce geçer):</strong></p>
-            <ul>
-                <li><strong>Mühendislik</strong> — Ingenieurwesen / Maschinenbau / Elektrotechnik / Bauingenieurwesen</li>
-                <li><strong>Tıp & sağlık</strong> — Medizin / Zahnmedizin / Pharmazie / Pflege</li>
-                <li><strong>Hukuk</strong> — Rechtswissenschaft / Jura</li>
-                <li><strong>İşletme & ekonomi</strong> — Betriebswirtschaft (BWL) / Wirtschaftswissenschaft / Business / Economics</li>
-                <li><strong>Bilgisayar</strong> — Informatik / Computer Science / Data Science</li>
-                <li><strong>Sosyal bilimler</strong> — Sozialwissenschaft / Pädagogik / Politikwissenschaft / Psychologie</li>
-                <li><strong>Doğa bilimleri</strong> — Mathematik / Physik / Chemie / Biologie</li>
-                <li><strong>Sanat & dil</strong> — Kunst / Musik / Anglistik / Germanistik</li>
-            </ul>
-            <p style="background:rgba(91,46,145,.06);padding:10px;border-radius:8px;font-size:12.5px;">
-                💡 <strong>İpucu:</strong> Bölüm filtresine <em>Türkçe</em> değil <em>Almanca/İngilizce</em> yaz (örn. "Tıp" yerine "Medizin"). Datalist'ten seçince doğru terim otomatik gelir.
-            </p>
+        <a href="#" aria-hidden="true" style="position:absolute;inset:0;"></a>
+        <div class="ps-modal">
+            <a href="#" class="ps-modal-close">×</a>
+            <h3>📊 Filtre Sayıları Hakkında</h3>
+            <p>Dropdown sayıları <strong>tüm aktif kataloğu</strong> esas alır. Diğer filtreleri uyguladığında gerçek sonuç sayısı değişir.</p>
+            <p><strong>İpucu:</strong> "Bölüm / Konu" alanına Türkçe değil <em>Almanca/İngilizce</em> yaz (Tıp → Medizin, Mühendislik → Ingenieurwesen). Datalist'ten seçince doğru terim gelir.</p>
         </div>
     </div>
 
+    {{-- ═══ SONUÇLAR ═══ --}}
     @if($rows->isEmpty())
         <div class="ps-empty">
             <div class="ps-empty-icon">🔍</div>
             <div class="ps-empty-title">Sonuç bulunamadı</div>
-            @if($filters['university'] !== '')
+            @if(!empty($filters['university']))
                 @php
                     $uniOnlyUrl = $formAction . '?' . http_build_query(['university' => $filters['university']]);
                     $uniProgramCount = $facets['universities'][$filters['university']] ?? 0;
                 @endphp
                 <div class="ps-empty-sub">
                     Seçili filtreler <strong>{{ $filters['university'] }}</strong> için sonuç vermedi.
-                    Bu üniversitenin toplam <strong>{{ $uniProgramCount }}</strong> programı var
-                    (örn. <em>{{ $filters['city'] ? '"'.$filters['city'].'" şehir filtresi üniversite ile çelişiyor olabilir' : 'diğer filtreleri gevşet' }}</em>).
+                    Bu üniversitenin toplam <strong>{{ $uniProgramCount }}</strong> programı var.
                     <br><br>
-                    <a href="{{ $uniOnlyUrl }}" style="color:#5b2e91;font-weight:600;">→ Sadece bu üniversitenin tüm programlarını göster</a><br>
-                    <a href="{{ $formAction }}" style="color:#64748b;">Tüm filtreleri temizle</a>
+                    <a href="{{ $uniOnlyUrl }}" style="color:var(--ps-primary);font-weight:600;">→ Sadece bu üniversitenin tüm programlarını göster</a><br>
+                    <a href="{{ $formAction }}" style="color:var(--ps-muted);">Tüm filtreleri temizle</a>
                 </div>
             @else
-                <div class="ps-empty-sub">Filtreleri gevşet veya farklı bir bölüm/şehir dene. Tüm 15K+ programı görmek için <a href="{{ $formAction }}" style="color:#5b2e91;">filtreleri temizle</a>.</div>
+                <div class="ps-empty-sub">Filtreleri gevşet veya farklı bir bölüm/şehir dene. Tüm 15K+ programı görmek için <a href="{{ $formAction }}" style="color:var(--ps-primary);">filtreleri temizle</a>.</div>
             @endif
         </div>
     @else
@@ -452,7 +474,7 @@
                         <span class="ps-pill lang">{{ $langLabel }}</span>
                         <span class="ps-pill tuition">{{ $tuitionLabel }}</span>
                         @if($p->location)<span class="ps-pill">📍 {{ $p->location }}</span>@endif
-                        @if($p->is_manually_curated)<span class="ps-pill curated">✓ Manuel</span>@endif
+                        @if($p->is_manually_curated && !$publicMode)<span class="ps-pill curated">✓ Manuel</span>@endif
                         @if($p->duration_semesters)<span class="ps-pill">⏱ {{ $p->duration_semesters }} dönem</span>@endif
                     </div>
                     @if(!empty($p->study_fields) && is_array($p->study_fields))
@@ -465,7 +487,7 @@
                     <div class="ps-card-actions">
                         <a href="{{ route('program.show', $p->id) }}" target="_blank" class="btn-detail">📄 Program Detayı</a>
                         @if($p->university && $p->university->id)
-                            <a href="{{ route('program.show', $p->id) }}#university-info" target="_blank" class="btn-uni">🏛 Üniversite Bilgisi</a>
+                            <a href="{{ route('program.show', $p->id) }}#university-info" target="_blank" class="btn-uni">🏛 Üniversite</a>
                         @endif
                     </div>
                 </div>
@@ -476,9 +498,5 @@
             <div style="margin-top:16px;">{{ $rows->links() }}</div>
         @endif
     @endif
-
-            </div>{{-- /ps-content --}}
-        </div>{{-- /ps-layout --}}
-    </form>
 </div>
 @endsection
