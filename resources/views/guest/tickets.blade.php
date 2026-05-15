@@ -200,9 +200,11 @@
 @section('content')
 @php
     $total  = $tickets->count();
-    $open   = $tickets->where('status', 'open')->count();
-    $closed = $tickets->where('status', 'closed')->count();
-    $urgent = $tickets->whereIn('priority', ['urgent','high'])->where('status','open')->count();
+    // "Açık" = henüz tamamlanmamış statuslar (in_progress dahil, resolved ve closed hariç)
+    $openStatuses = ['open', 'in_progress'];
+    $open   = $tickets->whereIn('status', $openStatuses)->count();
+    $closed = $tickets->whereIn('status', ['closed', 'resolved'])->count();
+    $urgent = $tickets->whereIn('priority', ['urgent','high'])->whereIn('status', $openStatuses)->count();
 @endphp
 
 {{-- ── KPI Bar ── --}}
@@ -576,10 +578,17 @@ document.querySelectorAll('[data-confirm-form]').forEach(function(f){
 (function(){
     var btns = document.querySelectorAll('.gt-filter-btn');
     var cards = document.querySelectorAll('[data-ticket-status]');
+    // Status grupları — "open" filter'ı in_progress de dahil; "closed" filter'ı
+    // closed + resolved'i dahil eder. Backend KPI sayımıyla tutarlı.
+    var statusGroups = {
+        'open':   ['open', 'in_progress'],
+        'closed': ['closed', 'resolved'],
+    };
     function applyFilter(filter){
         cards.forEach(function(c){
             var status = c.dataset.ticketStatus;
-            var visible = filter === 'all' || status === filter;
+            var allowed = statusGroups[filter] || null;
+            var visible = filter === 'all' || (allowed ? allowed.indexOf(status) !== -1 : status === filter);
             c.style.display = visible ? '' : 'none';
         });
         btns.forEach(function(b){

@@ -46,7 +46,11 @@ class GuestTicket extends Model
 
     public function replies()
     {
-        return $this->hasMany(GuestTicketReply::class, 'guest_ticket_id');
+        // Chronological order: eski mesaj en üstte, yeni mesaj en altta.
+        // WhatsApp/SMS sohbet tarzı — kullanıcı yeni mesajı sayfanın altına ekler.
+        return $this->hasMany(GuestTicketReply::class, 'guest_ticket_id')
+            ->orderBy('created_at')
+            ->orderBy('id');
     }
 
     public function assignedUser()

@@ -124,7 +124,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     // ── PWA & Geri Bildirim ───────────────────────────────────────────────────
     Route::get('/offline', fn () => view('guest.offline'))->name('guest.offline');
     Route::get('/feedback',  [GuestEngagementController::class, 'feedback'])->name('guest.feedback');
-    Route::post('/feedback', [GuestWorkflowController::class, 'storeFeedback'])->middleware('throttle:30,60')->name('guest.feedback.store');
+    Route::post('/feedback', [GuestWorkflowController::class, 'storeFeedback'])->middleware('throttle:120,1')->name('guest.feedback.store');
     Route::post('/nps',      [GuestWorkflowController::class, 'storeNps'])->middleware('throttle:120,1')->name('guest.nps.store');
 
     // ── Kılavuz ──────────────────────────────────────────────────────────────
