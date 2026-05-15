@@ -580,9 +580,12 @@
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v4M11 1v4M1 7h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         Takvime Aktar (.ics)
     </a>
-    <div style="font-size:11px;color:var(--u-muted,#64748b);max-width:280px;text-align:right;line-height:1.45;">
+    <div style="font-size:11px;color:var(--u-muted,#64748b);max-width:320px;text-align:right;line-height:1.55;">
         💡 .ics dosyası — Outlook / Apple Calendar otomatik açar.
-        <br>Google Calendar için: <a href="https://calendar.google.com/calendar/u/0/r/settings/export" target="_blank" rel="noopener" style="color:var(--u-brand,#2563eb);">İçe Aktar →</a> sonra indirilen .ics'i seç.
+        <br>
+        <strong style="color:var(--u-text);">Google Calendar:</strong> Önce yukarıdaki butonla <em>.ics'i indir</em>,
+        sonra <a href="https://calendar.google.com/calendar/u/0/r/settings/calendar" target="_blank" rel="noopener" style="color:var(--u-brand,#2563eb);">Google Calendar Ayarlar →</a>
+        "İçeri Aktar / Dışa Aktar" sekmesi → "İçeri Aktar" → indirdiğin .ics dosyasını seç.
     </div>
 </div>
 @endsection

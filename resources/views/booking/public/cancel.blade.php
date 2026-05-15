@@ -73,18 +73,37 @@
         </div>
 
         @if ($isActive)
-            <form method="POST" action="{{ route('booking.public.cancel', ['token' => $booking->booking_token]) }}">
+            <form method="POST" action="{{ route('booking.public.cancel', ['token' => $booking->booking_token]) }}" id="cancelForm">
                 @csrf
                 <div class="bc-field" style="margin-bottom:14px;">
                     <label>İptal gerekçesi (opsiyonel)</label>
                     <textarea name="reason" rows="3" maxlength="500" placeholder="Neden iptal ediyorsun?"></textarea>
                 </div>
-                <div style="display:flex;gap:10px;">
-                    <button type="submit" class="bc-btn bc-btn-danger" onclick="return confirm('Randevuyu iptal etmek istediğinden emin misin?');">
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <button type="submit" class="bc-btn bc-btn-danger" id="cancelBtn">
                         🚫 Randevuyu İptal Et
                     </button>
+                    <span id="cancelHint" style="font-size:12px;color:#991b1b;display:none;">Emin misin? Onaylamak için butona bir daha tıkla.</span>
                 </div>
             </form>
+            <script>
+            // İki tıklamayla iptal (native confirm() yerine inline mini-onay).
+            // Native browser confirm dark mode'da ekranı kaplayan grotesk kutu yaratıyordu.
+            (function(){
+                var form = document.getElementById('cancelForm');
+                var btn  = document.getElementById('cancelBtn');
+                var hint = document.getElementById('cancelHint');
+                if (!form || !btn) return;
+                form.addEventListener('submit', function(e){
+                    if (btn.dataset.confirmed === '1') return; // ikinci submit — geç
+                    e.preventDefault();
+                    btn.dataset.confirmed = '1';
+                    btn.textContent = '⚠️ Onayla: Tekrar Tıkla';
+                    btn.style.background = '#b91c1c';
+                    if (hint) hint.style.display = 'inline';
+                });
+            })();
+            </script>
         @else
             <div style="text-align:center;color:#64748b;font-size:13px;margin-top:20px;">
                 Bu randevu zaten aktif değil.
