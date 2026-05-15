@@ -513,8 +513,10 @@ window.__gm = {
     if (b) b.scrollTop = b.scrollHeight;
 })();
 
-// Form classic POST → sayfa yeniliyordu (kullanıcı F5 sandı). AJAX submit ile sayfa
-// yenilemesini durdur; mesaj polling (5 sn'de bir) zaten yeni mesajı DOM'a ekler.
+// Form AJAX submit + sayfayı yumuşak yenileme (attachment'in render edilmesi için).
+// Polling henüz yok; gönderilen mesajın (özellikle dosya/foto ile) ekranda hemen
+// görünebilmesi için server-side render'a güveniyoruz → success sonrası location.reload().
+// Kullanıcı F5 sanmaz çünkü zaten yenilenme zorunluluğu UX kabul edilmiş durum.
 (function(){
     var form = document.querySelector('form.gm-foot');
     if (!form) return;
@@ -524,12 +526,9 @@ window.__gm = {
     var fileName = document.getElementById('msgAttachName');
 
     form.addEventListener('submit', function(e){
-        // Mesaj veya dosya yoksa pas geç
         var hasText = (msgInput?.value || '').trim() !== '';
         var hasFile = fileInput?.files && fileInput.files.length > 0;
         if (!hasText && !hasFile) { e.preventDefault(); return; }
-
-        // Çift submit koruması
         if (btn?.disabled) { e.preventDefault(); return; }
 
         e.preventDefault();
@@ -541,17 +540,14 @@ window.__gm = {
             body: fd,
             headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
         })
-        .then(function(){
-            // Form temizle — polling 5 sn içinde mesajı DOM'a ekleyecek
-            if (msgInput) { msgInput.value = ''; msgInput.style.height = 'auto'; }
-            if (fileInput) fileInput.value = '';
-            if (fileName) fileName.textContent = '';
+        .then(function(r){
+            if (! r.ok) throw new Error('HTTP ' + r.status);
+            // Mesaj gönderildi — sayfayı yenile, server-side template yeni mesajı +
+            // (varsa) attachment link'ini render etsin. User input/file zaten clear olur.
+            window.location.reload();
         })
         .catch(function(){
-            // Network hatası — kullanıcıyı uyar
             alert('Mesaj gönderilemedi. Lütfen bağlantınızı kontrol edip tekrar deneyin.');
-        })
-        .finally(function(){
             if (btn) { btn.disabled = false; btn.textContent = origLabel || 'Gönder'; }
         });
     });
