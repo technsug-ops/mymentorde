@@ -233,6 +233,14 @@
 .ps-card-actions .btn-detail { background: var(--ps-primary); color: #fff; }
 .ps-card-actions .btn-uni { background: var(--ps-bg); color: var(--ps-text); }
 
+/* ═══ Pagination ═══ */
+.ps-pagination { display: flex; gap: 4px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
+.ps-page-link { padding: 7px 12px; min-width: 38px; box-sizing: border-box; text-align: center; background: var(--ps-card); border: 1px solid var(--ps-line); border-radius: 7px; color: var(--ps-text); font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; transition: all .12s; }
+.ps-page-link:hover { border-color: var(--ps-primary); color: var(--ps-primary); }
+.ps-page-link.active { background: var(--ps-primary); color: #fff; border-color: var(--ps-primary); }
+.ps-page-link.disabled { opacity: .35; cursor: default; pointer-events: none; }
+.ps-page-dots { padding: 7px 4px; color: var(--ps-muted); font-size: 13px; }
+
 .ps-empty { padding: 60px 20px; text-align: center; background: var(--ps-card); border: 1px dashed var(--ps-line); border-radius: 12px; }
 .ps-empty-icon { font-size: 40px; margin-bottom: 12px; }
 .ps-empty-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: var(--ps-text); }
@@ -611,7 +619,53 @@
                     </div>
 
                     @if($rows->hasPages())
-                        <div style="margin-top:16px;">{{ $rows->links() }}</div>
+                        @php
+                            $cp = $rows->currentPage();
+                            $lp = $rows->lastPage();
+                            // ortalanmış 5'lik pencere
+                            $start = max(1, $cp - 2);
+                            $end   = min($lp, $cp + 2);
+                            if ($end - $start < 4) {
+                                if ($start === 1)       $end = min($lp, $start + 4);
+                                elseif ($end === $lp)   $start = max(1, $end - 4);
+                            }
+                        @endphp
+                        <nav class="ps-pagination" aria-label="Sayfalama">
+                            {{-- Prev --}}
+                            @if($rows->onFirstPage())
+                                <span class="ps-page-link disabled" aria-disabled="true">‹</span>
+                            @else
+                                <a href="{{ $rows->previousPageUrl() }}" class="ps-page-link" rel="prev">‹</a>
+                            @endif
+
+                            {{-- İlk sayfa --}}
+                            @if($start > 1)
+                                <a href="{{ $rows->url(1) }}" class="ps-page-link">1</a>
+                                @if($start > 2)<span class="ps-page-dots">…</span>@endif
+                            @endif
+
+                            {{-- Sayfa pencere --}}
+                            @for($p = $start; $p <= $end; $p++)
+                                @if($p === $cp)
+                                    <span class="ps-page-link active" aria-current="page">{{ $p }}</span>
+                                @else
+                                    <a href="{{ $rows->url($p) }}" class="ps-page-link">{{ $p }}</a>
+                                @endif
+                            @endfor
+
+                            {{-- Son sayfa --}}
+                            @if($end < $lp)
+                                @if($end < $lp - 1)<span class="ps-page-dots">…</span>@endif
+                                <a href="{{ $rows->url($lp) }}" class="ps-page-link">{{ $lp }}</a>
+                            @endif
+
+                            {{-- Next --}}
+                            @if($rows->hasMorePages())
+                                <a href="{{ $rows->nextPageUrl() }}" class="ps-page-link" rel="next">›</a>
+                            @else
+                                <span class="ps-page-link disabled" aria-disabled="true">›</span>
+                            @endif
+                        </nav>
                     @endif
                 @endif
 
