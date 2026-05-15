@@ -51,7 +51,11 @@ class ProgramSearchController extends Controller
     private function renderSearch(Request $request, bool $publicMode): View
     {
         $filters = $this->extractFilters($request);
-        $rows = $this->buildQuery($filters)->paginate(30)->withQueryString();
+        // university eager load — card'da image_path için, N+1 önler
+        $rows = $this->buildQuery($filters)
+            ->with(['university:id,image_path'])
+            ->paginate(30)
+            ->withQueryString();
 
         $geo = config('germany_geo');
 

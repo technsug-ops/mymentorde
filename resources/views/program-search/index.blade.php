@@ -82,10 +82,10 @@
 .ps-hero-cta-secondary:hover { background: rgba(245,158,11,.18); border-color: #d97706; }
 .ps-hero-cta-secondary.is-active { background: #d97706; color: #fff; border-color: #d97706; }
 
-/* ═══ Sonuç sayım header ═══ */
-.ps-results-head { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; flex-wrap: wrap; }
-.ps-results-head h2 { margin: 0; font-size: 16px; color: var(--ps-text); font-weight: 700; }
-.ps-results-head .ps-results-count { color: var(--ps-primary); }
+/* ═══ Sonuç sayım header (sticky, scroll'da üstte kalır) ═══ */
+.ps-results-head { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; flex-wrap: wrap; padding: 10px 14px; background: var(--ps-card); border: 1px solid var(--ps-line); border-radius: 10px; position: sticky; top: 8px; z-index: 50; box-shadow: 0 2px 8px rgba(15,23,42,.04); }
+.ps-results-head h2 { margin: 0; font-size: 15px; color: var(--ps-text); font-weight: 700; }
+.ps-results-head .ps-results-count { color: var(--ps-primary); font-size: 17px; }
 .ps-results-head select { padding: 7px 11px; font-size: 12px; border: 1px solid var(--ps-line); border-radius: 7px; background: var(--ps-card); color: var(--ps-text); cursor: pointer; margin-left: auto; }
 
 /* ═══ Sol sticky sidebar + sağ content (MyGermanUniversity tarzı) ═══ */
@@ -130,7 +130,10 @@
 .ps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .ps-card { background: var(--ps-card); border: 1px solid var(--ps-line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; transition: border-color .15s, box-shadow .15s; }
 .ps-card:hover { border-color: var(--ps-primary); box-shadow: 0 2px 8px rgba(126,88,191,.08); }
-.ps-card-uni { font-size: 11.5px; color: var(--ps-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.ps-card-uni-row { display: flex; align-items: center; gap: 8px; }
+.ps-card-uni-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--ps-line); flex-shrink: 0; background: var(--ps-bg); }
+.ps-card-uni-initial { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--ps-primary), color-mix(in srgb, var(--ps-primary) 60%, #fff)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; text-transform: uppercase; }
+.ps-card-uni { font-size: 11.5px; color: var(--ps-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; flex: 1; line-height: 1.3; }
 .ps-card-title { font-size: 15px; font-weight: 700; color: var(--ps-text); line-height: 1.35; }
 .ps-card-title a { color: inherit; text-decoration: none; }
 .ps-card-title a:hover { color: var(--ps-primary); }
@@ -473,8 +476,20 @@
                                 };
                                 $langLabel = ['de' => '🇩🇪 DE', 'en' => '🇬🇧 EN', 'both' => '🇩🇪🇬🇧 DE+EN'][$p->language] ?? $p->language;
                             @endphp
+                            @php
+                                $uniName = $p->university_name_cached ?: 'Üniversite';
+                                $uniImage = $p->university?->image_path;
+                                $uniInitial = mb_strtoupper(mb_substr($uniName, 0, 1));
+                            @endphp
                             <div class="ps-card">
-                                <div class="ps-card-uni">{{ $p->university_name_cached ?: '—' }}</div>
+                                <div class="ps-card-uni-row">
+                                    @if($uniImage)
+                                        <img src="{{ url($uniImage) }}" class="ps-card-uni-img" alt="{{ $uniName }} logo" loading="lazy">
+                                    @else
+                                        <div class="ps-card-uni-initial" aria-hidden="true">{{ $uniInitial }}</div>
+                                    @endif
+                                    <div class="ps-card-uni">{{ $uniName }}</div>
+                                </div>
                                 <div class="ps-card-title">
                                     <a href="{{ route('program.show', $p->id) }}" target="_blank">{{ $p->course_name }}</a>
                                 </div>
