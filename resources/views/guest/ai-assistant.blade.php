@@ -187,13 +187,43 @@ async function sendAiMessage() {
     btn.disabled = true;
     btn.textContent = '...';
 
-    appendMsg('bot', '⌛ Yanıt bekleniyor...');
+    appendMsg('bot', '⌛ Yanıt bekleniyor (en fazla 60 sn)…');
 
-    const res = await fetch(AI_ASK_URL, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json','X-CSRF-TOKEN': CSRF},
-        body: JSON.stringify({question: q})
-    }).then(r => r.json()).catch(() => ({ok: false, answer: 'Bağlantı hatası.'}));
+    // 60 saniye timeout — Gemini API hatasında sonsuz beklemeyi önler
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+    let res;
+    try {
+        const response = await fetch(AI_ASK_URL, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRF-TOKEN': CSRF},
+            body: JSON.stringify({question: q}),
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+            // HTTP 4xx/5xx için body'yi JSON dene, başarısızsa generic mesaj
+            let bodyText = '';
+            try { const j = await response.json(); bodyText = j.answer || j.message || ''; } catch(_) {}
+            res = {
+                ok: false,
+                answer: bodyText
+                    ? bodyText
+                    : `AI servisi şu an cevap veremiyor (kod ${response.status}). Lütfen birkaç dakika sonra tekrar deneyin.`
+            };
+        } else {
+            res = await response.json();
+        }
+    } catch (err) {
+        clearTimeout(timeoutId);
+        res = {
+            ok: false,
+            answer: err && err.name === 'AbortError'
+                ? 'AI 60 saniyede cevap vermedi. Sorunu yeniden deneyebilir veya kısaltabilirsiniz.'
+                : 'Bağlantı hatası: ' + ((err && err.message) || 'bilinmeyen sorun') + '. Lütfen tekrar deneyin.'
+        };
+    }
 
     const msgs = document.querySelectorAll('#chat-messages .msg-bot');
     const last = msgs[msgs.length - 1];

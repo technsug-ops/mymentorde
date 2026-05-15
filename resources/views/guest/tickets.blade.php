@@ -293,7 +293,7 @@
                     <div style="display:flex;gap:8px;align-items:center;">
                         <button class="btn ok" type="submit" style="flex:1;justify-content:center;">Gönder</button>
                         <div class="eg-picker-wrap">
-                            <button type="button" class="eg-picker-btn" onclick="egTogglePicker('emoji','gNewTicketMsg')" title="Emoji">😊</button>
+                            <button type="button" class="eg-picker-btn" data-eg-toggle="emoji" data-eg-target="gNewTicketMsg" title="Emoji">😊</button>
                             <div class="eg-emoji-picker" id="egEmojiPicker_gNewTicketMsg">
                                 <div class="eg-emoji-cats" id="egEmojiCats_gNewTicketMsg"></div>
                                 <div class="eg-emoji-grid" id="egEmojiGrid_gNewTicketMsg"></div>
@@ -494,7 +494,7 @@
                                     <span style="color:var(--u-brand);"></span>
                                 </label>
                                 <div class="eg-picker-wrap">
-                                    <button type="button" class="eg-picker-btn" onclick="egTogglePicker('emoji','gReply{{ $ticket->id }}')" title="Emoji">😊</button>
+                                    <button type="button" class="eg-picker-btn" data-eg-toggle="emoji" data-eg-target="gReply{{ $ticket->id }}" title="Emoji">😊</button>
                                     <div class="eg-emoji-picker" id="egEmojiPicker_gReply{{ $ticket->id }}">
                                         <div class="eg-emoji-cats" id="egEmojiCats_gReply{{ $ticket->id }}"></div>
                                         <div class="eg-emoji-grid" id="egEmojiGrid_gReply{{ $ticket->id }}"></div>
@@ -529,6 +529,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (cards.length > 0) cards[0].classList.add('expanded');
     gtSlaUpdate();
     setInterval(gtSlaUpdate, 30000);
+});
+
+// Emoji picker delegated event handler — inline onclick yerine data-attribute pattern.
+// emoji-gif-picker.js (defer) yüklendikten sonra çalışır. Eski onclick pattern
+// "egTogglePicker is not defined" hatası verebiliyordu (defer + early click).
+document.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-eg-toggle]');
+    if (!btn) return;
+    if (typeof window.egTogglePicker !== 'function') return;
+    window.egTogglePicker(btn.dataset.egToggle, btn.dataset.egTarget);
 });
 
 // SLA Countdown
