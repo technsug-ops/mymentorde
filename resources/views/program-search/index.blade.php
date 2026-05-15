@@ -73,10 +73,31 @@
             }, { once: true });
         });
     }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () { attachErrorHandlers(); });
-    } else {
+
+    // Auto-submit: dropdown/checkbox seçimi değişince form anında submit
+    // (Filtrele butonuna basmaya gerek yok). Text input'lara DOKUNMA — her
+    // harf değişikliğinde submit olmaz, kullanıcı yazmayı bitirip Enter'a
+    // basmalı veya butonu kullanmalı.
+    function attachAutoSubmit(root) {
+        var sel = '.ps-hero-row select, .ps-sidebar select, .ps-sidebar input[type="checkbox"]';
+        (root || document).querySelectorAll(sel).forEach(function (el) {
+            if (el.dataset.autoSubmitBound) return;
+            el.dataset.autoSubmitBound = '1';
+            el.addEventListener('change', function () {
+                var form = el.closest('form');
+                if (form) form.submit();
+            });
+        });
+    }
+
+    function initAll() {
         attachErrorHandlers();
+        attachAutoSubmit();
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAll);
+    } else {
+        initAll();
     }
 })();
 </script>
