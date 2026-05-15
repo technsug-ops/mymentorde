@@ -38,6 +38,36 @@
 @endpush
 @endif
 
+@push('scripts')
+<script nonce="{{ $cspNonce ?? '' }}">
+// Üni logo CDN 404'lerini yakala, parent <span>'e is-fallback class ekle
+// → CSS ::before pseudo ile mor daire içinde baş harf gösterilir.
+(function () {
+    function attachErrorHandlers(root) {
+        (root || document).querySelectorAll('.ps-card-uni-img').forEach(function (img) {
+            if (img.dataset.fallbackBound) return;
+            img.dataset.fallbackBound = '1';
+            // Eğer image zaten yüklenmediyse (cache miss + 404)
+            if (img.complete && img.naturalWidth === 0) {
+                img.style.display = 'none';
+                if (img.parentElement) img.parentElement.classList.add('is-fallback');
+                return;
+            }
+            img.addEventListener('error', function () {
+                img.style.display = 'none';
+                if (img.parentElement) img.parentElement.classList.add('is-fallback');
+            }, { once: true });
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { attachErrorHandlers(); });
+    } else {
+        attachErrorHandlers();
+    }
+})();
+</script>
+@endpush
+
 @section('content')
 <style>
 /* ════════════════════════════════════════════════════════════
@@ -131,8 +161,20 @@
 .ps-card { background: var(--ps-card); border: 1px solid var(--ps-line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; transition: border-color .15s, box-shadow .15s; }
 .ps-card:hover { border-color: var(--ps-primary); box-shadow: 0 2px 8px rgba(126,88,191,.08); }
 .ps-card-uni-row { display: flex; align-items: center; gap: 8px; }
-.ps-card-uni-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--ps-line); flex-shrink: 0; background: var(--ps-bg); }
-.ps-card-uni-initial { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--ps-primary), color-mix(in srgb, var(--ps-primary) 60%, #fff)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; text-transform: uppercase; }
+.ps-card-uni-pic { position: relative; width: 32px; height: 32px; flex-shrink: 0; display: inline-block; }
+.ps-card-uni-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--ps-line); background: var(--ps-bg); display: block; }
+/* Fallback: image yükleme hatasında is-fallback class JS ile eklenir */
+.ps-card-uni-pic.is-fallback::before {
+    content: attr(data-initial);
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ps-primary), #b89adb);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+    text-transform: uppercase;
+}
+.ps-card-uni-initial { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--ps-primary), #b89adb); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; text-transform: uppercase; }
 .ps-card-uni { font-size: 11.5px; color: var(--ps-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; flex: 1; line-height: 1.3; }
 .ps-card-title { font-size: 15px; font-weight: 700; color: var(--ps-text); line-height: 1.35; }
 .ps-card-title a { color: inherit; text-decoration: none; }
@@ -480,11 +522,18 @@
                                 $uniName = $p->university_name_cached ?: 'Üniversite';
                                 $uniImage = $p->university?->image_path;
                                 $uniInitial = mb_strtoupper(mb_substr($uniName, 0, 1));
+                                // Clearbit URL'leri tam URL, yerel image_path'ler relative
+                                $uniImageSrc = $uniImage
+                                    ? (str_starts_with($uniImage, 'http') ? $uniImage : url($uniImage))
+                                    : null;
                             @endphp
                             <div class="ps-card">
                                 <div class="ps-card-uni-row">
-                                    @if($uniImage)
-                                        <img src="{{ url($uniImage) }}" class="ps-card-uni-img" alt="{{ $uniName }} logo" loading="lazy">
+                                    @if($uniImageSrc)
+                                        {{-- Logo CDN 404 verirse JS ile is-fallback class eklenip CSS-pseudo initial gösterilir --}}
+                                        <span class="ps-card-uni-pic" data-initial="{{ $uniInitial }}">
+                                            <img src="{{ $uniImageSrc }}" class="ps-card-uni-img" alt="{{ $uniName }}" loading="lazy">
+                                        </span>
                                     @else
                                         <div class="ps-card-uni-initial" aria-hidden="true">{{ $uniInitial }}</div>
                                     @endif
