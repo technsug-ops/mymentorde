@@ -125,6 +125,12 @@
 .ps-sidebar-wrapper > summary::-webkit-details-marker { display: none; }
 .ps-sidebar { background: var(--ps-card); border: 1px solid var(--ps-line); border-radius: 12px; padding: 0; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto; box-shadow: 0 1px 6px rgba(15,23,42,.04); }
 
+/* Desktop'ta sidebar her zaman görünür — wrapper details state'inden bağımsız.
+   Mobile'da @media override ile drawer pattern'i devreye girer. */
+@media (min-width: 761px) {
+    .ps-sidebar-wrapper > .ps-sidebar { display: block !important; }
+}
+
 .ps-side-group { border-bottom: 1px solid var(--ps-line); }
 .ps-side-group:last-of-type { border-bottom: none; }
 .ps-side-group > summary { list-style: none; cursor: pointer; padding: 12px 14px; font-size: 12.5px; font-weight: 800; color: var(--ps-primary); display: flex; align-items: center; justify-content: space-between; gap: 8px; user-select: none; }
@@ -337,8 +343,9 @@
         {{-- ═══ 2-Sütun Layout: Sol sidebar + Sağ sonuçlar ═══ --}}
         <div class="ps-layout">
 
-            {{-- Sol sidebar (desktop sticky, mobile drawer) --}}
-            <details class="ps-sidebar-wrapper" {{ $hasActiveSidebar ? 'open' : '' }}>
+            {{-- Sol sidebar — desktop'ta CSS ile her zaman görünür,
+                 mobile'da drawer (default closed, butonla açılır) --}}
+            <details class="ps-sidebar-wrapper">
                 <summary>
                     <span>Detaylı Filtrele</span>
                     @if($hasActiveSidebar)<span class="ps-badge">{{ $sidebarFilterCount }}</span>@endif
@@ -408,7 +415,7 @@
                         </div>
                     </details>
 
-                    {{-- 🏛️ Üniversite & Şehir --}}
+                    {{-- 🏛️ Üniversite & Şehir — sadece aktif filtre varsa açık --}}
                     <details class="ps-side-group" {{ ($filters['university'] || $filters['big_city'] || $filters['small_city']) ? 'open' : '' }}>
                         <summary>
                             <span>🏛️ Üniversite & Şehir</span>
@@ -445,7 +452,7 @@
                         </div>
                     </details>
 
-                    {{-- 💶 Bütçe --}}
+                    {{-- 💶 Bütçe — sadece aktif filtre varsa açık --}}
                     <details class="ps-side-group" {{ $filters['tuition_max'] ? 'open' : '' }}>
                         <summary>
                             <span>💶 Bütçe</span>
