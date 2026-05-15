@@ -872,6 +872,34 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
         // public/storage → storage/app/public symbolic link.
         // Profile foto, doc preview vb. icin gerekli. Prod'da bir kez calistirildiktan
         // sonra kalici (idempotent — link zaten varsa --force ile yeniden olusturur).
+        // ── HRK PDF'ten üniversite logo Clearbit URL'lerini sync et ────
+        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=sync-uni-logos
+        //   Default: --apply mode (DB güncellenir)
+        //   Dry run:   &dry=1  → sadece preview, DB değişmez
+        //   Min score: &score=0.7  → sadece yüksek skorlu eşleşmeler
+        if ($request->query('cleanup') === 'sync-uni-logos') {
+            try {
+                ini_set('memory_limit', '512M');
+                ini_set('max_execution_time', '120');
+                $apply = $request->query('dry') !== '1';
+                $minScore = (float) ($request->query('score', '0.5'));
+
+                $service = app(\App\Services\UniLogoSyncService::class);
+                $result = $service->syncAll($apply, $minScore);
+
+                $output .= ">>> sync-uni-logos (" . ($apply ? 'APPLIED' : 'DRY-RUN') . ", min_score={$minScore})\n";
+                foreach ($result['logs'] as $l) {
+                    $output .= "    {$l}\n";
+                }
+                $output .= "    Total uni in DB: " . \App\Models\University::count() . "\n";
+                $output .= "    With clearbit URL: " . \App\Models\University::where('image_path', 'like', 'https://logo.clearbit.com/%')->count() . "\n";
+                $output .= "    NULL image_path:   " . \App\Models\University::whereNull('image_path')->count() . "\n";
+            } catch (\Throwable $e) {
+                $output .= ">>> sync-uni-logos FAILED: " . $e->getMessage() . "\n";
+                $output .= "    " . $e->getFile() . ':' . $e->getLine() . "\n";
+            }
+        }
+
         // Kullanim: /_deploy/run-pending?cleanup=storage-link
         if ($request->query('cleanup') === 'storage-link') {
             try {
