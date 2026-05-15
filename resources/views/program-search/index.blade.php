@@ -40,14 +40,28 @@
 
 @push('scripts')
 <script nonce="{{ $cspNonce ?? '' }}">
-// Üni logo CDN 404'lerini yakala, parent <span>'e is-fallback class ekle
-// → CSS ::before pseudo ile mor daire içinde baş harf gösterilir.
+// 1) Desktop'ta sidebar wrapper'ı otomatik aç (<details> open).
+//    Browser <details> kapalı iken children hide eder, CSS override sınırlı.
+//    Bu yüzden JS ile media query'ye göre state set ediyoruz.
+// 2) Üni logo CDN 404 fallback: parent span'a is-fallback class → CSS pseudo
+//    ile mor daire + baş harf gösterilir.
 (function () {
+    var isDesktop = window.matchMedia('(min-width: 761px)').matches;
+    var wrapper = document.querySelector('.ps-sidebar-wrapper');
+    if (wrapper && isDesktop) {
+        wrapper.setAttribute('open', '');
+    }
+    // Viewport boyut değişimini de dinle (DevTools veya rotate)
+    window.matchMedia('(min-width: 761px)').addEventListener('change', function (e) {
+        if (!wrapper) return;
+        if (e.matches) wrapper.setAttribute('open', '');
+        else wrapper.removeAttribute('open');
+    });
+
     function attachErrorHandlers(root) {
         (root || document).querySelectorAll('.ps-card-uni-img').forEach(function (img) {
             if (img.dataset.fallbackBound) return;
             img.dataset.fallbackBound = '1';
-            // Eğer image zaten yüklenmediyse (cache miss + 404)
             if (img.complete && img.naturalWidth === 0) {
                 img.style.display = 'none';
                 if (img.parentElement) img.parentElement.classList.add('is-fallback');
