@@ -413,10 +413,10 @@
             min-height: 100vh;
         }
         body.sb-catalog-mode .sb-container {
-            max-width: 1320px;
-            padding: 18px clamp(16px, 3vw, 32px) 40px;
+            max-width: 1520px;
+            padding: 18px clamp(12px, 2vw, 24px) 40px;
         }
-        body.sb-catalog-mode .sb-header { max-width: 1320px; padding: 12px clamp(16px, 3vw, 32px); }
+        body.sb-catalog-mode .sb-header { max-width: 1520px; padding: 12px clamp(12px, 2vw, 24px); }
 
         /* ── Split layout: sol wizard, sağ büyük foto + counter ───
            min-height YOK — kart içeriği boyutuyla doğal büyür, kesilme olmaz.

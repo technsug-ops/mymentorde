@@ -124,7 +124,7 @@
 :root { --ps-primary: var(--ps-purple-dark); }
 @endif
 
-.ps-wrap { max-width: 1280px; margin: 0 auto; padding: 0 4px; }
+.ps-wrap { max-width: 1480px; margin: 0 auto; padding: 0 4px; }
 
 /* ═══ Hero — search + 3 ana select + 2 CTA ═══ */
 .ps-hero { background: var(--ps-card); border: 1px solid var(--ps-line); border-radius: 14px; padding: 22px 24px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(15,23,42,.04); }
@@ -199,6 +199,7 @@
 
 /* ═══ Result cards ═══ */
 .ps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (min-width: 1300px) { .ps-grid { grid-template-columns: 1fr 1fr 1fr; } }
 .ps-card { background: var(--ps-card); border: 1px solid var(--ps-line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; transition: border-color .15s, box-shadow .15s; }
 .ps-card:hover { border-color: var(--ps-primary); box-shadow: 0 2px 8px rgba(126,88,191,.08); }
 .ps-card-uni-row { display: flex; align-items: center; gap: 8px; }
