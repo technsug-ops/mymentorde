@@ -352,6 +352,15 @@
             <div class="token-hint">Bu kodu saklayın — başvuru durumunuzu sorgulamak için kullanılır.</div>
         </div>
 
+        {{-- E-posta doğrulama uyarısı — kullanıcı mail gelmedi diye paniklemesin --}}
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-size:20px;flex-shrink:0;line-height:1;">✉️</span>
+            <div style="font-size:13.5px;color:#78350f;line-height:1.6;">
+                <strong>Doğrulama maili gönderildi.</strong><br>
+                Spam/Önemsiz klasörünü de kontrol edin. 1-2 dakika içinde gelmezse aşağıdaki "Portala Giriş Yap" butonundan giriş yapın — orada yeniden gönderebilirsiniz.
+            </div>
+        </div>
+
         <a class="primary-btn" href="{{ route('login', ['email' => $portalEmail ?? $row->email, 'from_apply' => 1]) }}">
             Portala Giriş Yap →
         </a>

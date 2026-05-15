@@ -93,13 +93,8 @@
         <div class="ai-card-body">
             <div style="font-size:var(--tx-sm);color:var(--u-muted);line-height:1.7;">
                 <strong style="color:var(--u-text);">Günlük Soru Hakkı</strong><br>
-                Her aday öğrenci için <strong>15 soru/gün</strong> (paket bağımsız)
+                Her aday öğrenci için <strong>15 soru/gün</strong> · Hak gece yarısı sıfırlanır
             </div>
-            <a href="{{ route('guest.services') }}"
-               class="btn ok"
-               style="display:block;text-align:center;margin-top:10px;font-size:var(--tx-xs);padding:7px 12px;text-decoration:none;">
-                Paketi Yükselt →
-            </a>
         </div>
     </div>
 
@@ -132,8 +127,7 @@ async function loadRemaining() {
             const banner = document.createElement('div');
             banner.id        = 'quota-banner';
             banner.style.cssText = 'margin:10px 18px;padding:10px 14px;border-radius:8px;border:1px solid #fca5a5;background:#fef2f2;font-size:13px;color:#991b1b;display:flex;justify-content:space-between;align-items:center;gap:12px;';
-            banner.innerHTML = `<span>Günlük ${r.limit} soru hakkınızı kullandınız. Yarın tekrar sorabilirsiniz.</span>
-                <a href="{{ route('guest.services') }}" style="white-space:nowrap;font-weight:700;color:#dc2626;text-decoration:underline;">Paketi Yükselt →</a>`;
+            banner.innerHTML = `<span>Günlük ${r.limit} soru hakkınızı kullandınız. Hak gece yarısı sıfırlanır, yarın tekrar sorabilirsiniz.</span>`;
             document.getElementById('chat-messages').after(banner);
         }
     } else {

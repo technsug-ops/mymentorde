@@ -15,6 +15,16 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, SoftDeletes, CanResetPassword;
 
+    /**
+     * Email verification notification'ı Türkçe + public welcome.verify URL ile gönder.
+     * Default Laravel VerifyEmail İngilizce ve auth gerektiren URL kullanır
+     * (kullanıcı login değilse race condition oluşurdu).
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new \App\Notifications\VerifyEmailTr());
+    }
+
     protected static function booted(): void
     {
         static::creating(function (User $user): void {
