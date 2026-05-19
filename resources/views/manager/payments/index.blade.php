@@ -294,7 +294,7 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                 <div class="form-row">
                     <label>Tutar</label>
-                    <input type="number" name="amount_eur" step="0.01" min="0.01" required placeholder="1490.00">
+                    <input type="number" name="amount_eur" step="0.01" min="0.01" required placeholder="2000.00">
                 </div>
                 <div class="form-row">
                     <label>Para Birimi</label>
