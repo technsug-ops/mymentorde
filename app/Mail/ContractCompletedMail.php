@@ -28,7 +28,7 @@ class ContractCompletedMail extends Mailable
         public readonly array $annexNotes = [],
         public readonly ?string $portalUrl = null,
         // Ödeme bilgisi — manager onayında sözleşme mailine ödeme detayı eklenir
-        public readonly ?string $paymentAmountText = null,    // örn. "2.490 EUR"
+        public readonly ?string $paymentAmountText = null,    // örn. "2.750 EUR"
         public readonly ?string $paymentReference = null,     // örn. "AHMET YILMAZ #STU-00000123"
         public readonly array $bankInfo = [],                 // banka detayları (config('brand.banking'))
         public readonly int $paymentDueDays = 14,             // ödeme süresi (gün)

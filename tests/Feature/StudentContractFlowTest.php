@@ -47,7 +47,7 @@ class StudentContractFlowTest extends TestCase
             'contract_status'      => 'not_requested',
             'selected_package_code'  => 'pkg_basic',
             'selected_package_title' => 'Basic Paket',
-            'selected_package_price' => '1490 EUR',
+            'selected_package_price' => '2000 EUR',
         ]);
 
         return [$user, $guest];

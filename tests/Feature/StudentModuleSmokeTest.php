@@ -141,7 +141,7 @@ class StudentModuleSmokeTest extends TestCase
         $this->post(route('student.services.select-package'), [
             'package_code' => 'pkg_plus',
             'package_title' => 'Plus Paket',
-            'package_price' => '2490 EUR',
+            'package_price' => '2750 EUR',
         ])->assertRedirect('/student/services');
 
         $this->post(route('student.services.add-extra'), [

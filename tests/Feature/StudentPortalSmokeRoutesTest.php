@@ -37,7 +37,7 @@ class StudentPortalSmokeRoutesTest extends TestCase
             'registration_form_submitted_at' => now(),
             'selected_package_code' => 'pkg_basic',
             'selected_package_title' => 'Basic Paket',
-            'selected_package_price' => '1490 EUR',
+            'selected_package_price' => '2000 EUR',
             'contract_status' => 'requested',
             'notifications_enabled' => true,
             'notify_email' => true,

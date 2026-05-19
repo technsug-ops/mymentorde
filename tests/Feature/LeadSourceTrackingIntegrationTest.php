@@ -97,7 +97,7 @@ class LeadSourceTrackingIntegrationTest extends TestCase
             'registration_form_submitted_at' => now()->subHours(2),
             'selected_package_code' => 'pkg_basic',
             'selected_package_title' => 'Basic Paket',
-            'selected_package_price' => '1490 EUR',
+            'selected_package_price' => '2000 EUR',
             'contract_status' => 'approved',
             'contract_requested_at' => now()->subHours(2),
             'contract_signed_at' => now()->subHour(),

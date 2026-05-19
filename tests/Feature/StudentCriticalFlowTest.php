@@ -77,7 +77,7 @@ class StudentCriticalFlowTest extends TestCase
             'registration_form_submitted_at' => now(),
             'selected_package_code' => 'pkg_basic',
             'selected_package_title' => 'Basic Paket',
-            'selected_package_price' => '1490 EUR',
+            'selected_package_price' => '2000 EUR',
             'contract_status' => 'not_requested',
             'company_id' => 1,
         ]);
@@ -166,7 +166,7 @@ class StudentCriticalFlowTest extends TestCase
             ->post('/student/services/select-package', [
                 'package_code' => 'pkg_plus',
                 'package_title' => 'Plus Paket',
-                'package_price' => '2490 EUR',
+                'package_price' => '2750 EUR',
             ])
             ->assertRedirect('/student/services')
             ->assertSessionHas('status');

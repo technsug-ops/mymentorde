@@ -36,7 +36,7 @@ class ContractTemplateFlowTest extends TestCase
             'converted_student_id' => 'BCS-26-02-AB12',
             'selected_package_code' => 'pkg_basic',
             'selected_package_title' => 'Basic Paket',
-            'selected_package_price' => '1490 EUR',
+            'selected_package_price' => '2000 EUR',
             'selected_extra_services' => [],
         ]);
 
@@ -133,7 +133,7 @@ class ContractTemplateFlowTest extends TestCase
             'converted_student_id' => 'BCS-26-02-QA11',
             'selected_package_code' => 'pkg_plus',
             'selected_package_title' => 'Plus Paket',
-            'selected_package_price' => '2490 EUR',
+            'selected_package_price' => '2750 EUR',
             'contract_status' => 'not_requested',
         ]);
 
@@ -180,7 +180,7 @@ class ContractTemplateFlowTest extends TestCase
             'contract_template_code' => 'consultancy_v1',
             'selected_package_code' => 'pkg_plus',
             'selected_package_title' => 'Plus Paket',
-            'selected_package_price' => '2490 EUR',
+            'selected_package_price' => '2750 EUR',
         ]);
         $guest->save();
 

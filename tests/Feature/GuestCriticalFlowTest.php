@@ -52,7 +52,7 @@ class GuestCriticalFlowTest extends TestCase
             'docs_ready' => true,
             'selected_package_code' => 'pkg_basic',
             'selected_package_title' => 'Basic Paket',
-            'selected_package_price' => '1490 EUR',
+            'selected_package_price' => '2000 EUR',
         ])->save();
 
         $this->actingAs($user)
