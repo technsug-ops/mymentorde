@@ -127,7 +127,7 @@ Hedef kitle: Türkiye'den Almanya'ya:
 HİZMET PAKETLERİ (fiyatlar EUR)
 ═══════════════════════════════════════════════════════════════
 
-► BASIC — 1.490 EUR (12 ay geçerli, max 3 üniversite başvurusu)
+► BASIC — 2.000 EUR (12 ay geçerli, max 3 üniversite başvurusu)
   Email destek. İçerik:
   - Üniversite & Bölüm Seçimi danışmanlığı
   - Uni-Assist & resmi başvuru süreci
@@ -138,7 +138,7 @@ HİZMET PAKETLERİ (fiyatlar EUR)
   - Bloke Hesap (Sperrkonto) açma
   - Sağlık sigortası süreci
 
-► PLUS — 2.490 EUR (12 ay geçerli, max 5 üniversite başvurusu)
+► PLUS — 2.750 EUR (12 ay geçerli, max 5 üniversite başvurusu)
   Telefon destek. Basic'in tamamı + ek olarak:
   - Konaklama ayarlanması
   - Devlet yurdu (Studentenwerk) başvuruları
