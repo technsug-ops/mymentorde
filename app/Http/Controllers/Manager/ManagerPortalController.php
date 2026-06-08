@@ -186,7 +186,13 @@ class ManagerPortalController extends Controller
                     + (int) ($scoreBreakdown['demographic'] ?? 0)
                     + (int) ($scoreBreakdown['decay'] ?? 0);
 
-        return view('manager.guest-detail', compact('guest', 'seniorOptions', 'student', 'scoreBreakdown', 'scoreTotal'));
+        // Manuel şifre sıfırlama için guest user kaydı (mail teslim sorunu olan
+        // aday öğrenciler — student-detail'daki ile aynı pattern)
+        $guestUser = $guest->email
+            ? User::query()->where('email', strtolower(trim($guest->email)))->first()
+            : null;
+
+        return view('manager.guest-detail', compact('guest', 'seniorOptions', 'student', 'scoreBreakdown', 'scoreTotal', 'guestUser'));
     }
 
     public function guestUpdateStatus(Request $request, GuestApplication $guest): RedirectResponse
