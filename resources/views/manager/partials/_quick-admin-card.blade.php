@@ -136,6 +136,7 @@
                 </optgroup>
                 <optgroup label="Portal">
                     <option value="student">student</option>
+                    <option value="guest">guest (aday öğrenci)</option>
                     <option value="dealer">dealer</option>
                 </optgroup>
             </select>

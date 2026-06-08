@@ -24,12 +24,16 @@ use Illuminate\Support\Str;
  */
 class QuickAdminController extends Controller
 {
-    /** Manager UI'sından atanabilir roller (guest hariç). */
+    /**
+     * Manager UI'sından atanabilir roller — tüm portal rolleri.
+     * Manager istediği herkesin rolünü istediği role çevirebilir.
+     */
     private const ASSIGNABLE_ROLES = [
         User::ROLE_MANAGER,
         User::ROLE_SENIOR,
         User::ROLE_MENTOR,
         User::ROLE_STUDENT,
+        User::ROLE_GUEST,
         User::ROLE_DEALER,
         User::ROLE_FINANCE_ADMIN,
         User::ROLE_FINANCE_STAFF,
@@ -135,14 +139,6 @@ class QuickAdminController extends Controller
         ]);
 
         $user = User::query()->findOrFail((int) $data['user_id']);
-
-        if ($user->role === User::ROLE_GUEST) {
-            return response()->json([
-                'ok'      => false,
-                'message' => 'Aday öğrenciler için bu işlem geçerli değil. Önce kullanıcıyı student\'a dönüştür.',
-            ], 422);
-        }
-
         $oldRole = $user->role;
         $newRole = (string) $data['role'];
 
