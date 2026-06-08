@@ -90,7 +90,7 @@ class ApiPartnerController extends Controller
         $result = ApiPartner::provision($data);
 
         // Plain key sadece bu redirect'te flash session'da, sonra silinir
-        return redirect()->route('manager.api-partners.show', $result['partner'])
+        return redirect(\App\Support\PartnerRouting::url('show', $result['partner']))
             ->with('plaintext_key', $result['plaintext_key'])
             ->with('success', 'Partner oluşturuldu. API anahtarı yalnız bir kez gösterilir.');
     }
@@ -157,7 +157,7 @@ class ApiPartnerController extends Controller
 
         $apiPartner->update($data);
 
-        return redirect()->route('manager.api-partners.show', $apiPartner)
+        return redirect(\App\Support\PartnerRouting::url('show', $apiPartner))
             ->with('success', 'Partner bilgileri güncellendi.');
     }
 
@@ -165,7 +165,7 @@ class ApiPartnerController extends Controller
     {
         $newKey = $apiPartner->rotateKey();
 
-        return redirect()->route('manager.api-partners.show', $apiPartner)
+        return redirect(\App\Support\PartnerRouting::url('show', $apiPartner))
             ->with('plaintext_key', $newKey)
             ->with('success', 'Yeni anahtar oluşturuldu. Eski anahtar artık geçersiz.');
     }
@@ -175,7 +175,7 @@ class ApiPartnerController extends Controller
         $apiPartner->update(['is_active' => ! $apiPartner->is_active]);
 
         $state = $apiPartner->is_active ? 'aktif' : 'devre dışı';
-        return redirect()->route('manager.api-partners.index')
+        return redirect(\App\Support\PartnerRouting::url('index'))
             ->with('success', "Partner {$state} edildi.");
     }
 
@@ -184,7 +184,7 @@ class ApiPartnerController extends Controller
         // Audit log nullOnDelete ile partner_id NULL'a düşer, tarihçe korunur
         $apiPartner->delete();
 
-        return redirect()->route('manager.api-partners.index')
+        return redirect(\App\Support\PartnerRouting::url('index'))
             ->with('success', 'Partner silindi. Audit log tarihçesi korundu.');
     }
 }

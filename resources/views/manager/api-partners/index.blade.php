@@ -1,4 +1,4 @@
-@extends('manager.layouts.app')
+@extends(\App\Support\PartnerRouting::layout())
 
 @section('title', 'Partner API · ' . config('brand.name', 'MentorDE'))
 @section('page_title', 'Partner API Yönetimi')
@@ -39,7 +39,7 @@ table.apc-table tr:last-child td { border-bottom: none; }
     <div class="apc-toolbar">
         <h2>📡 {{ $partners->count() }} partner kayıtlı</h2>
         <div style="flex:1"></div>
-        <a href="{{ route('manager.api-partners.create') }}" class="apc-btn">+ Yeni Partner</a>
+        <a href="{{ \App\Support\PartnerRouting::url('create') }}" class="apc-btn">+ Yeni Partner</a>
     </div>
 
     <div class="apc-card">
@@ -49,7 +49,7 @@ table.apc-table tr:last-child td { border-bottom: none; }
                 <div style="font-weight:700;margin-bottom:6px;">Henüz partner yok</div>
                 <div style="font-size:12.5px;">Kardeş site ile veri paylaşmak için yeni bir API anahtarı oluştur.</div>
                 <div style="margin-top:14px;">
-                    <a href="{{ route('manager.api-partners.create') }}" class="apc-btn">+ İlk partnerı ekle</a>
+                    <a href="{{ \App\Support\PartnerRouting::url('create') }}" class="apc-btn">+ İlk partnerı ekle</a>
                 </div>
             </div>
         @else
@@ -75,7 +75,7 @@ table.apc-table tr:last-child td { border-bottom: none; }
                         @endphp
                         <tr>
                             <td>
-                                <div style="font-weight:600;color:var(--u-text);"><a href="{{ route('manager.api-partners.show', $p) }}" style="color:inherit;text-decoration:none;">{{ $p->name }}</a></div>
+                                <div style="font-weight:600;color:var(--u-text);"><a href="{{ \App\Support\PartnerRouting::url('show', $p) }}" style="color:inherit;text-decoration:none;">{{ $p->name }}</a></div>
                                 <div class="apc-mono">{{ $p->slug }}</div>
                                 @if($p->contact_email)
                                     <div style="font-size:11px;color:var(--u-muted,#94a3b8);margin-top:2px;">{{ $p->contact_email }}</div>
@@ -110,7 +110,7 @@ table.apc-table tr:last-child td { border-bottom: none; }
                                     <span style="color:var(--u-muted,#94a3b8);">hiç</span>
                                 @endif
                             </td>
-                            <td><a href="{{ route('manager.api-partners.show', $p) }}" class="apc-btn-ghost">Detay →</a></td>
+                            <td><a href="{{ \App\Support\PartnerRouting::url('show', $p) }}" class="apc-btn-ghost">Detay →</a></td>
                         </tr>
                     @endforeach
                 </tbody>

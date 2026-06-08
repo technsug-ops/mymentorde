@@ -237,7 +237,7 @@
             @php
                 $isMktgIcerik  = request()->is('mktg-admin/campaigns*','mktg-admin/content*','mktg-admin/email*','mktg-admin/social*','mktg-admin/tracking-links*','mktg-admin/events*','mktg-admin/workflows*','mktg-admin/abtests*');
                 $isMktgAnaliz  = request()->is('mktg-admin/attribution*','mktg-admin/kpi*','mktg-admin/reports*','mktg-admin/budget*');
-                $isMktgYonetim = request()->is('mktg-admin/integrations*','mktg-admin/team*','mktg-admin/settings*');
+                $isMktgYonetim = request()->is('mktg-admin/integrations*','mktg-admin/partners*','mktg-admin/team*','mktg-admin/settings*');
                 $isMktgHesap   = request()->is('mktg-admin/notifications*','mktg-admin/profile*','my-contracts*');
             @endphp
 
@@ -348,6 +348,10 @@
                 <a href="/mktg-admin/integrations"
                    class="nav-link {{ request()->is('mktg-admin/integrations*') ? 'active' : '' }}">
                     <span class="nav-icon">🔌</span> Entegrasyonlar
+                </a>
+                <a href="/mktg-admin/partners"
+                   class="nav-link {{ request()->is('mktg-admin/partners*') ? 'active' : '' }}">
+                    <span class="nav-icon">🤝</span> Partner API
                 </a>
                 @endif
                 @if($canSeeTeam)

@@ -1,4 +1,4 @@
-@extends('manager.layouts.app')
+@extends(\App\Support\PartnerRouting::layout())
 
 @section('title', 'Yeni Partner · ' . config('brand.name', 'MentorDE'))
 @section('page_title', 'Yeni API Partner')
@@ -23,10 +23,10 @@
 
 <div class="apc-form-wrap">
 
-    <a href="{{ route('manager.api-partners.index') }}" style="display:inline-block;margin-bottom:14px;color:#5b2e91;font-size:12.5px;text-decoration:none;">← Tüm partnerlar</a>
+    <a href="{{ \App\Support\PartnerRouting::url('index') }}" style="display:inline-block;margin-bottom:14px;color:#5b2e91;font-size:12.5px;text-decoration:none;">← Tüm partnerlar</a>
 
     <div class="apc-form-card">
-        <form method="POST" action="{{ route('manager.api-partners.store') }}">
+        <form method="POST" action="{{ \App\Support\PartnerRouting::url('store') }}">
             @csrf
 
             <div class="apc-field">
@@ -63,7 +63,7 @@
 
             <div class="apc-actions">
                 <button type="submit" class="apc-btn">🔐 Partner Oluştur + Key Üret</button>
-                <a href="{{ route('manager.api-partners.index') }}" class="apc-btn-ghost">Vazgeç</a>
+                <a href="{{ \App\Support\PartnerRouting::url('index') }}" class="apc-btn-ghost">Vazgeç</a>
             </div>
         </form>
     </div>

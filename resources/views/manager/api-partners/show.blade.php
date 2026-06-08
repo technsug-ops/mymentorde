@@ -1,4 +1,4 @@
-@extends('manager.layouts.app')
+@extends(\App\Support\PartnerRouting::layout())
 
 @section('title', $partner->name . ' · Partner API · ' . config('brand.name', 'MentorDE'))
 @section('page_title', '📡 ' . $partner->name)
@@ -45,7 +45,7 @@ table.apc-table td { padding: 7px 10px; border-bottom: 1px solid var(--u-line,#f
         </div>
     @endif
 
-    <a href="{{ route('manager.api-partners.index') }}" style="display:inline-block;margin-bottom:12px;color:#5b2e91;font-size:12.5px;text-decoration:none;">← Tüm partnerlar</a>
+    <a href="{{ \App\Support\PartnerRouting::url('index') }}" style="display:inline-block;margin-bottom:12px;color:#5b2e91;font-size:12.5px;text-decoration:none;">← Tüm partnerlar</a>
 
     {{-- Plaintext key — sadece flash session'da, sayfayı yenileyince kaybolur --}}
     @if($plaintextKey)
@@ -58,17 +58,17 @@ table.apc-table td { padding: 7px 10px; border-bottom: 1px solid var(--u-line,#f
 
     {{-- Toolbar --}}
     <div class="apc-toolbar">
-        <form method="POST" action="{{ route('manager.api-partners.rotate', $partner) }}" onsubmit="return confirm('Eski anahtar geçersiz olacak. Partner sitesinde key güncellemen gerekecek. Devam edilsin mi?')">
+        <form method="POST" action="{{ \App\Support\PartnerRouting::url('rotate', $partner) }}" onsubmit="return confirm('Eski anahtar geçersiz olacak. Partner sitesinde key güncellemen gerekecek. Devam edilsin mi?')">
             @csrf
             <button type="submit" class="apc-btn-warn">🔄 Anahtarı Yenile (Rotate)</button>
         </form>
-        <form method="POST" action="{{ route('manager.api-partners.toggle', $partner) }}">
+        <form method="POST" action="{{ \App\Support\PartnerRouting::url('toggle', $partner) }}">
             @csrf
             <button type="submit" class="apc-btn-ghost">
                 @if($partner->is_active) ⏸ Devre Dışı Bırak @else ▶ Aktif Et @endif
             </button>
         </form>
-        <form method="POST" action="{{ route('manager.api-partners.destroy', $partner) }}" onsubmit="return confirm('Partner kalıcı olarak silinecek. Audit log tarihçesi korunur. Emin misin?')">
+        <form method="POST" action="{{ \App\Support\PartnerRouting::url('destroy', $partner) }}" onsubmit="return confirm('Partner kalıcı olarak silinecek. Audit log tarihçesi korunur. Emin misin?')">
             @csrf @method('DELETE')
             <button type="submit" class="apc-btn-danger">🗑 Sil</button>
         </form>

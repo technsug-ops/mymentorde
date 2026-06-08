@@ -328,6 +328,23 @@ Route::middleware(['company.context', 'auth', 'marketing.access', 'module:market
         Route::get('/analytics/conversion-probability/{guestId}', [AnalyticsController::class, 'conversionProbability']);
         Route::get('/analytics/revenue-projection', [AnalyticsController::class, 'revenueProjection']);
         Route::get('/analytics/churn-risk', [AnalyticsController::class, 'churnRisk']);
+
+        // ─── Partner API Yönetimi (Marketing Admin) ────────────────────────
+        // Manager paneline ek olarak Marketing Admin de partnerları yönetebilir.
+        // Aynı controller — PartnerRouting::url() panel'e göre URL seçer.
+        // Parent group zaten 'mktg-admin.' prefix'i ekliyor → 'partners.index' →
+        // gerçek isim 'mktg-admin.partners.index' olur.
+        Route::middleware('marketing.admin')->group(function (): void {
+            $apc = \App\Http\Controllers\Manager\ApiPartnerController::class;
+            Route::get('/partners',                       [$apc, 'index'])->name('partners.index');
+            Route::get('/partners/create',                [$apc, 'create'])->name('partners.create');
+            Route::post('/partners',                      [$apc, 'store'])->middleware('throttle:10,1')->name('partners.store');
+            Route::get('/partners/{apiPartner}',          [$apc, 'show'])->name('partners.show');
+            Route::put('/partners/{apiPartner}',          [$apc, 'update'])->name('partners.update');
+            Route::post('/partners/{apiPartner}/rotate',  [$apc, 'rotate'])->middleware('throttle:10,1')->name('partners.rotate');
+            Route::post('/partners/{apiPartner}/toggle',  [$apc, 'toggle'])->name('partners.toggle');
+            Route::delete('/partners/{apiPartner}',       [$apc, 'destroy'])->name('partners.destroy');
+        });
     });
 
 Route::middleware(['company.context', 'auth', 'manager.role'])->prefix('mktg-admin')->group(function (): void {
