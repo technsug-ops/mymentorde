@@ -227,10 +227,9 @@
                    class="nav-link {{ request()->is('mktg-admin/tasks*') ? 'active' : '' }}">
                     <span class="nav-icon">✅</span> Görevlerim
                 </a>
-                <a href="/manager/requests"
-                   class="nav-link {{ request()->is('manager/requests*') ? 'active' : '' }}">
-                    <span class="nav-icon">📤</span> Manager'a Talep
-                </a>
+                {{-- "Manager'a Talep" linki kaldırıldı —
+                     /manager/requests manager layout'una geçiriyordu.
+                     Marketing-admin panelinin sınırlarını koruyalım. --}}
             </div>
 
             @if($panelMode === 'marketing')
@@ -257,14 +256,10 @@
             </div>
             @endif
 
-            {{-- User Activity Intelligence — aday + öğrenci aktivite takibi (marketing/sales dahil) --}}
-            <div class="nav-section">
-                <div class="nav-section-label">Kullanıcı İstihbarat</div>
-                <a href="/manager/user-intelligence"
-                   class="nav-link {{ request()->is('manager/user-intelligence*') ? 'active' : '' }}">
-                    <span class="nav-icon">👥</span> Kullanıcı Aktivitesi
-                </a>
-            </div>
+            {{-- "Kullanıcı Aktivitesi" linki kaldırıldı —
+                 /manager/user-intelligence manager layout'una geçiriyordu.
+                 Marketing-admin'in benzer ihtiyacı için ileride
+                 /mktg-admin/user-intelligence açılabilir. --}}
 
             <div class="nav-section">
                 <div class="nav-section-label">İçerik & Kampanya</div>
