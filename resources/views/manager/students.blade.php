@@ -173,6 +173,16 @@
                         <td style="color:var(--muted,#64748b);white-space:nowrap;">{{ optional($s->updated_at)->format('d.m.Y H:i') }}</td>
                         <td>
                             <a class="mgr-detail-btn" href="/manager/students/{{ urlencode($s->student_id) }}">Detay →</a>
+                            @if(!$s->is_archived)
+                                <button type="button" class="qa-del-btn archive" title="Arşivle (geri alınabilir)"
+                                        data-qa-delete-mode="archive"
+                                        data-qa-delete-url="{{ route('manager.quick-admin.student.delete', $s->id) }}"
+                                        data-qa-delete-label="Öğrenci '{{ $s->student_id }}'">🗑</button>
+                            @endif
+                            <button type="button" class="qa-del-btn force" title="KALICI Sil (geri alınamaz)"
+                                    data-qa-delete-mode="force"
+                                    data-qa-delete-url="{{ route('manager.quick-admin.student.delete', $s->id) }}"
+                                    data-qa-delete-label="Öğrenci '{{ $s->student_id }}'">🔥</button>
                         </td>
                     </tr>
                 @empty
@@ -181,6 +191,7 @@
             </tbody>
         </table>
     </div>
+    @include('manager.partials._lead-delete-script')
     @if($rows->hasPages())
     <div style="padding:12px 16px;border-top:1px solid var(--border,#e2e8f0);">
         {{ $rows->withQueryString()->links('partials.pagination') }}

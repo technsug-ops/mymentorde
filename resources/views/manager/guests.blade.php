@@ -172,6 +172,14 @@
                                style="display:inline-block;padding:4px 10px;font-size:var(--tx-xs);font-weight:600;color:#1e40af;border:1px solid rgba(30,64,175,.3);border-radius:6px;background:rgba(30,64,175,.05);text-decoration:none;white-space:nowrap;">
                                 Detay →
                             </a>
+                            <button type="button" class="qa-del-btn archive" title="Arşivle (geri alınabilir)"
+                                    data-qa-delete-mode="archive"
+                                    data-qa-delete-url="{{ route('manager.quick-admin.guest.delete', $g->id) }}"
+                                    data-qa-delete-label="Aday öğrenci '{{ trim(($g->first_name ?? '') . ' ' . ($g->last_name ?? '')) }}'">🗑</button>
+                            <button type="button" class="qa-del-btn force" title="KALICI Sil (geri alınamaz)"
+                                    data-qa-delete-mode="force"
+                                    data-qa-delete-url="{{ route('manager.quick-admin.guest.delete', $g->id) }}"
+                                    data-qa-delete-label="Aday öğrenci '{{ trim(($g->first_name ?? '') . ' ' . ($g->last_name ?? '')) }}'">🔥</button>
                         </td>
                     </tr>
                 @empty
@@ -180,6 +188,7 @@
             </tbody>
         </table>
     </div>
+    @include('manager.partials._lead-delete-script')
     @if($rows->hasPages())
     <div style="padding:12px 16px;border-top:1px solid var(--border,#e2e8f0);">
         {{ $rows->withQueryString()->links('partials.pagination') }}

@@ -439,6 +439,16 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::get('/manager/unimatch-funnel/leads.csv', [$umf, 'exportLeadsCsv'])->name('manager.unimatch-funnel.leads-csv');
     }
 
+    // ── Hızlı Yönetim: Yeni senior, rol ver, lead sil ──
+    {
+        $qac = \App\Http\Controllers\Manager\QuickAdminController::class;
+        Route::post('/manager/quick-admin/senior',          [$qac, 'storeSenior'])->middleware('throttle:30,1')->name('manager.quick-admin.senior.store');
+        Route::get('/manager/quick-admin/user-by-email',    [$qac, 'findUserByEmail'])->middleware('throttle:60,1')->name('manager.quick-admin.user.find');
+        Route::post('/manager/quick-admin/assign-role',     [$qac, 'assignRole'])->middleware('throttle:30,1')->name('manager.quick-admin.role.assign');
+        Route::delete('/manager/quick-admin/guest/{id}',    [$qac, 'deleteGuest'])->middleware('throttle:30,1')->name('manager.quick-admin.guest.delete');
+        Route::delete('/manager/quick-admin/student/{id}',  [$qac, 'deleteStudent'])->middleware('throttle:30,1')->name('manager.quick-admin.student.delete');
+    }
+
     // ── Partner API Yönetimi ──
     {
         $apc = \App\Http\Controllers\Manager\ApiPartnerController::class;

@@ -240,6 +240,9 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
     </div>
 </div>
 
+{{-- ── Hızlı Yönetim Kartı (Yeni Senior + Rol Ver) ── --}}
+@include('manager.partials._quick-admin-card')
+
 {{-- ── Müdahale Gerekli Widget (Lead Pipeline + Ops alerts birleşik) ── --}}
 @php
     $iv = $interventions ?? ['unassigned'=>0,'hot_no_contact'=>0,'overdue'=>0,'total_active'=>0];
