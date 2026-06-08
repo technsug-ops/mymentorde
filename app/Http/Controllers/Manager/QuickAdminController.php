@@ -50,12 +50,15 @@ class QuickAdminController extends Controller
     /**
      * POST /manager/quick-admin/senior
      * Yeni senior / mentor / advisor oluştur.
+     * Soft-deleted user (örn. silinen aday öğrenci) varsa restore + güncelle.
      */
     public function storeSenior(Request $request): JsonResponse
     {
         $data = $request->validate([
             'name'         => ['required', 'string', 'max:255'],
-            'email'        => ['required', 'email:rfc', 'max:255', 'unique:users,email'],
+            // Sadece aktif (not soft-deleted) kullanıcılarda unique
+            'email'        => ['required', 'email:rfc', 'max:255',
+                \Illuminate\Validation\Rule::unique('users', 'email')->whereNull('deleted_at')],
             'role'         => ['nullable', 'string', 'in:senior,mentor'],
             'password'     => ['nullable', 'string', 'min:8', 'max:255'],
             'senior_type'  => ['nullable', 'string', 'max:100'],
@@ -64,19 +67,39 @@ class QuickAdminController extends Controller
 
         $plainPassword = (string) ($data['password'] ?? Str::random(14));
         $role = (string) ($data['role'] ?? User::ROLE_SENIOR);
+        $email = strtolower(trim((string) $data['email']));
 
-        $user = User::query()->create([
-            'name'                => trim((string) $data['name']),
-            'email'               => strtolower(trim((string) $data['email'])),
-            'role'                => $role,
-            'password'            => Hash::make($plainPassword),
-            'senior_type'         => $data['senior_type'] ?? null,
-            'max_capacity'        => $data['max_capacity'] ?? 50,
-            'auto_assign_enabled' => true,
-            'can_view_guest_pool' => true,
-            'is_active'           => true,
-            'email_verified_at'   => now(),
-        ]);
+        // Eski silinmiş (soft-deleted) bir user varsa restore et + güncelle.
+        $trashed = User::onlyTrashed()->where('email', $email)->first();
+        if ($trashed) {
+            $trashed->restore();
+            $trashed->update([
+                'name'                => trim((string) $data['name']),
+                'role'                => $role,
+                'password'            => Hash::make($plainPassword),
+                'senior_type'         => $data['senior_type'] ?? null,
+                'max_capacity'        => $data['max_capacity'] ?? 50,
+                'auto_assign_enabled' => true,
+                'can_view_guest_pool' => true,
+                'is_active'           => true,
+                'email_verified_at'   => now(),
+                'student_id'          => null,
+            ]);
+            $user = $trashed;
+        } else {
+            $user = User::query()->create([
+                'name'                => trim((string) $data['name']),
+                'email'               => $email,
+                'role'                => $role,
+                'password'            => Hash::make($plainPassword),
+                'senior_type'         => $data['senior_type'] ?? null,
+                'max_capacity'        => $data['max_capacity'] ?? 50,
+                'auto_assign_enabled' => true,
+                'can_view_guest_pool' => true,
+                'is_active'           => true,
+                'email_verified_at'   => now(),
+            ]);
+        }
 
         $this->logEvent('quick_admin.senior_created', [
             'created_user_id' => $user->id,
@@ -179,12 +202,16 @@ class QuickAdminController extends Controller
         }
 
         if ($mode === 'force') {
-            // Kalıcı silme — ilgili user kayıtlar nullable FK'lar ile orphan kalır
+            // Kalıcı silme — ilgili user da forceDelete (email tekrar kullanılabilsin)
             $email = $app->email;
             $app->forceDelete();
-            // Aynı email'li user hesabı varsa onu da soft delete et (kullanıcı login olmasın)
             if ($email) {
-                User::query()->where('email', $email)->where('role', User::ROLE_GUEST)->delete();
+                // Aynı email'li guest user kaydı varsa gerçek silinir (soft delete değil)
+                // → email bir daha senior/portal user olarak kayıt için müsait kalır
+                User::query()->withTrashed()
+                    ->where('email', $email)
+                    ->where('role', User::ROLE_GUEST)
+                    ->forceDelete();
             }
             $this->logEvent('quick_admin.guest_force_deleted', [
                 'guest_id' => $id,
@@ -226,9 +253,11 @@ class QuickAdminController extends Controller
         if ($mode === 'force') {
             $assignment->forceDelete(); // gerçek silme (SoftDeletes bypass)
             if ($email) {
-                User::query()->where('email', $email)
+                // Aynı email'li student/guest user da gerçek silinir → email yeniden kullanılabilir
+                User::query()->withTrashed()
+                    ->where('email', $email)
                     ->whereIn('role', [User::ROLE_STUDENT, User::ROLE_GUEST])
-                    ->delete();
+                    ->forceDelete();
             }
             $this->logEvent('quick_admin.student_force_deleted', [
                 'assignment_id' => $id,
