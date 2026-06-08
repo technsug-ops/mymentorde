@@ -38,6 +38,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Authenticated kullanıcıların presence durumunu günceller (heartbeat)
         $middleware->append(\App\Http\Middleware\UpdateUserPresence::class);
 
+        // Şifre değiştirme zorunluluğu — manager reset sonrası geçici şifrenin tek-kullanımlık olmasını sağlar
+        $middleware->append(\App\Http\Middleware\EnsurePasswordChanged::class);
+
         $middleware->alias([
             'manager.role' => \App\Http\Middleware\EnsureManagerRole::class,
             'senior.role' => \App\Http\Middleware\EnsureSeniorRole::class,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PasswordResetByManagerMail;
 use App\Models\GuestApplication;
 use App\Models\StudentAssignment;
 use App\Models\SystemEventLog;
@@ -10,6 +11,8 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 /**
@@ -295,7 +298,6 @@ class QuickAdminController extends Controller
     {
         $data = $request->validate([
             'email'        => ['required', 'email:rfc', 'max:255'],
-            'password'     => ['nullable', 'string', 'min:8', 'max:255'],
             'name'         => ['nullable', 'string', 'max:255'],
             'default_role' => ['nullable', 'string', 'in:guest,student'],
         ]);
@@ -303,18 +305,19 @@ class QuickAdminController extends Controller
         $email = strtolower(trim((string) $data['email']));
         // Soft-deleted dahil ara — silinmişse restore et
         $user  = User::query()->withTrashed()->where('email', $email)->first();
-        $plainPassword = (string) ($data['password'] ?? Str::random(12));
+        // Manager şifreyi GÖRMEZ — backend tarafında üretilir, sadece mail'le gider
+        $tempPassword = Str::random(12);
         $created = false;
 
         if (! $user) {
-            // User yoksa otomatik oluştur (manager kart üzerinden tetikledi)
             $user = User::query()->create([
-                'name'              => trim((string) ($data['name'] ?? $email)),
-                'email'             => $email,
-                'role'              => (string) ($data['default_role'] ?? User::ROLE_GUEST),
-                'password'          => Hash::make($plainPassword),
-                'is_active'         => true,
-                'email_verified_at' => now(),
+                'name'                 => trim((string) ($data['name'] ?? $email)),
+                'email'                => $email,
+                'role'                 => (string) ($data['default_role'] ?? User::ROLE_GUEST),
+                'password'             => Hash::make($tempPassword),
+                'password_must_change' => true,
+                'is_active'            => true,
+                'email_verified_at'    => now(),
             ]);
             $created = true;
         } else {
@@ -322,29 +325,58 @@ class QuickAdminController extends Controller
                 $user->restore();
             }
             $user->update([
-                'password'          => Hash::make($plainPassword),
-                'email_verified_at' => $user->email_verified_at ?? now(),
-                'is_active'         => true,
+                'password'             => Hash::make($tempPassword),
+                'password_must_change' => true,
+                'email_verified_at'    => $user->email_verified_at ?? now(),
+                'is_active'            => true,
+            ]);
+        }
+
+        // Mail kullanıcıya gönderilir — manager şifreyi görmez
+        $mailSent = true;
+        $mailError = null;
+        try {
+            Mail::to($user->email)->send(new PasswordResetByManagerMail(
+                name: $user->name ?: $user->email,
+                email: $user->email,
+                tempPassword: $tempPassword,
+                loginUrl: url('/login'),
+            ));
+        } catch (\Throwable $e) {
+            $mailSent = false;
+            $mailError = $e->getMessage();
+            Log::error('Password reset mail failed', [
+                'email' => $user->email,
+                'error' => $mailError,
             ]);
         }
 
         $this->logEvent($created ? 'quick_admin.user_created_pwd' : 'quick_admin.password_reset', [
-            'user_id' => $user->id,
-            'email'   => $user->email,
-            'role'    => $user->role,
-            'created' => $created,
+            'user_id'   => $user->id,
+            'email'     => $user->email,
+            'role'      => $user->role,
+            'created'   => $created,
+            'mail_sent' => $mailSent,
         ]);
 
+        if (! $mailSent) {
+            return response()->json([
+                'ok'      => false,
+                'message' => "Şifre değişti ama MAIL GÖNDERİLEMEDİ: {$mailError}. "
+                           . "Kullanıcı şu an giriş yapamaz — info@panel.mentorde.com ile iletişime geçmesi gerekir.",
+            ], 502);
+        }
+
         $msg = $created
-            ? "✓ Hesap oluşturuldu + şifre verildi. Tek sefer gösterilir."
-            : "✓ Şifre sıfırlandı. Yeni şifre tek sefer gösterilir.";
+            ? "✓ Hesap oluşturuldu + geçici şifre mail ile {$user->email} adresine gönderildi. Kullanıcı giriş yapınca şifresini yeniden belirleyecek."
+            : "✓ Geçici şifre mail ile {$user->email} adresine gönderildi. Kullanıcı giriş yapınca şifresini yeniden belirleyecek.";
 
         return response()->json([
-            'ok'                 => true,
-            'created'            => $created,
-            'user'               => $user->only(['id', 'name', 'email', 'role']),
-            'generated_password' => $plainPassword,
-            'message'            => $msg,
+            'ok'      => true,
+            'created' => $created,
+            'user'    => $user->only(['id', 'name', 'email', 'role']),
+            // generated_password İSTEYEREK döndürülmüyor — manager şifreyi görmez
+            'message' => $msg,
         ]);
     }
 

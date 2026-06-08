@@ -467,6 +467,15 @@ Route::post('/cookie-consent', function(\Illuminate\Http\Request $r) {
 // Rol bazlı yönlendirme
 Route::get('/auth/redirect', [AuthController::class, 'redirectByRole'])->middleware('auth');
 
+// Manager şifre sıfırlama sonrası zorunlu değişim ekranı
+Route::middleware('auth')->group(function () {
+    $pcc = \App\Http\Controllers\Auth\PasswordChangeRequiredController::class;
+    Route::get('/password/change-required',  [$pcc, 'show'])->name('password.change-required.show');
+    Route::post('/password/change-required', [$pcc, 'update'])
+        ->middleware('throttle:10,1')
+        ->name('password.change-required.update');
+});
+
 
 // Webhook alım rotası (harici sistemlerden — auth gerektirmez)
 Route::post('/webhooks/{source}', [WebhookController::class, 'receive'])->middleware('throttle:60,1')->name('webhook.receive');
