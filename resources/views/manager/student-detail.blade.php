@@ -179,17 +179,24 @@
 
     {{-- SAĞ: Güncelleme Formu --}}
     <div>
-        @if($studentUser)
-        {{-- 🔐 Manuel Şifre Sıfırlama (mail gönderemediğimiz öğrenciler için) --}}
+        @php
+            $pwdResetEmail = $studentUser?->email ?? trim((string) ($guest?->email ?? ''));
+            $pwdResetName  = $guest
+                ? (trim($guest->first_name . ' ' . $guest->last_name) ?: $pwdResetEmail)
+                : ($studentUser?->name ?: $pwdResetEmail);
+        @endphp
+        @if(! empty($pwdResetEmail))
+        {{-- 🔐 Manuel Şifre Sıfırlama — her öğrenci için aktif --}}
         <section class="panel gd-panel" style="border:1px solid #fde68a;background:#fffbeb;">
             <h2 style="color:#92400e;">🔐 Şifre Sıfırla (Manuel)</h2>
             <div style="font-size:12px;color:#78350f;margin-bottom:10px;line-height:1.5;">
-                Öğrenci mail alamıyorsa kullan. Yeni şifre <strong>tek sefer</strong> ekranda gösterilir,
-                kapanınca tekrar görünmez. Öğrenciye manuel ilet (WhatsApp/telefon).
+                Mail teslim sorunu varsa kullan. Hesabı yoksa otomatik oluşturulur.
+                Yeni şifre <strong>tek sefer</strong> ekranda gösterilir — kapanınca görünmez. WhatsApp/telefonla ilet.
             </div>
             <div class="gd-field">
                 <label>Öğrenci E-posta</label>
-                <div class="gd-readonly" id="pwdReset-email">{{ $studentUser->email }}</div>
+                <div class="gd-readonly" id="pwdReset-email">{{ $pwdResetEmail }}</div>
+                <input type="hidden" id="pwdReset-name" value="{{ $pwdResetName }}">
             </div>
             <div class="gd-field">
                 <label>Yeni Şifre <span style="color:#92400e;font-weight:400;">(boş bırak → otomatik üretilsin)</span></label>
@@ -531,7 +538,10 @@
 @endcan
 @endmodule
 
-@if(! empty($studentUser))
+@php
+    $hasResetEmail = ! empty($studentUser?->email) || ! empty(trim((string) ($guest?->email ?? '')));
+@endphp
+@if($hasResetEmail)
 {{-- 🔐 Şifre Sıfırla — handler --}}
 <script nonce="{{ $cspNonce ?? '' }}">
 (function(){
@@ -548,6 +558,8 @@
     var CSRF = '{{ csrf_token() }}';
     var URL  = "{{ route('manager.quick-admin.password.reset') }}";
     var EMAIL = (emailBox.textContent || '').trim();
+    var nameEl = document.getElementById('pwdReset-name');
+    var NAME = nameEl ? (nameEl.value || '').trim() : '';
 
     btn.addEventListener('click', function(){
         errBox.style.display = 'none';
@@ -562,15 +574,16 @@
             return;
         }
 
-        if (!confirm("Bu kullanıcının şifresi sıfırlansın mı?\n\n" + EMAIL + "\n\nMail GÖNDERİLMEZ. Yeni şifre ekrana basılır."))
+        if (!confirm("Bu kullanıcının şifresi sıfırlansın mı?\n\n" + EMAIL + "\n\nHesap yoksa otomatik oluşturulur. Mail GÖNDERİLMEZ."))
             return;
 
         btn.disabled = true;
         var oldText = btn.textContent;
         btn.textContent = 'Sıfırlanıyor...';
 
-        var body = { email: EMAIL };
+        var body = { email: EMAIL, default_role: 'student' };
         if (customPwd.length > 0) body.password = customPwd;
+        if (NAME) body.name = NAME;
 
         fetch(URL, {
             method: 'POST',

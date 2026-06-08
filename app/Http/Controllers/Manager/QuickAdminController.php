@@ -294,38 +294,57 @@ class QuickAdminController extends Controller
     public function resetUserPassword(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'email'    => ['required', 'email:rfc', 'max:255'],
-            'password' => ['nullable', 'string', 'min:8', 'max:255'],
+            'email'        => ['required', 'email:rfc', 'max:255'],
+            'password'     => ['nullable', 'string', 'min:8', 'max:255'],
+            'name'         => ['nullable', 'string', 'max:255'],
+            'default_role' => ['nullable', 'string', 'in:guest,student'],
         ]);
 
         $email = strtolower(trim((string) $data['email']));
-        $user  = User::query()->where('email', $email)->first();
+        // Soft-deleted dahil ara — silinmişse restore et
+        $user  = User::query()->withTrashed()->where('email', $email)->first();
+        $plainPassword = (string) ($data['password'] ?? Str::random(12));
+        $created = false;
 
         if (! $user) {
-            return response()->json([
-                'ok'      => false,
-                'message' => 'Bu email ile aktif kullanıcı bulunamadı.',
-            ], 404);
+            // User yoksa otomatik oluştur (manager kart üzerinden tetikledi)
+            $user = User::query()->create([
+                'name'              => trim((string) ($data['name'] ?? $email)),
+                'email'             => $email,
+                'role'              => (string) ($data['default_role'] ?? User::ROLE_GUEST),
+                'password'          => Hash::make($plainPassword),
+                'is_active'         => true,
+                'email_verified_at' => now(),
+            ]);
+            $created = true;
+        } else {
+            if ($user->trashed()) {
+                $user->restore();
+            }
+            $user->update([
+                'password'          => Hash::make($plainPassword),
+                'email_verified_at' => $user->email_verified_at ?? now(),
+                'is_active'         => true,
+            ]);
         }
 
-        $plainPassword = (string) ($data['password'] ?? Str::random(12));
-
-        $user->update([
-            'password'          => Hash::make($plainPassword),
-            'email_verified_at' => $user->email_verified_at ?? now(),
-        ]);
-
-        $this->logEvent('quick_admin.password_reset', [
+        $this->logEvent($created ? 'quick_admin.user_created_pwd' : 'quick_admin.password_reset', [
             'user_id' => $user->id,
             'email'   => $user->email,
             'role'    => $user->role,
+            'created' => $created,
         ]);
+
+        $msg = $created
+            ? "✓ Hesap oluşturuldu + şifre verildi. Tek sefer gösterilir."
+            : "✓ Şifre sıfırlandı. Yeni şifre tek sefer gösterilir.";
 
         return response()->json([
             'ok'                 => true,
+            'created'            => $created,
             'user'               => $user->only(['id', 'name', 'email', 'role']),
             'generated_password' => $plainPassword,
-            'message'            => "✓ Şifre sıfırlandı. Yeni şifre tek sefer gösterilir, kapatınca tekrar gösterilmez.",
+            'message'            => $msg,
         ]);
     }
 
