@@ -1,55 +1,35 @@
 name: Deploy to KASSERVER (my.mentorde.com)
 
-# Her main branch push'unda otomatik tetiklenir
-# Manuel tetikleme için: GitHub > Actions > Deploy > "Run workflow"
+# Tetikleyiciler:
+#  - main branch'e push → otomatik deploy
+#  - Actions sekmesinden manuel "Run workflow"
 on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      force_rebuild:
-        description: 'Tüm adımları zorla çalıştır (composer + npm + Vite + transfer-all)'
-        required: false
-        default: 'false'
 
-# Yığılmayı önle: yeni push gelirse koşan/bekleyen eski run iptal edilsin.
-# KASSERVER tek FTP target — paralel deploy race condition yaratır.
+# Aynı anda iki deploy çalışmasın (push üst üste gelirse en yeniyi bekler).
+# cancel-in-progress: false → her commit deploy edilir, sıraya alınır
 concurrency:
-  group: deploy-kasserver-prod
-  cancel-in-progress: true
+  group: deploy-kasserver-production
+  cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Build and FTP Deploy
+  build-and-deploy:
+    name: Build & Deploy
     runs-on: ubuntu-latest
-    # Takılı kalan FTP transferleri 6 saat boyunca tutmaktansa 20 dk'da fail et.
-    timeout-minutes: 20
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout repository
+      # ─────────────────────────────────────────────────────
+      # 1. Checkout
+      # ─────────────────────────────────────────────────────
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          # paths-filter önceki commit'le diff yapar — fetch-depth: 2 gerekli
-          fetch-depth: 2
 
-      # Hangi path'lerde değişiklik oldu? Conditional step'ler buna göre çalışır.
-      - name: Detect changed paths
-        uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            composer:
-              - 'composer.json'
-              - 'composer.lock'
-            frontend:
-              - 'resources/js/**'
-              - 'resources/css/**'
-              - 'package.json'
-              - 'package-lock.json'
-              - 'vite.config.js'
-              - 'postcss.config.js'
-              - 'tailwind.config.js'
-
+      # ─────────────────────────────────────────────────────
+      # 2. PHP 8.4 + Composer (production deps)
+      # ─────────────────────────────────────────────────────
       - name: Setup PHP 8.4
         uses: shivammathur/setup-php@v2
         with:
@@ -58,122 +38,252 @@ jobs:
           coverage: none
           tools: composer:v2
 
+      - name: Ensure Laravel cache directories exist
+        run: |
+          # Laravel 'package:discover' bu klasörlere erişir — git'te boş klasörler kaybolabilir
+          mkdir -p bootstrap/cache
+          mkdir -p storage/framework/cache/data
+          mkdir -p storage/framework/sessions
+          mkdir -p storage/framework/views
+          mkdir -p storage/framework/testing
+          mkdir -p storage/logs
+          mkdir -p storage/app/public
+          chmod -R 775 storage bootstrap/cache
+
       - name: Cache Composer dependencies
-        id: composer-cache
         uses: actions/cache@v4
         with:
           path: vendor
-          key: ${{ runner.os }}-php8.4-composer-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-php8.4-composer-${{ hashFiles('composer.lock') }}
           restore-keys: ${{ runner.os }}-php8.4-composer-
 
-      - name: Install Composer dependencies (production)
-        # Sadece composer.lock değişti VEYA cache miss olunca çalıştır
-        if: steps.composer-cache.outputs.cache-hit != 'true' || steps.changes.outputs.composer == 'true' || inputs.force_rebuild == 'true'
-        run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+      - name: Composer install (production)
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist
 
       - name: Regenerate Composer autoload classmap
-        # composer.lock değişmese de yeni PHP class dosyaları classmap'e
-        # girmesi için her deploy'da autoload regenerate. Hızlı (~1-2 sn).
-        # Sebep: app/Models/X.php yeni eklendiğinde "Class not found" hatası
-        # vendor/composer cache'lenmiş classmap'ten kaynaklanır.
+        # Yeni PHP class dosyalari classmap'e girmesi icin her deploy'da regenerate
         run: composer dump-autoload --optimize --no-dev
 
+      # ─────────────────────────────────────────────────────
+      # 3. Node 20 + Vite build
+      # ─────────────────────────────────────────────────────
       - name: Setup Node 20
-        # Sadece frontend değişti veya manual force
-        if: steps.changes.outputs.frontend == 'true' || inputs.force_rebuild == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install NPM dependencies
-        if: steps.changes.outputs.frontend == 'true' || inputs.force_rebuild == 'true'
-        run: npm ci
+      - name: NPM install
+        run: npm ci --no-audit --no-fund
 
-      - name: Build Vite assets
-        if: steps.changes.outputs.frontend == 'true' || inputs.force_rebuild == 'true'
+      - name: Vite production build
         run: npm run build
 
-      - name: Install lftp
-        run: sudo apt-get install -y lftp
-
-      # ── Maintenance mode ON (FTP race window'unda 500 yerine 503) ────────
-      # storage/framework/maintenance.php var iken Laravel her isteği 503 döner.
-      # Mirror bittikten sonra siliyoruz; aradaki ~30-60 sn pencerede gelen
-      # request'ler "Class not found" / "Failed to open stream" yerine retry'lı
-      # 503 alır.
-      - name: Maintenance mode ON
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
+      # ─────────────────────────────────────────────────────
+      # 4. Deploy artefakt hazırlığı — bilinen hatalar için temizlik
+      # ─────────────────────────────────────────────────────
+      - name: Clean deploy artifacts
         run: |
-          cat > /tmp/maintenance.php <<'EOF'
-          <?php return [
-              // _deploy/* maintenance icinde de erisilebilir — admin stuck-503'ten
-              // cikis icin /_deploy/run-pending?cleanup=clear-maintenance cagirabilir
-              'except'   => ['_deploy/*'],
-              'redirect' => null,
-              'retry'    => 30,
-              'refresh'  => 30,
-              'secret'   => null,
-              'status'   => 503,
-              'template' => null,
-          ];
-          EOF
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "ftp://$FTP_HOST" -e "
-            set ftp:ssl-force yes
-            set ssl:verify-certificate no
-            set ftp:passive-mode true
-            set cmd:fail-exit yes
-            cd '$FTP_SERVER_DIR/storage/framework'
-            put /tmp/maintenance.php
-            bye
-          " || echo "::warning::Maintenance ON failed — continuing with deploy"
+          # Vite dev mode artığı — production'da sessiz fail sebebiyor
+          rm -f public/hot
+          # Eski cache'ler (server path'ler local path içerebilir)
+          rm -rf bootstrap/cache/*.php
+          rm -rf storage/framework/views/*.php
+          rm -rf storage/framework/cache/data/*
+          rm -rf storage/framework/sessions/*
+          # SQLite test DB sızıntısı olmasın
+          rm -f database/database.sqlite database/*.sqlite-*
+          # Build artefakt sanity
+          ls -la public/build > /dev/null 2>&1 || { echo "::error::public/build yok — Vite build başarısız!"; exit 1; }
+          echo "Artefakt temizliği tamam"
 
-      - name: Deploy via lftp (FTPS)
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
-          # Vite build çalışmadıysa public/build upload adımını atla
-          SKIP_BUILD_UPLOAD: ${{ (steps.changes.outputs.frontend != 'true' && inputs.force_rebuild != 'true') && 'true' || 'false' }}
-          # force_rebuild=true → lftp --transfer-all ile her dosyayi zorla upload
-          # (KAS partial transfer / mtime mismatch fix'i icin)
-          FORCE_REBUILD: ${{ inputs.force_rebuild == 'true' && 'true' || 'false' }}
-          # Telemetri: hangi step'ler skip edildi log'da görünsün
-          CHANGED_COMPOSER: ${{ steps.changes.outputs.composer }}
-          CHANGED_FRONTEND: ${{ steps.changes.outputs.frontend }}
-        run: python3 scripts/lftp-deploy.py
-
-      # ── Maintenance mode OFF — KRİTİK: deploy başarısız bile olsa çalışmalı
-      # Aksi halde site 503'te takılır. if: always() garanti eder.
-      - name: Maintenance mode OFF
-        if: always()
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
+      # ─────────────────────────────────────────────────────
+      # 5. Source kodu TEK ZIP dosyasına paketle
+      #    Sebep: KAS FTPS çok sayıda küçük dosyada bağlantıyı düşürüyor.
+      #    Tek ZIP = tek FTPS session = ~30 sn upload (eskiden ~20 dk).
+      # ─────────────────────────────────────────────────────
+      - name: Package source code into single ZIP
         run: |
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "ftp://$FTP_HOST" -e "
-            set ftp:ssl-force yes
-            set ssl:verify-certificate no
-            set ftp:passive-mode true
-            cd '$FTP_SERVER_DIR/storage/framework'
-            rm -f maintenance.php
-            bye
-          " || echo "::warning::Maintenance OFF failed — site may be stuck in 503 mode!"
+          # vendor/ DAHIL EDILDI — kismi vendor upload'i autoloader uyumsuzlugu yapar.
+          # .env DAHIL DEGIL — sunucudaki mevcut .env korunur (production secrets).
+          zip -r -q deploy-bundle.zip . \
+            -x "node_modules/*" \
+               ".git/*" \
+               ".github/*" \
+               "tests/*" \
+               "memory/*" \
+               "docs/*" \
+               "scripts/*" \
+               "storage/logs/*" \
+               "storage/app/db-dumps/*" \
+               "storage/framework/cache/data/*" \
+               "storage/framework/sessions/*" \
+               "storage/framework/views/*" \
+               "storage/framework/maintenance.php" \
+               ".vscode/*" \
+               ".idea/*" \
+               ".editorconfig" \
+               ".gitignore" \
+               ".gitattributes" \
+               ".npmrc" \
+               "phpunit.xml" \
+               "playwright.config.js" \
+               ".env" \
+               ".env.example" \
+               ".env.local" \
+               ".env.*" \
+               "CLAUDE.md" \
+               "HANDBOOK_TR.md" \
+               "HANDBOOK_EN.md" \
+               "DEV_HANDBOOK.md" \
+               "README.md" \
+               "*.rar" \
+               "public/build.zip" \
+               "public/build.rar" \
+               "deploy-bundle.zip"
+          ls -lh deploy-bundle.zip
+          echo "Bundle hazır: $(du -h deploy-bundle.zip | cut -f1)"
 
+      # ─────────────────────────────────────────────────────
+      # 6. Upload staging dizinleri
+      #    A) upload-webhook/   → public/_deploy.php  (her deploy senkron)
+      #    B) upload-bundle/    → storage/app/{ZIP + pulse}
+      # ─────────────────────────────────────────────────────
+      - name: Prepare upload directories
+        run: |
+          # A) Webhook — _deploy.php her deploy'da public/'a senkron edilir.
+          #    Chicken-and-egg: ZIP'i extract eden script ZIP'in içinde olamaz.
+          mkdir -p ./upload-webhook
+          cp public/_deploy.php ./upload-webhook/_deploy.php
+
+          # B) Bundle — ZIP + pulse storage/app/'a yüklenir, webhook bekler.
+          mkdir -p ./upload-bundle
+          mv deploy-bundle.zip ./upload-bundle/
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > ./upload-bundle/.deploy-pulse
+          ls -lh ./upload-webhook/ ./upload-bundle/
+
+      # 6a. Webhook upload (küçük, hızlı, ~1 sn)
+      - name: Upload webhook to public/
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./upload-webhook/
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}/public/
+          state-name: .ftp-webhook-state.json
+          log-level: standard
+          dangerous-clean-slate: false
+          timeout: 30000
+
+      # SamKirkland action — WORKFLOW-level retry: 5 deneme, escalating bekleme
+      # KAS FTPS bağlantısı bazen düşer (ECONNRESET). 5 deneme stabil.
+      - name: Upload bundle via FTPS (attempt 1)
+        id: ftp1
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./upload-bundle/
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}/storage/app/
+          state-name: .ftp-deploy-bundle-state.json
+          log-level: standard
+          dangerous-clean-slate: false
+          timeout: 60000
+
+      - name: Wait before FTPS attempt 2
+        if: steps.ftp1.outcome == 'failure'
+        run: sleep 30
+
+      - name: Upload bundle via FTPS (attempt 2)
+        id: ftp2
+        if: steps.ftp1.outcome == 'failure'
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./upload-bundle/
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}/storage/app/
+          state-name: .ftp-deploy-bundle-state.json
+          log-level: standard
+          dangerous-clean-slate: false
+          timeout: 60000
+
+      - name: Wait before FTPS attempt 3
+        if: steps.ftp1.outcome == 'failure' && steps.ftp2.outcome == 'failure'
+        run: sleep 45
+
+      - name: Upload bundle via FTPS (attempt 3 — final)
+        if: steps.ftp1.outcome == 'failure' && steps.ftp2.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./upload-bundle/
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}/storage/app/
+          state-name: .ftp-deploy-bundle-state.json
+          log-level: standard
+          dangerous-clean-slate: false
+          timeout: 60000
+
+      # ─────────────────────────────────────────────────────
+      # 7. Auto-trigger: server'da _deploy.php'yi çağır
+      #    → ZIP extract + cache rebuild OTOMATIK
+      #    Pulse-gated: saldırgan pulse oluşturamaz (FTP gerek)
+      # ─────────────────────────────────────────────────────
+      - name: Trigger server-side deploy (extract + cache rebuild)
+        run: |
+          set -e
+          MAX_TRIES=3
+          for i in $(seq 1 $MAX_TRIES); do
+            echo "Attempt $i/$MAX_TRIES — calling deploy webhook..."
+            HTTP_CODE=$(curl -sS -o /tmp/deploy-response.txt -w "%{http_code}" \
+              --max-time 120 \
+              "https://panel.mentorde.com/_deploy.php")
+            RESPONSE=$(cat /tmp/deploy-response.txt)
+            echo "Response: HTTP $HTTP_CODE — $RESPONSE"
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ Deploy webhook successful"
+              exit 0
+            elif [ "$HTTP_CODE" = "204" ]; then
+              echo "⚠️  No pulse found on server (FTP upload may not have completed)"
+              sleep 10
+            elif [ "$HTTP_CODE" = "429" ]; then
+              echo "⚠️  Rate limited / lock active, waiting 30s..."
+              sleep 30
+            else
+              echo "❌ Webhook failed with HTTP $HTTP_CODE"
+              sleep 15
+            fi
+          done
+          echo "::error::Deploy webhook failed after $MAX_TRIES attempts"
+          exit 1
+
+      # ─────────────────────────────────────────────────────
+      # 8. Bilgilendirme
+      # ─────────────────────────────────────────────────────
       - name: Deploy summary
         if: always()
         run: |
-          echo "### 🚀 Deploy özeti" >> $GITHUB_STEP_SUMMARY
+          echo "## Deploy Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Adım | Durum |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| Composer install | ${{ (steps.composer-cache.outputs.cache-hit != 'true' || steps.changes.outputs.composer == 'true') && '✅ Çalıştı' || '⏭️ Skip (değişiklik yok)' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| npm + Vite build | ${{ steps.changes.outputs.frontend == 'true' && '✅ Çalıştı' || '⏭️ Skip (frontend değişmedi)' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| FTP deploy | ✅ Çalıştı |" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Doğrulama:**" >> $GITHUB_STEP_SUMMARY
+          echo "- https://panel.mentorde.com" >> $GITHUB_STEP_SUMMARY
