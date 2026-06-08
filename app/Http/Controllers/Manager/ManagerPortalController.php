@@ -217,6 +217,7 @@ class ManagerPortalController extends Controller
         abort_if($cid > 0 && (int) $guest->company_id !== $cid, 403);
 
         $email = trim((string) $request->input('assigned_senior_email', '')) ?: null;
+        $previousEmail = $guest->assigned_senior_email;
 
         $guest->update([
             'assigned_senior_email' => $email,
@@ -224,7 +225,67 @@ class ManagerPortalController extends Controller
             'assigned_by'           => $email ? $request->user()?->email : null,
         ]);
 
-        return back()->with('status', $email ? 'Senior atandı: ' . $email : 'Senior ataması kaldırıldı.');
+        // Yeni atama → 2 in-app bildirim (aynı senior ise atla)
+        if ($email && $email !== $previousEmail) {
+            $this->sendAssignmentNotifications(
+                guestId: (string) $guest->id,
+                seniorEmail: $email,
+                guestName: trim($guest->first_name . ' ' . $guest->last_name),
+                companyId: (int) ($guest->company_id ?? 0),
+                triggeredBy: $request->user()?->email,
+                isGuest: true,
+            );
+        }
+
+        $seniorLabel = $email ? (User::where('email', $email)->value('name') ?: $email) : null;
+        return back()->with('status', $email ? 'Danışman atandı: ' . $seniorLabel : 'Danışman ataması kaldırıldı.');
+    }
+
+    /**
+     * Senior atama bildirimi — 2 in-app notification (senior + guest/student).
+     * Email/whatsapp değil, sadece in_app — kullanıcının panel bildirim
+     * sekmesinde görünür, kişisel email maruz kalmaz.
+     */
+    private function sendAssignmentNotifications(
+        string $guestId,
+        string $seniorEmail,
+        string $guestName,
+        int $companyId,
+        ?string $triggeredBy,
+        bool $isGuest,
+    ): void {
+        $svc = app(\App\Services\NotificationService::class);
+        $senior = User::where('email', $seniorEmail)->first();
+        $seniorName = $senior?->name ?: $seniorEmail;
+
+        // 1) Senior'a bildirim
+        if ($senior) {
+            $svc->send([
+                'channel'      => 'in_app',
+                'category'     => 'senior_assignment.received',
+                'user_id'      => (int) $senior->id,
+                'company_id'   => $companyId,
+                'subject'      => $isGuest ? 'Yeni aday öğrenci atandı' : 'Yeni öğrenci atandı',
+                'body'         => "{$guestName} sana atandı. Mesajlardan iletişime geçebilirsin.",
+                'source_type'  => $isGuest ? 'guest_application' : 'student_assignment',
+                'source_id'    => $guestId,
+                'triggered_by' => $triggeredBy,
+            ]);
+        }
+
+        // 2) Aday öğrenci / öğrenci'ye bildirim
+        $svc->send([
+            'channel'      => 'in_app',
+            'category'     => 'senior_assignment.assigned',
+            'guest_id'     => $isGuest ? $guestId : null,
+            'student_id'   => $isGuest ? null : $guestId,
+            'company_id'   => $companyId,
+            'subject'      => 'Eğitim danışmanın atandı',
+            'body'         => "Eğitim danışmanın artık {$seniorName}. Mesajlar sekmesinden iletişime geçebilirsin.",
+            'source_type'  => $isGuest ? 'guest_application' : 'student_assignment',
+            'source_id'    => $guestId,
+            'triggered_by' => $triggeredBy,
+        ]);
     }
 
     // ─── ÖĞRENCİ CSV EXPORT ─────────────────────────────────────────────────

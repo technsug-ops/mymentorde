@@ -16,7 +16,7 @@
 
     <section class="grid4">
         <div class="panel"><div class="muted">Öğrenci ID</div><div class="kpi" style="font-size:var(--tx-xl);">{{ $studentId ?: '-' }}</div></div>
-        <div class="panel"><div class="muted">Atanan Eğitim Danışmanı</div><div class="kpi" style="font-size:var(--tx-xl);">{{ $assignment?->senior_email ?: '-' }}</div></div>
+        <div class="panel"><div class="muted">Atanan Eğitim Danışmanı</div><div class="kpi" style="font-size:var(--tx-xl);">{{ $assignment?->senior?->name ?: '-' }}</div></div>
         <div class="panel"><div class="muted">Belge Durumu</div><div class="kpi">{{ (int)($docSummary['required_done'] ?? 0) }}/{{ (int)($docSummary['required_total'] ?? 0) }}</div></div>
         <div class="panel"><div class="muted">Bildirim</div><div class="kpi">{{ (int)($notificationCount ?? 0) }}</div></div>
     </section>

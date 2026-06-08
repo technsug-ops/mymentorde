@@ -145,6 +145,7 @@ class StudentAssignmentController extends Controller
             }
         }
 
+        $previousSeniorEmail = $existing?->senior_email;
         $row = StudentAssignment::query()->updateOrCreate(
             ['student_id' => (string) $data['student_id']],
             [
@@ -160,7 +161,66 @@ class StudentAssignmentController extends Controller
 
         $taskAutomation->ensureStudentAssignmentTask($row);
 
+        // Senior değiştiyse 2 in-app bildirim (senior'a + öğrenciye)
+        $newSeniorEmail = $row->senior_email;
+        if ($newSeniorEmail && $newSeniorEmail !== $previousSeniorEmail) {
+            $this->dispatchAssignmentNotifications(
+                studentId: (string) $row->student_id,
+                seniorEmail: $newSeniorEmail,
+                companyId: (int) ($row->company_id ?? 0),
+                triggeredBy: $request->user()?->email,
+            );
+        }
+
         return response()->json($row->fresh());
+    }
+
+    /**
+     * Senior atama in-app bildirimi (öğrenci + senior).
+     * E-posta gizli — sadece isim ve sistem içi mesajlaşma linki.
+     */
+    private function dispatchAssignmentNotifications(
+        string $studentId,
+        string $seniorEmail,
+        int $companyId,
+        ?string $triggeredBy,
+    ): void {
+        $svc = app(\App\Services\NotificationService::class);
+        $senior = User::query()->where('email', $seniorEmail)->first();
+        $seniorName = $senior?->name ?: $seniorEmail;
+
+        // Öğrenci adı için assignment + GuestApplication conversion lookup
+        $guestApp = \App\Models\GuestApplication::query()
+            ->where('converted_student_id', $studentId)->first();
+        $studentName = $guestApp ? trim($guestApp->first_name . ' ' . $guestApp->last_name) : $studentId;
+
+        // 1) Senior'a bildirim
+        if ($senior) {
+            $svc->send([
+                'channel'      => 'in_app',
+                'category'     => 'senior_assignment.received',
+                'user_id'      => (int) $senior->id,
+                'company_id'   => $companyId,
+                'subject'      => 'Yeni öğrenci atandı',
+                'body'         => "{$studentName} sana atandı. Mesajlardan iletişime geçebilirsin.",
+                'source_type'  => 'student_assignment',
+                'source_id'    => $studentId,
+                'triggered_by' => $triggeredBy,
+            ]);
+        }
+
+        // 2) Öğrenciye bildirim
+        $svc->send([
+            'channel'      => 'in_app',
+            'category'     => 'senior_assignment.assigned',
+            'student_id'   => $studentId,
+            'company_id'   => $companyId,
+            'subject'      => 'Eğitim danışmanın atandı',
+            'body'         => "Eğitim danışmanın artık {$seniorName}. Mesajlar sekmesinden iletişime geçebilirsin.",
+            'source_type'  => 'student_assignment',
+            'source_id'    => $studentId,
+            'triggered_by' => $triggeredBy,
+        ]);
     }
 
     public function bulkAssign(Request $request, TaskAutomationService $taskAutomation)

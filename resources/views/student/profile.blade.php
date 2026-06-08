@@ -310,7 +310,7 @@
     </div>
     <div class="prf-info-card">
         <div class="prf-info-label">Atanan Danışman</div>
-        <div class="prf-info-value" style="font-size:12px;">{{ $assignment?->senior_email ?: '—' }}</div>
+        <div class="prf-info-value" style="font-size:12px;">{{ $assignment?->senior?->name ?: '—' }}</div>
     </div>
 </div>
 
