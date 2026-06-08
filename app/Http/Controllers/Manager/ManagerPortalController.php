@@ -377,6 +377,10 @@ class ManagerPortalController extends Controller
         $guest   = GuestApplication::where('converted_student_id', $studentId)->first();
         $revenue = DealerStudentRevenue::where('student_id', $studentId)->first();
 
+        // Manuel şifre sıfırlama için student user kaydı
+        // (login email'i bul → reset card'da göster)
+        $studentUser = User::query()->where('student_id', $studentId)->first();
+
         $visa          = StudentVisaApplication::where('student_id', $studentId)->latest('id')->first();
         $accommodation = StudentAccommodation::where('student_id', $studentId)->latest('id')->first();
         $uniApplications = StudentUniversityApplication::where('student_id', $studentId)->orderBy('priority')->get();
@@ -399,7 +403,7 @@ class ManagerPortalController extends Controller
 
         return view('manager.student-detail', compact(
             'assignment', 'guest', 'revenue', 'studentId', 'seniorOptions', 'branchOptions',
-            'visa', 'accommodation', 'uniApplications'
+            'visa', 'accommodation', 'uniApplications', 'studentUser'
         ));
     }
 

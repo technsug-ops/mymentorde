@@ -283,6 +283,52 @@ class QuickAdminController extends Controller
         ]);
     }
 
+    /**
+     * POST /manager/quick-admin/reset-password
+     * Mail göndermeden manuel şifre sıfırlama. Yeni şifre cevapta plain
+     * dönülür — manager tek sefer görür, öğrenciye manuel iletir.
+     *
+     * Kullanım: mail teslim sorunu olan kullanıcılar, halen aktif olan
+     * unutmuş öğrenciler vs. için.
+     */
+    public function resetUserPassword(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'email'    => ['required', 'email:rfc', 'max:255'],
+            'password' => ['nullable', 'string', 'min:8', 'max:255'],
+        ]);
+
+        $email = strtolower(trim((string) $data['email']));
+        $user  = User::query()->where('email', $email)->first();
+
+        if (! $user) {
+            return response()->json([
+                'ok'      => false,
+                'message' => 'Bu email ile aktif kullanıcı bulunamadı.',
+            ], 404);
+        }
+
+        $plainPassword = (string) ($data['password'] ?? Str::random(12));
+
+        $user->update([
+            'password'          => Hash::make($plainPassword),
+            'email_verified_at' => $user->email_verified_at ?? now(),
+        ]);
+
+        $this->logEvent('quick_admin.password_reset', [
+            'user_id' => $user->id,
+            'email'   => $user->email,
+            'role'    => $user->role,
+        ]);
+
+        return response()->json([
+            'ok'                 => true,
+            'user'               => $user->only(['id', 'name', 'email', 'role']),
+            'generated_password' => $plainPassword,
+            'message'            => "✓ Şifre sıfırlandı. Yeni şifre tek sefer gösterilir, kapatınca tekrar gösterilmez.",
+        ]);
+    }
+
     private function logEvent(string $event, array $meta): void
     {
         try {

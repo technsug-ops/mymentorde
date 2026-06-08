@@ -179,6 +179,42 @@
 
     {{-- SAĞ: Güncelleme Formu --}}
     <div>
+        @if($studentUser)
+        {{-- 🔐 Manuel Şifre Sıfırlama (mail gönderemediğimiz öğrenciler için) --}}
+        <section class="panel gd-panel" style="border:1px solid #fde68a;background:#fffbeb;">
+            <h2 style="color:#92400e;">🔐 Şifre Sıfırla (Manuel)</h2>
+            <div style="font-size:12px;color:#78350f;margin-bottom:10px;line-height:1.5;">
+                Öğrenci mail alamıyorsa kullan. Yeni şifre <strong>tek sefer</strong> ekranda gösterilir,
+                kapanınca tekrar görünmez. Öğrenciye manuel ilet (WhatsApp/telefon).
+            </div>
+            <div class="gd-field">
+                <label>Öğrenci E-posta</label>
+                <div class="gd-readonly" id="pwdReset-email">{{ $studentUser->email }}</div>
+            </div>
+            <div class="gd-field">
+                <label>Yeni Şifre <span style="color:#92400e;font-weight:400;">(boş bırak → otomatik üretilsin)</span></label>
+                <input type="text" id="pwdReset-input" placeholder="En az 8 karakter (opsiyonel)" autocomplete="off">
+            </div>
+            <div class="gd-actions">
+                <button type="button" class="btn" id="pwdReset-btn"
+                        style="background:#f59e0b;color:#fff;border:none;font-weight:600;">
+                    Şifreyi Sıfırla
+                </button>
+            </div>
+            <div id="pwdReset-result" style="display:none;margin-top:10px;padding:10px 12px;border-radius:6px;background:#dcfce7;border:1px solid #86efac;">
+                <div style="font-size:11px;color:#166534;font-weight:600;margin-bottom:4px;">YENİ ŞİFRE (tek sefer)</div>
+                <input type="text" id="pwdReset-output" readonly
+                       style="width:100%;padding:8px 10px;border:1px solid #86efac;border-radius:6px;font-family:ui-monospace,monospace;font-size:14px;background:#fff;color:#166534;font-weight:700;">
+                <button type="button" id="pwdReset-copyBtn"
+                        style="margin-top:6px;padding:6px 12px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">
+                    📋 Kopyala
+                </button>
+                <span id="pwdReset-copied" style="display:none;margin-left:8px;font-size:11px;color:#166534;">✓ Kopyalandı</span>
+            </div>
+            <div id="pwdReset-error" style="display:none;margin-top:8px;padding:8px 10px;border-radius:6px;background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;font-size:12px;"></div>
+        </section>
+        @endif
+
         <section class="panel gd-panel">
             <h2>Bilgileri Güncelle</h2>
             <form method="POST" action="/manager/students/{{ urlencode($studentId) }}/update">
@@ -494,5 +530,88 @@
 </script>
 @endcan
 @endmodule
+
+@if(! empty($studentUser))
+{{-- 🔐 Şifre Sıfırla — handler --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    var btn       = document.getElementById('pwdReset-btn');
+    var emailBox  = document.getElementById('pwdReset-email');
+    var input     = document.getElementById('pwdReset-input');
+    var resultBox = document.getElementById('pwdReset-result');
+    var output    = document.getElementById('pwdReset-output');
+    var copyBtn   = document.getElementById('pwdReset-copyBtn');
+    var copiedLbl = document.getElementById('pwdReset-copied');
+    var errBox    = document.getElementById('pwdReset-error');
+    if (!btn) return;
+
+    var CSRF = '{{ csrf_token() }}';
+    var URL  = "{{ route('manager.quick-admin.password.reset') }}";
+    var EMAIL = (emailBox.textContent || '').trim();
+
+    btn.addEventListener('click', function(){
+        errBox.style.display = 'none';
+        errBox.textContent = '';
+        resultBox.style.display = 'none';
+        copiedLbl.style.display = 'none';
+
+        var customPwd = (input.value || '').trim();
+        if (customPwd.length > 0 && customPwd.length < 8) {
+            errBox.textContent = 'Özel şifre en az 8 karakter olmalı.';
+            errBox.style.display = 'block';
+            return;
+        }
+
+        if (!confirm("Bu kullanıcının şifresi sıfırlansın mı?\n\n" + EMAIL + "\n\nMail GÖNDERİLMEZ. Yeni şifre ekrana basılır."))
+            return;
+
+        btn.disabled = true;
+        var oldText = btn.textContent;
+        btn.textContent = 'Sıfırlanıyor...';
+
+        var body = { email: EMAIL };
+        if (customPwd.length > 0) body.password = customPwd;
+
+        fetch(URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': CSRF,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(body)
+        })
+        .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, body: j }; }); })
+        .then(function(res){
+            btn.disabled = false;
+            btn.textContent = oldText;
+            if (!res.ok || !res.body.ok) {
+                errBox.textContent = res.body.message || 'Sıfırlama başarısız oldu.';
+                errBox.style.display = 'block';
+                return;
+            }
+            output.value = res.body.generated_password || '';
+            resultBox.style.display = 'block';
+            input.value = '';
+        })
+        .catch(function(){
+            btn.disabled = false;
+            btn.textContent = oldText;
+            errBox.textContent = 'Ağ hatası — tekrar deneyin.';
+            errBox.style.display = 'block';
+        });
+    });
+
+    copyBtn.addEventListener('click', function(){
+        output.select();
+        navigator.clipboard.writeText(output.value).then(function(){
+            copiedLbl.style.display = 'inline';
+            setTimeout(function(){ copiedLbl.style.display = 'none'; }, 2000);
+        }).catch(function(){ document.execCommand('copy'); });
+    });
+})();
+</script>
+@endif
 
 @endsection
