@@ -164,9 +164,17 @@ class ManagerPortalController extends Controller
             request()->user()?->email,
         );
 
-        $seniorOptions = StudentAssignment::query()
+        // Tüm aktif senior + mentor kullanıcılarını listele (yeni eklenenler
+        // henüz bir öğrenciye atanmamış olsa bile dropdown'da görünsün).
+        $seniorOptions = User::query()
+            ->whereIn('role', [User::ROLE_SENIOR, User::ROLE_MENTOR])
+            ->where('is_active', true)
             ->when($cid > 0, fn ($b) => $b->where('company_id', $cid))
-            ->distinct()->pluck('senior_email')->filter()->sort()->values();
+            ->orderBy('name')
+            ->get(['email', 'name', 'role'])
+            ->mapWithKeys(fn ($u) => [
+                $u->email => trim(($u->name ?: $u->email)) . ' (' . $u->role . ')',
+            ]);
 
         $student = ($guest->converted_to_student && $guest->converted_student_id)
             ? StudentAssignment::where('student_id', $guest->converted_student_id)->first()
@@ -312,9 +320,17 @@ class ManagerPortalController extends Controller
         $accommodation = StudentAccommodation::where('student_id', $studentId)->latest('id')->first();
         $uniApplications = StudentUniversityApplication::where('student_id', $studentId)->orderBy('priority')->get();
 
-        $seniorOptions = StudentAssignment::query()
+        // Tüm aktif senior + mentor kullanıcılarını listele (yeni eklenenler
+        // henüz bir öğrenciye atanmamış olsa bile dropdown'da görünsün).
+        $seniorOptions = User::query()
+            ->whereIn('role', [User::ROLE_SENIOR, User::ROLE_MENTOR])
+            ->where('is_active', true)
             ->when($cid > 0, fn ($b) => $b->where('company_id', $cid))
-            ->distinct()->pluck('senior_email')->filter()->sort()->values();
+            ->orderBy('name')
+            ->get(['email', 'name', 'role'])
+            ->mapWithKeys(fn ($u) => [
+                $u->email => trim(($u->name ?: $u->email)) . ' (' . $u->role . ')',
+            ]);
 
         $branchOptions = StudentAssignment::query()
             ->when($cid > 0, fn ($b) => $b->where('company_id', $cid))

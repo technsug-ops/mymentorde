@@ -303,8 +303,8 @@
                     <label>Eğitim Danışmanı Seç</label>
                     <select name="assigned_senior_email">
                         <option value="">– Atamayı Kaldır –</option>
-                        @foreach($seniorOptions as $e)
-                            <option value="{{ $e }}" @selected($guest->assigned_senior_email === $e)>{{ $e }}</option>
+                        @foreach($seniorOptions as $email => $label)
+                            <option value="{{ $email }}" @selected($guest->assigned_senior_email === $email)>{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>

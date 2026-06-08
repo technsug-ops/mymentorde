@@ -187,8 +187,8 @@
                     <label>Eğitim Danışmanı E-posta</label>
                     <select name="senior_email">
                         <option value="">– Seç –</option>
-                        @foreach($seniorOptions as $e)
-                            <option value="{{ $e }}" @selected($assignment->senior_email === $e)>{{ $e }}</option>
+                        @foreach($seniorOptions as $email => $label)
+                            <option value="{{ $email }}" @selected($assignment->senior_email === $email)>{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>

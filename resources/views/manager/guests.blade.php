@@ -92,8 +92,8 @@
             <label style="font-size:var(--tx-xs);font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.04em;">Eğitim Danışmanı</label>
             <select name="senior">
                 <option value="">– Tümü –</option>
-                @foreach($seniorOptions as $e)
-                    <option value="{{ $e }}" @selected($senior === $e)>{{ $e }}</option>
+                @foreach($seniorOptions as $email => $label)
+                    <option value="{{ $email }}" @selected($senior === $email)>{{ $label }}</option>
                 @endforeach
             </select>
         </div>

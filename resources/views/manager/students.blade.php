@@ -64,8 +64,8 @@
             <label class="mgr-filter-label">Eğitim Danışmanı</label>
             <select name="senior">
                 <option value="">– Tümü –</option>
-                @foreach($seniorOptions as $e)
-                    <option value="{{ $e }}" @selected($senior === $e)>{{ $e }}</option>
+                @foreach($seniorOptions as $email => $label)
+                    <option value="{{ $email }}" @selected($senior === $email)>{{ $label }}</option>
                 @endforeach
             </select>
         </div>
