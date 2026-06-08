@@ -241,7 +241,10 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
 </div>
 
 {{-- ── Hızlı Yönetim Kartı (Yeni Senior + Rol Ver) ── --}}
-@include('manager.partials._quick-admin-card')
+{{-- @includeIf: partial dosyası henüz upload olmamışsa sessiz geç,
+     dashboard tüm 500 ile düşmesin. Deploy bitince partial yüklenir,
+     kart otomatik gözükür. --}}
+@includeIf('manager.partials._quick-admin-card')
 
 {{-- ── Müdahale Gerekli Widget (Lead Pipeline + Ops alerts birleşik) ── --}}
 @php
