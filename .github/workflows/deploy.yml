@@ -8,14 +8,22 @@ on:
   workflow_dispatch:
     inputs:
       force_rebuild:
-        description: 'Tüm adımları zorla çalıştır (composer + npm + Vite)'
+        description: 'Tüm adımları zorla çalıştır (composer + npm + Vite + transfer-all)'
         required: false
         default: 'false'
+
+# Yığılmayı önle: yeni push gelirse koşan/bekleyen eski run iptal edilsin.
+# KASSERVER tek FTP target — paralel deploy race condition yaratır.
+concurrency:
+  group: deploy-kasserver-prod
+  cancel-in-progress: true
 
 jobs:
   deploy:
     name: Build and FTP Deploy
     runs-on: ubuntu-latest
+    # Takılı kalan FTP transferleri 6 saat boyunca tutmaktansa 20 dk'da fail et.
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository

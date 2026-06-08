@@ -100,17 +100,22 @@ def main() -> int:
     # Normalize server_dir — avoid double slashes when concatenating build path
     build_dir = server_dir.rstrip("/") + "/public/build/"
 
-    # --transfer-all HER ZAMAN aktif: KAS lftp size/time karşılaştırması bazı
-    # dosyaları yanlışlıkla skip ediyor (özellikle yeni dosyalar veya yeni
-    # klasörler — Internal/, public/js/, vb. transfer edilmiyor). Sürekli
-    # partial transfer sorununu kalıcı çözüm: her commit'te tüm değişen dosyalar
-    # zorla upload. Hız kaybı 1-2 dakika ama deploy doğruluğu %100.
-    # FORCE_REBUILD env hala log için izleniyor (workflow_dispatch tetiklenmiş mi).
+    # --transfer-all KOŞULLU: sadece force_rebuild VEYA composer.lock değiştiğinde.
+    # Eskiden HER ZAMAN aktifti → her deploy vendor/ + app/ tümünü baştan upload
+    # ediyordu (~10-15K dosya), 15-20 dk sürüyordu, runner'lar yığılıyordu.
+    # Yeni davranış: lftp size+mtime karşılaştırması yapar, sadece değişen
+    # dosyaları upload eder. Composer paket yükseltmesi varsa vendor/ tümü
+    # yeniden yüklenir; bunun dışında ortalama 1-3 dk arası deploy.
+    # Partial transfer şüphesi varsa workflow_dispatch + force_rebuild=true.
     force_rebuild = os.environ.get("FORCE_REBUILD", "").lower() in ("true", "1", "yes")
-    transfer_all_flag = "--transfer-all "
-    print("=== --transfer-all HER ZAMAN aktif (KAS partial transfer fix) ===")
-    if force_rebuild:
-        print("=== FORCE_REBUILD workflow_dispatch tetikli ===")
+    composer_changed = changed_composer == "true"
+    use_transfer_all = force_rebuild or composer_changed
+    transfer_all_flag = "--transfer-all " if use_transfer_all else ""
+    if use_transfer_all:
+        reason = "FORCE_REBUILD" if force_rebuild else "composer.lock değişti"
+        print(f"=== --transfer-all AKTİF ({reason}) ===")
+    else:
+        print("=== --transfer-all KAPALI (incremental mirror — sadece değişenler) ===")
 
     lftp_commands = [
         "set ftp:ssl-force true",
@@ -123,9 +128,10 @@ def main() -> int:
         "set net:reconnect-interval-base 10",
         "set net:reconnect-interval-multiplier 1",
         "set ftp:passive-mode true",
-        # Sequential upload (parallel=1) — paralel timeout fail'lerini onler.
-        # Daha yavas ama ZAMAN kazaniyoruz cunku transfer-all rerun gerek olmuyor.
-        "set mirror:parallel-transfer-count 1",
+        # Parallel upload (parallel=3) — KAS FTP genelde 3-4 paralel kanal kaldırır.
+        # Eskiden parallel=1 vardı; her deploy 15-20 dk sürüyordu, yığılma yapıyordu.
+        # KAS'ın gerçek limiti aşılırsa lftp net:max-retries=5 ile geri çekilir.
+        "set mirror:parallel-transfer-count 3",
         "set cmd:fail-exit no",
         # Main mirror — ana repo (vendor, app, routes, etc.).
         # Default davranış: size+time karşılaştır, farklı olanları upload et.
