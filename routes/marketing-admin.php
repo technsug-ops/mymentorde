@@ -329,12 +329,36 @@ Route::middleware(['company.context', 'auth', 'marketing.access', 'module:market
         Route::get('/analytics/revenue-projection', [AnalyticsController::class, 'revenueProjection']);
         Route::get('/analytics/churn-risk', [AnalyticsController::class, 'churnRisk']);
 
-        // ─── Partner API Yönetimi (Marketing Admin) ────────────────────────
-        // Manager paneline ek olarak Marketing Admin de partnerları yönetebilir.
-        // Aynı controller — PartnerRouting::url() panel'e göre URL seçer.
-        // Parent group zaten 'mktg-admin.' prefix'i ekliyor → 'partners.index' →
-        // gerçek isim 'mktg-admin.partners.index' olur.
+        // ─── Bayi / Partner Yönetimi (Marketing Admin) ─────────────────────
+        // Lead-gen / freelance / B2B bayi modülleri — manager ile ortak
+        // controller. PanelRouting helper'ı panel'e göre URL/layout seçer.
+        // Parent group 'mktg-admin.' prefix ekliyor → 'dealers.index' →
+        // 'mktg-admin.dealers.index' olarak kayıtlanır.
         Route::middleware('marketing.admin')->group(function (): void {
+            // Bayiler
+            Route::get('/dealers',                                  [\App\Http\Controllers\Manager\ManagerPortalController::class, 'dealers'])->name('dealers.index');
+            Route::get('/dealers/{code}',                           [\App\Http\Controllers\Manager\ManagerPortalController::class, 'dealerShow'])->name('dealers.show');
+
+            // Bayi Tipleri (lead-gen / freelance / b2b)
+            Route::get('/dealer-types',                             [\App\Http\Controllers\Manager\ManagerPortalController::class, 'dealerTypes'])->name('dealer-types.index');
+            Route::post('/dealer-types/{code}',                     [\App\Http\Controllers\Manager\ManagerPortalController::class, 'updateDealerType'])->name('dealer-types.update');
+
+            // Komisyon Kademeleri (Lead Gen 5 + Freelance 3)
+            $dt = \App\Http\Controllers\Manager\DealerCommissionTierController::class;
+            Route::get('/dealer-tiers',                              [$dt, 'index'])->name('dealer-tiers.index');
+            Route::get('/dealer-tiers/create',                       [$dt, 'create'])->name('dealer-tiers.create');
+            Route::post('/dealer-tiers',                             [$dt, 'store'])->middleware('throttle:30,1')->name('dealer-tiers.store');
+            Route::get('/dealer-tiers/{dealerCommissionTier}/edit',  [$dt, 'edit'])->name('dealer-tiers.edit');
+            Route::put('/dealer-tiers/{dealerCommissionTier}',       [$dt, 'update'])->middleware('throttle:30,1')->name('dealer-tiers.update');
+            Route::post('/dealer-tiers/{dealerCommissionTier}/toggle', [$dt, 'toggleActive'])->middleware('throttle:30,1')->name('dealer-tiers.toggle');
+
+            // Bayi Başvuruları
+            $dapps = \App\Http\Controllers\Manager\DealerApplicationController::class;
+            Route::get('/dealer-applications',                       [$dapps, 'index'])->name('dealer-applications.index');
+            Route::get('/dealer-applications/{id}',                  [$dapps, 'show'])->where('id', '[0-9]+')->name('dealer-applications.show');
+            Route::post('/dealer-applications/{id}/status',          [$dapps, 'updateStatus'])->where('id', '[0-9]+')->middleware('throttle:30,1')->name('dealer-applications.status');
+
+            // API Partner (kardeş site API key) — önceki commit'ten kalır
             $apc = \App\Http\Controllers\Manager\ApiPartnerController::class;
             Route::get('/partners',                       [$apc, 'index'])->name('partners.index');
             Route::get('/partners/create',                [$apc, 'create'])->name('partners.create');

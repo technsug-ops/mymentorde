@@ -1,4 +1,4 @@
-@extends('manager.layouts.app')
+@extends(\App\Support\PanelRouting::layout())
 @section('title', 'Dealer Başvuruları')
 @section('page_title', '🤝 Satış Ortağı Başvuruları')
 
@@ -114,7 +114,7 @@
                         {{ $app->created_at->diffForHumans() }}
                     </td>
                     <td>
-                        <a href="{{ route('manager.dealer-applications.show', $app->id) }}"
+                        <a href="{{ \App\Support\PanelRouting::url('dealer-applications', 'show', $app->id) }}"
                            style="color:#5b2e91; font-weight:700; text-decoration:none; font-size:12px;">
                             İncele →
                         </a>

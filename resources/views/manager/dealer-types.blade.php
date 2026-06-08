@@ -1,4 +1,4 @@
-@extends('manager.layouts.app')
+@extends(\App\Support\PanelRouting::layout())
 @section('page_title', 'Bayi Tip Yönetimi')
 
 @section('content')
@@ -15,7 +15,7 @@
             <h1 style="font-size:20px;font-weight:700;margin:0;">Bayi Tip Yönetimi</h1>
             <p style="font-size:13px;color:var(--u-muted,#64748b);margin:4px 0 0;">Her tier'ın izinlerini buradan düzenleyin. Değişiklikler anında uygulanır.</p>
         </div>
-        <a href="{{ route('manager.dealers') }}" class="btn alt" style="font-size:13px;">← Bayi Listesi</a>
+        <a href="{{ \App\Support\PanelRouting::url('dealers', 'index') }}" class="btn alt" style="font-size:13px;">← Bayi Listesi</a>
     </div>
 
     <div style="display:grid;gap:16px;">
@@ -27,7 +27,7 @@
                 $tierColors = [1 => '#0891b2', 2 => '#7c3aed', 3 => '#1e40af'];
                 $count = $dealerCounts[$type->code] ?? 0;
             @endphp
-            <form method="POST" action="{{ route('manager.dealer-types.update', $type->code) }}" class="card" style="padding:20px;">
+            <form method="POST" action="{{ \App\Support\PanelRouting::url('dealer-types', 'update', $type->code) }}" class="card" style="padding:20px;">
                 @csrf
                 {{-- Header --}}
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">

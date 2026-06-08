@@ -1,4 +1,4 @@
-@extends('manager.layouts.app')
+@extends(\App\Support\PanelRouting::layout())
 
 @section('title', $mode === 'create' ? 'Yeni Tier' : 'Tier Düzenle: '.$tier->tier_name)
 @section('page_title', $mode === 'create' ? 'Yeni Bayi Tier' : 'Tier Düzenle: '.$tier->tier_emoji.' '.$tier->tier_name)
@@ -29,7 +29,7 @@
         </div>
     @endif
 
-    <form class="dtf-form" method="POST" action="{{ $mode === 'create' ? route('manager.dealer-tiers.store') : route('manager.dealer-tiers.update', $tier) }}">
+    <form class="dtf-form" method="POST" action="{{ $mode === 'create' ? \App\Support\PanelRouting::url('dealer-tiers', 'store') : \App\Support\PanelRouting::url('dealer-tiers', 'update', $tier) }}">
         @csrf
         @if($mode === 'edit') @method('PUT') @endif
 
@@ -109,7 +109,7 @@
 
         <div class="dtf-actions">
             <button type="submit" class="dtf-btn primary">{{ $mode === 'create' ? 'Oluştur' : 'Kaydet' }}</button>
-            <a href="{{ route('manager.dealer-tiers.index') }}" class="dtf-btn">İptal</a>
+            <a href="{{ \App\Support\PanelRouting::url('dealer-tiers', 'index') }}" class="dtf-btn">İptal</a>
         </div>
     </form>
 </div>

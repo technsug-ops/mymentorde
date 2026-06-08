@@ -58,7 +58,7 @@ class DealerCommissionTierController extends Controller
             message: 'Manager #' . (Auth::id() ?? '?') . ' tier güncelledi: ' . $dealerCommissionTier->tier_code,
         );
 
-        return redirect()->route('manager.dealer-tiers.index')->with('success', 'Tier güncellendi.');
+        return redirect(\App\Support\PanelRouting::url('dealer-tiers', 'index'))->with('success', 'Tier güncellendi.');
     }
 
     public function create(): View
@@ -75,7 +75,7 @@ class DealerCommissionTierController extends Controller
         $companyId = (int) (Auth::user()?->company_id ?? 0);
         DealerCommissionTier::create($data + ['company_id' => $companyId]);
 
-        return redirect()->route('manager.dealer-tiers.index')->with('success', 'Yeni tier oluşturuldu.');
+        return redirect(\App\Support\PanelRouting::url('dealer-tiers', 'index'))->with('success', 'Yeni tier oluşturuldu.');
     }
 
     public function toggleActive(DealerCommissionTier $dealerCommissionTier): RedirectResponse

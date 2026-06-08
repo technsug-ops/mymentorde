@@ -89,7 +89,7 @@ class DealerApplicationController extends Controller
             ], 'dealer_app_' . $app->id);
         } catch (\Throwable) {}
 
-        return redirect()->route('manager.dealer-applications.show', $id)
+        return redirect(\App\Support\PanelRouting::url('dealer-applications', 'show', $id))
             ->with('success', 'Başvuru durumu güncellendi: ' . $data['status']);
     }
 

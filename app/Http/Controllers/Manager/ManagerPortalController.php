@@ -719,7 +719,8 @@ class ManagerPortalController extends Controller
 
         \Illuminate\Support\Facades\Cache::flush();
 
-        return redirect()->route('manager.dealer-types')->with('status', "{$type->name_tr} güncellendi.");
+        return redirect(\App\Support\PanelRouting::url('dealer-types', 'index'))
+            ->with('status', "{$type->name_tr} güncellendi.");
     }
 
     // ─── KOMİSYON YÖNETİMİ ──────────────────────────────────────────────────

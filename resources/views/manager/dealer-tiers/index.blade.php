@@ -1,4 +1,4 @@
-@extends('manager.layouts.app')
+@extends(\App\Support\PanelRouting::layout())
 
 @section('title', 'Bayi Komisyon Kademeleri')
 @section('page_title', 'Bayi Komisyon Kademeleri')
@@ -30,7 +30,7 @@
     @if(session('success'))<div style="background:rgba(22,163,74,.08);color:#15803d;border:1px solid rgba(22,163,74,.3);padding:10px 14px;border-radius:10px;margin-bottom:14px;">✅ {{ session('success') }}</div>@endif
 
     <div style="display:flex; gap:8px; margin-bottom:14px;">
-        <a class="dt-btn primary" href="{{ route('manager.dealer-tiers.create') }}">+ Yeni Tier</a>
+        <a class="dt-btn primary" href="{{ \App\Support\PanelRouting::url('dealer-tiers', 'create') }}">+ Yeni Tier</a>
         <a class="dt-btn" href="{{ url('/satis-ortagi') }}" target="_blank">👁 Public sayfayı gör</a>
     </div>
 
@@ -69,8 +69,8 @@
                             </td>
                             <td>
                                 <div class="dt-actions">
-                                    <a class="dt-btn" href="{{ route('manager.dealer-tiers.edit', $t) }}">Düzenle</a>
-                                    <form method="POST" action="{{ route('manager.dealer-tiers.toggle', $t) }}" style="display:inline;">
+                                    <a class="dt-btn" href="{{ \App\Support\PanelRouting::url('dealer-tiers', 'edit', $t) }}">Düzenle</a>
+                                    <form method="POST" action="{{ \App\Support\PanelRouting::url('dealer-tiers', 'toggle', $t) }}" style="display:inline;">
                                         @csrf
                                         <button class="dt-btn" type="submit">{{ $t->is_active ? 'Pasif' : 'Aktif' }}</button>
                                     </form>

@@ -1,4 +1,4 @@
-@extends('manager.layouts.app')
+@extends(\App\Support\PanelRouting::layout())
 
 @section('title', 'Manager – Bayi Detay')
 @section('page_title', 'Bayi Detay')

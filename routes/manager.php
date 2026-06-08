@@ -119,9 +119,9 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/seniors/{email}',                  [ManagerPortalController::class, 'seniorShow'])->name('manager.seniors.show')->where('email', '[^/]+');
     Route::get('/manager/senior-leaderboard',               [ManagerPortalController::class, 'seniorLeaderboard'])->name('manager.senior-leaderboard');
     Route::post('/manager/seniors/{email}/targets',         [ManagerPortalController::class, 'setSeniorTargets'])->name('manager.seniors.targets')->where('email', '[^/]+');
-    Route::get('/manager/dealers',                          [ManagerPortalController::class, 'dealers'])->name('manager.dealers');
+    Route::get('/manager/dealers',                          [ManagerPortalController::class, 'dealers'])->name('manager.dealers.index');
     Route::get('/manager/dealers/{code}',                   [ManagerPortalController::class, 'dealerShow'])->name('manager.dealers.show');
-    Route::get('/manager/dealer-types',                     [ManagerPortalController::class, 'dealerTypes'])->name('manager.dealer-types');
+    Route::get('/manager/dealer-types',                     [ManagerPortalController::class, 'dealerTypes'])->name('manager.dealer-types.index');
     Route::post('/manager/dealer-types/{code}',             [ManagerPortalController::class, 'updateDealerType'])->name('manager.dealer-types.update');
     Route::get('/manager/commissions',                      [ManagerPortalController::class, 'commissions'])->name('manager.commissions');
     Route::patch('/manager/commissions/{payout}/approve',   [ManagerPortalController::class, 'approveCommission'])->name('manager.commissions.approve');
@@ -596,7 +596,7 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
 // Geniş erişim: admin panel rolleri + marketing/sales rolleri
 Route::middleware(['company.context', 'auth', 'verified', 'analytics.access'])->group(function (): void {
     $dealerApps = \App\Http\Controllers\Manager\DealerApplicationController::class;
-    Route::get('/manager/dealer-applications',                [$dealerApps, 'index'])->name('manager.dealer-applications');
+    Route::get('/manager/dealer-applications',                [$dealerApps, 'index'])->name('manager.dealer-applications.index');
     Route::get('/manager/dealer-applications/{id}',          [$dealerApps, 'show'])->where('id', '[0-9]+')->name('manager.dealer-applications.show');
     Route::post('/manager/dealer-applications/{id}/status',  [$dealerApps, 'updateStatus'])->where('id', '[0-9]+')->middleware('throttle:30,1')->name('manager.dealer-applications.status');
 

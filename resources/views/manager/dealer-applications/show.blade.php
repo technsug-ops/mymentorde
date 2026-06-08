@@ -1,4 +1,4 @@
-@extends('manager.layouts.app')
+@extends(\App\Support\PanelRouting::layout())
 @section('title', 'Dealer Başvurusu #' . $app->id)
 @section('page_title', '🤝 Başvuru ' . $app->reference_code . ' — ' . $app->full_name)
 
@@ -45,7 +45,7 @@
 </style>
 
 <div class="das-wrap">
-    <a href="{{ route('manager.dealer-applications', ['status' => $app->status]) }}" class="das-back">
+    <a href="{{ \App\Support\PanelRouting::url('dealer-applications', 'index', ['status' => $app->status]) }}" class="das-back">
         ← Tüm başvurulara dön
     </a>
 
@@ -136,7 +136,7 @@
     @if (!in_array($app->status, ['approved', 'rejected']))
     <div class="das-card" style="border-left:4px solid #5b2e91;">
         <h3>⚡ Aksiyon Al</h3>
-        <form method="POST" action="{{ route('manager.dealer-applications.status', $app->id) }}" class="das-action-form">
+        <form method="POST" action="{{ \App\Support\PanelRouting::url('dealer-applications', 'status', $app->id) }}" class="das-action-form">
             @csrf
             <label>Yeni Durum</label>
             <select name="status" id="action-status" required>
