@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\DiscountCode;
+use App\Services\Analytics\AnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -18,21 +19,43 @@ use Illuminate\View\View;
  */
 class PromoController extends Controller
 {
-    public function show(string $code): View
+    public function show(string $code, Request $request): View
     {
-        $code = strtoupper(trim($code));
+        $codeUpper = strtoupper(trim($code));
 
         $discount = DiscountCode::query()
-            ->whereRaw('UPPER(code) = ?', [$code])
+            ->whereRaw('UPPER(code) = ?', [$codeUpper])
             ->first();
 
         if (! $discount || ! $discount->isCurrentlyActive()) {
+            // PostHog: süresi geçmiş veya geçersiz kod görüntüleme — pazarlama
+            // ekibi hangi expired kodun hala paylaşıldığını bilsin
+            $this->safeCapture('discount_code_landing_expired_viewed', [
+                'code'    => $codeUpper,
+                'found'   => (bool) $discount,
+                'active'  => $discount?->isCurrentlyActive() ?? false,
+                'referer' => $request->headers->get('referer'),
+            ], $request);
+
             return view('promo.expired', [
-                'code' => $discount?->code ?? $code,
+                'code' => $discount?->code ?? $codeUpper,
             ]);
         }
 
         $tplId = $discount->effectiveTemplateId();
+
+        // PostHog: başarılı landing görüntüleme — share funnel metrik
+        $this->safeCapture('discount_code_landing_viewed', [
+            'code'        => $discount->code,
+            'discount_id' => $discount->id,
+            'template_id' => $tplId,
+            'discount_type'  => $discount->discount_type ?? null,
+            'discount_value' => $discount->discount_value ?? null,
+            'referer'     => $request->headers->get('referer'),
+            'utm_source'  => $request->query('utm_source'),
+            'utm_medium'  => $request->query('utm_medium'),
+            'utm_campaign'=> $request->query('utm_campaign'),
+        ], $request);
 
         // Default metinler (boşsa template-default kullan)
         $title       = $discount->landing_title ?: $this->defaultTitle($tplId, $discount);
@@ -72,5 +95,25 @@ class PromoController extends Controller
             5 => 'Bu fırsat sınırlı sayıda — kaçırma! Aşağıdaki kupon kodu ile başvurunu yap.',
             default => 'Almanya\'da öğrencilik hayalini başlatmak için bu kuponu kullan.',
         };
+    }
+
+    /**
+     * PostHog event yayını — analytics service hata verirse landing sayfası
+     * etkilenmesin (try/catch + null distinctId fallback session-bazlı).
+     */
+    private function safeCapture(string $event, array $properties, Request $request): void
+    {
+        try {
+            $distinctId = $request->user()?->id
+                ?? ($request->cookie('ph_distinct_id')
+                    ?: ('anon_' . substr(sha1($request->ip() . $request->userAgent()), 0, 12)));
+
+            app(AnalyticsService::class)->capture($event, $properties, $distinctId);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Promo landing analytics capture failed', [
+                'event' => $event,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

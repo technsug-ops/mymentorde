@@ -19,15 +19,28 @@
     <title>{{ $title }} — {{ $brandName }}</title>
     @include('partials.favicon')
 
-    {{-- Open Graph --}}
+    {{-- Open Graph — WhatsApp/sosyal medya link önizleme --}}
+    @php
+        // OG image öncelik: promo OG > brand OG > logo > favicon
+        $ogImage = $logoUrl ?: url('/favicon.svg');
+        if (file_exists(public_path('img/promo-og.png'))) {
+            $ogImage = url('/img/promo-og.png');
+        } elseif (file_exists(public_path('img/brand-og.png'))) {
+            $ogImage = url('/img/brand-og.png');
+        }
+    @endphp
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ $shareUrl }}">
     <meta property="og:title" content="{{ $title }} — {{ $brandName }}">
     <meta property="og:description" content="{{ \Illuminate\Support\Str::limit($subtitle, 200) }}">
+    <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:image:alt" content="{{ $title }}">
+    <meta property="og:site_name" content="{{ $brandName }}">
     <meta property="og:locale" content="tr_TR">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $title }}">
     <meta name="twitter:description" content="{{ \Illuminate\Support\Str::limit($subtitle, 200) }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Bebas+Neue&display=swap" rel="stylesheet">
     <style>
