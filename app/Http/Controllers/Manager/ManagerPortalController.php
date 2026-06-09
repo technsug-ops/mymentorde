@@ -583,6 +583,23 @@ class ManagerPortalController extends Controller
 
         $dealer   = Dealer::where('code', $code)->firstOrFail();
         abort_if($cid > 0 && (int) ($dealer->company_id ?? 0) !== $cid, 403);
+
+        // Bayinin orijinal başvuru kaydı (kayıt formundan gelen detaylar)
+        $application = \App\Models\DealerApplication::query()
+            ->where('approved_dealer_id', $dealer->id)
+            ->first();
+
+        // Bayi tipinin tam adı (kod yerine "Freelance Danışman" gibi)
+        $dealerType = $dealer->dealer_type_code
+            ? \App\Models\DealerType::where('code', $dealer->dealer_type_code)->first()
+            : null;
+
+        // Bayi user hesabı (varsa) — login email ile bağlanır
+        $dealerUser = \App\Models\User::query()
+            ->where('email', $dealer->email)
+            ->where('role', \App\Models\User::ROLE_DEALER)
+            ->first();
+
         $revenues = DealerStudentRevenue::where('dealer_id', $code)->get();
         $payouts  = DealerPayoutRequest::where('dealer_code', $code)->with('account')->latest()->paginate(25)->withQueryString();
 
@@ -629,7 +646,8 @@ class ManagerPortalController extends Controller
 
         return view('manager.dealer-detail', compact(
             'dealer', 'revenues', 'payouts', 'leads', 'revenueStats',
-            'utmLinks', 'leadStatsByCode', 'utmStats'
+            'utmLinks', 'leadStatsByCode', 'utmStats',
+            'application', 'dealerType', 'dealerUser'
         ));
     }
 

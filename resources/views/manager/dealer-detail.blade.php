@@ -86,6 +86,59 @@
     </div>
 </section>
 
+{{-- Bayi İletişim ve Başvuru Bilgileri --}}
+<section class="panel gd-panel">
+    <h2>📋 Bayi Bilgileri</h2>
+    <div class="grid2" style="margin-bottom:0;">
+        <div>
+            <div style="font-size:11px;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;">İletişim</div>
+            <div style="font-size:13px;line-height:1.7;">
+                <strong>📧 E-posta:</strong> {{ $dealer->email ?: '—' }}<br>
+                <strong>📞 Telefon:</strong> {{ $dealer->phone ?: '—' }}<br>
+                <strong>💬 WhatsApp:</strong> {{ $dealer->whatsapp ?: '—' }}<br>
+                <strong>🏷️ Bayi Tipi:</strong> {{ $dealerType?->name_tr ?? $dealer->dealer_type_code ?? '—' }}<br>
+                <strong>📅 Kayıt:</strong> {{ $dealer->created_at?->format('d.m.Y') ?? '—' }}<br>
+                <strong>🎁 Bonus Durum:</strong>
+                @php $bs = $dealer->signup_bonus_status ?? 'locked'; @endphp
+                <span class="badge {{ $bs === 'unlocked' ? 'ok' : ($bs === 'pending' ? 'warn' : '') }}">
+                    {{ match($bs) { 'locked'=>'Kilitli','pending'=>'Beklemede','unlocked'=>'Çekilebilir', default=>$bs } }}
+                </span>
+                @if($dealer->signup_bonus_amount)
+                    ({{ number_format($dealer->signup_bonus_amount, 0) }} EUR)
+                @endif
+            </div>
+        </div>
+        @if($application)
+        <div>
+            <div style="font-size:11px;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;">
+                Başvuru Detayları
+                <a href="/manager/dealer-applications/{{ $application->id }}" style="float:right;color:#1e40af;text-decoration:none;font-weight:600;text-transform:none;letter-spacing:0;">Tam Başvuruyu Aç →</a>
+            </div>
+            <div style="font-size:13px;line-height:1.7;">
+                @if($application->company_name)<strong>🏢 Şirket:</strong> {{ $application->company_name }}<br>@endif
+                @if($application->city || $application->country)<strong>📍 Konum:</strong> {{ trim(($application->city ?? '') . ' / ' . ($application->country ?? ''), ' / ') }}<br>@endif
+                @if($application->tax_number)<strong>💼 Vergi No:</strong> {{ $application->tax_number }}<br>@endif
+                @if($application->business_type)<strong>🏭 İş Türü:</strong> {{ $application->business_type }}<br>@endif
+                @if($application->expected_monthly_volume)<strong>📊 Beklenen Hacim:</strong> {{ $application->expected_monthly_volume }} lead/ay<br>@endif
+                @if($application->heard_from)<strong>📢 Nereden Duydu:</strong> {{ $application->heard_from }}<br>@endif
+                @if($application->utm_source)<strong>🔗 UTM:</strong> {{ $application->utm_source }} / {{ $application->utm_medium ?? '-' }} / {{ $application->utm_campaign ?? '-' }}<br>@endif
+                @if($application->motivation)
+                    <strong>💭 Motivasyon:</strong>
+                    <div style="margin:4px 0 0 0;padding:6px 8px;background:#f8fafc;border-left:2px solid #1e40af;border-radius:3px;font-size:12px;color:#475569;">{{ \Illuminate\Support\Str::limit($application->motivation, 200) }}</div>
+                @endif
+            </div>
+        </div>
+        @else
+        <div>
+            <div style="font-size:11px;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;">Başvuru Detayları</div>
+            <div style="font-size:12px;color:var(--u-muted);padding:8px;background:#fef9e7;border-left:3px solid #f59e0b;border-radius:3px;">
+                Bu bayi için orijinal başvuru kaydı bulunamadı (manuel oluşturulmuş veya eski sistemden).
+            </div>
+        </div>
+        @endif
+    </div>
+</section>
+
 {{-- KPI Çubuğu --}}
 <div class="gd-kpi-row">
     <div class="gd-kpi"><div class="lbl">Öğrenci</div><div class="val">{{ $revenueStats['students'] }}</div></div>

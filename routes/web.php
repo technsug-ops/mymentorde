@@ -99,6 +99,11 @@ Route::get('/privacy',     [\App\Http\Controllers\LegalController::class, 'priva
 Route::get('/cookies',     [\App\Http\Controllers\LegalController::class, 'cookies'])->name('legal.cookies');
 Route::get('/terms',       [\App\Http\Controllers\LegalController::class, 'terms'])->name('legal.terms');
 Route::get('/imprint',     [\App\Http\Controllers\LegalController::class, 'imprint'])->name('legal.imprint');
+// /legal/* alias'lar — dealer-landing, platform-landing vb. view'larda eski URL kullanılıyor
+Route::get('/legal/privacy', [\App\Http\Controllers\LegalController::class, 'privacy']);
+Route::get('/legal/cookies', [\App\Http\Controllers\LegalController::class, 'cookies']);
+Route::get('/legal/terms',   [\App\Http\Controllers\LegalController::class, 'terms']);
+Route::get('/legal/imprint', [\App\Http\Controllers\LegalController::class, 'imprint']);
 // Almanca alias'lar (Almanya kullanıcıları için doğal URL)
 Route::get('/datenschutz', [\App\Http\Controllers\LegalController::class, 'privacy'])->defaults('lang', 'de')->name('legal.datenschutz');
 Route::get('/impressum',   [\App\Http\Controllers\LegalController::class, 'imprint'])->defaults('lang', 'de')->name('legal.impressum');
