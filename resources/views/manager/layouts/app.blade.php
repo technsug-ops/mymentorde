@@ -401,40 +401,8 @@
                    class="nav-link {{ request()->is('manager/doc-templates*') ? 'active' : '' }}">
                     <span class="nav-icon">📝</span> Belge Şablonları
                 </a>
-                @php
-                    $isSozlesmeOpen = request()->is('manager/contract-template*') || request()->is('manager/business-contracts*') || request()->is('my-contracts*');
-                @endphp
-                <div>
-                    <button type="button"
-                            id="sozlesme-btn"
-                            data-toggle="sozlesme"
-                            class="nav-link {{ $isSozlesmeOpen ? 'active' : '' }}"
-                            style="display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;cursor:pointer;text-align:left;">
-                        <span><span class="nav-icon">📋</span> Sözleşme Yönetimi</span>
-                        <span id="sozlesme-caret" style="font-size:10px;transition:transform .2s;{{ $isSozlesmeOpen ? 'transform:rotate(180deg)' : '' }}">▾</span>
-                    </button>
-                    <div id="sozlesme-sub" style="{{ $isSozlesmeOpen ? '' : 'display:none;' }}padding-left:12px;">
-                        <a href="/manager/contract-template"
-                           class="nav-link {{ request()->is('manager/contract-template*') ? 'active' : '' }}"
-                           style="font-size:12px;padding:6px 12px;">
-                            <span class="nav-icon" style="font-size:14px;">👤</span> Öğrenci
-                        </a>
-                        <a href="/manager/business-contracts?type=staff"
-                           class="nav-link {{ (request()->is('manager/business-contracts*') && request()->get('type')==='staff') ? 'active' : '' }}"
-                           style="font-size:12px;padding:6px 12px;">
-                            <span class="nav-icon" style="font-size:14px;">👥</span> Staff
-                        </a>
-                        <a href="/manager/business-contracts?type=dealer"
-                           class="nav-link {{ (request()->is('manager/business-contracts*') && request()->get('type')==='dealer') ? 'active' : '' }}"
-                           style="font-size:12px;padding:6px 12px;">
-                            <span class="nav-icon" style="font-size:14px;">🤝</span> Dealer
-                        </a>
-                    </div>
-                </div>
-                <a href="/my-contracts"
-                   class="nav-link {{ request()->is('my-contracts*') ? 'active' : '' }}">
-                    <span class="nav-icon">📄</span> Tüm Sözleşmeler
-                </a>
+                {{-- Sözleşme Yönetimi — addon partial, modül kapalıysa veya rota yoksa skip --}}
+                @includeIf('manager.partials.contracts-sidebar-section')
             </div>
 
             @module('booking')

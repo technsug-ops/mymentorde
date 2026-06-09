@@ -18,7 +18,13 @@ class BusinessContractController extends Controller
 {
     public function __construct(
         private readonly BusinessContractService $service
-    ) {}
+    ) {
+        // Addon gate — modül kapalı ise tüm controller 404 (rota varlığını gizler)
+        $this->middleware(function ($request, $next) {
+            \App\Support\ModuleAccess::assertEnabled('contracts_hub');
+            return $next($request);
+        });
+    }
 
     public function index(Request $r): View
     {

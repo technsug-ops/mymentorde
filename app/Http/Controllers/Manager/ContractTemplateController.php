@@ -18,7 +18,13 @@ class ContractTemplateController extends Controller
 {
     public function __construct(
         private readonly ContractTemplateService $contractTemplateService,
-    ) {}
+    ) {
+        // Addon gate — modül kapalı ise tüm controller 404
+        $this->middleware(function ($request, $next) {
+            \App\Support\ModuleAccess::assertEnabled('contracts_hub');
+            return $next($request);
+        });
+    }
 
     public function show(Request $request)
     {

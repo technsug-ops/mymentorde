@@ -27,6 +27,15 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
  */
 class ContractsHubController extends Controller
 {
+    public function __construct()
+    {
+        // Addon gate — modül kapalı ise tüm controller 404
+        $this->middleware(function ($request, $next) {
+            \App\Support\ModuleAccess::assertEnabled('contracts_hub');
+            return $next($request);
+        });
+    }
+
     /** Personel rol → alt kategori map'i */
     private const ADMIN_ROLES  = ['manager', 'marketing_admin', 'operations_admin', 'finance_admin', 'system_admin'];
     private const SENIOR_ROLES = ['senior', 'mentor'];
