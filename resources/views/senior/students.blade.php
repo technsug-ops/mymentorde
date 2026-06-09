@@ -140,8 +140,10 @@
                 <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
                     <a href="{{ url('/senior/students/' . $row->student_id) }}"
                        style="font-size:var(--tx-xs);padding:4px 10px;border:1px solid var(--u-line);border-radius:6px;background:var(--u-bg);color:var(--u-text);text-decoration:none;font-weight:600;text-align:center;">Detay</a>
-                    <a href="{{ route('senior.messages.with-student', $row->student_id) }}"
-                       style="font-size:var(--tx-xs);padding:4px 10px;border:1px solid #7c3aed33;border-radius:6px;background:#7c3aed08;color:#7c3aed;text-decoration:none;font-weight:600;text-align:center;">💬 Mesaj</a>
+                    @if(\Illuminate\Support\Facades\Route::has('senior.messages.with-student'))
+                        <a href="{{ route('senior.messages.with-student', $row->student_id) }}"
+                           style="font-size:var(--tx-xs);padding:4px 10px;border:1px solid #7c3aed33;border-radius:6px;background:#7c3aed08;color:#7c3aed;text-decoration:none;font-weight:600;text-align:center;">💬 Mesaj</a>
+                    @endif
                 </div>
             </div>
             @if($loop->last && $loop->count > 2)</div>@endif
@@ -221,7 +223,8 @@
                 <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
                     <a href="/senior/guests/{{ $guest->id }}"
                        style="font-size:var(--tx-xs);padding:4px 10px;border:1px solid var(--u-line);border-radius:6px;background:var(--u-bg);color:var(--u-text);text-decoration:none;font-weight:600;text-align:center;">Detay</a>
-                    @if(strtolower(trim((string) $guest->assigned_senior_email)) === strtolower(trim((string) auth()->user()?->email)))
+                    @if(\Illuminate\Support\Facades\Route::has('senior.messages.with-guest')
+                        && strtolower(trim((string) $guest->assigned_senior_email)) === strtolower(trim((string) auth()->user()?->email)))
                     <a href="{{ route('senior.messages.with-guest', $guest->id) }}"
                        style="font-size:var(--tx-xs);padding:4px 10px;border:1px solid #7c3aed33;border-radius:6px;background:#7c3aed08;color:#7c3aed;text-decoration:none;font-weight:600;text-align:center;">💬 Mesaj</a>
                     @endif

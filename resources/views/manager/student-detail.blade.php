@@ -181,36 +181,16 @@
 
     {{-- SAĞ: Güncelleme Formu --}}
     <div>
-        @php
-            $pwdResetEmail = $studentUser?->email ?? trim((string) ($guest?->email ?? ''));
-            $pwdResetName  = $guest
-                ? (trim($guest->first_name . ' ' . $guest->last_name) ?: $pwdResetEmail)
-                : ($studentUser?->name ?: $pwdResetEmail);
-        @endphp
-        @if(! empty($pwdResetEmail))
-        {{-- 🔐 Şifre Sıfırlama — kullanıcıya mail gönderir, manager şifreyi GÖRMEZ --}}
-        <section class="panel gd-panel" style="border:1px solid #fde68a;background:#fffbeb;">
-            <h2 style="color:#92400e;">🔐 Şifre Sıfırla</h2>
-            <div style="font-size:12px;color:#78350f;margin-bottom:10px;line-height:1.5;">
-                Tıklayınca otomatik geçici şifre üretilir ve <strong>öğrencinin e-postasına</strong>
-                gönderilir. Öğrenci giriş yapınca <strong>zorunlu olarak yeni şifre belirler</strong>.
-                Hesabı yoksa otomatik oluşturulur.
-            </div>
-            <div class="gd-field">
-                <label>Hedef E-posta</label>
-                <div class="gd-readonly" id="pwdReset-email">{{ $pwdResetEmail }}</div>
-                <input type="hidden" id="pwdReset-name" value="{{ $pwdResetName }}">
-            </div>
-            <div class="gd-actions">
-                <button type="button" class="btn" id="pwdReset-btn"
-                        style="background:#f59e0b;color:#fff;border:none;font-weight:600;">
-                    📧 Şifre Sıfırlama Maili Gönder
-                </button>
-            </div>
-            <div id="pwdReset-result" style="display:none;margin-top:10px;padding:10px 12px;border-radius:6px;background:#dcfce7;border:1px solid #86efac;color:#166534;font-size:12px;font-weight:600;"></div>
-            <div id="pwdReset-error" style="display:none;margin-top:8px;padding:8px 10px;border-radius:6px;background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;font-size:12px;"></div>
-        </section>
-        @endif
+        {{-- 🔐 Şifre Sıfırlama — addon partial, hata olsa bile student-detail çalışır --}}
+        @includeIf('manager.partials.password-reset-card', [
+            'email'       => $studentUser?->email ?? trim((string) ($guest?->email ?? '')),
+            'name'        => $guest
+                ? (trim($guest->first_name . ' ' . $guest->last_name) ?: ($studentUser?->email ?? $guest->email))
+                : ($studentUser?->name ?: ($studentUser?->email ?? '')),
+            'defaultRole' => 'student',
+            'personLabel' => 'Öğrenci',
+            'idSuffix'    => 'student' . preg_replace('/[^a-zA-Z0-9]/', '', (string) $studentId),
+        ])
 
         <section class="panel gd-panel">
             <h2>Bilgileri Güncelle</h2>
@@ -563,71 +543,6 @@
 @endcan
 @endmodule
 
-@php
-    $hasResetEmail = ! empty($studentUser?->email) || ! empty(trim((string) ($guest?->email ?? '')));
-@endphp
-@if($hasResetEmail)
-{{-- 🔐 Şifre Sıfırla — handler --}}
-<script nonce="{{ $cspNonce ?? '' }}">
-(function(){
-    var btn       = document.getElementById('pwdReset-btn');
-    var emailBox  = document.getElementById('pwdReset-email');
-    var resultBox = document.getElementById('pwdReset-result');
-    var errBox    = document.getElementById('pwdReset-error');
-    if (!btn) return;
-
-    var CSRF = '{{ csrf_token() }}';
-    var URL  = "{{ route('manager.quick-admin.password.reset') }}";
-    var EMAIL = (emailBox.textContent || '').trim();
-    var nameEl = document.getElementById('pwdReset-name');
-    var NAME = nameEl ? (nameEl.value || '').trim() : '';
-
-    btn.addEventListener('click', function(){
-        errBox.style.display = 'none';
-        errBox.textContent = '';
-        resultBox.style.display = 'none';
-
-        if (!confirm("Şifre sıfırlama maili " + EMAIL + " adresine gönderilsin mi?\n\nÖğrenci geçici şifre ile giriş yapıp yeni şifresini belirleyecek."))
-            return;
-
-        btn.disabled = true;
-        var oldText = btn.textContent;
-        btn.textContent = 'Mail gönderiliyor...';
-
-        var body = { email: EMAIL, default_role: 'student' };
-        if (NAME) body.name = NAME;
-
-        fetch(URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': CSRF,
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify(body)
-        })
-        .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, body: j }; }); })
-        .then(function(res){
-            btn.disabled = false;
-            btn.textContent = oldText;
-            if (!res.ok || !res.body.ok) {
-                errBox.textContent = res.body.message || 'Mail gönderilemedi.';
-                errBox.style.display = 'block';
-                return;
-            }
-            resultBox.textContent = res.body.message || '✓ Mail gönderildi.';
-            resultBox.style.display = 'block';
-        })
-        .catch(function(){
-            btn.disabled = false;
-            btn.textContent = oldText;
-            errBox.textContent = 'Ağ hatası — tekrar deneyin.';
-            errBox.style.display = 'block';
-        });
-    });
-})();
-</script>
-@endif
+{{-- 🔐 Şifre Sıfırla JS handler — artık partial içinde, burası temizlendi --}}
 
 @endsection
