@@ -395,10 +395,13 @@
             <div style="display:flex;align-items:center;gap:8px;">
                 <span style="font-size:var(--tx-xs);color:var(--u-muted);">{{ $documents->count() }} belge</span>
                 @module('doc_request')
-                <button type="button" id="docReqOpenBtn"
-                        style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;font-size:var(--tx-xs);font-weight:600;color:#fff;background:linear-gradient(135deg,#1e40af,#3b5fcc);border:none;border-radius:6px;cursor:pointer;">
-                    📲 Belge Talep Et
-                </button>
+                    @if(\Illuminate\Support\Facades\Route::has('manager.guest.document-tokens.store')
+                        && \Illuminate\Support\Facades\Route::has('manager.guest.document-tokens.index'))
+                    <button type="button" id="docReqOpenBtn"
+                            style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;font-size:var(--tx-xs);font-weight:600;color:#fff;background:linear-gradient(135deg,#1e40af,#3b5fcc);border:none;border-radius:6px;cursor:pointer;">
+                        📲 Belge Talep Et
+                    </button>
+                    @endif
                 @endmodule
                 @if($documents->isNotEmpty())
                     <a href="{{ route('manager.guest.documents.zip', $guest->id) }}"
@@ -627,6 +630,8 @@
 </script>
 
 @module('doc_request')
+@if(\Illuminate\Support\Facades\Route::has('manager.guest.document-tokens.store')
+    && \Illuminate\Support\Facades\Route::has('manager.guest.document-tokens.index'))
 {{-- ── Belge Talep Linki Modal (Premium: doc_request) ─────────────────────── --}}
 <div id="docReqModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center;padding:16px;">
     <div style="background:#fff;border-radius:14px;max-width:520px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);">
@@ -836,6 +841,7 @@
     });
 })();
 </script>
+@endif
 @endmodule
 
 @endpush

@@ -23,13 +23,25 @@
       ])
 --}}
 @php
-    $_drModalId = $modalId;
-    $_drBtnId   = $btnId;
-    $_drIndex   = route($indexRoute, $routeParam);
-    $_drStore   = route($storeRoute, $routeParam);
-    $_drLabel   = (string) ($targetLabel ?? '');
-    $_drIntro   = (string) ($sendIntro ?? "Merhaba, MentorDE'den belge talebimiz var. Lütfen aşağıdaki linke tıklayıp belgeyi yükleyin:");
+    // ── Addon protection layer — modül kapalı veya rota yoksa partial sessizce skip ──
+    try {
+        $_drShow = \App\Support\ModuleAccess::enabled('doc_request')
+            && \Illuminate\Support\Facades\Route::has($indexRoute)
+            && \Illuminate\Support\Facades\Route::has($storeRoute);
+        if ($_drShow) {
+            $_drModalId = $modalId;
+            $_drBtnId   = $btnId;
+            $_drIndex   = route($indexRoute, $routeParam);
+            $_drStore   = route($storeRoute, $routeParam);
+            $_drLabel   = (string) ($targetLabel ?? '');
+            $_drIntro   = (string) ($sendIntro ?? "Merhaba, MentorDE'den belge talebimiz var. Lütfen aşağıdaki linke tıklayıp belgeyi yükleyin:");
+        }
+    } catch (\Throwable $_drEx) {
+        $_drShow = false;
+    }
 @endphp
+
+@if($_drShow ?? false)
 
 <div id="{{ $_drModalId }}" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center;padding:16px;">
     <div style="background:#fff;border-radius:14px;max-width:520px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);">
@@ -237,3 +249,4 @@
     });
 })();
 </script>
+@endif

@@ -335,10 +335,13 @@
             <div style="display:flex;flex-direction:column;gap:8px;">
                 @module('doc_request')
                     @can('doc_request.use')
+                        @if(\Illuminate\Support\Facades\Route::has('manager.student.document-tokens.store')
+                            && \Illuminate\Support\Facades\Route::has('manager.student.document-tokens.index'))
                         <button type="button" id="docReqOpenBtn"
                                 style="padding:8px 14px;border:none;border-radius:8px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#1e40af,#3b5fcc);cursor:pointer;display:inline-flex;align-items:center;gap:6px;justify-content:center;">
                             📲 Belge Talep Et
                         </button>
+                        @endif
                     @endcan
                 @endmodule
                 @if($assignment->senior_email)
@@ -359,6 +362,8 @@
 
 @module('doc_request')
 @can('doc_request.use')
+@if(\Illuminate\Support\Facades\Route::has('manager.student.document-tokens.store')
+    && \Illuminate\Support\Facades\Route::has('manager.student.document-tokens.index'))
 {{-- ── Belge Talep Linki Modal (öğrenci versiyonu) ─────────────────────────── --}}
 <div id="docReqModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center;padding:16px;">
     <div style="background:#fff;border-radius:14px;max-width:520px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);">
@@ -540,6 +545,7 @@
     });
 })();
 </script>
+@endif
 @endcan
 @endmodule
 
