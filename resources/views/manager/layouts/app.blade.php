@@ -236,14 +236,21 @@
                    class="nav-link {{ request()->is('manager/seniors*') ? 'active' : '' }}">
                     <span class="nav-icon">👨‍💼</span> Eğitim Danışmanı Yönetimi
                 </a>
-                <a href="/manager/dealers"
-                   class="nav-link {{ request()->is('manager/dealers*') ? 'active' : '' }}">
-                    <span class="nav-icon">🏪</span> Bayi Yönetimi
-                </a>
-                <a href="/manager/dealer-types"
-                   class="nav-link {{ request()->is('manager/dealer-types*') ? 'active' : '' }}">
-                    <span class="nav-icon">🎚️</span> Bayi Tip Yönetimi
-                </a>
+                {{-- Bayi yönetimi sidebar entries — @module gate ile addon, modül kapalıysa skip --}}
+                @module('dealer')
+                    @if(\Illuminate\Support\Facades\Route::has('manager.dealers.index'))
+                    <a href="{{ route('manager.dealers.index') }}"
+                       class="nav-link {{ request()->is('manager/dealers*') ? 'active' : '' }}">
+                        <span class="nav-icon">🏪</span> Bayi Yönetimi
+                    </a>
+                    @endif
+                    @if(\Illuminate\Support\Facades\Route::has('manager.dealer-types.index'))
+                    <a href="{{ route('manager.dealer-types.index') }}"
+                       class="nav-link {{ request()->is('manager/dealer-types*') ? 'active' : '' }}">
+                        <span class="nav-icon">🎚️</span> Bayi Tip Yönetimi
+                    </a>
+                    @endif
+                @endmodule
                 <a href="/manager/bulk-import/guests"
                    class="nav-link {{ request()->is('manager/bulk-import*') ? 'active' : '' }}">
                     <span class="nav-icon">📥</span> Toplu Kayıt İçeri Aktar
@@ -334,10 +341,12 @@
                     </a>
                 @endmodule
                 @module('dealer')
+                    @if(\Illuminate\Support\Facades\Route::has('manager.dealer-tiers.index'))
                     <a href="{{ route('manager.dealer-tiers.index') }}"
                        class="nav-link {{ request()->is('manager/dealer-tiers*') ? 'active' : '' }}">
                         <span class="nav-icon">🏆</span> Bayi Kademeleri
                     </a>
+                    @endif
                 @endmodule
             </div>
 

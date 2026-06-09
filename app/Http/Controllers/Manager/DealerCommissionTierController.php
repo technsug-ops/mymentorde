@@ -22,7 +22,14 @@ use Illuminate\View\View;
  */
 class DealerCommissionTierController extends Controller
 {
-    public function __construct(private readonly EventLogService $eventLogService) {}
+    public function __construct(private readonly EventLogService $eventLogService)
+    {
+        // Addon gate — modül kapalı ise tüm controller 404
+        $this->middleware(function ($request, $next) {
+            \App\Support\ModuleAccess::assertEnabled('dealer');
+            return $next($request);
+        });
+    }
 
     public function index(): View
     {

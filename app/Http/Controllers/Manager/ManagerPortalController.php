@@ -522,6 +522,7 @@ class ManagerPortalController extends Controller
 
     public function dealers(Request $request): View
     {
+        \App\Support\ModuleAccess::assertEnabled('dealer'); // addon gate
         $cid = $this->companyId();
 
         [$enriched, $kpis] = Cache::remember("mgr_dealers_{$cid}", 300, function () use ($cid) {
@@ -577,6 +578,7 @@ class ManagerPortalController extends Controller
 
     public function dealerShow(string $code): View
     {
+        \App\Support\ModuleAccess::assertEnabled('dealer'); // addon gate
         $cid = $this->companyId();
 
         $dealer   = Dealer::where('code', $code)->firstOrFail();
@@ -635,6 +637,7 @@ class ManagerPortalController extends Controller
 
     public function dealerTypes(): View
     {
+        \App\Support\ModuleAccess::assertEnabled('dealer'); // addon gate
         $types = \App\Models\DealerType::where('is_active', true)->orderBy('id')->get();
 
         $permissionLabels = [
@@ -661,6 +664,7 @@ class ManagerPortalController extends Controller
 
     public function updateDealerType(Request $request, string $code): \Illuminate\Http\RedirectResponse
     {
+        \App\Support\ModuleAccess::assertEnabled('dealer'); // addon gate
         $type = \App\Models\DealerType::where('code', $code)->firstOrFail();
 
         $validated = $request->validate([

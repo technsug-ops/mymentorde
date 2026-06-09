@@ -16,7 +16,14 @@ use Illuminate\View\View;
  */
 class DealerApplicationController extends Controller
 {
-    public function __construct(private AnalyticsService $analytics) {}
+    public function __construct(private AnalyticsService $analytics)
+    {
+        // Addon gate — modül kapalı ise tüm controller 404
+        $this->middleware(function ($request, $next) {
+            \App\Support\ModuleAccess::assertEnabled('dealer');
+            return $next($request);
+        });
+    }
 
     public function index(Request $request): View
     {
