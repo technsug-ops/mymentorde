@@ -52,7 +52,7 @@
 @section('content')
 
 <div style="margin-bottom:10px;">
-    <a class="btn" href="/manager/dealers">← Bayi Listesi</a>
+    <a class="btn" href="{{ \App\Support\PanelRouting::url('dealers', 'index') }}">← Bayi Listesi</a>
 </div>
 
 {{-- Bayi Başlık --}}
@@ -112,7 +112,7 @@
         <div>
             <div style="font-size:11px;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;">
                 Başvuru Detayları
-                <a href="/manager/dealer-applications/{{ $application->id }}" style="float:right;color:#1e40af;text-decoration:none;font-weight:600;text-transform:none;letter-spacing:0;">Tam Başvuruyu Aç →</a>
+                <a href="{{ \App\Support\PanelRouting::url('dealer-applications', 'show', $application->id) }}" style="float:right;color:#1e40af;text-decoration:none;font-weight:600;text-transform:none;letter-spacing:0;">Tam Başvuruyu Aç →</a>
             </div>
             <div style="font-size:13px;line-height:1.7;">
                 @if($application->company_name)<strong>🏢 Şirket:</strong> {{ $application->company_name }}<br>@endif
