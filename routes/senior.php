@@ -74,6 +74,9 @@ Route::middleware(['company.context', 'auth', 'senior.role'])->group(function ()
     Route::get('/senior/messages', [ConversationController::class, 'senior'])->name('senior.messages');
     Route::post('/senior/messages/{thread}/send', [ConversationController::class, 'seniorSend'])->name('senior.messages.send');
     Route::post('/senior/messages/{thread}/typing', [ConversationController::class, 'markAdvisorTyping'])->middleware('throttle:60,1')->name('senior.messages.typing');
+    // Kişi kartından direkt sohbet başlat — atanmış olunan kişiyle thread aç/redirect
+    Route::get('/senior/messages/with-guest/{guest}',  [ConversationController::class, 'seniorStartWithGuest'])->name('senior.messages.with-guest');
+    Route::get('/senior/messages/with-student/{studentId}', [ConversationController::class, 'seniorStartWithStudent'])->name('senior.messages.with-student');
     Route::get('/senior/document-builder', [SeniorDashboardController::class, 'documentBuilder'])->name('senior.document-builder');
     Route::post('/senior/document-builder/generate', [SeniorDashboardController::class, 'generateDocumentBuilderFile'])->name('senior.document-builder.generate');
     Route::post('/senior/document-builder/preview', [SeniorDashboardController::class, 'previewDocumentBuilder'])->name('senior.document-builder.preview');

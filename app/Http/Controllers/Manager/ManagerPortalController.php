@@ -231,7 +231,7 @@ class ManagerPortalController extends Controller
             'assigned_by'           => $email ? $request->user()?->email : null,
         ]);
 
-        // Yeni atama → 2 in-app bildirim (aynı senior ise atla)
+        // Yeni atama → 2 in-app bildirim + DM thread otomatik aç/güncelle
         if ($email && $email !== $previousEmail) {
             $this->sendAssignmentNotifications(
                 guestId: (string) $guest->id,
@@ -241,6 +241,20 @@ class ManagerPortalController extends Controller
                 triggeredBy: $request->user()?->email,
                 isGuest: true,
             );
+
+            // Senior'un kişiyle herhangi bir tetikleme olmadan iletişime geçebilmesi
+            // için DmThread'i otomatik aç + advisor_user_id'i yeni senior'a ata.
+            try {
+                \App\Http\Controllers\ConversationController::ensureGuestThread(
+                    $guest->fresh(),
+                    (int) ($request->user()?->id ?? 0),
+                );
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Auto-create guest thread failed', [
+                    'guest_id' => $guest->id,
+                    'error'    => $e->getMessage(),
+                ]);
+            }
         }
 
         $seniorLabel = $email ? (User::where('email', $email)->value('name') ?: $email) : null;

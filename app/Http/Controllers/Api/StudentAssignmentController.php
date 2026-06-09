@@ -161,7 +161,7 @@ class StudentAssignmentController extends Controller
 
         $taskAutomation->ensureStudentAssignmentTask($row);
 
-        // Senior değiştiyse 2 in-app bildirim (senior'a + öğrenciye)
+        // Senior değiştiyse 2 in-app bildirim + DmThread auto-create
         $newSeniorEmail = $row->senior_email;
         if ($newSeniorEmail && $newSeniorEmail !== $previousSeniorEmail) {
             $this->dispatchAssignmentNotifications(
@@ -170,6 +170,19 @@ class StudentAssignmentController extends Controller
                 companyId: (int) ($row->company_id ?? 0),
                 triggeredBy: $request->user()?->email,
             );
+
+            // Senior tetiklemesiz iletişime geçebilsin → thread otomatik aç
+            try {
+                \App\Http\Controllers\ConversationController::ensureStudentThread(
+                    (string) $row->student_id,
+                    (int) ($request->user()?->id ?? 0),
+                );
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Auto-create student thread failed', [
+                    'student_id' => $row->student_id,
+                    'error'      => $e->getMessage(),
+                ]);
+            }
         }
 
         return response()->json($row->fresh());

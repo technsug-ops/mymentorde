@@ -187,6 +187,55 @@ class ConversationController extends Controller
         ]);
     }
 
+    /**
+     * Senior tarafından bir aday öğrenci ile direkt sohbet başlat.
+     * Atama yapılmışsa thread otomatik açılır; senior'a /senior/messages?thread_id=X
+     * redirect edilir. Atama yoksa 403.
+     */
+    public function seniorStartWithGuest(Request $request, GuestApplication $guest)
+    {
+        $user = $request->user();
+        abort_if(!$user, 401);
+        abort_if(!$user->hasAnyRole([User::ROLE_SENIOR, User::ROLE_MENTOR, User::ROLE_MANAGER]), 403);
+
+        // Bu senior bu guest'e atanmış mı?
+        $assignedEmail = strtolower(trim((string) ($guest->assigned_senior_email ?? '')));
+        $userEmail     = strtolower(trim((string) ($user->email ?? '')));
+        if (! in_array((string) $user->role, [User::ROLE_MANAGER], true) && $assignedEmail !== $userEmail) {
+            abort(403, 'Bu aday öğrenci sana atanmamış.');
+        }
+
+        $thread = $this->resolveOrCreateGuestThread($guest, (int) $user->id);
+
+        return redirect()->route('senior.messages', ['thread_id' => (int) $thread->id]);
+    }
+
+    /**
+     * Senior tarafından bir öğrenci ile direkt sohbet başlat.
+     */
+    public function seniorStartWithStudent(Request $request, string $studentId)
+    {
+        $user = $request->user();
+        abort_if(!$user, 401);
+        abort_if(!$user->hasAnyRole([User::ROLE_SENIOR, User::ROLE_MENTOR, User::ROLE_MANAGER]), 403);
+
+        // Bu senior bu öğrenciye atanmış mı?
+        $assignment = \App\Models\StudentAssignment::query()
+            ->where('student_id', $studentId)
+            ->first();
+        abort_if(! $assignment, 404, 'Öğrenci bulunamadı.');
+
+        $assignedEmail = strtolower(trim((string) ($assignment->senior_email ?? '')));
+        $userEmail     = strtolower(trim((string) ($user->email ?? '')));
+        if (! in_array((string) $user->role, [User::ROLE_MANAGER], true) && $assignedEmail !== $userEmail) {
+            abort(403, 'Bu öğrenci sana atanmamış.');
+        }
+
+        $thread = $this->resolveOrCreateStudentThread($studentId, (int) $user->id);
+
+        return redirect()->route('senior.messages', ['thread_id' => (int) $thread->id]);
+    }
+
     public function markAdvisorTyping(Request $request, DmThread $thread): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
@@ -349,6 +398,20 @@ class ConversationController extends Controller
                 'error'     => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Public wrapper — atama anlarından (manager) çağrılır, thread'in advisor'ı
+     * doğru senior'a set edilir. Thread yoksa create eder.
+     */
+    public static function ensureGuestThread(GuestApplication $guest, ?int $initiatorUserId = null): DmThread
+    {
+        return app(self::class)->resolveOrCreateGuestThread($guest, (int) ($initiatorUserId ?? 0));
+    }
+
+    public static function ensureStudentThread(string $studentId, ?int $initiatorUserId = null): DmThread
+    {
+        return app(self::class)->resolveOrCreateStudentThread($studentId, (int) ($initiatorUserId ?? 0));
     }
 
     private function resolveOrCreateGuestThread(GuestApplication $guest, int $initiatorUserId): DmThread

@@ -5,8 +5,14 @@
 
 @section('content')
 
-<div style="margin-bottom:12px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap;">
     <a href="javascript:history.back()" style="font-size:var(--tx-sm);color:#7c3aed;font-weight:700;text-decoration:none;">← Geri</a>
+    @if(strtolower(trim((string) $guest->assigned_senior_email)) === strtolower(trim((string) auth()->user()?->email)))
+    <a href="{{ route('senior.messages.with-guest', $guest->id) }}"
+       style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 2px 4px rgba(124,58,237,.3);">
+        💬 Aday Öğrenciyle Mesajlaş
+    </a>
+    @endif
 </div>
 
 @if($guest->converted_to_student)

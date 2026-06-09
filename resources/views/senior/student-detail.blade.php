@@ -70,7 +70,13 @@
     </div>
 </div>
 
-<a class="btn" href="/senior/students" style="margin-bottom:14px;display:inline-block;">← Öğrenciler</a>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;flex-wrap:wrap;">
+    <a class="btn" href="/senior/students">← Öğrenciler</a>
+    <a href="{{ route('senior.messages.with-student', $studentId) }}"
+       style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 2px 4px rgba(124,58,237,.3);">
+        💬 Öğrenciyle Mesajlaş
+    </a>
+</div>
 
 {{-- Tabs --}}
 <div class="s360-tabs">
