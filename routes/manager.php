@@ -503,6 +503,16 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::post('/manager/guests/{guest}/vize-rehber/request-missing',     [$vag, 'requestMissingFields'])->middleware('throttle:10,1')->name('manager.visa-guide.request-missing');
     }
 
+    // ── Generic Application Guides (APS / Anmeldung / Sperrkonto / VPD) ──────
+    // Config-driven: config/application_guides.php → her slug için tek view render.
+    {
+        $ag = \App\Http\Controllers\Manager\ApplicationGuideController::class;
+        Route::get('/manager/guests/{guest}/rehber/{slug}',              [$ag, 'showForGuest'])
+            ->where('slug', '[a-z_-]+')->name('manager.application-guide.show');
+        Route::get('/manager/students/{studentId}/rehber/{slug}',        [$ag, 'showForStudent'])
+            ->where('slug', '[a-z_-]+')->name('manager.student.application-guide.show');
+    }
+
     // ── Public Landing Envanter (sisteme bağlı public sayfa registry'si) ─────
     Route::get('/manager/landing-inventory', [\App\Http\Controllers\Manager\LandingInventoryController::class, 'index'])
         ->name('manager.landing-inventory.index');

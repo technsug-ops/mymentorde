@@ -45,12 +45,18 @@
     @if(! empty($studentId))
         <a href="{{ route('manager.student.uni-assist-guide.show', $studentId) }}"
            style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:linear-gradient(135deg,#c8102e,#9f1239); color:#fff; border-radius:8px; font-size:13px; font-weight:700; text-decoration:none; margin-left:auto;">
-            🎓 Uni-Assist Rehberi →
+            🎓 Uni-Assist →
         </a>
         <a href="{{ route('manager.student.visa-guide.show', $studentId) }}"
            style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:linear-gradient(135deg,#003c8f,#002966); color:#fff; border-radius:8px; font-size:13px; font-weight:700; text-decoration:none;">
-            🛂 Vize Rehberi →
+            🛂 Vize →
         </a>
+        @foreach(['aps' => ['📜','APS','#0066b3','#003c8f'], 'anmeldung' => ['🏠','Anmeldung','#dc2626','#991b1b'], 'sperrkonto' => ['🏦','Sperrkonto','#15803d','#166534'], 'vpd' => ['📑','VPD','#7c3aed','#6d28d9']] as $sl => $cfg)
+            <a href="{{ route('manager.student.application-guide.show', [$studentId, $sl]) }}"
+               style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:linear-gradient(135deg,{{ $cfg[2] }},{{ $cfg[3] }}); color:#fff; border-radius:8px; font-size:13px; font-weight:700; text-decoration:none;">
+                {{ $cfg[0] }} {{ $cfg[1] }} →
+            </a>
+        @endforeach
     @endif
 </div>
 
