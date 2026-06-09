@@ -42,7 +42,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\EnsurePasswordChanged::class);
 
         $middleware->alias([
-            'platform.owner' => \App\Http\Middleware\EnsurePlatformOwner::class,
             'manager.role' => \App\Http\Middleware\EnsureManagerRole::class,
             'senior.role' => \App\Http\Middleware\EnsureSeniorRole::class,
             'ai_labs.access' => \App\Http\Middleware\AiLabsAccess::class,

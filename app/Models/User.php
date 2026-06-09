@@ -73,15 +73,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
     public const ROLE_SALES_STAFF = 'sales_staff';
     public const ROLE_MARKETING_STAFF = 'marketing_staff';
 
-    /**
-     * Platform Owner — Mentorde sahibi rolü.
-     * Customer Manager'ın üstünde, cross-company yetkili.
-     * Sadece /platform/* alanına erişir, modül toggle + billing kontrolü onda.
-     */
-    public const ROLE_PLATFORM_OWNER = 'platform_owner';
-
     public const ADMIN_PANEL_ROLES = [
-        self::ROLE_PLATFORM_OWNER,  // en üstte — admin paneline genel erişim için
         self::ROLE_MANAGER,
         self::ROLE_SYSTEM_ADMIN,
         self::ROLE_OPERATIONS_ADMIN,

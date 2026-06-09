@@ -474,13 +474,11 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
     }
 
     // ── SaaS modül toggle (company × module matrix) ──
-    // YETKİ KISITLAMASI: sadece Platform Owner — Customer Manager kendi modüllerini
-    // değiştiremez (premium feature'ları bedava aktifleştirmemesi için).
-    Route::middleware('platform.owner')->group(function (): void {
+    {
         $cm = \App\Http\Controllers\Manager\CompanyModulesController::class;
         Route::get('/manager/companies/modules',                          [$cm, 'index'])->name('manager.companies.modules');
         Route::post('/manager/companies/{company}/modules',               [$cm, 'update'])->middleware('throttle:30,1')->name('manager.companies.modules.update');
-    });
+    }
 
     // ── Application Guides — student altında (Uni-Assist + Vize) ──────────────
     // Uni-Assist sözleşme+ödeme sonrası (öğrenci aşamasında) yapılır.
