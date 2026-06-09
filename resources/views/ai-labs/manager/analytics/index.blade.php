@@ -98,6 +98,16 @@
             <div class="ala-kpi-label">Üretilen İçerik</div>
             <div class="ala-kpi-sub">draft/published</div>
         </div>
+        @php $ms = (int) ($conversations['avg_response_ms'] ?? 0); @endphp
+        @if($ms > 0)
+        <div class="ala-kpi">
+            <div class="ala-kpi-value" style="color:{{ $ms < 2000 ? '#16a34a' : ($ms < 5000 ? '#ca8a04' : '#dc2626') }};">
+                {{ number_format($ms / 1000, 1) }}<span style="font-size:14px;">s</span>
+            </div>
+            <div class="ala-kpi-label">Ortalama Yanıt Süresi</div>
+            <div class="ala-kpi-sub">{{ $ms < 2000 ? '🟢 hızlı' : ($ms < 5000 ? '🟡 normal' : '🔴 yavaş') }}</div>
+        </div>
+        @endif
     </div>
 
     {{-- Response mode dağılım --}}

@@ -23,6 +23,7 @@ class StaffAiConversation extends Model
         'tokens_input',
         'tokens_output',
         'tokens_used',
+        'response_time_ms',
         'provider',
         'model',
         'created_at',
@@ -34,6 +35,7 @@ class StaffAiConversation extends Model
         'tokens_input'  => 'integer',
         'tokens_output' => 'integer',
         'tokens_used'   => 'integer',
+        'response_time_ms' => 'integer',
         'created_at'    => 'datetime',
     ];
 

@@ -407,13 +407,37 @@ class AnalyticsService
         $costUsd = $totalIn * self::GEMINI_INPUT_COST_USD + $totalOut * self::GEMINI_OUTPUT_COST_USD;
         $costEur = $costUsd * self::USD_TO_EUR;
 
+        // Avg response time — guest + staff conversation'larından
+        $avgResponseMs = 0;
+        try {
+            $guestAvg = GuestAiConversation::query()
+                ->join('guest_applications', 'guest_ai_conversations.guest_application_id', '=', 'guest_applications.id')
+                ->where('guest_applications.company_id', $companyId)
+                ->where('guest_ai_conversations.created_at', '>=', $since)
+                ->whereNotNull('response_time_ms')
+                ->where('response_time_ms', '>', 0)
+                ->avg('response_time_ms');
+            $staffAvg = \App\Models\StaffAiConversation::query()
+                ->withoutGlobalScopes()
+                ->where('company_id', $companyId)
+                ->where('created_at', '>=', $since)
+                ->whereNotNull('response_time_ms')
+                ->where('response_time_ms', '>', 0)
+                ->avg('response_time_ms');
+            $avgs = array_filter([$guestAvg, $staffAvg], fn ($v) => $v > 0);
+            $avgResponseMs = count($avgs) > 0 ? (int) round(array_sum($avgs) / count($avgs)) : 0;
+        } catch (\Throwable $e) {
+            $avgResponseMs = 0;
+        }
+
         return [
-            'total_count'   => $totalCount,
-            'total_tokens'  => $totalIn + $totalOut,
-            'tokens_in'     => $totalIn,
-            'tokens_out'    => $totalOut,
-            'cost_eur'      => round($costEur, 3),
-            'by_role'       => $byRole,
+            'total_count'      => $totalCount,
+            'total_tokens'     => $totalIn + $totalOut,
+            'tokens_in'        => $totalIn,
+            'tokens_out'       => $totalOut,
+            'cost_eur'         => round($costEur, 3),
+            'avg_response_ms'  => $avgResponseMs,
+            'by_role'          => $byRole,
         ];
     }
 
