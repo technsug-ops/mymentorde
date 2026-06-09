@@ -36,6 +36,7 @@ class ModuleAccess
         'page_visibility', // Premium: rol-bazlı sayfa görünürlüğü (manager kontrol panelinden)
         'discount_codes',  // Manager üretir, aday services sayfasında uygular + paylaşım kartı
         'silence_checkin', // Aday/öğrenci timeline sessizliğinde otomatik "süreç aktif" touchpoint
+        'application_guides', // APS / Anmeldung / Sperrkonto / VPD / Uni-Assist / Vize rehberleri
     ];
 
     /**
@@ -55,6 +56,7 @@ class ModuleAccess
         'page_visibility'   => ['label' => 'Sayfa Görünürlüğü',       'group' => 'premium',  'desc' => 'Rol bazlı sayfa kapatma — manager kontrolünde'],
         'discount_codes'    => ['label' => 'İndirim Kodları',         'group' => 'premium',  'desc' => 'Hizmet paketlerinde indirim kodu uygulama + paylaşım kartı'],
         'silence_checkin'   => ['label' => 'Sessizlik Checkin',       'group' => 'premium',  'desc' => 'Aday/öğrenci sessizliğinde otomatik "süreç aktif" mesaj'],
+        'application_guides'=> ['label' => 'Başvuru Rehberleri',      'group' => 'gold',     'desc' => 'APS / Anmeldung / Sperrkonto / VPD adım adım rehberleri'],
         'dealer'            => ['label' => 'Bayi / Satış Ortağı',     'group' => 'premium',  'desc' => 'Satış ortakları portali + komisyon takibi'],
         'marketing_admin'   => ['label' => 'Marketing Admin',         'group' => 'premium',  'desc' => 'Email drip, A/B test, attribution dashboard'],
         'analytics_hub'     => ['label' => 'Analytics Hub',           'group' => 'premium',  'desc' => 'Platform analytics, performans raporları'],

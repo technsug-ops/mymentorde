@@ -39,6 +39,9 @@ class ApplicationGuideController extends Controller
 
     private function renderShow(GuestApplication $guest, ?string $studentId, string $slug): View
     {
+        // Addon gate — modül kapalı ise 404 (rota varlığını gizler)
+        \App\Support\ModuleAccess::assertEnabled('application_guides');
+
         $guides = config('application_guides', []);
         abort_unless(isset($guides[$slug]), 404, "Rehber bulunamadı: {$slug}");
 
