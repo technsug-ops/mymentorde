@@ -447,6 +447,8 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::post('/manager/quick-admin/assign-role',     [$qac, 'assignRole'])->middleware('throttle:30,1')->name('manager.quick-admin.role.assign');
         Route::delete('/manager/quick-admin/guest/{id}',    [$qac, 'deleteGuest'])->middleware('throttle:30,1')->name('manager.quick-admin.guest.delete');
         Route::delete('/manager/quick-admin/student/{id}',  [$qac, 'deleteStudent'])->middleware('throttle:30,1')->name('manager.quick-admin.student.delete');
+        Route::delete('/manager/quick-admin/senior/{id}',   [$qac, 'deleteSenior'])->middleware('throttle:30,1')->name('manager.quick-admin.senior.delete');
+        Route::delete('/manager/quick-admin/dealer/{id}',   [$qac, 'deleteDealer'])->middleware('throttle:30,1')->name('manager.quick-admin.dealer.delete');
         Route::post('/manager/quick-admin/reset-password',  [$qac, 'resetUserPassword'])->middleware('throttle:20,1')->name('manager.quick-admin.password.reset');
     }
 

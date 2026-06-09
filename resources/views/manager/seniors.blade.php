@@ -99,6 +99,16 @@
                         </td>
                         <td>
                             <a class="mgr-detail-btn" href="/manager/seniors/{{ urlencode($s['email']) }}">Detay →</a>
+                            @if(! empty($s['user_id']))
+                                <button class="qa-del-btn archive" data-qa-delete-mode="archive"
+                                        data-qa-delete-url="{{ route('manager.quick-admin.senior.delete', $s['user_id']) }}"
+                                        data-qa-delete-label="Senior {{ $s['name'] }}"
+                                        title="Pasif et (login engellenir, atamalar korunur)">🗑</button>
+                                <button class="qa-del-btn force" data-qa-delete-mode="force"
+                                        data-qa-delete-url="{{ route('manager.quick-admin.senior.delete', $s['user_id']) }}"
+                                        data-qa-delete-label="Senior {{ $s['name'] }}"
+                                        title="KALICI sil (öğrenciler atamasız kalır, email tekrar kullanılabilir)">🔥</button>
+                            @endif
                         </td>
                     </tr>
                 @empty
@@ -108,5 +118,8 @@
         </table>
     </div>
 </section>
+
+{{-- Soft/hard delete handler (archive 🗑 + force 🔥) — addon partial --}}
+@includeIf('manager.partials._lead-delete-script')
 
 @endsection

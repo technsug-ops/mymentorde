@@ -287,6 +287,144 @@ class QuickAdminController extends Controller
     }
 
     /**
+     * DELETE /manager/quick-admin/senior/{id}?mode=archive|force
+     * Senior/mentor silme — User kaydı + StudentAssignment ilişkileri.
+     *
+     * Senior = User with role=senior|mentor. Atanmış öğrencisi varsa:
+     * - archive: user.is_active = false (soft deactivate) — atamaları korunur
+     * - force: User::forceDelete() + assignment.senior_email NULL set
+     */
+    public function deleteSenior(Request $request, int $id): JsonResponse
+    {
+        $mode = $request->query('mode', 'archive');
+        $user = User::query()->withTrashed()->find($id);
+        if (! $user || ! in_array($user->role, [User::ROLE_SENIOR, User::ROLE_MENTOR], true)) {
+            return response()->json(['ok' => false, 'message' => 'Senior/Mentor bulunamadı.'], 404);
+        }
+
+        $email = $user->email;
+        $name  = $user->name ?: $email;
+
+        // Bu senior'a atanmış öğrenci/aday öğrenci sayısı
+        $assignedStudentCount = StudentAssignment::query()
+            ->where('senior_email', $email)
+            ->where('is_archived', false)
+            ->count();
+        $assignedGuestCount = GuestApplication::query()
+            ->where('assigned_senior_email', $email)
+            ->whereNull('converted_student_id')
+            ->count();
+
+        if ($mode === 'force') {
+            // Atamaları sıfırla — senior_email NULL → öğrenciler "atanmamış" olur, sonra başkasına atanabilir
+            StudentAssignment::query()
+                ->where('senior_email', $email)
+                ->update(['senior_email' => null]);
+            GuestApplication::query()
+                ->where('assigned_senior_email', $email)
+                ->update(['assigned_senior_email' => null, 'assigned_at' => null]);
+
+            $user->forceDelete(); // gerçek silme — email tekrar kullanılabilir
+
+            $this->logEvent('quick_admin.senior_force_deleted', [
+                'user_id'              => $id,
+                'email'                => $email,
+                'name'                 => $name,
+                'released_assignments' => $assignedStudentCount + $assignedGuestCount,
+            ]);
+            return response()->json([
+                'ok'      => true,
+                'mode'    => 'force',
+                'message' => "🔥 Senior '{$name}' kalıcı olarak silindi. {$assignedStudentCount} öğrenci + {$assignedGuestCount} aday atamasız bırakıldı.",
+            ]);
+        }
+
+        // Archive — is_active=false (soft deactivate). Atamaları korunur ama login engellenir.
+        $user->update(['is_active' => false]);
+        $this->logEvent('quick_admin.senior_archived', [
+            'user_id'             => $id,
+            'email'               => $email,
+            'name'                => $name,
+            'active_assignments'  => $assignedStudentCount + $assignedGuestCount,
+        ]);
+        return response()->json([
+            'ok'      => true,
+            'mode'    => 'archive',
+            'message' => "🗑 Senior '{$name}' pasif edildi (login engellendi). {$assignedStudentCount} öğrenci + {$assignedGuestCount} aday ataması korundu.",
+        ]);
+    }
+
+    /**
+     * DELETE /manager/quick-admin/dealer/{id}?mode=archive|force
+     * Dealer silme — Dealer kaydı + ilgili user.
+     *
+     * - archive: Dealer.is_archived=true (geri alınabilir)
+     * - force: Dealer::forceDelete() + User::forceDelete() — email tekrar kullanılabilir
+     */
+    public function deleteDealer(Request $request, int $id): JsonResponse
+    {
+        $mode = $request->query('mode', 'archive');
+        $dealer = \App\Models\Dealer::query()->withTrashed()->find($id);
+        if (! $dealer) {
+            return response()->json(['ok' => false, 'message' => 'Bayi bulunamadı.'], 404);
+        }
+
+        $email = $dealer->email;
+        $code  = $dealer->code;
+        $name  = $dealer->name ?: $code;
+
+        // Bu dealer'a ait lead sayısı (silinince leadler dealer'sız kalır)
+        $leadCount = GuestApplication::query()->where('dealer_code', $code)->count();
+
+        if ($mode === 'force') {
+            // GuestApplication.dealer_code NULL set — dealer'siz kalsınlar
+            GuestApplication::query()->where('dealer_code', $code)
+                ->update(['dealer_code' => null]);
+
+            $dealer->forceDelete(); // gerçek silme (SoftDeletes bypass)
+            if ($email) {
+                // Aynı email'li dealer user'ı da force delete → email yeniden kullanılabilir
+                User::query()->withTrashed()
+                    ->where('email', $email)
+                    ->where('role', User::ROLE_DEALER)
+                    ->forceDelete();
+            }
+
+            $this->logEvent('quick_admin.dealer_force_deleted', [
+                'dealer_id'      => $id,
+                'code'           => $code,
+                'email'          => $email,
+                'name'           => $name,
+                'released_leads' => $leadCount,
+            ]);
+            return response()->json([
+                'ok'      => true,
+                'mode'    => 'force',
+                'message' => "🔥 Bayi '{$name}' ({$code}) kalıcı olarak silindi. {$leadCount} lead dealer'sız bırakıldı.",
+            ]);
+        }
+
+        // Archive — is_archived=true (geri alınabilir, leadler bağlı kalır)
+        $dealer->update([
+            'is_archived' => true,
+            'archived_at' => now(),
+            'archived_by' => auth()->user()?->email,
+            'is_active'   => false,
+        ]);
+        $this->logEvent('quick_admin.dealer_archived', [
+            'dealer_id' => $id,
+            'code'      => $code,
+            'email'     => $email,
+            'name'      => $name,
+        ]);
+        return response()->json([
+            'ok'      => true,
+            'mode'    => 'archive',
+            'message' => "🗑 Bayi '{$name}' ({$code}) arşivlendi. {$leadCount} lead bağlı kaldı, gerekirse geri alınabilir.",
+        ]);
+    }
+
+    /**
      * POST /manager/quick-admin/reset-password
      * Mail göndermeden manuel şifre sıfırlama. Yeni şifre cevapta plain
      * dönülür — manager tek sefer görür, öğrenciye manuel iletir.

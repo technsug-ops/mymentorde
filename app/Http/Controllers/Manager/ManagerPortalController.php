@@ -448,6 +448,7 @@ class ManagerPortalController extends Controller
                 return [
                     'email'       => $email,
                     'name'        => $user?->name ?: $email,
+                    'user_id'     => $user?->id, // soft/hard delete butonu için
                     'active'      => (int) ($activeData[$email] ?? 0),
                     'archived'    => (int) ($archivedData[$email] ?? 0),
                     'guest_count' => (int) ($guestData[$email] ?? 0),
@@ -549,6 +550,7 @@ class ManagerPortalController extends Controller
                 $rev  = $revenueMap[$d->code] ?? null;
                 $lead = $leadMap[$d->code] ?? null;
                 return [
+                    'id'        => $d->id, // soft/hard delete butonu için
                     'code'      => $d->code,
                     'name'      => $d->name,
                     'type'      => $d->dealer_type_code,

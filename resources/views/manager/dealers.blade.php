@@ -178,6 +178,16 @@
                         </td>
                         <td>
                             <a class="mgr-detail-btn" href="/manager/dealers/{{ $d['code'] }}">Detay →</a>
+                            @if(! empty($d['id']))
+                                <button class="qa-del-btn archive" data-qa-delete-mode="archive"
+                                        data-qa-delete-url="{{ route('manager.quick-admin.dealer.delete', $d['id']) }}"
+                                        data-qa-delete-label="Bayi {{ $d['name'] }} ({{ $d['code'] }})"
+                                        title="Arşivle (geri alınabilir, leadler bağlı kalır)">🗑</button>
+                                <button class="qa-del-btn force" data-qa-delete-mode="force"
+                                        data-qa-delete-url="{{ route('manager.quick-admin.dealer.delete', $d['id']) }}"
+                                        data-qa-delete-label="Bayi {{ $d['name'] }} ({{ $d['code'] }})"
+                                        title="KALICI sil (leadler dealer'sız kalır, email tekrar kullanılabilir)">🔥</button>
+                            @endif
                         </td>
                     </tr>
                 @empty
@@ -187,5 +197,8 @@
         </table>
     </div>
 </section>
+
+{{-- Soft/hard delete handler (archive 🗑 + force 🔥) — addon partial --}}
+@includeIf('manager.partials._lead-delete-script')
 
 @endsection
