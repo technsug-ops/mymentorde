@@ -78,6 +78,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         self::ROLE_SYSTEM_ADMIN,
         self::ROLE_OPERATIONS_ADMIN,
         self::ROLE_FINANCE_ADMIN,
+        self::ROLE_MARKETING_ADMIN,  // marketing admin de co-manager olarak /manager/* erişebilir
     ];
 
     public const MARKETING_ACCESS_ROLES = [
