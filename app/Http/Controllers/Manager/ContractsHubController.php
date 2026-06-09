@@ -27,13 +27,10 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
  */
 class ContractsHubController extends Controller
 {
-    public function __construct()
+    /** Addon gate — Laravel 12 constructor middleware kaldırıldı, her method'da çağrılır */
+    private function ensureModuleEnabled(): void
     {
-        // Addon gate — modül kapalı ise tüm controller 404
-        $this->middleware(function ($request, $next) {
-            \App\Support\ModuleAccess::assertEnabled('contracts_hub');
-            return $next($request);
-        });
+        \App\Support\ModuleAccess::assertEnabled('contracts_hub');
     }
 
     /** Personel rol → alt kategori map'i */
@@ -62,6 +59,7 @@ class ContractsHubController extends Controller
 
     public function index(Request $request): View
     {
+        $this->ensureModuleEnabled();
         $user = Auth::user();
         abort_if($user?->role !== 'manager', 403, 'Contracts Hub sadece Manager için.');
 
@@ -250,6 +248,7 @@ class ContractsHubController extends Controller
      */
     public function downloadGuestContract(GuestApplication $guest)
     {
+        $this->ensureModuleEnabled();
         abort_if(Auth::user()?->role !== 'manager', 403);
 
         $path = trim((string) ($guest->contract_signed_file_path ?? ''));
@@ -274,6 +273,7 @@ class ContractsHubController extends Controller
      */
     public function previewGuestContract(GuestApplication $guest)
     {
+        $this->ensureModuleEnabled();
         abort_if(Auth::user()?->role !== 'manager', 403);
 
         $path = trim((string) ($guest->contract_signed_file_path ?? ''));
@@ -295,6 +295,7 @@ class ContractsHubController extends Controller
      */
     public function previewBusinessContract(BusinessContract $contract)
     {
+        $this->ensureModuleEnabled();
         abort_if(Auth::user()?->role !== 'manager', 403);
 
         $path = trim((string) ($contract->signed_file_path ?? ''));

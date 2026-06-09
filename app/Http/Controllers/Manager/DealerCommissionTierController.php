@@ -22,17 +22,17 @@ use Illuminate\View\View;
  */
 class DealerCommissionTierController extends Controller
 {
-    public function __construct(private readonly EventLogService $eventLogService)
+    public function __construct(private readonly EventLogService $eventLogService) {}
+
+    /** Addon gate — her method'un başına çağrılır (Laravel 12 __construct middleware kaldırıldı) */
+    private function ensureModuleEnabled(): void
     {
-        // Addon gate — modül kapalı ise tüm controller 404
-        $this->middleware(function ($request, $next) {
-            \App\Support\ModuleAccess::assertEnabled('dealer');
-            return $next($request);
-        });
+        \App\Support\ModuleAccess::assertEnabled('dealer');
     }
 
     public function index(): View
     {
+        $this->ensureModuleEnabled();
         $tiers = DealerCommissionTier::query()
             ->orderBy('dealer_type_code')
             ->orderBy('display_order')
@@ -47,6 +47,7 @@ class DealerCommissionTierController extends Controller
 
     public function edit(DealerCommissionTier $dealerCommissionTier): View
     {
+        $this->ensureModuleEnabled();
         return view('manager.dealer-tiers.form', [
             'mode' => 'edit',
             'tier' => $dealerCommissionTier,
@@ -55,6 +56,7 @@ class DealerCommissionTierController extends Controller
 
     public function update(Request $request, DealerCommissionTier $dealerCommissionTier): RedirectResponse
     {
+        $this->ensureModuleEnabled();
         $data = $this->validatePayload($request);
         $dealerCommissionTier->update($data);
 
@@ -70,6 +72,7 @@ class DealerCommissionTierController extends Controller
 
     public function create(): View
     {
+        $this->ensureModuleEnabled();
         return view('manager.dealer-tiers.form', [
             'mode' => 'create',
             'tier' => new DealerCommissionTier(['is_active' => true, 'display_order' => 99]),
@@ -78,6 +81,7 @@ class DealerCommissionTierController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $this->ensureModuleEnabled();
         $data = $this->validatePayload($request);
         $companyId = (int) (Auth::user()?->company_id ?? 0);
         DealerCommissionTier::create($data + ['company_id' => $companyId]);
@@ -87,6 +91,7 @@ class DealerCommissionTierController extends Controller
 
     public function toggleActive(DealerCommissionTier $dealerCommissionTier): RedirectResponse
     {
+        $this->ensureModuleEnabled();
         $dealerCommissionTier->update(['is_active' => ! $dealerCommissionTier->is_active]);
         return back()->with('success', $dealerCommissionTier->is_active ? 'Tier aktif edildi.' : 'Tier pasif edildi.');
     }

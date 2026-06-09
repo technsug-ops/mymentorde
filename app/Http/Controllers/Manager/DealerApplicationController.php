@@ -16,17 +16,17 @@ use Illuminate\View\View;
  */
 class DealerApplicationController extends Controller
 {
-    public function __construct(private AnalyticsService $analytics)
+    public function __construct(private AnalyticsService $analytics) {}
+
+    /** Addon gate — her method başında çağrılır (Laravel 12 constructor middleware kaldırıldı) */
+    private function ensureModuleEnabled(): void
     {
-        // Addon gate — modül kapalı ise tüm controller 404
-        $this->middleware(function ($request, $next) {
-            \App\Support\ModuleAccess::assertEnabled('dealer');
-            return $next($request);
-        });
+        \App\Support\ModuleAccess::assertEnabled('dealer');
     }
 
     public function index(Request $request): View
     {
+        $this->ensureModuleEnabled();
         $this->ensureAdmin($request);
 
         $status = $request->input('status', 'pending');
@@ -61,6 +61,7 @@ class DealerApplicationController extends Controller
 
     public function show(Request $request, int $id): View
     {
+        $this->ensureModuleEnabled();
         $this->ensureAdmin($request);
         $app = DealerApplication::withoutGlobalScopes()->findOrFail($id);
         return view('manager.dealer-applications.show', compact('app'));
@@ -68,6 +69,7 @@ class DealerApplicationController extends Controller
 
     public function updateStatus(Request $request, int $id)
     {
+        $this->ensureModuleEnabled();
         $this->ensureAdmin($request);
 
         $data = $request->validate([

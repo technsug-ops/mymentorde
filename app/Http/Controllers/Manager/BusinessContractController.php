@@ -18,16 +18,17 @@ class BusinessContractController extends Controller
 {
     public function __construct(
         private readonly BusinessContractService $service
-    ) {
-        // Addon gate — modül kapalı ise tüm controller 404 (rota varlığını gizler)
-        $this->middleware(function ($request, $next) {
-            \App\Support\ModuleAccess::assertEnabled('contracts_hub');
-            return $next($request);
-        });
+    ) {}
+
+    /** Addon gate — Laravel 12 constructor middleware kaldırıldı, her method'da çağrılır */
+    private function ensureModuleEnabled(): void
+    {
+        \App\Support\ModuleAccess::assertEnabled('contracts_hub');
     }
 
     public function index(Request $r): View
     {
+        $this->ensureModuleEnabled();
         $companyId = (int) session('company_id', 0);
 
         $query = BusinessContract::query()
@@ -55,6 +56,7 @@ class BusinessContractController extends Controller
 
     public function create(Request $r): View
     {
+        $this->ensureModuleEnabled();
         $companyId = (int) session('company_id', 0);
 
         $dealers = Dealer::query()
@@ -136,6 +138,7 @@ class BusinessContractController extends Controller
 
     public function store(Request $r): RedirectResponse
     {
+        $this->ensureModuleEnabled();
         $r->validate([
             'contract_type'      => 'required|in:dealer,staff',
             'template_id'        => 'required|integer|exists:business_contract_templates,id',
@@ -174,6 +177,7 @@ class BusinessContractController extends Controller
 
     public function show(BusinessContract $businessContract): View
     {
+        $this->ensureModuleEnabled();
         $this->authorizeContract($businessContract);
         $businessContract->load(['dealer:id,name,code,dealer_type_code', 'staffUser:id,name,email', 'issuedByUser:id,name', 'approvedByUser:id,name']);
 
@@ -215,6 +219,7 @@ class BusinessContractController extends Controller
 
     public function updateBody(Request $r, BusinessContract $businessContract): RedirectResponse
     {
+        $this->ensureModuleEnabled();
         $this->authorizeContract($businessContract);
         if ($businessContract->status !== 'draft') {
             return back()->with('error', 'Yalnızca taslak sözleşmelerin içeriği düzenlenebilir.');
@@ -229,6 +234,7 @@ class BusinessContractController extends Controller
 
     public function issue(BusinessContract $businessContract): RedirectResponse
     {
+        $this->ensureModuleEnabled();
         $this->authorizeContract($businessContract);
         if ($businessContract->status !== 'draft') {
             return back()->with('error', 'Yalnızca taslak sözleşmeler gönderilebilir.');
@@ -241,6 +247,7 @@ class BusinessContractController extends Controller
 
     public function uploadSigned(Request $r, BusinessContract $businessContract): RedirectResponse
     {
+        $this->ensureModuleEnabled();
         $this->authorizeContract($businessContract);
         $r->validate([
             'signed_file' => FileUploadRules::signedContract(),
@@ -253,6 +260,7 @@ class BusinessContractController extends Controller
 
     public function approve(BusinessContract $businessContract): RedirectResponse
     {
+        $this->ensureModuleEnabled();
         $this->authorizeContract($businessContract);
         if ($businessContract->status !== 'signed_uploaded') {
             return back()->with('error', 'Yalnızca imzalı yüklenen sözleşmeler onaylanabilir.');
@@ -265,6 +273,7 @@ class BusinessContractController extends Controller
 
     public function cancel(BusinessContract $businessContract): RedirectResponse
     {
+        $this->ensureModuleEnabled();
         $this->authorizeContract($businessContract);
         $this->service->cancel($businessContract);
 
@@ -273,6 +282,7 @@ class BusinessContractController extends Controller
 
     public function downloadSigned(BusinessContract $businessContract)
     {
+        $this->ensureModuleEnabled();
         $this->authorizeContract($businessContract);
         if (!$businessContract->signed_file_path) {
             abort(404);

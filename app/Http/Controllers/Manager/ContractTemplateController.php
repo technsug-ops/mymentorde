@@ -18,16 +18,17 @@ class ContractTemplateController extends Controller
 {
     public function __construct(
         private readonly ContractTemplateService $contractTemplateService,
-    ) {
-        // Addon gate — modül kapalı ise tüm controller 404
-        $this->middleware(function ($request, $next) {
-            \App\Support\ModuleAccess::assertEnabled('contracts_hub');
-            return $next($request);
-        });
+    ) {}
+
+    /** Addon gate — Laravel 12 constructor middleware kaldırıldı, her method'da çağrılır */
+    private function ensureModuleEnabled(): void
+    {
+        \App\Support\ModuleAccess::assertEnabled('contracts_hub');
     }
 
     public function show(Request $request)
     {
+        $this->ensureModuleEnabled();
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
         $active = $this->contractTemplateService->resolveActiveTemplate($companyId);
         $company = Company::query()
@@ -170,6 +171,7 @@ class ContractTemplateController extends Controller
 
     public function save(Request $request): RedirectResponse
     {
+        $this->ensureModuleEnabled();
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
         $active = $this->contractTemplateService->resolveActiveTemplate($companyId);
 
@@ -226,6 +228,7 @@ class ContractTemplateController extends Controller
 
     public function saveCompanySettings(Request $request): RedirectResponse
     {
+        $this->ensureModuleEnabled();
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
         $company = Company::query()
             ->when($companyId > 0, fn ($q) => $q->where('id', $companyId))
@@ -296,6 +299,7 @@ class ContractTemplateController extends Controller
 
     public function diff(Request $request): JsonResponse|\Illuminate\Contracts\View\View
     {
+        $this->ensureModuleEnabled();
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
         $guestId   = (int) $request->query('guest_id', 0);
 
@@ -346,6 +350,7 @@ class ContractTemplateController extends Controller
 
     public function analytics(Request $request): \Illuminate\Contracts\View\View
     {
+        $this->ensureModuleEnabled();
         $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
 
         $base = GuestApplication::query()->when($companyId > 0, fn ($q) => $q->forCompany($companyId));
