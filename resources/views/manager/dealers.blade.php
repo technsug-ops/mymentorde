@@ -177,7 +177,7 @@
                             @endif
                         </td>
                         <td>
-                            <a class="mgr-detail-btn" href="/manager/dealers/{{ $d['code'] }}">Detay →</a>
+                            <a class="mgr-detail-btn" href="{{ \App\Support\PanelRouting::url('dealers', 'show', $d['code']) }}">Detay →</a>
                             @if(! empty($d['id']))
                                 <button class="qa-del-btn archive" data-qa-delete-mode="archive"
                                         data-qa-delete-url="{{ route('manager.quick-admin.dealer.delete', $d['id']) }}"
