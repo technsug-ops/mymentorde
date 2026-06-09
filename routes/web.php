@@ -682,19 +682,6 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             $output .= ">>> clearstatcache OK\n";
         }
 
-        // Opsiyonel: junk DAM klasor cleanup — ?cleanup=junk-folders
-        // Test sirasinda yaratilmis 'tt'/'dd' gibi 1-2 karakterlik
-        // is_system=false klasorleri soft-delete eder. Idempotent.
-        if ($request->query('cleanup') === 'junk-folders') {
-            $junkNames = ['tt', 'dd', 'TT', 'DD', 'aa', 'bb', 'cc', 'test', 'sample'];
-            $deleted = \DB::table('digital_asset_folders')
-                ->whereIn('name', $junkNames)
-                ->where('is_system', false)
-                ->whereNull('deleted_at')
-                ->update(['deleted_at' => now()]);
-            $output .= ">>> cleanup junk-folders: {$deleted} folder soft-deleted\n";
-        }
-
         // optimize:clear — config/route/view/event/compiled cache'leri temizler.
         // Plus bootstrap/cache/*.php manuel sil (artisan komutu KAS'ta bazen
         // sessizce skip ediyor).
@@ -766,103 +753,6 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
-        // guest_required_documents tablosunda kayitli zorunlu belgeleri listele
-        // Kullanim: /_deploy/run-pending?cleanup=audit-required-docs
-        if ($request->query('cleanup') === 'audit-required-docs') {
-            $rows = DB::table('guest_required_documents')
-                ->orderBy('application_type')->orderBy('sort_order')
-                ->get(['application_type', 'document_code', 'name', 'is_required', 'is_active', 'company_id']);
-            $output .= "\n>>> guest_required_documents (" . $rows->count() . " row):\n";
-            $byType = [];
-            foreach ($rows as $r) {
-                $byType[$r->application_type][] = $r;
-            }
-            foreach ($byType as $type => $list) {
-                $output .= "\n  [" . $type . "] (" . count($list) . " belge):\n";
-                foreach ($list as $r) {
-                    $req = $r->is_required ? 'REQ' : 'opt';
-                    $act = $r->is_active ? 'active' : 'INACTIVE';
-                    $output .= sprintf("    - %s | %s | cid=%s | %s | %s\n",
-                        $r->document_code, $r->name, $r->company_id ?? 'NULL', $req, $act);
-                }
-            }
-        }
-
-        // Eksik zorunlu belgeleri seeder'dan yeniden insert et (varsa atlar)
-        // Kullanim: /_deploy/run-pending?cleanup=reseed-required-docs
-        if ($request->query('cleanup') === 'reseed-required-docs') {
-            $companyId = Schema::hasTable('companies')
-                ? (int) DB::table('companies')->where('is_active', true)->orderBy('id')->value('id')
-                : 0;
-            $companyId = $companyId > 0 ? $companyId : null;
-            $now = now();
-
-            $catalog = [
-                'bachelor' => [
-                    ['DOC-DIPL', 'Lise Diploması',                    10],
-                    ['DOC-TRNS', 'Transkript',                         20],
-                    ['DOC-UNWN', 'Üniversite Kazandı Belgesi',         30],
-                    ['DOC-YKSP', 'YKS Yerleştirme Belgesi',            40],
-                    ['DOC-IDCR', 'Kimlik Ön-Arka Fotoğrafı',           50],
-                    ['DOC-PASS', 'Pasaport İlk 2 Sayfa',               60],
-                ],
-                'master' => [
-                    ['DOC-DIPL', 'Üniversite Diploması + yeminli tercüme', 10],
-                    ['DOC-TRNS', 'Üniversite Transkript + yeminli tercüme', 20],
-                    ['DOC-UNWN', 'Üniversite Kabul/Referans Belgesi',  30],
-                    ['DOC-YKSP', 'Ek Akademik Yerleştirme Belgesi',    40],
-                    ['DOC-IDCR', 'Kimlik Ön-Arka Fotoğrafı',           50],
-                    ['DOC-PASS', 'Pasaport İlk 2 Sayfa',               60],
-                ],
-                'dil_kursu' => [
-                    ['DOC-PASS', 'Pasaport İlk 2 Sayfa',               10],
-                    ['DOC-IDCR', 'Kimlik Ön-Arka Fotoğrafı',           20],
-                ],
-            ];
-            $inserted = 0; $existed = 0;
-            foreach ($catalog as $type => $docs) {
-                foreach ($docs as [$code, $name, $sort]) {
-                    $exists = DB::table('guest_required_documents')
-                        ->where('application_type', $type)
-                        ->where('document_code', $code)
-                        ->exists();
-                    if ($exists) { $existed++; continue; }
-                    DB::table('guest_required_documents')->insert([
-                        'company_id' => $companyId,
-                        'application_type' => $type,
-                        'document_code' => $code,
-                        'category_code' => $code,
-                        'name' => $name,
-                        'description' => $type . ' için zorunlu',
-                        'is_required' => 1,
-                        'accepted' => 'pdf,jpg,png',
-                        'max_mb' => 10,
-                        'sort_order' => $sort,
-                        'is_active' => 1,
-                        'created_at' => $now,
-                        'updated_at' => $now,
-                    ]);
-                    $inserted++;
-                }
-            }
-            $output .= ">>> reseed-required-docs: {$inserted} insert, {$existed} zaten vardi\n";
-        }
-
-        // role_page_visibility tablosunda guest icin kayitli false satirlari listele
-        // (debug — manager kayit sonrasi ne yazilmis gormek icin)
-        // Kullanim: /_deploy/run-pending?cleanup=audit-page-visibility
-        if ($request->query('cleanup') === 'audit-page-visibility') {
-            $rows = DB::table('role_page_visibility')
-                ->orderBy('company_id')->orderBy('role')->orderBy('page_key')
-                ->get(['company_id', 'role', 'page_key', 'is_visible', 'updated_at']);
-            $output .= "\n>>> role_page_visibility full dump (" . $rows->count() . " row):\n";
-            foreach ($rows as $r) {
-                $vis = $r->is_visible ? 'visible' : 'HIDDEN';
-                $output .= sprintf("  cid=%d role=%-15s page=%-20s %s @ %s\n",
-                    $r->company_id, $r->role, $r->page_key, $vis, $r->updated_at);
-            }
-        }
-
         // SOS: tum role_page_visibility kayitlarini sil (manager UI'sinden yanlis kayit
         // yazildiginda default-true mantigina geri don). Bu YIKICI — manager'in
         // kasten kapattigi sayfalar da acilir.
@@ -881,34 +771,6 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
         // public/storage → storage/app/public symbolic link.
         // Profile foto, doc preview vb. icin gerekli. Prod'da bir kez calistirildiktan
         // sonra kalici (idempotent — link zaten varsa --force ile yeniden olusturur).
-        // ── HRK PDF'ten üniversite logo Clearbit URL'lerini sync et ────
-        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=sync-uni-logos
-        //   Default: --apply mode (DB güncellenir)
-        //   Dry run:   &dry=1  → sadece preview, DB değişmez
-        //   Min score: &score=0.7  → sadece yüksek skorlu eşleşmeler
-        if ($request->query('cleanup') === 'sync-uni-logos') {
-            try {
-                ini_set('memory_limit', '512M');
-                ini_set('max_execution_time', '120');
-                $apply = $request->query('dry') !== '1';
-                $minScore = (float) ($request->query('score', '0.5'));
-
-                $service = app(\App\Services\UniLogoSyncService::class);
-                $result = $service->syncAll($apply, $minScore);
-
-                $output .= ">>> sync-uni-logos (" . ($apply ? 'APPLIED' : 'DRY-RUN') . ", min_score={$minScore})\n";
-                foreach ($result['logs'] as $l) {
-                    $output .= "    {$l}\n";
-                }
-                $output .= "    Total uni in DB: " . \App\Models\University::count() . "\n";
-                $output .= "    With clearbit URL: " . \App\Models\University::where('image_path', 'like', 'https://logo.clearbit.com/%')->count() . "\n";
-                $output .= "    NULL image_path:   " . \App\Models\University::whereNull('image_path')->count() . "\n";
-            } catch (\Throwable $e) {
-                $output .= ">>> sync-uni-logos FAILED: " . $e->getMessage() . "\n";
-                $output .= "    " . $e->getFile() . ':' . $e->getLine() . "\n";
-            }
-        }
-
         // Kullanim: /_deploy/run-pending?cleanup=storage-link
         if ($request->query('cleanup') === 'storage-link') {
             try {
@@ -942,57 +804,6 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
                 $output .= ">>> maintenance.php deleted — site live again\n";
             } else {
                 $output .= ">>> maintenance.php zaten yok (site normalde)\n";
-            }
-        }
-
-        // ─── CMS Bootstrap Komutları (commit 95fd989 sonrası tek seferlik) ──────
-        //
-        // Kullanım: /_deploy/run-pending?secret=XXX&cleanup=assign-content-codes
-        //   Mevcut cms_contents satırlarına kategori bazlı content_code atar
-        //   (UNI-001, BLOG-014, vb.). Idempotent — zaten kod'u olanlara dokunmaz.
-        if ($request->query('cleanup') === 'assign-content-codes') {
-            try {
-                \Illuminate\Support\Facades\Artisan::call('cms:assign-content-codes');
-                $output .= ">>> cms:assign-content-codes\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
-            } catch (\Throwable $e) {
-                $output .= ">>> cms:assign-content-codes FAILED: " . $e->getMessage() . "\n";
-            }
-        }
-
-        // Kullanım: /_deploy/run-pending?secret=XXX&cleanup=cms-fetch-uni-covers
-        //   10 mevcut üni blog'una Wikipedia'dan kapak görseli çek (TUM/LMU/...).
-        if ($request->query('cleanup') === 'cms-fetch-uni-covers') {
-            try {
-                \Illuminate\Support\Facades\Artisan::call('cms:fetch-university-covers');
-                $output .= ">>> cms:fetch-university-covers\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
-            } catch (\Throwable $e) {
-                $output .= ">>> cms:fetch-university-covers FAILED: " . $e->getMessage() . "\n";
-            }
-        }
-
-        // Kullanım: /_deploy/run-pending?secret=XXX&cleanup=cms-generate-uni-blogs
-        //   20 yeni üniversite için Gemini ile AI blog draft üretir (Berlin, Köln,
-        //   Münster, Würzburg, Tübingen, vb.). ~25 dk sürer + Gemini API tüketimi.
-        if ($request->query('cleanup') === 'cms-generate-uni-blogs') {
-            try {
-                @set_time_limit(1800); // 30 dk — Gemini call'ları için
-                \Illuminate\Support\Facades\Artisan::call('cms:generate-university-blogs');
-                $output .= ">>> cms:generate-university-blogs\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
-            } catch (\Throwable $e) {
-                $output .= ">>> cms:generate-university-blogs FAILED: " . $e->getMessage() . "\n";
-            }
-        }
-
-        // Kullanım: /_deploy/run-pending?secret=XXX&cleanup=cms-fill-missing-covers
-        //   Kapaksız tüm published blog'lara title-bazlı + kategori-default Wiki
-        //   cover atar (~147 blog, 8-10 dk). Idempotent.
-        if ($request->query('cleanup') === 'cms-fill-missing-covers') {
-            try {
-                @set_time_limit(900); // 15 dk
-                \Illuminate\Support\Facades\Artisan::call('cms:fill-missing-covers');
-                $output .= ">>> cms:fill-missing-covers\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
-            } catch (\Throwable $e) {
-                $output .= ">>> cms:fill-missing-covers FAILED: " . $e->getMessage() . "\n";
             }
         }
 

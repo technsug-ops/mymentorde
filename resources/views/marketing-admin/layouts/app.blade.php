@@ -372,10 +372,6 @@
                    class="nav-link {{ request()->is('mktg-admin/integrations*') ? 'active' : '' }}">
                     <span class="nav-icon">🔌</span> Entegrasyonlar
                 </a>
-                <a href="/mktg-admin/partners"
-                   class="nav-link {{ request()->is('mktg-admin/partners*') ? 'active' : '' }}">
-                    <span class="nav-icon">🔑</span> Kardeş Site API Key
-                </a>
                 @endif
                 @if($canSeeTeam)
                 <a href="/mktg-admin/team"

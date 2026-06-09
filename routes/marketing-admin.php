@@ -358,16 +358,6 @@ Route::middleware(['company.context', 'auth', 'marketing.access', 'module:market
             Route::get('/dealer-applications/{id}',                  [$dapps, 'show'])->where('id', '[0-9]+')->name('dealer-applications.show');
             Route::post('/dealer-applications/{id}/status',          [$dapps, 'updateStatus'])->where('id', '[0-9]+')->middleware('throttle:30,1')->name('dealer-applications.status');
 
-            // API Partner (kardeş site API key) — önceki commit'ten kalır
-            $apc = \App\Http\Controllers\Manager\ApiPartnerController::class;
-            Route::get('/partners',                       [$apc, 'index'])->name('partners.index');
-            Route::get('/partners/create',                [$apc, 'create'])->name('partners.create');
-            Route::post('/partners',                      [$apc, 'store'])->middleware('throttle:10,1')->name('partners.store');
-            Route::get('/partners/{apiPartner}',          [$apc, 'show'])->name('partners.show');
-            Route::put('/partners/{apiPartner}',          [$apc, 'update'])->name('partners.update');
-            Route::post('/partners/{apiPartner}/rotate',  [$apc, 'rotate'])->middleware('throttle:10,1')->name('partners.rotate');
-            Route::post('/partners/{apiPartner}/toggle',  [$apc, 'toggle'])->name('partners.toggle');
-            Route::delete('/partners/{apiPartner}',       [$apc, 'destroy'])->name('partners.destroy');
         });
     });
 
