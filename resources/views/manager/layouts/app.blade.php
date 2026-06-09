@@ -497,10 +497,10 @@
 
             <div class="nav-section">
                 <div class="nav-section-label">Sistem</div>
-                <a href="/manager/system"
-                   class="nav-link {{ request()->is('manager/system') ? 'active' : '' }}">
-                    <span class="nav-icon">🖥</span> Sistem Paneli
-                </a>
+                {{-- Platform Owner sidebar entries (system admin, modül toggle, security, roles, ip rules) --}}
+                {{-- Addon partial — silinse layout intakt kalır, Customer Manager bu link'leri görmez --}}
+                @includeIf('manager.partials.platform-owner-sidebar')
+
                 <a href="{{ route('manager.landing-inventory.index') }}"
                    class="nav-link {{ request()->is('manager/landing-inventory*') ? 'active' : '' }}">
                     <span class="nav-icon">🌐</span> Landing Envanter
@@ -511,28 +511,12 @@
                         <span class="nav-icon">📍</span> Sessizlik Monitörü
                     </a>
                 @endmodule
-                <a href="{{ route('manager.companies.modules') }}"
-                   class="nav-link {{ request()->is('manager/companies/modules*') ? 'active' : '' }}">
-                    <span class="nav-icon">🧩</span> SaaS Modül Yönetimi
-                </a>
-                <a href="/manager/system/security"
-                   class="nav-link {{ request()->is('manager/system/security*') ? 'active' : '' }}">
-                    <span class="nav-icon">🛡</span> Güvenlik Paneli
-                </a>
-                <a href="/manager/system/roles"
-                   class="nav-link {{ request()->is('manager/system/roles*') ? 'active' : '' }}">
-                    <span class="nav-icon">🔑</span> Rol Yönetimi
-                </a>
                 @module('page_visibility')
                 <a href="/manager/page-visibility"
                    class="nav-link {{ request()->is('manager/page-visibility*') ? 'active' : '' }}">
                     <span class="nav-icon">🎛</span> Sayfa Görünürlüğü
                 </a>
                 @endmodule
-                <a href="/manager/system/ip-rules"
-                   class="nav-link {{ request()->is('manager/system/ip-rules*') ? 'active' : '' }}">
-                    <span class="nav-icon">🌐</span> IP Erişim Kuralları
-                </a>
                 <a href="/manager/audit-log"
                    class="nav-link {{ request()->is('manager/audit-log*') ? 'active' : '' }}">
                     <span class="nav-icon">🔍</span> Denetim Kayıtları
