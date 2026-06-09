@@ -280,6 +280,14 @@ Schedule::command('bulletin:send-birthday-wishes')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/birthday-bulletins.log'));
 
+// ─── Separability Smoke Test (haftalık — her Pazartesi sabah) ────────────────
+// Her modül izole edildiğinde core view+route'lar hâlâ çalışıyor mu?
+// Test fail ederse → ops:critical-check de bunu yakalayıp alert atar.
+Schedule::command('separability:smoke')
+    ->weeklyOn(1, '06:00') // Pazartesi 06:00
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/separability-smoke.log'));
+
 // ─── System Cleanup ───────────────────────────────────────────────────────────
 
 Schedule::command('system:cleanup')
