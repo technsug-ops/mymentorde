@@ -71,10 +71,24 @@
                         Alıcı E-posta <span style="color:#94a3b8;font-weight:500;text-transform:none;letter-spacing:0;">(opsiyonel — hatırlatma için)</span>
                     </span>
                     <input type="email" data-dr-email maxlength="180"
+                           value="{{ $prefillEmail ?? '' }}"
                            placeholder="aday@example.com"
                            style="padding:9px 11px;border-radius:8px;border:1px solid #cbd5e1;font-size:13px;">
                     <span style="font-size:11px;color:#64748b;line-height:1.4;">
                         ✉ Girersen 24 saat içinde tıklanmazsa hatırlatma, süre dolmadan 1 saat önce son uyarı maili gider.
+                    </span>
+                </label>
+                {{-- D6: WhatsApp direkt gönderim için telefon (opsiyonel) --}}
+                <label style="display:flex;flex-direction:column;gap:4px;">
+                    <span style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;">
+                        WhatsApp Telefon <span style="color:#94a3b8;font-weight:500;text-transform:none;letter-spacing:0;">(opsiyonel — direkt sohbete götürür)</span>
+                    </span>
+                    <input type="tel" data-dr-phone maxlength="50"
+                           value="{{ $prefillPhone ?? '' }}"
+                           placeholder="+905551234567 veya 5551234567"
+                           style="padding:9px 11px;border-radius:8px;border:1px solid #cbd5e1;font-size:13px;">
+                    <span style="font-size:11px;color:#64748b;line-height:1.4;">
+                        💬 Girersen WhatsApp butonu doğrudan o numaraya açar — manuel arama yok.
                     </span>
                 </label>
             </div>
@@ -121,6 +135,7 @@
     var expirySelect = modal.querySelector('[data-dr-expiry]');
     var msgInput     = modal.querySelector('[data-dr-msg]');
     var emailInput   = modal.querySelector('[data-dr-email]');
+    var phoneInput   = modal.querySelector('[data-dr-phone]');
     var genBtn       = modal.querySelector('[data-dr-gen]');
     var resultBox    = modal.querySelector('[data-dr-result]');
     var urlInput     = modal.querySelector('[data-dr-url]');
@@ -155,7 +170,18 @@
             })
             .catch(() => { catSelect.innerHTML = '<option value="">Yükleme hatası</option>'; });
     }
-    function openModal(){ modal.style.display='flex'; resultBox.style.display='none'; msgInput.value=''; if (emailInput) emailInput.value=''; loadCategories(); }
+    // Prefill değerleri sakla — modal her açılışta input'lar reset olmasın
+    var PREFILL_EMAIL = emailInput ? emailInput.value : '';
+    var PREFILL_PHONE = phoneInput ? phoneInput.value : '';
+
+    function openModal(){
+        modal.style.display='flex';
+        resultBox.style.display='none';
+        msgInput.value='';
+        if (emailInput) emailInput.value = PREFILL_EMAIL;
+        if (phoneInput) phoneInput.value = PREFILL_PHONE;
+        loadCategories();
+    }
     function closeModal(){ modal.style.display='none'; }
 
     btn.addEventListener('click', openModal);
@@ -174,6 +200,7 @@
                 expires_hours: parseInt(expirySelect.value, 10) || 48,
                 custom_message: msgInput.value || null,
                 recipient_email: (emailInput && emailInput.value) ? emailInput.value.trim() : null,
+                recipient_phone: (phoneInput && phoneInput.value) ? phoneInput.value.trim() : null,
             })
         })
         .then(r => r.json().then(d => ({ ok:r.ok, data:d })))
@@ -182,7 +209,20 @@
             if (!res.ok) { alert(res.data.error || 'Hata oluştu.'); return; }
             urlInput.value = res.data.url;
             var msg = INTRO + "\n\n" + res.data.url;
-            waBtn.href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+            // D6: telefon girildiyse direkt o numaraya açar (https://wa.me/{phone}?text=...)
+            // E.164 normalize: rakam dışını temizle, başına 90 (TR) ekle eksikse
+            var phoneRaw = (phoneInput && phoneInput.value) ? phoneInput.value.trim() : '';
+            var phoneDigits = phoneRaw.replace(/[^0-9]/g, '');
+            if (phoneDigits.length > 0) {
+                // 0 ile başlıyorsa kaldır (Türkiye yerel format), country code yoksa 90 ekle
+                if (phoneDigits.charAt(0) === '0') phoneDigits = phoneDigits.substring(1);
+                if (phoneDigits.length === 10) phoneDigits = '90' + phoneDigits; // 10 hane → TR mobil
+                waBtn.href = 'https://wa.me/' + phoneDigits + '?text=' + encodeURIComponent(msg);
+                waBtn.textContent = '💬 ' + phoneDigits + ' WhatsApp';
+            } else {
+                waBtn.href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+                waBtn.textContent = "💬 WhatsApp'la Gönder";
+            }
             resultBox.style.display = 'block';
         })
         .catch(() => { genBtn.disabled = false; genBtn.textContent = '🔗 Linki Oluştur'; alert('Bağlantı hatası.'); });

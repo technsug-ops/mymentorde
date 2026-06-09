@@ -410,6 +410,28 @@
                         style="padding:9px 11px;border-radius:8px;border:1px solid #cbd5e1;font-size:13px;font-family:inherit;resize:vertical;"
                         placeholder="Örn: Pasaportunuzu net çekin."></textarea>
                 </label>
+
+                {{-- D7: hatırlatma için email --}}
+                <label style="display:flex;flex-direction:column;gap:4px;">
+                    <span style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;">
+                        Alıcı E-posta <span style="color:#94a3b8;font-weight:500;text-transform:none;letter-spacing:0;">(opsiyonel — hatırlatma)</span>
+                    </span>
+                    <input type="email" id="docReqEmail" maxlength="180"
+                           value="{{ $guest?->email ?? '' }}"
+                           placeholder="ogrenci@example.com"
+                           style="padding:9px 11px;border-radius:8px;border:1px solid #cbd5e1;font-size:13px;">
+                </label>
+
+                {{-- D6: WhatsApp direkt aç için telefon --}}
+                <label style="display:flex;flex-direction:column;gap:4px;">
+                    <span style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;">
+                        WhatsApp Telefon <span style="color:#94a3b8;font-weight:500;text-transform:none;letter-spacing:0;">(opsiyonel)</span>
+                    </span>
+                    <input type="tel" id="docReqPhone" maxlength="50"
+                           value="{{ $guest?->phone ?? '' }}"
+                           placeholder="+905551234567"
+                           style="padding:9px 11px;border-radius:8px;border:1px solid #cbd5e1;font-size:13px;">
+                </label>
             </div>
             <button type="button" id="docReqGenBtn"
                     style="margin-top:16px;width:100%;padding:12px 18px;border:none;border-radius:10px;background:linear-gradient(135deg,#1e40af,#3b5fcc);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">
@@ -445,6 +467,8 @@
     var catSelect = document.getElementById('docReqCategory');
     var expirySelect = document.getElementById('docReqExpiry');
     var messageInput = document.getElementById('docReqMessage');
+    var emailInput = document.getElementById('docReqEmail');
+    var phoneInput = document.getElementById('docReqPhone');
     var genBtn = document.getElementById('docReqGenBtn');
     var resultBox = document.getElementById('docReqResult');
     var urlInput = document.getElementById('docReqUrl');
@@ -500,6 +524,8 @@
                 category_code: cat,
                 expires_hours: parseInt(expirySelect.value, 10) || 48,
                 custom_message: messageInput.value || null,
+                recipient_email: (emailInput && emailInput.value) ? emailInput.value.trim() : null,
+                recipient_phone: (phoneInput && phoneInput.value) ? phoneInput.value.trim() : null,
             })
         })
         .then(r => r.json().then(d => ({ ok:r.ok, data:d })))
@@ -508,7 +534,16 @@
             if (!res.ok) { alert(res.data.error || 'Hata oluştu.'); return; }
             urlInput.value = res.data.url;
             var msg = "Merhaba, MentorDE'den belge talebimiz var. Lütfen linke tıklayıp belgeyi yükleyin:\n\n" + res.data.url;
-            waBtn.href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+            // D6: telefon varsa direkt o numaraya yönlendir
+            var phoneRaw = (phoneInput && phoneInput.value) ? phoneInput.value.trim() : '';
+            var phoneDigits = phoneRaw.replace(/[^0-9]/g, '');
+            if (phoneDigits.length > 0) {
+                if (phoneDigits.charAt(0) === '0') phoneDigits = phoneDigits.substring(1);
+                if (phoneDigits.length === 10) phoneDigits = '90' + phoneDigits;
+                waBtn.href = 'https://wa.me/' + phoneDigits + '?text=' + encodeURIComponent(msg);
+            } else {
+                waBtn.href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+            }
             resultBox.style.display = 'block';
         })
         .catch(() => { genBtn.disabled = false; genBtn.textContent = '🔗 Linki Oluştur'; alert('Bağlantı hatası.'); });
