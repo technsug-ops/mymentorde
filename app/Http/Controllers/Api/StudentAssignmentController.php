@@ -161,15 +161,19 @@ class StudentAssignmentController extends Controller
 
         $taskAutomation->ensureStudentAssignmentTask($row);
 
-        // Senior değiştiyse 2 in-app bildirim + DmThread auto-create
+        // Senior değiştiyse 2 in-app bildirim + DmThread auto-create.
+        // İkisi de ADDON — service fail etse atama akışı bozulmaz.
         $newSeniorEmail = $row->senior_email;
         if ($newSeniorEmail && $newSeniorEmail !== $previousSeniorEmail) {
-            $this->dispatchAssignmentNotifications(
-                studentId: (string) $row->student_id,
-                seniorEmail: $newSeniorEmail,
-                companyId: (int) ($row->company_id ?? 0),
-                triggeredBy: $request->user()?->email,
-            );
+            try {
+                app(\App\Services\SeniorAssignmentNotificationService::class)
+                    ->notifyForStudent($row, $newSeniorEmail, $request->user()?->email);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('senior_assignment_notify.student_failed', [
+                    'student_id' => $row->student_id,
+                    'error'      => $e->getMessage(),
+                ]);
+            }
 
             // Senior tetiklemesiz iletişime geçebilsin → thread otomatik aç
             try {
@@ -188,53 +192,8 @@ class StudentAssignmentController extends Controller
         return response()->json($row->fresh());
     }
 
-    /**
-     * Senior atama in-app bildirimi (öğrenci + senior).
-     * E-posta gizli — sadece isim ve sistem içi mesajlaşma linki.
-     */
-    private function dispatchAssignmentNotifications(
-        string $studentId,
-        string $seniorEmail,
-        int $companyId,
-        ?string $triggeredBy,
-    ): void {
-        $svc = app(\App\Services\NotificationService::class);
-        $senior = User::query()->where('email', $seniorEmail)->first();
-        $seniorName = $senior?->name ?: $seniorEmail;
-
-        // Öğrenci adı için assignment + GuestApplication conversion lookup
-        $guestApp = \App\Models\GuestApplication::query()
-            ->where('converted_student_id', $studentId)->first();
-        $studentName = $guestApp ? trim($guestApp->first_name . ' ' . $guestApp->last_name) : $studentId;
-
-        // 1) Senior'a bildirim
-        if ($senior) {
-            $svc->send([
-                'channel'      => 'in_app',
-                'category'     => 'senior_assignment.received',
-                'user_id'      => (int) $senior->id,
-                'company_id'   => $companyId,
-                'subject'      => 'Yeni öğrenci atandı',
-                'body'         => "{$studentName} sana atandı. Mesajlardan iletişime geçebilirsin.",
-                'source_type'  => 'student_assignment',
-                'source_id'    => $studentId,
-                'triggered_by' => $triggeredBy,
-            ]);
-        }
-
-        // 2) Öğrenciye bildirim
-        $svc->send([
-            'channel'      => 'in_app',
-            'category'     => 'senior_assignment.assigned',
-            'student_id'   => $studentId,
-            'company_id'   => $companyId,
-            'subject'      => 'Eğitim danışmanın atandı',
-            'body'         => "Eğitim danışmanın artık {$seniorName}. Mesajlar sekmesinden iletişime geçebilirsin.",
-            'source_type'  => 'student_assignment',
-            'source_id'    => $studentId,
-            'triggered_by' => $triggeredBy,
-        ]);
-    }
+    // dispatchAssignmentNotifications private helper'ı SeniorAssignmentNotificationService'e
+    // taşındı (separability) — bu controller artık inline notification logic içermez.
 
     public function bulkAssign(Request $request, TaskAutomationService $taskAutomation)
     {

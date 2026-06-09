@@ -341,28 +341,8 @@
                 @endif
             </div>
 
-            {{-- Bayi / Partner Yönetimi — lead-gen + freelance + b2b (sadece marketing admin) --}}
-            @if($isAdmin)
-            <div class="nav-section">
-                <div class="nav-section-label">Bayi / Partner Yönetimi</div>
-                <a href="/mktg-admin/dealers"
-                   class="nav-link {{ request()->is('mktg-admin/dealers*') ? 'active' : '' }}">
-                    <span class="nav-icon">🤝</span> Bayiler
-                </a>
-                <a href="/mktg-admin/dealer-applications"
-                   class="nav-link {{ request()->is('mktg-admin/dealer-applications*') ? 'active' : '' }}">
-                    <span class="nav-icon">📋</span> Bayi Başvuruları
-                </a>
-                <a href="/mktg-admin/dealer-types"
-                   class="nav-link {{ request()->is('mktg-admin/dealer-types*') ? 'active' : '' }}">
-                    <span class="nav-icon">🏷️</span> Bayi Tipleri
-                </a>
-                <a href="/mktg-admin/dealer-tiers"
-                   class="nav-link {{ request()->is('mktg-admin/dealer-tiers*') ? 'active' : '' }}">
-                    <span class="nav-icon">💎</span> Komisyon Kademeleri
-                </a>
-            </div>
-            @endif
+            {{-- Bayi / Partner Yönetimi — addon partial, modül/rota yoksa skip --}}
+            @includeIf('marketing-admin.partials.bayi-section', ['isAdmin' => $isAdmin ?? false])
 
             @if($canSeeIntegrations || $canSeeTeam || $canSeeSettings)
             <div class="nav-section">
