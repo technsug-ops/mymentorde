@@ -621,6 +621,9 @@
                 </form>
 
                 @push('scripts')
+                {{-- Coupon JS — discount_codes modülü + route varlığı kontrolü --}}
+                @module('discount_codes')
+                @if(\Illuminate\Support\Facades\Route::has('guest.services.discount-code.validate'))
                 <script nonce="{{ $cspNonce ?? '' }}">
                 (function(){
                     var input = document.getElementById('couponInput');
@@ -675,6 +678,8 @@
                     });
                 })();
                 </script>
+                @endif
+                @endmodule
                 @endpush
                 <div style="margin-top:8px;font-size:var(--tx-xs);color:var(--u-muted);line-height:1.5;text-align:center;">
                     Talebiniz danışmanınıza iletilir. Ödeme bilgileri size ayrıca gönderilecektir.

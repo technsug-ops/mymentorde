@@ -392,12 +392,16 @@
 
             <div class="nav-section">
                 <div class="nav-section-label">Belgeler & Sözleşmeler</div>
-                @can('dam.view')
-                <a href="{{ route('manager.dam.index') }}"
-                   class="nav-link {{ request()->is('manager/digital-assets*') ? 'active' : '' }}">
-                    <span class="nav-icon">📁</span> Dijital Varlıklar
-                </a>
-                @endcan
+                @module('dam')
+                    @can('dam.view')
+                        @if(\Illuminate\Support\Facades\Route::has('manager.dam.index'))
+                        <a href="{{ route('manager.dam.index') }}"
+                           class="nav-link {{ request()->is('manager/digital-assets*') ? 'active' : '' }}">
+                            <span class="nav-icon">📁</span> Dijital Varlıklar
+                        </a>
+                        @endif
+                    @endcan
+                @endmodule
                 <a href="/manager/university-requirements"
                    class="nav-link {{ request()->is('manager/university-requirements*') ? 'active' : '' }}">
                     <span class="nav-icon">🗺️</span> Üniversite Belge Haritası
