@@ -8,7 +8,7 @@ return [
         'emoji'       => '🏔',
         'tagline'     => 'Teknoloji, finans ve prestijin başkenti',
         'hero_color'  => 'linear-gradient(135deg,#1d4ed8,#7c3aed)',
-        'hero_video_id' => 'LzLOhMsjpsw',     // YouTube video ID (boşsa gösterilmez)
+        'hero_video_id' => 'fkiCdD1MRTc',     // YouTube video ID (boşsa gösterilmez)
         'hero_video_thumb' => 'https://images.unsplash.com/photo-1595867818082-083862f3d630?w=800&q=80',              // Özel kapak resmi URL'i (boşsa YouTube'dan alınır). Ör: '/img/cities/munich-cover.jpg'
         'cost_index'  => 5, // 1-5 pahalılık
         'student_pop' => '120.000+',
@@ -215,7 +215,7 @@ return [
         'emoji'       => '🐻',
         'tagline'     => 'Sanat, teknoloji ve tarihin başkenti',
         'hero_color'  => 'linear-gradient(135deg,#2563eb,#0891b2)',
-        'hero_video_id' => 'LzLOhMsjpsw',
+        'hero_video_id' => 'hlYbP-BL3tg',
         'hero_video_thumb' => 'https://images.unsplash.com/photo-1560969184-10fe8719e047?w=800&q=80',
         'cost_index'  => 3,
         'student_pop' => '180.000+',
@@ -323,7 +323,7 @@ return [
         'emoji'       => '⚓',
         'tagline'     => 'Liman şehri, ticaret ve lojistiğin kalbi',
         'hero_color'  => 'linear-gradient(135deg,#dc2626,#d97706)',
-        'hero_video_id' => 'LzLOhMsjpsw',
+        'hero_video_id' => '4hp5OgLn0IY',
 
         'hero_video_thumb' => 'https://images.unsplash.com/photo-1552751753-0fc84ae3a766?w=800&q=80',
         'cost_index'  => 3,
@@ -398,7 +398,7 @@ return [
         'emoji'       => '🏦',
         'tagline'     => 'Avrupa\'nın finans merkezi',
         'hero_color'  => 'linear-gradient(135deg,#0891b2,#16a34a)',
-        'hero_video_id' => 'LzLOhMsjpsw',
+        'hero_video_id' => 'R3Xt0ivyZCs',
 
         'hero_video_thumb' => 'https://images.unsplash.com/photo-1577185748577-b842fd77e9c7?w=800&q=80',
         'cost_index'  => 4,
@@ -473,7 +473,7 @@ return [
         'emoji'       => '⛪',
         'tagline'     => 'Medya, kültür ve uygun fiyatlı yaşam',
         'hero_color'  => 'linear-gradient(135deg,#7c3aed,#0891b2)',
-        'hero_video_id' => 'LzLOhMsjpsw',
+        'hero_video_id' => 'P9hKIFaDSU8',
 
         'hero_video_thumb' => 'https://images.unsplash.com/photo-1598892886985-a6e2b28a5a22?w=800&q=80',
         'cost_index'  => 2,
@@ -548,7 +548,7 @@ return [
         'emoji'       => '🚗',
         'tagline'     => 'Otomotiv ve mühendisliğin kalbi',
         'hero_color'  => 'linear-gradient(135deg,#dc2626,#7c3aed)',
-        'hero_video_id' => 'LzLOhMsjpsw',
+        'hero_video_id' => 'B0_aLXLyaQ4',
 
         'hero_video_thumb' => 'https://images.unsplash.com/photo-1583079889956-c0c4dd6f61c1?w=800&q=80',
         'cost_index'  => 4,
@@ -626,7 +626,7 @@ return [
         'emoji'       => '🎭',
         'tagline'     => 'Moda, tasarım ve uluslararası iş dünyasının kalbi',
         'hero_color'  => 'linear-gradient(135deg,#0891b2,#2563eb)',
-        'hero_video_id' => 'LzLOhMsjpsw',
+        'hero_video_id' => 'cIXFh4mV9S8',
 
         'hero_video_thumb' => 'https://images.unsplash.com/photo-1624085568108-36410d0b87bd?w=800&q=80',
         'cost_index'  => 4,
@@ -707,7 +707,7 @@ return [
         'emoji'       => '🏰',
         'tagline'     => 'Güçlü mühendislik eğitimi, uygun yaşam maliyeti',
         'hero_color'  => 'linear-gradient(135deg,#7c3aed,#16a34a)',
-        'hero_video_id' => 'LzLOhMsjpsw',
+        'hero_video_id' => 'VQuOZzpipzg',
 
         'hero_video_thumb' => 'https://images.unsplash.com/photo-1609856878074-cf31e21ccb6d?w=800&q=80',
         'cost_index'  => 2,
@@ -879,7 +879,7 @@ return [
         'emoji'       => '🏛',
         'tagline'     => 'Tarihin ve Bavyera mühendisliğinin güçlü şehri',
         'hero_color'  => 'linear-gradient(135deg,#dc2626,#d97706)',
-        'hero_video_id' => 'LzLOhMsjpsw',
+        'hero_video_id' => 'QQ4c2CpBZlg',
 
         'hero_video_thumb' => 'https://images.unsplash.com/photo-1599566175617-5c0e95a15f4c?w=800&q=80',
         'cost_index'  => 3,
