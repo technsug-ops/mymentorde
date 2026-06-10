@@ -690,6 +690,41 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
         // optimize:clear — config/route/view/event/compiled cache'leri temizler.
         // Plus bootstrap/cache/*.php manuel sil (artisan komutu KAS'ta bazen
         // sessizce skip ediyor).
+        // ── Tüm company'lerin enabled_modules'una eksik modülleri ekle ──────
+        // Yeni modüller (application_guides, manager_password_reset vb.) DEFAULT_MODULES'a
+        // eklendikten sonra mevcut company kayıtlarına otomatik gelmez (NULL ise default
+        // kullanılır ama explicit set edilmişse eski liste kalır).
+        // Bu cleanup tüm DEFAULT_MODULES'u her company'nin enabled_modules'una merge eder.
+        // Kullanim: /_deploy/run-pending?cleanup=sync-modules
+        if ($request->query('cleanup') === 'sync-modules') {
+            try {
+                $allDefault = \App\Support\ModuleAccess::allModules();
+                $companies = \App\Models\Company::query()->get(['id', 'name', 'enabled_modules']);
+                $output .= ">>> sync-modules: {$companies->count()} company, " . count($allDefault) . " default modül\n";
+                foreach ($companies as $c) {
+                    $existing = is_array($c->enabled_modules) ? $c->enabled_modules : [];
+                    if (empty($existing)) {
+                        // NULL → tüm modülleri açık say
+                        $merged = $allDefault;
+                    } else {
+                        $merged = array_values(array_unique(array_merge($existing, $allDefault)));
+                    }
+                    $added = array_diff($merged, $existing);
+                    if (empty($added) && !empty($existing)) {
+                        $output .= "    cid={$c->id} '{$c->name}': zaten tam (skip)\n";
+                        continue;
+                    }
+                    \App\Models\Company::query()->where('id', $c->id)
+                        ->update(['enabled_modules' => $merged]);
+                    \App\Support\ModuleAccess::flushCache($c->id);
+                    $addedList = empty($added) ? 'tümü-eklendi-fresh' : implode(',', $added);
+                    $output .= "    cid={$c->id} '{$c->name}': eklendi [{$addedList}]\n";
+                }
+            } catch (\Throwable $e) {
+                $output .= ">>> sync-modules FAILED: " . $e->getMessage() . "\n";
+            }
+        }
+
         // Kullanim: /_deploy/run-pending?cleanup=optimize-clear
         if ($request->query('cleanup') === 'optimize-clear') {
             try {
