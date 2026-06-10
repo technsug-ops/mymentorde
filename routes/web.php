@@ -662,6 +662,34 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
         ]);
         $output .= ">>> db:seed DefaultPolicyTemplatesSeeder\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
 
+        // ── Auto-sync modules: Yeni eklenen modüller her company'ye otomatik dağıt ──
+        // Yeni modül DEFAULT_MODULES'a girince eski companies otomatik almıyordu;
+        // her deploy'da senkronize ediyoruz (idempotent: zaten varsa skip).
+        try {
+            $allDefault = \App\Support\ModuleAccess::allModules();
+            $companies = \App\Models\Company::query()->get(['id', 'name', 'enabled_modules']);
+            $output .= ">>> auto-sync modules: {$companies->count()} company, " . count($allDefault) . " default modül\n";
+            $totalAdded = 0;
+            foreach ($companies as $c) {
+                $existing = is_array($c->enabled_modules) ? $c->enabled_modules : [];
+                $merged = empty($existing) ? $allDefault : array_values(array_unique(array_merge($existing, $allDefault)));
+                $added = array_diff($merged, $existing);
+                if (empty($added) && !empty($existing)) {
+                    continue; // zaten tam
+                }
+                \App\Models\Company::query()->where('id', $c->id)
+                    ->update(['enabled_modules' => $merged]);
+                \App\Support\ModuleAccess::flushCache($c->id);
+                $totalAdded += count($added);
+                $output .= "    cid={$c->id} '{$c->name}': +" . count($added) . " modül [" . implode(',', $added) . "]\n";
+            }
+            if ($totalAdded === 0) {
+                $output .= "    Hepsi zaten senkron — eklenmesi gereken modül yok.\n";
+            }
+        } catch (\Throwable $e) {
+            $output .= ">>> auto-sync modules WARN: " . $e->getMessage() . "\n";
+        }
+
         // Cache temizle (yeni route/config görsün)
         \Illuminate\Support\Facades\Artisan::call('view:clear');
         \Illuminate\Support\Facades\Artisan::call('config:clear');
