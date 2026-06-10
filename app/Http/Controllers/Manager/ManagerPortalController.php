@@ -328,7 +328,7 @@ class ManagerPortalController extends Controller
         $rows = $this->studentList
             ->filteredQuery($cid, compact('q', 'senior', 'branch', 'risk', 'payment') + ['archived' => $arch])
             ->latest('updated_at')
-            ->paginate(50, ['student_id', 'senior_email', 'branch', 'risk_level',
+            ->paginate(50, ['id', 'student_id', 'senior_email', 'branch', 'risk_level',
                             'payment_status', 'dealer_id', 'student_type', 'is_archived', 'updated_at']);
 
         $kpis = $this->studentList->kpis($cid);

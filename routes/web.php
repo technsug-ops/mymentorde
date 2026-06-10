@@ -806,6 +806,85 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // Gemini API key'i temizle: bas/son tirnak ('"' veya "'") ve gorunmez
+        // boslukları (NBSP, ZWNJ, ZWSP, normal whitespace) strip et.
+        // 9 Mayis kayit sirasinda key sarili (quoted) saklanmis — Google API
+        // malformed key olarak reddediyor.
+        // Kullanim: /_deploy/run-pending?cleanup=fix-gemini-key-quotes
+        if ($request->query('cleanup') === 'fix-gemini-key-quotes') {
+            $rows = DB::table('marketing_admin_settings')
+                ->where('setting_key', 'ai_labs_gemini_key')
+                ->get();
+            $fixed = 0;
+            $skipped = 0;
+            foreach ($rows as $row) {
+                $original = (string) $row->setting_value;
+                $cleaned = trim($original);
+                $cleaned = trim($cleaned, "\"'`");
+                $cleaned = preg_replace('/[\s\x{00A0}\x{200B}-\x{200D}\x{FEFF}]/u', '', $cleaned);
+                if ($cleaned === $original) {
+                    $skipped++;
+                    continue;
+                }
+                DB::table('marketing_admin_settings')
+                    ->where('id', $row->id)
+                    ->update([
+                        'setting_value' => $cleaned,
+                        'updated_at'    => now(),
+                    ]);
+                $fixed++;
+                $output .= ">>> fix-gemini-key-quotes: company {$row->company_id}: "
+                    . strlen($original) . " char → " . strlen($cleaned) . " char\n";
+            }
+            $output .= ">>> fix-gemini-key-quotes: {$fixed} satir temizlendi, {$skipped} satir zaten temizdi\n";
+        }
+
+        // Gemini API key'in gercekten calisip calismadigini Google API'sine ping
+        // atarak dogrula. Tek bir hafif models.list cagrisi yapar (quota'ya etki yok).
+        // Kullanim: /_deploy/run-pending?cleanup=test-gemini
+        if ($request->query('cleanup') === 'test-gemini') {
+            $row = DB::table('marketing_admin_settings')
+                ->where('setting_key', 'ai_labs_gemini_key')
+                ->orderBy('updated_at', 'desc')
+                ->first();
+            if (!$row || empty($row->setting_value)) {
+                $output .= ">>> test-gemini: ai_labs_gemini_key kaydedilmemis\n";
+            } else {
+                $key = (string) $row->setting_value;
+                $output .= ">>> test-gemini:\n";
+                $output .= "    key length: " . strlen($key) . "\n";
+                $output .= "    key head: '" . substr($key, 0, 6) . "...'\n";
+                $url = 'https://generativelanguage.googleapis.com/v1beta/models?key=' . urlencode($key);
+                $ch = curl_init($url);
+                curl_setopt_array($ch, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_TIMEOUT        => 10,
+                    CURLOPT_HTTPHEADER     => ['Accept: application/json'],
+                ]);
+                $resp = curl_exec($ch);
+                $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $err  = curl_error($ch);
+                curl_close($ch);
+                $output .= "    http_status: {$http}\n";
+                if ($err) {
+                    $output .= "    curl_error: {$err}\n";
+                }
+                if ($http === 200) {
+                    $data = json_decode((string) $resp, true);
+                    $count = is_array($data['models'] ?? null) ? count($data['models']) : 0;
+                    $output .= "    SONUC: KEY CALISIYOR ✓ ({$count} model erisilebilir)\n";
+                    if ($count > 0) {
+                        $names = array_slice(array_map(fn($m) => $m['name'] ?? '?', $data['models']), 0, 5);
+                        $output .= "    ilk modeller: " . implode(', ', $names) . "\n";
+                    }
+                } else {
+                    $errBody = is_string($resp) ? substr($resp, 0, 400) : '';
+                    $output .= "    SONUC: KEY CALISMIYOR ✗\n";
+                    $output .= "    response: {$errBody}\n";
+                }
+            }
+        }
+
         // Gemini File API uri'lerini sifirla → bir sonraki "Kaynakları Senkronize Et"
         // butonu re-upload tetikler. Yeni Gemini API key'i farkli projede ise eski
         // file_uri'ler 403 (PERMISSION_DENIED) doner cunku File API proje-bazli.
