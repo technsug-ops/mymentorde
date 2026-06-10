@@ -220,23 +220,27 @@
 
             <div class="nav-section">
                 <div class="nav-section-label">Kullanıcı Yönetimi</div>
-                <a href="/manager/guests"
-                   class="nav-link {{ request()->is('manager/guests*') ? 'active' : '' }}">
-                    <span class="nav-icon">👤</span> Aday Öğrenci Yönetimi
-                </a>
+                {{-- 1) Lead Pipeline --}}
                 <a href="/manager/pipeline/oversight"
                    class="nav-link {{ request()->is('manager/pipeline*') ? 'active' : '' }}">
-                    <span class="nav-icon">🛰</span> Lead Pipeline Oversight
+                    <span class="nav-icon">🛰</span> Lead Pipeline
                 </a>
+                {{-- 2) Aday Öğrenciler --}}
+                <a href="/manager/guests"
+                   class="nav-link {{ request()->is('manager/guests*') ? 'active' : '' }}">
+                    <span class="nav-icon">👤</span> Aday Öğrenciler
+                </a>
+                {{-- 3) Öğrenciler --}}
                 <a href="/manager/students"
                    class="nav-link {{ request()->is('manager/students*') ? 'active' : '' }}">
                     <span class="nav-icon">👨‍🎓</span> Öğrenciler
                 </a>
+                {{-- 4) Eğitim Danışmanı Yönetimi --}}
                 <a href="/manager/seniors"
                    class="nav-link {{ request()->is('manager/seniors*') ? 'active' : '' }}">
                     <span class="nav-icon">👨‍💼</span> Eğitim Danışmanı Yönetimi
                 </a>
-                {{-- Bayi yönetimi sidebar entries — @module gate ile addon, modül kapalıysa skip --}}
+                {{-- 5) Bayi Yönetimi & 6) Bayi Tip Yönetimi — @module gate ile addon --}}
                 @module('dealer')
                     @if(\Illuminate\Support\Facades\Route::has('manager.dealers.index'))
                     <a href="{{ route('manager.dealers.index') }}"
@@ -251,9 +255,10 @@
                     </a>
                     @endif
                 @endmodule
+                {{-- 7) Toplu İçe Aktar --}}
                 <a href="/manager/bulk-import/guests"
                    class="nav-link {{ request()->is('manager/bulk-import*') ? 'active' : '' }}">
-                    <span class="nav-icon">📥</span> Toplu Kayıt İçeri Aktar
+                    <span class="nav-icon">📥</span> Toplu İçe Aktar
                 </a>
             </div>
 
