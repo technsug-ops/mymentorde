@@ -169,25 +169,25 @@
             </a>
 
             <div class="plat-nav-label">Analiz & Faturalama</div>
-            <a href="#" title="Yakında">
-                <x-icon name="bar-chart-3" size="16" /> Analytics <span style="margin-left:auto;font-size:9px;color:var(--plat-muted);">SOON</span>
+            <a href="{{ route('platform.analytics') }}" class="{{ request()->routeIs('platform.analytics') || request()->routeIs('platform.analytics.export') ? 'active' : '' }}">
+                <x-icon name="bar-chart-3" size="16" /> Analytics
             </a>
-            <a href="#" title="Yakında">
-                <x-icon name="dollar-sign" size="16" /> Faturalama <span style="margin-left:auto;font-size:9px;color:var(--plat-muted);">SOON</span>
+            <a href="{{ route('platform.billing') }}" class="{{ request()->routeIs('platform.billing') || request()->routeIs('platform.billing.show') || request()->routeIs('platform.billing.pdf') ? 'active' : '' }}">
+                <x-icon name="dollar-sign" size="16" /> Faturalama
             </a>
-            <a href="#" title="Yakında">
-                <x-icon name="trending-up" size="16" /> MRR Trendi <span style="margin-left:auto;font-size:9px;color:var(--plat-muted);">SOON</span>
+            <a href="{{ route('platform.mrr-trend') }}" class="{{ request()->routeIs('platform.mrr-trend') || request()->routeIs('platform.mrr-trend.export') ? 'active' : '' }}">
+                <x-icon name="trending-up" size="16" /> MRR Trendi
             </a>
 
             <div class="plat-nav-label">Sistem</div>
-            <a href="#" title="Yakında">
-                <x-icon name="settings" size="16" /> Platform Ayarları <span style="margin-left:auto;font-size:9px;color:var(--plat-muted);">SOON</span>
+            <a href="{{ route('platform.settings') }}" class="{{ request()->routeIs('platform.settings') || request()->routeIs('platform.settings.*') ? 'active' : '' }}">
+                <x-icon name="settings" size="16" /> Platform Ayarları
             </a>
-            <a href="#" title="Yakında">
-                <x-icon name="server" size="16" /> Altyapı <span style="margin-left:auto;font-size:9px;color:var(--plat-muted);">SOON</span>
+            <a href="{{ route('platform.infrastructure') }}" class="{{ request()->routeIs('platform.infrastructure') || request()->routeIs('platform.infrastructure.*') ? 'active' : '' }}">
+                <x-icon name="server" size="16" /> Altyapı
             </a>
-            <a href="#" title="Yakında">
-                <x-icon name="shield" size="16" /> Güvenlik <span style="margin-left:auto;font-size:9px;color:var(--plat-muted);">SOON</span>
+            <a href="{{ route('platform.security') }}" class="{{ request()->routeIs('platform.security') || request()->routeIs('platform.security.*') ? 'active' : '' }}">
+                <x-icon name="shield" size="16" /> Güvenlik
             </a>
 
             <div class="plat-nav-label">Diğer</div>

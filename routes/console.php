@@ -315,6 +315,15 @@ Schedule::command('university:deadline-reminder')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/university-deadline-reminder.log'));
 
+// ─── Platform Billing — Aylik fatura uretimi ────────────────────────────────
+// Her ayin 1'inde 03:00'ta otomatik fatura kes (--send ile mail de gonderir).
+// Trial company'ler atlanir, sadece mrr_eur > 0 olanlar fatura alir.
+// Overdue kontrol her calismada otomatik tetiklenir.
+Schedule::command('billing:generate-monthly --send')
+    ->monthlyOn(1, '03:00')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/billing-monthly.log'));
+
 // ─── Google Calendar 2-way Sync (Pull) ───────────────────────────────────────
 // Portal'a Google'dan değişen event'leri çeker. Push observer ile anında,
 // pull ise 15 dk'da bir — senior Google tarafında değişiklik yaparsa burada yakalanır.
