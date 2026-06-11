@@ -6,6 +6,7 @@ use App\Http\Controllers\MarketingAdmin\ABTestController;
 use App\Http\Controllers\MarketingAdmin\AttributionController;
 use App\Http\Controllers\MarketingAdmin\BudgetController;
 use App\Http\Controllers\MarketingAdmin\CampaignController;
+use App\Http\Controllers\MarketingAdmin\CityVideosController;
 use App\Http\Controllers\MarketingAdmin\CMSCategoryController;
 use App\Http\Controllers\MarketingAdmin\CMSContentController;
 use App\Http\Controllers\MarketingAdmin\CMSMediaController;
@@ -88,6 +89,13 @@ Route::middleware(['company.context', 'auth', 'marketing.access', 'module:market
             Route::get('/media', [CMSMediaController::class, 'index']);
             Route::post('/media/upload', [CMSMediaController::class, 'upload']);
             Route::delete('/media/{id}', [CMSMediaController::class, 'destroy']);
+
+            // Şehir tanıtım & kategori bazlı videoları — kolay yönetim
+            Route::get('/city-videos',                       [CityVideosController::class, 'index'])->name('mktg-admin.city-videos');
+            Route::post('/city-videos/{citySlug}',           [CityVideosController::class, 'store']);
+            Route::patch('/city-videos/{citySlug}/{idx}',    [CityVideosController::class, 'update']);
+            Route::delete('/city-videos/{citySlug}/{idx}',   [CityVideosController::class, 'destroy']);
+            Route::post('/city-videos/{citySlug}/{idx}/move',[CityVideosController::class, 'move']);
 
             Route::resource('/email/templates', EmailTemplateController::class);
             Route::post('/email/templates/{id}/test-send', [EmailTemplateController::class, 'testSend']);

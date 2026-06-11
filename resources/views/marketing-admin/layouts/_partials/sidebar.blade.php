@@ -103,7 +103,7 @@
         @if($panelMode === 'marketing')
         {{-- ─── PAZARLAMA MENÜSÜ — v3.0 §2.7 ─── --}}
         @php
-            $isMktgIcerik  = request()->is('mktg-admin/campaigns*','mktg-admin/content*','mktg-admin/email*','mktg-admin/social*','mktg-admin/tracking-links*','mktg-admin/events*','mktg-admin/workflows*','mktg-admin/abtests*');
+            $isMktgIcerik  = request()->is('mktg-admin/campaigns*','mktg-admin/content*','mktg-admin/city-videos*','mktg-admin/email*','mktg-admin/social*','mktg-admin/tracking-links*','mktg-admin/events*','mktg-admin/workflows*','mktg-admin/abtests*');
             $isMktgAnaliz  = request()->is('mktg-admin/attribution*','mktg-admin/kpi*','mktg-admin/reports*','mktg-admin/budget*');
             $isMktgYonetim = request()->is('mktg-admin/integrations*','mktg-admin/team*','mktg-admin/settings*');
             $isMktgHesap   = request()->is('mktg-admin/notifications*','mktg-admin/profile*','my-contracts*');
@@ -121,6 +121,7 @@
                 @endif
                 @if($canSeeContent)
                 <a class="{{ request()->is('mktg-admin/content*') ? 'active' : '' }}" href="/mktg-admin/content">CMS İçerik</a>
+                <a class="{{ request()->is('mktg-admin/city-videos*') ? 'active' : '' }}" href="/mktg-admin/city-videos">Şehir Videoları</a>
                 @endif
                 @if($canSeeEmail)
                 <a class="{{ request()->is('mktg-admin/email*') ? 'active' : '' }}" href="/mktg-admin/email/templates">E-posta</a>
