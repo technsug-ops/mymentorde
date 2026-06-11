@@ -6,12 +6,14 @@
         'label' => 'Aday Öğrenci Yönetimi',
         'title' => 'Aday Öğrenciler',
         'sub'   => 'Tüm lead akışı, atamalar ve dönüşüm durumu bir arada.',
-        'icon'  => '👥',
+        'icon'  => 'users',          // SVG icon adı (x-icon component)
+                                     // — geriye dönük uyumluluk: emoji de kabul edilir
+                                     // (örn. '👥'). Yeni kodda SVG adı tercih edilmeli.
         'bg'    => 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1400&q=80',
         'tone'  => 'blue',  // blue|purple|green|amber|red|slate|indigo|teal
         'stats' => [
-            ['icon' => '📊', 'text' => '142 toplam'],
-            ['icon' => '✅', 'text' => '28 dönüşen'],
+            ['icon' => 'bar-chart-3', 'text' => '142 toplam'],   // SVG icon adı veya emoji
+            ['icon' => 'circle-check', 'text' => '28 dönüşen'],
         ],
     ])
 --}}
@@ -30,6 +32,17 @@
     $mh = $mhTones[$tone ?? 'blue'] ?? $mhTones['blue'];
     $mhBg = $bg ?? '';
     $mhBgCss = $mhBg !== '' ? $mh['fallback'] . " url('" . $mhBg . "') center/cover" : $mh['fallback'];
+
+    /**
+     * Icon değer kontrolü — string'in SVG icon adı (örn. "users") mı yoksa
+     * emoji (örn. "👥") mı olduğunu belirler.
+     * Heuristic: a-z + tire + rakam içeriyorsa SVG name varsayılır,
+     * aksi halde emoji/karakter olarak çıktı verilir.
+     */
+    $mhIsIconName = function ($val) {
+        if ($val === null || $val === '') return false;
+        return (bool) preg_match('/^[a-z][a-z0-9\-]*$/', trim((string) $val));
+    };
 @endphp
 <style>
 .mgr-hero {
@@ -49,12 +62,15 @@
 .mgr-hero-sub { font-size:12.5px; opacity:.88; line-height:1.5; max-width:600px; }
 .mgr-hero-stats { display:flex; gap:7px; flex-wrap:wrap; margin-top:8px; padding-top:12px; border-top:1px solid rgba(255,255,255,.2); }
 .mgr-hero-stat { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:18px; background:rgba(255,255,255,.18); font-size:11.5px; font-weight:600; line-height:1; border:1px solid rgba(255,255,255,.12); }
-.mgr-hero-icon { font-size:50px; line-height:1; flex-shrink:0; opacity:.88; filter:drop-shadow(0 4px 12px rgba(0,0,0,.25)); }
+.mgr-hero-stat svg { width:13px; height:13px; flex-shrink:0; }
+.mgr-hero-icon { font-size:50px; line-height:1; flex-shrink:0; opacity:.88; filter:drop-shadow(0 4px 12px rgba(0,0,0,.25)); display:inline-flex; align-items:center; justify-content:center; }
+.mgr-hero-icon svg { width:50px; height:50px; }
 @media (max-width:640px){
     .mgr-hero-body { gap:14px; padding:18px; align-items:flex-start; }
     .mgr-hero-title { font-size:20px; }
     .mgr-hero-sub { font-size:12px; }
     .mgr-hero-icon { font-size:36px; }
+    .mgr-hero-icon svg { width:36px; height:36px; }
 }
 </style>
 <div class="mgr-hero">
@@ -66,11 +82,26 @@
             @if(!empty($stats))
             <div class="mgr-hero-stats">
                 @foreach($stats as $st)
-                    <span class="mgr-hero-stat">{{ $st['icon'] ?? '' }} {{ $st['text'] ?? '' }}</span>
+                    <span class="mgr-hero-stat">
+                        @php $stIcon = $st['icon'] ?? ''; @endphp
+                        @if($mhIsIconName($stIcon))
+                            <x-icon :name="$stIcon" size="13" />
+                        @else
+                            {{ $stIcon }}
+                        @endif
+                        {{ $st['text'] ?? '' }}
+                    </span>
                 @endforeach
             </div>
             @endif
         </div>
-        <div class="mgr-hero-icon">{{ $icon ?? '' }}</div>
+        <div class="mgr-hero-icon">
+            @php $mhIcon = $icon ?? ''; @endphp
+            @if($mhIsIconName($mhIcon))
+                <x-icon :name="$mhIcon" size="50" />
+            @else
+                {{ $mhIcon }}
+            @endif
+        </div>
     </div>
 </div>

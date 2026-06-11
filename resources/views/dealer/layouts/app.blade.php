@@ -168,7 +168,7 @@
             <div class="nav-section">
                 <a href="/dealer/dashboard"
                    class="nav-link {{ request()->is('dealer/dashboard') ? 'active' : '' }}">
-                    <span class="nav-icon">🏠</span> Dashboard
+                    <x-icon name="home" size="18" class="nav-icon" aria-label="Dashboard" /> Dashboard
                 </a>
             </div>
 
@@ -177,18 +177,18 @@
                 <div class="nav-section-label">Öğrenci İşleri</div>
                 <a href="/dealer/lead-create"
                    class="nav-link {{ request()->is('dealer/lead-create') ? 'active' : '' }}">
-                    <span class="nav-icon">➕</span> Öğrenci Yönlendir
+                    <x-icon name="plus" size="18" class="nav-icon" aria-label="Öğrenci Yönlendir" /> Öğrenci Yönlendir
                 </a>
                 <a href="/dealer/leads"
                    class="nav-link {{ request()->is('dealer/leads') ? 'active' : '' }}">
-                    <span class="nav-icon">👥</span> Yönlendirmelerim
+                    <x-icon name="users" size="18" class="nav-icon" aria-label="Yönlendirmelerim" /> Yönlendirmelerim
                 </a>
                 {{-- Tier 2+ : Süreç takibi görünür --}}
                 @if($tierPerms->can('canViewProcessDetails'))
                 <a href="/dealer/leads?view=process"
                    class="nav-link {{ request()->is('dealer/leads') && request('view')==='process' ? 'active' : '' }}"
                    style="font-size:11px;padding-left:28px;">
-                    <span class="nav-icon" style="font-size:13px;">🔄</span> Süreç Takibi
+                    <x-icon name="refresh-cw" size="13" class="nav-icon" aria-label="Süreç Takibi" /> Süreç Takibi
                 </a>
                 @endif
             </div>
@@ -198,21 +198,21 @@
                 <div class="nav-section-label">Finans</div>
                 <a href="/dealer/earnings"
                    class="nav-link {{ request()->is('dealer/earnings') ? 'active' : '' }}">
-                    <span class="nav-icon">💰</span> Kazancım
+                    <x-icon name="dollar-sign" size="18" class="nav-icon" aria-label="Kazancım" /> Kazancım
                 </a>
                 @if($tierPerms->can('canAccessCalculator'))
                 <a href="/dealer/calculator"
                    class="nav-link {{ request()->is('dealer/calculator') ? 'active' : '' }}">
-                    <span class="nav-icon">🧮</span> Komisyon Hesapla
+                    <x-icon name="calculator" size="18" class="nav-icon" aria-label="Komisyon Hesapla" /> Komisyon Hesapla
                 </a>
                 @endif
                 <a href="/dealer/payments"
                    class="nav-link {{ request()->is('dealer/payments') ? 'active' : '' }}">
-                    <span class="nav-icon">💳</span> Ödemeler
+                    <x-icon name="credit-card" size="18" class="nav-icon" aria-label="Ödemeler" /> Ödemeler
                 </a>
                 <a href="/dealer/contracts"
                    class="nav-link {{ request()->is('dealer/contracts*') ? 'active' : '' }}">
-                    <span class="nav-icon">📋</span> Sözleşmelerim
+                    <x-icon name="clipboard-list" size="18" class="nav-icon" aria-label="Sözleşmelerim" /> Sözleşmelerim
                 </a>
             </div>
 
@@ -222,29 +222,33 @@
                 @if($tierPerms->can('canAccessSupport'))
                 <a href="/dealer/advisor"
                    class="nav-link {{ request()->is('dealer/advisor') ? 'active' : '' }}">
-                    <span class="nav-icon">{{ $tierPerms->isBasic() ? '🎫' : '👨‍💼' }}</span>
+                    @if($tierPerms->isBasic())
+                        <x-icon name="life-buoy" size="18" class="nav-icon" aria-label="Destek Talebi" />
+                    @else
+                        <x-icon name="briefcase" size="18" class="nav-icon" aria-label="Danışmanım" />
+                    @endif
                     {{ $tierPerms->isBasic() ? 'Destek Talebi' : 'Danışmanım' }}
                 </a>
                 @endif
                 @if($tierPerms->can('canAccessTraining'))
                 <a href="/dealer/training"
                    class="nav-link {{ request()->is('dealer/training') ? 'active' : '' }}">
-                    <span class="nav-icon">📚</span> Eğitim Merkezi
+                    <x-icon name="book-open" size="18" class="nav-icon" aria-label="Eğitim Merkezi" /> Eğitim Merkezi
                 </a>
                 @endif
                 {{-- Tier 2+ : Referans, Performans, Takvim --}}
                 @if($tierPerms->isStandard())
                 <a href="/dealer/referral-links"
                    class="nav-link {{ request()->is('dealer/referral-links') ? 'active' : '' }}">
-                    <span class="nav-icon">🔗</span> Referans Linklerim
+                    <x-icon name="link" size="18" class="nav-icon" aria-label="Referans Linklerim" /> Referans Linklerim
                 </a>
                 <a href="/dealer/performance"
                    class="nav-link {{ request()->is('dealer/performance') ? 'active' : '' }}">
-                    <span class="nav-icon">📊</span> Performans Raporu
+                    <x-icon name="bar-chart" size="18" class="nav-icon" aria-label="Performans Raporu" /> Performans Raporu
                 </a>
                 <a href="/dealer/calendar"
                    class="nav-link {{ request()->is('dealer/calendar') ? 'active' : '' }}">
-                    <span class="nav-icon">📅</span> Takvimim
+                    <x-icon name="calendar" size="18" class="nav-icon" aria-label="Takvimim" /> Takvimim
                 </a>
                 @endif
             </div>
@@ -258,16 +262,16 @@
                 @endphp
                 <a href="/dealer/notifications"
                    class="nav-link {{ request()->is('dealer/notifications') ? 'active' : '' }}">
-                    <span class="nav-icon">🔔</span> Bildirimlerim
+                    <x-icon name="bell" size="18" class="nav-icon" aria-label="Bildirimlerim" /> Bildirimlerim
                     @if($dealerNotifUnread > 0)<span class="nav-badge">{{ $dealerNotifUnread }}</span>@endif
                 </a>
                 <a href="/dealer/profile"
                    class="nav-link {{ request()->is('dealer/profile') ? 'active' : '' }}">
-                    <span class="nav-icon">👤</span> Profilim
+                    <x-icon name="user" size="18" class="nav-icon" aria-label="Profilim" /> Profilim
                 </a>
                 <a href="/dealer/settings"
                    class="nav-link {{ request()->is('dealer/settings') ? 'active' : '' }}">
-                    <span class="nav-icon">⚙️</span> Ayarlar
+                    <x-icon name="settings" size="18" class="nav-icon" aria-label="Ayarlar" /> Ayarlar
                 </a>
             </div>
         </nav>
@@ -275,14 +279,14 @@
         <div class="sidebar-footer">
             @can('dam.view')
             <a href="{{ route('dealer.dam.index') }}" class="nav-link {{ request()->routeIs('dealer.dam.*') ? 'active' : '' }}" style="margin-bottom:6px;">
-                <span class="nav-icon">📁</span> Marka Kütüphanesi
+                <x-icon name="folder" size="18" class="nav-icon" aria-label="Marka Kütüphanesi" /> Marka Kütüphanesi
             </a>
             @endcan
             <a href="{{ route('dealer.handbook') }}" class="nav-link {{ request()->routeIs('dealer.handbook') ? 'active' : '' }}" style="margin-bottom:6px;">
-                <span class="nav-icon">📖</span> Bayi Kılavuzu
+                <x-icon name="book-open" size="18" class="nav-icon" aria-label="Bayi Kılavuzu" /> Bayi Kılavuzu
             </a>
             <a href="/logout" class="nav-link logout">
-                <span class="nav-icon">🚪</span> Çıkış Yap
+                <x-icon name="log-out" size="18" class="nav-icon" aria-label="Çıkış Yap" /> Çıkış Yap
             </a>
         </div>
     </aside>
@@ -293,8 +297,8 @@
         {{-- Topbar --}}
         <header class="topbar">
             <div class="topbar-left">
-                <button class="icon-btn" id="premium-menu-btn"
-                        style="display:none;">☰</button>
+                <button class="icon-btn" id="premium-menu-btn" aria-label="Menüyü Aç"
+                        style="display:none;align-items:center;justify-content:center;"><x-icon name="menu" size="22" /></button>
                 <a href="/dealer/dashboard" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:22px;line-height:1;width:44px;height:44px;flex-shrink:0;border:1px solid var(--u-line,#e5e7eb);background:var(--u-card,#fff);border-radius:10px;text-decoration:none;display:flex;align-items:center;justify-content:center;">&#8592;</a>
                 <div>
                     <div class="topbar-title">@yield('page_title', 'Bayi Portalı')</div>
@@ -305,8 +309,8 @@
             </div>
             <div class="topbar-right">
                 @yield('topbar-actions')
-                <button class="icon-btn" id="dm-btn" title="Tema">🌙</button>
-                <button class="icon-btn" id="design-btn" title="Tasarım Teması">🎨</button>
+                <button class="icon-btn" id="dm-btn" title="Tema" aria-label="Karanlık moda geç"><x-icon name="moon" size="18" /></button>
+                <button class="icon-btn" id="design-btn" title="Tasarım Teması" aria-label="Tasarım temasını değiştir"><x-icon name="palette" size="18" /></button>
                 <div class="avatar" style="width:36px;height:36px;font-size:13px;" title="{{ $dealerUser?->name ?? 'Bayi' }}">
                     {{ $dealerInitials }}
                 </div>
@@ -344,8 +348,8 @@
 </style>
 
 {{-- Dark mode toggle FAB --}}
-<div class="dark-toggle" id="theme-toggle" title="Tema Değiştir">
-    <span id="theme-icon">🌙</span>
+<div class="dark-toggle" id="theme-toggle" title="Tema Değiştir" aria-label="Tema Değiştir">
+    <span id="theme-icon"><x-icon name="moon" size="22" /></span>
 </div>
 
 {{-- Toast container --}}
@@ -360,6 +364,14 @@
 
 {{-- Theme + Toast + Dark Mode --}}
 <script nonce="{{ $cspNonce ?? '' }}">
+// ── Inline SVG icon markup (Lucide) — emoji yerine kullanilir ──
+var __ICON_SVG = {
+    moon:    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+    sun:     '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+    palette: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>',
+    circle:  '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>'
+};
+function __setIcon(id, name){var el=document.getElementById(id);if(el)el.innerHTML=__ICON_SVG[name];}
 function __designToggle(){
     var link=document.getElementById('mentorde-theme-css');
     if(!link)return;
@@ -374,8 +386,7 @@ function __designToggle(){
         var ml2=document.getElementById('minimalist-css-pre');if(ml2)ml2.remove();
         var ov=document.getElementById('design-override');if(ov)ov.remove();
     }
-    var btn=document.getElementById('design-btn');
-    if(btn)btn.textContent=next==='minimalist'?'◎':'🎨';
+    __setIcon('design-btn', next==='minimalist'?'circle':'palette');
 }
 function __dmToggle(){
     var html=document.documentElement;
@@ -384,13 +395,13 @@ function __dmToggle(){
     html.setAttribute('data-theme',next);
     html.classList.toggle('dark',next==='dark');
     localStorage.setItem('mentorde_dark',next==='dark');
-    var icon=next==='dark'?'☀️':'🌙';
-    ['dm-btn','theme-icon'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=icon;});
+    var iconName=next==='dark'?'sun':'moon';
+    ['dm-btn','theme-icon'].forEach(function(id){__setIcon(id, iconName);});
 }
 // ── İkon başlangıç değerleri (DOMContentLoaded sonrası) ──
 document.addEventListener('DOMContentLoaded',function(){
-    if(localStorage.getItem('mentorde_design')==='minimalist'){var b=document.getElementById('design-btn');if(b)b.textContent='◎';}
-    if(localStorage.getItem('mentorde_dark')==='true'){['dm-btn','theme-icon'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent='☀️';});}
+    if(localStorage.getItem('mentorde_design')==='minimalist'){__setIcon('design-btn','circle');}
+    if(localStorage.getItem('mentorde_dark')==='true'){['dm-btn','theme-icon'].forEach(function(id){__setIcon(id,'sun');});}
 });
 
 document.addEventListener('alpine:init',function(){

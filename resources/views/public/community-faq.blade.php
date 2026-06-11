@@ -115,9 +115,9 @@
     <h1>Topluluk Soru Arşivi</h1>
     <p class="lead">Almanya eğitim ve vize sürecinde topluluk forumlarında en çok sorulan {{ $totalQuestions }} soru — {{ $topicCount }} ana konu başlığı altında derlendi.</p>
     <div class="hero-stats">
-        <span class="hero-stat">📚 {{ $totalQuestions }} soru</span>
-        <span class="hero-stat">🗂️ {{ $topicCount }} kategori</span>
-        <span class="hero-stat">🛡️ Anonim & PII temizliği</span>
+        <span class="hero-stat"><x-icon name="book-open" size="14" aria-label="Soru" /> {{ $totalQuestions }} soru</span>
+        <span class="hero-stat"><x-icon name="folder" size="14" aria-label="Kategori" /> {{ $topicCount }} kategori</span>
+        <span class="hero-stat"><x-icon name="shield-check" size="14" aria-label="Anonim" /> Anonim & PII temizliği</span>
     </div>
 </section>
 
@@ -130,7 +130,7 @@
 <div class="wrap">
     <div class="search-wrap">
         <div class="search-box">
-            <span class="search-icon">🔍</span>
+            <span class="search-icon"><x-icon name="search" size="16" aria-label="Ara" /></span>
             <input type="text" id="topic-search" placeholder="Konu ara... (ör. vize, denklik, dil)">
         </div>
     </div>
@@ -161,8 +161,8 @@
         <h3>Soruna özel bir cevap mı arıyorsun?</h3>
         <p>Bu arşivde göremediğin sorular için danışmanlarımız ücretsiz randevu açıyor. AI asistanımıza da anlık soru sorabilirsin.</p>
         <div class="cta-buttons">
-            <a href="/randevu" class="cta-btn primary">📅 Ücretsiz Randevu Al</a>
-            <a href="{{ route('public.faq') }}" class="cta-btn secondary">📖 Resmi SSS</a>
+            <a href="/randevu" class="cta-btn primary"><x-icon name="calendar-days" size="16" aria-label="Randevu" /> Ücretsiz Randevu Al</a>
+            <a href="{{ route('public.faq') }}" class="cta-btn secondary"><x-icon name="book-open" size="16" aria-label="SSS" /> Resmi SSS</a>
         </div>
     </div>
 </div>

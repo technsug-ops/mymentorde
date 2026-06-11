@@ -201,41 +201,41 @@
                 <div class="nav-section-label">Genel</div>
                 <a href="{{ route('guest.dashboard') }}"
                    class="nav-link {{ request()->routeIs('guest.dashboard') ? 'active' : '' }}">
-                    <span class="nav-icon">🏠</span> Ana Sayfa
+                    <x-icon name="home" size="18" class="nav-icon" aria-label="Ana Sayfa" /> Ana Sayfa
                 </a>
                 <a href="{{ route('guest.registration.form') }}"
                    class="nav-link {{ request()->routeIs('guest.registration.form') ? 'active' : '' }}">
-                    <span class="nav-icon">📋</span> Başvuru Formu
+                    <x-icon name="clipboard-list" size="18" class="nav-icon" aria-label="Başvuru Formu" /> Başvuru Formu
                 </a>
                 <a href="{{ route('guest.registration.documents') }}"
                    class="nav-link {{ request()->routeIs('guest.registration.documents') ? 'active' : '' }}">
-                    <span class="nav-icon">📂</span> Belgelerim
+                    <x-icon name="folder-open" size="18" class="nav-icon" aria-label="Belgelerim" /> Belgelerim
                     @if((int)($guestDocsUnread ?? 0) > 0)
                         <span class="nav-badge">{{ (int)$guestDocsUnread }}</span>
                     @endif
                 </a>
                 <a href="{{ route('guest.services') }}"
                    class="nav-link {{ request()->routeIs('guest.services') ? 'active' : '' }}">
-                    <span class="nav-icon">🎓</span> Hizmetler
+                    <x-icon name="graduation-cap" size="18" class="nav-icon" aria-label="Hizmetler" /> Hizmetler
                 </a>
                 <a href="{{ route('guest.contract') }}"
                    class="nav-link {{ request()->routeIs('guest.contract') ? 'active' : '' }}">
-                    <span class="nav-icon">📜</span> Sözleşme Sürecim
+                    <x-icon name="file-text" size="18" class="nav-icon" aria-label="Sözleşme Sürecim" /> Sözleşme Sürecim
                 </a>
                 @pageVisible('process_tracking')
                 <a href="{{ route('guest.timeline') }}"
                    class="nav-link {{ request()->routeIs('guest.timeline') ? 'active' : '' }}">
-                    <span class="nav-icon">📅</span> Süreç Takvimi
+                    <x-icon name="calendar" size="18" class="nav-icon" aria-label="Süreç Takvimi" /> Süreç Takvimi
                 </a>
                 @endpageVisible
                 <a href="{{ route('guest.cost-calculator') }}"
                    class="nav-link {{ request()->routeIs('guest.cost-calculator') ? 'active' : '' }}">
-                    <span class="nav-icon">💰</span> Maliyet Hesabı
+                    <x-icon name="calculator" size="18" class="nav-icon" aria-label="Maliyet Hesabı" /> Maliyet Hesabı
                 </a>
                 @pageVisible('ai_assistant')
                 <a href="{{ route('guest.ai-assistant') }}"
                    class="nav-link {{ request()->routeIs('guest.ai-assistant*') ? 'active' : '' }}">
-                    <span class="nav-icon">🤖</span> AI Asistan
+                    <x-icon name="bot" size="18" class="nav-icon" aria-label="AI Asistan" /> AI Asistan
                     <span style="margin-left:auto;font-size:9px;font-weight:600;background:var(--accent-soft,rgba(0,0,0,.05));color:var(--text,#1a1a1a);padding:1px 6px;border-radius:4px;">Yeni</span>
                 </a>
                 @endpageVisible
@@ -247,14 +247,14 @@
                 @pageVisible('appointments')
                 <a href="{{ route('guest.booking') }}"
                    class="nav-link {{ request()->is('guest/randevu','randevu','book*') ? 'active' : '' }}">
-                    <span class="nav-icon">📅</span> Randevu Al
+                    <x-icon name="calendar" size="18" class="nav-icon" aria-label="Randevu Al" /> Randevu Al
                 </a>
                 @endpageVisible
                 @endmodule
                 @pageVisible('messages')
                 <a href="{{ route('guest.messages') }}"
                    class="nav-link {{ request()->routeIs('guest.messages') ? 'active' : '' }}">
-                    <span class="nav-icon">💬</span> Mesajlar
+                    <x-icon name="message-circle" size="18" class="nav-icon" aria-label="Mesajlar" /> Mesajlar
                     @if((int)($guestDmUnread ?? 0) > 0)
                         <span class="nav-badge" style="background:var(--c-info,#2678bd);">{{ (int)$guestDmUnread }}</span>
                     @endif
@@ -263,12 +263,12 @@
                 @pageVisible('support')
                 <a href="{{ route('guest.tickets') }}"
                    class="nav-link {{ request()->routeIs('guest.tickets') ? 'active' : '' }}">
-                    <span class="nav-icon">🎫</span> Destek Talebi
+                    <x-icon name="life-buoy" size="18" class="nav-icon" aria-label="Destek Talebi" /> Destek Talebi
                 </a>
                 @endpageVisible
                 <a href="{{ route('guest.feedback') }}"
                    class="nav-link {{ request()->routeIs('guest.feedback') ? 'active' : '' }}">
-                    <span class="nav-icon">💬</span> Geri Bildirim
+                    <x-icon name="message-square" size="18" class="nav-icon" aria-label="Geri Bildirim" /> Geri Bildirim
                 </a>
             </div>
 
@@ -277,43 +277,43 @@
                 @pageVisible('university_guide')
                 <a href="{{ route('guest.university-guide') }}"
                    class="nav-link {{ request()->routeIs('guest.university-guide') ? 'active' : '' }}">
-                    <span class="nav-icon">🎓</span> Üniversite Rehberi
+                    <x-icon name="graduation-cap" size="18" class="nav-icon" aria-label="Üniversite Rehberi" /> Üniversite Rehberi
                 </a>
                 @endpageVisible
                 @pageVisible('document_guide')
                 <a href="{{ route('guest.document-guide') }}"
                    class="nav-link {{ request()->routeIs('guest.document-guide') ? 'active' : '' }}">
-                    <span class="nav-icon">📋</span> Belge Hazırlama
+                    <x-icon name="clipboard-list" size="18" class="nav-icon" aria-label="Belge Hazırlama" /> Belge Hazırlama
                 </a>
                 @endpageVisible
                 @pageVisible('success_stories')
                 <a href="{{ route('guest.success-stories') }}"
                    class="nav-link {{ request()->routeIs('guest.success-stories') ? 'active' : '' }}">
-                    <span class="nav-icon">⭐</span> Başarı Hikayeleri
+                    <x-icon name="award" size="18" class="nav-icon" aria-label="Başarı Hikayeleri" /> Başarı Hikayeleri
                 </a>
                 @endpageVisible
                 @pageVisible('living_guide')
                 <a href="{{ route('guest.living-guide') }}"
                    class="nav-link {{ request()->routeIs('guest.living-guide') ? 'active' : '' }}">
-                    <span class="nav-icon">🏠</span> Almanya'da Yaşam
+                    <x-icon name="home" size="18" class="nav-icon" aria-label="Almanya'da Yaşam" /> Almanya'da Yaşam
                 </a>
                 @endpageVisible
                 @pageVisible('visa_guide')
                 <a href="{{ route('guest.vize-guide') }}"
                    class="nav-link {{ request()->routeIs('guest.vize-guide') ? 'active' : '' }}">
-                    <span class="nav-icon">🛂</span> Vize & Sperrkonto
+                    <x-icon name="shield-check" size="18" class="nav-icon" aria-label="Vize ve Sperrkonto" /> Vize & Sperrkonto
                 </a>
                 @endpageVisible
                 @pageVisible('discover')
                 <a href="{{ route('guest.discover') }}"
                    class="nav-link {{ request()->routeIs('guest.discover') ? 'active' : '' }}">
-                    <span class="nav-icon">📚</span> Tüm İçerikler
+                    <x-icon name="book-open" size="18" class="nav-icon" aria-label="Tüm İçerikler" /> Tüm İçerikler
                 </a>
                 @endpageVisible
                 @pageVisible('saved')
                 <a href="{{ route('guest.saved') }}"
                    class="nav-link {{ request()->routeIs('guest.saved') ? 'active' : '' }}">
-                    <span class="nav-icon">🔖</span> Favorilerim
+                    <x-icon name="bookmark" size="18" class="nav-icon" aria-label="Favorilerim" /> Favorilerim
                 </a>
                 @endpageVisible
             </div>
@@ -322,21 +322,21 @@
                 <div class="nav-section-label">Hesap</div>
                 <a href="{{ route('guest.profile') }}"
                    class="nav-link {{ request()->routeIs('guest.profile') ? 'active' : '' }}">
-                    <span class="nav-icon">👤</span> Profilim
+                    <x-icon name="user" size="18" class="nav-icon" aria-label="Profilim" /> Profilim
                 </a>
                 <a href="{{ route('guest.settings') }}"
                    class="nav-link {{ request()->routeIs('guest.settings') ? 'active' : '' }}">
-                    <span class="nav-icon">⚙️</span> Ayarlar
+                    <x-icon name="settings" size="18" class="nav-icon" aria-label="Ayarlar" /> Ayarlar
                 </a>
             </div>
         </nav>
 
         <div class="sidebar-footer">
             <a href="{{ route('guest.handbook') }}" class="nav-link {{ request()->routeIs('guest.handbook') ? 'active' : '' }}" style="margin-bottom:6px;">
-                <span class="nav-icon">📖</span> Kullanıcı Kılavuzu
+                <x-icon name="book-open" size="18" class="nav-icon" aria-label="Kullanıcı Kılavuzu" /> Kullanıcı Kılavuzu
             </a>
             <a href="/logout" class="nav-link logout">
-                <span class="nav-icon">🚪</span> Çıkış Yap
+                <x-icon name="log-out" size="18" class="nav-icon" aria-label="Çıkış Yap" /> Çıkış Yap
             </a>
         </div>
     </aside>
@@ -347,8 +347,8 @@
         {{-- Topbar --}}
         <header class="topbar">
             <div class="topbar-left" style="flex:0 1 auto;">
-                <button class="icon-btn" id="premium-menu-btn"
-                        style="display:none;font-size:22px;line-height:1;width:44px;height:44px;flex-shrink:0;border:1px solid var(--u-line,#e5e7eb);background:var(--u-card,#fff);border-radius:10px;">☰</button>
+                <button class="icon-btn" id="premium-menu-btn" aria-label="Menüyü Aç"
+                        style="display:none;font-size:22px;line-height:1;width:44px;height:44px;flex-shrink:0;border:1px solid var(--u-line,#e5e7eb);background:var(--u-card,#fff);border-radius:10px;align-items:center;justify-content:center;"><x-icon name="menu" size="22" /></button>
                 <a href="{{ route('guest.dashboard') }}" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:22px;line-height:1;width:44px;height:44px;flex-shrink:0;border:1px solid var(--u-line,#e5e7eb);background:var(--u-card,#fff);border-radius:10px;text-decoration:none;display:flex;align-items:center;justify-content:center;">&#8592;</a>
                 <div>
                     <div class="topbar-title">@yield('page_title', config('brand.name', 'MentorDE'))</div>
@@ -377,10 +377,10 @@
                     </select>
                 </form>
                 @endif
-                <button class="icon-btn" id="dm-btn" title="Tema">🌙</button>
-                <button class="icon-btn" id="design-btn" title="Tasarım Teması">🎨</button>
-                <a href="{{ route('guest.messages') }}" class="icon-btn" title="Mesajlar">
-                    💬
+                <button class="icon-btn" id="dm-btn" title="Tema" aria-label="Karanlık moda geç"><x-icon name="moon" size="18" /></button>
+                <button class="icon-btn" id="design-btn" title="Tasarım Teması" aria-label="Tasarım temasını değiştir"><x-icon name="palette" size="18" /></button>
+                <a href="{{ route('guest.messages') }}" class="icon-btn" title="Mesajlar" aria-label="Mesajlar">
+                    <x-icon name="message-circle" size="18" />
                     @if((int)($guestDmUnread ?? 0) > 0)<span class="notif-dot"></span>@endif
                 </a>
                 <div class="avatar" style="width:36px;height:36px;font-size:13px;" title="{{ auth()->user()?->name ?? 'Kullanıcı' }}">
@@ -447,8 +447,8 @@
 </style>
 
 {{-- Dark mode toggle FAB --}}
-<div class="dark-toggle" title="Tema Değiştir" id="theme-toggle">
-    <span id="theme-icon">🌙</span>
+<div class="dark-toggle" title="Tema Değiştir" id="theme-toggle" aria-label="Tema Değiştir">
+    <span id="theme-icon"><x-icon name="moon" size="22" /></span>
 </div>
 
 {{-- Toast container --}}
@@ -480,8 +480,8 @@
 @media(max-width:640px){.gchat-fab{bottom:24px;right:16px;width:48px;height:48px;font-size:20px;}.gchat-panel{width:calc(100vw - 32px);right:16px;bottom:80px;max-height:60vh;}}
 </style>
 <div>
-    <button class="gchat-fab" id="gchatFab" title="Danışmana Mesaj">
-        💬
+    <button class="gchat-fab" id="gchatFab" title="Danışmana Mesaj" aria-label="Danışmana Mesaj">
+        <x-icon name="message-circle" size="22" />
         <span class="gchat-badge" id="gchatBadge" style="display:none;">0</span>
     </button>
     <div class="gchat-panel" id="gchatPanel">
@@ -521,6 +521,14 @@
 
 {{-- Theme + Toast + Dark Mode --}}
 <script nonce="{{ $cspNonce ?? '' }}">
+// ── Inline SVG icon markup (Lucide) — emoji yerine kullanilir ──
+var __ICON_SVG = {
+    moon:    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+    sun:     '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+    palette: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>',
+    circle:  '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>'
+};
+function __setIcon(id, name){var el=document.getElementById(id);if(el)el.innerHTML=__ICON_SVG[name];}
 function __designToggle(){
     var link=document.getElementById('mentorde-theme-css');
     if(!link)return;
@@ -535,8 +543,7 @@ function __designToggle(){
         var ml2=document.getElementById('minimalist-css-pre');if(ml2)ml2.remove();
         var ov=document.getElementById('design-override');if(ov)ov.remove();
     }
-    var btn=document.getElementById('design-btn');
-    if(btn)btn.textContent=next==='minimalist'?'◎':'🎨';
+    __setIcon('design-btn', next==='minimalist'?'circle':'palette');
 }
 function __dmToggle(){
     var html=document.documentElement;
@@ -545,13 +552,13 @@ function __dmToggle(){
     html.setAttribute('data-theme',next);
     html.classList.toggle('dark',next==='dark');
     localStorage.setItem('mentorde_dark',next==='dark');
-    var icon=next==='dark'?'☀️':'🌙';
-    ['dm-btn','theme-icon'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=icon;});
+    var iconName=next==='dark'?'sun':'moon';
+    ['dm-btn','theme-icon'].forEach(function(id){__setIcon(id, iconName);});
 }
 // ── İkon başlangıç değerleri (DOMContentLoaded sonrası) ──
 document.addEventListener('DOMContentLoaded',function(){
-    if(localStorage.getItem('mentorde_design')==='minimalist'){var b=document.getElementById('design-btn');if(b)b.textContent='◎';}
-    if(localStorage.getItem('mentorde_dark')==='true'){['dm-btn','theme-icon'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent='☀️';});}
+    if(localStorage.getItem('mentorde_design')==='minimalist'){__setIcon('design-btn','circle');}
+    if(localStorage.getItem('mentorde_dark')==='true'){['dm-btn','theme-icon'].forEach(function(id){__setIcon(id,'sun');});}
 });
 
 document.addEventListener('alpine:init',function(){

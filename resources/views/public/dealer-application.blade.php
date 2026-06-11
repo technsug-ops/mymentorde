@@ -235,7 +235,7 @@ a { color:var(--primary); text-decoration:none; }
 
             {{-- STEP 1: Kişisel --}}
             <div class="wz-step active" data-step="1">
-                <h2 class="wz-step-title">👋 Tanışalım</h2>
+                <h2 class="wz-step-title"><x-icon name="user" size="22" aria-label="Kişisel" /> Tanışalım</h2>
                 <p class="wz-step-sub">Öncelikle seni tanıyalım — sana nasıl ulaşacağımızı bilmemiz lazım.</p>
 
                 <div class="wz-grid2">
@@ -278,25 +278,25 @@ a { color:var(--primary); text-decoration:none; }
 
             {{-- STEP 2: Plan --}}
             <div class="wz-step" data-step="2">
-                <h2 class="wz-step-title">🎯 Nasıl Kazanmak İstiyorsun?</h2>
+                <h2 class="wz-step-title"><x-icon name="target" size="22" aria-label="Plan" /> Nasıl Kazanmak İstiyorsun?</h2>
                 <p class="wz-step-sub">İki farklı model var — hangisi sana daha uygun?</p>
 
                 <div class="wz-plan-cards">
                     <label class="wz-plan-card active" data-plan="lead_generation">
                         <input type="radio" name="preferred_plan" value="lead_generation" checked>
-                        <div class="icon">🤝</div>
+                        <div class="icon"><x-icon name="handshake" size="34" aria-label="Lead Generation" /></div>
                         <div class="name">Lead Generation</div>
                         <div class="desc">Adayları biz ararız, satışı biz kapatırız.<br><strong style="color:var(--primary);">€200-400/kayıt</strong></div>
                     </label>
                     <label class="wz-plan-card" data-plan="freelance">
                         <input type="radio" name="preferred_plan" value="freelance">
-                        <div class="icon">🎯</div>
+                        <div class="icon"><x-icon name="target" size="34" aria-label="Freelance" /></div>
                         <div class="name">Freelance</div>
                         <div class="desc">Ön görüşmeyi sen yaparsın, vize/okul biz.<br><strong style="color:var(--primary);">€500-750/kayıt</strong></div>
                     </label>
                     <label class="wz-plan-card" data-plan="unsure">
                         <input type="radio" name="preferred_plan" value="unsure">
-                        <div class="icon">💡</div>
+                        <div class="icon"><x-icon name="lightbulb" size="34" aria-label="Kararsız" /></div>
                         <div class="name">Kararsızım</div>
                         <div class="desc">Temsilcimiz sana en uygun olanı önerir.<br><strong style="color:var(--primary);">Görüşelim</strong></div>
                     </label>
@@ -311,7 +311,7 @@ a { color:var(--primary); text-decoration:none; }
 
             {{-- STEP 3: Profil --}}
             <div class="wz-step" data-step="3">
-                <h2 class="wz-step-title">🏢 Çalışma Şeklin</h2>
+                <h2 class="wz-step-title"><x-icon name="building-2" size="22" aria-label="Çalışma Şekli" /> Çalışma Şeklin</h2>
                 <p class="wz-step-sub">Bireysel mi, freelance mi, şirket olarak mı başvuruyorsun?</p>
 
                 <div class="wz-field">
@@ -319,15 +319,15 @@ a { color:var(--primary); text-decoration:none; }
                     <div class="wz-radio-group">
                         <label class="wz-radio-card active" data-biztype="individual">
                             <input type="radio" name="business_type" value="individual" checked>
-                            👤 Bireysel
+                            <x-icon name="user" size="14" aria-label="Bireysel" /> Bireysel
                         </label>
                         <label class="wz-radio-card" data-biztype="freelance">
                             <input type="radio" name="business_type" value="freelance">
-                            💼 Freelance / Serbest
+                            <x-icon name="briefcase" size="14" aria-label="Freelance" /> Freelance / Serbest
                         </label>
                         <label class="wz-radio-card" data-biztype="company">
                             <input type="radio" name="business_type" value="company">
-                            🏢 Şirket / Kurum
+                            <x-icon name="building-2" size="14" aria-label="Şirket" /> Şirket / Kurum
                         </label>
                     </div>
                 </div>
@@ -360,7 +360,7 @@ a { color:var(--primary); text-decoration:none; }
 
             {{-- STEP 4: Kaynak --}}
             <div class="wz-step" data-step="4">
-                <h2 class="wz-step-title">📍 Sizi Tanıyalım</h2>
+                <h2 class="wz-step-title"><x-icon name="map-pin" size="22" aria-label="Kaynak" /> Sizi Tanıyalım</h2>
                 <p class="wz-step-sub">Bizi nereden buldun ve neden bizimle çalışmak istiyorsun?</p>
 
                 <div class="wz-field">
@@ -379,7 +379,7 @@ a { color:var(--primary); text-decoration:none; }
                 <div class="wz-field">
                     <label>Sizi yönlendiren kişinin email'i <span style="color:var(--muted); font-weight:normal;">(varsa)</span></label>
                     <input type="email" name="referrer_email" value="{{ old('referrer_email') }}" placeholder="arkadas@email.com">
-                    <div class="hint">💡 Yönlendiren kişi varsa ona referral bonusu tanımlanır.</div>
+                    <div class="hint" style="display:inline-flex; align-items:center; gap:6px;"><x-icon name="lightbulb" size="12" aria-label="İpucu" /> Yönlendiren kişi varsa ona referral bonusu tanımlanır.</div>
                 </div>
 
                 <div class="wz-field">
@@ -390,16 +390,16 @@ a { color:var(--primary); text-decoration:none; }
 
             {{-- STEP 5: Onay --}}
             <div class="wz-step" data-step="5">
-                <h2 class="wz-step-title">✅ Son Kontrol</h2>
+                <h2 class="wz-step-title"><x-icon name="circle-check" size="22" aria-label="Onay" /> Son Kontrol</h2>
                 <p class="wz-step-sub">Bilgilerini gözden geçir, onay ver ve gönder.</p>
 
                 <div class="wz-summary" id="wz-summary">
                     {{-- JS tarafından doldurulur --}}
                 </div>
 
-                <div class="wz-note">
-                    📌 <strong>Sonraki adım:</strong> Form iletilir → 48 saat içinde ekibimiz arar
-                    → onay sonrası panele erişim + 100€ hoş geldin bonusu hesabına tanımlanır.
+                <div class="wz-note" style="display:flex; align-items:flex-start; gap:8px;">
+                    <x-icon name="pin" size="16" aria-label="Sonraki adım" /> <span><strong>Sonraki adım:</strong> Form iletilir → 48 saat içinde ekibimiz arar
+                    → onay sonrası panele erişim + 100€ hoş geldin bonusu hesabına tanımlanır.</span>
                 </div>
 
                 <div class="wz-field">
@@ -425,7 +425,7 @@ a { color:var(--primary); text-decoration:none; }
                         data-track="cta_clicked"
                         data-ph-cta-name="dealer_wizard_submit"
                         data-ph-location="dealer_application_wizard">
-                    🚀 Başvuruyu Gönder
+                    <x-icon name="rocket" size="16" aria-label="Gönder" /> Başvuruyu Gönder
                 </button>
             </div>
         </form>
@@ -515,22 +515,22 @@ a { color:var(--primary); text-decoration:none; }
     function fillSummary() {
         const fd = new FormData(form);
         const rows = [
-            ['👤 Ad Soyad', (fd.get('first_name') || '') + ' ' + (fd.get('last_name') || '')],
-            ['📧 Email', fd.get('email')],
-            ['📞 Telefon', fd.get('phone')],
-            ['📍 Şehir', fd.get('city') || '—'],
-            ['🎯 Plan', {
-                'lead_generation': '🤝 Lead Generation (€200-400/kayıt)',
-                'freelance': '🎯 Freelance (€500-750/kayıt)',
-                'unsure': '💡 Kararsız — Temsilci önerir',
+            ['Ad Soyad', (fd.get('first_name') || '') + ' ' + (fd.get('last_name') || '')],
+            ['Email', fd.get('email')],
+            ['Telefon', fd.get('phone')],
+            ['Şehir', fd.get('city') || '—'],
+            ['Plan', {
+                'lead_generation': 'Lead Generation (€200-400/kayıt)',
+                'freelance': 'Freelance (€500-750/kayıt)',
+                'unsure': 'Kararsız — Temsilci önerir',
             }[fd.get('preferred_plan')] || '—'],
-            ['📊 Aylık Hedef', fd.get('expected_monthly_volume') ? fd.get('expected_monthly_volume') + ' aday' : '—'],
-            ['🏢 Tip', {
+            ['Aylık Hedef', fd.get('expected_monthly_volume') ? fd.get('expected_monthly_volume') + ' aday' : '—'],
+            ['Tip', {
                 'individual': 'Bireysel',
                 'freelance': 'Freelance',
                 'company': 'Şirket' + (fd.get('company_name') ? ' (' + fd.get('company_name') + ')' : ''),
             }[fd.get('business_type')] || '—'],
-            ['✨ Deneyim', fd.get('education_experience') ? '✅ Eğitim sektöründe deneyim' : '—'],
+            ['Deneyim', fd.get('education_experience') ? 'Eğitim sektöründe deneyim' : '—'],
         ];
         summary.innerHTML = rows.map(r => `
             <div class="wz-summary-row">

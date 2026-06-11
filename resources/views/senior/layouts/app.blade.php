@@ -224,14 +224,14 @@
             <a href="/senior/dashboard"
                class="nav-link {{ request()->is('senior/dashboard') ? 'active' : '' }}"
                style="margin:2px 6px;border-radius:8px;">
-                <span class="nav-icon">🏠</span> Dashboard
+                <x-icon name="home" size="18" class="nav-icon" aria-label="Dashboard" /> Dashboard
             </a>
 
             {{-- Duyurular — standalone, dashboard altı --}}
             <a href="/bulletins"
                class="nav-link {{ request()->is('bulletins*') ? 'active' : '' }}"
                style="margin:2px 6px;border-radius:8px;justify-content:space-between;">
-                <span><span class="nav-icon">📢</span> Duyurular</span>
+                <span><x-icon name="megaphone" size="18" class="nav-icon" aria-label="Duyurular" /> Duyurular</span>
                 @if(($bulletinUnread ?? 0) > 0)<span class="nav-badge" style="background:#dc2626;">{{ $bulletinUnread }}</span>@endif
             </a>
 
@@ -243,12 +243,12 @@
                     <span class="acc-arrow" style="font-size:12px;opacity:.7;display:inline-block;transition:transform .2s;{{ $isComm ? '' : 'transform:rotate(-90deg);' }}">▾</span>
                 </div>
                 <div class="nav-acc-body" style="{{ $isComm ? '' : 'display:none;' }}">
-                    <a href="/senior/inbox"               class="nav-link {{ request()->is('senior/inbox*') ? 'active' : '' }}"><span class="nav-icon">📬</span> Gelen Kutusu</a>
-                    <a href="/im"                         class="nav-link {{ request()->is('im*') ? 'active' : '' }}"><span class="nav-icon">💬</span> Danışan İletişim @if((int)($dmUnread??0)>0)<span class="nav-badge">{{(int)$dmUnread}}</span>@endif</a>
-                    <a href="/senior/tickets"             class="nav-link {{ request()->is('senior/tickets*') ? 'active' : '' }}"><span class="nav-icon">🎫</span> Ticket</a>
-                    <a href="/tasks"                      class="nav-link {{ request()->is('tasks*') ? 'active' : '' }}"><span class="nav-icon">✅</span> Görevlerim</a>
-                    <a href="/senior/response-templates"  class="nav-link {{ request()->is('senior/response-templates*') ? 'active' : '' }}"><span class="nav-icon">📋</span> Şablon Yanıtlar</a>
-                    <a href="/manager/requests"           class="nav-link {{ request()->is('manager/requests*') ? 'active' : '' }}"><span class="nav-icon">📤</span> Manager'a Talep</a>
+                    <a href="/senior/inbox"               class="nav-link {{ request()->is('senior/inbox*') ? 'active' : '' }}"><x-icon name="inbox" size="18" class="nav-icon" aria-label="Gelen Kutusu" /> Gelen Kutusu</a>
+                    <a href="/im"                         class="nav-link {{ request()->is('im*') ? 'active' : '' }}"><x-icon name="message-circle" size="18" class="nav-icon" aria-label="Danışan İletişim" /> Danışan İletişim @if((int)($dmUnread??0)>0)<span class="nav-badge">{{(int)$dmUnread}}</span>@endif</a>
+                    <a href="/senior/tickets"             class="nav-link {{ request()->is('senior/tickets*') ? 'active' : '' }}"><x-icon name="life-buoy" size="18" class="nav-icon" aria-label="Ticket" /> Ticket</a>
+                    <a href="/tasks"                      class="nav-link {{ request()->is('tasks*') ? 'active' : '' }}"><x-icon name="check-square" size="18" class="nav-icon" aria-label="Görevlerim" /> Görevlerim</a>
+                    <a href="/senior/response-templates"  class="nav-link {{ request()->is('senior/response-templates*') ? 'active' : '' }}"><x-icon name="clipboard-list" size="18" class="nav-icon" aria-label="Şablon Yanıtlar" /> Şablon Yanıtlar</a>
+                    <a href="/manager/requests"           class="nav-link {{ request()->is('manager/requests*') ? 'active' : '' }}"><x-icon name="send" size="18" class="nav-icon" aria-label="Manager'a Talep" /> Manager'a Talep</a>
                 </div>
             </div>
 
@@ -260,17 +260,17 @@
                     <span class="acc-arrow" style="font-size:12px;opacity:.7;display:inline-block;transition:transform .2s;{{ $isOgrenci ? '' : 'transform:rotate(-90deg);' }}">▾</span>
                 </div>
                 <div class="nav-acc-body" style="{{ $isOgrenci ? '' : 'display:none;' }}">
-                    <a href="/senior/students"               class="nav-link {{ request()->is('senior/students*') ? 'active' : '' }}"><span class="nav-icon">🎓</span> Öğrencilerim</a>
-                    <a href="/senior/registration-documents" class="nav-link {{ request()->is('senior/registration-documents*') ? 'active' : '' }}"><span class="nav-icon">📂</span> Belge Onayları</a>
-                    <a href="/senior/process-tracking"       class="nav-link {{ request()->is('senior/process-tracking*','senior/university-applications*','senior/visa*','senior/housing*') ? 'active' : '' }}"><span class="nav-icon">🔄</span> Başvuru & Süreç @if(($deadlineIn7 ?? 0) > 0)<span style="background:#dc2626;color:#fff;border-radius:999px;font-size:10px;font-weight:700;padding:1px 6px;margin-left:4px;">{{ $deadlineIn7 }}</span>@endif</a>
-                    <a href="/senior/guest-pipeline"         class="nav-link {{ request()->is('senior/guest-pipeline*') ? 'active' : '' }}" style="padding-left:32px;font-size:var(--tx-xs);"><span class="nav-icon" style="font-size:11px;">🌀</span> Aday Öğrenci Pipeline</a>
-                    <a href="/senior/student-pipeline"       class="nav-link {{ request()->is('senior/student-pipeline*') ? 'active' : '' }}" style="padding-left:32px;font-size:var(--tx-xs);"><span class="nav-icon" style="font-size:11px;">🗂</span> Pipeline Kanban</a>
-                    <a href="/senior/appointments"           class="nav-link {{ request()->is('senior/appointments*') ? 'active' : '' }}"><span class="nav-icon">📅</span> Randevularım</a>
+                    <a href="/senior/students"               class="nav-link {{ request()->is('senior/students*') ? 'active' : '' }}"><x-icon name="graduation-cap" size="18" class="nav-icon" aria-label="Öğrencilerim" /> Öğrencilerim</a>
+                    <a href="/senior/registration-documents" class="nav-link {{ request()->is('senior/registration-documents*') ? 'active' : '' }}"><x-icon name="folder-open" size="18" class="nav-icon" aria-label="Belge Onayları" /> Belge Onayları</a>
+                    <a href="/senior/process-tracking"       class="nav-link {{ request()->is('senior/process-tracking*','senior/university-applications*','senior/visa*','senior/housing*') ? 'active' : '' }}"><x-icon name="refresh-cw" size="18" class="nav-icon" aria-label="Başvuru ve Süreç" /> Başvuru & Süreç @if(($deadlineIn7 ?? 0) > 0)<span style="background:#dc2626;color:#fff;border-radius:999px;font-size:10px;font-weight:700;padding:1px 6px;margin-left:4px;">{{ $deadlineIn7 }}</span>@endif</a>
+                    <a href="/senior/guest-pipeline"         class="nav-link {{ request()->is('senior/guest-pipeline*') ? 'active' : '' }}" style="padding-left:32px;font-size:var(--tx-xs);"><x-icon name="users" size="14" class="nav-icon" aria-label="Aday Öğrenci Pipeline" /> Aday Öğrenci Pipeline</a>
+                    <a href="/senior/student-pipeline"       class="nav-link {{ request()->is('senior/student-pipeline*') ? 'active' : '' }}" style="padding-left:32px;font-size:var(--tx-xs);"><x-icon name="kanban" size="14" class="nav-icon" aria-label="Pipeline Kanban" /> Pipeline Kanban</a>
+                    <a href="/senior/appointments"           class="nav-link {{ request()->is('senior/appointments*') ? 'active' : '' }}"><x-icon name="calendar" size="18" class="nav-icon" aria-label="Randevularım" /> Randevularım</a>
                     @module('booking')
-                    <a href="/senior/earnings"               class="nav-link {{ request()->is('senior/earnings*') ? 'active' : '' }}"><span class="nav-icon">💰</span> Kazançlarım</a>
+                    <a href="/senior/earnings"               class="nav-link {{ request()->is('senior/earnings*') ? 'active' : '' }}"><x-icon name="dollar-sign" size="18" class="nav-icon" aria-label="Kazançlarım" /> Kazançlarım</a>
                     @endmodule
-                    <a href="/senior/contracts"              class="nav-link {{ request()->is('senior/contracts*') ? 'active' : '' }}"><span class="nav-icon">📜</span> Sözleşmeler</a>
-                    <a href="/senior/batch-review"           class="nav-link {{ request()->is('senior/batch-review*') ? 'active' : '' }}"><span class="nav-icon">⚡</span> Toplu İnceleme</a>
+                    <a href="/senior/contracts"              class="nav-link {{ request()->is('senior/contracts*') ? 'active' : '' }}"><x-icon name="file-text" size="18" class="nav-icon" aria-label="Sözleşmeler" /> Sözleşmeler</a>
+                    <a href="/senior/batch-review"           class="nav-link {{ request()->is('senior/batch-review*') ? 'active' : '' }}"><x-icon name="zap" size="18" class="nav-icon" aria-label="Toplu İnceleme" /> Toplu İnceleme</a>
                 </div>
             </div>
 
@@ -282,8 +282,8 @@
                     <span class="acc-arrow" style="font-size:12px;opacity:.7;display:inline-block;transition:transform .2s;{{ $isLojistik ? '' : 'transform:rotate(-90deg);' }}">▾</span>
                 </div>
                 <div class="nav-acc-body" style="{{ $isLojistik ? '' : 'display:none;' }}">
-                    <a href="/senior/notes"   class="nav-link {{ request()->is('senior/notes*') ? 'active' : '' }}"><span class="nav-icon">🔒</span> Gizli Notlar</a>
-                    <a href="/senior/vault"   class="nav-link {{ request()->is('senior/vault*') ? 'active' : '' }}"><span class="nav-icon">🔐</span> Hesap Kasası</a>
+                    <a href="/senior/notes"   class="nav-link {{ request()->is('senior/notes*') ? 'active' : '' }}"><x-icon name="lock" size="18" class="nav-icon" aria-label="Gizli Notlar" /> Gizli Notlar</a>
+                    <a href="/senior/vault"   class="nav-link {{ request()->is('senior/vault*') ? 'active' : '' }}"><x-icon name="archive" size="18" class="nav-icon" aria-label="Hesap Kasası" /> Hesap Kasası</a>
                 </div>
             </div>
 
@@ -295,14 +295,14 @@
                     <span class="acc-arrow" style="font-size:12px;opacity:.7;display:inline-block;transition:transform .2s;{{ $isIcerik ? '' : 'transform:rotate(-90deg);' }}">▾</span>
                 </div>
                 <div class="nav-acc-body" style="{{ $isIcerik ? '' : 'display:none;' }}">
-                    <a href="/senior/document-builder" class="nav-link {{ request()->is('senior/document-builder*') ? 'active' : '' }}"><span class="nav-icon">📝</span> Doküman Oluştur</a>
-                    <a href="/senior/ai-assistant"     class="nav-link {{ request()->is('senior/ai-assistant*') ? 'active' : '' }}"><span class="nav-icon">🤖</span> AI Asistan</a>
-                    <a href="{{ route('uni-match.landing') }}" target="_blank" rel="noopener" class="nav-link"><span class="nav-icon">🎯</span> UniMatch</a>
-                    <a href="{{ route('program-search') }}" class="nav-link {{ request()->is('program-search*') ? 'active' : '' }}"><span class="nav-icon">🔍</span> Program Arama</a>
-                    <a href="/senior/knowledge-base"   class="nav-link {{ request()->is('senior/knowledge-base*','senior/materials*') ? 'active' : '' }}"><span class="nav-icon">📚</span> Materyaller & KB</a>
-                    <a href="/senior/services"         class="nav-link {{ request()->is('senior/services*') ? 'active' : '' }}"><span class="nav-icon">🔧</span> Servisler</a>
+                    <a href="/senior/document-builder" class="nav-link {{ request()->is('senior/document-builder*') ? 'active' : '' }}"><x-icon name="pen-line" size="18" class="nav-icon" aria-label="Doküman Oluştur" /> Doküman Oluştur</a>
+                    <a href="/senior/ai-assistant"     class="nav-link {{ request()->is('senior/ai-assistant*') ? 'active' : '' }}"><x-icon name="bot" size="18" class="nav-icon" aria-label="AI Asistan" /> AI Asistan</a>
+                    <a href="{{ route('uni-match.landing') }}" target="_blank" rel="noopener" class="nav-link"><x-icon name="target" size="18" class="nav-icon" aria-label="UniMatch" /> UniMatch</a>
+                    <a href="{{ route('program-search') }}" class="nav-link {{ request()->is('program-search*') ? 'active' : '' }}"><x-icon name="search" size="18" class="nav-icon" aria-label="Program Arama" /> Program Arama</a>
+                    <a href="/senior/knowledge-base"   class="nav-link {{ request()->is('senior/knowledge-base*','senior/materials*') ? 'active' : '' }}"><x-icon name="book-open" size="18" class="nav-icon" aria-label="Materyaller ve Bilgi Tabanı" /> Materyaller & KB</a>
+                    <a href="/senior/services"         class="nav-link {{ request()->is('senior/services*') ? 'active' : '' }}"><x-icon name="wrench" size="18" class="nav-icon" aria-label="Servisler" /> Servisler</a>
                     @can('dam.view')
-                    <a href="{{ route('senior.dam.index') }}" class="nav-link {{ request()->routeIs('senior.dam.*') ? 'active' : '' }}"><span class="nav-icon">📁</span> Dijital Varlıklar</a>
+                    <a href="{{ route('senior.dam.index') }}" class="nav-link {{ request()->routeIs('senior.dam.*') ? 'active' : '' }}"><x-icon name="folder" size="18" class="nav-icon" aria-label="Dijital Varlıklar" /> Dijital Varlıklar</a>
                     @endcan
                 </div>
             </div>
@@ -316,9 +316,9 @@
                     <span class="acc-arrow" style="font-size:12px;opacity:.7;display:inline-block;transition:transform .2s;{{ $isAiLabs ? '' : 'transform:rotate(-90deg);' }}">▾</span>
                 </div>
                 <div class="nav-acc-body" style="{{ $isAiLabs ? '' : 'display:none;' }}">
-                    <a href="/manager/ai-labs/sources"  class="nav-link {{ request()->is('manager/ai-labs/sources*') ? 'active' : '' }}"><span class="nav-icon">📚</span> Bilgi Havuzu</a>
-                    <a href="/manager/ai-labs/content"  class="nav-link {{ request()->is('manager/ai-labs/content*') ? 'active' : '' }}"><span class="nav-icon">✨</span> İçerik Üretici</a>
-                    <a href="/manager/ai-labs/external" class="nav-link {{ request()->is('manager/ai-labs/external*') ? 'active' : '' }}"><span class="nav-icon">🌐</span> Dış Kaynaklar</a>
+                    <a href="/manager/ai-labs/sources"  class="nav-link {{ request()->is('manager/ai-labs/sources*') ? 'active' : '' }}"><x-icon name="book-open" size="18" class="nav-icon" aria-label="Bilgi Havuzu" /> Bilgi Havuzu</a>
+                    <a href="/manager/ai-labs/content"  class="nav-link {{ request()->is('manager/ai-labs/content*') ? 'active' : '' }}"><x-icon name="sparkles" size="18" class="nav-icon" aria-label="İçerik Üretici" /> İçerik Üretici</a>
+                    <a href="/manager/ai-labs/external" class="nav-link {{ request()->is('manager/ai-labs/external*') ? 'active' : '' }}"><x-icon name="globe" size="18" class="nav-icon" aria-label="Dış Kaynaklar" /> Dış Kaynaklar</a>
                 </div>
             </div>
             @endmodule
@@ -331,9 +331,9 @@
                     <span class="acc-arrow" style="font-size:12px;opacity:.7;display:inline-block;transition:transform .2s;{{ $isKisisel ? '' : 'transform:rotate(-90deg);' }}">▾</span>
                 </div>
                 <div class="nav-acc-body" style="{{ $isKisisel ? '' : 'display:none;' }}">
-                    <a href="/senior/performance" class="nav-link {{ request()->is('senior/performance*') ? 'active' : '' }}"><span class="nav-icon">📊</span> Performansım</a>
-                    <a href="/senior/profile"     class="nav-link {{ request()->is('senior/profile*','my-contracts*','hr/my/leaves*') ? 'active' : '' }}"><span class="nav-icon">👤</span> Profil & Sözleşmeler</a>
-                    <a href="/senior/settings"    class="nav-link {{ request()->is('senior/settings*') ? 'active' : '' }}"><span class="nav-icon">⚙️</span> Ayarlar</a>
+                    <a href="/senior/performance" class="nav-link {{ request()->is('senior/performance*') ? 'active' : '' }}"><x-icon name="bar-chart" size="18" class="nav-icon" aria-label="Performansım" /> Performansım</a>
+                    <a href="/senior/profile"     class="nav-link {{ request()->is('senior/profile*','my-contracts*','hr/my/leaves*') ? 'active' : '' }}"><x-icon name="user" size="18" class="nav-icon" aria-label="Profil ve Sözleşmeler" /> Profil & Sözleşmeler</a>
+                    <a href="/senior/settings"    class="nav-link {{ request()->is('senior/settings*') ? 'active' : '' }}"><x-icon name="settings" size="18" class="nav-icon" aria-label="Ayarlar" /> Ayarlar</a>
                 </div>
             </div>
 
@@ -348,10 +348,10 @@
                  İzin Taleplerim → Kişisel altına taşındı.
                  Footer'da sadece Danışman Kılavuzu ve Çıkış Yap kalıyor. --}}
             <a href="{{ route('senior.handbook') }}" class="nav-link {{ request()->routeIs('senior.handbook') ? 'active' : '' }}" style="margin-bottom:4px;">
-                <span class="nav-icon">📖</span> Danışman Kılavuzu
+                <x-icon name="book-open" size="18" class="nav-icon" aria-label="Danışman Kılavuzu" /> Danışman Kılavuzu
             </a>
             <a href="/logout" class="nav-link logout">
-                <span class="nav-icon">🚪</span> Çıkış Yap
+                <x-icon name="log-out" size="18" class="nav-icon" aria-label="Çıkış Yap" /> Çıkış Yap
             </a>
         </div>
     </aside>
@@ -362,8 +362,8 @@
         {{-- Topbar --}}
         <header class="topbar">
             <div class="topbar-left" style="flex:0 1 auto;">
-                <button class="icon-btn" id="premium-menu-btn"
-                        style="display:none;">☰</button>
+                <button class="icon-btn" id="premium-menu-btn" aria-label="Menüyü Aç"
+                        style="display:none;align-items:center;justify-content:center;"><x-icon name="menu" size="22" /></button>
                 <a href="/senior/dashboard" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:22px;line-height:1;width:44px;height:44px;flex-shrink:0;border:1px solid var(--u-line,#e5e7eb);background:var(--u-card,#fff);border-radius:10px;text-decoration:none;display:flex;align-items:center;justify-content:center;">&#8592;</a>
                 <div>
                     <div class="topbar-title">@yield('page_title', 'Eğitim Danışmanı Paneli')</div>
@@ -380,8 +380,8 @@
             </div>
             <div class="topbar-right">
                 @yield('topbar-actions')
-                <button class="icon-btn" id="dm-btn" title="Tema">🌙</button>
-                <button class="icon-btn" id="design-btn" title="Tasarım Teması">🎨</button>
+                <button class="icon-btn" id="dm-btn" title="Tema" aria-label="Karanlık moda geç"><x-icon name="moon" size="18" /></button>
+                <button class="icon-btn" id="design-btn" title="Tasarım Teması" aria-label="Tasarım temasını değiştir"><x-icon name="palette" size="18" /></button>
                 <div class="avatar" style="width:36px;height:36px;font-size:13px;" title="{{ $name }}">
                     {{ $initials }}
                 </div>
@@ -426,8 +426,8 @@
 </style>
 
 {{-- Dark mode toggle FAB --}}
-<div class="dark-toggle" id="theme-toggle" title="Tema Değiştir">
-    <span id="theme-icon">🌙</span>
+<div class="dark-toggle" id="theme-toggle" title="Tema Değiştir" aria-label="Tema Değiştir">
+    <span id="theme-icon"><x-icon name="moon" size="22" /></span>
 </div>
 
 {{-- Toast container --}}
@@ -452,11 +452,11 @@
 .qn-note-item:last-child{border-bottom:none;}
 </style>
 
-<button id="qn-fab" title="Hızlı Not (Alt+N)" onclick="qnToggle()">📝</button>
+<button id="qn-fab" title="Hızlı Not (Alt+N)" onclick="qnToggle()" aria-label="Hızlı Not"><x-icon name="pen-line" size="22" /></button>
 
 <div id="qn-panel">
     <div class="qn-header">
-        <span class="qn-header-title">📝 Hızlı Not</span>
+        <span class="qn-header-title"><x-icon name="pen-line" size="16" /> Hızlı Not</span>
         <button onclick="qnLoadRecent()">Son Notlar</button>
         <button onclick="qnClose()" style="margin-left:4px;">✕</button>
     </div>
@@ -495,6 +495,14 @@
 
 {{-- Theme + Toast + Dark Mode --}}
 <script nonce="{{ $cspNonce ?? '' }}">
+// ── Inline SVG icon markup (Lucide) — emoji yerine kullanilir ──
+var __ICON_SVG = {
+    moon:    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+    sun:     '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+    palette: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>',
+    circle:  '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>'
+};
+function __setIcon(id, name){var el=document.getElementById(id);if(el)el.innerHTML=__ICON_SVG[name];}
 function __designToggle(){
     var link=document.getElementById('mentorde-theme-css');
     if(!link)return;
@@ -510,8 +518,7 @@ function __designToggle(){
         var ml2=document.getElementById('minimalist-css-pre');if(ml2)ml2.remove();
         var ov=document.getElementById('design-override');if(ov)ov.remove();
     }
-    var btn=document.getElementById('design-btn');
-    if(btn)btn.textContent=next==='minimalist'?'◎':'🎨';
+    __setIcon('design-btn', next==='minimalist'?'circle':'palette');
 }
 function __dmToggle(){
     var html=document.documentElement;
@@ -520,13 +527,13 @@ function __dmToggle(){
     html.setAttribute('data-theme',next);
     html.classList.toggle('dark',next==='dark');
     localStorage.setItem('mentorde_dark',next==='dark');
-    var icon=next==='dark'?'☀️':'🌙';
-    ['dm-btn','theme-icon'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=icon;});
+    var iconName=next==='dark'?'sun':'moon';
+    ['dm-btn','theme-icon'].forEach(function(id){__setIcon(id, iconName);});
 }
 // ── İkon başlangıç değerleri (DOMContentLoaded sonrası) ──
 document.addEventListener('DOMContentLoaded',function(){
-    if(localStorage.getItem('mentorde_design')==='minimalist'){var b=document.getElementById('design-btn');if(b)b.textContent='◎';}
-    if(localStorage.getItem('mentorde_dark')==='true'){['dm-btn','theme-icon'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent='☀️';});}
+    if(localStorage.getItem('mentorde_design')==='minimalist'){__setIcon('design-btn','circle');}
+    if(localStorage.getItem('mentorde_dark')==='true'){['dm-btn','theme-icon'].forEach(function(id){__setIcon(id,'sun');});}
 });
 
 document.addEventListener('alpine:init',function(){

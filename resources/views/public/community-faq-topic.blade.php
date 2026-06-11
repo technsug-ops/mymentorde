@@ -145,7 +145,7 @@
         </div>
         <h1>{{ $title }}</h1>
         <p class="lead">{{ $desc }}</p>
-        <div class="hero-meta">📚 {{ $count }} anonim soru · 🛡️ Kişisel bilgi temizliği uygulandı</div>
+        <div class="hero-meta" style="display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap;"><x-icon name="book-open" size="14" aria-label="Soru" /> {{ $count }} anonim soru · <x-icon name="shield-check" size="14" aria-label="Anonim" /> Kişisel bilgi temizliği uygulandı</div>
     </div>
 </section>
 
@@ -173,7 +173,7 @@
         </div>
 
         <div class="search-bar">
-            <span style="color: {{ $primary }};">🔍</span>
+            <span style="color: {{ $primary }}; display:inline-flex;"><x-icon name="search" size="16" aria-label="Ara" /></span>
             <input type="text" id="q-search" placeholder="Bu konudaki soruları filtrele...">
         </div>
 
@@ -182,7 +182,7 @@
                 <li class="question-item" data-q="{{ mb_strtolower($q['text']) }}">
                     <p class="question-text">{{ $q['text'] }}</p>
                     <div class="question-meta">
-                        <span class="question-date">📅 {{ $q['date'] ?? '—' }}</span>
+                        <span class="question-date" style="display:inline-flex; align-items:center; gap:4px;"><x-icon name="calendar-days" size="12" aria-label="Tarih" /> {{ $q['date'] ?? '—' }}</span>
                         <a href="/randevu" class="question-cta">Bu konuda danışmanlık →</a>
                     </div>
                 </li>
@@ -194,7 +194,7 @@
         <div class="bottom-cta">
             <h3>Sorduğun soruya çok benzeyen bir başlık var mı?</h3>
             <p>Sürecin senin durumuna nasıl uygulanacağı kişiseldir. Ücretsiz danışmanlık randevusunda spesifik cevap alabilirsin.</p>
-            <a href="/randevu" class="cta-btn">📅 Ücretsiz Randevu Al</a>
+            <a href="/randevu" class="cta-btn"><x-icon name="calendar-days" size="16" aria-label="Randevu" /> Ücretsiz Randevu Al</a>
         </div>
 
     </main>

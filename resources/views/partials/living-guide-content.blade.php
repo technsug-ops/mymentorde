@@ -198,10 +198,10 @@ $lgDiscover = function ($cat = null) use ($lgIsStudent) {
 
 $cityList = $cities ?? [];
 $rate     = $eurTryRate ?? null;
-$cityEmojiMap = [
-    'berlin' => '🐻', 'munich' => '🏔', 'hamburg' => '⚓', 'frankfurt' => '🏦',
-    'cologne' => '⛪', 'stuttgart' => '🚗', 'dusseldorf' => '🎭',
-    'dresden' => '🏰', 'hannover' => '🌿', 'nurnberg' => '🏛',
+$cityIconMap = [
+    'berlin' => 'building', 'munich' => 'mountain', 'hamburg' => 'anchor', 'frankfurt' => 'wallet',
+    'cologne' => 'church', 'stuttgart' => 'car', 'dusseldorf' => 'palette',
+    'dresden' => 'castle', 'hannover' => 'tree', 'nurnberg' => 'landmark',
 ];
 @endphp
 
@@ -215,24 +215,24 @@ $cityEmojiMap = [
                 Konut, ulaşım, sigorta, banka hesabı — Almanya'ya gelmeden önce bilmen gereken her şey.
             </div>
             <div class="lg-hero-stats">
-                <span class="lg-hero-stat"><span class="lg-hero-stat-ico">💶</span>Ort. €850–1.100/ay</span>
-                <span class="lg-hero-stat"><span class="lg-hero-stat-ico">🏛</span>10 popüler şehir</span>
-                <span class="lg-hero-stat"><span class="lg-hero-stat-ico">🎫</span>Semesterticket ücretsiz</span>
+                <span class="lg-hero-stat"><span class="lg-hero-stat-ico"><x-icon name="euro" size="13" aria-label="Maliyet" /></span>Ort. €850–1.100/ay</span>
+                <span class="lg-hero-stat"><span class="lg-hero-stat-ico"><x-icon name="landmark" size="13" aria-label="Şehirler" /></span>10 popüler şehir</span>
+                <span class="lg-hero-stat"><span class="lg-hero-stat-ico"><x-icon name="ticket" size="13" aria-label="Semesterticket" /></span>Semesterticket ücretsiz</span>
                 @if($rate)
-                <span class="lg-hero-stat"><span class="lg-hero-stat-ico">💱</span>1 EUR = {{ number_format($rate, 2) }} TRY</span>
+                <span class="lg-hero-stat"><span class="lg-hero-stat-ico"><x-icon name="wallet" size="13" aria-label="Döviz kuru" /></span>1 EUR = {{ number_format($rate, 2) }} TRY</span>
                 @endif
             </div>
             @pageVisible('discover')
             <div class="lg-hero-chips">
-                <a class="lg-hero-chip" href="{{ $lgDiscover() }}">🧭 Tüm İçerikler</a>
-                <a class="lg-hero-chip" href="{{ $lgDiscover('city-content') }}">🏙 Şehir Rehberleri</a>
-                <a class="lg-hero-chip" href="{{ $lgDiscover('tips-tricks') }}">💡 İpuçları</a>
-                <a class="lg-hero-chip" href="{{ $lgDiscover('careers') }}">💼 Kariyer</a>
-                <a class="lg-hero-chip" href="{{ $lgDiscover('student-life') }}">🎓 Öğrenci Hayatı</a>
+                <a class="lg-hero-chip" href="{{ $lgDiscover() }}"><x-icon name="compass" size="13" aria-label="Tüm içerikler" /> Tüm İçerikler</a>
+                <a class="lg-hero-chip" href="{{ $lgDiscover('city-content') }}"><x-icon name="building" size="13" aria-label="Şehir rehberleri" /> Şehir Rehberleri</a>
+                <a class="lg-hero-chip" href="{{ $lgDiscover('tips-tricks') }}"><x-icon name="lightbulb" size="13" aria-label="İpuçları" /> İpuçları</a>
+                <a class="lg-hero-chip" href="{{ $lgDiscover('careers') }}"><x-icon name="briefcase" size="13" aria-label="Kariyer" /> Kariyer</a>
+                <a class="lg-hero-chip" href="{{ $lgDiscover('student-life') }}"><x-icon name="graduation-cap" size="13" aria-label="Öğrenci hayatı" /> Öğrenci Hayatı</a>
             </div>
             @endpageVisible
         </div>
-        <div class="lg-hero-icon">🏙</div>
+        <div class="lg-hero-icon" style="color:#fff;display:flex;align-items:center;justify-content:center;"><x-icon name="building" size="64" aria-label="Şehir" /></div>
     </div>
 </div>
 
@@ -256,12 +256,12 @@ $cityEmojiMap = [
             @php
                 $monthly     = ($c['rent_avg']??0) + ($c['food_avg']??0) + ($c['transport_avg']??0) + ($c['misc_avg']??0) + 110;
                 $isExpensive = $monthly > 1100;
-                $emoji       = $cityEmojiMap[$key] ?? '🏙';
+                $cityIcon    = $cityIconMap[$key] ?? 'map-pin';
             @endphp
             <tr>
                 <td>
                     <div class="lg-city-cell">
-                        <span class="lg-city-emoji">{{ $emoji }}</span>
+                        <span class="lg-city-emoji" style="color:var(--u-brand,#2563eb);"><x-icon name="{{ $cityIcon }}" size="16" aria-label="{{ $c['label'] ?? $key }}" /></span>
                         {{ $c['label'] ?? $key }}
                         @if($isExpensive)<span class="badge warn" style="font-size:10px;">Pahalı</span>@endif
                     </div>
@@ -284,7 +284,7 @@ $cityEmojiMap = [
 </div>
 
 {{-- ══════ Housing Options ══════ --}}
-<div class="lg-section-title">🏠 Konut Seçenekleri</div>
+<div class="lg-section-title"><x-icon name="home" size="18" aria-label="Konut" /> Konut Seçenekleri</div>
 <div class="lg-housing-grid">
     @foreach([
         ['Studentenwohnheim', 'Yurt', 'En ucuz seçenek. Studentenwerk listelerine yazılın — bekleme listesi uzun olabilir.', '€150–400', '#16a34a',
@@ -309,7 +309,7 @@ $cityEmojiMap = [
 
 {{-- ══════ Almanya'ya Gelince Yapılacaklar ══════ --}}
 <div class="lg-arrival-card">
-    <div class="lg-arrival-title">📋 Almanya'ya Gelince Yapılacaklar</div>
+    <div class="lg-arrival-title"><x-icon name="file-text" size="16" aria-label="Yapılacaklar listesi" /> Almanya'ya Gelince Yapılacaklar</div>
     <div class="lg-arrival-grid">
         @foreach([
             ['1','Anmeldung (İkamet Tescili)','Gelişten itibaren 2 hafta içinde zorunlu. Einwohnermeldeamt\'a gidin.'],
@@ -331,19 +331,19 @@ $cityEmojiMap = [
 </div>
 
 {{-- ══════ Tasarruf İpuçları ══════ --}}
-<div class="lg-section-title">💡 Tasarruf İpuçları</div>
+<div class="lg-section-title"><x-icon name="lightbulb" size="18" aria-label="Tasarruf ipuçları" /> Tasarruf İpuçları</div>
 <div class="lg-tips-grid">
     @foreach([
-        ['🛒','#16a34a','Gıda','ALDI, LIDL, REWE öğrencilerin favorisi. Yemek pişirerek aylık €150–200\'e düşürebilirsin.'],
-        ['🚲','#0891b2','Ulaşım','Semesterticket ile toplu taşıma ücretsiz veya indirimli. Bisiklet de yaygın ve ucuz.'],
-        ['💊','#e11d48','Sağlık','Devlet sigortasıyla (TK/AOK) tüm temel sağlık hizmetleri kapsanır.'],
-        ['📱','#7c3aed','Telefon','Aldi Talk, Congstar gibi ön ödemeli hatlar €10–15/ay. Öğrenci tarifeleri mevcut.'],
-        ['☕','#f59e0b','Sosyal Hayat','Mensa yemekleri €2–4. Kütüphaneler ve müzeler öğrenciye ücretsiz/indirimli.'],
-        ['💰','#2563eb','Çalışma','Öğrenci vizesiyle yılda 120 tam/240 yarım gün çalışabilirsin. Minijob yaygın.'],
-    ] as [$icon,$color,$title,$desc])
+        ['shopping-cart','#16a34a','Gıda','ALDI, LIDL, REWE öğrencilerin favorisi. Yemek pişirerek aylık €150–200\'e düşürebilirsin.'],
+        ['bike','#0891b2','Ulaşım','Semesterticket ile toplu taşıma ücretsiz veya indirimli. Bisiklet de yaygın ve ucuz.'],
+        ['pill','#e11d48','Sağlık','Devlet sigortasıyla (TK/AOK) tüm temel sağlık hizmetleri kapsanır.'],
+        ['smartphone','#7c3aed','Telefon','Aldi Talk, Congstar gibi ön ödemeli hatlar €10–15/ay. Öğrenci tarifeleri mevcut.'],
+        ['coffee','#f59e0b','Sosyal Hayat','Mensa yemekleri €2–4. Kütüphaneler ve müzeler öğrenciye ücretsiz/indirimli.'],
+        ['wallet','#2563eb','Çalışma','Öğrenci vizesiyle yılda 120 tam/240 yarım gün çalışabilirsin. Minijob yaygın.'],
+    ] as [$iconName,$color,$title,$desc])
     <div class="lg-tip" style="--t-color:{{ $color }};">
         <div class="lg-tip-head">
-            <div class="lg-tip-icon">{{ $icon }}</div>
+            <div class="lg-tip-icon" style="color:{{ $color }};"><x-icon name="{{ $iconName }}" size="20" aria-label="{{ $title }}" /></div>
             <div class="lg-tip-title">{{ $title }}</div>
         </div>
         <div class="lg-tip-desc">{{ $desc }}</div>

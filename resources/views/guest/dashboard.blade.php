@@ -377,7 +377,7 @@
     $docsRequiredTotal    = (int) ($docsChecklistStats['required_total']   ?? 0);
     $docsRequiredUploaded = (int) ($docsChecklistStats['required_uploaded'] ?? 0);
     $docsPct              = (int) ($docsChecklistStats['percent'] ?? 0);
-    $motivationMessage    = $motivationMessage ?? ['emoji' => '🚀', 'text' => 'Almanya yolculuğun başlıyor!'];
+    $motivationMessage    = $motivationMessage ?? ['emoji' => '', 'text' => 'Almanya yolculuğun başlıyor!'];
 
     $guestFirstName  = trim((string) ($guest?->first_name ?? ''));
     $selectedPkgCode = (string) ($guest?->selected_package_code ?? '');
@@ -402,37 +402,37 @@
     // ── Hero config ──
     $heroConfig = match($stateKey) {
         'fresh' => [
-            'icon'   => '📋',
+            'icon'   => 'clipboard-list',
             'title'  => 'Başvuru formunu doldur',
             'sub'    => 'Kişisel bilgilerini, eğitim geçmişini ve tercihlerini girmen gerekiyor.',
             'url'    => route('guest.registration.form'),
             'action' => 'Başla →',
-            'meta'   => ['⏱️ ~10 dakika', '💾 Otomatik kayıt'],
+            'meta'   => ['~10 dakika', 'Otomatik kayıt'],
         ],
         'docs'  => [
-            'icon'   => '📄',
+            'icon'   => 'file-text',
             'title'  => 'Belgelerini yükle',
             'sub'    => 'Başvurun için gerekli belgeleri yükle. PDF veya fotoğraf formatında olabilir.',
             'url'    => route('guest.registration.documents'),
             'action' => 'Yükle →',
-            'meta'   => ["📋 {$docsRequiredTotal} belge gerekli", '📸 Fotoğraf da olur'],
+            'meta'   => ["{$docsRequiredTotal} belge gerekli", 'Fotoğraf da olur'],
         ],
         'pkg'   => [
-            'icon'   => '📦',
+            'icon'   => 'package',
             'title'  => 'Sana uygun paketi seç',
             'sub'    => '3 farklı hizmet paketi arasından seçim yapabilirsin.',
             'url'    => route('guest.services'),
             'action' => 'Seç →',
-            'meta'   => ['📦 3 paket', '🔄 Değiştirilebilir'],
+            'meta'   => ['3 paket', 'Değiştirilebilir'],
         ],
-        default => ['icon' => '🎉', 'title' => '', 'sub' => '', 'url' => '#', 'action' => '', 'meta' => []],
+        default => ['icon' => 'party-popper', 'title' => '', 'sub' => '', 'url' => '#', 'action' => '', 'meta' => []],
     };
 
     $greetTitle = match($stateKey) {
-        'fresh' => "Merhaba {$guestFirstName} 👋",
-        'docs'  => "Harika gidiyorsun {$guestFirstName}! 🎉",
-        'pkg'   => "Son bir adım kaldı! 🎯",
-        'done'  => "Tebrikler {$guestFirstName}! 🎓",
+        'fresh' => "Merhaba {$guestFirstName}",
+        'docs'  => "Harika gidiyorsun {$guestFirstName}!",
+        'pkg'   => "Son bir adım kaldı!",
+        'done'  => "Tebrikler {$guestFirstName}!",
     };
     $greetSub = match($stateKey) {
         'fresh' => 'Almanya yolculuğun başlamak üzere. Adım adım seni yönlendireceğiz.',
@@ -446,9 +446,9 @@
     $step2 = $docsCompleted ? 'done' : 'active';
     $step3 = $packageSelected ? 'done' : 'active';
 
-    $step1Status = $formCompleted ? 'Tamamlandı ✓' : 'Şimdi başla';
-    $step2Status = $docsCompleted ? 'Onaylandı ✓' : 'Şimdi yükle';
-    $step3Status = $packageSelected ? 'Seçildi ✓' : 'Paket seç';
+    $step1Status = $formCompleted ? 'Tamamlandı' : 'Şimdi başla';
+    $step2Status = $docsCompleted ? 'Onaylandı' : 'Şimdi yükle';
+    $step3Status = $packageSelected ? 'Seçildi' : 'Paket seç';
 @endphp
 
 {{-- ── Greeting ── --}}
@@ -480,15 +480,15 @@
     </div>
     <div class="gdb-steps">
         <a href="{{ route('guest.registration.form') }}" class="gdb-step {{ $step1 }}">
-            <div class="gdb-step-num">{{ $formCompleted ? '✓' : '1' }}</div>
+            <div class="gdb-step-num">@if($formCompleted)<x-icon name="check" size="14" aria-label="Tamam" />@else 1 @endif</div>
             <div><div class="gdb-step-name">Başvuru Formu</div><div class="gdb-step-status">{{ $step1Status }}</div></div>
         </a>
         <a href="{{ route('guest.registration.documents') }}" class="gdb-step {{ $step2 }}">
-            <div class="gdb-step-num">{{ $docsCompleted ? '✓' : '2' }}</div>
+            <div class="gdb-step-num">@if($docsCompleted)<x-icon name="check" size="14" aria-label="Tamam" />@else 2 @endif</div>
             <div><div class="gdb-step-name">Belgeler</div><div class="gdb-step-status">{{ $step2Status }}</div></div>
         </a>
         <a href="{{ route('guest.services') }}" class="gdb-step {{ $step3 }}">
-            <div class="gdb-step-num">{{ $packageSelected ? '✓' : '3' }}</div>
+            <div class="gdb-step-num">@if($packageSelected)<x-icon name="check" size="14" aria-label="Tamam" />@else 3 @endif</div>
             <div><div class="gdb-step-name">Paket Seçimi</div><div class="gdb-step-status">{{ $step3Status }}</div></div>
         </a>
     </div>
@@ -511,7 +511,7 @@
             </div>
         </div>
         <div class="gdb-hero-right">
-            <div class="gdb-hero-action-icon">{{ $heroConfig['icon'] }}</div>
+            <div class="gdb-hero-action-icon" style="color:#fff;"><x-icon name="{{ $heroConfig['icon'] }}" size="28" aria-label="Sıradaki adım" /></div>
             <div class="gdb-hero-action-text">{{ $heroConfig['action'] }}</div>
         </div>
     </div>
@@ -519,7 +519,7 @@
 @else
 {{-- ── Celebration ── --}}
 <div class="gdb-celebrate">
-    <div class="gdb-celebrate-emoji">🎉</div>
+    <div class="gdb-celebrate-emoji" style="display:flex;justify-content:center;color:#fff;"><x-icon name="party-popper" size="48" aria-label="Kutlama" /></div>
     <h3>Tebrikler {{ $guestFirstName }}!</h3>
     <p>Tüm adımları başarıyla tamamladın. Sözleşme süreci başlatıldı — danışmanın en kısa sürede seninle iletişime geçecek.</p>
 </div>
@@ -533,7 +533,7 @@
           border-radius:14px; color:#fff; text-decoration:none;
           box-shadow:0 4px 14px rgba(126,88,191,.22);">
     <div style="display:flex; align-items:center; gap:14px;">
-        <div style="font-size:26px; line-height:1;">🎯</div>
+        <div style="line-height:1; color:#fff; display:flex;"><x-icon name="target" size="26" aria-label="Akıllı eşleştirme" /></div>
         <div>
             <div style="font-size:15px; font-weight:700; letter-spacing:-.2px;">
                 Sana en uygun Almanya programını bul
@@ -552,7 +552,7 @@
 {{-- ── Stats Row ── --}}
 <div class="gdb-grid-3">
     <div class="gdb-stat">
-        <div class="gdb-stat-icon {{ $stateKey === 'done' ? 'green' : 'blue' }}">📊</div>
+        <div class="gdb-stat-icon {{ $stateKey === 'done' ? 'green' : 'blue' }}" style="color:{{ $stateKey === 'done' ? 'var(--u-ok)' : 'var(--u-brand)' }};"><x-icon name="bar-chart-3" size="20" aria-label="İstatistik" /></div>
         <div>
             <div class="gdb-stat-label">Tamamlanan adım</div>
             <div class="gdb-stat-value">{{ $doneCount }}<span style="font-size:14px;color:var(--u-muted);font-weight:400"> / 3</span></div>
@@ -565,11 +565,11 @@
         </div>
     </div>
     <div class="gdb-stat">
-        <div class="gdb-stat-icon amber">⏱️</div>
+        <div class="gdb-stat-icon amber" style="color:#d97706;"><x-icon name="clock" size="20" aria-label="Süre" /></div>
         <div>
             <div class="gdb-stat-label">{{ $stateKey === 'done' ? 'Kayıt durumu' : 'Tahmini kalan süre' }}</div>
             <div class="gdb-stat-value">
-                @if($stateKey === 'done') <span style="color:var(--u-ok);font-size:15px">✓ Tamamlandı</span>
+                @if($stateKey === 'done') <span style="color:var(--u-ok);font-size:15px;display:inline-flex;align-items:center;gap:4px;"><x-icon name="check" size="14" aria-label="Tamam" /> Tamamlandı</span>
                 @elseif($stateKey === 'pkg') ~2 dk
                 @elseif($stateKey === 'docs') ~7 dk
                 @else ~17 dk
@@ -579,7 +579,7 @@
         </div>
     </div>
     <div class="gdb-stat">
-        <div class="gdb-stat-icon purple">💬</div>
+        <div class="gdb-stat-icon purple" style="color:#7c3aed;"><x-icon name="message-circle" size="20" aria-label="Mesaj" /></div>
         <div>
             <div class="gdb-stat-label">Yeni Mesaj</div>
             <div class="gdb-stat-value">{{ (int)($ticketSummary['unread_like'] ?? 0) }}</div>
@@ -596,24 +596,24 @@
 <div class="gdb-grid-2">
     <div class="gdb-cl">
         <div class="gdb-cl-head">
-            <h4>📋 Yapılacaklar <span class="count">{{ $doneCount }}/3</span></h4>
+            <h4><x-icon name="clipboard-list" size="16" aria-label="Yapılacaklar" /> Yapılacaklar <span class="count">{{ $doneCount }}/3</span></h4>
         </div>
         <div class="gdb-cl-item {{ $formCompleted ? 'done' : 'active' }}">
-            <div class="gdb-cl-check">{{ $formCompleted ? '✓' : '1' }}</div>
+            <div class="gdb-cl-check">@if($formCompleted)<x-icon name="check" size="11" aria-label="Tamam" />@else 1 @endif</div>
             <div class="gdb-cl-text">Başvuru formunu doldur</div>
             <span class="gdb-cl-tag {{ $formCompleted ? 'done' : 'active' }}">
                 {{ $formCompleted ? 'Tamam' : 'Şimdi' }}
             </span>
         </div>
         <div class="gdb-cl-item {{ $docsCompleted ? 'done' : 'active' }}">
-            <div class="gdb-cl-check">{{ $docsCompleted ? '✓' : '2' }}</div>
+            <div class="gdb-cl-check">@if($docsCompleted)<x-icon name="check" size="11" aria-label="Tamam" />@else 2 @endif</div>
             <div class="gdb-cl-text">Belgelerini yükle</div>
             <span class="gdb-cl-tag {{ $docsCompleted ? 'done' : 'active' }}">
                 {{ $docsCompleted ? 'Tamam' : 'Şimdi' }}
             </span>
         </div>
         <div class="gdb-cl-item {{ $packageSelected ? 'done' : (($formCompleted && $docsCompleted) ? 'active' : 'locked') }}">
-            <div class="gdb-cl-check">{{ $packageSelected ? '✓' : '3' }}</div>
+            <div class="gdb-cl-check">@if($packageSelected)<x-icon name="check" size="11" aria-label="Tamam" />@else 3 @endif</div>
             <div class="gdb-cl-text">Paketini seç</div>
             <span class="gdb-cl-tag {{ $packageSelected ? 'done' : (($formCompleted && $docsCompleted) ? 'active' : 'locked') }}">
                 {{ $packageSelected ? 'Tamam' : (($formCompleted && $docsCompleted) ? 'Şimdi' : 'Bekliyor') }}
@@ -623,20 +623,20 @@
 
     <div class="gdb-cl">
         <div class="gdb-cl-head">
-            <h4>📁 Gerekli Belgeler <span class="count">{{ $docsRequiredUploaded }}/{{ $docsRequiredTotal }}</span></h4>
+            <h4><x-icon name="folder" size="16" aria-label="Belgeler" /> Gerekli Belgeler <span class="count">{{ $docsRequiredUploaded }}/{{ $docsRequiredTotal }}</span></h4>
         </div>
         @php $missingDocs = $missingRequiredDocuments ?? []; @endphp
         @if(!empty($missingDocs))
             @foreach(array_slice($missingDocs, 0, 4) as $doc)
                 <a href="{{ route('guest.registration.documents') }}" class="gdb-cl-item active" style="text-decoration:none;color:inherit;cursor:pointer;">
-                    <div class="gdb-cl-check">📄</div>
+                    <div class="gdb-cl-check"><x-icon name="file-text" size="12" aria-label="Belge" /></div>
                     <div class="gdb-cl-text">{{ $doc['name'] ?? 'Belge' }}</div>
                     <span class="gdb-cl-tag active">Yükle →</span>
                 </a>
             @endforeach
         @else
             <div class="gdb-cl-item done">
-                <div class="gdb-cl-check">✓</div>
+                <div class="gdb-cl-check"><x-icon name="check" size="11" aria-label="Tamam" /></div>
                 <div class="gdb-cl-text">Tüm belgeler yüklendi</div>
                 <span class="gdb-cl-tag done">Tamam</span>
             </div>
@@ -650,10 +650,10 @@
         'done' => 'background:linear-gradient(135deg,#d1fae5,#ecfdf5);border-color:rgba(16,185,129,.15);',
         default => '',
     };
-    $tipIcon = match($stateKey) { 'fresh' => '💡', 'docs' => '📸', 'pkg' => '🎯', 'done' => '🎓' };
+    $tipIcon = match($stateKey) { 'fresh' => 'lightbulb', 'docs' => 'camera', 'pkg' => 'target', 'done' => 'graduation-cap' };
 @endphp
 <div class="gdb-tip" @if($tipStyle) style="{{ $tipStyle }}" @endif>
-    <div class="gdb-tip-icon">{{ $tipIcon }}</div>
+    <div class="gdb-tip-icon" style="color:var(--u-brand);"><x-icon name="{{ $tipIcon }}" size="18" aria-label="İpucu" /></div>
     <div>
         <h5>{{ match($stateKey) {
             'fresh' => 'Form otomatik kaydedilir',
@@ -666,15 +666,15 @@
 </div>
 
 {{-- ── Advisor Sticky Card kaldırıldı —
-     Layout'taki küçük 💬 FAB widget aynı işi görüyor, çift gösterim oluyordu. --}}
+     Layout'taki kucuk mesajlasma FAB widget'i ayni isi goruyor, cift gosterim oluyordu. --}}
 
 @if($stateKey === 'done')
 {{-- ── Quick Links ── --}}
 <div class="gdb-ql">
-    <a href="{{ route('guest.messages') }}" class="gdb-ql-item">💬 Danışmanınla konuş</a>
-    <a href="{{ route('guest.contract') }}" class="gdb-ql-item">📜 Sözleşme durumu</a>
+    <a href="{{ route('guest.messages') }}" class="gdb-ql-item"><x-icon name="message-circle" size="16" aria-label="Mesaj" /> Danışmanınla konuş</a>
+    <a href="{{ route('guest.contract') }}" class="gdb-ql-item"><x-icon name="signature" size="16" aria-label="Sözleşme" /> Sözleşme durumu</a>
     @pageVisible('discover')
-    <a href="{{ route('guest.discover') }}" class="gdb-ql-item">🌍 Almanya rehberi</a>
+    <a href="{{ route('guest.discover') }}" class="gdb-ql-item"><x-icon name="globe" size="16" aria-label="Rehber" /> Almanya rehberi</a>
     @endpageVisible
 </div>
 @endif
@@ -694,7 +694,7 @@
 {{-- ── Başvuru Durumun ── --}}
 @if(!empty($guestAnalytics))
 <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:18px 20px;margin-bottom:16px;">
-    <div style="font-size:13px;font-weight:700;color:var(--text,#111);margin-bottom:12px;">📊 Başvuru Durumun</div>
+    <div style="font-size:13px;font-weight:700;color:var(--text,#111);margin-bottom:12px;display:flex;align-items:center;gap:6px;"><x-icon name="bar-chart-3" size="14" aria-label="İstatistik" /> Başvuru Durumun</div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
         <div style="text-align:center;padding:10px;background:var(--bg,#f8fafc);border-radius:8px;">
             <div style="font-size:20px;font-weight:800;color:#3b82f6;">{{ $guestAnalytics['daysSinceRegistration'] ?? 0 }}</div>
@@ -720,7 +720,7 @@
 @php $activityFeedSafe = $activityFeed ?? []; @endphp
 @if(!empty($activityFeedSafe))
 <div class="gdb-tl">
-    <div class="gdb-tl-head"><h4>📅 Son Aktiviteler</h4></div>
+    <div class="gdb-tl-head"><h4 style="display:flex;align-items:center;gap:6px;"><x-icon name="calendar" size="14" aria-label="Aktiviteler" /> Son Aktiviteler</h4></div>
     @foreach(array_slice($activityFeedSafe, 0, 4) as $act)
         <div class="gdb-tl-item">
             <div class="gdb-tl-dot"></div>
@@ -746,10 +746,10 @@
         <div style="padding:24px 28px 16px;border-bottom:1px solid var(--u-line,#e2e8f0);">
             <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                    <div style="font-size:20px;font-weight:800;color:var(--u-text);">👋 Hoş Geldiniz!</div>
+                    <div style="font-size:20px;font-weight:800;color:var(--u-text);display:flex;align-items:center;gap:8px;"><x-icon name="wave" size="22" aria-label="Hoş geldin" /> Hoş Geldiniz!</div>
                     <div style="font-size:13px;color:var(--u-muted);margin-top:4px;">Birkaç adımda başlangıç rehberinizi tamamlayın.</div>
                 </div>
-                <button id="ob-close-btn" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--u-muted);padding:4px;">✕</button>
+                <button id="ob-close-btn" aria-label="Kapat" style="background:none;border:none;cursor:pointer;color:var(--u-muted);padding:4px;display:flex;"><x-icon name="x" size="22" aria-label="Kapat" /></button>
             </div>
             <div style="margin-top:14px;">
                 <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--u-muted);margin-bottom:5px;">
@@ -764,9 +764,13 @@
             @foreach($onboardingSteps as $obs)
             <a href="{{ $obs['url'] }}"
                style="display:flex;align-items:center;gap:14px;padding:12px;border:1px solid var(--u-line);border-radius:12px;margin-bottom:8px;text-decoration:none;color:var(--u-text);{{ $obs['done'] ? 'opacity:.6;' : '' }}">
-                <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
-                    {{ $obs['done'] ? 'background:rgba(22,163,74,.12);' : 'background:rgba(37,99,235,.1);' }}">
-                    {{ $obs['done'] ? '✓' : ($obs['icon'] ?? '•') }}
+                <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                    {{ $obs['done'] ? 'background:rgba(22,163,74,.12);color:var(--u-ok);' : 'background:rgba(37,99,235,.1);color:var(--u-brand);' }}">
+                    @if($obs['done'])
+                        <x-icon name="check" size="18" aria-label="Tamam" />
+                    @else
+                        <x-icon name="circle-check" size="18" aria-label="Adım" />
+                    @endif
                 </div>
                 <div style="flex:1;">
                     <div style="font-size:14px;font-weight:600;{{ $obs['done'] ? 'text-decoration:line-through;' : '' }}">{{ $obs['label'] }}</div>

@@ -793,7 +793,7 @@ footer a:hover { color:#fff; }
                    data-track="cta_clicked"
                    data-ph-cta-name="hero_demo"
                    data-ph-location="platform_hero">
-                    🎯 Ücretsiz Demo Talebi
+                    <x-icon name="target" size="18" aria-label="Hedef" /> Ücretsiz Demo Talebi
                 </a>
                 <a href="#portallar"
                    class="btn-ghost"
@@ -835,12 +835,12 @@ footer a:hover { color:#fff; }
                     </div>
                 </div>
                 <div class="hero-card hero-card-2">
-                    <div class="lbl">💰 Bu Ay Tahsilat</div>
+                    <div class="lbl"><x-icon name="euro" size="14" aria-label="Tahsilat" /> Bu Ay Tahsilat</div>
                     <div class="val eur">€48.350</div>
                     <div class="delta">↑ 12 sözleşme</div>
                 </div>
                 <div class="hero-card hero-card-3">
-                    <div class="lbl">🤖 AI Soruları</div>
+                    <div class="lbl"><x-icon name="bot" size="14" aria-label="AI" /> AI Soruları</div>
                     <div class="val">1.247</div>
                     <div class="delta">98% memnuniyet</div>
                 </div>
@@ -854,22 +854,22 @@ footer a:hover { color:#fff; }
     <div class="container">
         <div class="stats-grid">
             <div class="stat">
-                <div class="stat-icon">🎯</div>
+                <div class="stat-icon"><x-icon name="target" size="28" aria-label="Portallar" /></div>
                 <div class="stat-num">6 <span>portal</span></div>
                 <div class="stat-lbl">Aday · Öğrenci · Senior · Bayi · Manager · Marketing</div>
             </div>
             <div class="stat">
-                <div class="stat-icon">⚡</div>
+                <div class="stat-icon"><x-icon name="zap" size="28" aria-label="Modüller" /></div>
                 <div class="stat-num">28+</div>
                 <div class="stat-lbl">Hazır Modül + Genişleyebilir Mimari</div>
             </div>
             <div class="stat">
-                <div class="stat-icon">🤖</div>
+                <div class="stat-icon"><x-icon name="bot" size="28" aria-label="AI" /></div>
                 <div class="stat-num">AI</div>
                 <div class="stat-lbl">Gemini 2.5 Flash + Knowledge Base RAG</div>
             </div>
             <div class="stat">
-                <div class="stat-icon">🇪🇺</div>
+                <div class="stat-icon"><x-icon name="shield-check" size="28" aria-label="GDPR" /></div>
                 <div class="stat-num">GDPR</div>
                 <div class="stat-lbl">EU Data Residency + Full Audit Trail</div>
             </div>
@@ -921,7 +921,7 @@ footer a:hover { color:#fff; }
         </p>
         <div class="compare-grid">
             <div class="compare-card bad">
-                <h3>❌ Geleneksel Yaklaşım</h3>
+                <h3><x-icon name="x" size="20" aria-label="Yok" /> Geleneksel Yaklaşım</h3>
                 <ul>
                     <li>5+ farklı araç (Excel + Email + WhatsApp + Drive + Trello)</li>
                     <li>Aday süreci karaya oturduğunda kimsenin haberi olmuyor</li>
@@ -971,14 +971,14 @@ footer a:hover { color:#fff; }
                         </tr>
                         <tr>
                             <td>Üniversite başvuru pipeline + DAAD entegrasyonu</td>
-                            <td class="col-bad">❌ Yok</td>
-                            <td class="col-mid">❌ Yok</td>
+                            <td class="col-bad">Yok</td>
+                            <td class="col-mid">Yok</td>
                             <td class="col-good">✓ 500+ üni + deadline tracker</td>
                         </tr>
                         <tr>
                             <td>Vize süreci (Sperrkonto · randevu · konsolosluk)</td>
-                            <td class="col-bad">❌ Yok</td>
-                            <td class="col-mid">❌ Yok</td>
+                            <td class="col-bad">Yok</td>
+                            <td class="col-mid">Yok</td>
                             <td class="col-good">✓ Checklist + status timeline</td>
                         </tr>
                         <tr>
@@ -989,7 +989,7 @@ footer a:hover { color:#fff; }
                         </tr>
                         <tr>
                             <td>AI knowledge base + adaya RAG asistan</td>
-                            <td class="col-bad">❌ Yok</td>
+                            <td class="col-bad">Yok</td>
                             <td class="col-mid">Eklenti gerekir (extra cost)</td>
                             <td class="col-good">✓ AI Labs dahil + intent analizi</td>
                         </tr>
@@ -1007,7 +1007,7 @@ footer a:hover { color:#fff; }
                         </tr>
                         <tr>
                             <td>Multi-portal (aday/öğrenci/senior/bayi/yönetici)</td>
-                            <td class="col-bad">❌ Yok</td>
+                            <td class="col-bad">Yok</td>
                             <td class="col-mid">Tek arayüz, role-based gizleme</td>
                             <td class="col-good">✓ 6 ayrı UX, izole portal</td>
                         </tr>
@@ -1033,7 +1033,7 @@ footer a:hover { color:#fff; }
 
         <div class="portals-grid">
             <div class="portal">
-                <div class="portal-icon-wrap guest">🙋</div>
+                <div class="portal-icon-wrap guest"><x-icon name="user" size="32" aria-label="Aday" /></div>
                 <div class="portal-name">Portal 1</div>
                 <h3>Aday Öğrenci</h3>
                 <p>Türkiye'den başvuran adayların ilk dokunuşu — başvuru formu, belge yükleme, randevu, soru-cevap.</p>
@@ -1047,7 +1047,7 @@ footer a:hover { color:#fff; }
             </div>
 
             <div class="portal">
-                <div class="portal-icon-wrap student">🎓</div>
+                <div class="portal-icon-wrap student"><x-icon name="graduation-cap" size="32" aria-label="Öğrenci" /></div>
                 <div class="portal-name">Portal 2</div>
                 <h3>Öğrenci</h3>
                 <p>Sözleşme imzalamış aktif öğrenciler — Almanya'ya geçiş sürecinin tüm adımları.</p>
@@ -1061,7 +1061,7 @@ footer a:hover { color:#fff; }
             </div>
 
             <div class="portal">
-                <div class="portal-icon-wrap senior">👨‍🏫</div>
+                <div class="portal-icon-wrap senior"><x-icon name="user-tie" size="32" aria-label="Senior Danışman" /></div>
                 <div class="portal-name">Portal 3</div>
                 <h3>Senior Danışman</h3>
                 <p>Aday-öğrenci ilişkisini yöneten danışman ekibi — pipeline + müsaitlik + iletişim hub.</p>
@@ -1069,13 +1069,13 @@ footer a:hover { color:#fff; }
                     <li>Atanan adaylar + lead pipeline kanban</li>
                     <li>Müsaitlik takvimi (haftalık + away)</li>
                     <li>Booking yönetimi (otomatik confirm)</li>
-                    <li>Hızlı aksiyon (📞 ara, 💬 WhatsApp, 📧 mail)</li>
+                    <li>Hızlı aksiyon (ara, WhatsApp, mail)</li>
                     <li>Performans dashboard + KPI</li>
                 </ul>
             </div>
 
             <div class="portal">
-                <div class="portal-icon-wrap dealer">🤝</div>
+                <div class="portal-icon-wrap dealer"><x-icon name="handshake" size="32" aria-label="Bayi" /></div>
                 <div class="portal-name">Portal 4</div>
                 <h3>Bayi (Dealer)</h3>
                 <p>Aday yönlendiren satış ortakları için şeffaf takip + komisyon yönetimi.</p>
@@ -1089,7 +1089,7 @@ footer a:hover { color:#fff; }
             </div>
 
             <div class="portal">
-                <div class="portal-icon-wrap marketing">📣</div>
+                <div class="portal-icon-wrap marketing"><x-icon name="megaphone" size="32" aria-label="Marketing" /></div>
                 <div class="portal-name">Portal 5</div>
                 <h3>Marketing Admin</h3>
                 <p>Pazarlama ve satış ekibi için kampanya yönetimi + lead funnel analytics.</p>
@@ -1103,7 +1103,7 @@ footer a:hover { color:#fff; }
             </div>
 
             <div class="portal">
-                <div class="portal-icon-wrap manager">👔</div>
+                <div class="portal-icon-wrap manager"><x-icon name="briefcase-user" size="32" aria-label="Yönetici" /></div>
                 <div class="portal-name">Portal 6</div>
                 <h3>Yönetici (Manager)</h3>
                 <p>Tüm operasyonun komuta merkezi — analytics, finans, HR, ayarlar, AI Labs.</p>
@@ -1130,32 +1130,32 @@ footer a:hover { color:#fff; }
         <div class="hl-section-tag">★ Flagship Modüller</div>
         <div class="hl-modules-grid">
             <div class="hl-module">
-                <div class="hl-module-icon">👥</div>
+                <div class="hl-module-icon"><x-icon name="users" size="32" aria-label="CRM" /></div>
                 <h4>CRM &amp; Lead Pipeline</h4>
                 <p>5-tier scoring · otomatik atama · dormant alarm · multi-touch attribution. Eğitim danışmanlığına özel akışlar — generic CRM'de bulamazsın.</p>
             </div>
             <div class="hl-module">
-                <div class="hl-module-icon">📜</div>
+                <div class="hl-module-icon"><x-icon name="scroll" size="32" aria-label="Sözleşmeler" /></div>
                 <h4>Contracts Hub</h4>
                 <p>Sözleşme şablonları · dijital imza · ödeme planı · ek madde versiyonu · iptal akışı. Aday → öğrenci geçişinin yasal kalbi.</p>
             </div>
             <div class="hl-module">
-                <div class="hl-module-icon">📄</div>
+                <div class="hl-module-icon"><x-icon name="file-text" size="32" aria-label="Belge" /></div>
                 <h4>Document Pipeline</h4>
                 <p>Belge upload · OCR · kategori · deadline tracker · e-imza altyapı · public talep linki. Sperrkonto'dan diplomaya 50+ belge tipi.</p>
             </div>
             <div class="hl-module">
-                <div class="hl-module-icon">📅</div>
+                <div class="hl-module-icon"><x-icon name="calendar-days" size="32" aria-label="Takvim" /></div>
                 <h4>Booking &amp; Calendar</h4>
                 <p>Senior takvimi · public booking widget · Google Calendar 2-way sync · otomatik reminder · ücretli/ücretsiz seans yönetimi.</p>
             </div>
             <div class="hl-module">
-                <div class="hl-module-icon">🤖</div>
+                <div class="hl-module-icon"><x-icon name="bot" size="32" aria-label="AI" /></div>
                 <h4>AI Labs (Diferansiyatör)</h4>
                 <p>Gemini 2.5 + RAG knowledge base · intent analizi · FAQ önerileri · streaming yanıt · token guard. Aday soruları otomatik öğrenir.</p>
             </div>
             <div class="hl-module" style="border-left:3px solid var(--primary);">
-                <div class="hl-module-icon">🎯</div>
+                <div class="hl-module-icon"><x-icon name="target" size="32" aria-label="UniMatch" /></div>
                 <h4>UniMatch — Akıllı Program Bulucu <span style="font-size:10px; background:var(--primary); color:#fff; padding:2px 6px; border-radius:4px; vertical-align:middle; margin-left:4px;">YENİ</span></h4>
                 <p>{{ config('brand.catalog.program_count_full') }} Almanya programı canonical katalog · 19 adımlık UniMatch wizard · 9-faktör akıllı öneri motoru · TR↔EN otomatik çeviri (Gemini). Aday tek tıkla en uygun 5 programı görür — danışman ön elemeyi atlar.</p>
                 <a href="{{ route('uni-match.landing') }}"
@@ -1168,17 +1168,17 @@ footer a:hover { color:#fff; }
                 </a>
             </div>
             <div class="hl-module">
-                <div class="hl-module-icon">💳</div>
+                <div class="hl-module-icon"><x-icon name="credit-card" size="32" aria-label="Ödemeler" /></div>
                 <h4>Payments &amp; Invoicing</h4>
                 <p>Stripe checkout · fatura · taksitli plan · overdue takibi · dealer payout · ödeme hatırlatma akışı (4+1 kademeli mail).</p>
             </div>
             <div class="hl-module">
-                <div class="hl-module-icon">📈</div>
+                <div class="hl-module-icon"><x-icon name="trending-up" size="32" aria-label="Marketing Attribution" /></div>
                 <h4>Marketing Attribution</h4>
                 <p>UTM tracking · multi-touch · kanal ROI · lead quality score · A/B test · email/SMS drip · referral programı.</p>
             </div>
             <div class="hl-module">
-                <div class="hl-module-icon">📊</div>
+                <div class="hl-module-icon"><x-icon name="bar-chart-3" size="32" aria-label="Analytics" /></div>
                 <h4>Analytics Hub (16+ Dashboard)</h4>
                 <p>Lead funnel · senior performans · revenue · NPS · GDPR · kampanya ROI · scheduled snapshots. BI-ready, export edilebilir.</p>
             </div>
@@ -1188,25 +1188,25 @@ footer a:hover { color:#fff; }
         <div class="hl-section-tag" style="margin-top:60px;">+ Tamamlayıcı Modüller (19)</div>
         <p class="hl-section-sub">Çekirdek operasyonu tamamlayan iş akışı modülleri — hepsi dahil, ayrıca yapılandırma gerekmez.</p>
         <div class="modules-pills">
-            <div class="m-pill"><span class="m-pill-icon">🏛️</span><span><strong>Üniversite Belge Haritası</strong> · 500+ üni + DAAD</span></div>
-            <div class="m-pill"><span class="m-pill-icon">🛂</span><span><strong>Vize Süreci</strong> · randevu + checklist</span></div>
-            <div class="m-pill"><span class="m-pill-icon">🏠</span><span><strong>Konaklama</strong> · Wohnung + Anmeldung</span></div>
-            <div class="m-pill"><span class="m-pill-icon">💬</span><span><strong>Messaging Hub</strong> · DM + Email + WhatsApp</span></div>
-            <div class="m-pill"><span class="m-pill-icon">🎫</span><span><strong>Ticket System</strong> · SLA + auto-assign</span></div>
-            <div class="m-pill"><span class="m-pill-icon">📢</span><span><strong>Bulletin Board</strong> · iç duyuru</span></div>
-            <div class="m-pill"><span class="m-pill-icon">📧</span><span><strong>Email Campaigns</strong> · A/B + drip</span></div>
-            <div class="m-pill"><span class="m-pill-icon">📱</span><span><strong>Sosyal Medya</strong> · içerik takvimi</span></div>
-            <div class="m-pill"><span class="m-pill-icon">🤝</span><span><strong>Dealer Network</strong> · komisyon + payout</span></div>
-            <div class="m-pill"><span class="m-pill-icon">👔</span><span><strong>İnsan Kaynakları</strong> · personel + izin</span></div>
-            <div class="m-pill"><span class="m-pill-icon">📋</span><span><strong>Görev Yönetimi</strong> · kanban + SLA</span></div>
-            <div class="m-pill"><span class="m-pill-icon">📑</span><span><strong>Workflow Engine</strong> · kural tabanlı</span></div>
-            <div class="m-pill"><span class="m-pill-icon">🔒</span><span><strong>GDPR &amp; Audit</strong> · export + retention</span></div>
-            <div class="m-pill"><span class="m-pill-icon">🛡️</span><span><strong>Security</strong> · 2FA + anomaly detect</span></div>
-            <div class="m-pill"><span class="m-pill-icon">💱</span><span><strong>Currency Sync</strong> · EUR/TRY/USD canlı</span></div>
-            <div class="m-pill"><span class="m-pill-icon">📝</span><span><strong>Audit Reports</strong> · aylık snapshot</span></div>
-            <div class="m-pill"><span class="m-pill-icon">📍</span><span><strong>Sessizlik Monitörü</strong> · auto check-in</span></div>
-            <div class="m-pill"><span class="m-pill-icon">🎟️</span><span><strong>İndirim Kodları</strong> · 5 template + AI</span></div>
-            <div class="m-pill"><span class="m-pill-icon">⏰</span><span><strong>Ödeme Hatırlatma</strong> · 4+1 kademeli</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="landmark" size="18" aria-label="Üniversite" /></span><span><strong>Üniversite Belge Haritası</strong> · 500+ üni + DAAD</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="plane" size="18" aria-label="Vize" /></span><span><strong>Vize Süreci</strong> · randevu + checklist</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="home" size="18" aria-label="Konaklama" /></span><span><strong>Konaklama</strong> · Wohnung + Anmeldung</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="message-square" size="18" aria-label="Mesajlaşma" /></span><span><strong>Messaging Hub</strong> · DM + Email + WhatsApp</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="ticket" size="18" aria-label="Ticket" /></span><span><strong>Ticket System</strong> · SLA + auto-assign</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="megaphone" size="18" aria-label="Duyuru" /></span><span><strong>Bulletin Board</strong> · iç duyuru</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="mail" size="18" aria-label="Email" /></span><span><strong>Email Campaigns</strong> · A/B + drip</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="smartphone" size="18" aria-label="Sosyal Medya" /></span><span><strong>Sosyal Medya</strong> · içerik takvimi</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="handshake" size="18" aria-label="Bayi" /></span><span><strong>Dealer Network</strong> · komisyon + payout</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="briefcase-user" size="18" aria-label="İK" /></span><span><strong>İnsan Kaynakları</strong> · personel + izin</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="clipboard-list" size="18" aria-label="Görev" /></span><span><strong>Görev Yönetimi</strong> · kanban + SLA</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="route" size="18" aria-label="Workflow" /></span><span><strong>Workflow Engine</strong> · kural tabanlı</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="lock" size="18" aria-label="GDPR" /></span><span><strong>GDPR &amp; Audit</strong> · export + retention</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="shield-check" size="18" aria-label="Güvenlik" /></span><span><strong>Security</strong> · 2FA + anomaly detect</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="dollar-sign" size="18" aria-label="Currency" /></span><span><strong>Currency Sync</strong> · EUR/TRY/USD canlı</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="file-text" size="18" aria-label="Rapor" /></span><span><strong>Audit Reports</strong> · aylık snapshot</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="map-pin" size="18" aria-label="Monitor" /></span><span><strong>Sessizlik Monitörü</strong> · auto check-in</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="tag" size="18" aria-label="İndirim" /></span><span><strong>İndirim Kodları</strong> · 5 template + AI</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="clock" size="18" aria-label="Hatırlatma" /></span><span><strong>Ödeme Hatırlatma</strong> · 4+1 kademeli</span></div>
         </div>
     </div>
 </section>
@@ -1251,23 +1251,23 @@ footer a:hover { color:#fff; }
                     <a href="#cta" class="btn-gold"
                        data-track="cta_clicked"
                        data-ph-cta-name="ai_demo">
-                        🤖 AI Asistan Demosu
+                        <x-icon name="bot" size="18" aria-label="AI" /> AI Asistan Demosu
                     </a>
                 </div>
 
                 <div class="ai-mockup">
-                    <div style="font-size:11px; opacity:.7; margin-bottom:14px;">💬 ai-asistan.{{ $brand }}.com</div>
+                    <div style="font-size:11px; opacity:.7; margin-bottom:14px; display:inline-flex; align-items:center; gap:6px;"><x-icon name="message-square" size="14" aria-label="Sohbet" /> ai-asistan.{{ $brand }}.com</div>
 
                     <div class="ai-msg">
                         <strong>Aday:</strong> Münih'te yüksek lisans için Sperrkonto miktarı 2026'da değişti mi?
                     </div>
                     <div class="ai-reply">
-                        <span class="badge">📚 KAYNAK</span><br>
+                        <span class="badge"><x-icon name="book-open" size="12" aria-label="Kaynak" /> KAYNAK</span><br>
                         Evet, 2026 başında <strong>€11.904</strong>'e güncellendi (önceki yıl €11.208). Detaylı bilgi DAAD ve federal yönetmelikten teyitli (Source: KB-2026-04).
                     </div>
 
-                    <div style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,.1); font-size:11px; opacity:.6;">
-                        🎯 Bu soru bu hafta <strong>14 kez</strong> soruldu — FAQ adayı olarak işaretlendi.
+                    <div style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,.1); font-size:11px; opacity:.6; display:flex; align-items:center; gap:6px;">
+                        <x-icon name="target" size="14" aria-label="Sıkça sorulan" /> Bu soru bu hafta <strong>14 kez</strong> soruldu — FAQ adayı olarak işaretlendi.
                     </div>
                 </div>
             </div>
@@ -1286,56 +1286,56 @@ footer a:hover { color:#fff; }
             <div class="flow-steps">
                 <div class="flow-step">
                     <div class="flow-num">1</div>
-                    <div class="flow-icon">📝</div>
+                    <div class="flow-icon"><x-icon name="pencil" size="28" aria-label="Başvuru" /></div>
                     <h4>Aday Başvuru</h4>
                     <p>Reklam → form → otomatik lead score</p>
                     <span class="meta">Score: 0-25</span>
                 </div>
                 <div class="flow-step">
                     <div class="flow-num">2</div>
-                    <div class="flow-icon">👥</div>
+                    <div class="flow-icon"><x-icon name="users" size="28" aria-label="Senior Atama" /></div>
                     <h4>Senior Atama</h4>
                     <p>Auto-assign veya manuel</p>
                     <span class="meta">Tier: Cold/Warm</span>
                 </div>
                 <div class="flow-step">
                     <div class="flow-num">3</div>
-                    <div class="flow-icon">📞</div>
+                    <div class="flow-icon"><x-icon name="phone" size="28" aria-label="Görüşme" /></div>
                     <h4>İlk Görüşme</h4>
                     <p>Booking + AI brief + script</p>
                     <span class="meta">Tier: Hot</span>
                 </div>
                 <div class="flow-step">
                     <div class="flow-num">4</div>
-                    <div class="flow-icon">📜</div>
+                    <div class="flow-icon"><x-icon name="scroll" size="28" aria-label="Sözleşme" /></div>
                     <h4>Sözleşme</h4>
                     <p>Dijital imza + Stripe ödeme</p>
                     <span class="meta">Conversion ✓</span>
                 </div>
                 <div class="flow-step">
                     <div class="flow-num">5</div>
-                    <div class="flow-icon">📄</div>
+                    <div class="flow-icon"><x-icon name="file-text" size="28" aria-label="Belge" /></div>
                     <h4>Belge Süreci</h4>
                     <p>Upload + checklist + deadline</p>
                     <span class="meta">DOC Pipeline</span>
                 </div>
                 <div class="flow-step">
                     <div class="flow-num">6</div>
-                    <div class="flow-icon">🛂</div>
+                    <div class="flow-icon"><x-icon name="plane" size="28" aria-label="Vize" /></div>
                     <h4>Vize</h4>
                     <p>Konsolosluk + dosya kontrol</p>
                     <span class="meta">Status track</span>
                 </div>
                 <div class="flow-step">
                     <div class="flow-num">7</div>
-                    <div class="flow-icon">🎓</div>
+                    <div class="flow-icon"><x-icon name="graduation-cap" size="28" aria-label="Almanya" /></div>
                     <h4>Almanya'da</h4>
                     <p>Anmeldung + Wohnung + sigorta</p>
                     <span class="meta">Active student</span>
                 </div>
                 <div class="flow-step">
                     <div class="flow-num">8</div>
-                    <div class="flow-icon">🏆</div>
+                    <div class="flow-icon"><x-icon name="trophy" size="28" aria-label="Mezuniyet" /></div>
                     <h4>Mezuniyet</h4>
                     <p>Referral + champion + alumni</p>
                     <span class="meta">Lifetime value</span>
@@ -1354,7 +1354,7 @@ footer a:hover { color:#fff; }
 
         <div class="dash-frame">
             <div style="display:flex; justify-content:space-between; margin-bottom:18px; align-items:center;">
-                <div style="font-weight:800; color:var(--primary-deep); font-size:18px;">📊 Manager Dashboard</div>
+                <div style="font-weight:800; color:var(--primary-deep); font-size:18px; display:inline-flex; align-items:center; gap:8px;"><x-icon name="bar-chart-3" size="18" aria-label="Dashboard" /> Manager Dashboard</div>
                 <div style="display:flex; gap:6px;">
                     @foreach(['7G','30G','90G','1Y'] as $i => $p)
                     <span style="padding:4px 12px; background:{{ $i === 1 ? 'var(--primary)' : '#f1f5f9' }}; color:{{ $i === 1 ? '#fff' : 'var(--muted)' }}; border-radius:8px; font-size:11px; font-weight:700;">{{ $p }}</span>
@@ -1406,18 +1406,18 @@ footer a:hover { color:#fff; }
         <p class="sec-lead">Webhook + REST API + native entegrasyonlar — kurulum 1-2 dakika.</p>
 
         <div class="integ-grid">
-            <div class="integ"><div class="integ-icon">📅</div><div class="integ-name">Google Calendar</div></div>
-            <div class="integ"><div class="integ-icon">💳</div><div class="integ-name">Stripe</div></div>
-            <div class="integ"><div class="integ-icon">🤖</div><div class="integ-name">Gemini AI</div></div>
-            <div class="integ"><div class="integ-icon">📧</div><div class="integ-name">Resend</div></div>
-            <div class="integ"><div class="integ-icon">💬</div><div class="integ-name">WhatsApp</div></div>
-            <div class="integ"><div class="integ-icon">📊</div><div class="integ-name">PostHog</div></div>
-            <div class="integ"><div class="integ-icon">🎬</div><div class="integ-name">Giphy</div></div>
-            <div class="integ"><div class="integ-icon">🔔</div><div class="integ-name">FCM Push</div></div>
-            <div class="integ"><div class="integ-icon">🌐</div><div class="integ-name">Google OAuth</div></div>
-            <div class="integ"><div class="integ-icon">📈</div><div class="integ-name">Metabase</div></div>
-            <div class="integ"><div class="integ-icon">📄</div><div class="integ-name">PDF.js</div></div>
-            <div class="integ"><div class="integ-icon">⚙️</div><div class="integ-name">Webhook API</div></div>
+            <div class="integ"><div class="integ-icon"><x-icon name="calendar-days" size="26" aria-label="Calendar" /></div><div class="integ-name">Google Calendar</div></div>
+            <div class="integ"><div class="integ-icon"><x-icon name="credit-card" size="26" aria-label="Stripe" /></div><div class="integ-name">Stripe</div></div>
+            <div class="integ"><div class="integ-icon"><x-icon name="bot" size="26" aria-label="Gemini" /></div><div class="integ-name">Gemini AI</div></div>
+            <div class="integ"><div class="integ-icon"><x-icon name="mail" size="26" aria-label="Email" /></div><div class="integ-name">Resend</div></div>
+            <div class="integ"><div class="integ-icon"><x-icon name="message-square" size="26" aria-label="WhatsApp" /></div><div class="integ-name">WhatsApp</div></div>
+            <div class="integ"><div class="integ-icon"><x-icon name="bar-chart-3" size="26" aria-label="PostHog" /></div><div class="integ-name">PostHog</div></div>
+            <div class="integ"><div class="integ-icon"><x-icon name="film" size="26" aria-label="Giphy" /></div><div class="integ-name">Giphy</div></div>
+            <div class="integ"><div class="integ-icon"><x-icon name="bell" size="26" aria-label="FCM Push" /></div><div class="integ-name">FCM Push</div></div>
+            <div class="integ"><div class="integ-icon"><x-icon name="globe" size="26" aria-label="OAuth" /></div><div class="integ-name">Google OAuth</div></div>
+            <div class="integ"><div class="integ-icon"><x-icon name="trending-up" size="26" aria-label="Metabase" /></div><div class="integ-name">Metabase</div></div>
+            <div class="integ"><div class="integ-icon"><x-icon name="file-text" size="26" aria-label="PDF.js" /></div><div class="integ-name">PDF.js</div></div>
+            <div class="integ"><div class="integ-icon"><x-icon name="settings" size="26" aria-label="Webhook" /></div><div class="integ-name">Webhook API</div></div>
         </div>
     </div>
 </section>
@@ -1431,42 +1431,42 @@ footer a:hover { color:#fff; }
 
         <div class="sec-grid">
             <div class="sec-card">
-                <div class="sec-card-icon">🇪🇺</div>
+                <div class="sec-card-icon"><x-icon name="shield-check" size="32" aria-label="GDPR" /></div>
                 <div>
                     <h4>GDPR + KVKK Uyumlu</h4>
                     <p>Right-to-access, right-to-erasure, data portability, retention policy. Tüm akış doc + API.</p>
                 </div>
             </div>
             <div class="sec-card">
-                <div class="sec-card-icon">🔒</div>
+                <div class="sec-card-icon"><x-icon name="lock" size="32" aria-label="Audit" /></div>
                 <div>
                     <h4>Audit Trail</h4>
                     <p>Her CRUD işlem loglanır — kim, ne zaman, nereden, hangi alanı değiştirdi. 90 gün arşiv + cold storage.</p>
                 </div>
             </div>
             <div class="sec-card">
-                <div class="sec-card-icon">🛡️</div>
+                <div class="sec-card-icon"><x-icon name="shield" size="32" aria-label="2FA" /></div>
                 <div>
                     <h4>2FA + RBAC</h4>
                     <p>İki faktörlü auth, role-based access (15+ rol), permission matrix, IP allowlist desteği.</p>
                 </div>
             </div>
             <div class="sec-card">
-                <div class="sec-card-icon">⚠️</div>
+                <div class="sec-card-icon"><x-icon name="alert-triangle" size="32" aria-label="Anomaly" /></div>
                 <div>
                     <h4>Anomaly Detection</h4>
                     <p>Gece yarısı toplu silme, beklenmedik IP, 5+ failed login → otomatik alert + lockdown.</p>
                 </div>
             </div>
             <div class="sec-card">
-                <div class="sec-card-icon">🔐</div>
+                <div class="sec-card-icon"><x-icon name="key-round" size="32" aria-label="Encryption" /></div>
                 <div>
                     <h4>Encryption</h4>
                     <p>HTTPS-only, encrypted cookies, hashed PII (email/phone), bcrypt password, signed URLs.</p>
                 </div>
             </div>
             <div class="sec-card">
-                <div class="sec-card-icon">📦</div>
+                <div class="sec-card-icon"><x-icon name="database" size="32" aria-label="Backup" /></div>
                 <div>
                     <h4>Data Backup</h4>
                     <p>Günlük full backup, 30 gün retention, point-in-time recovery, cross-region replication.</p>
@@ -1491,7 +1491,7 @@ footer a:hover { color:#fff; }
             {{-- SOLO --}}
             <div class="tier-card">
                 <div class="tier-header">
-                    <div class="tier-icon">👤</div>
+                    <div class="tier-icon"><x-icon name="user" size="32" aria-label="Solo" /></div>
                     <h3 class="tier-name">Solo</h3>
                     <p class="tier-tag">1–3 kişilik ekip · ≤100 aday/yıl</p>
                 </div>
@@ -1518,9 +1518,9 @@ footer a:hover { color:#fff; }
 
             {{-- BÜYÜYEN — featured --}}
             <div class="tier-card featured">
-                <div class="tier-tag-pop">⭐ En Popüler</div>
+                <div class="tier-tag-pop"><x-icon name="star-filled" size="12" aria-label="Popüler" /> En Popüler</div>
                 <div class="tier-header">
-                    <div class="tier-icon">📈</div>
+                    <div class="tier-icon"><x-icon name="trending-up" size="32" aria-label="Büyüyen Ekip" /></div>
                     <h3 class="tier-name">Büyüyen Ekip</h3>
                     <p class="tier-tag">3–10 kişi · 100–500 aday/yıl</p>
                 </div>
@@ -1531,9 +1531,9 @@ footer a:hover { color:#fff; }
                 <div class="tier-yearly">veya €4.790/yıl <small>(%20 indirim)</small></div>
                 <ul class="tier-features">
                     <li><strong>Solo'daki her şey +</strong></li>
-                    <li>🤖 AI Asistan dahil (Gemini RAG)</li>
-                    <li>📣 Marketing Admin modülü</li>
-                    <li>📜 Contracts Hub + dijital imza</li>
+                    <li>AI Asistan dahil (Gemini RAG)</li>
+                    <li>Marketing Admin modülü</li>
+                    <li>Contracts Hub + dijital imza</li>
                     <li>250 aktif öğrenci · 15 senior · 3 manager</li>
                     <li>Analytics Hub (16+ dashboard)</li>
                     <li>Öncelikli destek (4h SLA)</li>
@@ -1548,7 +1548,7 @@ footer a:hover { color:#fff; }
             {{-- KURUMSAL --}}
             <div class="tier-card">
                 <div class="tier-header">
-                    <div class="tier-icon">🏢</div>
+                    <div class="tier-icon"><x-icon name="building-2" size="32" aria-label="Kurumsal" /></div>
                     <h3 class="tier-name">Kurumsal</h3>
                     <p class="tier-tag">10+ kişi · 500+ aday/yıl · bayi ağı</p>
                 </div>
@@ -1559,9 +1559,9 @@ footer a:hover { color:#fff; }
                 <div class="tier-yearly">veya €9.590/yıl <small>(%20 indirim)</small></div>
                 <ul class="tier-features">
                     <li><strong>Büyüyen'deki her şey +</strong></li>
-                    <li>🤝 Dealer Network modülü + komisyon</li>
-                    <li>🌐 White-label + custom domain</li>
-                    <li>📦 DAM (Dijital Varlık Yönetimi)</li>
+                    <li>Dealer Network modülü + komisyon</li>
+                    <li>White-label + custom domain</li>
+                    <li>DAM (Dijital Varlık Yönetimi)</li>
                     <li>Sınırsız öğrenci · sınırsız senior</li>
                     <li>API erişim + webhook</li>
                     <li>Dedicated success manager (1h SLA)</li>
@@ -1598,7 +1598,7 @@ footer a:hover { color:#fff; }
             <div class="core-plan">
                 <div class="core-plan-header">
                     <div>
-                        <span class="core-badge">⚡ ZORUNLU</span>
+                        <span class="core-badge"><x-icon name="zap" size="12" aria-label="Zorunlu" /> ZORUNLU</span>
                         <h3 class="core-name">Core Platform</h3>
                         <p class="core-desc">3 portal · Lead pipeline · Belge yönetimi · Bildirim · Temel raporlar</p>
                     </div>
@@ -1626,7 +1626,7 @@ footer a:hover { color:#fff; }
             {{-- ──── 11 ADD-ON MODULES ──── --}}
             <div class="addons-header">
                 <div>
-                    <h3 style="margin:0 0 6px; font-size:22px; color:var(--primary-deep);">📦 İsteğe Bağlı Add-on Modüller (11)</h3>
+                    <h3 style="margin:0 0 6px; font-size:22px; color:var(--primary-deep); display:inline-flex; align-items:center; gap:8px;"><x-icon name="package" size="22" aria-label="Add-on" /> İsteğe Bağlı Add-on Modüller (11)</h3>
                     <p style="margin:0; color:var(--muted); font-size:14px;">Açıp kapatabilirsin — değişiklik anında geçerli olur. <strong>Tümünü açarsan %15 paket indirimi.</strong></p>
                 </div>
                 <div class="addons-toggle-all">
@@ -1641,7 +1641,7 @@ footer a:hover { color:#fff; }
                 {{-- AI ENTEGRASYON --}}
                 <div class="addon-card" data-addon="ai" data-price="149">
                     <div class="addon-header">
-                        <div class="addon-icon" style="background:linear-gradient(140deg, #8b5cf6, #5b21b6);">🤖</div>
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #8b5cf6, #5b21b6); color:#fff;"><x-icon name="bot" size="24" aria-label="AI" /></div>
                         <label class="addon-switch">
                             <input type="checkbox" data-addon-toggle="ai">
                             <span class="addon-slider"></span>
@@ -1662,7 +1662,7 @@ footer a:hover { color:#fff; }
                 {{-- DAM --}}
                 <div class="addon-card" data-addon="dam" data-price="99">
                     <div class="addon-header">
-                        <div class="addon-icon" style="background:linear-gradient(140deg, #06b6d4, #0e7490);">📦</div>
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #06b6d4, #0e7490); color:#fff;"><x-icon name="package" size="24" aria-label="DAM" /></div>
                         <label class="addon-switch">
                             <input type="checkbox" data-addon-toggle="dam">
                             <span class="addon-slider"></span>
@@ -1683,7 +1683,7 @@ footer a:hover { color:#fff; }
                 {{-- MARKETING ADMIN --}}
                 <div class="addon-card" data-addon="marketing" data-price="199">
                     <div class="addon-header">
-                        <div class="addon-icon" style="background:linear-gradient(140deg, #e8b931, #c99c26);">📣</div>
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #e8b931, #c99c26); color:#fff;"><x-icon name="megaphone" size="24" aria-label="Marketing" /></div>
                         <label class="addon-switch">
                             <input type="checkbox" data-addon-toggle="marketing">
                             <span class="addon-slider"></span>
@@ -1704,7 +1704,7 @@ footer a:hover { color:#fff; }
                 {{-- DEALER --}}
                 <div class="addon-card" data-addon="dealer" data-price="149">
                     <div class="addon-header">
-                        <div class="addon-icon" style="background:linear-gradient(140deg, #16a34a, #14532d);">🤝</div>
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #16a34a, #14532d); color:#fff;"><x-icon name="handshake" size="24" aria-label="Bayi" /></div>
                         <label class="addon-switch">
                             <input type="checkbox" data-addon-toggle="dealer">
                             <span class="addon-slider"></span>
@@ -1725,7 +1725,7 @@ footer a:hover { color:#fff; }
                 {{-- HR --}}
                 <div class="addon-card" data-addon="hr" data-price="99">
                     <div class="addon-header">
-                        <div class="addon-icon" style="background:linear-gradient(140deg, #db2777, #831843);">👔</div>
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #db2777, #831843); color:#fff;"><x-icon name="briefcase-user" size="24" aria-label="HR" /></div>
                         <label class="addon-switch">
                             <input type="checkbox" data-addon-toggle="hr">
                             <span class="addon-slider"></span>
@@ -1746,7 +1746,7 @@ footer a:hover { color:#fff; }
                 {{-- FINANS --}}
                 <div class="addon-card" data-addon="finance" data-price="149">
                     <div class="addon-header">
-                        <div class="addon-icon" style="background:linear-gradient(140deg, #f59e0b, #b45309);">💰</div>
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #f59e0b, #b45309); color:#fff;"><x-icon name="dollar-sign" size="24" aria-label="Finans" /></div>
                         <label class="addon-switch">
                             <input type="checkbox" data-addon-toggle="finance">
                             <span class="addon-slider"></span>
@@ -1767,7 +1767,7 @@ footer a:hover { color:#fff; }
                 {{-- KEŞFET --}}
                 <div class="addon-card" data-addon="discover" data-price="79">
                     <div class="addon-header">
-                        <div class="addon-icon" style="background:linear-gradient(140deg, #2563eb, #1e3a8a);">🔍</div>
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #2563eb, #1e3a8a); color:#fff;"><x-icon name="search" size="24" aria-label="Keşfet" /></div>
                         <label class="addon-switch">
                             <input type="checkbox" data-addon-toggle="discover">
                             <span class="addon-slider"></span>
@@ -1788,7 +1788,7 @@ footer a:hover { color:#fff; }
                 {{-- BOOKING --}}
                 <div class="addon-card" data-addon="booking" data-price="49">
                     <div class="addon-header">
-                        <div class="addon-icon" style="background:linear-gradient(140deg, #0ea5e9, #075985);">📅</div>
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #0ea5e9, #075985); color:#fff;"><x-icon name="calendar-days" size="24" aria-label="Booking" /></div>
                         <label class="addon-switch">
                             <input type="checkbox" data-addon-toggle="booking">
                             <span class="addon-slider"></span>
@@ -1809,7 +1809,7 @@ footer a:hover { color:#fff; }
                 {{-- CONTRACTS HUB --}}
                 <div class="addon-card" data-addon="contracts" data-price="79">
                     <div class="addon-header">
-                        <div class="addon-icon" style="background:linear-gradient(140deg, #7c3aed, #4c1d95);">📄</div>
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #7c3aed, #4c1d95); color:#fff;"><x-icon name="scroll" size="24" aria-label="Contracts" /></div>
                         <label class="addon-switch">
                             <input type="checkbox" data-addon-toggle="contracts">
                             <span class="addon-slider"></span>
@@ -1830,7 +1830,7 @@ footer a:hover { color:#fff; }
                 {{-- ANALYTICS HUB --}}
                 <div class="addon-card" data-addon="analytics" data-price="99">
                     <div class="addon-header">
-                        <div class="addon-icon" style="background:linear-gradient(140deg, #10b981, #064e3b);">📊</div>
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #10b981, #064e3b); color:#fff;"><x-icon name="bar-chart-3" size="24" aria-label="Analytics" /></div>
                         <label class="addon-switch">
                             <input type="checkbox" data-addon-toggle="analytics">
                             <span class="addon-slider"></span>
@@ -1851,7 +1851,7 @@ footer a:hover { color:#fff; }
                 {{-- DOCUMENT BUILDER AI --}}
                 <div class="addon-card" data-addon="docbuilder" data-price="49">
                     <div class="addon-header">
-                        <div class="addon-icon" style="background:linear-gradient(140deg, #f43f5e, #881337);">✍️</div>
+                        <div class="addon-icon" style="background:linear-gradient(140deg, #f43f5e, #881337); color:#fff;"><x-icon name="signature" size="24" aria-label="Doküman" /></div>
                         <label class="addon-switch">
                             <input type="checkbox" data-addon-toggle="docbuilder">
                             <span class="addon-slider"></span>
@@ -1881,15 +1881,15 @@ footer a:hover { color:#fff; }
                     <span class="ps-val" id="ps-addons-total">€0<small>/ay</small></span>
                 </div>
                 <div class="ps-row" id="ps-discount-row" style="display:none; color:var(--success);">
-                    <span class="ps-lbl">🎉 Tümünü seç paket indirimi (%15)</span>
+                    <span class="ps-lbl"><x-icon name="party-popper" size="14" aria-label="İndirim" /> Tümünü seç paket indirimi (%15)</span>
                     <span class="ps-val" id="ps-discount-amount">−€0<small>/ay</small></span>
                 </div>
                 <div class="ps-row total">
                     <span class="ps-lbl"><strong>TOPLAM AYLIK</strong></span>
                     <span class="ps-val total-amount" id="ps-total">€199<small>/ay</small></span>
                 </div>
-                <div class="ps-yearly">
-                    💡 Yıllık ödeme: <strong id="ps-yearly">€1.910/yıl</strong> <small>(2 ay bedava — %17 ek tasarruf)</small>
+                <div class="ps-yearly" style="display:flex; align-items:center; gap:8px;">
+                    <x-icon name="lightbulb" size="14" aria-label="İpucu" /> Yıllık ödeme: <strong id="ps-yearly">€1.910/yıl</strong> <small>(2 ay bedava — %17 ek tasarruf)</small>
                 </div>
 
                 <div class="ps-cta">
@@ -1897,7 +1897,7 @@ footer a:hover { color:#fff; }
                        data-track="cta_clicked"
                        data-ph-cta-name="modular_demo"
                        data-ph-location="platform_pricing">
-                        🎯 Bu Paketle Demo İste
+                        <x-icon name="target" size="16" aria-label="Demo" /> Bu Paketle Demo İste
                     </a>
                     <a href="#cta" class="btn-ghost"
                        data-track="cta_clicked"
@@ -1931,8 +1931,8 @@ footer a:hover { color:#fff; }
             </a>
         </div>
 
-        <p style="text-align:center; margin-top:32px; font-size:13px; color:var(--muted);">
-            🎁 14 gün ücretsiz deneme · Kredi kartı gerekmez · Add-on'ları istediğin zaman aç/kapat · İstediğin zaman iptal
+        <p style="text-align:center; margin-top:32px; font-size:13px; color:var(--muted); display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap;">
+            <x-icon name="gift" size="14" aria-label="Ücretsiz" /> 14 gün ücretsiz deneme · Kredi kartı gerekmez · Add-on'ları istediğin zaman aç/kapat · İstediğin zaman iptal
         </p>
     </div>
 </section>
@@ -1973,7 +1973,7 @@ footer a:hover { color:#fff; }
                        class="btn-primary"
                        data-track="cta_clicked"
                        data-ph-cta-name="partner_program">
-                        🤝 Partner Programını İncele →
+                        <x-icon name="handshake" size="16" aria-label="Partner" /> Partner Programını İncele →
                     </a>
                 </div>
 
@@ -2057,7 +2057,7 @@ footer a:hover { color:#fff; }
                data-track="cta_clicked"
                data-ph-cta-name="cta_demo_email"
                data-ph-location="platform_cta">
-                🎯 Demo Talebi Gönder
+                <x-icon name="target" size="18" aria-label="Demo" /> Demo Talebi Gönder
             </a>
             <a href="https://wa.me/4915203253691?text={{ urlencode('Merhaba, ' . $brand . ' platformu hakkında bilgi almak istiyorum.') }}"
                target="_blank" rel="noopener"
@@ -2066,14 +2066,14 @@ footer a:hover { color:#fff; }
                data-track="cta_clicked"
                data-ph-cta-name="cta_whatsapp"
                data-ph-location="platform_cta">
-                💬 WhatsApp ile Konuş
+                <x-icon name="message-square" size="18" aria-label="WhatsApp" /> WhatsApp ile Konuş
             </a>
         </div>
 
         <div class="contacts">
-            <div>📧 <a href="mailto:info@mentorde.com">info@mentorde.com</a></div>
-            <div>💬 <a href="https://wa.me/4915203253691">+49 1520 325 3691</a></div>
-            <div>🌐 <a href="https://panel.mentorde.com">panel.mentorde.com</a></div>
+            <div><x-icon name="mail" size="14" aria-label="Email" /> <a href="mailto:info@mentorde.com">info@mentorde.com</a></div>
+            <div><x-icon name="message-square" size="14" aria-label="WhatsApp" /> <a href="https://wa.me/4915203253691">+49 1520 325 3691</a></div>
+            <div><x-icon name="globe" size="14" aria-label="Web" /> <a href="https://panel.mentorde.com">panel.mentorde.com</a></div>
         </div>
     </div>
 </section>
@@ -2114,8 +2114,8 @@ footer a:hover { color:#fff; }
         <div>
             <h5>İletişim</h5>
             <ul>
-                <li>📧 info@mentorde.com</li>
-                <li>💬 +49 1520 325 3691</li>
+                <li><x-icon name="mail" size="14" aria-label="Email" /> info@mentorde.com</li>
+                <li><x-icon name="message-square" size="14" aria-label="WhatsApp" /> +49 1520 325 3691</li>
                 <li><a href="/legal/privacy">Gizlilik</a></li>
                 <li><a href="/legal/terms">Kullanım</a></li>
             </ul>

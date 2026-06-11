@@ -110,8 +110,8 @@
 @section('content')
 @php
 $typeLabels = ['blog'=>'Blog','video_feature'=>'Video','podcast'=>'Podcast','presentation'=>'Sunum','experience'=>'Kişisel Deneyim','career_guide'=>'Kariyer Rehberi','tip'=>'Hızlı İpucu'];
-$catLabels  = ['student-life'=>'🎓 Öğrenci Hayatı','culture-fun'=>'🎭 Kültür & Eğlence','careers'=>'💼 Kariyer','tips-tricks'=>'💡 Pratik İpuçları','city-content'=>'🏙 Şehirler','uni-content'=>'🏛 Üniversiteler','success-stories'=>'⭐ Başarı Hikayeleri'];
-$typeIcons  = ['blog'=>'📝','video_feature'=>'▶️','podcast'=>'🎙','presentation'=>'📊','experience'=>'💬','career_guide'=>'🗺','tip'=>'💡'];
+$catLabels  = ['student-life'=>'Öğrenci Hayatı','culture-fun'=>'Kültür & Eğlence','careers'=>'Kariyer','tips-tricks'=>'Pratik İpuçları','city-content'=>'Şehirler','uni-content'=>'Üniversiteler','success-stories'=>'Başarı Hikayeleri'];
+$typeIcons  = ['blog'=>'pencil','video_feature'=>'play-circle','podcast'=>'headphones','presentation'=>'presentation','experience'=>'message-circle','career_guide'=>'map','tip'=>'lightbulb'];
 $gradients  = ['student-life'=>'linear-gradient(135deg,#1e3a8a,#3b82f6)','culture-fun'=>'linear-gradient(135deg,#4c1d95,#8b5cf6)','careers'=>'linear-gradient(135deg,#064e3b,#10b981)','tips-tricks'=>'linear-gradient(135deg,#78350f,#f59e0b)','city-content'=>'linear-gradient(135deg,#0c4a6e,#0ea5e9)','uni-content'=>'linear-gradient(135deg,#312e81,#6366f1)','success-stories'=>'linear-gradient(135deg,#1e1b4b,#a78bfa)'];
 
 $hasToc   = in_array($item->type, ['blog','career_guide','experience']);
@@ -125,7 +125,7 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
 {{-- Breadcrumb --}}
 <div class="cd-breadcrumb">
     @pageVisible('discover')
-    <a href="{{ route('student.discover') }}">🧭 Keşfet</a>
+    <a href="{{ route('student.discover') }}" style="display:inline-flex;align-items:center;gap:4px;"><x-icon name="compass" size="13" aria-label="Keşfet" /> Keşfet</a>
     <span>/</span>
     @if($item->category)
     <a href="{{ route('student.discover', ['cat' => $item->category]) }}">{{ $catLabels[$item->category] ?? $item->category }}</a>
@@ -145,7 +145,7 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
     <div class="cd-hero-overlay"></div>
     <div class="cd-hero-body">
         <div class="cd-hero-badges">
-            <span class="cd-hero-badge">{{ $typeIcons[$item->type] ?? '📄' }} {{ $typeLabels[$item->type] ?? $item->type }}</span>
+            <span class="cd-hero-badge" style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="{{ $typeIcons[$item->type] ?? 'file-text' }}" size="13" aria-label="İçerik türü" /> {{ $typeLabels[$item->type] ?? $item->type }}</span>
             @if($item->category)
             <span class="cd-hero-badge">{{ $catLabels[$item->category] ?? $item->category }}</span>
             @endif
@@ -160,20 +160,20 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
 {{-- Meta bar — sidebar varsa gizlenir --}}
 <div class="cd-meta-bar" @if($hasToc) style="display:none;" @endif>
     @if($item->metric_total_views)
-    <div class="cd-meta-item">👁 {{ number_format($item->metric_total_views) }} görüntülenme</div>
+    <div class="cd-meta-item"><x-icon name="eye" size="14" aria-label="Görüntülenme" /> {{ number_format($item->metric_total_views) }} görüntülenme</div>
     @endif
     @php $rtMins = $item->metric_avg_read_time_seconds ? intdiv($item->metric_avg_read_time_seconds, 60) : 0; @endphp
     @if($rtMins)
-    <div class="cd-meta-item">⏱ {{ $rtMins }} dk okuma</div>
+    <div class="cd-meta-item"><x-icon name="clock" size="14" aria-label="Okuma süresi" /> {{ $rtMins }} dk okuma</div>
     @endif
     @if($item->published_at)
-    <div class="cd-meta-item">📅 {{ $item->published_at->format('d M Y') }}</div>
+    <div class="cd-meta-item"><x-icon name="calendar" size="14" aria-label="Tarih" /> {{ $item->published_at->format('d M Y') }}</div>
     @endif
     @if(!empty($item->author))
-    <div class="cd-meta-item">✍️ {{ $item->author }}</div>
+    <div class="cd-meta-item"><x-icon name="pen" size="14" aria-label="Yazar" /> {{ $item->author }}</div>
     @endif
     @foreach($itemTags as $tag)
-    <span class="cd-tag">🏷 {{ $tag }}</span>
+    <span class="cd-tag" style="display:inline-flex;align-items:center;gap:4px;"><x-icon name="tag" size="12" aria-label="Etiket" /> {{ $tag }}</span>
     @endforeach
 </div>
 
@@ -182,19 +182,22 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
     <button id="btn-like"
         data-url="{{ route('student.content.react', $item->slug) }}"
         data-reacted="{{ $isLiked ? '1' : '0' }}"
+        aria-label="Beğen"
         style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1.5px solid {{ $isLiked ? 'var(--u-brand,#7c3aed)' : 'var(--u-line,#d6e1ef)' }};background:{{ $isLiked ? 'rgba(124,58,237,.08)' : 'var(--u-card,#fff)' }};color:{{ $isLiked ? 'var(--u-brand,#7c3aed)' : 'var(--u-muted,#6b7280)' }};font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s;">
-        👍 <span id="like-label">{{ $isLiked ? 'Beğenildi' : 'Beğen' }}</span>
+        <x-icon name="thumbs-up" size="14" aria-label="Beğeni" /> <span id="like-label">{{ $isLiked ? 'Beğenildi' : 'Beğen' }}</span>
         @if($likeCount > 0)<span id="like-count" style="margin-left:4px;opacity:.7;">{{ $likeCount }}</span>@else<span id="like-count" style="margin-left:4px;opacity:.7;display:none;">0</span>@endif
     </button>
 
     <button id="btn-save"
         data-url="{{ route('student.content.save', $item->slug) }}"
         data-saved="{{ $isSaved ? '1' : '0' }}"
+        aria-label="Kaydet"
         style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1.5px solid {{ $isSaved ? 'var(--u-brand,#7c3aed)' : 'var(--u-line,#d6e1ef)' }};background:{{ $isSaved ? 'rgba(124,58,237,.08)' : 'var(--u-card,#fff)' }};color:{{ $isSaved ? 'var(--u-brand,#7c3aed)' : 'var(--u-muted,#6b7280)' }};font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s;">
-        🔖 <span id="save-label">{{ $isSaved ? 'Kaydedildi' : 'Kaydet' }}</span>
+        <span id="save-icon" style="display:inline-flex;"><x-icon name="{{ $isSaved ? 'bookmark-filled' : 'bookmark' }}" size="14" aria-label="Kayıt durumu" /></span>
+        <span id="save-label">{{ $isSaved ? 'Kaydedildi' : 'Kaydet' }}</span>
     </button>
 
-    <a href="{{ route('student.saved') }}" style="font-size:.8rem;color:var(--u-muted,#6b7280);text-decoration:none;margin-left:auto;">📋 Kayıtlarım →</a>
+    <a href="{{ route('student.saved') }}" aria-label="Kayıtlarım sayfası" style="font-size:.8rem;color:var(--u-muted,#6b7280);text-decoration:none;margin-left:auto;display:inline-flex;align-items:center;gap:4px;"><x-icon name="clipboard-list" size="13" aria-label="Kayıtlar" /> Kayıtlarım →</a>
 </div>
 
 {{-- City CTA --}}
@@ -202,7 +205,7 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
 @pageVisible('discover')
 <a href="{{ route('student.discover', ['cat'=>'city-content','q'=>$linkedCitySlug]) }}" class="cd-city-cta">
     <div>
-        <div class="cd-city-cta-left">📍 {{ ucfirst($linkedCitySlug) }} Şehir İçerikleri</div>
+        <div class="cd-city-cta-left" style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="map-pin" size="16" aria-label="Şehir" /> {{ ucfirst($linkedCitySlug) }} Şehir İçerikleri</div>
         <div class="cd-city-cta-sub">Bu şehre ait blog, deneyim ve kariyer rehberleri</div>
     </div>
     <div class="cd-city-cta-arrow">→</div>
@@ -244,7 +247,7 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
 
     @elseif($item->type === 'tip')
         <div class="cd-tip-card">
-            <div class="cd-tip-icon">💡</div>
+            <div class="cd-tip-icon" style="color:var(--u-brand,#7c3aed);display:flex;"><x-icon name="lightbulb" size="36" aria-label="İpucu" /></div>
             <div class="cd-tip-body">{!! $item->rendered_content_tr !!}</div>
         </div>
 
@@ -264,28 +267,28 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
 <div class="cd-sidebar">
 <div class="cd-sidebar-sticky">
 <div class="cd-toc" id="cd-toc">
-    <div class="cd-toc-title">📑 İçindekiler</div>
+    <div class="cd-toc-title" style="display:flex;align-items:center;gap:5px;"><x-icon name="list" size="13" aria-label="İçindekiler" /> İçindekiler</div>
     <ul class="cd-toc-list"></ul>
 </div>
 
 {{-- Meta sidebar'da --}}
 <div style="background:var(--u-card,#fff);border:1px solid var(--u-line,#e5e7eb);border-radius:12px;padding:16px 18px;font-size:.83rem;color:var(--u-muted,#6b7280);display:flex;flex-direction:column;gap:8px;">
     @if($item->metric_total_views)
-    <div>👁 <strong style="color:var(--u-text,#333);">{{ number_format($item->metric_total_views) }}</strong> görüntülenme</div>
+    <div style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="eye" size="14" aria-label="Görüntülenme" /> <strong style="color:var(--u-text,#333);">{{ number_format($item->metric_total_views) }}</strong> görüntülenme</div>
     @endif
     @php $rtMins = $item->metric_avg_read_time_seconds ? intdiv($item->metric_avg_read_time_seconds, 60) : 0; @endphp
     @if($rtMins)
-    <div>⏱ <strong style="color:var(--u-text,#333);">{{ $rtMins }} dk</strong> okuma süresi</div>
+    <div style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="clock" size="14" aria-label="Süre" /> <strong style="color:var(--u-text,#333);">{{ $rtMins }} dk</strong> okuma süresi</div>
     @endif
     @if($item->published_at)
-    <div>📅 {{ $item->published_at->format('d M Y') }}</div>
+    <div style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="calendar" size="14" aria-label="Tarih" /> {{ $item->published_at->format('d M Y') }}</div>
     @endif
     @if(!empty($item->author))
-    <div>✍️ {{ $item->author }}</div>
+    <div style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="pen" size="14" aria-label="Yazar" /> {{ $item->author }}</div>
     @endif
     @pageVisible('discover')
     @foreach($itemTags as $tag)
-    <a href="{{ route('student.discover', ['q' => $tag]) }}" class="cd-tag" style="width:fit-content;">🏷 {{ $tag }}</a>
+    <a href="{{ route('student.discover', ['q' => $tag]) }}" class="cd-tag" style="width:fit-content;display:inline-flex;align-items:center;gap:4px;"><x-icon name="tag" size="12" aria-label="Etiket" /> {{ $tag }}</a>
     @endforeach
     @endpageVisible
 </div>
@@ -296,12 +299,12 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
 
 {{-- İlgili İçerikler --}}
 @if($related->isNotEmpty())
-<div class="cd-related-title">📚 İlgili İçerikler</div>
+<div class="cd-related-title" style="display:flex;align-items:center;gap:6px;"><x-icon name="books" size="16" aria-label="İlgili" /> İlgili İçerikler</div>
 <div class="cd-related-grid">
     @foreach($related as $r)
     <a href="{{ route('student.content-detail', $r->slug) }}" class="cd-rel-card">
-        <div class="cd-rel-img" style="background:{{ $gradients[$r->category] ?? 'linear-gradient(135deg,#4c1d95,#7c3aed)' }}">
-            {{ $typeIcons[$r->type] ?? '📄' }}
+        <div class="cd-rel-img" style="background:{{ $gradients[$r->category] ?? 'linear-gradient(135deg,#4c1d95,#7c3aed)' }};color:#fff;">
+            <x-icon name="{{ $typeIcons[$r->type] ?? 'file-text' }}" size="28" aria-label="İçerik türü" />
         </div>
         <div class="cd-rel-body">
             <div class="cd-rel-title">{{ Str::limit($r->title_tr, 55) }}</div>
@@ -337,7 +340,7 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
 
 @pageVisible('discover')
 <div style="margin-top:16px;text-align:center;">
-    <a href="{{ route('student.discover') }}" class="btn alt">← Keşfet'e Dön</a>
+    <a href="{{ route('student.discover') }}" class="btn alt" style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="arrow-left" size="14" aria-label="Geri" /> Keşfet'e Dön</a>
 </div>
 @endpageVisible
 
@@ -417,6 +420,11 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
 (function(){
     var btn=document.getElementById('btn-save');
     if(!btn)return;
+    var BM_OUTLINE='<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>';
+    var BM_FILLED='<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" fill="currentColor"/>';
+    function svgFor(saved){
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="lucide-icon">'+(saved?BM_FILLED:BM_OUTLINE)+'</svg>';
+    }
     btn.addEventListener('click',function(){
         fetch(btn.getAttribute('data-url'),{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]')?.content||'','Accept':'application/json'}})
         .then(function(r){return r.json();})
@@ -424,6 +432,8 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
             if(!d.ok)return;
             var on=d.saved;
             document.getElementById('save-label').textContent=on?'Kaydedildi':'Kaydet';
+            var icn=document.getElementById('save-icon');
+            if(icn)icn.innerHTML=svgFor(on);
             btn.style.borderColor=on?'var(--u-brand,#7c3aed)':'var(--u-line,#d6e1ef)';
             btn.style.background=on?'rgba(124,58,237,.08)':'var(--u-card,#fff)';
             btn.style.color=on?'var(--u-brand,#7c3aed)':'var(--u-muted,#6b7280)';

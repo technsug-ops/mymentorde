@@ -197,7 +197,7 @@
             <div class="nav-section">
                 <a href="/student/dashboard"
                    class="nav-link {{ request()->is('student/dashboard') ? 'active' : '' }}">
-                    <span class="nav-icon">🏠</span> Ana Sayfa
+                    <x-icon name="home" size="18" class="nav-icon" aria-label="Ana Sayfa" /> Ana Sayfa
                 </a>
             </div>
 
@@ -205,41 +205,41 @@
                 <div class="nav-section-label">Kayit Sureci</div>
                 <a href="/student/registration"
                    class="nav-link {{ request()->is('student/registration') ? 'active' : '' }}">
-                    <span class="nav-icon">📝</span> Kayit Formu
+                    <x-icon name="pen-line" size="18" class="nav-icon" aria-label="Kayıt Formu" /> Kayit Formu
                     @if(!empty($guestApplication?->registration_form_submitted_at))
                         <span class="nav-badge" style="background:rgba(22,163,74,.15);color:#16a34a;font-size:9px;padding:1px 6px;border-radius:6px;margin-left:auto;">✓</span>
                     @endif
                 </a>
                 <a href="/student/registration/documents"
                    class="nav-link {{ request()->is('student/registration/documents') ? 'active' : '' }}">
-                    <span class="nav-icon">📄</span> Belgelerim
+                    <x-icon name="file-text" size="18" class="nav-icon" aria-label="Belgelerim" /> Belgelerim
                     @if(isset($docSummary))
                         <span class="nav-badge" style="background:{{ ($guestApplication?->docs_ready ?? false) ? 'rgba(22,163,74,.15)' : 'rgba(217,119,6,.15)' }};color:{{ ($guestApplication?->docs_ready ?? false) ? '#16a34a' : '#d97706' }};font-size:9px;padding:1px 6px;border-radius:6px;margin-left:auto;">{{ $docSummary['approved'] ?? 0 }}/{{ $docSummary['total'] ?? 0 }}</span>
                     @endif
                 </a>
                 <a href="/student/contract"
                    class="nav-link {{ request()->is('student/contract*') ? 'active' : '' }}">
-                    <span class="nav-icon">📜</span> Sozlesme
+                    <x-icon name="file-text" size="18" class="nav-icon" aria-label="Sözleşme" /> Sozlesme
                     @if(($guestApplication?->contract_status ?? '') === 'approved')
                         <span class="nav-badge" style="background:rgba(22,163,74,.15);color:#16a34a;font-size:9px;padding:1px 6px;border-radius:6px;margin-left:auto;">✓</span>
                     @endif
                 </a>
                 <a href="/student/process-tracking"
                    class="nav-link {{ request()->is('student/process-tracking*','student/visa*','student/housing*','student/university-applications*','student/institution-documents*') ? 'active' : '' }}">
-                    <span class="nav-icon">📊</span> Surec Takibi
-                    <span class="nav-badge" style="background:rgba(124,58,237,.12);color:#7c3aed;font-size:9px;padding:1px 6px;border-radius:6px;margin-left:auto;" title="Üniversite + Vize + Konut dahil">🎓🛂🏠</span>
+                    <x-icon name="bar-chart" size="18" class="nav-icon" aria-label="Süreç Takibi" /> Surec Takibi
+                    <span class="nav-badge" style="background:rgba(124,58,237,.12);color:#7c3aed;font-size:9px;padding:1px 6px;border-radius:6px;margin-left:auto;" title="Üniversite + Vize + Konut dahil">U+V+K</span>
                 </a>
                 <a href="/student/appointments"
                    class="nav-link {{ request()->is('student/appointments*') ? 'active' : '' }}">
-                    <span class="nav-icon">📅</span> Randevular
+                    <x-icon name="calendar" size="18" class="nav-icon" aria-label="Randevular" /> Randevular
                 </a>
                 <a href="/student/calendar"
                    class="nav-link {{ request()->is('student/calendar*') ? 'active' : '' }}">
-                    <span class="nav-icon">🗓</span> Takvimim
+                    <x-icon name="calendar" size="18" class="nav-icon" aria-label="Takvimim" /> Takvimim
                 </a>
                 <a href="/student/checklist"
                    class="nav-link {{ request()->is('student/checklist*') ? 'active' : '' }}">
-                    <span class="nav-icon">✅</span> Yapilacaklar
+                    <x-icon name="check-square" size="18" class="nav-icon" aria-label="Yapılacaklar" /> Yapilacaklar
                 </a>
             </div>
 
@@ -247,14 +247,14 @@
                 <div class="nav-section-label">Iletisim</div>
                 <a href="/student/messages"
                    class="nav-link {{ request()->is('student/messages*') ? 'active' : '' }}">
-                    <span class="nav-icon">💬</span> Mesajlar
+                    <x-icon name="message-circle" size="18" class="nav-icon" aria-label="Mesajlar" /> Mesajlar
                     @if((int)($dmUnread ?? 0) > 0)
                         <span class="nav-badge">{{ (int)$dmUnread }}</span>
                     @endif
                 </a>
                 <a href="/student/tickets"
                    class="nav-link {{ request()->is('student/tickets*') ? 'active' : '' }}">
-                    <span class="nav-icon">📞</span> Destek
+                    <x-icon name="phone" size="18" class="nav-icon" aria-label="Destek" /> Destek
                 </a>
             </div>
 
@@ -262,19 +262,19 @@
                 <div class="nav-section-label">Araclar</div>
                 <a href="/student/services"
                    class="nav-link {{ request()->is('student/services*') ? 'active' : '' }}">
-                    <span class="nav-icon">📦</span> Servisler
+                    <x-icon name="package" size="18" class="nav-icon" aria-label="Servisler" /> Servisler
                 </a>
                 <a href="/student/ai-assistant"
                    class="nav-link {{ request()->is('student/ai-assistant*') ? 'active' : '' }}">
-                    <span class="nav-icon">🤖</span> AI Asistan
+                    <x-icon name="bot" size="18" class="nav-icon" aria-label="AI Asistan" /> AI Asistan
                 </a>
                 <a href="/student/document-builder"
                    class="nav-link {{ request()->is('student/document-builder*') ? 'active' : '' }}">
-                    <span class="nav-icon">📝</span> Dokuman Olustur
+                    <x-icon name="pen-line" size="18" class="nav-icon" aria-label="Doküman Oluştur" /> Dokuman Olustur
                 </a>
                 <a href="/student/cost-calculator"
                    class="nav-link {{ request()->is('student/cost-calculator*') ? 'active' : '' }}">
-                    <span class="nav-icon">🧮</span> Maliyet Hesapla
+                    <x-icon name="calculator" size="18" class="nav-icon" aria-label="Maliyet Hesapla" /> Maliyet Hesapla
                 </a>
             </div>
 
@@ -282,37 +282,37 @@
                 <div class="nav-section-label">Kesfet</div>
                 <a href="/student/materials"
                    class="nav-link {{ request()->is('student/materials*') ? 'active' : '' }}">
-                    <span class="nav-icon">📚</span> Materyaller
+                    <x-icon name="book-open" size="18" class="nav-icon" aria-label="Materyaller" /> Materyaller
                 </a>
                 <a href="{{ route('student.info.university-guide') }}"
                    class="nav-link {{ request()->routeIs('student.info.university-guide') ? 'active' : '' }}">
-                    <span class="nav-icon">🎓</span> Üniversite Rehberi
+                    <x-icon name="graduation-cap" size="18" class="nav-icon" aria-label="Üniversite Rehberi" /> Üniversite Rehberi
                 </a>
                 <a href="{{ route('student.info.living-guide') }}"
                    class="nav-link {{ request()->routeIs('student.info.living-guide') ? 'active' : '' }}">
-                    <span class="nav-icon">🏙</span> Yaşam Rehberi
+                    <x-icon name="building" size="18" class="nav-icon" aria-label="Yaşam Rehberi" /> Yaşam Rehberi
                 </a>
                 <a href="{{ route('student.info.vize-guide') }}"
                    class="nav-link {{ request()->routeIs('student.info.vize-guide') ? 'active' : '' }}">
-                    <span class="nav-icon">🛂</span> Vize & Sperrkonto
+                    <x-icon name="shield-check" size="18" class="nav-icon" aria-label="Vize ve Sperrkonto" /> Vize & Sperrkonto
                 </a>
                 <a href="{{ route('student.info.document-guide') }}"
                    class="nav-link {{ request()->routeIs('student.info.document-guide') ? 'active' : '' }}">
-                    <span class="nav-icon">📋</span> Belge Rehberi
+                    <x-icon name="clipboard-list" size="18" class="nav-icon" aria-label="Belge Rehberi" /> Belge Rehberi
                 </a>
                 <a href="{{ route('student.info.success-stories') }}"
                    class="nav-link {{ request()->routeIs('student.info.success-stories') ? 'active' : '' }}">
-                    <span class="nav-icon">⭐</span> Başarı Hikayeleri
+                    <x-icon name="award" size="18" class="nav-icon" aria-label="Başarı Hikayeleri" /> Başarı Hikayeleri
                 </a>
                 @pageVisible('discover')
                 <a href="{{ route('student.discover') }}"
                    class="nav-link {{ request()->routeIs('student.discover') ? 'active' : '' }}">
-                    <span class="nav-icon">🧭</span> Icerikler
+                    <x-icon name="compass" size="18" class="nav-icon" aria-label="İçerikler" /> Icerikler
                 </a>
                 @endpageVisible
                 <a href="{{ route('student.saved') }}"
                    class="nav-link {{ request()->routeIs('student.saved') ? 'active' : '' }}">
-                    <span class="nav-icon">🔖</span> Favorilerim
+                    <x-icon name="bookmark" size="18" class="nav-icon" aria-label="Favorilerim" /> Favorilerim
                 </a>
             </div>
 
@@ -320,25 +320,25 @@
                 <div class="nav-section-label">Hesap</div>
                 <a href="/student/payments"
                    class="nav-link {{ request()->is('student/payments*') ? 'active' : '' }}">
-                    <span class="nav-icon">💳</span> Odeme Durumum
+                    <x-icon name="credit-card" size="18" class="nav-icon" aria-label="Ödeme Durumum" /> Odeme Durumum
                 </a>
                 <a href="/student/profile"
                    class="nav-link {{ request()->is('student/profile*') ? 'active' : '' }}">
-                    <span class="nav-icon">👤</span> Profil
+                    <x-icon name="user" size="18" class="nav-icon" aria-label="Profil" /> Profil
                 </a>
                 <a href="/student/settings"
                    class="nav-link {{ request()->is('student/settings*') ? 'active' : '' }}">
-                    <span class="nav-icon">⚙️</span> Ayarlar
+                    <x-icon name="settings" size="18" class="nav-icon" aria-label="Ayarlar" /> Ayarlar
                 </a>
             </div>
         </nav>
 
         <div class="sidebar-footer">
             <a href="{{ route('student.handbook') }}" class="nav-link {{ request()->routeIs('student.handbook') ? 'active' : '' }}" style="margin-bottom:6px;">
-                <span class="nav-icon">📖</span> Öğrenci Kılavuzu
+                <x-icon name="book-open" size="18" class="nav-icon" aria-label="Öğrenci Kılavuzu" /> Öğrenci Kılavuzu
             </a>
             <a href="/logout" class="nav-link logout">
-                <span class="nav-icon">🚪</span> Çıkış Yap
+                <x-icon name="log-out" size="18" class="nav-icon" aria-label="Çıkış Yap" /> Çıkış Yap
             </a>
         </div>
     </aside>
@@ -349,8 +349,8 @@
         {{-- Topbar --}}
         <header class="topbar">
             <div class="topbar-left" style="flex:0 1 auto;">
-                <button class="icon-btn" id="premium-menu-btn"
-                        style="display:none;">☰</button>
+                <button class="icon-btn" id="premium-menu-btn" aria-label="Menüyü Aç"
+                        style="display:none;align-items:center;justify-content:center;"><x-icon name="menu" size="22" /></button>
                 <a href="/student/dashboard" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:22px;line-height:1;width:44px;height:44px;flex-shrink:0;border:1px solid var(--u-line,#e5e7eb);background:var(--u-card,#fff);border-radius:10px;text-decoration:none;display:flex;align-items:center;justify-content:center;">&#8592;</a>
                 <div>
                     <div class="topbar-title">@yield('page_title', 'Öğrenci Portalı')</div>
@@ -367,8 +367,8 @@
             </div>
 
             <div class="topbar-right">
-                <button class="icon-btn" id="dm-btn" title="Tema">🌙</button>
-                <button class="icon-btn" id="design-btn" title="Tasarım Teması">🎨</button>
+                <button class="icon-btn" id="dm-btn" title="Tema" aria-label="Karanlık moda geç"><x-icon name="moon" size="18" /></button>
+                <button class="icon-btn" id="design-btn" title="Tasarım Teması" aria-label="Tasarım temasını değiştir"><x-icon name="palette" size="18" /></button>
                 <div class="avatar" style="width:36px;height:36px;font-size:13px;" title="{{ $user?->name ?? 'Öğrenci' }}">
                     {{ $sideInitials }}
                 </div>
@@ -406,8 +406,8 @@
 </style>
 
 {{-- Dark mode toggle FAB --}}
-<div class="dark-toggle" id="theme-toggle" title="Tema Değiştir">
-    <span id="theme-icon">🌙</span>
+<div class="dark-toggle" id="theme-toggle" title="Tema Değiştir" aria-label="Tema Değiştir">
+    <span id="theme-icon"><x-icon name="moon" size="22" /></span>
 </div>
 
 {{-- Toast container --}}
@@ -422,6 +422,14 @@
 
 {{-- Theme + Toast + Dark Mode --}}
 <script nonce="{{ $cspNonce ?? '' }}">
+// ── Inline SVG icon markup (Lucide) — emoji yerine kullanilir ──
+var __ICON_SVG = {
+    moon:    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+    sun:     '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+    palette: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>',
+    circle:  '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>'
+};
+function __setIcon(id, name){var el=document.getElementById(id);if(el)el.innerHTML=__ICON_SVG[name];}
 function __designToggle(){
     var link=document.getElementById('mentorde-theme-css');
     if(!link)return;
@@ -436,8 +444,7 @@ function __designToggle(){
         var ml2=document.getElementById('minimalist-css-pre');if(ml2)ml2.remove();
         var ov=document.getElementById('design-override');if(ov)ov.remove();
     }
-    var btn=document.getElementById('design-btn');
-    if(btn)btn.textContent=next==='minimalist'?'◎':'🎨';
+    __setIcon('design-btn', next==='minimalist'?'circle':'palette');
 }
 function __dmToggle(){
     var html=document.documentElement;
@@ -446,13 +453,13 @@ function __dmToggle(){
     html.setAttribute('data-theme',next);
     html.classList.toggle('dark',next==='dark');
     localStorage.setItem('mentorde_dark',next==='dark');
-    var icon=next==='dark'?'☀️':'🌙';
-    ['dm-btn','theme-icon'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=icon;});
+    var iconName=next==='dark'?'sun':'moon';
+    ['dm-btn','theme-icon'].forEach(function(id){__setIcon(id, iconName);});
 }
 // ── İkon başlangıç değerleri (DOMContentLoaded sonrası) ──
 document.addEventListener('DOMContentLoaded',function(){
-    if(localStorage.getItem('mentorde_design')==='minimalist'){var b=document.getElementById('design-btn');if(b)b.textContent='◎';}
-    if(localStorage.getItem('mentorde_dark')==='true'){['dm-btn','theme-icon'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent='☀️';});}
+    if(localStorage.getItem('mentorde_design')==='minimalist'){__setIcon('design-btn','circle');}
+    if(localStorage.getItem('mentorde_dark')==='true'){['dm-btn','theme-icon'].forEach(function(id){__setIcon(id,'sun');});}
 });
 
 document.addEventListener('alpine:init',function(){

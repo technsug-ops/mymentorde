@@ -206,7 +206,7 @@ $cdCostCalc = $cdIsStudent
     $costLabels = [1=>'Çok Uygun', 2=>'Uygun', 3=>'Orta', 4=>'Pahalı', 5=>'Çok Pahalı'];
     $costBadge  = [1=>'ok', 2=>'ok', 3=>'info', 4=>'warn', 5=>'danger'];
     $idx = $c['cost_index'] ?? 3;
-    $collarIcon = ['beyaz yaka'=>'👔', 'mavi yaka'=>'🔧', 'her ikisi'=>'⚡'];
+    $collarIcon = ['beyaz yaka'=>'briefcase', 'mavi yaka'=>'wrench', 'her ikisi'=>'zap'];
 @endphp
 
 {{-- Hero (B: compact + data-forward) --}}
@@ -235,9 +235,9 @@ $cdCostCalc = $cdIsStudent
             </div>
 
             <div class="city-hero-stats">
-                <span class="city-hero-stat"><span class="city-hero-stat-ico">👥</span>{{ $c['population'] ?? '' }}</span>
-                <span class="city-hero-stat"><span class="city-hero-stat-ico">🎓</span>{{ $c['student_pop'] ?? '' }} öğrenci</span>
-                <span class="city-hero-stat"><span class="city-hero-stat-ico">💶</span>{{ $costLabels[$idx] }}</span>
+                <span class="city-hero-stat"><span class="city-hero-stat-ico"><x-icon name="users" size="13" aria-label="Nüfus" /></span>{{ $c['population'] ?? '' }}</span>
+                <span class="city-hero-stat"><span class="city-hero-stat-ico"><x-icon name="graduation-cap" size="13" aria-label="Öğrenci sayısı" /></span>{{ $c['student_pop'] ?? '' }} öğrenci</span>
+                <span class="city-hero-stat"><span class="city-hero-stat-ico"><x-icon name="euro" size="13" aria-label="Maliyet" /></span>{{ $costLabels[$idx] }}</span>
             </div>
 
             @if($heroOverview)
@@ -269,7 +269,7 @@ $cdCostCalc = $cdIsStudent
         @foreach($allCities ?? [] as $key => $ac)
         <a href="{{ $cdCityDetail($key) }}"
            class="city-nav-pill {{ $key === ($c['slug'] ?? '') ? 'active' : '' }}">
-            <span class="city-nav-ico">{{ $ac['emoji'] ?? '' }}</span>
+            <span class="city-nav-ico"><x-icon name="map-pin" size="14" aria-label="Şehir" /></span>
             <span class="city-nav-name">{{ $ac['name'] }}</span>
         </a>
         @endforeach
@@ -283,7 +283,7 @@ $cdCostCalc = $cdIsStudent
     @if(!empty($c['location']))
     <div class="card">
         <div class="card-body" style="padding:20px;">
-            <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:14px;">📍 Konum & Ulaşım</div>
+            <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:14px;display:flex;align-items:center;gap:6px;"><x-icon name="map-pin" size="16" aria-label="Konum" /> Konum & Ulaşım</div>
             @if(!empty($c['location']['region']))
             <div style="padding:8px 0;border-bottom:1px solid var(--u-line);">
                 <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-bottom:2px;">BÖLGE</div>
@@ -293,21 +293,21 @@ $cdCostCalc = $cdIsStudent
             @if(!empty($c['location']['airport']))
             <div style="padding:8px 0;border-bottom:1px solid var(--u-line);">
                 <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-bottom:2px;">HAVALİMANI</div>
-                <div style="font-size:var(--tx-sm);">✈ {{ $c['location']['airport'] }}</div>
+                <div style="font-size:var(--tx-sm);display:inline-flex;align-items:center;gap:6px;"><x-icon name="plane" size="14" aria-label="Havalimanı" /> {{ $c['location']['airport'] }}</div>
             </div>
             @endif
             @if(!empty($c['location']['train_hubs']))
             <div style="padding:8px 0;border-bottom:1px solid var(--u-line);">
                 <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-bottom:6px;">TREN BAĞLANTILARI</div>
                 @foreach($c['location']['train_hubs'] as $train)
-                <div style="font-size:var(--tx-xs);margin-bottom:3px;">🚄 {{ $train }}</div>
+                <div style="font-size:var(--tx-xs);margin-bottom:3px;display:inline-flex;align-items:center;gap:6px;"><x-icon name="train" size="13" aria-label="Tren" /> {{ $train }}</div>
                 @endforeach
             </div>
             @endif
             @if(!empty($c['location']['city_transport']))
             <div style="padding:8px 0;">
                 <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-bottom:2px;">ŞEHİR İÇİ ULAŞIM</div>
-                <div style="font-size:var(--tx-xs);">🚇 {{ $c['location']['city_transport'] }}</div>
+                <div style="font-size:var(--tx-xs);display:inline-flex;align-items:center;gap:6px;"><x-icon name="tram" size="13" aria-label="Şehir içi ulaşım" /> {{ $c['location']['city_transport'] }}</div>
             </div>
             @endif
             @if(!empty($c['location']['geography']))
@@ -323,7 +323,7 @@ $cdCostCalc = $cdIsStudent
     @if(!empty($c['culture']))
     <div class="card">
         <div class="card-body" style="padding:20px;">
-            <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:14px;">🎭 Şehir Kültürü</div>
+            <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:14px;display:flex;align-items:center;gap:6px;"><x-icon name="theater" size="16" aria-label="Kültür" /> Şehir Kültürü</div>
             @if(!empty($c['culture']['personality']))
             <div style="padding:8px 0;border-bottom:1px solid var(--u-line);">
                 <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-bottom:2px;">KARAKTERİ</div>
@@ -348,7 +348,7 @@ $cdCostCalc = $cdIsStudent
             @endif
             @if(!empty($c['culture']['turkish_community']))
             <div style="padding:8px 0;">
-                <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-bottom:2px;">🇹🇷 TÜRK TOPLULUĞU</div>
+                <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-bottom:2px;display:inline-flex;align-items:center;gap:6px;"><x-icon name="users" size="12" aria-label="Türk topluluğu" /> TÜRK TOPLULUĞU</div>
                 <div style="font-size:var(--tx-xs);line-height:1.5;">{{ $c['culture']['turkish_community'] }}</div>
             </div>
             @endif
@@ -360,7 +360,7 @@ $cdCostCalc = $cdIsStudent
 
 {{-- Üniversiteler --}}
 @if(!empty($c['universities']))
-<div style="font-weight:700;font-size:var(--tx-base);margin-bottom:14px;">🏛 Üniversiteler</div>
+<div style="font-weight:700;font-size:var(--tx-base);margin-bottom:14px;display:flex;align-items:center;gap:6px;"><x-icon name="landmark" size="18" aria-label="Üniversiteler" /> Üniversiteler</div>
 <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
     @foreach($c['universities'] as $uni)
     <div class="card">
@@ -375,10 +375,10 @@ $cdCostCalc = $cdIsStudent
                             <span class="badge" style="font-size:var(--tx-xs);">Est. {{ $uni['founded'] }}</span>
                             @endif
                             @if(!empty($uni['students']))
-                            <span class="badge" style="font-size:var(--tx-xs);">👥 {{ number_format($uni['students']) }} öğrenci</span>
+                            <span class="badge" style="font-size:var(--tx-xs);display:inline-flex;align-items:center;gap:4px;"><x-icon name="users" size="11" aria-label="Öğrenci sayısı" /> {{ number_format($uni['students']) }} öğrenci</span>
                             @endif
                             @if(!empty($uni['english_programs']))
-                            <span class="badge ok" style="font-size:var(--tx-xs);">🌍 İngilizce program var</span>
+                            <span class="badge ok" style="font-size:var(--tx-xs);display:inline-flex;align-items:center;gap:4px;"><x-icon name="globe" size="11" aria-label="İngilizce program" /> İngilizce program var</span>
                             @endif
                         </div>
                     </div>
@@ -422,7 +422,7 @@ $cdCostCalc = $cdIsStudent
     <div class="card">
         <div class="card-body" style="padding:20px;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <div style="font-weight:700;font-size:var(--tx-sm);">💶 Yaşam Maliyeti</div>
+                <div style="font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="euro" size="16" aria-label="Yaşam maliyeti" /> Yaşam Maliyeti</div>
                 <span class="badge {{ $costBadge[$idx] ?? 'info' }}">{{ $costLabels[$idx] ?? '' }}</span>
             </div>
             {{-- Pahalılık çubuğu --}}
@@ -476,10 +476,10 @@ $cdCostCalc = $cdIsStudent
     @if(!empty($c['pros_cons']))
     <div class="card">
         <div class="card-body" style="padding:20px;">
-            <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:14px;">⚖️ Artılar & Eksiler</div>
+            <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:14px;display:flex;align-items:center;gap:6px;"><x-icon name="bar-chart" size="16" aria-label="Artılar ve eksiler" /> Artılar & Eksiler</div>
             @if(!empty($c['pros_cons']['pros']))
             <div style="margin-bottom:12px;">
-                <div style="font-size:var(--tx-xs);color:var(--u-ok,#16a34a);font-weight:700;margin-bottom:6px;">✓ ARTILARI</div>
+                <div style="font-size:var(--tx-xs);color:var(--u-ok,#16a34a);font-weight:700;margin-bottom:6px;display:inline-flex;align-items:center;gap:6px;"><x-icon name="check" size="12" aria-label="Artılar" /> ARTILARI</div>
                 @foreach($c['pros_cons']['pros'] as $p)
                 <div style="font-size:var(--tx-xs);padding:4px 0;border-bottom:1px solid var(--u-line);display:flex;gap:6px;align-items:flex-start;">
                     <span style="color:var(--u-ok,#16a34a);flex-shrink:0;">+</span><span>{{ $p }}</span>
@@ -489,7 +489,7 @@ $cdCostCalc = $cdIsStudent
             @endif
             @if(!empty($c['pros_cons']['cons']))
             <div>
-                <div style="font-size:var(--tx-xs);color:var(--u-danger,#dc2626);font-weight:700;margin-bottom:6px;">✗ EKSİLERİ</div>
+                <div style="font-size:var(--tx-xs);color:var(--u-danger,#dc2626);font-weight:700;margin-bottom:6px;display:inline-flex;align-items:center;gap:6px;"><x-icon name="x" size="12" aria-label="Eksiler" /> EKSİLERİ</div>
                 @foreach($c['pros_cons']['cons'] as $con)
                 <div style="font-size:var(--tx-xs);padding:4px 0;border-bottom:1px solid var(--u-line);display:flex;gap:6px;align-items:flex-start;">
                     <span style="color:var(--u-danger,#dc2626);flex-shrink:0;">−</span><span>{{ $con }}</span>
@@ -506,7 +506,7 @@ $cdCostCalc = $cdIsStudent
 {{-- İş Piyasası --}}
 @if(!empty($c['job_market']))
 @php $jm = $c['job_market']; @endphp
-<div style="font-weight:700;font-size:var(--tx-base);margin-bottom:14px;">💼 İş Piyasası & Kariyer</div>
+<div style="font-weight:700;font-size:var(--tx-base);margin-bottom:14px;display:flex;align-items:center;gap:6px;"><x-icon name="briefcase" size="18" aria-label="İş piyasası" /> İş Piyasası & Kariyer</div>
 <div class="card" style="margin-bottom:16px;">
     <div class="card-body" style="padding:20px;">
         @if(!empty($jm['overview']))
@@ -544,7 +544,7 @@ $cdCostCalc = $cdIsStudent
             <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
                 <div style="flex:1;min-width:200px;">
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                        <span style="font-size:var(--tx-lg);">{{ $collarIcon[$sector['collar'] ?? 'beyaz yaka'] ?? '💼' }}</span>
+                        <span style="display:inline-flex;align-items:center;color:var(--u-brand,#2563eb);"><x-icon name="{{ $collarIcon[$sector['collar'] ?? 'beyaz yaka'] ?? 'briefcase' }}" size="18" aria-label="Sektör türü" /></span>
                         <span style="font-weight:700;font-size:var(--tx-sm);">{{ $sector['name'] }}</span>
                         <span class="badge info" style="font-size:var(--tx-xs);">{{ $sector['collar'] ?? '' }}</span>
                     </div>
@@ -579,7 +579,7 @@ $cdCostCalc = $cdIsStudent
 
 {{-- Gezilecek Yerler --}}
 @if(!empty($c['attractions']))
-<div style="font-weight:700;font-size:var(--tx-base);margin-bottom:14px;">📸 Gezilecek Yerler</div>
+<div style="font-weight:700;font-size:var(--tx-base);margin-bottom:14px;display:flex;align-items:center;gap:6px;"><x-icon name="camera" size="18" aria-label="Gezilecek yerler" /> Gezilecek Yerler</div>
 <div class="col3" style="margin-bottom:20px;">
     @foreach($c['attractions'] as $att)
     <div class="card" style="margin-bottom:0;">
@@ -604,7 +604,7 @@ $cdCostCalc = $cdIsStudent
 @if(!empty($c['student_tips']))
 <div class="card" style="margin-bottom:20px;">
     <div class="card-body" style="padding:20px;">
-        <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:14px;">💡 Öğrenci İpuçları</div>
+        <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:14px;display:flex;align-items:center;gap:6px;"><x-icon name="lightbulb" size="16" aria-label="Öğrenci ipuçları" /> Öğrenci İpuçları</div>
         <div class="col2">
             @foreach($c['student_tips'] as $tip => $desc)
             <div style="padding:10px 12px;background:var(--u-bg,#f8fafc);border-radius:8px;border:1px solid var(--u-line);">
@@ -621,7 +621,7 @@ $cdCostCalc = $cdIsStudent
 @if(!empty($c['culture']['events']))
 <div class="card" style="margin-bottom:20px;">
     <div class="card-body" style="padding:20px;">
-        <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:14px;">🎪 Önemli Etkinlikler</div>
+        <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:14px;display:flex;align-items:center;gap:6px;"><x-icon name="party-popper" size="16" aria-label="Etkinlikler" /> Önemli Etkinlikler</div>
         <div style="display:flex;flex-direction:column;gap:8px;">
             @foreach($c['culture']['events'] as $event => $desc)
             <div style="display:flex;gap:12px;align-items:center;padding:8px;background:var(--u-bg,#f8fafc);border-radius:8px;">
@@ -634,7 +634,7 @@ $cdCostCalc = $cdIsStudent
 </div>
 @endif
 
-{{-- 📹 Video İçerikleri --}}
+{{-- Video İçerikleri --}}
 @php
     // Placeholder youtube_id'leri (LzLOhMsjpsw) filtrele — config'te gercek video gelene kadar gosterme
     $placeholderIds = ['LzLOhMsjpsw'];
@@ -652,11 +652,11 @@ $cdCostCalc = $cdIsStudent
         ]]);
     }
 
-    $categoryLabels = ['şehir' => '🏙 Şehir Hayatı', 'üniversite' => '🏛 Üniversite', 'yaşam' => '🏠 Yaşam', 'kariyer' => '💼 Kariyer', 'genel' => '📌 Genel'];
+    $categoryLabels = ['şehir' => 'Şehir Hayatı', 'üniversite' => 'Üniversite', 'yaşam' => 'Yaşam', 'kariyer' => 'Kariyer', 'genel' => 'Genel'];
     $categoryColors = ['şehir' => '#2563eb', 'üniversite' => '#7c3aed', 'yaşam' => '#16a34a', 'kariyer' => '#d97706', 'genel' => '#64748b'];
 @endphp
 @if($videos->isNotEmpty())
-<div style="font-weight:700;font-size:var(--tx-base);margin-bottom:14px;">📹 Video İçerikleri</div>
+<div style="font-weight:700;font-size:var(--tx-base);margin-bottom:14px;display:flex;align-items:center;gap:6px;"><x-icon name="video" size="18" aria-label="Video içerikleri" /> Video İçerikleri</div>
 
 {{-- Kategori filtre butonları --}}
 @php $videoCategories = $videos->pluck('category')->unique()->values(); @endphp
@@ -784,7 +784,7 @@ $cityContents = CmsContent::where('status', 'published')
 @if($cityContents->isNotEmpty())
 <div style="margin-top:32px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <div style="font-size:1rem;font-weight:700;color:var(--u-text,#1a1a1a);">📚 Bu Şehir Hakkında İçerikler</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--u-text,#1a1a1a);display:flex;align-items:center;gap:6px;"><x-icon name="book-open" size="16" aria-label="İçerikler" /> Bu Şehir Hakkında İçerikler</div>
         @pageVisible('discover')
         <a href="{{ $cdDiscover(['cat' => 'city-content']) }}" style="font-size:.82rem;color:var(--u-brand,#2563eb);text-decoration:none;font-weight:600;">Tümünü Gör →</a>
         @endpageVisible
@@ -792,12 +792,12 @@ $cityContents = CmsContent::where('status', 'published')
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
         @foreach($cityContents as $cms)
         @php
-        $typeIcons = ['blog'=>'📝','video_feature'=>'▶️','podcast'=>'🎙','presentation'=>'📊','experience'=>'💬','career_guide'=>'🗺','tip'=>'💡'];
+        $typeIcons = ['blog'=>'pencil','video_feature'=>'play-circle','podcast'=>'microphone','presentation'=>'bar-chart','experience'=>'message-circle','career_guide'=>'map','tip'=>'lightbulb'];
         $typeLabels = ['blog'=>'Blog','video_feature'=>'Video','podcast'=>'Podcast','presentation'=>'Sunum','experience'=>'Deneyim','career_guide'=>'Kariyer','tip'=>'İpucu'];
         $gradients = ['student-life'=>'linear-gradient(to right,#0d2748,#1f6fd9)','culture-fun'=>'linear-gradient(to right,#2e1660,#6b3fa0)','careers'=>'linear-gradient(to right,#0a2e18,#166534)','tips-tricks'=>'linear-gradient(to right,#0a2e3e,#1e607a)','city-content'=>'linear-gradient(to right,#072840,#0e6fa0)','uni-content'=>'linear-gradient(to right,#0f1d5a,#2a3fa8)','success-stories'=>'linear-gradient(to right,#0d1e52,#1a3a8a)'];
         @endphp
         <a href="{{ $cdContentDetail($cms->slug) }}" class="cms-card-link" style="display:flex;gap:12px;background:var(--u-card,#fff);border:1px solid var(--u-line,#e5e7eb);border-radius:10px;overflow:hidden;text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s;">
-            <div style="width:72px;flex-shrink:0;background:{{ $gradients[$cms->category] ?? 'linear-gradient(to right,#0d2748,#1f6fd9)' }};display:flex;align-items:center;justify-content:center;font-size:1.8rem;">{{ $typeIcons[$cms->type] ?? '📄' }}</div>
+            <div style="width:72px;flex-shrink:0;background:{{ $gradients[$cms->category] ?? 'linear-gradient(to right,#0d2748,#1f6fd9)' }};display:flex;align-items:center;justify-content:center;color:#fff;"><x-icon name="{{ $typeIcons[$cms->type] ?? 'file-text' }}" size="28" aria-label="İçerik türü" /></div>
             <div style="padding:10px 12px;flex:1;">
                 <div style="font-size:.78rem;color:var(--u-muted,#888);margin-bottom:3px;">{{ $typeLabels[$cms->type] ?? $cms->type }}</div>
                 <div style="font-size:.88rem;font-weight:600;color:var(--u-text,#1a1a1a);line-height:1.35;">{{ Str::limit($cms->title_tr, 65) }}</div>
@@ -826,8 +826,8 @@ $cityContents = CmsContent::where('status', 'published')
             <iframe id="city-vid-iframe" src="" allow="autoplay;accelerometer;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen
                     style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:12px;"></iframe>
         </div>
-        <button onclick="cityVidClose()"
-                style="position:absolute;top:-14px;right:-14px;background:#fff;border:none;color:#111;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.3);">✕</button>
+        <button onclick="cityVidClose()" aria-label="Kapat"
+                style="position:absolute;top:-14px;right:-14px;background:#fff;border:none;color:#111;border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.3);"><x-icon name="x" size="18" /></button>
     </div>
 </div>
 <script>

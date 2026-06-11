@@ -120,22 +120,22 @@ $typeLabels = [
     'tip'          => 'Hızlı İpucu',
 ];
 $catLabels = [
-    'student-life'   => '🎓 Öğrenci Hayatı',
-    'culture-fun'    => '🎭 Kültür & Eğlence',
-    'careers'        => '💼 Kariyer',
-    'tips-tricks'    => '💡 Pratik İpuçları',
-    'city-content'   => '🏙 Şehirler',
-    'uni-content'    => '🏛 Üniversiteler',
-    'success-stories'=> '⭐ Başarı Hikayeleri',
+    'student-life'   => 'Öğrenci Hayatı',
+    'culture-fun'    => 'Kültür & Eğlence',
+    'careers'        => 'Kariyer',
+    'tips-tricks'    => 'Pratik İpuçları',
+    'city-content'   => 'Şehirler',
+    'uni-content'    => 'Üniversiteler',
+    'success-stories'=> 'Başarı Hikayeleri',
 ];
 $typeIcons = [
-    'blog'         => '📝',
-    'video_feature'=> '▶️',
-    'podcast'      => '🎙',
-    'presentation' => '📊',
-    'experience'   => '💬',
-    'career_guide' => '🗺',
-    'tip'          => '💡',
+    'blog'         => 'pencil',
+    'video_feature'=> 'play-circle',
+    'podcast'      => 'headphones',
+    'presentation' => 'presentation',
+    'experience'   => 'message-circle',
+    'career_guide' => 'map',
+    'tip'          => 'lightbulb',
 ];
 $gradients = [
     'student-life'   => 'linear-gradient(to right,#0d2748,#1f6fd9)',
@@ -161,7 +161,7 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
 {{-- Breadcrumb --}}
 <div class="cd-breadcrumb">
     @pageVisible('discover')
-    <a href="{{ route('guest.discover') }}">🧭 Keşfet</a>
+    <a href="{{ route('guest.discover') }}" style="display:inline-flex;align-items:center;gap:4px;"><x-icon name="compass" size="13" aria-label="Keşfet" /> Keşfet</a>
     <span>/</span>
     @if($item->category)
     <a href="{{ route('guest.discover', ['cat' => $item->category]) }}">{{ $catLabels[$item->category] ?? $item->category }}</a>
@@ -181,7 +181,7 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
     <div class="cd-hero-overlay"></div>
     <div class="cd-hero-body">
         <div class="cd-hero-badges">
-            <span class="cd-hero-badge">{{ $typeIcons[$item->type] ?? '📄' }} {{ $typeLabels[$item->type] ?? $item->type }}</span>
+            <span class="cd-hero-badge" style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="{{ $typeIcons[$item->type] ?? 'file-text' }}" size="13" aria-label="İçerik türü" /> {{ $typeLabels[$item->type] ?? $item->type }}</span>
             @if($item->category)
             <span class="cd-hero-badge">{{ $catLabels[$item->category] ?? $item->category }}</span>
             @endif
@@ -196,20 +196,20 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
 {{-- Meta bar — blog/career_guide/experience'da sidebar'da gösterilir --}}
 <div class="cd-meta-bar" @if($hasToc) style="display:none;" @endif>
     @if($item->metric_total_views)
-    <div class="cd-meta-item">👁 {{ number_format($item->metric_total_views) }} görüntülenme</div>
+    <div class="cd-meta-item"><x-icon name="eye" size="14" aria-label="Görüntülenme" /> {{ number_format($item->metric_total_views) }} görüntülenme</div>
     @endif
     @php $rtMins = $item->metric_avg_read_time_seconds ? intdiv($item->metric_avg_read_time_seconds, 60) : 0; @endphp
     @if($rtMins)
-    <div class="cd-meta-item">⏱ {{ $rtMins }} dk okuma</div>
+    <div class="cd-meta-item"><x-icon name="clock" size="14" aria-label="Okuma süresi" /> {{ $rtMins }} dk okuma</div>
     @endif
     @if($item->published_at)
-    <div class="cd-meta-item">📅 {{ $item->published_at->format('d M Y') }}</div>
+    <div class="cd-meta-item"><x-icon name="calendar" size="14" aria-label="Tarih" /> {{ $item->published_at->format('d M Y') }}</div>
     @endif
     @if($item->author)
-    <div class="cd-meta-item">✍️ {{ $item->author }}</div>
+    <div class="cd-meta-item"><x-icon name="pen" size="14" aria-label="Yazar" /> {{ $item->author }}</div>
     @endif
     @foreach($itemTags as $tag)
-    <span class="cd-tag">🏷 {{ $tag }}</span>
+    <span class="cd-tag" style="display:inline-flex;align-items:center;gap:4px;"><x-icon name="tag" size="12" aria-label="Etiket" /> {{ $tag }}</span>
     @endforeach
 </div>
 
@@ -219,8 +219,9 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
         data-slug="{{ $item->slug }}"
         data-reacted="{{ $isLiked ? '1' : '0' }}"
         data-url="{{ route('guest.content.react', $item->slug) }}"
+        aria-label="Beğen"
         style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1.5px solid {{ $isLiked ? 'var(--u-brand,#1f6fd9)' : 'var(--u-line,#d6e1ef)' }};background:{{ $isLiked ? 'var(--u-bg,#eaf1fb)' : 'var(--u-card,#fff)' }};color:{{ $isLiked ? 'var(--u-brand,#1f6fd9)' : 'var(--u-muted,#4f6787)' }};font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s;">
-        👍 <span id="like-label">{{ $isLiked ? 'Beğenildi' : 'Beğen' }}</span>
+        <x-icon name="thumbs-up" size="14" aria-label="Beğeni" /> <span id="like-label">{{ $isLiked ? 'Beğenildi' : 'Beğen' }}</span>
         {{-- Counter butonun title'ında, görünür değil (UX karışıklığı önler) --}}
         <span id="like-count" data-count="{{ $likeCount }}" style="display:none;">{{ $likeCount }}</span>
     </button>
@@ -229,19 +230,20 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
         data-slug="{{ $item->slug }}"
         data-saved="{{ $isSaved ? '1' : '0' }}"
         data-url="{{ route('guest.content.save', $item->slug) }}"
+        aria-label="Favoriye Ekle"
         style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1.5px solid {{ $isSaved ? 'var(--u-brand,#1f6fd9)' : 'var(--u-line,#d6e1ef)' }};background:{{ $isSaved ? 'var(--u-bg,#eaf1fb)' : 'var(--u-card,#fff)' }};color:{{ $isSaved ? 'var(--u-brand,#1f6fd9)' : 'var(--u-muted,#4f6787)' }};font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s;">
-        <span id="save-icon">{{ $isSaved ? '⭐' : '☆' }}</span>
-        <span id="save-label">{{ $isSaved ? 'Favoride ✓' : 'Favoriye Ekle' }}</span>
+        <span id="save-icon" style="display:inline-flex;"><x-icon name="{{ $isSaved ? 'bookmark-filled' : 'bookmark' }}" size="14" aria-label="Favori durumu" /></span>
+        <span id="save-label">{{ $isSaved ? 'Favoride' : 'Favoriye Ekle' }}</span>
     </button>
 
-    <a href="{{ route('guest.saved') }}" style="font-size:.8rem;color:var(--u-muted,#4f6787);text-decoration:none;margin-left:auto;">⭐ Favorilerim →</a>
+    <a href="{{ route('guest.saved') }}" aria-label="Favorilerim sayfası" style="font-size:.8rem;color:var(--u-muted,#4f6787);text-decoration:none;margin-left:auto;display:inline-flex;align-items:center;gap:4px;"><x-icon name="bookmark-filled" size="13" aria-label="Favoriler" /> Favorilerim →</a>
 </div>
 
 {{-- City CTA --}}
 @if($linkedCity)
 <a href="{{ route('guest.city-detail', $linkedCitySlug) }}" class="cd-city-cta">
     <div>
-        <div class="cd-city-cta-left">📍 {{ $linkedCity['name'] ?? $linkedCitySlug }} Şehir Rehberi</div>
+        <div class="cd-city-cta-left" style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="map-pin" size="16" aria-label="Şehir" /> {{ $linkedCity['name'] ?? $linkedCitySlug }} Şehir Rehberi</div>
         <div class="cd-city-cta-sub">Bu şehir hakkında detaylı rehber, üniversiteler, yaşam maliyeti ve daha fazlası</div>
     </div>
     <div class="cd-city-cta-arrow">→</div>
@@ -283,7 +285,7 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
 
     @elseif($item->type === 'tip')
         <div class="cd-tip-card">
-            <div class="cd-tip-icon">💡</div>
+            <div class="cd-tip-icon" style="color:var(--u-brand,#1f6fd9);display:flex;"><x-icon name="lightbulb" size="36" aria-label="İpucu" /></div>
             <div class="cd-tip-body">{!! $item->rendered_content_tr !!}</div>
         </div>
 
@@ -303,28 +305,28 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
 <div class="cd-sidebar">
 <div class="cd-sidebar-sticky">
 <div class="cd-toc" id="cd-toc">
-    <div class="cd-toc-title">📑 İçindekiler</div>
+    <div class="cd-toc-title" style="display:flex;align-items:center;gap:5px;"><x-icon name="list" size="13" aria-label="İçindekiler" /> İçindekiler</div>
     <ul class="cd-toc-list"></ul>
 </div>
 
 {{-- Meta bilgileri sidebar'da da göster --}}
 <div style="background:var(--u-card,#fff);border:1px solid var(--u-line,#e5e7eb);border-radius:12px;padding:16px 18px;font-size:.83rem;color:var(--u-muted,#4f6787);display:flex;flex-direction:column;gap:8px;margin-top:0;">
     @if($item->metric_total_views)
-    <div>👁 <strong style="color:var(--u-text,#333);">{{ number_format($item->metric_total_views) }}</strong> görüntülenme</div>
+    <div style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="eye" size="14" aria-label="Görüntülenme" /> <strong style="color:var(--u-text,#333);">{{ number_format($item->metric_total_views) }}</strong> görüntülenme</div>
     @endif
     @php $rtMins = $item->metric_avg_read_time_seconds ? intdiv($item->metric_avg_read_time_seconds, 60) : 0; @endphp
     @if($rtMins)
-    <div>⏱ <strong style="color:var(--u-text,#333);">{{ $rtMins }} dk</strong> okuma süresi</div>
+    <div style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="clock" size="14" aria-label="Süre" /> <strong style="color:var(--u-text,#333);">{{ $rtMins }} dk</strong> okuma süresi</div>
     @endif
     @if($item->published_at)
-    <div>📅 {{ $item->published_at->format('d M Y') }}</div>
+    <div style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="calendar" size="14" aria-label="Tarih" /> {{ $item->published_at->format('d M Y') }}</div>
     @endif
     @if($item->author)
-    <div>✍️ {{ $item->author }}</div>
+    <div style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="pen" size="14" aria-label="Yazar" /> {{ $item->author }}</div>
     @endif
     @pageVisible('discover')
     @foreach($itemTags as $tag)
-    <a href="{{ route('guest.discover', ['tag' => $tag]) }}" class="cd-tag" style="width:fit-content;">🏷 {{ $tag }}</a>
+    <a href="{{ route('guest.discover', ['tag' => $tag]) }}" class="cd-tag" style="width:fit-content;display:inline-flex;align-items:center;gap:4px;"><x-icon name="tag" size="12" aria-label="Etiket" /> {{ $tag }}</a>
     @endforeach
     @endpageVisible
 </div>
@@ -335,12 +337,12 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
 
 {{-- Related content --}}
 @if($related->isNotEmpty())
-<div class="cd-related-title">📚 İlgili İçerikler</div>
+<div class="cd-related-title" style="display:flex;align-items:center;gap:6px;"><x-icon name="books" size="16" aria-label="İlgili" /> İlgili İçerikler</div>
 <div class="cd-related-grid">
     @foreach($related as $r)
     <a href="{{ route('guest.content-detail', $r->slug) }}" class="cd-rel-card">
-        <div class="cd-rel-img" style="background:{{ $gradients[$r->category] ?? 'linear-gradient(135deg,#a8edea,#fed6e3)' }}">
-            {{ $typeIcons[$r->type] ?? '📄' }}
+        <div class="cd-rel-img" style="background:{{ $gradients[$r->category] ?? 'linear-gradient(135deg,#a8edea,#fed6e3)' }};color:#fff;">
+            <x-icon name="{{ $typeIcons[$r->type] ?? 'file-text' }}" size="28" aria-label="İçerik türü" />
         </div>
         <div class="cd-rel-body">
             <div class="cd-rel-title">{{ Str::limit($r->title_tr, 55) }}</div>
@@ -376,7 +378,7 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
 
 @pageVisible('discover')
 <div style="margin-top:16px;text-align:center;">
-    <a href="{{ route('guest.discover') }}" class="btn alt">← Keşfet'e Dön</a>
+    <a href="{{ route('guest.discover') }}" class="btn alt" style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="arrow-left" size="14" aria-label="Geri" /> Keşfet'e Dön</a>
 </div>
 @endpageVisible
 
@@ -462,6 +464,12 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
 (function(){
     var btn = document.getElementById('btn-save');
     if(!btn) return;
+    // SVG path data — server-side icon component ile aynı
+    var BM_OUTLINE = '<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>';
+    var BM_FILLED  = '<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" fill="currentColor"/>';
+    function svgFor(saved){
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="lucide-icon">'+ (saved ? BM_FILLED : BM_OUTLINE) +'</svg>';
+    }
     btn.addEventListener('click', function(){
         var url = btn.getAttribute('data-url');
         fetch(url, {method:'POST', headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]')?.content||'','Accept':'application/json'}})
@@ -470,8 +478,8 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
             if(!data.ok) return;
             var saved = data.saved;
             btn.setAttribute('data-saved', saved ? '1' : '0');
-            document.getElementById('save-label').textContent = saved ? 'Favoride ✓' : 'Favoriye Ekle';
-            document.getElementById('save-icon').textContent  = saved ? '⭐' : '☆';
+            document.getElementById('save-label').textContent = saved ? 'Favoride' : 'Favoriye Ekle';
+            document.getElementById('save-icon').innerHTML    = svgFor(saved);
             btn.style.borderColor = saved ? 'var(--u-brand,#1f6fd9)' : 'var(--u-line,#d6e1ef)';
             btn.style.background  = saved ? 'var(--u-bg,#eaf1fb)' : 'var(--u-card,#fff)';
             btn.style.color       = saved ? 'var(--u-brand,#1f6fd9)' : 'var(--u-muted,#4f6787)';

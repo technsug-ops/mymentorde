@@ -145,10 +145,10 @@
 
     $stageGreet = match($stage) {
         'contract'   => "Merhaba {$firstName}! Sözleşme sürecin seni bekliyor.",
-        'documents'  => "Merhaba {$firstName}! 👋",
-        'uni_assist' => "Harika gidiyorsun {$firstName}! 🚀",
-        'visa'       => "Kabul geldi {$firstName}! 🎉",
-        'abroad'     => "Tebrikler {$firstName}! 🇩🇪",
+        'documents'  => "Merhaba {$firstName}!",
+        'uni_assist' => "Harika gidiyorsun {$firstName}!",
+        'visa'       => "Kabul geldi {$firstName}!",
+        'abroad'     => "Tebrikler {$firstName}!",
         default      => $greeting ?? 'Merhaba!',
     };
     $stageSub = match($stage) {
@@ -178,8 +178,8 @@
             <div class="sd-hero-sub">{{ $stageSub }}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
-            <a href="/student/messages" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.25);">✉ Mesaj</a>
-            <a href="/student/tickets" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.25);">🛟 Destek</a>
+            <a href="/student/messages" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.25);display:inline-flex;align-items:center;gap:5px;"><x-icon name="mail" size="12" aria-label="Mesaj" /> Mesaj</a>
+            <a href="/student/tickets" style="padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.25);display:inline-flex;align-items:center;gap:5px;"><x-icon name="life-buoy" size="12" aria-label="Destek" /> Destek</a>
         </div>
     </div>
 
@@ -188,7 +188,7 @@
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:18px;">
         @if($level2Pending ?? false)
         <a href="{{ route('student.registration') }}" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);text-decoration:none;color:#fff;transition:all .15s;">
-            <span style="font-size:32px;flex-shrink:0;line-height:1;">📋</span>
+            <span style="flex-shrink:0;line-height:1;display:flex;color:#fff;"><x-icon name="clipboard-list" size="28" aria-label="Form" /></span>
             <span style="flex:1;min-width:0;">
                 <span style="display:block;font-size:14px;font-weight:800;line-height:1.2;margin-bottom:3px;">Detaylı Form</span>
                 <span style="display:block;font-size:11.5px;opacity:.88;line-height:1.4;">Eğitim, finansal ve aile bilgileri — vize ile üniversite süreçleri için gerekli</span>
@@ -198,7 +198,7 @@
         @endif
         @if($missingRequired > 0)
         <a href="{{ route('student.registration.documents') }}" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);text-decoration:none;color:#fff;transition:all .15s;">
-            <span style="font-size:32px;flex-shrink:0;line-height:1;">📄</span>
+            <span style="flex-shrink:0;line-height:1;display:flex;color:#fff;"><x-icon name="file-text" size="28" aria-label="Belgeler" /></span>
             <span style="flex:1;min-width:0;">
                 <span style="display:block;font-size:14px;font-weight:800;line-height:1.2;margin-bottom:3px;">Belgelerim ({{ $missingRequired }} eksik)</span>
                 <span style="display:block;font-size:11.5px;opacity:.88;line-height:1.4;">{{ $missingRequired }}/{{ $totalRequired }} zorunlu belge — vize, sigorta ve başvuru için</span>
@@ -213,7 +213,15 @@
 {{-- Alerts (sistem alarmlarına özel — eksik form/belge zaten hero'da görünüyor) --}}
 @foreach(($alerts ?? collect()) as $al)
 <div class="sd-alert {{ $al['type'] ?? 'info' }}">
-    <span class="sd-alert-icon">{{ $al['icon'] ?? 'ℹ' }}</span>
+    @php
+        // type'a göre icon belirle (icon array string ise component'e çevrilir, emoji ise info kullanılır)
+        $alIcon = match(($al['type'] ?? 'info')) {
+            'warn'   => 'circle-alert',
+            'danger' => 'circle-alert',
+            default  => 'info',
+        };
+    @endphp
+    <span class="sd-alert-icon" style="display:inline-flex;"><x-icon name="{{ $alIcon }}" size="14" aria-label="Bildirim" /></span>
     <div class="sd-alert-body">{{ $al['message'] ?? '' }}</div>
     @if(!empty($al['action_url']))
     <a href="{{ $al['action_url'] }}" class="sd-alert-btn">{{ $al['action_text'] ?? 'Git' }}</a>
@@ -239,7 +247,7 @@
                 $cls = $s['done'] ? 'done' : ($s['key'] === $stage ? 'active' : 'locked');
             @endphp
             <div class="sd-step {{ $cls }}">
-                <div class="sd-step-num">{{ $s['done'] ? '✓' : ($i + 1) }}</div>
+                <div class="sd-step-num">@if($s['done'])<x-icon name="check" size="11" aria-label="Tamam" />@else{{ $i + 1 }}@endif</div>
                 <div class="sd-step-name">{{ $s['label'] }}</div>
             </div>
         @endforeach
@@ -255,18 +263,18 @@
     <div class="sd-hero-badge"><span class="pulse"></span> Siradaki adim</div>
     <div class="sd-hero-title">Sozlesme surecini tamamla</div>
     <div class="sd-hero-sub">Basvurun alindi. Simdi sozlesme surecini tamamlaman gerekiyor.</div>
-    <a href="/student/contract" class="sd-hero-btn">📜 Sozlesmeye Git →</a>
+    <a href="/student/contract" class="sd-hero-btn"><x-icon name="signature" size="14" aria-label="Sözleşme" /> Sozlesmeye Git →</a>
 </div>
 @elseif($stage === 'documents')
 <div class="sd-hero blue">
     <div class="sd-hero-badge"><span class="pulse"></span> Siradaki adim</div>
     <div class="sd-hero-title">Belgelerini tamamla</div>
     <div class="sd-hero-sub">Universite basvurusu icin {{ $totalRequired }} belge gerekiyor. Su ana kadar {{ $docSummary['approved'] ?? 0 }} tanesi onaylandi. Eksik belgeleri yukle ve danismaninin onayini bekle.</div>
-    <a href="/student/registration/documents" class="sd-hero-btn">📄 Belge Merkezine Git →</a>
+    <a href="/student/registration/documents" class="sd-hero-btn"><x-icon name="file-text" size="14" aria-label="Belgeler" /> Belge Merkezine Git →</a>
     <div class="sd-hero-meta">
-        <span>📎 {{ $docSummary['approved'] ?? 0 }}/{{ $totalRequired }} onayli</span>
-        @if($missingRequired > 0)<span>⏱️ ~{{ $missingRequired }} belge acil</span>@endif
-        <span>📸 Fotograf da yuklenebilir</span>
+        <span><x-icon name="check" size="11" aria-label="Onaylı" /> {{ $docSummary['approved'] ?? 0 }}/{{ $totalRequired }} onayli</span>
+        @if($missingRequired > 0)<span><x-icon name="clock" size="11" aria-label="Acil" /> ~{{ $missingRequired }} belge acil</span>@endif
+        <span><x-icon name="camera" size="11" aria-label="Fotoğraf" /> Fotograf da yuklenebilir</span>
     </div>
 </div>
 @elseif($stage === 'uni_assist')
@@ -274,10 +282,10 @@
     <div class="sd-hero-badge"><span class="pulse"></span> Siradaki adim</div>
     <div class="sd-hero-title">Uni-Assist basvurusu</div>
     <div class="sd-hero-sub">Belgelerin tamamlandi! Simdi danismanin Uni-Assist basvurunu hazirliyor.</div>
-    <a href="/student/process-tracking" class="sd-hero-btn">📊 Surec Takibine Git →</a>
+    <a href="/student/process-tracking" class="sd-hero-btn"><x-icon name="bar-chart-3" size="14" aria-label="Süreç" /> Surec Takibine Git →</a>
     <div class="sd-hero-meta">
-        <span>⏱️ Tahmini: 2-3 hafta</span>
-        <span>📧 Gelismeler bildirilecek</span>
+        <span><x-icon name="clock" size="11" aria-label="Süre" /> Tahmini: 2-3 hafta</span>
+        <span><x-icon name="mail" size="11" aria-label="Bildirim" /> Gelismeler bildirilecek</span>
     </div>
 </div>
 @elseif($stage === 'visa')
@@ -285,15 +293,14 @@
     <div class="sd-hero-badge"><span class="pulse"></span> Siradaki adim</div>
     <div class="sd-hero-title">Vize basvurusu</div>
     <div class="sd-hero-sub">Universiteden kabul geldi! Simdi vize basvurusu icin Sperrkonto acma ve konsolosluk randevusu surecin basliyor.</div>
-    <a href="/student/visa" class="sd-hero-btn" style="color:#134e4a;">🛂 Vize Takibine Git →</a>
+    <a href="/student/visa" class="sd-hero-btn" style="color:#134e4a;"><x-icon name="plane" size="14" aria-label="Vize" /> Vize Takibine Git →</a>
     <div class="sd-hero-meta">
-        <span>🏦 Sperrkonto sureci</span>
-        <span>📅 Konsolosluk randevusu</span>
+        <span><x-icon name="landmark" size="11" aria-label="Banka" /> Sperrkonto sureci</span>
+        <span><x-icon name="calendar" size="11" aria-label="Randevu" /> Konsolosluk randevusu</span>
     </div>
 </div>
-@elseif($stage === 'abroad' || $allDone)
-<div class="sd-celebrate">
-    <div class="emoji">🇩🇪</div>
+@elseif($stage === 'abroad' || $allDone)<div class="sd-celebrate">
+    <div class="emoji" style="display:flex;justify-content:center;color:#fff;"><x-icon name="flag" size="48" aria-label="Almanya" /></div>
     <h2>Almanya'ya hos geldin!</h2>
     <p>Tum surec tamamlandi. Artik Almanya'da yeni hayatina basliyorsun. Danismanin hala yaninda!</p>
 </div>
@@ -323,12 +330,12 @@
 {{-- ══ 6. ACIL BELGELER + BU HAFTA (HER ZAMAN) ══ --}}
 <div class="sd-grid-2">
     <div class="sd-card" style="margin-bottom:0;">
-        <div class="sd-card-head"><h4>📋 Acil Belgeler</h4><a class="sd-card-link" href="/student/registration/documents">Tumunu Gor →</a></div>
+        <div class="sd-card-head"><h4><x-icon name="clipboard-list" size="14" aria-label="Belgeler" /> Acil Belgeler</h4><a class="sd-card-link" href="/student/registration/documents">Tumunu Gor →</a></div>
         <div class="sd-card-body">
             @forelse(($requiredChecklist ?? collect())->take(5) as $doc)
             <div class="sd-cl">
                 @if($doc['done'] ?? false)
-                    <div class="sd-cl-dot" style="background:#16a34a;color:#fff;border-radius:50%;">✓</div>
+                    <div class="sd-cl-dot" style="background:#16a34a;color:#fff;border-radius:50%;"><x-icon name="check" size="11" aria-label="Onaylı" /></div>
                 @else
                     <div class="sd-cl-dot" style="background:#f59e0b;color:#fff;border-radius:50%;font-weight:800;">!</div>
                 @endif
@@ -341,26 +348,26 @@
         </div>
     </div>
     <div class="sd-card" style="margin-bottom:0;">
-        <div class="sd-card-head"><h4>📊 Bu Hafta</h4></div>
+        <div class="sd-card-head"><h4><x-icon name="bar-chart-3" size="14" aria-label="Haftalık" /> Bu Hafta</h4></div>
         <div class="sd-card-body">
             <div class="sd-cl">
-                <div class="sd-cl-dot" style="background:#dbeafe;color:#3b82f6;">📄</div>
+                <div class="sd-cl-dot" style="background:#dbeafe;color:#3b82f6;"><x-icon name="file-text" size="11" aria-label="Belge" /></div>
                 <div class="sd-cl-name">{{ $weekActivity['documents_uploaded'] ?? 0 }} belge yuklendi</div>
                 <span class="sd-cl-tag" style="background:#dbeafe;color:#2563eb;font-weight:700;padding:3px 10px;border-radius:6px;">Yeni</span>
             </div>
             <div class="sd-cl">
-                <div class="sd-cl-dot" style="background:var(--accent-soft,#ede9fe);color:var(--u-brand);">💬</div>
+                <div class="sd-cl-dot" style="background:var(--accent-soft,#ede9fe);color:var(--u-brand);"><x-icon name="message-circle" size="11" aria-label="Mesaj" /></div>
                 <div class="sd-cl-name">{{ $weekActivity['messages_received'] ?? 0 }} mesaj geldi</div>
                 <span class="sd-cl-tag" style="background:{{ ($dmUnread ?? 0) > 0 ? '#fef3c7' : '#dcfce7' }};color:{{ ($dmUnread ?? 0) > 0 ? '#d97706' : '#16a34a' }};font-weight:700;padding:3px 10px;border-radius:6px;">{{ ($dmUnread ?? 0) > 0 ? 'Okunmadi' : 'Tamam' }}</span>
             </div>
             <div class="sd-cl">
-                <div class="sd-cl-dot" style="background:#dcfce7;color:#16a34a;">✅</div>
+                <div class="sd-cl-dot" style="background:#dcfce7;color:#16a34a;"><x-icon name="circle-check" size="11" aria-label="Onaylandı" /></div>
                 <div class="sd-cl-name">{{ $weekActivity['outcomes_added'] ?? 0 }} belge onaylandi</div>
                 <span class="sd-cl-tag" style="background:#dcfce7;color:#16a34a;font-weight:700;padding:3px 10px;border-radius:6px;">Tamamlandi</span>
             </div>
             @if(($docSummary['rejected'] ?? 0) > 0)
             <div class="sd-cl">
-                <div class="sd-cl-dot" style="background:#fee2e2;color:#dc2626;">❌</div>
+                <div class="sd-cl-dot" style="background:#fee2e2;color:#dc2626;"><x-icon name="x" size="11" aria-label="Reddedildi" /></div>
                 <div class="sd-cl-name">{{ $docSummary['rejected'] }} belge reddedildi</div>
                 <span class="sd-cl-tag" style="background:#fee2e2;color:#dc2626;font-weight:700;padding:3px 10px;border-radius:6px;">Duzelt</span>
             </div>
@@ -372,36 +379,36 @@
 {{-- ══ 7. STATE-SPECIFIC KARTLAR ══ --}}
 @if($stage === 'uni_assist')
 <div class="sd-grid-3">
-    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(22,163,74,.08);">📄</div><div><div style="font-size:10px;color:var(--u-muted);">Belgeler</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);">✓ Tamam</div><div style="font-size:10px;color:var(--u-muted);">{{ $docSummary['approved'] ?? 0 }}/{{ $totalRequired }} onayli</div></div></div>
-    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(124,58,237,.08);">🎓</div><div><div style="font-size:10px;color:var(--u-muted);">Basvuru</div><div style="font-size:14px;font-weight:700;">{{ ($outcomeByStep ?? collect())->where('step', 'uni_assist')->sum('total') ?: 'Hazirlaniyor' }}</div><div style="font-size:10px;color:var(--u-muted);">universiteye</div></div></div>
-    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(217,119,6,.08);">⏳</div><div><div style="font-size:10px;color:var(--u-muted);">Durum</div><div style="font-size:14px;font-weight:700;">Hazirlaniyor</div></div></div>
+    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(22,163,74,.08);color:var(--u-ok);"><x-icon name="file-text" size="16" aria-label="Belge" /></div><div><div style="font-size:10px;color:var(--u-muted);">Belgeler</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);display:inline-flex;align-items:center;gap:4px;"><x-icon name="check" size="12" aria-label="Tamam" /> Tamam</div><div style="font-size:10px;color:var(--u-muted);">{{ $docSummary['approved'] ?? 0 }}/{{ $totalRequired }} onayli</div></div></div>
+    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(124,58,237,.08);color:#7c3aed;"><x-icon name="graduation-cap" size="16" aria-label="Üniversite" /></div><div><div style="font-size:10px;color:var(--u-muted);">Basvuru</div><div style="font-size:14px;font-weight:700;">{{ ($outcomeByStep ?? collect())->where('step', 'uni_assist')->sum('total') ?: 'Hazirlaniyor' }}</div><div style="font-size:10px;color:var(--u-muted);">universiteye</div></div></div>
+    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(217,119,6,.08);color:#d97706;"><x-icon name="hourglass" size="16" aria-label="Bekleniyor" /></div><div><div style="font-size:10px;color:var(--u-muted);">Durum</div><div style="font-size:14px;font-weight:700;">Hazirlaniyor</div></div></div>
 </div>
 <div class="sd-tip">
-    <div class="sd-tip-icon">☕</div>
+    <div class="sd-tip-icon" style="color:var(--u-brand-2);"><x-icon name="coffee" size="15" aria-label="Bekleyiş" /></div>
     <div><h5>Danismanin calisiyor</h5><p>Uni-Assist basvurun hazirlanirken sen rahatlikla bekleyebilirsin.</p></div>
 </div>
 @endif
 
 @if($stage === 'visa')
 <div class="sd-grid-3">
-    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(22,163,74,.08);">🎓</div><div><div style="font-size:10px;color:var(--u-muted);">Universite</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);">Kabul Geldi!</div></div></div>
-    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(8,145,178,.08);">🏦</div><div><div style="font-size:10px;color:var(--u-muted);">Sperrkonto</div><div style="font-size:14px;font-weight:700;">Surecte</div></div></div>
-    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(217,119,6,.08);">📅</div><div><div style="font-size:10px;color:var(--u-muted);">Konsolosluk</div><div style="font-size:14px;font-weight:700;">Bekliyor</div></div></div>
+    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(22,163,74,.08);color:var(--u-ok);"><x-icon name="graduation-cap" size="16" aria-label="Üniversite" /></div><div><div style="font-size:10px;color:var(--u-muted);">Universite</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);">Kabul Geldi!</div></div></div>
+    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(8,145,178,.08);color:#0891b2;"><x-icon name="landmark" size="16" aria-label="Banka" /></div><div><div style="font-size:10px;color:var(--u-muted);">Sperrkonto</div><div style="font-size:14px;font-weight:700;">Surecte</div></div></div>
+    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(217,119,6,.08);color:#d97706;"><x-icon name="calendar" size="16" aria-label="Randevu" /></div><div><div style="font-size:10px;color:var(--u-muted);">Konsolosluk</div><div style="font-size:14px;font-weight:700;">Bekliyor</div></div></div>
 </div>
 @endif
 
 @if($stage === 'abroad' || $allDone)
 <div class="sd-grid-3" style="margin-bottom:20px;">
-    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(22,163,74,.08);">🎓</div><div><div style="font-size:10px;color:var(--u-muted);">Universite</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);">Kayit Tamamlandi</div></div></div>
-    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(22,163,74,.08);">🛂</div><div><div style="font-size:10px;color:var(--u-muted);">Vize</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);">✓ Onaylandi</div></div></div>
-    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(22,163,74,.08);">🏠</div><div><div style="font-size:10px;color:var(--u-muted);">Konaklama</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);">✓ Ayarlandi</div></div></div>
+    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(22,163,74,.08);color:var(--u-ok);"><x-icon name="graduation-cap" size="16" aria-label="Üniversite" /></div><div><div style="font-size:10px;color:var(--u-muted);">Universite</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);">Kayit Tamamlandi</div></div></div>
+    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(22,163,74,.08);color:var(--u-ok);"><x-icon name="plane" size="16" aria-label="Vize" /></div><div><div style="font-size:10px;color:var(--u-muted);">Vize</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);display:inline-flex;align-items:center;gap:4px;"><x-icon name="check" size="12" aria-label="Onaylandı" /> Onaylandi</div></div></div>
+    <div class="sd-stat"><div class="sd-stat-icon" style="background:rgba(22,163,74,.08);color:var(--u-ok);"><x-icon name="home" size="16" aria-label="Konaklama" /></div><div><div style="font-size:10px;color:var(--u-muted);">Konaklama</div><div style="font-size:14px;font-weight:700;color:var(--u-ok);display:inline-flex;align-items:center;gap:4px;"><x-icon name="check" size="12" aria-label="Ayarlandı" /> Ayarlandi</div></div></div>
 </div>
 
 <div class="sd-ql">
-    <a href="/student/housing"><span class="sd-ql-icon" style="background:#3b82f6;">🏙</span> Sehir Rehberi</a>
-    <a href="/student/payments"><span class="sd-ql-icon" style="background:#7c3aed;">🏦</span> Banka & Sigorta</a>
-    <a href="/student/cost-calculator"><span class="sd-ql-icon" style="background:#0891b2;">🚌</span> Ulasim</a>
-    <a href="/student/materials"><span class="sd-ql-icon" style="background:#16a34a;">🛒</span> Yasam Rehberi</a>
+    <a href="/student/housing"><span class="sd-ql-icon" style="background:#3b82f6;color:#fff;"><x-icon name="building-2" size="14" aria-label="Şehir" /></span> Sehir Rehberi</a>
+    <a href="/student/payments"><span class="sd-ql-icon" style="background:#7c3aed;color:#fff;"><x-icon name="landmark" size="14" aria-label="Banka" /></span> Banka & Sigorta</a>
+    <a href="/student/cost-calculator"><span class="sd-ql-icon" style="background:#0891b2;color:#fff;"><x-icon name="bus" size="14" aria-label="Ulaşım" /></span> Ulasim</a>
+    <a href="/student/materials"><span class="sd-ql-icon" style="background:#16a34a;color:#fff;"><x-icon name="shopping-cart" size="14" aria-label="Yaşam" /></span> Yasam Rehberi</a>
 </div>
 @endif
 
@@ -413,7 +420,7 @@
           border-radius:12px; color:#fff; text-decoration:none;
           box-shadow:0 4px 12px rgba(126,88,191,.2);">
     <div style="display:flex; align-items:center; gap:12px;">
-        <div style="font-size:22px; line-height:1;">🎯</div>
+        <div style="line-height:1; color:#fff; display:flex;"><x-icon name="target" size="22" aria-label="Hedef" /></div>
         <div>
             <div style="font-size:13.5px; font-weight:700;">
                 Yeni / Yedek Program Keşfet
@@ -456,11 +463,11 @@
 {{-- Countdowns --}}
 @if(($countdowns ?? collect())->isNotEmpty())
 <div class="sd-card">
-    <div class="sd-card-head"><h4>⏳ Yaklasan Tarihler</h4></div>
+    <div class="sd-card-head"><h4><x-icon name="hourglass" size="14" aria-label="Yaklaşan" /> Yaklasan Tarihler</h4></div>
     <div class="sd-card-body">
         @foreach($countdowns as $cd)
         <div class="sd-cl">
-            <div class="sd-cl-dot" style="background:{{ ($cd['urgency'] ?? '') === 'urgent' ? 'rgba(220,38,38,.08)' : 'rgba(217,119,6,.08)' }};color:{{ ($cd['urgency'] ?? '') === 'urgent' ? '#dc2626' : '#d97706' }};">⏰</div>
+            <div class="sd-cl-dot" style="background:{{ ($cd['urgency'] ?? '') === 'urgent' ? 'rgba(220,38,38,.08)' : 'rgba(217,119,6,.08)' }};color:{{ ($cd['urgency'] ?? '') === 'urgent' ? '#dc2626' : '#d97706' }};"><x-icon name="clock" size="11" aria-label="Tarih" /></div>
             <div class="sd-cl-name">{{ $cd['label'] ?? '' }}</div>
             <span class="sd-cl-tag" style="background:{{ ($cd['urgency'] ?? '') === 'urgent' ? 'rgba(220,38,38,.08)' : 'rgba(217,119,6,.08)' }};color:{{ ($cd['urgency'] ?? '') === 'urgent' ? '#dc2626' : '#d97706' }};">{{ $cd['days_left'] ?? '?' }} gun · {{ $cd['deadline'] ?? '' }}</span>
         </div>
@@ -472,7 +479,7 @@
 {{-- ── Öğrenci Analitikleri ── --}}
 @if(!empty($studentAnalytics))
 <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:18px 20px;margin-top:16px;">
-    <div style="font-size:13px;font-weight:700;color:var(--text,#111);margin-bottom:12px;">📊 Süreç Analitiklerin</div>
+    <div style="font-size:13px;font-weight:700;color:var(--text,#111);margin-bottom:12px;display:flex;align-items:center;gap:6px;"><x-icon name="bar-chart-3" size="14" aria-label="Analitik" /> Süreç Analitiklerin</div>
     <div class="kpi-row-compact" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
         <div style="text-align:center;padding:10px 6px;background:var(--bg,#f8fafc);border-radius:8px;min-width:0;">
             <div style="font-size:20px;font-weight:800;color:#3b82f6;">{{ $studentAnalytics['daysSinceStart'] ?? 0 }}</div>

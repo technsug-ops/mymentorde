@@ -28,7 +28,7 @@ $ugCostRoute = $ugIsStudent
 <div class="card" style="background:linear-gradient(135deg,#2563eb,#0891b2);color:#fff;margin-bottom:20px;">
     <div class="card-body" style="padding:28px 28px 24px;">
         <div style="font-size:var(--tx-sm);opacity:.85;margin-bottom:6px;">Almanya'da Yükseköğretim</div>
-        <div style="font-size:var(--tx-2xl);font-weight:800;margin-bottom:8px;">🎓 Üniversite Rehberi</div>
+        <div style="font-size:var(--tx-2xl);font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:10px;"><x-icon name="graduation-cap" size="28" aria-label="Üniversite rehberi" /> Üniversite Rehberi</div>
         <div style="font-size:var(--tx-sm);opacity:.85;max-width:560px;line-height:1.6;">
             Almanya'da 400+ yükseköğretim kurumu bulunmaktadır. Devlet üniversitelerinde eğitim büyük ölçüde <strong>ücretsizdir</strong>.
             Doğru üniversite türünü ve şehrini seçmek başarınızın temelini oluşturur.
@@ -43,7 +43,7 @@ $ugCostRoute = $ugIsStudent
 
     <a href="{{ $ugDiscoverRoute }}" class="card" style="text-decoration:none;color:inherit;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
         <div class="card-body" style="padding:20px;">
-            <div style="font-size:var(--tx-2xl);margin-bottom:10px;">🏛</div>
+            <div style="margin-bottom:10px;color:var(--u-brand,#2563eb);"><x-icon name="landmark" size="32" aria-label="Universität" /></div>
             <div style="font-weight:700;font-size:var(--tx-base);margin-bottom:6px;">Universität (TU/Uni)</div>
             <div style="font-size:var(--tx-sm);color:var(--u-muted,#64748b);line-height:1.6;margin-bottom:12px;">
                 Teorik ve araştırma odaklı. Tıp, Hukuk, Doğa Bilimleri için ideal.
@@ -60,7 +60,7 @@ $ugCostRoute = $ugIsStudent
 
     <a href="{{ $ugDiscoverRoute }}" class="card" style="text-decoration:none;color:inherit;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
         <div class="card-body" style="padding:20px;">
-            <div style="font-size:var(--tx-2xl);margin-bottom:10px;">⚙️</div>
+            <div style="margin-bottom:10px;color:var(--u-brand,#2563eb);"><x-icon name="cog" size="32" aria-label="Fachhochschule" /></div>
             <div style="font-weight:700;font-size:var(--tx-base);margin-bottom:6px;">Fachhochschule (FH/HAW)</div>
             <div style="font-size:var(--tx-sm);color:var(--u-muted,#64748b);line-height:1.6;margin-bottom:12px;">
                 Uygulamalı bilimler. Mühendislik, İşletme, Tasarım için güçlü seçenek.
@@ -77,7 +77,7 @@ $ugCostRoute = $ugIsStudent
 
     <a href="{{ $ugDiscoverRoute }}" class="card" style="text-decoration:none;color:inherit;display:block;transition:transform .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
         <div class="card-body" style="padding:20px;">
-            <div style="font-size:var(--tx-2xl);margin-bottom:10px;">🎨</div>
+            <div style="margin-bottom:10px;color:var(--u-brand,#2563eb);"><x-icon name="palette" size="32" aria-label="Kunsthochschule" /></div>
             <div style="font-weight:700;font-size:var(--tx-base);margin-bottom:6px;">Kunsthochschule / Musikhochschule</div>
             <div style="font-size:var(--tx-sm);color:var(--u-muted,#64748b);line-height:1.6;margin-bottom:12px;">
                 Sanat, Mimarlık ve Müzik alanlarında uzmanlaşmış kurumlar.
@@ -139,16 +139,16 @@ $ugCostRoute = $ugIsStudent
 
     @php
     $cities = [
-        ['name'=>'Berlin','emoji'=>'🐻','desc'=>'Almanya\'nın başkenti. TU Berlin, FU Berlin, HU Berlin. Canlı öğrenci hayatı, görece uygun kira. Uluslararası öğrenci topluluğu çok güçlü.','tag'=>'Büyük Şehir','badge'=>'info'],
-        ['name'=>'München','emoji'=>'🏔','desc'=>'TU München (Dünya sıralaması Top 50). BMW, Siemens merkezi. Yüksek yaşam maliyeti ama güçlü kariyer fırsatları. Kira ~€800-1200.','tag'=>'Prestijli','badge'=>'ok'],
-        ['name'=>'Hamburg','emoji'=>'⚓','desc'=>'Avrupa\'nın en büyük limanı. HAW Hamburg, Uni Hamburg. Lojistik, ticaret ve medya güçlü. Kozmopolit şehir atmosferi.','tag'=>'Liman Şehri','badge'=>'info'],
-        ['name'=>'Frankfurt','emoji'=>'🏦','desc'=>'Avrupa\'nın finans merkezi. Goethe Uni. Bankacılık, finans ve ekonomi için ideal. Frankfurt Havalimanı uluslararası erişim sağlar.','tag'=>'Finans','badge'=>'warn'],
-        ['name'=>'Köln','emoji'=>'⛪','desc'=>'Uygun fiyatlı yaşam (~€600-900 kira). Büyük üniversite, çok sayıda FH. Medya, sanat ve sosyal bilimler güçlü.','tag'=>'Uygun Fiyat','badge'=>'ok'],
-        ['name'=>'Stuttgart','emoji'=>'🚗','desc'=>'Mercedes, Porsche, Bosch merkezi. Uni Stuttgart + DHBW. Mühendislik ve otomotiv sektöründe iş bulmak çok kolay.','tag'=>'Mühendislik','badge'=>'warn'],
-        ['name'=>'Düsseldorf','emoji'=>'🎭','desc'=>'Moda, tasarım ve reklam merkezi. HSD & HHU Düsseldorf. 400+ Japon şirketi, uluslararası iş ortamı eşsiz.','tag'=>'Tasarım','badge'=>'info'],
-        ['name'=>'Dresden','emoji'=>'🏰','desc'=>'TU Dresden Exzellenzuniversität kalitesi. Yaşam maliyeti çok uygun (kira €350-600). Silicon Saxony — yarı iletken kariyer merkezi.','tag'=>'Uygun+Güçlü','badge'=>'ok'],
-        ['name'=>'Hannover','emoji'=>'🌿','desc'=>'Leibniz Uni Hannover. Volkswagen & Continental Ar-Ge merkezi. Uygun kira (~€400-650), sakin öğrenci şehri. Hannover Fuarı dünya devi.','tag'=>'Teknoloji','badge'=>'pending'],
-        ['name'=>'Nürnberg','emoji'=>'🏛','desc'=>'FAU Erlangen-Nürnberg (Bavyera\'nın köklü üniversitesi). Siemens & Adidas merkezi. Münih\'e alternatif, daha uygun yaşam maliyeti.','tag'=>'Köklü','badge'=>'warn'],
+        ['name'=>'Berlin','icon'=>'building','desc'=>'Almanya\'nın başkenti. TU Berlin, FU Berlin, HU Berlin. Canlı öğrenci hayatı, görece uygun kira. Uluslararası öğrenci topluluğu çok güçlü.','tag'=>'Büyük Şehir','badge'=>'info'],
+        ['name'=>'München','icon'=>'mountain','desc'=>'TU München (Dünya sıralaması Top 50). BMW, Siemens merkezi. Yüksek yaşam maliyeti ama güçlü kariyer fırsatları. Kira ~€800-1200.','tag'=>'Prestijli','badge'=>'ok'],
+        ['name'=>'Hamburg','icon'=>'anchor','desc'=>'Avrupa\'nın en büyük limanı. HAW Hamburg, Uni Hamburg. Lojistik, ticaret ve medya güçlü. Kozmopolit şehir atmosferi.','tag'=>'Liman Şehri','badge'=>'info'],
+        ['name'=>'Frankfurt','icon'=>'wallet','desc'=>'Avrupa\'nın finans merkezi. Goethe Uni. Bankacılık, finans ve ekonomi için ideal. Frankfurt Havalimanı uluslararası erişim sağlar.','tag'=>'Finans','badge'=>'warn'],
+        ['name'=>'Köln','icon'=>'church','desc'=>'Uygun fiyatlı yaşam (~€600-900 kira). Büyük üniversite, çok sayıda FH. Medya, sanat ve sosyal bilimler güçlü.','tag'=>'Uygun Fiyat','badge'=>'ok'],
+        ['name'=>'Stuttgart','icon'=>'car','desc'=>'Mercedes, Porsche, Bosch merkezi. Uni Stuttgart + DHBW. Mühendislik ve otomotiv sektöründe iş bulmak çok kolay.','tag'=>'Mühendislik','badge'=>'warn'],
+        ['name'=>'Düsseldorf','icon'=>'palette','desc'=>'Moda, tasarım ve reklam merkezi. HSD & HHU Düsseldorf. 400+ Japon şirketi, uluslararası iş ortamı eşsiz.','tag'=>'Tasarım','badge'=>'info'],
+        ['name'=>'Dresden','icon'=>'castle','desc'=>'TU Dresden Exzellenzuniversität kalitesi. Yaşam maliyeti çok uygun (kira €350-600). Silicon Saxony — yarı iletken kariyer merkezi.','tag'=>'Uygun+Güçlü','badge'=>'ok'],
+        ['name'=>'Hannover','icon'=>'tree','desc'=>'Leibniz Uni Hannover. Volkswagen & Continental Ar-Ge merkezi. Uygun kira (~€400-650), sakin öğrenci şehri. Hannover Fuarı dünya devi.','tag'=>'Teknoloji','badge'=>'pending'],
+        ['name'=>'Nürnberg','icon'=>'landmark','desc'=>'FAU Erlangen-Nürnberg (Bavyera\'nın köklü üniversitesi). Siemens & Adidas merkezi. Münih\'e alternatif, daha uygun yaşam maliyeti.','tag'=>'Köklü','badge'=>'warn'],
     ];
     $citySlugMap = [
         'Berlin'     => 'berlin',
@@ -169,7 +169,7 @@ $ugCostRoute = $ugIsStudent
          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(0,0,0,.1)'"
          onmouseout="this.style.transform='';this.style.boxShadow=''">
         <div class="card-body" style="padding:16px 18px;display:flex;align-items:flex-start;gap:14px;">
-            <div style="font-size:30px;line-height:1;flex-shrink:0;">{{ $c['emoji'] }}</div>
+            <div style="flex-shrink:0;width:40px;height:40px;border-radius:10px;background:color-mix(in srgb, var(--u-brand,#2563eb) 10%, var(--u-bg));display:flex;align-items:center;justify-content:center;color:var(--u-brand,#2563eb);"><x-icon name="{{ $c['icon'] ?? 'map-pin' }}" size="22" aria-label="{{ $c['name'] }} simgesi" /></div>
             <div style="flex:1;min-width:0;">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
                     <span style="font-weight:700;font-size:var(--tx-sm);">{{ $c['name'] }}</span>
@@ -189,12 +189,12 @@ $ugCostRoute = $ugIsStudent
 </div>
 
 {{-- Başvuru Takvimi --}}
-<div style="font-weight:700;font-size:var(--tx-base);margin-bottom:14px;">📅 Başvuru Takvimi</div>
+<div style="font-weight:700;font-size:var(--tx-base);margin-bottom:14px;display:flex;align-items:center;gap:6px;"><x-icon name="calendar" size="18" aria-label="Başvuru takvimi" /> Başvuru Takvimi</div>
 <div class="col2" style="margin-bottom:20px;">
 
     <div class="card" style="overflow:hidden;">
         <div style="background:linear-gradient(135deg,#2563eb,#0891b2);padding:14px 20px;">
-            <div style="color:#fff;font-weight:700;font-size:var(--tx-base);">❄️ Kış Dönemi (WS)</div>
+            <div style="color:#fff;font-weight:700;font-size:var(--tx-base);display:flex;align-items:center;gap:6px;"><x-icon name="snowflake" size="16" aria-label="Kış" /> Kış Dönemi (WS)</div>
             <div style="color:rgba(255,255,255,.8);font-size:var(--tx-xs);margin-top:2px;">Ekim başlangıç — başvuru takvimi</div>
         </div>
         <div class="card-body" style="padding:0;">
@@ -222,7 +222,7 @@ $ugCostRoute = $ugIsStudent
 
     <div class="card" style="overflow:hidden;">
         <div style="background:linear-gradient(135deg,#059669,#16a34a);padding:14px 20px;">
-            <div style="color:#fff;font-weight:700;font-size:var(--tx-base);">🌸 Yaz Dönemi (SS)</div>
+            <div style="color:#fff;font-weight:700;font-size:var(--tx-base);display:flex;align-items:center;gap:6px;"><x-icon name="flower" size="16" aria-label="Yaz" /> Yaz Dönemi (SS)</div>
             <div style="color:rgba(255,255,255,.8);font-size:var(--tx-xs);margin-top:2px;">Nisan başlangıç — başvuru takvimi</div>
         </div>
         <div class="card-body" style="padding:0;">
@@ -253,7 +253,7 @@ $ugCostRoute = $ugIsStudent
 {{-- Başvuru İpuçları --}}
 <div class="card" style="margin-bottom:20px;">
     <div class="card-body" style="padding:20px;">
-        <div style="font-weight:700;font-size:var(--tx-base);margin-bottom:16px;">🏆 Başarılı Başvuru İçin 10 Altın Kural</div>
+        <div style="font-weight:700;font-size:var(--tx-base);margin-bottom:16px;display:flex;align-items:center;gap:6px;"><x-icon name="trophy" size="18" aria-label="Altın kurallar" /> Başarılı Başvuru İçin 10 Altın Kural</div>
         <div class="col2">
             @foreach([
                 ['1','Dil sertifikanızı erken alın','TestDaF veya DSH sınavlarına 6-12 ay öncesinden hazırlanın. IELTS de birçok İngilizce program için geçerlidir.'],

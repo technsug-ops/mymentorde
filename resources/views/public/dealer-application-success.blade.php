@@ -21,7 +21,8 @@
 html, body { margin:0; padding:0; }
 body { font-family:var(--font-base); background:linear-gradient(140deg, #f7f3ff 0%, #faf9f5 50%, #e9e7e2 100%); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; -webkit-font-smoothing:antialiased; }
 .wrap { max-width:620px; width:100%; text-align:center; }
-.icon-success { font-size:80px; margin-bottom:20px; animation:pop .5s ease-out; }
+.icon-success { color:var(--success); margin-bottom:20px; animation:pop .5s ease-out; display:inline-flex; }
+.icon-success svg { width:80px; height:80px; }
 @keyframes pop { 0% { transform:scale(0); } 70% { transform:scale(1.1); } 100% { transform:scale(1); } }
 h1 { font-family:var(--font-base); font-weight:700; font-size:40px; color:var(--primary-deep); margin:0 0 14px; line-height:1.15; letter-spacing:-1px; }
 .sub { color:var(--muted); font-size:16px; margin:0 0 30px; }
@@ -44,7 +45,7 @@ ul.steps strong { color:var(--primary-deep); }
 <body>
 
 <div class="wrap">
-    <div class="icon-success">🎉</div>
+    <div class="icon-success" aria-label="Başarılı"><x-icon name="party-popper" size="80" /></div>
     <h1>Başvurunuz Alındı!</h1>
     <p class="sub">
         @if ($app)
@@ -62,7 +63,7 @@ ul.steps strong { color:var(--primary-deep); }
             </div>
         @endif
 
-        <h3>📅 Sonraki Adımlar</h3>
+        <h3 style="display:flex; align-items:center; gap:8px;"><x-icon name="calendar-days" size="14" aria-label="Adımlar" /> Sonraki Adımlar</h3>
         <ul class="steps">
             <li><strong>48 saat içinde:</strong> Ekibimiz email/WhatsApp'tan sizinle iletişime geçecek.</li>
             <li><strong>Kısa değerlendirme görüşmesi:</strong> Plan önerisi + sorularınızın cevaplanması (15 dk).</li>
@@ -70,7 +71,7 @@ ul.steps strong { color:var(--primary-deep); }
             <li><strong>İlk Yönlendirme:</strong> Pazarlama materyalleriniz panelinizde hazır.</li>
         </ul>
 
-        <h3>📞 Bu Sırada</h3>
+        <h3 style="display:flex; align-items:center; gap:8px;"><x-icon name="phone" size="14" aria-label="İletişim" /> Bu Sırada</h3>
         <ul class="steps">
             <li>Almanya eğitim fırsatlarını çevrenize anlatmaya başlayabilirsiniz — onay sonrası yönlendirdiğiniz adaylar hemen sisteme alınır.</li>
             <li>Sorularınız için hızlıca ulaşın: <strong>+49 1520 325 3691</strong></li>
@@ -79,7 +80,7 @@ ul.steps strong { color:var(--primary-deep); }
         <div class="cta-row">
             <a href="https://wa.me/4915203253691?text=Merhaba%2C%20sat%C4%B1%C5%9F%20orta%C4%9Fl%C4%B1%C4%9F%C4%B1%20ba%C5%9Fvurumla%20ilgili%20bilgi%20almak%20istiyorum.@if($app)%20Referans%3A%20{{ $app->reference_code }}@endif"
                target="_blank" rel="noopener" class="btn-primary">
-                💬 WhatsApp'tan Hızlı Destek
+                <x-icon name="message-square" size="14" aria-label="WhatsApp" /> WhatsApp'tan Hızlı Destek
             </a>
             <a href="{{ route('public.dealer-landing') }}" class="btn-ghost">
                 ← Program sayfasına dön
