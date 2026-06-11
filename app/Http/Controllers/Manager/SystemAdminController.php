@@ -18,13 +18,22 @@ use Illuminate\Support\Facades\DB;
 
 class SystemAdminController extends Controller
 {
-    /** Manager veya system_admin rolüne izin ver */
+    /**
+     * Sadece Platform Owner ve System Admin erisebilir.
+     * Customer Manager BLOKLANIR (eski davranis: manager + system_admin idi).
+     *
+     * Sebep: System admin (/manager/system/*) sayfalari IP rules, role templates,
+     * audit log, security panel gibi platform-seviye yonetim ekranlari iceriyor —
+     * Customer Manager bunlara mudahale edememeli, sadece Platform Owner ve onun
+     * teknik destek elemani (system_admin) gorebilmeli.
+     */
     private function authorizeAccess(): void
     {
         $role = auth()->user()?->role;
         abort_unless(
-            in_array($role, ['manager', 'system_admin'], true),
-            403
+            in_array($role, [\App\Models\User::ROLE_PLATFORM_OWNER, \App\Models\User::ROLE_SYSTEM_ADMIN], true),
+            403,
+            'System admin sadece Platform Owner ve System Admin icindir.'
         );
     }
 

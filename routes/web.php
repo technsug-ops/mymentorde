@@ -900,6 +900,34 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // Platform Owner rolune yukselt — Mentorde sahibinin kendi hesabini
+        // 'platform_owner' rolune cevirir. SaaS yetki ayrimi Faz 1 deploy sonrasi
+        // bir kerelik calistirilir.
+        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=promote-platform-owner&email=USER_EMAIL
+        if ($request->query('cleanup') === 'promote-platform-owner') {
+            $email = strtolower(trim((string) $request->query('email', '')));
+            if ($email === '') {
+                $output .= ">>> promote-platform-owner: email parametresi gerekli\n";
+                $output .= "    ornek: ?cleanup=promote-platform-owner&email=owner@mentorde.com\n";
+            } else {
+                $user = \App\Models\User::query()
+                    ->whereRaw('lower(email) = ?', [$email])
+                    ->first();
+                if (!$user) {
+                    $output .= ">>> promote-platform-owner: {$email} kullanicisi bulunamadi\n";
+                } else {
+                    $oldRole = (string) $user->role;
+                    $user->role = \App\Models\User::ROLE_PLATFORM_OWNER;
+                    $user->save();
+                    $output .= ">>> promote-platform-owner: {$email}\n";
+                    $output .= "    eski rol: {$oldRole}\n";
+                    $output .= "    yeni rol: platform_owner\n";
+                    $output .= "    artik /manager/companies/modules ve /manager/system/* sayfalarina erisebilir.\n";
+                    $output .= "    Customer Manager'lar bu sayfalardan BLOKLI.\n";
+                }
+            }
+        }
+
         // Sadece 'discover' page key'i icin tum rollere ait visibility kayitlarini sil.
         // 404 donen /guest/discover, /student/discover icin hizli kurtarma.
         // Default TRUE mantigi geri gelir (page_visibility module kapali ise zaten TRUE).

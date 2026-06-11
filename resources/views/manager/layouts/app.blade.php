@@ -510,8 +510,15 @@
                 </a>
             </div>
 
+            @php
+                $__isPlatformOwner = in_array((string) (auth()->user()?->role ?? ''), [\App\Models\User::ROLE_PLATFORM_OWNER, \App\Models\User::ROLE_SYSTEM_ADMIN], true);
+            @endphp
+
+            {{-- Platform-seviye sistem yonetimi (modul toggle, GDPR, denetim, IP kurali, vb.)
+                 → Sadece Platform Owner + System Admin. Customer Manager BLOKLI. --}}
+            @if($__isPlatformOwner)
             <div class="nav-section">
-                <div class="nav-section-label">Sistem</div>
+                <div class="nav-section-label">Sistem (Platform)</div>
                 <a href="/manager/system"
                    class="nav-link {{ request()->is('manager/system') ? 'active' : '' }}">
                     <span class="nav-icon">🖥</span> Sistem Paneli
@@ -520,12 +527,6 @@
                    class="nav-link {{ request()->is('manager/landing-inventory*') ? 'active' : '' }}">
                     <span class="nav-icon">🌐</span> Landing Envanter
                 </a>
-                @module('silence_checkin')
-                    <a href="{{ route('manager.silence-monitor.index') }}"
-                       class="nav-link {{ request()->is('manager/silence-monitor*') ? 'active' : '' }}">
-                        <span class="nav-icon">📍</span> Sessizlik Monitörü
-                    </a>
-                @endmodule
                 <a href="{{ route('manager.companies.modules') }}"
                    class="nav-link {{ request()->is('manager/companies/modules*') ? 'active' : '' }}">
                     <span class="nav-icon">🧩</span> SaaS Modül Yönetimi
@@ -560,6 +561,18 @@
                    class="nav-link {{ request()->is('manager/webhooks*') ? 'active' : '' }}">
                     <span class="nav-icon">🔗</span> Webhook Logları
                 </a>
+            </div>
+            @endif
+
+            {{-- Sirket-seviye yonetim (branding, popup, tema) → Customer Manager + Platform Owner ikisi de gorur --}}
+            <div class="nav-section">
+                <div class="nav-section-label">Görsel & Marka</div>
+                @module('silence_checkin')
+                    <a href="{{ route('manager.silence-monitor.index') }}"
+                       class="nav-link {{ request()->is('manager/silence-monitor*') ? 'active' : '' }}">
+                        <span class="nav-icon">📍</span> Sessizlik Monitörü
+                    </a>
+                @endmodule
                 <a href="/manager/theme"
                    class="nav-link {{ request()->is('manager/theme*') ? 'active' : '' }}">
                     <span class="nav-icon">🎨</span> Tema Yönetimi

@@ -73,7 +73,16 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
     public const ROLE_SALES_STAFF = 'sales_staff';
     public const ROLE_MARKETING_STAFF = 'marketing_staff';
 
+    /**
+     * Platform Owner — Mentorde SaaS sahibi. Cross-company yetki, modul toggle,
+     * billing, sistem admin yetkileri. Customer Manager'larin uzerinde tek rol.
+     * Customer'larin enabled_modules JSON'unu degistirebilir = premium feature
+     * paywallini koruyan tek yetki.
+     */
+    public const ROLE_PLATFORM_OWNER = 'platform_owner';
+
     public const ADMIN_PANEL_ROLES = [
+        self::ROLE_PLATFORM_OWNER,   // ← Mentorde sahibi (top-level), Customer Manager'larin uzerinde
         self::ROLE_MANAGER,
         self::ROLE_SYSTEM_ADMIN,
         self::ROLE_OPERATIONS_ADMIN,

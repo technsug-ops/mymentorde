@@ -504,11 +504,16 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::delete('/manager/universities/{university}/video',          [$uc, 'deleteVideo'])->middleware('throttle:30,1')->name('manager.universities.video.delete');
     }
 
-    // ── SaaS modül toggle (company × module matrix) ──
+    // ── SaaS modül toggle (company × module matrix) — PLATFORM OWNER ONLY ──
+    // Customer Manager BLOKLANIR. Sebep: modul toggle = premium feature paywall.
+    // Customer kendi tier'ini upgrade edememeli; sadece Mentorde Platform sahibi
+    // (veya billing yönetimi yapan Stripe webhook'u) modüllerini değiştirebilir.
     {
         $cm = \App\Http\Controllers\Manager\CompanyModulesController::class;
-        Route::get('/manager/companies/modules',                          [$cm, 'index'])->name('manager.companies.modules');
-        Route::post('/manager/companies/{company}/modules',               [$cm, 'update'])->middleware('throttle:30,1')->name('manager.companies.modules.update');
+        Route::middleware('platform.owner')->group(function () use ($cm) {
+            Route::get('/manager/companies/modules',                          [$cm, 'index'])->name('manager.companies.modules');
+            Route::post('/manager/companies/{company}/modules',               [$cm, 'update'])->middleware('throttle:30,1')->name('manager.companies.modules.update');
+        });
     }
 
     // ── Application Guides — student altında (Uni-Assist + Vize) ──────────────
