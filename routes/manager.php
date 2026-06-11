@@ -516,6 +516,16 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         });
     }
 
+    // ── Customer Manager için "Planim" (read-only modul listesi + tier upgrade talep) ──
+    // Customer Manager kendi tier'ini ve aktif modullerini gorur. Modul toggle YAPAMAZ —
+    // sadece daha yuksek bir tier'a yukseltme talebinde bulunabilir. Talep Platform
+    // Owner'a in_app notification olarak iletilir.
+    {
+        $mp = \App\Http\Controllers\Manager\MyPlanController::class;
+        Route::get('/manager/my-plan',                  [$mp, 'index'])->name('manager.my-plan');
+        Route::post('/manager/my-plan/upgrade-request', [$mp, 'requestUpgrade'])->middleware('throttle:5,1')->name('manager.my-plan.upgrade-request');
+    }
+
     // ── Application Guides — student altında (Uni-Assist + Vize) ──────────────
     // Uni-Assist sözleşme+ödeme sonrası (öğrenci aşamasında) yapılır.
     // Guest URL legacy backward-compat için tutuldu.

@@ -564,6 +564,17 @@
             </div>
             @endif
 
+            {{-- Customer Manager icin "Planim" linki — Platform Owner'a gizle, o /platform'da yonetiyor --}}
+            @if(!$__isPlatformOwner)
+            <div class="nav-section">
+                <div class="nav-section-label">SaaS Planım</div>
+                <a href="{{ route('manager.my-plan') }}"
+                   class="nav-link {{ request()->is('manager/my-plan*') ? 'active' : '' }}">
+                    <span class="nav-icon">👑</span> Planım & Modüller
+                </a>
+            </div>
+            @endif
+
             {{-- Sirket-seviye yonetim (branding, popup, tema) → Customer Manager + Platform Owner ikisi de gorur --}}
             <div class="nav-section">
                 <div class="nav-section-label">Görsel & Marka</div>
