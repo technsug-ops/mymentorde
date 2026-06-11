@@ -7,6 +7,7 @@ use App\Models\GuestAiConversation;
 use App\Models\KnowledgeSource;
 use App\Models\SeniorAiConversation;
 use App\Models\StaffAiConversation;
+use App\Services\AiLabs\ProviderPricing;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -41,23 +42,31 @@ class AnalyticsService
     public function monthly(int $companyId): array
     {
         $monthStart = now()->startOfMonth();
+        $monthEnd   = now()->endOfMonth();
 
         return [
-            'period_label'         => $monthStart->translatedFormat('F Y'),
-            'conversations'        => $this->conversationMetrics($companyId, $monthStart),
-            'response_modes'       => $this->responseModeDistribution($companyId, $monthStart),
-            'top_topics'           => $this->topTopics($companyId, $monthStart, 10),
-            'faq_candidates'       => $this->faqCandidates($companyId, 60, 2, 20),
-            'hot_leads'            => $this->hotLeads($companyId, 30, 15),
-            'topic_categories'     => $this->topicCategories($companyId, $monthStart),
-            'conversion_intents'   => $this->conversionVsLostIntents($companyId, 180),
-            'unused_sources'       => $this->unusedSources($companyId, 30),
-            'top_cited_sources'    => $this->topCitedSources($companyId, 10),
-            'content_drafts'       => $this->contentDraftMetrics($companyId, $monthStart),
-            'daily_trend'          => $this->dailyTrend($companyId, 30),
-            'feedback'             => $this->feedbackMetrics($companyId, $monthStart),
-            'problem_answers'      => $this->problemAnswers($companyId, 10),
-            'alerts'               => $this->alerts($companyId, $monthStart),
+            'period_label'                 => $monthStart->translatedFormat('F Y'),
+            'conversations'                => $this->conversationMetrics($companyId, $monthStart),
+            'response_modes'               => $this->responseModeDistribution($companyId, $monthStart),
+            'top_topics'                   => $this->topTopics($companyId, $monthStart, 10),
+            'faq_candidates'               => $this->faqCandidates($companyId, 60, 2, 20),
+            'hot_leads'                    => $this->hotLeads($companyId, 30, 15),
+            'topic_categories'             => $this->topicCategories($companyId, $monthStart),
+            'conversion_intents'           => $this->conversionVsLostIntents($companyId, 180),
+            'unused_sources'               => $this->unusedSources($companyId, 30),
+            'top_cited_sources'            => $this->topCitedSources($companyId, 10),
+            'content_drafts'               => $this->contentDraftMetrics($companyId, $monthStart),
+            'daily_trend'                  => $this->dailyTrend($companyId, 30),
+            'feedback'                     => $this->feedbackMetrics($companyId, $monthStart),
+            'problem_answers'              => $this->problemAnswers($companyId, 10),
+            'alerts'                       => $this->alerts($companyId, $monthStart),
+            // ── Multi-provider cost analytics (Haziran 2026) ──
+            'cost_by_provider'             => $this->costByProvider($companyId, $monthStart, $monthEnd),
+            'cost_by_model'                => $this->costByModel($companyId, $monthStart, $monthEnd),
+            'top_cost_users'               => $this->topCostUsers($companyId, $monthStart, $monthEnd, 10),
+            'token_trend_daily'            => $this->tokenTrendDaily($companyId, 30),
+            'knowledge_source_effectiveness' => $this->knowledgeSourceEffectiveness($companyId),
+            'cost_projection'              => $this->costProjection($companyId),
         ];
     }
 
@@ -796,5 +805,459 @@ class AnalyticsService
         }
 
         return $alerts;
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // MULTI-PROVIDER COST ANALYTICS — Haziran 2026
+    // ══════════════════════════════════════════════════════════════════
+
+    /**
+     * 3 conversation tablosundan model + provider + token alanlarını birleştirir.
+     * Cost hesaplamaları, top users vb. methodlar bunu kullanır.
+     *
+     * @return array<int, array{
+     *   table:string, model:?string, provider:?string, role:?string,
+     *   user_id:?int, guest_application_id:?int, company_id:int,
+     *   tokens_input:int, tokens_output:int, created_at:?string
+     * }>
+     */
+    private function unifiedConversationRows(int $companyId, Carbon $from, Carbon $to): array
+    {
+        $rows = [];
+
+        // Guest + student → guest_ai_conversations
+        $guestRows = GuestAiConversation::query()
+            ->join('guest_applications', 'guest_ai_conversations.guest_application_id', '=', 'guest_applications.id')
+            ->where('guest_applications.company_id', $companyId)
+            ->whereBetween('guest_ai_conversations.created_at', [$from, $to])
+            ->select([
+                'guest_ai_conversations.model',
+                'guest_ai_conversations.provider',
+                'guest_ai_conversations.role',
+                'guest_ai_conversations.guest_application_id',
+                'guest_ai_conversations.tokens_input',
+                'guest_ai_conversations.tokens_output',
+                'guest_ai_conversations.created_at',
+                'guest_applications.email as ga_email',
+                'guest_applications.first_name as ga_first_name',
+                'guest_applications.last_name as ga_last_name',
+            ])
+            ->get();
+
+        foreach ($guestRows as $r) {
+            $rows[] = [
+                'table'                => 'guest',
+                'model'                => $r->model,
+                'provider'             => $r->provider,
+                'role'                 => $r->role ?? 'guest',
+                'user_id'              => null,
+                'guest_application_id' => (int) $r->guest_application_id,
+                'company_id'           => $companyId,
+                'tokens_input'         => (int) $r->tokens_input,
+                'tokens_output'        => (int) $r->tokens_output,
+                'created_at'           => (string) $r->created_at,
+                '_label'               => trim(($r->ga_first_name ?? '') . ' ' . ($r->ga_last_name ?? '')) ?: $r->ga_email,
+                '_email'               => $r->ga_email,
+            ];
+        }
+
+        // Senior → senior_ai_conversations (user_id üzerinden company)
+        $seniorRows = SeniorAiConversation::query()
+            ->join('users', 'senior_ai_conversations.user_id', '=', 'users.id')
+            ->where('users.company_id', $companyId)
+            ->whereBetween('senior_ai_conversations.created_at', [$from, $to])
+            ->select([
+                'senior_ai_conversations.model',
+                'senior_ai_conversations.provider',
+                'senior_ai_conversations.user_id',
+                'senior_ai_conversations.tokens_input',
+                'senior_ai_conversations.tokens_output',
+                'senior_ai_conversations.created_at',
+                'users.name as u_name',
+                'users.email as u_email',
+            ])
+            ->get();
+
+        foreach ($seniorRows as $r) {
+            $rows[] = [
+                'table'                => 'senior',
+                'model'                => $r->model,
+                'provider'             => $r->provider,
+                'role'                 => 'senior',
+                'user_id'              => (int) $r->user_id,
+                'guest_application_id' => null,
+                'company_id'           => $companyId,
+                'tokens_input'         => (int) $r->tokens_input,
+                'tokens_output'        => (int) $r->tokens_output,
+                'created_at'           => (string) $r->created_at,
+                '_label'               => (string) ($r->u_name ?: $r->u_email),
+                '_email'               => $r->u_email,
+            ];
+        }
+
+        // Staff → staff_ai_conversations (company_id native)
+        $staffRows = StaffAiConversation::withoutGlobalScopes()
+            ->leftJoin('users', 'staff_ai_conversations.user_id', '=', 'users.id')
+            ->where('staff_ai_conversations.company_id', $companyId)
+            ->whereBetween('staff_ai_conversations.created_at', [$from, $to])
+            ->select([
+                'staff_ai_conversations.model',
+                'staff_ai_conversations.provider',
+                'staff_ai_conversations.role',
+                'staff_ai_conversations.user_id',
+                'staff_ai_conversations.tokens_input',
+                'staff_ai_conversations.tokens_output',
+                'staff_ai_conversations.created_at',
+                'users.name as u_name',
+                'users.email as u_email',
+            ])
+            ->get();
+
+        foreach ($staffRows as $r) {
+            $rows[] = [
+                'table'                => 'staff',
+                'model'                => $r->model,
+                'provider'             => $r->provider,
+                'role'                 => $r->role ?? 'manager',
+                'user_id'              => $r->user_id ? (int) $r->user_id : null,
+                'guest_application_id' => null,
+                'company_id'           => $companyId,
+                'tokens_input'         => (int) $r->tokens_input,
+                'tokens_output'        => (int) $r->tokens_output,
+                'created_at'           => (string) $r->created_at,
+                '_label'               => (string) ($r->u_name ?: $r->u_email ?: 'staff'),
+                '_email'               => $r->u_email,
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Provider başına toplam token + EUR maliyet + soru sayısı.
+     * Sıfır kullanım → key var ama 0 değerle döner (UI "kullanılmamış" gösterir).
+     *
+     * @return array<string, array{provider:string, label:string, color:string,
+     *                              questions:int, tokens_in:int, tokens_out:int,
+     *                              total_tokens:int, cost_eur:float}>
+     */
+    public function costByProvider(int $companyId, Carbon $from, Carbon $to): array
+    {
+        $rows = $this->unifiedConversationRows($companyId, $from, $to);
+
+        $out = [];
+        foreach (ProviderPricing::allProviders() as $p) {
+            $meta = ProviderPricing::providerLabel($p);
+            $out[$p] = [
+                'provider'     => $p,
+                'label'        => $meta['label'],
+                'color'        => $meta['color'],
+                'questions'    => 0,
+                'tokens_in'    => 0,
+                'tokens_out'   => 0,
+                'total_tokens' => 0,
+                'cost_eur'     => 0.0,
+            ];
+        }
+
+        foreach ($rows as $r) {
+            // provider sütunu yoksa model adından çıkar
+            $provider = $r['provider'] ?: ProviderPricing::providerOf((string) ($r['model'] ?? ''));
+            if (!isset($out[$provider])) {
+                continue; // unknown / null → atla, UI 3 sabit kartla çalışıyor
+            }
+            $out[$provider]['questions']++;
+            $out[$provider]['tokens_in']    += $r['tokens_input'];
+            $out[$provider]['tokens_out']   += $r['tokens_output'];
+            $out[$provider]['total_tokens'] += $r['tokens_input'] + $r['tokens_output'];
+            $out[$provider]['cost_eur']     += ProviderPricing::costEur(
+                (string) ($r['model'] ?? ''),
+                $r['tokens_input'],
+                $r['tokens_output']
+            );
+        }
+
+        // EUR yuvarla
+        foreach ($out as $k => $v) {
+            $out[$k]['cost_eur'] = round($v['cost_eur'], 4);
+        }
+
+        return $out;
+    }
+
+    /**
+     * Model başına token + cost + count, cost'a göre azalan sıralı.
+     *
+     * @return array<int, array{model:string, provider:string, count:int,
+     *                          tokens_in:int, tokens_out:int, cost_eur:float}>
+     */
+    public function costByModel(int $companyId, Carbon $from, Carbon $to): array
+    {
+        $rows = $this->unifiedConversationRows($companyId, $from, $to);
+
+        $agg = [];
+        foreach ($rows as $r) {
+            $model = (string) ($r['model'] ?? 'unknown');
+            if ($model === '') $model = 'unknown';
+            $key = $model;
+            if (!isset($agg[$key])) {
+                $agg[$key] = [
+                    'model'      => $model,
+                    'provider'   => $r['provider'] ?: ProviderPricing::providerOf($model),
+                    'count'      => 0,
+                    'tokens_in'  => 0,
+                    'tokens_out' => 0,
+                    'cost_eur'   => 0.0,
+                ];
+            }
+            $agg[$key]['count']++;
+            $agg[$key]['tokens_in']  += $r['tokens_input'];
+            $agg[$key]['tokens_out'] += $r['tokens_output'];
+            $agg[$key]['cost_eur']   += ProviderPricing::costEur($model, $r['tokens_input'], $r['tokens_output']);
+        }
+
+        foreach ($agg as $k => $v) {
+            $agg[$k]['cost_eur'] = round($v['cost_eur'], 4);
+        }
+
+        $list = array_values($agg);
+        usort($list, fn ($a, $b) => $b['cost_eur'] <=> $a['cost_eur']);
+
+        return $list;
+    }
+
+    /**
+     * En pahalı N kullanıcı — guest_application_id veya user_id key'ine göre toplulanır.
+     * Etiketleme: guest için "Ad Soyad / email", staff/senior için users.name / email.
+     *
+     * @return array<int, array{rank_key:string, label:string, email:?string, role:string,
+     *                          questions:int, tokens:int, cost_eur:float}>
+     */
+    public function topCostUsers(int $companyId, Carbon $from, Carbon $to, int $limit = 10): array
+    {
+        $rows = $this->unifiedConversationRows($companyId, $from, $to);
+
+        $agg = [];
+        foreach ($rows as $r) {
+            // Rank key — guest için "guest:{id}", staff/senior için "user:{id}", aksi atla
+            if ($r['guest_application_id']) {
+                $key = 'guest:' . $r['guest_application_id'];
+            } elseif ($r['user_id']) {
+                $key = 'user:' . $r['user_id'];
+            } else {
+                continue;
+            }
+
+            if (!isset($agg[$key])) {
+                $agg[$key] = [
+                    'rank_key'  => $key,
+                    'label'     => $r['_label'] ?? '—',
+                    'email'     => $r['_email'] ?? null,
+                    'role'      => $r['role'] ?? 'unknown',
+                    'questions' => 0,
+                    'tokens'    => 0,
+                    'cost_eur'  => 0.0,
+                ];
+            }
+            $agg[$key]['questions']++;
+            $agg[$key]['tokens']   += $r['tokens_input'] + $r['tokens_output'];
+            $agg[$key]['cost_eur'] += ProviderPricing::costEur(
+                (string) ($r['model'] ?? ''),
+                $r['tokens_input'],
+                $r['tokens_output']
+            );
+        }
+
+        foreach ($agg as $k => $v) {
+            $agg[$k]['cost_eur'] = round($v['cost_eur'], 4);
+        }
+
+        $list = array_values($agg);
+        usort($list, fn ($a, $b) => $b['cost_eur'] <=> $a['cost_eur']);
+
+        return array_slice($list, 0, $limit);
+    }
+
+    /**
+     * Günlük token + cost trend — son N gün, eksik günler 0 ile doldurulur.
+     *
+     * @return array<string, array{date:string, tokens:int, cost_eur:float, count:int}>
+     */
+    public function tokenTrendDaily(int $companyId, int $days = 30): array
+    {
+        $from = now()->subDays($days - 1)->startOfDay();
+        $to   = now()->endOfDay();
+        $rows = $this->unifiedConversationRows($companyId, $from, $to);
+
+        $byDay = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $d = now()->subDays($i)->format('Y-m-d');
+            $byDay[$d] = [
+                'date'     => $d,
+                'tokens'   => 0,
+                'cost_eur' => 0.0,
+                'count'    => 0,
+            ];
+        }
+
+        foreach ($rows as $r) {
+            $d = substr((string) $r['created_at'], 0, 10);
+            if (!isset($byDay[$d])) continue;
+            $byDay[$d]['count']++;
+            $byDay[$d]['tokens']   += $r['tokens_input'] + $r['tokens_output'];
+            $byDay[$d]['cost_eur'] += ProviderPricing::costEur(
+                (string) ($r['model'] ?? ''),
+                $r['tokens_input'],
+                $r['tokens_output']
+            );
+        }
+
+        foreach ($byDay as $d => $v) {
+            $byDay[$d]['cost_eur'] = round($v['cost_eur'], 4);
+        }
+
+        return $byDay;
+    }
+
+    /**
+     * Knowledge source etkinliği — citation × satisfaction.
+     * Satisfaction = bu source'u citation eden conversation'lara verilen
+     * 👍 / (👍 + 👎) oranı.
+     *
+     * Yaklaşım: her source için cited_sources JSON'a giren conversation'lar bulunur,
+     * onlara bağlı feedback'ler citation_count × good% ile etkinlik skoru üretir.
+     *
+     * Top 10 — citation_count azalan sıralı.
+     *
+     * @return array<int, array{
+     *   id:int, title:string, type:string, source_tier:?string,
+     *   citation_count:int, good:int, bad:int, satisfaction:float,
+     *   effectiveness:float, last_used_at:?string
+     * }>
+     */
+    public function knowledgeSourceEffectiveness(int $companyId): array
+    {
+        $sources = KnowledgeSource::withoutGlobalScopes()
+            ->where('company_id', $companyId)
+            ->where('citation_count', '>', 0)
+            ->orderByDesc('citation_count')
+            ->take(10)
+            ->get(['id', 'title', 'type', 'source_tier', 'citation_count', 'last_used_at']);
+
+        if ($sources->isEmpty()) {
+            return [];
+        }
+
+        $sourceIds = $sources->pluck('id')->all();
+
+        // Conversation tablolarından bu source'lara citation veren id'leri topla
+        // cited_sources JSON array — JSON_CONTAINS ile MySQL 5.7+
+        $citingByType = [
+            'guest'  => [],
+            'senior' => [],
+            'staff'  => [],
+        ];
+
+        try {
+            foreach ($sourceIds as $sid) {
+                $citingByType['guest']  = array_merge($citingByType['guest'], GuestAiConversation::query()
+                    ->whereJsonContains('cited_sources', $sid)
+                    ->pluck('id')->all());
+                $citingByType['senior'] = array_merge($citingByType['senior'], SeniorAiConversation::query()
+                    ->whereJsonContains('cited_sources', $sid)
+                    ->pluck('id')->all());
+                $citingByType['staff']  = array_merge($citingByType['staff'], StaffAiConversation::withoutGlobalScopes()
+                    ->whereJsonContains('cited_sources', $sid)
+                    ->pluck('id')->all());
+            }
+        } catch (\Throwable $e) {
+            // JSON_CONTAINS başarısızsa boş bırak — effectiveness sadece citation üzerinden
+        }
+
+        // Toplam feedback bu source'lara dolaylı bağlı conversation'lardan
+        $totalGood = 0;
+        $totalBad  = 0;
+        foreach (['guest', 'senior', 'staff'] as $type) {
+            $ids = array_unique($citingByType[$type]);
+            if (empty($ids)) continue;
+            $fbs = \App\Models\AiLabsFeedback::withoutGlobalScopes()
+                ->where('company_id', $companyId)
+                ->where('conversation_type', $type)
+                ->whereIn('conversation_id', $ids)
+                ->selectRaw('rating, COUNT(*) as cnt')
+                ->groupBy('rating')
+                ->pluck('cnt', 'rating')->toArray();
+            $totalGood += (int) ($fbs['good'] ?? 0);
+            $totalBad  += (int) ($fbs['bad']  ?? 0);
+        }
+
+        // Global memnuniyet oranı — her source'a aynı katsayıyı çarparız (citation_count × global_sat)
+        // Source-başına granular satisfaction çoğu tabloda mümkün değil (cited_sources JSON, feedback↔conversation 1:1)
+        $totalFb  = $totalGood + $totalBad;
+        $globalSat = $totalFb > 0 ? round(($totalGood / $totalFb) * 100, 1) : 0;
+
+        $out = [];
+        foreach ($sources as $s) {
+            $effectiveness = $totalFb > 0
+                ? round($s->citation_count * ($globalSat / 100), 2)
+                : (float) $s->citation_count;
+
+            $out[] = [
+                'id'             => (int) $s->id,
+                'title'          => (string) $s->title,
+                'type'           => (string) $s->type,
+                'source_tier'    => $s->source_tier,
+                'citation_count' => (int) $s->citation_count,
+                'good'           => $totalGood,
+                'bad'            => $totalBad,
+                'satisfaction'   => (float) $globalSat,
+                'effectiveness'  => $effectiveness,
+                'last_used_at'   => $s->last_used_at?->toIso8601String(),
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Ay sonu EUR maliyet projeksiyonu — son 30 günlük ortalamadan extrapolation.
+     *
+     * @return array{
+     *   last_30d_cost:float, daily_avg:float, days_left_in_month:int,
+     *   projected_month_total:float, projected_eom:float, actual_month_to_date:float
+     * }
+     */
+    public function costProjection(int $companyId): array
+    {
+        $now    = now();
+        $eom    = $now->copy()->endOfMonth();
+        $som    = $now->copy()->startOfMonth();
+        $trend  = $this->tokenTrendDaily($companyId, 30);
+
+        $last30 = array_sum(array_column($trend, 'cost_eur'));
+        $dailyAvg = $last30 / 30;
+
+        // Bu ayın şimdiye kadar gerçek harcaması
+        $monthRows = $this->unifiedConversationRows($companyId, $som, $now);
+        $monthCost = 0.0;
+        foreach ($monthRows as $r) {
+            $monthCost += ProviderPricing::costEur(
+                (string) ($r['model'] ?? ''),
+                $r['tokens_input'],
+                $r['tokens_output']
+            );
+        }
+
+        $daysLeft = max(0, $now->diffInDays($eom, false));
+        $projectedEom = $monthCost + ($dailyAvg * $daysLeft);
+
+        return [
+            'last_30d_cost'         => round($last30, 4),
+            'daily_avg'             => round($dailyAvg, 4),
+            'days_left_in_month'    => $daysLeft,
+            'projected_month_total' => round($projectedEom, 2),
+            'projected_eom'         => round($projectedEom, 2),
+            'actual_month_to_date'  => round($monthCost, 4),
+        ];
     }
 }

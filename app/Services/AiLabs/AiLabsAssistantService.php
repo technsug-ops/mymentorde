@@ -65,6 +65,13 @@ class AiLabsAssistantService
 
         // PostHog: ai_query_submitted event — Phase 2 lead intelligence için
         try {
+            $modelName = (string) ($result['model'] ?? '');
+            $tokensIn  = (int) ($result['tokens_input'] ?? 0);
+            $tokensOut = (int) ($result['tokens_output'] ?? 0);
+            $costEur   = $modelName !== ''
+                ? \App\Services\AiLabs\ProviderPricing::costEur($modelName, $tokensIn, $tokensOut)
+                : 0.0;
+
             app(\App\Services\Analytics\AnalyticsService::class)->capture(
                 'ai_query_submitted',
                 [
@@ -75,11 +82,13 @@ class AiLabsAssistantService
                     'guest_application_id' => $guestApplicationId,
                     'mode'               => $result['mode'] ?? 'external',
                     'prompt_length'      => mb_strlen($question),
-                    'prompt_tokens'      => (int) ($result['tokens_input'] ?? 0),
-                    'completion_tokens'  => (int) ($result['tokens_output'] ?? 0),
-                    'total_tokens'       => (int) (($result['tokens_input'] ?? 0) + ($result['tokens_output'] ?? 0)),
+                    'prompt_tokens'      => $tokensIn,
+                    'completion_tokens'  => $tokensOut,
+                    'total_tokens'       => $tokensIn + $tokensOut,
                     'source_count'       => is_array($result['sources_meta'] ?? null) ? count($result['sources_meta']) : 0,
-                    'model'              => $result['model'] ?? null,
+                    'model'              => $modelName ?: null,
+                    'provider'           => $modelName !== '' ? \App\Services\AiLabs\ProviderPricing::providerOf($modelName) : null,
+                    'cost_eur'           => $costEur,
                     'response_time_ms'   => (int) ($result['response_time_ms'] ?? 0),
                     'remaining_daily'    => $limit > 0 ? max(0, $limit - $dailyUsed - 1) : null,
                 ],

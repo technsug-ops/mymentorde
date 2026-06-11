@@ -18,6 +18,7 @@ class SeniorAiConversation extends Model
         'tokens_used',
         'tokens_input',
         'tokens_output',
+        'response_time_ms',
         'response_mode',
         'cited_sources',
         'provider',
@@ -27,12 +28,13 @@ class SeniorAiConversation extends Model
     ];
 
     protected $casts = [
-        'context'       => 'array',
-        'cited_sources' => 'array',
-        'tokens_used'   => 'integer',
-        'tokens_input'  => 'integer',
-        'tokens_output' => 'integer',
-        'created_at'    => 'datetime',
+        'context'          => 'array',
+        'cited_sources'    => 'array',
+        'tokens_used'      => 'integer',
+        'tokens_input'     => 'integer',
+        'tokens_output'    => 'integer',
+        'response_time_ms' => 'integer',
+        'created_at'       => 'datetime',
     ];
 
     public function user(): BelongsTo
