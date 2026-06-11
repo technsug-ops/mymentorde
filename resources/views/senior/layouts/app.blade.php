@@ -267,7 +267,7 @@
                     <a href="/senior/student-pipeline"       class="nav-link {{ request()->is('senior/student-pipeline*') ? 'active' : '' }}" style="padding-left:32px;font-size:var(--tx-xs);"><x-icon name="kanban" size="14" class="nav-icon" aria-label="Pipeline Kanban" /> Pipeline Kanban</a>
                     <a href="/senior/appointments"           class="nav-link {{ request()->is('senior/appointments*') ? 'active' : '' }}"><x-icon name="calendar" size="18" class="nav-icon" aria-label="Randevularım" /> Randevularım</a>
                     @module('booking')
-                    <a href="/senior/earnings"               class="nav-link {{ request()->is('senior/earnings*') ? 'active' : '' }}"><x-icon name="dollar-sign" size="18" class="nav-icon" aria-label="Kazançlarım" /> Kazançlarım</a>
+                    <a href="/senior/earnings"               class="nav-link {{ request()->is('senior/earnings*') ? 'active' : '' }}"><x-icon name="wallet" size="18" class="nav-icon" aria-label="Kazançlarım" /> Kazançlarım</a>
                     @endmodule
                     <a href="/senior/contracts"              class="nav-link {{ request()->is('senior/contracts*') ? 'active' : '' }}"><x-icon name="file-text" size="18" class="nav-icon" aria-label="Sözleşmeler" /> Sözleşmeler</a>
                     <a href="/senior/batch-review"           class="nav-link {{ request()->is('senior/batch-review*') ? 'active' : '' }}"><x-icon name="zap" size="18" class="nav-icon" aria-label="Toplu İnceleme" /> Toplu İnceleme</a>

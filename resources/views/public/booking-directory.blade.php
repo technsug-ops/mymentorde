@@ -464,6 +464,13 @@
                                 <x-icon name="clock" size="14" />
                                 <strong>{{ $item['slot_minutes'] }}dk</strong> seans
                             </span>
+                            @if(!empty($item['avg_rating']) && ($item['total_reviews'] ?? 0) > 0)
+                                <span class="d-card-meta-item" style="color:#a16207;">
+                                    <x-icon name="star-filled" size="14" />
+                                    <strong>{{ number_format((float) $item['avg_rating'], 1) }}</strong>
+                                    ({{ $item['total_reviews'] }})
+                                </span>
+                            @endif
                             @if($item['sessions'] > 0)
                                 <span class="d-card-meta-item">
                                     <x-icon name="check" size="14" />
@@ -475,10 +482,19 @@
                             </span>
                         </div>
 
-                        <a href="{{ route('booking.public.show', ['slug' => $item['slug']]) }}" class="d-card-cta">
-                            <x-icon name="calendar" size="16" />
-                            Randevu Al
-                        </a>
+                        <div style="display:flex; gap:8px; margin-top:14px;">
+                            <a href="{{ route('booking.public.profile', ['slug' => $item['slug']]) }}"
+                               class="d-card-cta-secondary"
+                               style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:11px 14px; border-radius:8px; font-weight:600; font-size:13.5px;">
+                                Profili Gör
+                            </a>
+                            <a href="{{ route('booking.public.show', ['slug' => $item['slug']]) }}"
+                               class="d-card-cta"
+                               style="flex:1.4;">
+                                <x-icon name="calendar" size="16" />
+                                Randevu Al
+                            </a>
+                        </div>
                     </article>
                 @endforeach
             </div>

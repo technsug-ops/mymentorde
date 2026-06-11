@@ -43,9 +43,21 @@
                     Sözleşmen kapsamında ücretsiz
                 </div>
             @else
-                <div style="background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.5;margin-bottom:12px;">
-                    <strong style="display:block;margin-bottom:3px;">Ücretli randevu yakında</strong>
-                    Şimdilik onay vermek için danışmanınla iletişime geç.
+                @php
+                    $previewPrice = null;
+                    try {
+                        $companyPricing = \App\Models\CompanyBookingPricing::forCompany((int) $settings->company_id);
+                        $previewPrice = $companyPricing->priceFor((int) $settings->slot_duration);
+                    } catch (\Throwable) {}
+                @endphp
+                <div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.5;margin-bottom:12px;">
+                    <strong style="display:block;margin-bottom:3px;">Ücretli randevu</strong>
+                    @if($previewPrice !== null && $previewPrice > 0)
+                        {{ number_format($previewPrice, 2, ',', '.') }} EUR · {{ $settings->slot_duration }} dakika
+                        <div style="font-size:11px;color:#64748b;margin-top:3px;">Stripe ile guvenli odeme. 24 saat oncesine kadar tam iade.</div>
+                    @else
+                        Onay sonrasinda Stripe odeme sayfasina yonlendirileceksin.
+                    @endif
                 </div>
             @endif
 
@@ -124,8 +136,8 @@
                 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                     <button type="submit" id="pbs-submit"
                             style="padding:11px 22px;background:var(--c-accent,#1e40af);color:#fff;border:none;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
-                        <x-icon name="check" size="14" aria-label="Onayla" />
-                        Randevuyu Onayla
+                        <x-icon name="{{ $isContracted ? 'check' : 'credit-card' }}" size="14" aria-label="Onayla" />
+                        {{ $isContracted ? 'Randevuyu Onayla' : 'Ödeme ile Devam Et' }}
                     </button>
                     <button type="button" id="pbs-cancel"
                             style="padding:11px 18px;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
@@ -318,6 +330,21 @@
         .then(function(r){ return r.json().then(function(j){ return { status:r.status, body:j }; }); })
         .then(function(res){
             if (res.body.ok){
+                // Phase 5 — Stripe Checkout: ücretli randevuda redirect_url Stripe URL'si.
+                // res.body.stripe === true ise hemen Stripe sayfasina yonlendir.
+                if (res.body.stripe && res.body.redirect_url){
+                    $form.style.display = 'none';
+                    $grid.style.display = 'none';
+                    var $stripeMsg = document.createElement('div');
+                    $stripeMsg.style.cssText = 'padding:30px;text-align:center;color:var(--c-muted,#64748b);font-size:14px;';
+                    $stripeMsg.innerHTML = 'Stripe odeme sayfasina yonlendiriliyorsunuz…<br><br>'
+                        + '<a href="'+res.body.redirect_url+'" style="color:var(--c-accent,#1e40af);font-weight:700;">Otomatik gitmiyorsa tikla</a>';
+                    $success.parentNode.insertBefore($stripeMsg, $success);
+                    setTimeout(function(){ window.location.href = res.body.redirect_url; }, 250);
+                    return;
+                }
+
+                // Ücretsiz (sözleşmeli) akış — eski mevcut başarı ekranı
                 $form.style.display = 'none';
                 $grid.style.display = 'none';
                 document.getElementById('pbs-success-link').href = res.body.redirect_url || '#';

@@ -83,6 +83,10 @@ return [
         'key'            => env('STRIPE_KEY'),
         'secret'         => env('STRIPE_SECRET'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        // 'test' veya 'live' — sk_test_* / sk_live_* arasındaki ayrımı developer'a sinyal verir.
+        // Aktif env değişkeni STRIPE_SECRET'in prefix'inden otomatik anlasilir,
+        // bu key sadece UI flag/log icin (services.stripe.mode okunabilir).
+        'mode'           => env('STRIPE_MODE', 'test'),
     ],
 
     'posthog' => [

@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\GuestApplication;
 use App\Models\SeniorBookingSetting;
 use App\Models\User;
+use App\Models\PublicBooking;
 use App\Services\Booking\BookingConfirmationService;
+use App\Services\Booking\PricingResolver;
 use App\Services\Booking\SlotGeneratorService;
+use App\Services\Booking\StripeCheckoutService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -31,6 +34,8 @@ class PortalBookingController extends Controller
     public function __construct(
         private readonly SlotGeneratorService $slotGenerator,
         private readonly BookingConfirmationService $confirmation,
+        private readonly StripeCheckoutService $stripe = new StripeCheckoutService(),
+        private readonly PricingResolver $pricing = new PricingResolver(),
     ) {
     }
 
@@ -194,15 +199,6 @@ class PortalBookingController extends Controller
         $user = $request->user();
         $isContracted = $this->resolveIsContracted($request);
 
-        if (!$isContracted) {
-            // Phase 5'te Stripe checkout buraya bağlanacak. Şu an manager'a yönlendirme + bilgi.
-            return response()->json([
-                'ok'      => false,
-                'pending' => true,
-                'error'   => 'Şu anda ücretli randevu sistemi hazırlanıyor. Lütfen danışmanınla iletişime geç ya da seni arayalım.',
-            ], 402);
-        }
-
         $payload = [
             'senior_user_id' => $settings->senior_user_id,
             'starts_at_iso'  => $data['starts_at_iso'],
@@ -227,25 +223,147 @@ class PortalBookingController extends Controller
             }
         }
 
+        // Sözleşmeli user → mevcut ücretsiz akış (Phase 5'te değişmedi)
+        if ($isContracted) {
+            try {
+                $booking = $this->confirmation->confirm($payload);
+            } catch (\DomainException $e) {
+                return response()->json(['ok' => false, 'error' => $e->getMessage()], 409);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Portal booking confirm failed (free)', [
+                    'slug'  => $slug,
+                    'user'  => $user->id ?? null,
+                    'error' => $e->getMessage(),
+                ]);
+                return response()->json(['ok' => false, 'error' => 'Beklenmeyen bir hata oluştu.'], 500);
+            }
+
+            return response()->json([
+                'ok'            => true,
+                'booking_token' => $booking->booking_token,
+                'redirect_url'  => $this->successRedirectFor($request),
+                'cancel_url'    => route('booking.public.cancel.show', ['token' => $booking->booking_token]),
+            ]);
+        }
+
+        // ── Phase 5 — Ücretli akış: pending_payment booking + Stripe Checkout ──
         try {
-            $booking = $this->confirmation->confirm($payload);
+            $booking = $this->createPendingPaymentBooking($settings, $payload);
         } catch (\DomainException $e) {
             return response()->json(['ok' => false, 'error' => $e->getMessage()], 409);
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Portal booking confirm failed', [
+            \Illuminate\Support\Facades\Log::error('Portal booking pending_payment create failed', [
                 'slug'  => $slug,
                 'user'  => $user->id ?? null,
                 'error' => $e->getMessage(),
             ]);
-            return response()->json(['ok' => false, 'error' => 'Beklenmeyen bir hata oluştu.'], 500);
+            return response()->json(['ok' => false, 'error' => 'Randevu kaydedilemedi.'], 500);
+        }
+
+        // Stripe Checkout başlat
+        try {
+            $session = $this->stripe->createCheckoutSession(
+                $booking,
+                sprintf('Randevu: %s — %d dk', $settings->display_name ?: 'MentorDE', (int) $settings->slot_duration)
+            );
+        } catch (\DomainException $e) {
+            // Booking row var ama Stripe başlatılamadı — kayıt expired/failed olarak işaretle
+            $booking->update([
+                'payment_status'         => 'failed',
+                'status'                 => 'canceled_by_invitee',
+                'canceled_at'            => now(),
+                'payment_failure_reason' => mb_substr($e->getMessage(), 0, 250),
+            ]);
+            return response()->json(['ok' => false, 'error' => $e->getMessage()], 402);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Stripe checkout session create failed', [
+                'booking_id' => $booking->id,
+                'error'      => $e->getMessage(),
+            ]);
+            return response()->json(['ok' => false, 'error' => 'Ödeme sayfası açılamadı. Lütfen tekrar deneyin.'], 502);
         }
 
         return response()->json([
             'ok'            => true,
             'booking_token' => $booking->booking_token,
-            'redirect_url'  => $this->successRedirectFor($request),
-            'cancel_url'    => route('booking.public.cancel.show', ['token' => $booking->booking_token]),
+            'redirect_url'  => $session['url'],
+            'stripe'        => true,
+            'expires_at'    => $session['expires_at'],
         ]);
+    }
+
+    /**
+     * Phase 5 — pending_payment booking row'u oluştur ve Stripe checkout için hazırla.
+     * Slot availability kontrolü + pricing resolution + DB write (transaction).
+     *
+     * @throws \DomainException slot artik bos degil veya fiyat tanimli degil
+     */
+    private function createPendingPaymentBooking(SeniorBookingSetting $settings, array $payload): PublicBooking
+    {
+        $tz       = $settings->timezone ?: 'Europe/Berlin';
+        $startsAt = CarbonImmutable::parse($payload['starts_at_iso'])->setTimezone($tz);
+        $endsAt   = $startsAt->copy()->addMinutes((int) $settings->slot_duration);
+
+        // Slot re-check
+        $dayKey   = $startsAt->toDateString();
+        $daySlots = $this->slotGenerator->generateForSenior(
+            $settings->senior_user_id,
+            $startsAt->startOfDay(),
+            $startsAt->endOfDay(),
+            useCache: false
+        );
+        if (empty($daySlots[$dayKey])) {
+            throw new \DomainException('Seçilen gün için boş slot yok.');
+        }
+        $targetIso = $startsAt->toIso8601String();
+        $found = false;
+        foreach ($daySlots[$dayKey] as $slot) {
+            if ($slot['iso_starts_at'] === $targetIso) { $found = true; break; }
+        }
+        if (!$found) {
+            throw new \DomainException('Seçtiğiniz saat artık boş değil. Lütfen başka bir saat seçin.');
+        }
+
+        // Pricing
+        $resolved = $this->pricing->resolve(
+            companyId: (int) $settings->company_id,
+            durationMinutes: (int) $settings->slot_duration,
+            customerCountryCode: $payload['customer_country_code'] ?? null,
+            customerType: $payload['customer_type'] ?? 'b2c',
+            seniorUserId: (int) $settings->senior_user_id,
+            serviceType: $payload['service_type'] ?? null,
+            isContractedUser: false,
+        );
+
+        if ($resolved['is_free'] || $resolved['amount_gross_cents'] <= 0) {
+            throw new \DomainException('Bu randevu için fiyat tanımlı değil veya ücretli akış kapalı.');
+        }
+
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($settings, $payload, $startsAt, $endsAt, $resolved) {
+            return PublicBooking::create([
+                'company_id'            => $settings->company_id,
+                'senior_user_id'        => $settings->senior_user_id,
+                'booked_by_user_id'     => $payload['booked_by_user_id'] ?? null,
+                'student_user_id'       => $payload['student_user_id'] ?? null,
+                'guest_application_id'  => $payload['guest_application_id'] ?? null,
+                'invitee_name'          => $payload['invitee_name'],
+                'invitee_email'         => $payload['invitee_email'],
+                'invitee_phone'         => $payload['invitee_phone'] ?? null,
+                'customer_country_code' => $payload['customer_country_code'] ?? null,
+                'customer_type'         => $payload['customer_type'] ?? 'b2c',
+                'is_contracted_user'    => false,
+                'starts_at'             => $startsAt->setTimezone('UTC'),
+                'ends_at'               => $endsAt->setTimezone('UTC'),
+                'status'                => 'pending_confirm',
+                'notes'                 => $payload['notes'] ?? null,
+                'amount_net_cents'      => $resolved['amount_net_cents'],
+                'tax_rate_pct_applied'  => $resolved['tax_rate_pct'],
+                'tax_amount_cents'      => $resolved['tax_amount_cents'],
+                'amount_gross_cents'    => $resolved['amount_gross_cents'],
+                'currency'              => $resolved['currency'],
+                'payment_status'        => 'pending_payment',
+            ]);
+        });
     }
 
     // ──────────────────────────────────────────────────────────────────

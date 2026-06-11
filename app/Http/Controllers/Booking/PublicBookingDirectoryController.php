@@ -135,6 +135,9 @@ class PublicBookingDirectoryController extends Controller
                 'expertise'    => array_slice($expertise, 0, 4),
                 'slot_minutes' => (int) $s->slot_duration,
                 'sessions'     => (int) ($sessionCounts[$s->senior_user_id] ?? 0),
+                // Marketplace Phase 7 — cache kolonlarindan
+                'avg_rating'   => $s->avg_rating !== null ? (float) $s->avg_rating : null,
+                'total_reviews'=> (int) ($s->total_reviews ?? 0),
                 // Tier / fiyat — Stripe entegrasyonu sonrası gerçek değer; şimdilik "Ücretsiz görüşme"
                 'price_label'  => 'Ücretsiz tanışma',
             ];

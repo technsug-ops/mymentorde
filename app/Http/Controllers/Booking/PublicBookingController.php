@@ -149,6 +149,28 @@ class PublicBookingController extends Controller
         ]);
     }
 
+    /**
+     * Phase 5 — Stripe Checkout success URL handler.
+     * Kullanıcı Stripe sayfasından dönünce buraya iner; webhook asenkron çalıştığı için
+     * burada sadece "ödeme alındı, randevu kısa süre içinde onaylanacak" gösteririz.
+     * Eğer webhook hızlı geldiyse (genelde 1-2 sn) booking zaten paid olur.
+     */
+    public function success(string $token): View
+    {
+        $booking = $this->resolveBookingByToken($token);
+        $settings = SeniorBookingSetting::query()
+            ->withoutGlobalScopes()
+            ->where('senior_user_id', $booking->senior_user_id)
+            ->first();
+        $senior = User::query()->withoutGlobalScopes()->where('id', $booking->senior_user_id)->first();
+
+        return view('booking.public.success', [
+            'booking'  => $booking,
+            'settings' => $settings,
+            'senior'   => $senior,
+        ]);
+    }
+
     public function cancel(Request $request, string $token): RedirectResponse
     {
         $booking = $this->resolveBookingByToken($token);

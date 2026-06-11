@@ -440,6 +440,22 @@
                    class="nav-link {{ request()->is('manager/booking-pricing*') ? 'active' : '' }}">
                     <span class="nav-icon"><x-icon name="euro" size="16" /></span> Fiyatlandırma
                 </a>
+                <a href="/manager/commission-rules"
+                   class="nav-link {{ request()->is('manager/commission-rules*') ? 'active' : '' }}">
+                    <span class="nav-icon"><x-icon name="sliders" size="16" /></span> Komisyon Kuralları
+                </a>
+                <a href="/manager/payout-settings"
+                   class="nav-link {{ request()->is('manager/payout-settings*') ? 'active' : '' }}">
+                    <span class="nav-icon"><x-icon name="wallet" size="16" /></span> Ödeme Ayarları
+                </a>
+                <a href="/manager/payouts"
+                   class="nav-link {{ request()->is('manager/payouts*') ? 'active' : '' }}">
+                    <span class="nav-icon"><x-icon name="dollar-sign" size="16" /></span> Ödemeler
+                </a>
+                <a href="/manager/reviews"
+                   class="nav-link {{ request()->is('manager/reviews*') ? 'active' : '' }}">
+                    <span class="nav-icon"><x-icon name="star-filled" size="16" /></span> Yorum Moderasyonu
+                </a>
             </div>
             @endmodule
 

@@ -35,6 +35,12 @@ Schedule::command('doc-request:send-reminders')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/doc-request-reminders.log'));
 Schedule::command('risk-scores:calculate --limit=500')->dailyAt('01:15');
+
+// Marketplace Phase 7: Booking sonrasi review davetiye maillerini saatlik queue'ya gonder
+Schedule::command('reviews:queue-requests')
+    ->hourlyAt(25)
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/review-requests.log'));
 Schedule::command('archive:inactive-records --guest-days=180')->dailyAt('01:30');
 Schedule::command('marketing:sync-external-metrics --days=7')
     ->hourlyAt(20)
@@ -189,6 +195,13 @@ Schedule::command('senior:send-reminders')
     ->dailyAt('08:30')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/senior-reminders.log'));
+
+// ─── Marketplace Phase 5: Senior Earnings Settle ──────────────────────────────
+// 24 saat geçen recorded earning'leri 'available'a yükselt (iade penceresi kapandı).
+Schedule::command('senior:earnings:settle')
+    ->dailyAt('02:30')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/senior-earnings-settle.log'));
 
 // ─── Email Drip Campaign ──────────────────────────────────────────────────────
 

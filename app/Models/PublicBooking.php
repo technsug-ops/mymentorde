@@ -38,8 +38,11 @@ class PublicBooking extends Model
         'payment_status',
         'stripe_session_id',
         'stripe_payment_intent_id',
+        'stripe_expires_at',
         'paid_at',
         'refunded_at',
+        'refund_id',
+        'payment_failure_reason',
         'booking_token',
         'student_appointment_id',
         'canceled_at',
@@ -51,6 +54,7 @@ class PublicBooking extends Model
         'canceled_at'            => 'datetime',
         'paid_at'                => 'datetime',
         'refunded_at'            => 'datetime',
+        'stripe_expires_at'      => 'datetime',
         'is_contracted_user'     => 'boolean',
         'amount_net_cents'       => 'integer',
         'tax_rate_pct_applied'   => 'decimal:2',
@@ -103,5 +107,39 @@ class PublicBooking extends Model
     public function scopeActive($q)
     {
         return $q->whereIn('status', ['pending_confirm', 'confirmed']);
+    }
+
+    // ── Phase 5 helpers ───────────────────────────────────────────────────
+
+    /** Ödendi mi? (Stripe webhook checkout.session.completed sonrasi true) */
+    public function isPaid(): bool
+    {
+        return $this->payment_status === 'paid';
+    }
+
+    /** İade edildi mi? */
+    public function isRefunded(): bool
+    {
+        return $this->payment_status === 'refunded';
+    }
+
+    /** Ödeme bekleyen (Stripe checkout açık, 15dk hold içinde). */
+    public function isPendingPayment(): bool
+    {
+        return $this->payment_status === 'pending_payment';
+    }
+
+    /** Ödeme hold süresi dolmuş mu? (15dk pending_payment sonrası true) */
+    public function isPaymentExpired(): bool
+    {
+        if (!$this->isPendingPayment()) return false;
+        if (!$this->stripe_expires_at) return false;
+        return $this->stripe_expires_at->isPast();
+    }
+
+    /** EUR cinsinden brüt tutar (UI gösterimi). */
+    public function amountGrossEur(): float
+    {
+        return round(((int) $this->amount_gross_cents) / 100, 2);
     }
 }

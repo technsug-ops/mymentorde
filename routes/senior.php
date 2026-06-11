@@ -173,7 +173,14 @@ Route::middleware(['company.context', 'auth', 'senior.role'])->group(function ()
         Route::post('/senior/booking-settings/exceptions',           [$c, 'storeException'])->middleware('throttle:60,1')->name('senior.booking-settings.exceptions.store');
         Route::delete('/senior/booking-settings/exceptions/{exception}', [$c, 'destroyException'])->middleware('throttle:60,1')->name('senior.booking-settings.exceptions.destroy');
 
-        // Earnings dashboard
-        Route::get('/senior/earnings', [\App\Http\Controllers\Booking\SeniorEarningsController::class, 'index'])->name('senior.earnings');
+        // Earnings dashboard — Phase 6 (Senior namespace; commission rules + payouts + on-demand + invoice)
+        // 'senior.earnings' adı Phase 5'ten geliyor — Phase 6 controller'a yönlendirildi.
+        Route::get('/senior/earnings', [\App\Http\Controllers\Senior\SeniorEarningsController::class, 'index'])->name('senior.earnings');
+        Route::post('/senior/earnings/request-payout', [\App\Http\Controllers\Senior\SeniorEarningsController::class, 'requestOnDemand'])
+            ->middleware('throttle:5,1')
+            ->name('senior.earnings.request-on-demand');
+        Route::get('/senior/earnings/payouts/{payoutId}/invoice', [\App\Http\Controllers\Senior\SeniorEarningsController::class, 'downloadInvoice'])
+            ->where('payoutId', '[0-9]+')
+            ->name('senior.earnings.invoice');
     });
 });

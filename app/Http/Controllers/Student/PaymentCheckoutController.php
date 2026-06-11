@@ -106,6 +106,9 @@ class PaymentCheckoutController extends Controller
     /**
      * Stripe webhook — ödeme başarılı olduğunda DB'yi güncelle.
      * Route: POST /webhooks/stripe (auth gerektirmez, imza kontrolü var)
+     *
+     * Phase 5 ek: marketplace booking event'leri (metadata.source = 'mentorde_booking')
+     * StripeCheckoutService'e devredilir.
      */
     public static function handleWebhook(Request $request): \Illuminate\Http\Response
     {
@@ -119,6 +122,27 @@ class PaymentCheckoutController extends Controller
             $event = \Stripe\Webhook::constructEvent($payload, $sigHeader, $secret);
         } catch (\Stripe\Exception\SignatureVerificationException $e) {
             return response('Webhook imzası geçersiz.', 400);
+        }
+
+        // ── Phase 5 — Marketplace booking webhook dispatch ────────────────
+        // Stripe event metadata.source = 'mentorde_booking' ise StripeCheckoutService'e devret.
+        // Diğer kaynaklar (student payment) aşağıdaki orjinal akışı kullanır.
+        if (self::isBookingEvent($event)) {
+            try {
+                $result = app(\App\Services\Booking\StripeCheckoutService::class)
+                    ->handleWebhookEvent($event);
+                \Illuminate\Support\Facades\Log::info('Marketplace booking webhook handled', [
+                    'event'  => $event->type,
+                    'result' => $result,
+                ]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Marketplace booking webhook failed', [
+                    'event' => $event->type,
+                    'error' => $e->getMessage(),
+                ]);
+                // Stripe retry'ı önlemek için 200 dön (retry yapsa da idempotent)
+            }
+            return response('OK', 200);
         }
 
         if ($event->type === 'checkout.session.completed') {
@@ -188,5 +212,27 @@ class PaymentCheckoutController extends Controller
         }
 
         return response('OK', 200);
+    }
+
+    /**
+     * Phase 5 — bu Stripe event marketplace booking için mi (vs student tuition payment)?
+     * Booking event'lerinde metadata.source = 'mentorde_booking' veya metadata.booking_id var.
+     */
+    private static function isBookingEvent(\Stripe\Event $event): bool
+    {
+        $object = $event->data->object ?? null;
+        if (!$object) return false;
+
+        // Checkout Session veya PaymentIntent metadata
+        $metadata = $object->metadata ?? null;
+        if ($metadata) {
+            $source = (string) ($metadata->source ?? '');
+            if ($source === 'mentorde_booking') return true;
+            if (!empty($metadata->booking_id)) return true;
+        }
+
+        // Charge / Refund event'lerinde metadata charge üzerinden gelmemiş olabilir;
+        // o durumda payment_intent.metadata'ya bakmak gerek — burada false dön, ana akış zaten retry tolerant.
+        return false;
     }
 }

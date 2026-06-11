@@ -2,6 +2,7 @@
 
 namespace App\Services\Booking;
 
+use App\Models\CompanyBookingPricing;
 use App\Models\GuestApplication;
 use App\Models\PublicBooking;
 use App\Models\SeniorBookingSetting;
@@ -155,6 +156,12 @@ class BookingConfirmationService
             throw new \DomainException('Bu randevu zaten aktif değil.');
         }
 
+        // ── Phase 5 — Refund decision (24 saat penceresi) ───────────────
+        // Eğer booking ödenmiş + iptal penceresi içindeyse → Stripe refund tetikle.
+        // Pencere dışıysa → refund yok (senior payment'a hak kazanmaya devam eder).
+        // Senior tarafından iptal edilirse → her zaman iade et (müşteri suçu değil).
+        [$refundAttempted, $refundOk, $refundReason] = $this->maybeRefundOnCancel($booking, $canceledBy, $reason);
+
         $fresh = DB::transaction(function () use ($booking, $reason, $canceledBy) {
             $statusKey = $canceledBy === 'senior' ? 'canceled_by_senior' : 'canceled_by_invitee';
             $booking->update([
@@ -183,6 +190,16 @@ class BookingConfirmationService
             return $booking->fresh();
         });
 
+        // Refund info log (kullanıcı UI'da görmüyor, denetim için)
+        if ($refundAttempted) {
+            Log::info('booking.cancel.refund_outcome', [
+                'booking_id' => $fresh->id,
+                'ok'         => $refundOk,
+                'reason'     => $refundReason,
+                'canceled_by'=> $canceledBy,
+            ]);
+        }
+
         // Cross-cancel mail notification — kim iptal etti, KARSI tarafa mail gider
         // (kendisine bilgi mail gerek yok, zaten iptal eden buton/onay sayfasi gordu).
         try {
@@ -195,6 +212,61 @@ class BookingConfirmationService
         }
 
         return $fresh;
+    }
+
+    /**
+     * Phase 5 — iptal anında Stripe refund gerek mi?
+     *
+     * Kurallar:
+     *   - Booking ödenmemiş (free veya pending) → refund yok.
+     *   - Senior iptal etti → her zaman tam iade.
+     *   - İnvitee iptal etti + iptal penceresi içinde → tam iade.
+     *   - İnvitee iptal etti + pencere dışı → refund YOK (senior kazancı kalır).
+     *
+     * @return array{0:bool,1:bool,2:?string} [refund_attempted, ok, reason]
+     */
+    private function maybeRefundOnCancel(PublicBooking $booking, string $canceledBy, string $reason): array
+    {
+        if ($booking->payment_status !== 'paid') {
+            return [false, false, null];
+        }
+
+        // İptal penceresi belirle
+        $shouldRefund = true;
+        if ($canceledBy === 'invitee') {
+            $pricing = CompanyBookingPricing::query()
+                ->withoutGlobalScopes()
+                ->where('company_id', $booking->company_id)
+                ->first();
+
+            if ($pricing && $booking->starts_at) {
+                $startsAt = $booking->starts_at instanceof \DateTimeInterface
+                    ? $booking->starts_at
+                    : \Carbon\Carbon::parse($booking->starts_at);
+
+                $shouldRefund = $pricing->isWithinCancellationWindow($startsAt);
+            }
+        }
+
+        if (!$shouldRefund) {
+            Log::info('booking.cancel.no_refund_window_closed', [
+                'booking_id' => $booking->id,
+                'starts_at'  => (string) $booking->starts_at,
+            ]);
+            return [true, false, 'İptal penceresi kapandı — iade yapılmadı.'];
+        }
+
+        // Stripe refund tetikle
+        try {
+            $result = app(StripeCheckoutService::class)->createRefund($booking, $reason);
+            return [true, (bool) ($result['ok'] ?? false), $result['reason'] ?? null];
+        } catch (\Throwable $e) {
+            Log::error('booking.cancel.refund_exception', [
+                'booking_id' => $booking->id,
+                'error'      => $e->getMessage(),
+            ]);
+            return [true, false, $e->getMessage()];
+        }
     }
 
     /**

@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/login');
 Route::view('/landing/mentorde', 'landing.mentorde')->name('landing.mentorde');
 
-// ── SEO Sitemap (public_landings.php'den dinamik) ────────────────────────────
+// ── SEO Sitemap (public_landings.php'den dinamik + senior profilleri) ────────
 Route::get('/sitemap.xml', function () {
     $landings = config('public_landings', []);
     $base = url('/');
@@ -33,6 +33,28 @@ Route::get('/sitemap.xml', function () {
         };
         $urls[] = ['loc' => $base . $path, 'priority' => $priority];
     }
+
+    // Marketplace Phase 7 — Aktif & public senior profilleri sitemap'e ekle
+    try {
+        \App\Models\SeniorBookingSetting::query()
+            ->withoutGlobalScopes()
+            ->where('is_public', true)
+            ->where('is_active', true)
+            ->whereNotNull('public_slug')
+            ->select(['public_slug'])
+            ->chunk(500, function ($rows) use (&$urls, $base): void {
+                foreach ($rows as $r) {
+                    if (empty($r->public_slug)) continue;
+                    $urls[] = [
+                        'loc'      => $base . '/uzman/' . $r->public_slug,
+                        'priority' => '0.7',
+                    ];
+                }
+            });
+    } catch (\Throwable $e) {
+        // Tablo / index yoksa sessizce geç — sitemap kalan landing'lerle render edilir
+    }
+
     $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
     foreach ($urls as $u) {
@@ -338,6 +360,18 @@ Route::middleware(['company.context', 'module:booking'])->group(function (): voi
     Route::post('/book/{slug}/confirm',              [$bc, 'confirm'])->middleware('throttle:30,1')->name('booking.public.confirm');
     Route::get('/book/cancel/{token}',               [$bc, 'cancelShow'])->middleware('throttle:60,1')->name('booking.public.cancel.show');
     Route::post('/book/cancel/{token}',              [$bc, 'cancel'])->middleware('throttle:10,1')->name('booking.public.cancel');
+    // Phase 5 — Stripe Checkout success URL ("ödeme alındı, webhook randevuyu onaylıyor")
+    Route::get('/book/success/{token}',              [$bc, 'success'])->middleware('throttle:60,1')->name('booking.public.success');
+
+    // Marketplace Phase 7 — Senior public profile sayfasi + AJAX review list
+    $sp = \App\Http\Controllers\Booking\SeniorProfileController::class;
+    Route::get('/uzman/{slug}',         [$sp, 'show'])->middleware('throttle:60,1')->name('booking.public.profile');
+    Route::get('/uzman/{slug}/reviews', [$sp, 'reviews'])->middleware('throttle:60,1')->name('booking.public.profile.reviews');
+
+    // Marketplace Phase 7 — Review submission (booking_token ile)
+    $rv = \App\Http\Controllers\Booking\ReviewSubmissionController::class;
+    Route::get('/review/{token}',  [$rv, 'showForm'])->middleware('throttle:60,1')->name('booking.review.show');
+    Route::post('/review/{token}', [$rv, 'submit'])->middleware('throttle:5,1')->name('booking.review.submit');
 });
 
 Route::middleware(['company.context'])->group(function () {

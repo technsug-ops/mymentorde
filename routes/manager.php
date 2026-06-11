@@ -578,6 +578,32 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
         Route::delete('/manager/booking-pricing/tax/{rule}',        [$b, 'destroyTaxRule'])->middleware('throttle:30,1')->name('manager.booking-pricing.tax.destroy');
         Route::post('/manager/booking-pricing/commission',          [$b, 'storeCommissionRule'])->middleware('throttle:30,1')->name('manager.booking-pricing.commission.store');
         Route::delete('/manager/booking-pricing/commission/{rule}', [$b, 'destroyCommissionRule'])->middleware('throttle:30,1')->name('manager.booking-pricing.commission.destroy');
+
+        // ── Marketplace Phase 6: Komisyon Kuralları (matrix UI) ──
+        $cr = \App\Http\Controllers\Manager\CommissionRulesController::class;
+        Route::get('/manager/commission-rules',                  [$cr, 'index'])->name('manager.commission-rules.index');
+        Route::post('/manager/commission-rules',                 [$cr, 'store'])->middleware('throttle:30,1')->name('manager.commission-rules.store');
+        Route::put('/manager/commission-rules/{commissionRule}', [$cr, 'update'])->middleware('throttle:30,1')->name('manager.commission-rules.update');
+        Route::delete('/manager/commission-rules/{commissionRule}', [$cr, 'destroy'])->middleware('throttle:30,1')->name('manager.commission-rules.destroy');
+
+        // ── Marketplace Phase 6: Şirket Ödeme Ayarları ──
+        $ps = \App\Http\Controllers\Manager\PayoutSettingsController::class;
+        Route::get('/manager/payout-settings', [$ps, 'index'])->name('manager.payout-settings.index');
+        Route::put('/manager/payout-settings', [$ps, 'update'])->middleware('throttle:20,1')->name('manager.payout-settings.update');
+
+        // ── Marketplace Phase 6: Payouts (liste + detay + retry) ──
+        $po = \App\Http\Controllers\Manager\PayoutsController::class;
+        Route::get('/manager/payouts',                    [$po, 'index'])->name('manager.payouts.index');
+        Route::get('/manager/payouts/{id}',               [$po, 'show'])->where('id', '[0-9]+')->name('manager.payouts.show');
+        Route::post('/manager/payouts/{id}/retry',        [$po, 'retry'])->where('id', '[0-9]+')->middleware('throttle:10,1')->name('manager.payouts.retry');
+
+        // Marketplace Phase 7 — Yorum moderasyonu cockpit
+        $rm = \App\Http\Controllers\Manager\ReviewModerationController::class;
+        Route::get('/manager/reviews',                          [$rm, 'index'])->name('manager.reviews.index');
+        Route::post('/manager/reviews/{review}/approve',        [$rm, 'approve'])->middleware('throttle:60,1')->name('manager.reviews.approve');
+        Route::post('/manager/reviews/{review}/reject',         [$rm, 'reject'])->middleware('throttle:60,1')->name('manager.reviews.reject');
+        Route::post('/manager/reviews/{review}/toggle-public',  [$rm, 'togglePublic'])->middleware('throttle:60,1')->name('manager.reviews.toggle');
+        Route::delete('/manager/reviews/{review}',              [$rm, 'destroy'])->middleware('throttle:30,1')->name('manager.reviews.destroy');
     });
 
     // ── AI Labs modülü: Knowledge base + ayarlar ─────────────────────────────
