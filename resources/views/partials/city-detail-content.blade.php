@@ -636,7 +636,22 @@ $cdCostCalc = $cdIsStudent
 
 {{-- 📹 Video İçerikleri --}}
 @php
-    $videos = collect($c['videos'] ?? [])->filter(fn($v) => !empty($v['youtube_id']));
+    // Placeholder youtube_id'leri (LzLOhMsjpsw) filtrele — config'te gercek video gelene kadar gosterme
+    $placeholderIds = ['LzLOhMsjpsw'];
+    $videos = collect($c['videos'] ?? [])
+        ->filter(fn($v) => !empty($v['youtube_id']) && !in_array($v['youtube_id'], $placeholderIds, true));
+
+    // Hic gercek video yoksa ama sehrin hero tanitim videosu varsa, onu tek video olarak goster
+    if ($videos->isEmpty() && !empty($c['hero_video_id']) && !in_array($c['hero_video_id'], $placeholderIds, true)) {
+        $videos = collect([[
+            'youtube_id'  => $c['hero_video_id'],
+            'title'       => ($c['name'] ?? 'Şehir') . ' — Tanıtım Videosu',
+            'category'    => 'şehir',
+            'duration'    => '',
+            'description' => 'Şehre genel bakış: hayat, kültür ve öğrenci deneyimi.',
+        ]]);
+    }
+
     $categoryLabels = ['şehir' => '🏙 Şehir Hayatı', 'üniversite' => '🏛 Üniversite', 'yaşam' => '🏠 Yaşam', 'kariyer' => '💼 Kariyer', 'genel' => '📌 Genel'];
     $categoryColors = ['şehir' => '#2563eb', 'üniversite' => '#7c3aed', 'yaşam' => '#16a34a', 'kariyer' => '#d97706', 'genel' => '#64748b'];
 @endphp
