@@ -38,8 +38,10 @@ $typeLabels = ['blog'=>'Blog','video_feature'=>'Video','podcast'=>'Podcast','pre
 <div style="font-size:.82rem;color:var(--u-muted,#888);margin-bottom:12px;display:flex;align-items:center;gap:6px;">
     <a href="{{ route('student.dashboard') }}" style="color:var(--u-brand,#2563eb);text-decoration:none;">Ana Sayfa</a>
     <span>›</span>
+    @pageVisible('discover')
     <a href="{{ route('student.discover') }}" style="color:var(--u-brand,#2563eb);text-decoration:none;">🧭 Keşfet</a>
     <span>›</span>
+    @endpageVisible
     <span style="color:var(--u-text,#333);font-weight:600;">🔖 Favorilerim</span>
 </div>
 
@@ -53,7 +55,9 @@ $typeLabels = ['blog'=>'Blog','video_feature'=>'Video','podcast'=>'Podcast','pre
     <div style="font-size:3rem;margin-bottom:12px;">🔖</div>
     <div style="font-size:1rem;font-weight:600;margin-bottom:8px;">Henüz kaydettiğiniz içerik yok</div>
     <div style="font-size:.88rem;color:var(--u-muted,#888);margin-bottom:20px;">İçerik okurken 🔖 Kaydet butonuna basın.</div>
+    @pageVisible('discover')
     <a href="{{ route('student.discover') }}" class="btn">🧭 İçeriklere Göz At</a>
+    @endpageVisible
 </div>
 @else
 <div class="sv-grid">
@@ -80,7 +84,9 @@ $typeLabels = ['blog'=>'Blog','video_feature'=>'Video','podcast'=>'Podcast','pre
 @endif
 @endif
 
+@pageVisible('discover')
 <div style="margin-top:20px;">
     <a href="{{ route('student.discover') }}" class="btn alt">← Keşfet'e Dön</a>
 </div>
+@endpageVisible
 @endsection

@@ -222,6 +222,7 @@ $cityEmojiMap = [
                 <span class="lg-hero-stat"><span class="lg-hero-stat-ico">💱</span>1 EUR = {{ number_format($rate, 2) }} TRY</span>
                 @endif
             </div>
+            @pageVisible('discover')
             <div class="lg-hero-chips">
                 <a class="lg-hero-chip" href="{{ $lgDiscover() }}">🧭 Tüm İçerikler</a>
                 <a class="lg-hero-chip" href="{{ $lgDiscover('city-content') }}">🏙 Şehir Rehberleri</a>
@@ -229,6 +230,7 @@ $cityEmojiMap = [
                 <a class="lg-hero-chip" href="{{ $lgDiscover('careers') }}">💼 Kariyer</a>
                 <a class="lg-hero-chip" href="{{ $lgDiscover('student-life') }}">🎓 Öğrenci Hayatı</a>
             </div>
+            @endpageVisible
         </div>
         <div class="lg-hero-icon">🏙</div>
     </div>

@@ -160,12 +160,14 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
 
 {{-- Breadcrumb --}}
 <div class="cd-breadcrumb">
+    @pageVisible('discover')
     <a href="{{ route('guest.discover') }}">🧭 Keşfet</a>
     <span>/</span>
     @if($item->category)
     <a href="{{ route('guest.discover', ['cat' => $item->category]) }}">{{ $catLabels[$item->category] ?? $item->category }}</a>
     <span>/</span>
     @endif
+    @endpageVisible
     <span style="color:var(--u-text,#333);">{{ Str::limit($item->title_tr, 50) }}</span>
 </div>
 
@@ -320,9 +322,11 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
     @if($item->author)
     <div>✍️ {{ $item->author }}</div>
     @endif
+    @pageVisible('discover')
     @foreach($itemTags as $tag)
     <a href="{{ route('guest.discover', ['tag' => $tag]) }}" class="cd-tag" style="width:fit-content;">🏷 {{ $tag }}</a>
     @endforeach
+    @endpageVisible
 </div>
 </div>
 </div>{{-- /sidebar --}}
@@ -370,9 +374,11 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
 </div>
 @endif
 
+@pageVisible('discover')
 <div style="margin-top:16px;text-align:center;">
     <a href="{{ route('guest.discover') }}" class="btn alt">← Keşfet'e Dön</a>
 </div>
+@endpageVisible
 
 @push('scripts')
 <div id="cd-progress-bar"></div>

@@ -124,12 +124,14 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
 
 {{-- Breadcrumb --}}
 <div class="cd-breadcrumb">
+    @pageVisible('discover')
     <a href="{{ route('student.discover') }}">🧭 Keşfet</a>
     <span>/</span>
     @if($item->category)
     <a href="{{ route('student.discover', ['cat' => $item->category]) }}">{{ $catLabels[$item->category] ?? $item->category }}</a>
     <span>/</span>
     @endif
+    @endpageVisible
     <span style="color:var(--u-text,#333);">{{ Str::limit($item->title_tr, 50) }}</span>
 </div>
 
@@ -197,6 +199,7 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
 
 {{-- City CTA --}}
 @if($linkedCitySlug)
+@pageVisible('discover')
 <a href="{{ route('student.discover', ['cat'=>'city-content','q'=>$linkedCitySlug]) }}" class="cd-city-cta">
     <div>
         <div class="cd-city-cta-left">📍 {{ ucfirst($linkedCitySlug) }} Şehir İçerikleri</div>
@@ -204,6 +207,7 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
     </div>
     <div class="cd-city-cta-arrow">→</div>
 </a>
+@endpageVisible
 @endif
 
 {{-- 2-sütun layout: İçerik + TOC Sidebar (blog/career_guide/experience) --}}
@@ -279,9 +283,11 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
     @if(!empty($item->author))
     <div>✍️ {{ $item->author }}</div>
     @endif
+    @pageVisible('discover')
     @foreach($itemTags as $tag)
     <a href="{{ route('student.discover', ['q' => $tag]) }}" class="cd-tag" style="width:fit-content;">🏷 {{ $tag }}</a>
     @endforeach
+    @endpageVisible
 </div>
 </div>
 </div>{{-- /sidebar --}}
@@ -329,9 +335,11 @@ $linkedCitySlug = collect($itemTags)->first(fn($t) => in_array(strtolower($t), $
 </div>
 @endif
 
+@pageVisible('discover')
 <div style="margin-top:16px;text-align:center;">
     <a href="{{ route('student.discover') }}" class="btn alt">← Keşfet'e Dön</a>
 </div>
+@endpageVisible
 
 @push('scripts')
 <div id="cd-progress-bar"></div>

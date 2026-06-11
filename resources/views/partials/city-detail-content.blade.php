@@ -770,7 +770,9 @@ $cityContents = CmsContent::where('status', 'published')
 <div style="margin-top:32px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
         <div style="font-size:1rem;font-weight:700;color:var(--u-text,#1a1a1a);">📚 Bu Şehir Hakkında İçerikler</div>
+        @pageVisible('discover')
         <a href="{{ $cdDiscover(['cat' => 'city-content']) }}" style="font-size:.82rem;color:var(--u-brand,#2563eb);text-decoration:none;font-weight:600;">Tümünü Gör →</a>
+        @endpageVisible
     </div>
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
         @foreach($cityContents as $cms)

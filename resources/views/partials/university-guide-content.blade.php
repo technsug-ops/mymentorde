@@ -37,6 +37,7 @@ $ugCostRoute = $ugIsStudent
 </div>
 
 {{-- Üniversite Türleri --}}
+@pageVisible('discover')
 <div style="font-weight:700;font-size:var(--tx-base);margin-bottom:14px;">Üniversite Türleri</div>
 <div class="col3" style="margin-bottom:24px;">
 
@@ -92,6 +93,7 @@ $ugCostRoute = $ugIsStudent
     </a>
 
 </div>
+@endpageVisible
 
 {{-- Başvuru Portalları --}}
 <div style="font-weight:700;font-size:var(--tx-base);margin-bottom:14px;">Başvuru Portalları</div>

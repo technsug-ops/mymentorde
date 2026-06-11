@@ -673,7 +673,9 @@
 <div class="gdb-ql">
     <a href="{{ route('guest.messages') }}" class="gdb-ql-item">💬 Danışmanınla konuş</a>
     <a href="{{ route('guest.contract') }}" class="gdb-ql-item">📜 Sözleşme durumu</a>
+    @pageVisible('discover')
     <a href="{{ route('guest.discover') }}" class="gdb-ql-item">🌍 Almanya rehberi</a>
+    @endpageVisible
 </div>
 @endif
 
