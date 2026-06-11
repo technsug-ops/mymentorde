@@ -125,13 +125,23 @@ class ModuleAccess
             "company:{$companyId}:enabled_modules",
             300,
             function () use ($companyId): array {
-                $raw = Company::query()->where('id', $companyId)->value('enabled_modules');
-                if ($raw === null || $raw === '') {
-                    return self::DEFAULT_MODULES;
+                // SaaS tier fallback: company.enabled_modules NULL ise
+                // config/subscription_tiers.php'den tier'in modul listesini al.
+                // explicit set edilen enabled_modules tier'i ezer (override).
+                $cols = ['enabled_modules'];
+                if (Schema::hasColumn('companies', 'subscription_tier')) {
+                    $cols[] = 'subscription_tier';
                 }
+                $row = Company::query()->where('id', $companyId)->first($cols);
+                $raw = $row?->getAttribute('enabled_modules');
+
+                if ($raw === null || $raw === '' || $raw === '[]') {
+                    return self::resolveTierModules($row?->getAttribute('subscription_tier'));
+                }
+
                 $decoded = is_array($raw) ? $raw : json_decode((string) $raw, true);
                 if (!is_array($decoded) || empty($decoded)) {
-                    return self::DEFAULT_MODULES;
+                    return self::resolveTierModules($row?->getAttribute('subscription_tier'));
                 }
                 return array_values(array_filter(array_map(
                     fn ($v) => strtolower(trim((string) $v)),
@@ -139,6 +149,35 @@ class ModuleAccess
                 )));
             }
         );
+    }
+
+    /**
+     * Tier'a gore izinli modul listesini dondur.
+     * config/subscription_tiers.php'deki 'modules' alanini okur.
+     * '*' = tum DEFAULT_MODULES, dizi = whitelisted, null/bilinmeyen = sadece core.
+     */
+    private static function resolveTierModules(?string $tier): array
+    {
+        $tier = is_string($tier) && $tier !== '' ? strtolower(trim($tier)) : null;
+        if ($tier === null) {
+            // Tier yoksa eski davranis: hepsi acik (geriye uyum)
+            return self::DEFAULT_MODULES;
+        }
+        $tierConfig = config("subscription_tiers.{$tier}");
+        if (!is_array($tierConfig)) {
+            return self::DEFAULT_MODULES;
+        }
+        $modules = $tierConfig['modules'] ?? [];
+        if ($modules === '*') {
+            return self::DEFAULT_MODULES;
+        }
+        if (!is_array($modules) || empty($modules)) {
+            return ['core'];
+        }
+        return array_values(array_filter(array_map(
+            fn ($v) => strtolower(trim((string) $v)),
+            $modules
+        )));
     }
 
     private static function resolveCurrentCompanyId(): int

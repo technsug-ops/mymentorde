@@ -629,6 +629,7 @@ require __DIR__.'/dealer.php';
 require __DIR__.'/tasks.php';
 require __DIR__.'/common.php';
 require __DIR__.'/marketing-admin.php';
+require __DIR__.'/platform.php';
 
 // ── Deploy post-hook (KAS shared hosting'de SSH yok, web ile tetikleme) ──────
 // Kullanım: curl 'https://panel.mentorde.com/_deploy/run-pending?secret=XXX'

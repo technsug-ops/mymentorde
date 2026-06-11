@@ -12,6 +12,12 @@ class Company extends Model
         'is_active',
         'enabled_modules',
         'doc_request_monthly_limit',
+        // SaaS subscription (Platform Owner Faz 2)
+        'subscription_tier',
+        'trial_ends_at',
+        'subscription_renews_at',
+        'billing_email',
+        'mrr_eur',
     ];
 
     protected $casts = [
@@ -19,7 +25,34 @@ class Company extends Model
         'silence_checkin_overrides' => 'array',
         'enabled_modules'           => 'array',
         'doc_request_monthly_limit' => 'integer',
+        // SaaS subscription
+        'trial_ends_at'             => 'date',
+        'subscription_renews_at'    => 'date',
+        'mrr_eur'                   => 'decimal:2',
     ];
+
+    /**
+     * SaaS subscription tier sabitleri — config/subscription_tiers.php ile senkron.
+     */
+    public const TIER_TRIAL   = 'trial';
+    public const TIER_BASIC   = 'basic';
+    public const TIER_GOLD    = 'gold';
+    public const TIER_PREMIUM = 'premium';
+
+    public const TIERS = [
+        self::TIER_TRIAL,
+        self::TIER_BASIC,
+        self::TIER_GOLD,
+        self::TIER_PREMIUM,
+    ];
+
+    /** Trial siresi dolmus mu (trial_ends_at gecmis)? */
+    public function isTrialExpired(?\Carbon\CarbonInterface $now = null): bool
+    {
+        if ($this->subscription_tier !== self::TIER_TRIAL) return false;
+        if (!$this->trial_ends_at) return false;
+        return $this->trial_ends_at->lt($now ?? \Carbon\CarbonImmutable::now());
+    }
 
     /**
      * D11: Bu ay icin uretilen doc_request token sayisi (quota gating icin).
