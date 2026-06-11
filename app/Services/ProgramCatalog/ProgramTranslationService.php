@@ -136,7 +136,10 @@ class ProgramTranslationService
             fileRefs:     [],
             options:      [
                 'temperature' => 0.3, // teknik çeviri — düşük creativity
-                'max_tokens'  => 4096,
+                // Engineering/CS programlarinda uzun "qualification requirements" + "required
+                // documents" listeleri 4096'yi asabiliyor (Gemini truncation -> JSON parse 500).
+                // 8192'ye yukseltildi — Gemini 1.5/2.0 modelleri rahat destekliyor.
+                'max_tokens'  => 8192,
             ],
             companyId:    $companyId
         );

@@ -32,7 +32,24 @@ class ProgramTranslationController extends Controller
         // API key company-spesifik — request'in tenant context'ini al
         $companyId = (int) ($request->attributes->get('company_id') ?? $request->user()?->company_id ?? 1);
 
-        $result = $this->translator->translateProgram($program, force: $force, companyId: $companyId);
+        // Engineering/CS programlari icin uzun content + Gemini timeout veya parse hatasi 500'e
+        // gidiyordu. Service throw etmedigi senaryolar (GeminiProvider OOM, network, vs.) icin
+        // controller-seviyesinde guvenli yakalama. Hicbir cevap kullaniciya 500 olarak gitmesin.
+        try {
+            $result = $this->translator->translateProgram($program, force: $force, companyId: $companyId);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('ProgramTranslation.controller_failed', [
+                'program_id' => $program->id,
+                'course'     => $program->course_name,
+                'error'      => $e->getMessage(),
+            ]);
+            return response()->json([
+                'success'  => false,
+                'message'  => 'Ceviri servisi su an cevap vermedi. Lutfen birazdan tekrar deneyin.',
+                'detail'   => app()->hasDebugModeEnabled() ? $e->getMessage() : null,
+                'skipped'  => 4,
+            ], 503);
+        }
 
         // PostHog: lazy translate triggered (cost ölçümü + popularity sinyali)
         try {
