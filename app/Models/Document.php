@@ -22,11 +22,19 @@ class Document extends Model
         'approved_by',
         'approved_at',
         'review_note',
+        'extracted_data',
+        'extracted_at',
+        'extraction_confidence',
+        'extraction_status',
+        'extraction_error',
     ];
 
     protected $casts = [
         'process_tags' => 'array',
         'approved_at' => 'datetime',
+        'extracted_data' => 'array',
+        'extracted_at' => 'datetime',
+        'extraction_confidence' => 'float',
     ];
 
     public function category()

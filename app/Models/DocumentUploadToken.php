@@ -51,8 +51,11 @@ class DocumentUploadToken extends Model
         'created_by_user_id',
         'recipient_email',
         'recipient_phone',
+        'notification_channels',
         'reminder_first_sent_at',
         'reminder_final_sent_at',
+        'whatsapp_first_sent_at',
+        'whatsapp_final_sent_at',
         'max_uses',
         'used_count',
         'expires_at',
@@ -67,9 +70,33 @@ class DocumentUploadToken extends Model
         'last_used_at'           => 'datetime',
         'reminder_first_sent_at' => 'datetime',
         'reminder_final_sent_at' => 'datetime',
+        'whatsapp_first_sent_at' => 'datetime',
+        'whatsapp_final_sent_at' => 'datetime',
+        'notification_channels'  => 'array',
         'max_uses'               => 'integer',
         'used_count'             => 'integer',
     ];
+
+    /**
+     * Default notification channels for tokens olusturuldugunda channel
+     * belirtilmedi. Geriye uyum + safe fallback.
+     */
+    public function getNotificationChannelsAttribute($value): array
+    {
+        if ($value === null) {
+            return ['email'];
+        }
+        $decoded = is_array($value) ? $value : json_decode((string) $value, true);
+        if (!is_array($decoded) || empty($decoded)) {
+            return ['email'];
+        }
+        return array_values(array_intersect($decoded, ['email', 'whatsapp']));
+    }
+
+    public function hasChannel(string $channel): bool
+    {
+        return in_array($channel, $this->notification_channels, true);
+    }
 
     /**
      * Save öncesi: legacy alanlar set edilmişse polymorphic alanları senkronla

@@ -185,6 +185,35 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::post('/manager/business-contracts/{businessContract}/document-tokens',         [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'storeForContract'])->name('manager.contract.document-tokens.store');
     Route::delete('/manager/business-contracts/{businessContract}/document-tokens/{token}', [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'destroyForContract'])->name('manager.contract.document-tokens.destroy');
 
+    // ─── Belge Talep Analytics (doc_request KPI + funnel + hatırlatma etkisi) ────
+    // KPI + funnel + kategori bazlı performans + aylık trend + CSV export.
+    // Sadece doc_request modülü aktif olanlar erişebilir (controller'da assert).
+    Route::middleware('module:doc_request')->group(function (): void {
+        $dra = \App\Http\Controllers\Manager\DocumentRequestAnalyticsController::class;
+        Route::get('/manager/document-requests/analytics',        [$dra, 'index'])->name('manager.document-requests.analytics');
+        Route::get('/manager/document-requests/analytics/export', [$dra, 'export'])->middleware('throttle:10,1')->name('manager.document-requests.analytics.export');
+
+        // ── Toplu Belge Talep (D10) ───────────────────────────────────────────
+        // Birden fazla aday/öğrenciye aynı kategoriden tek seferde belge talep
+        // linki gönder. Email + WhatsApp ilk bildirimi anında tetiklenir, batch
+        // sonucu CSV export'a hazır halde session'da kalır.
+        $bdr = \App\Http\Controllers\Manager\BulkDocumentRequestController::class;
+        Route::get('/manager/document-requests/bulk',                 [$bdr, 'index'])->name('manager.doc-request.bulk.index');
+        Route::post('/manager/document-requests/bulk/preview',        [$bdr, 'preview'])->middleware('throttle:30,1')->name('manager.doc-request.bulk.preview');
+        Route::post('/manager/document-requests/bulk/store',          [$bdr, 'store'])->middleware('throttle:10,1')->name('manager.doc-request.bulk.store');
+        Route::get('/manager/document-requests/bulk/export/{batch}',  [$bdr, 'export'])->where('batch', '[a-zA-Z0-9-]+')->name('manager.doc-request.bulk.export');
+
+        // ── Belge OCR / Gemini Vision extraction (D8) ─────────────────────────
+        // Yüklenen pasaport/diploma/transkript belgelerinden alan çıkarımı.
+        // Yükleme sırasında otomatik tetiklenir (PublicDocumentUploadController),
+        // bu endpoint'ler inline preview + manuel re-trigger için.
+        $docOcr = \App\Http\Controllers\Manager\DocumentOcrController::class;
+        Route::get('/manager/documents/{id}/extraction',  [$docOcr, 'show'])
+            ->whereNumber('id')->name('manager.documents.extraction.show');
+        Route::post('/manager/documents/{id}/re-extract', [$docOcr, 'reExtract'])
+            ->whereNumber('id')->middleware('throttle:30,1')->name('manager.documents.re-extract');
+    });
+
     // ─── Katman 2 — Dashboard Alt Modüller ──────────────────────────────────
     Route::get('/manager/revenue-analytics', [ManagerAnalyticsController::class, 'revenueAnalytics'])->name('manager.revenue-analytics');
     Route::get('/manager/feedback-analytics',        [ManagerAnalyticsController::class, 'feedbackAnalytics'])->name('manager.feedback-analytics');

@@ -412,42 +412,177 @@
                 @endif
             </div>
         </div>
+        @php
+            $ocrSchemas = app(\App\Services\DocumentOcrSchemas::class);
+        @endphp
         @forelse($documents as $doc)
             @php
                 $mime = strtolower((string) ($doc->mime_type ?? ''));
                 $canPreview = str_starts_with($mime, 'image/') || $mime === 'application/pdf';
+                $catCode = (string) ($doc->category->code ?? '');
+                $ocrSchema = $ocrSchemas->getSchemaForCategory($catCode);
+                $ocrStatus = (string) ($doc->extraction_status ?? '');
+                $hasOcr    = $ocrSchema !== null;
+                $extData   = is_array($doc->extracted_data) ? $doc->extracted_data : [];
+                $confidence = $doc->extraction_confidence !== null ? (float) $doc->extraction_confidence : null;
             @endphp
-            <div style="padding:10px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--u-line);font-size:var(--tx-sm);">
-                <span style="font-size:16px;">
-                    @if($doc->status === 'approved') ✅
-                    @elseif(in_array($doc->status, ['review','uploaded'])) ⏳
-                    @else ❌
-                    @endif
-                </span>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $doc->title ?? $doc->original_file_name ?? $doc->document_code ?? 'Belge' }}</div>
-                    <div style="font-size:var(--tx-xs);color:var(--u-muted);">{{ $doc->category->name ?? $doc->category->code ?? '' }} · {{ $doc->updated_at?->format('d.m.Y H:i') }}</div>
-                </div>
-                <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-                    <span class="badge {{ match($doc->status) { 'approved' => 'ok', 'review', 'uploaded' => 'warn', default => 'danger' } }}">
-                        {{ match($doc->status) { 'approved' => 'Onaylandı', 'review' => 'İncelemede', 'uploaded' => 'Yüklendi', default => 'Bekliyor' } }}
+            <div style="border-bottom:1px solid var(--u-line);">
+                <div style="padding:10px 18px;display:flex;align-items:center;gap:10px;font-size:var(--tx-sm);">
+                    <span style="font-size:16px;">
+                        @if($doc->status === 'approved') ✅
+                        @elseif(in_array($doc->status, ['review','uploaded'])) ⏳
+                        @else ❌
+                        @endif
                     </span>
-                    @if($canPreview)
-                        <button type="button" class="doc-preview-btn"
-                                data-url="{{ route('manager.guest.document.serve', [$guest->id, $doc->id]) }}"
-                                data-mime="{{ $mime }}"
-                                data-name="{{ $doc->title ?? $doc->original_file_name ?? 'Belge' }}"
-                                style="padding:3px 8px;font-size:var(--tx-xs);background:var(--u-bg);border:1px solid var(--u-line);border-radius:5px;cursor:pointer;color:var(--u-text);"
-                                title="Önizle">
-                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        </button>
-                    @endif
-                    <a href="{{ route('manager.guest.document.download', [$guest->id, $doc->id]) }}"
-                       style="padding:3px 8px;font-size:var(--tx-xs);background:var(--u-bg);border:1px solid var(--u-line);border-radius:5px;text-decoration:none;color:var(--u-text);"
-                       title="İndir">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    </a>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $doc->title ?? $doc->original_file_name ?? $doc->document_code ?? 'Belge' }}</div>
+                        <div style="font-size:var(--tx-xs);color:var(--u-muted);">{{ $doc->category->name ?? $doc->category->code ?? '' }} · {{ $doc->updated_at?->format('d.m.Y H:i') }}</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                        @if($hasOcr)
+                            <span class="ocr-status-badge"
+                                  data-doc-id="{{ $doc->id }}"
+                                  style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;font-size:var(--tx-xs);font-weight:600;border-radius:5px;
+                                  {{ $ocrStatus === 'completed' ? 'background:#dcfce7;color:#166534;' :
+                                     ($ocrStatus === 'failed' ? 'background:#fee2e2;color:#991b1b;' :
+                                     ($ocrStatus === 'processing' || $ocrStatus === 'pending' ? 'background:#fef3c7;color:#92400e;' : 'background:#f1f5f9;color:#475569;')) }}"
+                                  title="AI veri çıkarımı durumu">
+                                <x-icon name="sparkles" size="12" />
+                                <span class="ocr-status-label">
+                                    @switch($ocrStatus)
+                                        @case('completed') {{ $confidence !== null ? round($confidence * 100) . '%' : 'OK' }} @break
+                                        @case('failed') Hata @break
+                                        @case('processing') İşleniyor @break
+                                        @case('pending') Kuyrukta @break
+                                        @default Hazır değil
+                                    @endswitch
+                                </span>
+                            </span>
+                        @endif
+                        <span class="badge {{ match($doc->status) { 'approved' => 'ok', 'review', 'uploaded' => 'warn', default => 'danger' } }}">
+                            {{ match($doc->status) { 'approved' => 'Onaylandı', 'review' => 'İncelemede', 'uploaded' => 'Yüklendi', default => 'Bekliyor' } }}
+                        </span>
+                        @if($hasOcr)
+                            <button type="button" class="ocr-toggle-btn"
+                                    data-doc-id="{{ $doc->id }}"
+                                    style="padding:3px 8px;font-size:var(--tx-xs);background:var(--u-bg);border:1px solid var(--u-line);border-radius:5px;cursor:pointer;color:var(--u-text);display:inline-flex;align-items:center;gap:3px;"
+                                    title="Çıkarılan veriler">
+                                <x-icon name="file-text" size="14" />
+                            </button>
+                        @endif
+                        @if($canPreview)
+                            <button type="button" class="doc-preview-btn"
+                                    data-url="{{ route('manager.guest.document.serve', [$guest->id, $doc->id]) }}"
+                                    data-mime="{{ $mime }}"
+                                    data-name="{{ $doc->title ?? $doc->original_file_name ?? 'Belge' }}"
+                                    style="padding:3px 8px;font-size:var(--tx-xs);background:var(--u-bg);border:1px solid var(--u-line);border-radius:5px;cursor:pointer;color:var(--u-text);"
+                                    title="Önizle">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        @endif
+                        <a href="{{ route('manager.guest.document.download', [$guest->id, $doc->id]) }}"
+                           style="padding:3px 8px;font-size:var(--tx-xs);background:var(--u-bg);border:1px solid var(--u-line);border-radius:5px;text-decoration:none;color:var(--u-text);"
+                           title="İndir">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        </a>
+                    </div>
                 </div>
+                @if($hasOcr)
+                    {{-- OCR çıkarılan veri paneli — toggle ile açılır kapanır --}}
+                    <div class="ocr-panel"
+                         data-doc-id="{{ $doc->id }}"
+                         data-category-label="{{ $ocrSchema['category_label'] ?? '' }}"
+                         data-extract-url="{{ route('manager.documents.re-extract', $doc->id) }}"
+                         data-show-url="{{ route('manager.documents.extraction.show', $doc->id) }}"
+                         style="display:none;padding:12px 18px;background:var(--u-bg);border-top:1px dashed var(--u-line);font-size:var(--tx-xs);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap;">
+                            <div style="display:flex;align-items:center;gap:6px;font-weight:600;color:var(--u-text);">
+                                <x-icon name="sparkles" size="14" />
+                                AI Çıkarılan Veriler — {{ $ocrSchema['category_label'] }}
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                @if($ocrStatus === 'completed')
+                                    <button type="button" class="ocr-action-btn ocr-approve-btn"
+                                            style="display:inline-flex;align-items:center;gap:3px;padding:4px 10px;font-size:var(--tx-xs);font-weight:600;background:#16a34a;color:#fff;border:none;border-radius:5px;cursor:pointer;">
+                                        <x-icon name="check" size="12" />
+                                        Verileri Onayla
+                                    </button>
+                                    <button type="button" class="ocr-action-btn ocr-edit-btn"
+                                            style="display:inline-flex;align-items:center;gap:3px;padding:4px 10px;font-size:var(--tx-xs);font-weight:600;background:var(--u-card);color:var(--u-text);border:1px solid var(--u-line);border-radius:5px;cursor:pointer;">
+                                        <x-icon name="pencil" size="12" />
+                                        Düzenle
+                                    </button>
+                                @endif
+                                <button type="button" class="ocr-action-btn ocr-reextract-btn"
+                                        style="display:inline-flex;align-items:center;gap:3px;padding:4px 10px;font-size:var(--tx-xs);font-weight:600;background:var(--u-card);color:var(--u-text);border:1px solid var(--u-line);border-radius:5px;cursor:pointer;">
+                                    <x-icon name="refresh-cw" size="12" />
+                                    Belgeden Tekrar Çıkar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="ocr-panel-body">
+                            @if($ocrStatus === 'completed' && !empty($extData))
+                                <table style="width:100%;border-collapse:collapse;">
+                                    <thead>
+                                        <tr style="background:var(--u-card);">
+                                            <th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--u-line);font-weight:600;width:35%;">Alan</th>
+                                            <th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--u-line);font-weight:600;">Değer</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($ocrSchema['fields'] as $field)
+                                            @php
+                                                $val = $extData[$field['key']] ?? null;
+                                                $display = is_array($val) ? implode(', ', array_map('strval', $val)) : (string) ($val ?? '');
+                                                $isEmpty = $display === '' || $val === null;
+                                            @endphp
+                                            <tr>
+                                                <td style="padding:6px 10px;border-bottom:1px solid var(--u-line);color:var(--u-muted);">
+                                                    {{ $field['label'] }}
+                                                    @if(!empty($field['required']))
+                                                        <span style="color:#dc2626;" title="Zorunlu">*</span>
+                                                    @endif
+                                                </td>
+                                                <td style="padding:6px 10px;border-bottom:1px solid var(--u-line);">
+                                                    @if($isEmpty)
+                                                        <span style="color:var(--u-muted);font-style:italic;">—</span>
+                                                    @else
+                                                        <span style="font-family:'SF Mono', Monaco, Menlo, monospace;">{{ $display }}</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                                @if($confidence !== null)
+                                    <div style="margin-top:8px;font-size:var(--tx-xs);color:var(--u-muted);">
+                                        Güven: <strong>{{ round($confidence * 100) }}%</strong>
+                                        · Çıkarım: {{ $doc->extracted_at?->format('d.m.Y H:i') ?? '—' }}
+                                    </div>
+                                @endif
+                            @elseif($ocrStatus === 'failed')
+                                <div style="padding:12px;background:#fee2e2;border:1px solid #fecaca;border-radius:6px;color:#991b1b;">
+                                    <strong>Çıkarım başarısız.</strong>
+                                    @if(!empty($doc->extraction_error))
+                                        <div style="margin-top:4px;font-family:'SF Mono', Monaco, Menlo, monospace;font-size:11px;opacity:.85;">
+                                            {{ \Illuminate\Support\Str::limit($doc->extraction_error, 200) }}
+                                        </div>
+                                    @endif
+                                    <div style="margin-top:6px;">"Belgeden Tekrar Çıkar" butonu ile yeniden deneyebilirsiniz.</div>
+                                </div>
+                            @elseif($ocrStatus === 'processing' || $ocrStatus === 'pending')
+                                <div style="padding:12px;background:#fef3c7;border:1px solid #fde68a;border-radius:6px;color:#92400e;">
+                                    AI veri çıkarımı işleniyor… Sonuç birkaç saniye içinde burada görüntülenecek.
+                                </div>
+                            @else
+                                <div style="padding:12px;background:var(--u-card);border:1px dashed var(--u-line);border-radius:6px;color:var(--u-muted);text-align:center;">
+                                    Bu belge için henüz çıkarım yapılmadı. Başlatmak için yukarıdaki <strong>Belgeden Tekrar Çıkar</strong> butonuna basın.
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
             </div>
         @empty
             <div style="padding:20px 18px;text-align:center;color:var(--u-muted);font-size:var(--tx-sm);">
@@ -456,6 +591,151 @@
         @endforelse
     </div>
 </div>
+
+{{-- OCR panel toggle + re-extract + poll script (CSP-safe, nonce'lu) --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    // Panel aç/kapa
+    document.querySelectorAll('.ocr-toggle-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            const id = btn.getAttribute('data-doc-id');
+            const panel = document.querySelector('.ocr-panel[data-doc-id="' + id + '"]');
+            if (!panel) return;
+            panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
+        });
+    });
+
+    // Re-extract → POST endpoint + polling
+    document.querySelectorAll('.ocr-panel').forEach(function(panel){
+        const docId = panel.getAttribute('data-doc-id');
+        const extractUrl = panel.getAttribute('data-extract-url');
+        const showUrl = panel.getAttribute('data-show-url');
+        const reBtn = panel.querySelector('.ocr-reextract-btn');
+        const body = panel.querySelector('.ocr-panel-body');
+        const badge = document.querySelector('.ocr-status-badge[data-doc-id="' + docId + '"]');
+
+        let pollTimer = null;
+
+        function setBadge(status, confidence){
+            if (!badge) return;
+            const label = badge.querySelector('.ocr-status-label');
+            const styles = {
+                completed:  {bg:'#dcfce7', fg:'#166534', text: confidence !== null ? Math.round(confidence*100) + '%' : 'OK'},
+                failed:     {bg:'#fee2e2', fg:'#991b1b', text: 'Hata'},
+                processing: {bg:'#fef3c7', fg:'#92400e', text: 'İşleniyor'},
+                pending:    {bg:'#fef3c7', fg:'#92400e', text: 'Kuyrukta'},
+            };
+            const s = styles[status] || {bg:'#f1f5f9', fg:'#475569', text:'Hazır değil'};
+            badge.style.background = s.bg;
+            badge.style.color = s.fg;
+            if (label) label.textContent = s.text;
+        }
+
+        function render(json){
+            const status = json.extraction_status || '';
+            const data = json.extracted_data || {};
+            const fields = json.schema_fields || [];
+            const confidence = json.extraction_confidence;
+            setBadge(status, confidence);
+
+            if (status === 'completed') {
+                let html = '<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:var(--u-card);">' +
+                    '<th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--u-line);font-weight:600;width:35%;">Alan</th>' +
+                    '<th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--u-line);font-weight:600;">Değer</th></tr></thead><tbody>';
+                fields.forEach(function(f){
+                    const v = data[f.key];
+                    const display = Array.isArray(v) ? v.join(', ') : (v == null ? '' : String(v));
+                    const isEmpty = display === '';
+                    const reqMark = f.required ? ' <span style="color:#dc2626;">*</span>' : '';
+                    const val = isEmpty
+                        ? '<span style="color:var(--u-muted);font-style:italic;">—</span>'
+                        : '<span style="font-family:\'SF Mono\', Monaco, Menlo, monospace;">' + escapeHtml(display) + '</span>';
+                    html += '<tr><td style="padding:6px 10px;border-bottom:1px solid var(--u-line);color:var(--u-muted);">' + escapeHtml(f.label) + reqMark +
+                        '</td><td style="padding:6px 10px;border-bottom:1px solid var(--u-line);">' + val + '</td></tr>';
+                });
+                html += '</tbody></table>';
+                if (confidence !== null && confidence !== undefined) {
+                    html += '<div style="margin-top:8px;font-size:var(--tx-xs);color:var(--u-muted);">Güven: <strong>' + Math.round(confidence*100) + '%</strong></div>';
+                }
+                body.innerHTML = html;
+            } else if (status === 'failed') {
+                const err = json.extraction_error ? '<div style="margin-top:4px;font-family:\'SF Mono\',monospace;font-size:11px;opacity:.85;">' + escapeHtml(json.extraction_error.substring(0,200)) + '</div>' : '';
+                body.innerHTML = '<div style="padding:12px;background:#fee2e2;border:1px solid #fecaca;border-radius:6px;color:#991b1b;"><strong>Çıkarım başarısız.</strong>' + err + '<div style="margin-top:6px;">"Belgeden Tekrar Çıkar" butonu ile yeniden deneyebilirsiniz.</div></div>';
+            } else if (status === 'processing' || status === 'pending') {
+                body.innerHTML = '<div style="padding:12px;background:#fef3c7;border:1px solid #fde68a;border-radius:6px;color:#92400e;">AI veri çıkarımı işleniyor… Sonuç birkaç saniye içinde burada görüntülenecek.</div>';
+            }
+        }
+
+        function escapeHtml(s){
+            return String(s).replace(/[&<>"']/g, function(c){
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+            });
+        }
+
+        function poll(){
+            fetch(showUrl, {headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}})
+                .then(function(r){ return r.json(); })
+                .then(function(json){
+                    if (!json.ok) return;
+                    render(json);
+                    if (json.extraction_status === 'processing' || json.extraction_status === 'pending') {
+                        pollTimer = setTimeout(poll, 3000);
+                    }
+                })
+                .catch(function(){});
+        }
+
+        if (reBtn) {
+            reBtn.addEventListener('click', function(){
+                reBtn.disabled = true;
+                reBtn.style.opacity = '.6';
+                fetch(extractUrl, {
+                    method: 'POST',
+                    headers: {'Accept':'application/json','X-CSRF-TOKEN':csrf,'X-Requested-With':'XMLHttpRequest'},
+                })
+                .then(function(r){ return r.json(); })
+                .then(function(json){
+                    if (json.ok) {
+                        setBadge('pending', null);
+                        body.innerHTML = '<div style="padding:12px;background:#fef3c7;border:1px solid #fde68a;border-radius:6px;color:#92400e;">AI veri çıkarımı kuyruğa alındı…</div>';
+                        if (pollTimer) clearTimeout(pollTimer);
+                        pollTimer = setTimeout(poll, 2500);
+                    } else {
+                        alert(json.error || 'Yeniden çıkarım başlatılamadı.');
+                    }
+                })
+                .catch(function(){ alert('Sunucuya ulaşılamadı.'); })
+                .finally(function(){
+                    reBtn.disabled = false;
+                    reBtn.style.opacity = '1';
+                });
+            });
+        }
+
+        // Approve / Edit — şimdilik placeholder (manager düzenleme akışı sonraki sprint)
+        const approveBtn = panel.querySelector('.ocr-approve-btn');
+        if (approveBtn) {
+            approveBtn.addEventListener('click', function(){
+                alert('Veri onay akışı sonraki sprint\'te aktifleştirilecek. Şimdilik manuel olarak işlem yapabilirsiniz.');
+            });
+        }
+        const editBtn = panel.querySelector('.ocr-edit-btn');
+        if (editBtn) {
+            editBtn.addEventListener('click', function(){
+                alert('Manuel düzenleme akışı sonraki sprint\'te aktifleştirilecek.');
+            });
+        }
+
+        // Sayfa açıldığında pending/processing varsa otomatik poll başlat
+        const initialBadge = badge?.querySelector('.ocr-status-label')?.textContent || '';
+        if (initialBadge === 'İşleniyor' || initialBadge === 'Kuyrukta') {
+            pollTimer = setTimeout(poll, 2500);
+        }
+    });
+})();
+</script>
 
 {{-- ══════════════════════════════════════════════════════════
      C7: Aday Form Cevapları (Level 1 + Level 2 ayrı section'larda)

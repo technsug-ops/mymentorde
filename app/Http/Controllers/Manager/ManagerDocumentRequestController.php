@@ -10,9 +10,11 @@ use App\Models\Dealer;
 use App\Models\GuestApplication;
 use App\Models\StudentAssignment;
 use App\Models\User;
+use App\Services\WhatsAppService;
 use App\Support\ModuleAccess;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Belge Talep Linki — Premium özellik (doc_request modülü).
@@ -259,11 +261,14 @@ class ManagerDocumentRequestController extends Controller
         }
 
         $data = $request->validate([
-            'category_code'   => 'required|string|max:64|regex:/^[A-Za-z0-9_-]+$/',
-            'expires_hours'   => 'nullable|integer|min:1|max:168', // max 7 gün
-            'custom_message'  => 'nullable|string|max:500',
-            'recipient_email' => 'nullable|email|max:180', // D7: hatirlatma icin alici
-            'recipient_phone' => 'nullable|string|max:50',  // D6/SMS gelecek
+            'category_code'           => 'required|string|max:64|regex:/^[A-Za-z0-9_-]+$/',
+            'expires_hours'           => 'nullable|integer|min:1|max:168', // max 7 gün
+            'custom_message'          => 'nullable|string|max:500',
+            'recipient_email'         => 'nullable|email|max:180', // D7: hatirlatma icin alici
+            'recipient_phone'         => 'nullable|string|max:50',  // D6: WhatsApp direkt gonderim
+            // D6: kanal secimi — UI'dan checkbox grup
+            'notification_channels'   => 'nullable|array',
+            'notification_channels.*' => 'in:email,whatsapp',
         ]);
 
         $category = DocumentCategory::where('code', $data['category_code'])->first();
@@ -271,28 +276,83 @@ class ManagerDocumentRequestController extends Controller
             return response()->json(['error' => 'Belge kategorisi bulunamadı.'], 422);
         }
 
+        // ── Kanal cozumleme ──
+        // 1. UI'dan gelen channels (varsa) onceliklidir
+        // 2. UI bos brakirsa: kullaniciya gore default
+        //    - sadece email var → ['email']
+        //    - sadece phone var → ['whatsapp']
+        //    - ikisi de var → ['email', 'whatsapp']
+        $channels = array_values(array_unique($data['notification_channels'] ?? []));
+        if (empty($channels)) {
+            $channels = [];
+            if (!empty($data['recipient_email'])) $channels[] = 'email';
+            if (!empty($data['recipient_phone'])) $channels[] = 'whatsapp';
+            if (empty($channels)) $channels = ['email']; // geriye uyum varsayilani
+        }
+
+        // WhatsApp kanali secildi ama telefon yok → hata
+        if (in_array('whatsapp', $channels, true) && empty($data['recipient_phone'])) {
+            return response()->json([
+                'error' => 'WhatsApp kanali secildi ama alici telefon numarasi bos. Lutfen telefon girin.',
+            ], 422);
+        }
+
+        $expiresAt = CarbonImmutable::now()->addHours((int) ($data['expires_hours'] ?? 48));
+
         $token = DocumentUploadToken::create([
-            'company_id'          => $companyId,
-            'token'               => DocumentUploadToken::generateToken(),
-            'target_type'         => $targetType,
-            'target_id'           => $targetId,
-            'target_display_name' => $displayName,
-            'category_code'       => $data['category_code'],
-            'category_name'       => $category->name_tr ?? $data['category_code'],
-            'document_name_de'    => $category->name_de ?? null,
-            'custom_message'      => $data['custom_message'] ?? null,
-            'recipient_email'     => $data['recipient_email'] ?? null,
-            'recipient_phone'     => $data['recipient_phone'] ?? null,
-            'created_by_user_id'  => $request->user()?->id,
-            'max_uses'            => 1,
-            'used_count'          => 0,
-            'expires_at'          => CarbonImmutable::now()->addHours($data['expires_hours'] ?? 48),
+            'company_id'            => $companyId,
+            'token'                 => DocumentUploadToken::generateToken(),
+            'target_type'           => $targetType,
+            'target_id'             => $targetId,
+            'target_display_name'   => $displayName,
+            'category_code'         => $data['category_code'],
+            'category_name'         => $category->name_tr ?? $data['category_code'],
+            'document_name_de'      => $category->name_de ?? null,
+            'custom_message'        => $data['custom_message'] ?? null,
+            'recipient_email'       => $data['recipient_email'] ?? null,
+            'recipient_phone'       => $data['recipient_phone'] ?? null,
+            'notification_channels' => $channels,
+            'created_by_user_id'    => $request->user()?->id,
+            'max_uses'              => 1,
+            'used_count'            => 0,
+            'expires_at'            => $expiresAt,
         ]);
 
+        $tokenUrl = url('/u/' . $token->token);
+
+        // ── D6: WhatsApp ilk link gonderimi ──
+        // Channel="whatsapp" + recipient_phone varsa: direkt link mesaji gonder
+        $whatsappSent = false;
+        if (in_array('whatsapp', $channels, true) && !empty($data['recipient_phone'])) {
+            try {
+                $whatsapp = app(WhatsAppService::class);
+                $expiresLabel = $expiresAt->locale('tr')->isoFormat('D MMMM, HH:mm');
+                $body  = "Merhaba! ";
+                $body .= "{$token->category_name} belgesini su linkten yukleyebilirsin: {$tokenUrl}";
+                $body .= "\n\nSon tarih: {$expiresLabel}";
+                if (!empty($data['custom_message'])) {
+                    $body .= "\n\nNot: " . $data['custom_message'];
+                }
+                $body .= "\n\n- MentorDE";
+
+                $whatsappSent = $whatsapp->sendText($data['recipient_phone'], $body);
+                if ($whatsappSent) {
+                    $token->forceFill(['whatsapp_first_sent_at' => CarbonImmutable::now()])->save();
+                }
+            } catch (\Throwable $e) {
+                Log::warning('doc_request: WhatsApp ilk gonderim hatasi', [
+                    'token_id' => $token->id,
+                    'error'    => $e->getMessage(),
+                ]);
+            }
+        }
+
         return response()->json([
-            'success' => true,
-            'token'   => $this->serializeToken($token),
-            'url'     => url('/u/' . $token->token),
+            'success'        => true,
+            'token'          => $this->serializeToken($token),
+            'url'            => $tokenUrl,
+            'whatsapp_sent'  => $whatsappSent,
+            'channels'       => $channels,
         ]);
     }
 

@@ -419,6 +419,16 @@
                    class="nav-link {{ request()->is('manager/doc-templates*') ? 'active' : '' }}">
                     <span class="nav-icon">📝</span> Belge Şablonları
                 </a>
+                @module('doc_request')
+                    <a href="/manager/document-requests/bulk"
+                       class="nav-link {{ request()->is('manager/document-requests/bulk*') ? 'active' : '' }}">
+                        <span class="nav-icon"><x-icon name="clipboard-list" size="16" /></span> Toplu Belge Talep
+                    </a>
+                    <a href="/manager/document-requests/analytics"
+                       class="nav-link {{ request()->is('manager/document-requests/analytics*') ? 'active' : '' }}">
+                        <span class="nav-icon"><x-icon name="bar-chart-3" size="16" /></span> Belge Talep Analytics
+                    </a>
+                @endmodule
                 {{-- Sözleşme Yönetimi — addon partial, modül kapalıysa veya rota yoksa skip --}}
                 @includeIf('manager.partials.contracts-sidebar-section')
             </div>

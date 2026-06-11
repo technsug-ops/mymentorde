@@ -46,7 +46,10 @@
 <div id="{{ $_drModalId }}" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center;padding:16px;">
     <div style="background:#fff;border-radius:14px;max-width:520px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);">
         <div style="padding:18px 22px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;">
-            <strong style="font-size:15px;">📲 Belge Talep Linki Oluştur</strong>
+            <strong style="font-size:15px;display:inline-flex;align-items:center;gap:8px;">
+                <x-icon name="message-circle" size="18" />
+                Belge Talep Linki Oluştur
+            </strong>
             <button type="button" data-dr-close="{{ $_drModalId }}" style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;">✕</button>
         </div>
         <div style="padding:18px 22px;">
@@ -92,17 +95,42 @@
                 </label>
                 {{-- D6: WhatsApp direkt gönderim için telefon (opsiyonel) --}}
                 <label style="display:flex;flex-direction:column;gap:4px;">
-                    <span style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;">
-                        WhatsApp Telefon <span style="color:#94a3b8;font-weight:500;text-transform:none;letter-spacing:0;">(opsiyonel — direkt sohbete götürür)</span>
+                    <span style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;display:inline-flex;align-items:center;gap:6px;">
+                        <x-icon name="message-circle" size="14" />
+                        WhatsApp Telefon <span style="color:#94a3b8;font-weight:500;text-transform:none;letter-spacing:0;">(opsiyonel)</span>
                     </span>
                     <input type="tel" data-dr-phone maxlength="50"
                            value="{{ $prefillPhone ?? '' }}"
-                           placeholder="+905551234567 veya 5551234567"
+                           placeholder="+905551234567 veya 05551234567"
                            style="padding:9px 11px;border-radius:8px;border:1px solid #cbd5e1;font-size:13px;">
                     <span style="font-size:11px;color:#64748b;line-height:1.4;">
-                        💬 Girersen WhatsApp butonu doğrudan o numaraya açar — manuel arama yok.
+                        Girersen Meta WhatsApp API ile direkt mesaj gider VEYA manuel WhatsApp butonu kullanabilirsin.
                     </span>
                 </label>
+
+                {{-- D6: Bildirim kanali secimi — Email + WhatsApp checkboxlari --}}
+                <div style="border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;background:#f8fafc;">
+                    <div style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">
+                        Bildirim Kanalları
+                    </div>
+                    <div style="display:flex;gap:14px;flex-wrap:wrap;">
+                        <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                            <input type="checkbox" data-dr-ch-email value="email" checked
+                                   style="width:16px;height:16px;cursor:pointer;accent-color:#1e40af;">
+                            <x-icon name="mail" size="14" />
+                            <span>E-posta</span>
+                        </label>
+                        <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                            <input type="checkbox" data-dr-ch-whatsapp value="whatsapp" checked
+                                   style="width:16px;height:16px;cursor:pointer;accent-color:#25d366;">
+                            <x-icon name="message-circle" size="14" />
+                            <span>WhatsApp</span>
+                        </label>
+                    </div>
+                    <div data-dr-ch-warn style="display:none;margin-top:8px;padding:6px 10px;background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;font-size:11.5px;color:#92400e;line-height:1.4;">
+                        WhatsApp seçildi — alıcı telefon zorunludur. Lütfen yukarıdaki "WhatsApp Telefon" alanını doldur.
+                    </div>
+                </div>
             </div>
             <button type="button" data-dr-gen data-track="cta_clicked" data-ph-cta-name="doc_request_create_link"
                     style="margin-top:16px;width:100%;padding:12px 18px;border:none;border-radius:10px;background:linear-gradient(135deg,#1e40af,#3b5fcc);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">
@@ -148,12 +176,24 @@
     var msgInput     = modal.querySelector('[data-dr-msg]');
     var emailInput   = modal.querySelector('[data-dr-email]');
     var phoneInput   = modal.querySelector('[data-dr-phone]');
+    var chEmail      = modal.querySelector('[data-dr-ch-email]');
+    var chWhatsApp   = modal.querySelector('[data-dr-ch-whatsapp]');
+    var chWarn       = modal.querySelector('[data-dr-ch-warn]');
     var genBtn       = modal.querySelector('[data-dr-gen]');
     var resultBox    = modal.querySelector('[data-dr-result]');
     var urlInput     = modal.querySelector('[data-dr-url]');
     var copyBtn      = modal.querySelector('[data-dr-copy]');
     var waBtn        = modal.querySelector('[data-dr-wa]');
     var closeBtn     = modal.querySelector('[data-dr-close="' + modalId + '"]');
+
+    function refreshChannelWarn(){
+        if (!chWarn || !chWhatsApp) return;
+        var waChecked = chWhatsApp.checked;
+        var phoneEmpty = !phoneInput || !phoneInput.value.trim();
+        chWarn.style.display = (waChecked && phoneEmpty) ? 'block' : 'none';
+    }
+    if (chWhatsApp) chWhatsApp.addEventListener('change', refreshChannelWarn);
+    if (phoneInput) phoneInput.addEventListener('input', refreshChannelWarn);
 
     function loadCategories(){
         catSelect.innerHTML = '<option value="">— Yükleniyor —</option>';
@@ -203,6 +243,24 @@
     genBtn.addEventListener('click', function(){
         var cat = catSelect.value;
         if (!cat) { alert('Lütfen bir belge seç.'); return; }
+
+        // ── Kanal secimleri ──
+        var channels = [];
+        if (chEmail && chEmail.checked) channels.push('email');
+        if (chWhatsApp && chWhatsApp.checked) channels.push('whatsapp');
+        if (channels.length === 0) {
+            alert('En az bir bildirim kanalı seç (Email veya WhatsApp).');
+            return;
+        }
+
+        // WhatsApp seçili ama telefon yok → engelle
+        var phoneVal = (phoneInput && phoneInput.value) ? phoneInput.value.trim() : '';
+        if (channels.indexOf('whatsapp') !== -1 && !phoneVal) {
+            alert('WhatsApp kanalı seçildi — alıcı telefon numarası zorunlu.');
+            if (phoneInput) phoneInput.focus();
+            return;
+        }
+
         genBtn.disabled = true; genBtn.textContent = '⏳ Oluşturuluyor...';
         fetch(STORE_URL, {
             method:'POST',
@@ -212,7 +270,8 @@
                 expires_hours: parseInt(expirySelect.value, 10) || 48,
                 custom_message: msgInput.value || null,
                 recipient_email: (emailInput && emailInput.value) ? emailInput.value.trim() : null,
-                recipient_phone: (phoneInput && phoneInput.value) ? phoneInput.value.trim() : null,
+                recipient_phone: phoneVal || null,
+                notification_channels: channels,
             })
         })
         .then(r => r.json().then(d => ({ ok:r.ok, data:d })))
@@ -221,6 +280,17 @@
             if (!res.ok) { alert(res.data.error || 'Hata oluştu.'); return; }
             urlInput.value = res.data.url;
             var msg = INTRO + "\n\n" + res.data.url;
+
+            // Eğer backend WhatsApp gönderdiyse kullanıcıya bildir
+            if (res.data.whatsapp_sent) {
+                var info = document.createElement('div');
+                info.style.cssText = 'margin-bottom:8px;padding:6px 10px;background:#dcfce7;border:1px solid #16a34a;border-radius:6px;font-size:11.5px;color:#166534;font-weight:600;';
+                info.textContent = 'WhatsApp mesajı doğrudan gönderildi.';
+                if (resultBox && !resultBox.querySelector('[data-dr-wa-ok]')) {
+                    info.setAttribute('data-dr-wa-ok', '1');
+                    resultBox.insertBefore(info, resultBox.firstChild);
+                }
+            }
             // D6: telefon girildiyse direkt o numaraya açar (https://wa.me/{phone}?text=...)
             // E.164 normalize: rakam dışını temizle, başına 90 (TR) ekle eksikse
             var phoneRaw = (phoneInput && phoneInput.value) ? phoneInput.value.trim() : '';

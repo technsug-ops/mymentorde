@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ExtractDocumentDataJob;
 use App\Models\Document;
 use App\Models\DocumentCategory;
 use App\Models\DocumentUploadToken;
 use App\Models\GuestApplication;
 use App\Rules\ValidFileMagicBytes;
 use App\Services\DocumentNamingService;
+use App\Services\DocumentOcrSchemas;
 use App\Support\ModuleAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -88,21 +90,49 @@ class PublicDocumentUploadController extends Controller
         );
         $stored = $file->storeAs($storageDir, $stdName, 'local');
 
+        // OCR uygunluk kontrolü — image/PDF + desteklenen kategori
+        $schemas = app(DocumentOcrSchemas::class);
+        $ocrSupported = $schemas->isSupported($category->code)
+            && in_array(strtolower((string) ($file->getMimeType() ?: '')), [
+                'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf',
+            ], true);
+
+        $processTags = ['public_upload', 'doc_request_token', 'target:' . $row->target_type];
+        if ($ocrSupported) {
+            $processTags[] = 'ocr_queued';
+        } else {
+            $processTags[] = 'ocr_skipped';
+        }
+
         $doc = Document::query()->create([
             'student_id'         => $ownerId,
             'category_id'        => $category->id,
-            'process_tags'       => ['public_upload', 'doc_request_token', 'target:' . $row->target_type],
+            'process_tags'       => $processTags,
             'original_file_name' => (string) $file->getClientOriginalName(),
             'standard_file_name' => $stdName,
             'storage_path'       => $stored,
             'mime_type'          => (string) ($file->getMimeType() ?: ''),
             'status'             => 'uploaded',
             'uploaded_by'        => 'public:token:' . substr($row->token, 0, 8),
+            'extraction_status'  => $ocrSupported ? 'pending' : null,
         ]);
         $doc->forceFill([
             'document_id' => 'DOC-PUB-' . str_pad((string) $doc->id, 6, '0', STR_PAD_LEFT),
             'company_id'  => $row->company_id,
         ])->save();
+
+        // OCR uygunsa async extract'a yolla — yükleme cevabını bloklamasın
+        if ($ocrSupported) {
+            try {
+                ExtractDocumentDataJob::dispatch($doc->id);
+            } catch (\Throwable $e) {
+                // Queue down olsa bile yükleme başarısız sayılmasın
+                Log::warning('public.document-upload: OCR dispatch failed (non-fatal)', [
+                    'document_id' => $doc->id,
+                    'error'       => $e->getMessage(),
+                ]);
+            }
+        }
 
         $row->markUsed(
             ip: $request->ip(),
