@@ -812,6 +812,46 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // Gemini API key'i URL uzerinden direkt DB'ye yazar (UI bypass — debug icin).
+        // setting_value JSON kolonu, json_encode ile dogru formatlama yapilir.
+        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=set-gemini-key&key=AQ.Ab8...
+        if ($request->query('cleanup') === 'set-gemini-key') {
+            $newKey = urldecode((string) $request->query('key', ''));
+            if (strlen($newKey) < 20) {
+                $output .= ">>> set-gemini-key: key parametresi cok kisa veya eksik. Beklenen: 30+ char, gelen: " . strlen($newKey) . " char\n";
+            } else {
+                $companyId = (int) $request->query('company', 1);
+                $jsonValue = json_encode($newKey, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                $existing  = DB::table('marketing_admin_settings')
+                    ->where('company_id', $companyId)
+                    ->where('setting_key', 'ai_labs_gemini_key')
+                    ->first();
+                if ($existing) {
+                    DB::statement(
+                        "UPDATE marketing_admin_settings SET setting_value = ?, updated_at = NOW() WHERE id = ?",
+                        [$jsonValue, $existing->id]
+                    );
+                    $output .= ">>> set-gemini-key: id={$existing->id} guncellendi\n";
+                } else {
+                    DB::table('marketing_admin_settings')->insert([
+                        'company_id'    => $companyId,
+                        'setting_key'   => 'ai_labs_gemini_key',
+                        'setting_value' => DB::raw("CAST('" . addslashes($jsonValue) . "' AS JSON)"),
+                        'created_at'    => now(),
+                        'updated_at'    => now(),
+                    ]);
+                    $output .= ">>> set-gemini-key: yeni satir insert edildi (company_id={$companyId})\n";
+                }
+                $output .= "    key length: " . strlen($newKey) . " char\n";
+                $output .= "    key head: '" . substr($newKey, 0, 8) . "...'\n";
+                $output .= "    key tail: '..." . substr($newKey, -6) . "'\n";
+
+                // Cache flush
+                try { \Illuminate\Support\Facades\Cache::flush(); } catch (\Throwable $e) {}
+                $output .= "    cache flushed\n";
+            }
+        }
+
         // Gemini key JSON format kurtarma — kritik bug fix.
         // marketing_admin_settings.setting_value JSON kolonu, dogru format: '"AIzaSy..."'
         // (tirnak DAHIL JSON string). Onceki fix-gemini-key-quotes endpoint tirnaklari
