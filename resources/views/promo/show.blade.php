@@ -21,14 +21,18 @@
 
     {{-- Open Graph — WhatsApp/sosyal medya link önizleme --}}
     @php
-        // OG image öncelik: promo OG > brand OG > logo > favicon
-        $ogImage = $logoUrl ?: url('/favicon.svg');
+        // OG image oncelik: statik promo OG > statik brand OG > dinamik GD render > logo > favicon
         if (file_exists(public_path('img/promo-og.png'))) {
             $ogImage = url('/img/promo-og.png');
         } elseif (file_exists(public_path('img/brand-og.png'))) {
             $ogImage = url('/img/brand-og.png');
+        } else {
+            // Statik PNG yoksa dinamik GD render (her zaman 1200x630, brand'a uygun)
+            $ogImage = route('og.promo');
         }
     @endphp
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ $shareUrl }}">
     <meta property="og:title" content="{{ $title }} — {{ $brandName }}">

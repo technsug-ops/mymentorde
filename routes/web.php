@@ -91,6 +91,11 @@ Route::middleware('company.context')->group(function (): void {
         ->middleware('throttle:10,1')->name('program.translate');
 });
 
+// ── Dinamik Open Graph image generator (GD library, sosyal medya paylasimlari icin) ──
+Route::get('/og/brand.png',    [\App\Http\Controllers\OgImageController::class, 'brand'])->name('og.brand');
+Route::get('/og/promo.png',    [\App\Http\Controllers\OgImageController::class, 'promo'])->name('og.promo');
+Route::get('/og/unimatch.png', [\App\Http\Controllers\OgImageController::class, 'unimatch'])->name('og.unimatch');
+
 // ── Yasal Sayfalar (Privacy / Terms) ─────────────────────────────────────────
 // SaaS gerekliliği: Google OAuth consent screen + KVKK/GDPR uyumu için public erişim
 // Public yasal sayfalar — manager paneli üzerinden DB'den render edilir
