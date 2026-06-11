@@ -55,6 +55,7 @@ class CMSContentController extends Controller
             'q' => trim((string) $request->query('q', '')),
             'category' => (string) $request->query('category', 'all'),
             'status' => (string) $request->query('status', 'all'),
+            'type' => (string) $request->query('type', 'all'),
         ];
 
         $query = CmsContent::query()->orderBy('content_code');
@@ -72,12 +73,20 @@ class CMSContentController extends Controller
         if ($filters['status'] !== 'all') {
             $query->where('status', $filters['status']);
         }
+        if ($filters['type'] !== 'all') {
+            $query->where('type', $filters['type']);
+        }
 
         $rows = $query->paginate(50)->withQueryString();
         $categoryCounts = CmsContent::query()
             ->selectRaw('category, COUNT(*) as cnt')
             ->groupBy('category')
             ->pluck('cnt', 'category')
+            ->all();
+        $typeCounts = CmsContent::query()
+            ->selectRaw('type, COUNT(*) as cnt')
+            ->groupBy('type')
+            ->pluck('cnt', 'type')
             ->all();
 
         return view('marketing-admin.content.overview', [
@@ -86,7 +95,9 @@ class CMSContentController extends Controller
             'rows' => $rows,
             'filters' => $filters,
             'statusOptions' => $this->statusOptions(),
+            'typeOptions' => $this->typeOptions(),
             'categoryCounts' => $categoryCounts,
+            'typeCounts' => $typeCounts,
             'categoryPrefixes' => CmsContent::CATEGORY_CODE_PREFIXES,
         ]);
     }

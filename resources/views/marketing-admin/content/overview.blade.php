@@ -35,6 +35,18 @@
 .cot-author strong { color:var(--u-text); font-weight:600; }
 
 .cot-cat { font-size:11px; padding:3px 8px; border-radius:999px; background:rgba(99,102,241,.12); color:#4338ca; font-weight:600; white-space:nowrap; }
+.cot-type { font-size:11px; padding:3px 8px; border-radius:999px; font-weight:600; white-space:nowrap; display:inline-flex; align-items:center; gap:4px; }
+.cot-type-blog          { background:rgba(37,99,235,.12);  color:#1d4ed8; }
+.cot-type-landing       { background:rgba(14,165,233,.12); color:#0369a1; }
+.cot-type-guide         { background:rgba(124,58,237,.12); color:#6d28d9; }
+.cot-type-faq           { background:rgba(20,184,166,.12); color:#0f766e; }
+.cot-type-event         { background:rgba(244,114,182,.12);color:#be185d; }
+.cot-type-video_feature { background:rgba(220,38,38,.12);  color:#b91c1c; }
+.cot-type-podcast       { background:rgba(168,85,247,.14); color:#6b21a8; }
+.cot-type-presentation  { background:rgba(245,158,11,.14); color:#b45309; }
+.cot-type-experience    { background:rgba(236,72,153,.12); color:#9d174d; }
+.cot-type-career_guide  { background:rgba(16,185,129,.14); color:#047857; }
+.cot-type-tip           { background:rgba(234,179,8,.18);  color:#92400e; }
 .cot-status-chip { font-size:11px; padding:3px 9px; border-radius:999px; font-weight:600; cursor:pointer; border:none; transition:opacity .15s; }
 .cot-status-chip:hover { opacity:.85; }
 .cot-status-published { background:rgba(16,185,129,.15); color:#047857; }
@@ -89,6 +101,19 @@
 </style>
 
 <div class="cot-wrap">
+    @php
+        $typeLabels = [
+            'blog' => 'Blog', 'landing' => 'Landing', 'guide' => 'Rehber', 'faq' => 'SSS', 'event' => 'Etkinlik',
+            'video_feature' => 'Video', 'podcast' => 'Podcast', 'presentation' => 'Sunum',
+            'experience' => 'Deneyim', 'career_guide' => 'Kariyer', 'tip' => 'İpucu',
+        ];
+        $typeIcons = [
+            'blog' => '📝', 'landing' => '🌐', 'guide' => '📖', 'faq' => '❓', 'event' => '📅',
+            'video_feature' => '▶️', 'podcast' => '🎙', 'presentation' => '📊',
+            'experience' => '💬', 'career_guide' => '🗺', 'tip' => '💡',
+        ];
+    @endphp
+
     {{-- Filtre Bar --}}
     <form method="GET" action="{{ url('/mktg-admin/content/overview') }}" class="cot-filters">
         <input type="text" name="q" value="{{ $filters['q'] }}" placeholder="🔍 ID kod, başlık veya slug ara...">
@@ -98,6 +123,12 @@
                 <option value="{{ $cat }}" @selected($filters['category'] === $cat)>{{ $prefix }} — {{ $cat }} ({{ $categoryCounts[$cat] ?? 0 }})</option>
             @endforeach
         </select>
+        <select name="type">
+            <option value="all">🔖 Tüm Türler</option>
+            @foreach(($typeOptions ?? []) as $tp)
+                <option value="{{ $tp }}" @selected(($filters['type'] ?? 'all') === $tp)>{{ $typeIcons[$tp] ?? '·' }} {{ $typeLabels[$tp] ?? $tp }} ({{ $typeCounts[$tp] ?? 0 }})</option>
+            @endforeach
+        </select>
         <select name="status">
             <option value="all">⚪ Tüm Durumlar</option>
             @foreach($statusOptions as $st)
@@ -105,7 +136,7 @@
             @endforeach
         </select>
         <button type="submit" class="btn" style="padding:7px 14px;font-size:12.5px;background:var(--u-brand,#2563eb);color:#fff;border:none;border-radius:7px;cursor:pointer;">Filtrele</button>
-        @if($filters['q'] || $filters['category'] !== 'all' || $filters['status'] !== 'all')
+        @if($filters['q'] || $filters['category'] !== 'all' || $filters['status'] !== 'all' || ($filters['type'] ?? 'all') !== 'all')
             <a href="{{ url('/mktg-admin/content/overview') }}" class="cot-stat" style="text-decoration:none;">✕ Temizle</a>
         @endif
         <span class="cot-stat">Toplam: <strong>{{ $rows->total() }}</strong> kayıt</span>
@@ -122,6 +153,7 @@
                 <th style="width:80px;">Kapak</th>
                 <th>Blog İsmi / Yazar</th>
                 <th style="width:130px;">Kategori</th>
+                <th style="width:120px;">Tür</th>
                 <th style="width:110px;">Durum</th>
                 <th style="width:100px;">Tarih</th>
                 <th style="width:110px; text-align:center;">İşlemler</th>
@@ -157,6 +189,16 @@
                     @if($row->category)<span class="cot-cat">{{ $row->category }}</span>@else<span style="color:#cbd5e1;">—</span>@endif
                 </td>
                 <td>
+                    @if($row->type)
+                        <span class="cot-type cot-type-{{ $row->type }}">
+                            <span>{{ $typeIcons[$row->type] ?? '·' }}</span>
+                            <span>{{ $typeLabels[$row->type] ?? $row->type }}</span>
+                        </span>
+                    @else
+                        <span style="color:#cbd5e1;">—</span>
+                    @endif
+                </td>
+                <td>
                     <button type="button" class="cot-status-chip cot-status-{{ $row->status }}" data-status-id="{{ $row->id }}" data-current-status="{{ $row->status }}" title="Durumu değiştir">
                         {{ ucfirst($row->status) }}
                     </button>
@@ -175,7 +217,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="9" style="text-align:center; padding:40px 0; color:var(--u-muted,#64748b);">
+                <td colspan="10" style="text-align:center; padding:40px 0; color:var(--u-muted,#64748b);">
                     Sonuç bulunamadı.
                 </td>
             </tr>
