@@ -259,12 +259,22 @@
 
 /* ══════ City Mosaic ══════ */
 .ss-cities { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:28px; }
-.ss-city-tile { position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; cursor:pointer; transition:transform .2s; }
-.ss-city-tile:hover { transform:scale(1.04); z-index:2; }
-.ss-city-tile img { width:100%; height:100%; object-fit:cover; }
+.ss-city-tile {
+    position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden;
+    cursor:pointer; transition:transform .2s, box-shadow .2s;
+    text-decoration:none;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+.ss-city-tile:hover { transform:scale(1.04); z-index:2; box-shadow:0 8px 24px rgba(0,0,0,.18); }
+.ss-city-emoji {
+    font-size:46px; line-height:1; filter:drop-shadow(0 2px 6px rgba(0,0,0,.35));
+    transition:transform .2s;
+}
+.ss-city-tile:hover .ss-city-emoji { transform:scale(1.12) rotate(-4deg); }
 .ss-city-tile::after {
-    content:''; position:absolute; inset:0;
-    background:linear-gradient(to bottom, rgba(0,0,0,0) 40%, rgba(0,0,0,.75));
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(to bottom, rgba(0,0,0,0) 45%, rgba(0,0,0,.55));
 }
 .ss-city-tile-label {
     position:absolute; left:8px; bottom:7px; right:8px;
@@ -278,7 +288,10 @@
     font-size:10px; font-weight:800; padding:2px 7px; border-radius:12px;
     z-index:1; box-shadow:0 2px 6px rgba(0,0,0,.2);
 }
-@media (max-width:720px){ .ss-cities{grid-template-columns:repeat(3,1fr); gap:6px;} }
+@media (max-width:720px){
+    .ss-cities{grid-template-columns:repeat(3,1fr); gap:6px;}
+    .ss-city-emoji { font-size:38px; }
+}
 
 /* Section title */
 .ss-section-title { display:flex; align-items:baseline; gap:10px; font-weight:700; font-size:var(--tx-base); margin-bottom:14px; color:var(--u-text); }
@@ -408,15 +421,15 @@ foreach ($allStories as $st) {
 <div class="ss-section-title">📍 Öğrencilerimiz Almanya'da <small>6 şehirde 80+ öğrenci</small></div>
 <div class="ss-cities">
     @foreach([
-        ['city'=>'Münih',     'count'=>18, 'img'=>'https://images.unsplash.com/photo-1595867818082-083862f3d630?w=400&q=80', 'slug'=>'munich'],
-        ['city'=>'Berlin',    'count'=>22, 'img'=>'https://images.unsplash.com/photo-1560969184-10fe8719e047?w=400&q=80',  'slug'=>'berlin'],
-        ['city'=>'Hamburg',   'count'=>12, 'img'=>'https://images.unsplash.com/photo-1552751753-0fc84ae3a766?w=400&q=80',  'slug'=>'hamburg'],
-        ['city'=>'Frankfurt', 'count'=>9,  'img'=>'https://images.unsplash.com/photo-1577185748577-b842fd77e9c7?w=400&q=80','slug'=>'frankfurt'],
-        ['city'=>'Köln',      'count'=>8,  'img'=>'https://images.unsplash.com/photo-1598892886985-a6e2b28a5a22?w=400&q=80','slug'=>'cologne'],
-        ['city'=>'Stuttgart', 'count'=>7,  'img'=>'https://images.unsplash.com/photo-1583079889956-c0c4dd6f61c1?w=400&q=80','slug'=>'stuttgart'],
+        ['city'=>'Münih',     'count'=>18, 'emoji'=>'🏔', 'bg'=>'linear-gradient(135deg,#1d4ed8,#7c3aed)', 'slug'=>'munich'],
+        ['city'=>'Berlin',    'count'=>22, 'emoji'=>'🐻', 'bg'=>'linear-gradient(135deg,#2563eb,#0891b2)', 'slug'=>'berlin'],
+        ['city'=>'Hamburg',   'count'=>12, 'emoji'=>'⚓', 'bg'=>'linear-gradient(135deg,#dc2626,#d97706)', 'slug'=>'hamburg'],
+        ['city'=>'Frankfurt', 'count'=>9,  'emoji'=>'🏦', 'bg'=>'linear-gradient(135deg,#0891b2,#16a34a)', 'slug'=>'frankfurt'],
+        ['city'=>'Köln',      'count'=>8,  'emoji'=>'⛪', 'bg'=>'linear-gradient(135deg,#7c3aed,#0891b2)', 'slug'=>'cologne'],
+        ['city'=>'Stuttgart', 'count'=>7,  'emoji'=>'🚗', 'bg'=>'linear-gradient(135deg,#dc2626,#7c3aed)', 'slug'=>'stuttgart'],
     ] as $cityTile)
-    <a class="ss-city-tile" href="{{ $cityTileRoute($cityTile['slug']) }}">
-        <img src="{{ $cityTile['img'] }}" alt="{{ $cityTile['city'] }}" loading="lazy">
+    <a class="ss-city-tile" href="{{ $cityTileRoute($cityTile['slug']) }}" style="background:{{ $cityTile['bg'] }};" aria-label="{{ $cityTile['city'] }} — {{ $cityTile['count'] }} öğrenci">
+        <span class="ss-city-emoji">{{ $cityTile['emoji'] }}</span>
         <span class="ss-city-tile-count">{{ $cityTile['count'] }}</span>
         <span class="ss-city-tile-label">{{ $cityTile['city'] }}</span>
     </a>
