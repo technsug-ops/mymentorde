@@ -29,7 +29,7 @@
 .ss-hero-stats { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; padding-top:12px; border-top:1px solid rgba(255,255,255,.2); }
 .ss-hero-stat { display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:20px; background:rgba(255,255,255,.18); font-size:12px; font-weight:600; line-height:1; border:1px solid rgba(255,255,255,.12); }
 .ss-hero-stat-ico { font-size:13px; }
-.ss-hero-icon { font-size:64px; line-height:1; flex-shrink:0; opacity:.9; filter:drop-shadow(0 4px 12px rgba(0,0,0,.25)); }
+.ss-hero-icon { display:flex; align-items:center; justify-content:center; flex-shrink:0; opacity:.85; color:#fff; filter:drop-shadow(0 4px 12px rgba(0,0,0,.25)); }
 
 @media (max-width:720px){
     .ss-hero{border-radius:12px;}
@@ -59,7 +59,7 @@
 .ss-stat-icon {
     width:38px; height:38px; border-radius:10px;
     display:flex; align-items:center; justify-content:center;
-    font-size:19px; flex-shrink:0;
+    color:var(--s-color); flex-shrink:0;
     background:color-mix(in srgb, var(--s-color) 12%, #fff);
     border:1px solid color-mix(in srgb, var(--s-color) 22%, transparent);
 }
@@ -132,7 +132,7 @@
     text-shadow:0 1px 3px rgba(0,0,0,.7);
     z-index:1;
 }
-.ss-story-photo-city::before { content:'📍'; font-size:13px; }
+.ss-story-photo-city svg { width:13px; height:13px; flex-shrink:0; }
 .ss-story-body { padding:18px 20px 16px; display:flex; flex-direction:column; flex:1; }
 .ss-story:hover {
     transform:translateY(-3px);
@@ -219,8 +219,10 @@
     position:relative; overflow:hidden;
 }
 .ss-cta::before {
-    content:'🚀'; position:absolute; top:-20px; right:-20px;
-    font-size:140px; opacity:.08; pointer-events:none;
+    content:''; position:absolute; top:-30px; right:-30px;
+    width:180px; height:180px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,255,255,.16), transparent 70%);
+    pointer-events:none;
 }
 .ss-cta-title { font-size:22px; font-weight:800; margin:0 0 8px; letter-spacing:-.3px; }
 .ss-cta-sub { font-size:14px; opacity:.9; margin-bottom:18px; max-width:520px; margin-left:auto; margin-right:auto; line-height:1.5; }
@@ -367,12 +369,12 @@ foreach ($allStories as $st) {
                 Türkiye'den Almanya'ya hayallerini gerçekleştiren öğrencilerimizin gerçek deneyimleri.
             </div>
             <div class="ss-hero-stats">
-                <span class="ss-hero-stat"><span class="ss-hero-stat-ico">🎓</span>80+ öğrenci</span>
-                <span class="ss-hero-stat"><span class="ss-hero-stat-ico">🏛</span>50+ üniversite</span>
-                <span class="ss-hero-stat"><span class="ss-hero-stat-ico">⭐</span>%95 memnuniyet</span>
+                <span class="ss-hero-stat"><x-icon name="graduation-cap" size="14" />80+ öğrenci</span>
+                <span class="ss-hero-stat"><x-icon name="building-2" size="14" />50+ üniversite</span>
+                <span class="ss-hero-stat"><x-icon name="star-filled" size="14" />%95 memnuniyet</span>
             </div>
         </div>
-        <div class="ss-hero-icon">🌟</div>
+        <div class="ss-hero-icon"><x-icon name="sparkles" size="48" /></div>
     </div>
 </div>
 
@@ -380,7 +382,7 @@ foreach ($allStories as $st) {
 <div class="ss-stats-grid">
     <div class="ss-stat-card" style="--s-color:#0891b2;">
         <div class="ss-stat-head">
-            <div class="ss-stat-icon">🎓</div>
+            <div class="ss-stat-icon"><x-icon name="graduation-cap" size="22" /></div>
             <div class="ss-stat-label">Almanya'da Öğrenci</div>
         </div>
         <div class="ss-stat-value">80+</div>
@@ -388,7 +390,7 @@ foreach ($allStories as $st) {
     </div>
     <div class="ss-stat-card" style="--s-color:#7c3aed;">
         <div class="ss-stat-head">
-            <div class="ss-stat-icon">🏛</div>
+            <div class="ss-stat-icon"><x-icon name="building-2" size="22" /></div>
             <div class="ss-stat-label">Farklı Üniversite</div>
         </div>
         <div class="ss-stat-value">50+</div>
@@ -396,7 +398,7 @@ foreach ($allStories as $st) {
     </div>
     <div class="ss-stat-card" style="--s-color:#f59e0b;">
         <div class="ss-stat-head">
-            <div class="ss-stat-icon">⭐</div>
+            <div class="ss-stat-icon"><x-icon name="star-filled" size="22" /></div>
             <div class="ss-stat-label">Memnuniyet Oranı</div>
         </div>
         <div class="ss-stat-value">%95</div>
@@ -405,7 +407,7 @@ foreach ($allStories as $st) {
 </div>
 
 {{-- ══════ City Mosaic ══════ --}}
-<div class="ss-section-title">Öğrencilerimiz Almanya'da <small>6 şehirde 80+ öğrenci</small></div>
+<div class="ss-section-title"><x-icon name="map-pin" size="18" /> Öğrencilerimiz Almanya'da <small>6 şehirde 80+ öğrenci</small></div>
 <div class="ss-cities">
     @foreach([
         ['city'=>'Münih',     'count'=>18, 'img'=>'https://images.unsplash.com/photo-1595867818082-083862f3d630?w=400&q=80', 'slug'=>'munich'],
@@ -474,7 +476,7 @@ foreach ($allStories as $st) {
             <img src="{{ $storyPhoto }}" alt="{{ $story->title_tr }}" loading="lazy">
             <span class="ss-story-photo-badge">{{ $source }}</span>
             @if(!empty($story->summary_tr))
-            <span class="ss-story-photo-city">{{ \Illuminate\Support\Str::limit($story->summary_tr, 30) }}</span>
+            <span class="ss-story-photo-city"><x-icon name="map-pin" size="13" /> {{ \Illuminate\Support\Str::limit($story->summary_tr, 30) }}</span>
             @endif
         </div>
         <div class="ss-story-body">
@@ -508,7 +510,7 @@ foreach ($allStories as $st) {
             <img src="{{ $s['photo'] }}" alt="{{ $s['name'] }}" loading="lazy">
             <span class="ss-story-photo-badge">{{ $s['source'] }}</span>
             @if(!empty($s['city']))
-            <span class="ss-story-photo-city">{{ $s['city'] }}</span>
+            <span class="ss-story-photo-city"><x-icon name="map-pin" size="13" /> {{ $s['city'] }}</span>
             @endif
         </div>
         <div class="ss-story-body">
@@ -528,7 +530,7 @@ foreach ($allStories as $st) {
 </div>
 
 {{-- ══════ Video Testimonials ══════ --}}
-<div class="ss-section-title">🎬 Video Deneyimler</div>
+<div class="ss-section-title"><x-icon name="video" size="18" /> Video Deneyimler</div>
 <div class="ss-video-grid">
     @php
         $videosToShow = [];
@@ -563,7 +565,7 @@ foreach ($allStories as $st) {
             @endif
             <div class="ss-video-overlay"></div>
             @if($v->featured ?? false)
-            <span class="ss-video-badge">⭐ Öne Çıkan</span>
+            <span class="ss-video-badge"><x-icon name="star-filled" size="11" /> Öne Çıkan</span>
             @endif
             <div class="ss-video-play"><div class="ss-video-play-tri"></div></div>
             <div class="ss-video-caption">
@@ -613,7 +615,7 @@ foreach ($allStories as $st) {
                     <span id="ssModalSource" style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;"></span>
                 </div>
             </div>
-            <button class="ss-modal-close" onclick="ssCloseModal()">✕</button>
+            <button class="ss-modal-close" onclick="ssCloseModal()" aria-label="Kapat"><x-icon name="x" size="20" /></button>
         </div>
         <div id="ssModalBody" class="ss-modal-body"></div>
     </div>
