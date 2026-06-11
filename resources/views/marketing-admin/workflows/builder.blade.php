@@ -34,18 +34,18 @@ $nodesData = $nodes->map(fn($n) => [
 ])->values()->toArray();
 
 $nodeTypeMeta = [
-    'send_email'        => ['icon'=>'✉️',  'color'=>'#1e40af', 'label'=>'Email Gönder'],
-    'send_notification' => ['icon'=>'🔔',  'color'=>'#d97706', 'label'=>'Bildirim Gönder'],
-    'wait'              => ['icon'=>'⏳',  'color'=>'#64748b', 'label'=>'Bekle'],
-    'wait_until'        => ['icon'=>'⏱',  'color'=>'#64748b', 'label'=>'Koşul Bekle'],
-    'condition'         => ['icon'=>'❓',  'color'=>'#7c3aed', 'label'=>'Koşul (If/Else)'],
-    'add_score'         => ['icon'=>'📈',  'color'=>'#16a34a', 'label'=>'Puan Ekle'],
-    'create_task'       => ['icon'=>'📋',  'color'=>'#0891b2', 'label'=>'Task Oluştur'],
-    'update_field'      => ['icon'=>'✏️',  'color'=>'#0891b2', 'label'=>'Alan Güncelle'],
-    'move_to_segment'   => ['icon'=>'📂',  'color'=>'#0891b2', 'label'=>'Segmente Taşı'],
-    'ab_split'          => ['icon'=>'🔀',  'color'=>'#9333ea', 'label'=>'A/B Bölünme'],
-    'goal_check'        => ['icon'=>'🏁',  'color'=>'#16a34a', 'label'=>'Hedef Kontrol'],
-    'exit'              => ['icon'=>'🚪',  'color'=>'#dc2626', 'label'=>'Çıkış'],
+    'send_email'        => ['icon'=>'mail',          'color'=>'#1e40af', 'label'=>'Email Gönder'],
+    'send_notification' => ['icon'=>'bell',          'color'=>'#d97706', 'label'=>'Bildirim Gönder'],
+    'wait'              => ['icon'=>'hourglass',     'color'=>'#64748b', 'label'=>'Bekle'],
+    'wait_until'        => ['icon'=>'clock',         'color'=>'#64748b', 'label'=>'Koşul Bekle'],
+    'condition'         => ['icon'=>'help-circle',   'color'=>'#7c3aed', 'label'=>'Koşul (If/Else)'],
+    'add_score'         => ['icon'=>'trending-up',   'color'=>'#16a34a', 'label'=>'Puan Ekle'],
+    'create_task'       => ['icon'=>'clipboard-list','color'=>'#0891b2', 'label'=>'Task Oluştur'],
+    'update_field'      => ['icon'=>'pencil',        'color'=>'#0891b2', 'label'=>'Alan Güncelle'],
+    'move_to_segment'   => ['icon'=>'folder',        'color'=>'#0891b2', 'label'=>'Segmente Taşı'],
+    'ab_split'          => ['icon'=>'route',         'color'=>'#9333ea', 'label'=>'A/B Bölünme'],
+    'goal_check'        => ['icon'=>'flag',          'color'=>'#16a34a', 'label'=>'Hedef Kontrol'],
+    'exit'              => ['icon'=>'log-out',       'color'=>'#dc2626', 'label'=>'Çıkış'],
 ];
 @endphp
 
@@ -120,17 +120,17 @@ $nodeTypeMeta = [
 
         <div class="wf-flow">
             {{-- Trigger --}}
-            <div class="wf-trigger">🎯 TRIGGER: {{ $workflow->trigger_type }}</div>
+            <div class="wf-trigger"><x-icon name="target" size="14" /> TRIGGER: {{ $workflow->trigger_type }}</div>
 
             @if($nodes->isEmpty())
             <div style="text-align:center;padding:40px;color:var(--u-muted,#64748b);">
-                <div style="font-size:var(--tx-2xl);margin-bottom:8px;">➕</div>
+                <div style="font-size:var(--tx-2xl);margin-bottom:8px;"><x-icon name="plus" size="24" /></div>
                 Henüz node yok. Sağ panelden ekle.
             </div>
             @else
             @foreach($nodes as $node)
             @php
-                $meta   = $nodeTypeMeta[$node->node_type] ?? ['icon'=>'⚙️','color'=>'#64748b','label'=>$node->node_type];
+                $meta   = $nodeTypeMeta[$node->node_type] ?? ['icon'=>'cog','color'=>'#64748b','label'=>$node->node_type];
                 $cfg    = $node->node_config ?? [];
                 $sublbl = match($node->node_type) {
                     'send_email'        => $cfg['subject_tr'] ?? ($cfg['template_key'] ?? '—'),
@@ -146,7 +146,7 @@ $nodeTypeMeta = [
             <div class="wf-arrow" style="height:24px;"></div>
             <div class="wf-node" id="node-{{ $node->id }}" onclick="selectNode({{ $node->id }})">
                 <div class="wf-node-icon" style="background:color-mix(in srgb,{{ $meta['color'] }} 12%,var(--u-card,#fff));">
-                    {{ $meta['icon'] }}
+                    <x-icon :name="$meta['icon']" size="20" />
                 </div>
                 <div class="wf-node-body">
                     <div class="wf-node-title">{{ $meta['label'] }}</div>
@@ -198,7 +198,7 @@ $nodeTypeMeta = [
                 <input type="hidden" name="_method" value="PUT">
                 <div id="editConfigArea"></div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
-                    <button type="submit" class="btn">💾 Kaydet</button>
+                    <button type="submit" class="btn"><x-icon name="save" size="14" /> Kaydet</button>
                     <button type="button" onclick="closeEdit()" class="btn alt">İptal</button>
                 </div>
             </form>
@@ -207,7 +207,7 @@ $nodeTypeMeta = [
         {{-- Yeni Node Ekle --}}
         <div class="card" id="addPanel">
             <div style="font-weight:700;font-size:var(--tx-sm);text-transform:uppercase;letter-spacing:.04em;color:var(--u-muted,#64748b);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--u-line,#e2e8f0);">
-                ➕ Node Ekle
+                <x-icon name="plus" size="14" /> Node Ekle
             </div>
 
             <form method="POST" action="/mktg-admin/workflows/{{ $workflow->id }}/nodes"

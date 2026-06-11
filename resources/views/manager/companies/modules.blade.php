@@ -1,7 +1,7 @@
 @extends('manager.layouts.app')
 
 @section('title', 'SaaS Modül Yönetimi')
-@section('page_title', '🧩 SaaS Modül Yönetimi')
+@section('page_title', 'SaaS Modül Yönetimi')
 @section('page_subtitle', 'Her company için aktif modülleri seçin — değişiklik anında tüm portallarda etkili')
 
 @push('head')
@@ -139,7 +139,7 @@
             $limit = $company->doc_request_monthly_limit;
         @endphp
         <div class="cm-group" style="margin-top:6px;">
-            <div class="cm-group-title">📲 Belge Talep Linki Quota (aylık)</div>
+            <div class="cm-group-title" style="display:flex;align-items:center;gap:6px;"><x-icon name="smartphone" size="14" aria-label="belge talep linki" /> Belge Talep Linki Quota (aylık)</div>
             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;">
                 <label style="display:flex;align-items:center;gap:8px;">
                     <span style="color:#6b5894;font-weight:600;">Aylık limit:</span>
@@ -155,7 +155,7 @@
         </div>
 
         <div class="cm-actions">
-            <button type="submit" class="cm-save-btn">💾 Kaydet</button>
+            <button type="submit" class="cm-save-btn" style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="save" size="16" aria-label="kaydet" /> Kaydet</button>
             <span class="cm-tier-presets">
                 <button type="button" class="cm-tier-btn" data-preset="basic">Basic preset</button>
                 <button type="button" class="cm-tier-btn" data-preset="gold">Gold preset</button>

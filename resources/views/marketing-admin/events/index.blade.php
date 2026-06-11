@@ -93,7 +93,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
     {{-- Rehber --}}
     <details class="card">
         <summary class="det-sum">
-            <h3>📖 Kullanım Kılavuzu — Etkinlikler</h3>
+            <h3><x-icon name="book-open" size="18" /> Kullanım Kılavuzu — Etkinlikler</h3>
             <span class="det-chev">▼</span>
         </summary>
         <p style="font-size:var(--tx-sm);color:var(--u-muted,#64748b);margin:0 0 14px;line-height:1.6;">
@@ -117,7 +117,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
                     <div style="display:flex;gap:8px;padding:8px 10px;align-items:center;"><span class="badge danger">Cancelled</span><span style="color:var(--u-muted);">İptal edildi</span></div>
                 </div>
                 <div style="margin-top:10px;background:color-mix(in srgb,var(--u-brand,#1e40af) 5%,var(--u-card,#fff));border:1px solid var(--u-line,#e2e8f0);border-radius:8px;padding:10px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);">
-                    💡 Kontenjan dolduğunda sistem otomatik olarak yeni kayıtları kapatır.
+                    <x-icon name="lightbulb" size="14" /> Kontenjan dolduğunda sistem otomatik olarak yeni kayıtları kapatır.
                 </div>
             </div>
         </div>
@@ -136,7 +136,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
         @endphp
         <details class="card" {{ $isEdit ? 'open' : '' }}>
             <summary class="det-sum">
-                <h3>{{ $isEdit ? '✏️ Etkinlik Düzenle #'.$editing->id : '+ Yeni Etkinlik' }}</h3>
+                <h3>@if($isEdit)<x-icon name="pencil" size="18" /> Etkinlik Düzenle #{{ $editing->id }}@else+ Yeni Etkinlik @endif</h3>
                 <span class="det-chev">▼</span>
             </summary>
             <form method="POST" action="{{ $action }}" style="margin-top:12px;">

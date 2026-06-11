@@ -54,7 +54,7 @@ table.avv-table { width:100%; border-collapse:collapse; font-size:13px; min-widt
 
 <div class="avv-wrap">
     <div class="avv-head">
-        <h2>📁 AVV Registry — Veri İşleme Sözleşmeleri</h2>
+        <h2 style="display:inline-flex;align-items:center;gap:8px;"><x-icon name="handshake" size="20" aria-label="sozlesme" /> AVV Registry — Veri İşleme Sözleşmeleri</h2>
         <p>DSGVO Art. 28 zorunluluğu. Sizin için veri işleyen tüm 3. taraf sağlayıcılar (hosting, email, CRM, analytics, payment) ile imzalanan AVV/DPA sözleşmelerinin arşivi.</p>
         <div class="avv-actions">
             <a href="{{ route('manager.avv.create') }}" class="avv-btn primary">+ Yeni AVV Ekle</a>
@@ -75,7 +75,7 @@ table.avv-table { width:100%; border-collapse:collapse; font-size:13px; min-widt
 
     @if($agreements->isEmpty())
         <div class="empty-state">
-            <h3 style="font-size:15px;font-weight:700;color:#475569;margin:0 0 6px;">📁 AVV Kayıtlı Değil</h3>
+            <h3 style="font-size:15px;font-weight:700;color:#475569;margin:0 0 6px;display:inline-flex;align-items:center;gap:6px;justify-content:center;"><x-icon name="folder-open" size="18" aria-label="bos klasor" /> AVV Kayıtlı Değil</h3>
             <p style="font-size:12.5px;margin:0 0 14px;">Tipik AVV gerektiren sağlayıcılar: Hosting (IONOS/AWS), Email (Brevo/Google), CRM (HubSpot), Payment (Stripe), Analytics (Google), Cloud (Drive/Dropbox)...</p>
             <a href="{{ route('manager.avv.create') }}" class="avv-btn primary">+ İlk AVV'yi Ekle</a>
         </div>
@@ -123,7 +123,7 @@ table.avv-table { width:100%; border-collapse:collapse; font-size:13px; min-widt
                             <td>
                                 <span style="font-size:11.5px;">{{ $a->country ?: '—' }}</span>
                                 @if(!$a->eu_based)
-                                    <span class="pill expired" style="margin-left:4px;">EU Dışı ⚠</span>
+                                    <span class="pill expired" style="margin-left:4px;display:inline-flex;align-items:center;gap:3px;">EU Dışı <x-icon name="alert-triangle" size="11" aria-label="uyari" /></span>
                                 @endif
                             </td>
                             <td>
@@ -131,18 +131,18 @@ table.avv-table { width:100%; border-collapse:collapse; font-size:13px; min-widt
                             </td>
                             <td>
                                 @if($a->avv_pdf_path)
-                                    <a href="{{ route('manager.avv.download', $a) }}" class="pdf" style="font-size:11.5px;color:#1e40af;text-decoration:none;font-weight:700;">📄 İndir</a>
+                                    <a href="{{ route('manager.avv.download', $a) }}" class="pdf" style="font-size:11.5px;color:#1e40af;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><x-icon name="file-text" size="13" aria-label="pdf" /> İndir</a>
                                 @else
-                                    <span style="font-size:11px;color:#dc2626;font-weight:600;">⚠ Eksik</span>
+                                    <span style="font-size:11px;color:#dc2626;font-weight:600;display:inline-flex;align-items:center;gap:3px;"><x-icon name="alert-triangle" size="12" aria-label="eksik" /> Eksik</span>
                                 @endif
                             </td>
                             <td>
                                 <div class="actions">
-                                    <a href="{{ route('manager.avv.edit', $a) }}">✏️</a>
+                                    <a href="{{ route('manager.avv.edit', $a) }}" aria-label="duzenle"><x-icon name="pencil" size="13" /></a>
                                     <form method="post" action="{{ route('manager.avv.destroy', $a) }}" style="display:inline;margin:0;"
                                           onsubmit="return confirm('Bu AVV kaydını silmek istediğinizden emin misiniz?');">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="danger">🗑️</button>
+                                        <button type="submit" class="danger" aria-label="sil"><x-icon name="trash" size="13" /></button>
                                     </form>
                                 </div>
                             </td>

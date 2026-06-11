@@ -283,12 +283,12 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
 
 <details class="card" style="margin-top:0;">
     <summary class="det-sum">
-        <h3>📖 Kullanım Kılavuzu — E-posta Segmentleri</h3>
+        <h3><x-icon name="book-open" size="18" /> Kullanım Kılavuzu — E-posta Segmentleri</h3>
         <span class="det-chev">▼</span>
     </summary>
     <div style="padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div>
-            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">🎯 Segment Türleri</strong>
+            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="target" size="14" /> Segment Türleri</strong>
             <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                 <li><strong>static:</strong> Manuel CSV yükleme veya sabit liste — değişmez</li>
                 <li><strong>dynamic:</strong> Kural tabanlı — yeni uygun kayıtlar otomatik eklenir</li>
@@ -297,7 +297,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
             </ul>
         </div>
         <div>
-            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">📋 Kural Örnekleri</strong>
+            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="clipboard-list" size="14" /> Kural Örnekleri</strong>
             <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                 <li>Durum = "new" + kayıt tarihi son 30 gün → Yeni lead serisi</li>
                 <li>Lead skoru 50+ → Warm lead kampanyası</li>

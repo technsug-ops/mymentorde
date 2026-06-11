@@ -22,7 +22,7 @@
     'label' => 'Kaynak Analitik',
     'title' => 'Lead Kaynakları',
     'sub'   => 'Organik, reklam, partner, referans — lead\'lerin hangi kanaldan geldiği ve kanal bazlı dönüşüm performansı.',
-    'icon'  => '🌐',
+    'icon'  => 'globe',
     'bg'    => 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1400&q=80',
     'tone'  => 'indigo',
     'stats' => [],
@@ -316,7 +316,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
 {{-- Rehber --}}
 <details class="card">
     <summary class="det-sum">
-        <h3>📖 Kullanım Kılavuzu — Lead Kaynakları</h3>
+        <h3><x-icon name="book-open" size="16" /> Kullanım Kılavuzu — Lead Kaynakları</h3>
         <span class="det-chev">▼</span>
     </summary>
     <ol style="margin:0;padding-left:18px;font-size:var(--tx-sm);color:var(--u-muted,#64748b);line-height:1.7;">

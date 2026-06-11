@@ -180,7 +180,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
     {{-- Rehber --}}
     <details class="card">
         <summary class="det-sum">
-            <h3>📖 Kullanım Kılavuzu — Profil</h3>
+            <h3><x-icon name="book-open" size="16" /> Kullanım Kılavuzu — Profil</h3>
             <span class="det-chev">▼</span>
         </summary>
         <ol style="margin:0;padding-left:18px;font-size:var(--tx-sm);color:var(--u-muted,#64748b);line-height:1.7;">
@@ -323,12 +323,12 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
                         @if($att->type === 'file')
                         <a href="{{ route('hr.my.leave-attachment.download', $att) }}"
                            style="display:inline-flex;align-items:center;gap:4px;background:color-mix(in srgb,var(--u-brand,#1e40af) 8%,#fff);border:1px solid color-mix(in srgb,var(--u-brand,#1e40af) 25%,#fff);border-radius:6px;padding:3px 10px;font-size:11px;color:var(--u-brand,#1e40af);text-decoration:none;font-weight:600;">
-                            📎 {{ $att->original_name }}
+                            <x-icon name="paperclip" size="12" /> {{ $att->original_name }}
                         </a>
                         @else
                         <a href="{{ $att->url }}" target="_blank" rel="noopener"
                            style="display:inline-flex;align-items:center;gap:4px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:3px 10px;font-size:11px;color:#1d4ed8;text-decoration:none;font-weight:600;">
-                            🔗 {{ parse_url($att->url, PHP_URL_HOST) ?: $att->url }}
+                            <x-icon name="link" size="12" /> {{ parse_url($att->url, PHP_URL_HOST) ?: $att->url }}
                         </a>
                         @endif
                     @endforeach

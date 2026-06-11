@@ -33,22 +33,22 @@
     'label' => 'Lead Yönetimi',
     'title' => 'Aday Öğrenci Yönetimi',
     'sub'   => 'Tüm başvuru akışı, danışman atamaları ve dönüşüm durumu. Yeni gelen lead\'leri hızlıca önceliklendir.',
-    'icon'  => '👥',
+    'icon'  => 'users',
     'bg'    => 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1400&q=80',
     'tone'  => 'blue',
     'stats' => [
-        ['icon' => '📊', 'text' => ($kpis['total'] ?? 0) . ' toplam'],
-        ['icon' => '✅', 'text' => ($kpis['converted'] ?? 0) . ' dönüşen'],
-        ['icon' => '⏳', 'text' => ($kpis['unassigned'] ?? 0) . ' atanmamış'],
-        ['icon' => '📅', 'text' => ($kpis['today'] ?? 0) . ' bugün'],
+        ['icon' => 'bar-chart-3', 'text' => ($kpis['total'] ?? 0) . ' toplam'],
+        ['icon' => 'circle-check', 'text' => ($kpis['converted'] ?? 0) . ' dönüşen'],
+        ['icon' => 'clock', 'text' => ($kpis['unassigned'] ?? 0) . ' atanmamış'],
+        ['icon' => 'calendar', 'text' => ($kpis['today'] ?? 0) . ' bugün'],
     ],
 ])
 
 {{-- Action Bar --}}
 <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
     <a href="{{ route('manager.bulk-import.index') }}" class="btn"
-       style="background:#16a34a;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;">
-        📥 Toplu Kayıt İçeri Aktar
+       style="background:#16a34a;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:6px;" aria-label="Toplu kayıt içeri aktar">
+        <x-icon name="upload" size="15" /> Toplu Kayıt İçeri Aktar
     </a>
 </div>
 
@@ -172,14 +172,14 @@
                                style="display:inline-block;padding:4px 10px;font-size:var(--tx-xs);font-weight:600;color:#1e40af;border:1px solid rgba(30,64,175,.3);border-radius:6px;background:rgba(30,64,175,.05);text-decoration:none;white-space:nowrap;">
                                 Detay →
                             </a>
-                            <button type="button" class="qa-del-btn archive" title="Arşivle (geri alınabilir)"
+                            <button type="button" class="qa-del-btn archive" title="Arşivle (geri alınabilir)" aria-label="Aday öğrenciyi arşivle"
                                     data-qa-delete-mode="archive"
                                     data-qa-delete-url="{{ route('manager.quick-admin.guest.delete', $g->id) }}"
-                                    data-qa-delete-label="Aday öğrenci '{{ trim(($g->first_name ?? '') . ' ' . ($g->last_name ?? '')) }}'">🗑</button>
-                            <button type="button" class="qa-del-btn force" title="KALICI Sil (geri alınamaz)"
+                                    data-qa-delete-label="Aday öğrenci '{{ trim(($g->first_name ?? '') . ' ' . ($g->last_name ?? '')) }}'"><x-icon name="archive" size="14" /></button>
+                            <button type="button" class="qa-del-btn force" title="KALICI Sil (geri alınamaz)" aria-label="Aday öğrenciyi kalıcı sil"
                                     data-qa-delete-mode="force"
                                     data-qa-delete-url="{{ route('manager.quick-admin.guest.delete', $g->id) }}"
-                                    data-qa-delete-label="Aday öğrenci '{{ trim(($g->first_name ?? '') . ' ' . ($g->last_name ?? '')) }}'">🔥</button>
+                                    data-qa-delete-label="Aday öğrenci '{{ trim(($g->first_name ?? '') . ' ' . ($g->last_name ?? '')) }}'"><x-icon name="flame" size="14" /></button>
                         </td>
                     </tr>
                 @empty

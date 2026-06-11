@@ -52,10 +52,10 @@
 
     {{-- Güvenlik Anomalileri --}}
     <section class="panel" style="padding:0;overflow:hidden;">
-        <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);">⚠ Güvenlik Anomalileri</div>
+        <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="alert-triangle" size="16" aria-label="uyari" /> Güvenlik Anomalileri</div>
         @if($anomalies->isEmpty())
         <div style="padding:40px;text-align:center;color:var(--u-muted);">
-            <div style="font-size:28px;margin-bottom:8px;">✅</div>
+            <div style="margin-bottom:8px;color:#16a34a;"><x-icon name="circle-check" size="28" aria-label="basarili" /></div>
             <div style="font-size:13px;font-weight:700;color:#16a34a;">Anomali tespit edilmedi.</div>
             <div style="font-size:11px;margin-top:4px;">Sistem normal görünüyor.</div>
         </div>
@@ -87,7 +87,7 @@
     {{-- 2FA Durumu --}}
     <section class="panel" style="padding:0;overflow:hidden;">
         <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-weight:700;font-size:var(--tx-sm);">🔐 2FA Durumu</div>
+            <div style="font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="shield-check" size="16" aria-label="iki adimli dogrulama" /> 2FA Durumu</div>
             <div style="font-size:11px;color:var(--u-muted);">{{ $twoFaEnabled }}/{{ $twoFaRows->count() }} aktif</div>
         </div>
         {{-- Progress Bar --}}
@@ -129,7 +129,7 @@
 {{-- ─── Kritik Olay Geçmişi ─── --}}
 <section class="panel" style="padding:0;overflow:hidden;">
     <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-weight:700;font-size:var(--tx-sm);">🔍 Kritik Güvenlik Olayları</div>
+        <div style="font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="search" size="16" aria-label="arama" /> Kritik Güvenlik Olayları</div>
         <a href="/manager/audit-log" style="font-size:11px;color:#1e40af;font-weight:700;text-decoration:none;">Tüm Loglar →</a>
     </div>
     @if($criticalEvents->isEmpty())

@@ -42,8 +42,12 @@
     <a href="{{ route('manager.ropa.index') }}" class="rf-back">← ROPA Listesine Dön</a>
 
     <div class="rf-card">
-        <h2 style="font-size:18px;font-weight:800;margin:0 0 6px;">
-            {{ $activity ? '✏️ İşlem Aktivitesini Düzenle' : '➕ Yeni İşlem Aktivitesi' }}
+        <h2 style="font-size:18px;font-weight:800;margin:0 0 6px;display:inline-flex;align-items:center;gap:8px;">
+            @if($activity)
+                <x-icon name="pencil" size="18" aria-label="duzenle" /> İşlem Aktivitesini Düzenle
+            @else
+                <x-icon name="plus" size="18" aria-label="ekle" /> Yeni İşlem Aktivitesi
+            @endif
         </h2>
         <p style="font-size:12.5px;color:#64748b;margin:0 0 18px;line-height:1.5;">
             DSGVO Art. 30 kapsamında bu aktivitenin tüm metadata'sını gir. Tipik örnek: "Newsletter gönderimi · email+isim · Brevo · 2 yıl saklama".
@@ -160,7 +164,13 @@
 
             <div class="rf-actions">
                 <a href="{{ route('manager.ropa.index') }}" class="rf-btn cancel">İptal</a>
-                <button type="submit" class="rf-btn save">{{ $activity ? '💾 Kaydet' : '➕ Ekle' }}</button>
+                <button type="submit" class="rf-btn save" style="display:inline-flex;align-items:center;gap:6px;">
+                    @if($activity)
+                        <x-icon name="save" size="14" aria-label="kaydet" /> Kaydet
+                    @else
+                        <x-icon name="plus" size="14" aria-label="ekle" /> Ekle
+                    @endif
+                </button>
             </div>
         </form>
     </div>

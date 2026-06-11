@@ -28,13 +28,13 @@
     'label' => 'Danışman Kadrosu',
     'title' => 'Eğitim Danışmanları',
     'sub'   => 'Danışman portföyü, öğrenci yükleri ve kapasite dağılımı. Yük dengesini ve atanamayan lead riskini tek bakışta gör.',
-    'icon'  => '🧑\u{200D}🏫',
+    'icon'  => 'user-tie',
     'bg'    => 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1400&q=80',
     'tone'  => 'indigo',
     'stats' => [
-        ['icon' => '👥', 'text' => ($kpis['total'] ?? 0) . ' danışman'],
-        ['icon' => '🎓', 'text' => ($kpis['total_students'] ?? 0) . ' öğrenci'],
-        ['icon' => '⚠️', 'text' => ($kpis['over_capacity'] ?? 0) . ' kapasitede'],
+        ['icon' => 'users', 'text' => ($kpis['total'] ?? 0) . ' danışman'],
+        ['icon' => 'graduation-cap', 'text' => ($kpis['total_students'] ?? 0) . ' öğrenci'],
+        ['icon' => 'alert-triangle', 'text' => ($kpis['over_capacity'] ?? 0) . ' kapasitede'],
     ],
 ])
 
@@ -103,11 +103,13 @@
                                 <button class="qa-del-btn archive" data-qa-delete-mode="archive"
                                         data-qa-delete-url="{{ route('manager.quick-admin.senior.delete', $s['user_id']) }}"
                                         data-qa-delete-label="Senior {{ $s['name'] }}"
-                                        title="Pasif et (login engellenir, atamalar korunur)">🗑</button>
+                                        aria-label="Danışmanı pasif et"
+                                        title="Pasif et (login engellenir, atamalar korunur)"><x-icon name="archive" size="14" /></button>
                                 <button class="qa-del-btn force" data-qa-delete-mode="force"
                                         data-qa-delete-url="{{ route('manager.quick-admin.senior.delete', $s['user_id']) }}"
                                         data-qa-delete-label="Senior {{ $s['name'] }}"
-                                        title="KALICI sil (öğrenciler atamasız kalır, email tekrar kullanılabilir)">🔥</button>
+                                        aria-label="Danışmanı kalıcı sil"
+                                        title="KALICI sil (öğrenciler atamasız kalır, email tekrar kullanılabilir)"><x-icon name="flame" size="14" /></button>
                             @endif
                         </td>
                     </tr>
@@ -119,7 +121,7 @@
     </div>
 </section>
 
-{{-- Soft/hard delete handler (archive 🗑 + force 🔥) — addon partial --}}
+{{-- Soft/hard delete handler (archive + force) — addon partial --}}
 @includeIf('manager.partials._lead-delete-script')
 
 @endsection

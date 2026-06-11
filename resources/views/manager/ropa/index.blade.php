@@ -68,7 +68,7 @@ table.ropa-table { width:100%; border-collapse:collapse; font-size:13px; min-wid
 
 <div class="ropa-wrap">
     <div class="ropa-head">
-        <h2>📋 ROPA — Veri İşleme Sicili</h2>
+        <h2 style="display:inline-flex;align-items:center;gap:8px;"><x-icon name="clipboard-list" size="20" aria-label="sicil" /> ROPA — Veri İşleme Sicili</h2>
         <p>DSGVO Art. 30 zorunluluğu. Şirketinizdeki tüm kişisel veri işleme süreçlerinin yazılı kaydı. Denetim olduğunda <strong>ilk istenen belge</strong>.</p>
         <div class="ropa-actions">
             <a href="{{ route('manager.ropa.create') }}" class="ropa-btn primary">+ Yeni Aktivite</a>
@@ -82,7 +82,7 @@ table.ropa-table { width:100%; border-collapse:collapse; font-size:13px; min-wid
 
     @if($activities->isEmpty())
         <div class="empty-state">
-            <h3>📋 Henüz işlem aktivitesi tanımlanmamış</h3>
+            <h3 style="display:inline-flex;align-items:center;gap:6px;justify-content:center;"><x-icon name="clipboard-list" size="18" aria-label="bos sicil" /> Henüz işlem aktivitesi tanımlanmamış</h3>
             <p>İlk işlem aktivitenizi ekleyerek başlayın. Tipik örnekler: Newsletter gönderimi, Faturalandırma, Çalışan yönetimi, Web analytics...</p>
             <a href="{{ route('manager.ropa.create') }}" class="ropa-btn primary">+ İlk Aktiviteyi Ekle</a>
         </div>
@@ -121,7 +121,7 @@ table.ropa-table { width:100%; border-collapse:collapse; font-size:13px; min-wid
                                     <span class="pill">{{ $r }}</span>
                                 @endforeach
                                 @if($a->third_country_transfer)
-                                    <span class="pill tc">3. Ülke ⚠</span>
+                                    <span class="pill tc" style="display:inline-flex;align-items:center;gap:3px;">3. Ülke <x-icon name="alert-triangle" size="11" aria-label="uyari" /></span>
                                 @endif
                             </td>
                             <td>
@@ -139,11 +139,11 @@ table.ropa-table { width:100%; border-collapse:collapse; font-size:13px; min-wid
                             </td>
                             <td>
                                 <div class="actions">
-                                    <a href="{{ route('manager.ropa.edit', $a) }}">✏️ Düzenle</a>
+                                    <a href="{{ route('manager.ropa.edit', $a) }}" style="display:inline-flex;align-items:center;gap:4px;"><x-icon name="pencil" size="13" aria-label="duzenle" /> Düzenle</a>
                                     <form method="post" action="{{ route('manager.ropa.destroy', $a) }}" style="display:inline;margin:0;"
                                           onsubmit="return confirm('Bu aktiviteyi silmek istediğinizden emin misiniz?');">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="danger">🗑️</button>
+                                        <button type="submit" class="danger" aria-label="sil"><x-icon name="trash" size="13" /></button>
                                     </form>
                                 </div>
                             </td>

@@ -123,7 +123,7 @@
 
 /* Audit hover tooltip */
 .pv-toggle[data-audit-by]:hover::after {
-    content: "👤 " attr(data-audit-by) " · " attr(data-audit-at);
+    content: attr(data-audit-by) " · " attr(data-audit-at);
     position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%);
     background:#0f172a; color:#fff; font-size:10.5px; padding:5px 9px; border-radius:5px;
     white-space:nowrap; pointer-events:none; z-index:10;
@@ -140,7 +140,7 @@
 <div class="pv-wrap">
 
     <div class="pv-head">
-        <h2>🎛️ Sayfa Görünürlüğü <span class="badge">PREMIUM</span></h2>
+        <h2><x-icon name="sliders" size="22" aria-label="kontrol paneli" /> Sayfa Görünürlüğü <span class="badge">PREMIUM</span></h2>
         <p>Aşağıdaki matrisle, her rolün hangi sayfayı göreceğini kontrol et. <strong>Yeşil</strong> = sayfa görünür. <strong>Gri</strong> = sayfa gizli (rol kullanıcıları sidebar'da görmez, doğrudan URL'e gitse 404 alır).</p>
         <p style="margin-top:6px;">Bir rolde tanımlı olmayan sayfalar (rol o sayfayı kullanmıyor) <span style="opacity:.5;">soluk</span> gösterilir, değiştirilemez.</p>
     </div>
@@ -154,17 +154,17 @@
 
         <div class="pv-card">
             <div class="pv-tabs">
-                <button type="button" class="pv-tab active" data-pv-tab="core">👥 Kullanıcı Rolleri</button>
-                <button type="button" class="pv-tab" data-pv-tab="staff">🏢 Yönetici / Staff Rolleri</button>
+                <button type="button" class="pv-tab active" data-pv-tab="core" style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="users" size="14" aria-label="kullanıcı rolleri" /> Kullanıcı Rolleri</button>
+                <button type="button" class="pv-tab" data-pv-tab="staff" style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="building-2" size="14" aria-label="yönetici staff rolleri" /> Yönetici / Staff Rolleri</button>
             </div>
 
             <div class="pv-bulk-bar">
-                <span class="lbl">⚡ Hızlı eylemler:</span>
+                <span class="lbl" style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="zap" size="13" aria-label="hızlı eylem" /> Hızlı eylemler:</span>
                 @foreach($coreRoles as $rc => $rl)
                     <button type="button" class="pv-bulk-btn" data-pv-bulk="role-all-on" data-pv-role="{{ $rc }}">{{ $rl }} → Tümü Aç</button>
                     <button type="button" class="pv-bulk-btn" data-pv-bulk="role-all-off" data-pv-role="{{ $rc }}">{{ $rl }} → Tümü Kapat</button>
                 @endforeach
-                <button type="button" class="pv-bulk-btn danger" data-pv-bulk="reset-all">⚠ Matrix'i Sıfırla (Default)</button>
+                <button type="button" class="pv-bulk-btn danger" data-pv-bulk="reset-all" style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="alert-triangle" size="13" aria-label="dikkat" /> Matrix'i Sıfırla (Default)</button>
             </div>
 
             {{-- Core Roller (Aday Öğrenci, Öğrenci, Bayi, Senior) --}}
@@ -177,7 +177,7 @@
                 @endphp
 
                 @foreach($groups as $groupName => $groupPages)
-                    <div class="pv-group-head">📂 {{ $groupName }}</div>
+                    <div class="pv-group-head"><x-icon name="folder-open" size="16" aria-label="grup" /> {{ $groupName }}</div>
                     <div class="pv-table-wrap">
                         <table class="pv-table">
                             <thead>
@@ -223,7 +223,7 @@
             {{-- Staff Roller (Manager altındaki personel) --}}
             <div class="pv-section pv-staff-section" data-pv-section="staff">
                 <div class="pv-group-head" style="background:#faf5ff;color:#7c3aed;">
-                    🏢 Manager altındaki staff'lar — ileride büyürse otomatik buradan yönetilir
+                    <x-icon name="building-2" size="16" aria-label="staff" /> Manager altındaki staff'lar — ileride büyürse otomatik buradan yönetilir
                 </div>
                 <div class="pv-table-wrap">
                     <table class="pv-table">
@@ -263,14 +263,14 @@
                     </table>
                 </div>
                 <div style="padding:14px 18px;background:#fefce8;border-top:1px solid #fde68a;font-size:11.5px;color:#854d0e;">
-                    💡 Şu anda staff alt rolleri bağımsız sayfalara sahip değil; bu matrix gelecekte her staff rolü için özel sayfalar eklendiğinde otomatik aktif olur.
+                    <x-icon name="lightbulb" size="14" aria-label="ipucu" /> Şu anda staff alt rolleri bağımsız sayfalara sahip değil; bu matrix gelecekte her staff rolü için özel sayfalar eklendiğinde otomatik aktif olur.
                 </div>
             </div>
         </div>
 
         <div class="pv-actions">
             <div class="info">
-                ⚡ <strong>Anlık kayıt:</strong> Her toggle değişimi otomatik kaydedilir. Cache otomatik temizlenir. Audit için toggle'ın üzerine gel.
+                <x-icon name="zap" size="13" aria-label="anlık" /> <strong>Anlık kayıt:</strong> Her toggle değişimi otomatik kaydedilir. Cache otomatik temizlenir. Audit için toggle'ın üzerine gel.
             </div>
         </div>
     </div>

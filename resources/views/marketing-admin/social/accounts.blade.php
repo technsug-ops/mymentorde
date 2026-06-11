@@ -155,12 +155,12 @@
 
     <details class="card">
         <summary class="det-sum">
-            <h3>📖 Kullanım Kılavuzu — Sosyal Medya Hesapları</h3>
+            <h3><x-icon name="book-open" size="18" /> Kullanım Kılavuzu — Sosyal Medya Hesapları</h3>
             <span class="det-chev">▼</span>
         </summary>
         <div style="padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
             <div>
-                <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">🔗 Hesap Yönetimi</strong>
+                <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="link" size="14" /> Hesap Yönetimi</strong>
                 <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                     <li>Her platform için ayrı hesap tanımla (Instagram, Facebook, LinkedIn, YouTube…)</li>
                     <li><strong>Handle/username</strong> alanı → profil URL'si oluşturmak için kullanılır</li>
@@ -169,7 +169,7 @@
                 </ul>
             </div>
             <div>
-                <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">📋 İş Akışı</strong>
+                <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="clipboard-list" size="14" /> İş Akışı</strong>
                 <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                     <li>Yeni hesap ekle → Postlar menüsünden bu hesaba gönderi planla</li>
                     <li>Aylık metrikleri Metrikler menüsünden manuel gir</li>

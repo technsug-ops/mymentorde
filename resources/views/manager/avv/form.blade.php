@@ -38,8 +38,12 @@
     <a href="{{ route('manager.avv.index') }}" class="af-back">← AVV Listesine Dön</a>
 
     <div class="af-card">
-        <h2 style="font-size:18px;font-weight:800;margin:0 0 6px;">
-            {{ $avv ? '✏️ AVV Kaydını Düzenle' : '➕ Yeni AVV Kaydı' }}
+        <h2 style="font-size:18px;font-weight:800;margin:0 0 6px;display:inline-flex;align-items:center;gap:8px;">
+            @if($avv)
+                <x-icon name="pencil" size="18" aria-label="duzenle" /> AVV Kaydını Düzenle
+            @else
+                <x-icon name="plus" size="18" aria-label="ekle" /> Yeni AVV Kaydı
+            @endif
         </h2>
         <p style="font-size:12.5px;color:#64748b;margin:0 0 18px;line-height:1.5;">
             Bu sağlayıcıyla imzalanan veri işleme sözleşmesinin (AVV/DPA) bilgilerini gir + PDF'i yükle.
@@ -122,8 +126,8 @@
                     <label>AVV PDF</label>
                     <input type="file" name="avv_pdf" accept="application/pdf">
                     @if($avv?->avv_pdf_path)
-                        <div class="current-pdf">
-                            📄 Mevcut PDF: <a href="{{ route('manager.avv.download', $avv) }}" style="font-weight:700;">İndir</a>
+                        <div class="current-pdf" style="display:inline-flex;align-items:center;gap:6px;">
+                            <x-icon name="file-text" size="14" aria-label="pdf" /> Mevcut PDF: <a href="{{ route('manager.avv.download', $avv) }}" style="font-weight:700;">İndir</a>
                             <span style="color:#64748b;">— Yeni dosya seçersen mevcut silinir.</span>
                         </div>
                     @endif
@@ -136,7 +140,13 @@
 
             <div class="af-actions">
                 <a href="{{ route('manager.avv.index') }}" class="af-btn cancel">İptal</a>
-                <button type="submit" class="af-btn save">{{ $avv ? '💾 Güncelle' : '➕ Ekle' }}</button>
+                <button type="submit" class="af-btn save" style="display:inline-flex;align-items:center;gap:6px;">
+                    @if($avv)
+                        <x-icon name="save" size="14" aria-label="kaydet" /> Güncelle
+                    @else
+                        <x-icon name="plus" size="14" aria-label="ekle" /> Ekle
+                    @endif
+                </button>
             </div>
         </form>
     </div>

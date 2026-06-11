@@ -89,12 +89,12 @@
 
 <details class="card" style="margin-top:0;">
     <summary class="det-sum">
-        <h3>📖 Kullanım Kılavuzu — AI Pazarlama Asistanı</h3>
+        <h3><x-icon name="book-open" size="16" /> Kullanım Kılavuzu — AI Pazarlama Asistanı</h3>
         <span class="det-chev">▼</span>
     </summary>
     <div style="padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div>
-            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">✍️ İçerik Üretimi</strong>
+            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="pencil" size="12" /> İçerik Üretimi</strong>
             <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                 <li><strong>Blog:</strong> SEO uyumlu uzun-form içerik taslakları</li>
                 <li><strong>E-posta Konusu:</strong> A/B test için birden fazla konu önerisi al</li>
@@ -103,7 +103,7 @@
             </ul>
         </div>
         <div>
-            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">💡 Kullanım İpuçları</strong>
+            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="lightbulb" size="12" /> Kullanım İpuçları</strong>
             <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                 <li>Geçmiş sekmesi önceki AI sorgularını saklar — tekrar kullan veya düzenle</li>
                 <li>Konu ne kadar spesifik olursa içerik o kadar kaliteli olur</li>

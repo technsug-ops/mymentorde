@@ -191,13 +191,13 @@
                    title="Pazarlama paneline geç"
                    style="flex:1;text-align:center;padding:6px 4px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none;transition:all .15s;
                           {{ $panelMode === 'marketing' ? 'background:rgba(255,255,255,.22);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);' : 'color:rgba(255,255,255,.5);' }}">
-                    📣 Pazarlama
+                    <x-icon name="megaphone" size="14" /> Pazarlama
                 </a>
                 <a href="/mktg-admin/switch-mode/sales"
                    title="Satış paneline geç"
                    style="flex:1;text-align:center;padding:6px 4px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none;transition:all .15s;
                           {{ $panelMode === 'sales' ? 'background:rgba(255,255,255,.22);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);' : 'color:rgba(255,255,255,.5);' }}">
-                    💼 Satış
+                    <x-icon name="briefcase" size="14" /> Satış
                 </a>
             </div>
         </div>
@@ -207,12 +207,12 @@
             <div class="nav-section">
                 <a href="/mktg-admin/dashboard"
                    class="nav-link {{ request()->is('mktg-admin/dashboard') ? 'active' : '' }}">
-                    <span class="nav-icon">🏠</span> {{ $panelMode === 'sales' ? 'Sales Dashboard' : 'Marketing Dashboard' }}
+                    <span class="nav-icon"><x-icon name="home" size="16" /></span> {{ $panelMode === 'sales' ? 'Sales Dashboard' : 'Marketing Dashboard' }}
                 </a>
                 <a href="/bulletins"
                    class="nav-link {{ request()->is('bulletins*') ? 'active' : '' }}"
                    style="justify-content:space-between;">
-                    <span><span class="nav-icon">📢</span> Duyurular</span>
+                    <span><span class="nav-icon"><x-icon name="megaphone" size="16" /></span> Duyurular</span>
                     @if(($bulletinUnread ?? 0) > 0)<span class="nav-badge" style="background:#dc2626;">{{ $bulletinUnread }}</span>@endif
                 </a>
             </div>
@@ -221,11 +221,11 @@
                 <div class="nav-section-label">İletişim Merkezi</div>
                 <a href="/im"
                    class="nav-link {{ request()->is('im*') ? 'active' : '' }}">
-                    <span class="nav-icon">💬</span> İletişim
+                    <span class="nav-icon"><x-icon name="message-circle" size="16" /></span> İletişim
                 </a>
                 <a href="/mktg-admin/tasks"
                    class="nav-link {{ request()->is('mktg-admin/tasks*') ? 'active' : '' }}">
-                    <span class="nav-icon">✅</span> Görevlerim
+                    <span class="nav-icon"><x-icon name="circle-check" size="16" /></span> Görevlerim
                 </a>
                 {{-- "Manager'a Talep" linki kaldırıldı —
                      /manager/requests manager layout'una geçiriyordu.
@@ -246,12 +246,12 @@
                 <div class="nav-section-label">Satış Süreci</div>
                 <a href="/mktg-admin/pipeline"
                    class="nav-link {{ request()->is('mktg-admin/pipeline') || (request()->is('mktg-admin/pipeline*') && !request()->is('mktg-admin/pipeline/kanban*')) ? 'active' : '' }}">
-                    <span class="nav-icon">🗂</span> Sales Pipeline
+                    <span class="nav-icon"><x-icon name="kanban" size="16" /></span> Sales Pipeline
                 </a>
                 <a href="/mktg-admin/pipeline/kanban"
                    class="nav-link {{ request()->is('mktg-admin/pipeline/kanban*') ? 'active' : '' }}"
                    style="padding-left:32px;font-size:var(--tx-xs);">
-                    <span class="nav-icon" style="font-size:11px;">🌀</span> Pipeline Kanban
+                    <span class="nav-icon" style="font-size:11px;"><x-icon name="refresh-cw" size="11" /></span> Pipeline Kanban
                 </a>
             </div>
             @endif
@@ -266,49 +266,49 @@
                 @if($canSeeCampaigns)
                 <a href="/mktg-admin/campaigns"
                    class="nav-link {{ request()->is('mktg-admin/campaigns*') ? 'active' : '' }}">
-                    <span class="nav-icon">📢</span> Kampanyalar
+                    <span class="nav-icon"><x-icon name="megaphone" size="16" /></span> Kampanyalar
                 </a>
                 @endif
                 @if($canSeeContent)
                 <a href="/mktg-admin/content"
                    class="nav-link {{ request()->is('mktg-admin/content*') ? 'active' : '' }}">
-                    <span class="nav-icon">📝</span> CMS İçerik
+                    <span class="nav-icon"><x-icon name="pencil" size="16" /></span> CMS İçerik
                 </a>
                 @endif
                 @if($canSeeEmail)
                 <a href="/mktg-admin/email/templates"
                    class="nav-link {{ request()->is('mktg-admin/email*') ? 'active' : '' }}">
-                    <span class="nav-icon">✉️</span> E-posta
+                    <span class="nav-icon"><x-icon name="mail" size="16" /></span> E-posta
                 </a>
                 @endif
                 @if($canSeeSocial)
                 <a href="/mktg-admin/social/metrics"
                    class="nav-link {{ request()->is('mktg-admin/social*') ? 'active' : '' }}">
-                    <span class="nav-icon">📱</span> Sosyal Medya
+                    <span class="nav-icon"><x-icon name="smartphone" size="16" /></span> Sosyal Medya
                 </a>
                 @endif
                 @if($canSeeTracking)
                 <a href="/mktg-admin/tracking-links"
                    class="nav-link {{ request()->is('mktg-admin/tracking-links*') ? 'active' : '' }}">
-                    <span class="nav-icon">🔗</span> Tracking Linkler
+                    <span class="nav-icon"><x-icon name="link" size="16" /></span> Tracking Linkler
                 </a>
                 @endif
                 @if($canSeeEvents)
                 <a href="/mktg-admin/events"
                    class="nav-link {{ request()->is('mktg-admin/events*') ? 'active' : '' }}">
-                    <span class="nav-icon">📅</span> Etkinlikler
+                    <span class="nav-icon"><x-icon name="calendar" size="16" /></span> Etkinlikler
                 </a>
                 @endif
                 @if($canSeeWorkflows)
                 <a href="/mktg-admin/workflows"
                    class="nav-link {{ request()->is('mktg-admin/workflows*') ? 'active' : '' }}">
-                    <span class="nav-icon">⚡</span> Otomasyon
+                    <span class="nav-icon"><x-icon name="zap" size="16" /></span> Otomasyon
                 </a>
                 @endif
                 @if($canSeeABTests)
                 <a href="/mktg-admin/abtests"
                    class="nav-link {{ request()->is('mktg-admin/abtests*') ? 'active' : '' }}">
-                    <span class="nav-icon">🧪</span> A/B Testler
+                    <span class="nav-icon"><x-icon name="beaker" size="16" /></span> A/B Testler
                 </a>
                 @endif
             </div>
@@ -318,25 +318,25 @@
                 @if($canSeeAttribution)
                 <a href="/mktg-admin/attribution"
                    class="nav-link {{ request()->is('mktg-admin/attribution*') ? 'active' : '' }}">
-                    <span class="nav-icon">🎯</span> Attribution
+                    <span class="nav-icon"><x-icon name="target" size="16" /></span> Attribution
                 </a>
                 @endif
                 @if($canSeeKpi)
                 <a href="/mktg-admin/kpi"
                    class="nav-link {{ request()->is('mktg-admin/kpi*') ? 'active' : '' }}">
-                    <span class="nav-icon">📊</span> KPI & Raporlar
+                    <span class="nav-icon"><x-icon name="bar-chart-3" size="16" /></span> KPI & Raporlar
                 </a>
                 @endif
                 @if($canSeeReports)
                 <a href="/mktg-admin/reports/scheduled"
                    class="nav-link {{ request()->is('mktg-admin/reports*') ? 'active' : '' }}">
-                    <span class="nav-icon">📈</span> Zamanlanmış Raporlar
+                    <span class="nav-icon"><x-icon name="trending-up" size="16" /></span> Zamanlanmış Raporlar
                 </a>
                 @endif
                 @if($canSeeBudget)
                 <a href="/mktg-admin/budget"
                    class="nav-link {{ request()->is('mktg-admin/budget*') ? 'active' : '' }}">
-                    <span class="nav-icon">💰</span> Bütçe
+                    <span class="nav-icon"><x-icon name="dollar-sign" size="16" /></span> Bütçe
                 </a>
                 @endif
             </div>
@@ -350,19 +350,19 @@
                 @if($canSeeIntegrations)
                 <a href="/mktg-admin/integrations"
                    class="nav-link {{ request()->is('mktg-admin/integrations*') ? 'active' : '' }}">
-                    <span class="nav-icon">🔌</span> Entegrasyonlar
+                    <span class="nav-icon"><x-icon name="git-branch" size="16" /></span> Entegrasyonlar
                 </a>
                 @endif
                 @if($canSeeTeam)
                 <a href="/mktg-admin/team"
                    class="nav-link {{ request()->is('mktg-admin/team*') ? 'active' : '' }}">
-                    <span class="nav-icon">👥</span> Ekip
+                    <span class="nav-icon"><x-icon name="users" size="16" /></span> Ekip
                 </a>
                 @endif
                 @if($canSeeSettings)
                 <a href="/mktg-admin/settings"
                    class="nav-link {{ request()->is('mktg-admin/settings*') ? 'active' : '' }}">
-                    <span class="nav-icon">⚙️</span> Ayarlar
+                    <span class="nav-icon"><x-icon name="settings" size="16" /></span> Ayarlar
                 </a>
                 @endif
             </div>
@@ -372,11 +372,11 @@
                 <div class="nav-section-label">Hesap</div>
                 <a href="/mktg-admin/notifications"
                    class="nav-link {{ request()->is('mktg-admin/notifications*') ? 'active' : '' }}">
-                    <span class="nav-icon">🔔</span> Bildirimler
+                    <span class="nav-icon"><x-icon name="bell" size="16" /></span> Bildirimler
                 </a>
                 <a href="/mktg-admin/profile"
                    class="nav-link {{ request()->is('mktg-admin/profile*','my-contracts*') ? 'active' : '' }}">
-                    <span class="nav-icon">👤</span> Profil & Sözleşmeler
+                    <span class="nav-icon"><x-icon name="user" size="16" /></span> Profil & Sözleşmeler
                 </a>
             </div>
 
@@ -394,36 +394,36 @@
                 @if($canSeePipeline)
                 <a href="/mktg-admin/pipeline"
                    class="nav-link {{ request()->is('mktg-admin/pipeline') || (request()->is('mktg-admin/pipeline*') && !request()->is('mktg-admin/pipeline/kanban*')) ? 'active' : '' }}">
-                    <span class="nav-icon">🗂</span> Sales Pipeline
+                    <span class="nav-icon"><x-icon name="kanban" size="16" /></span> Sales Pipeline
                 </a>
                 <a href="/mktg-admin/pipeline/kanban"
                    class="nav-link {{ request()->is('mktg-admin/pipeline/kanban*') ? 'active' : '' }}"
                    style="padding-left:32px;font-size:var(--tx-xs);">
-                    <span class="nav-icon" style="font-size:11px;">🌀</span> Pipeline Kanban
+                    <span class="nav-icon" style="font-size:11px;"><x-icon name="refresh-cw" size="11" /></span> Pipeline Kanban
                 </a>
                 @endif
                 @if($canSeeScoring)
                 <a href="/mktg-admin/scoring"
                    class="nav-link {{ request()->is('mktg-admin/scoring') || request()->is('mktg-admin/scoring/leaderboard*') || request()->is('mktg-admin/scoring/history*') ? 'active' : '' }}">
-                    <span class="nav-icon">⭐</span> Lead Scoring
+                    <span class="nav-icon"><x-icon name="star" size="16" /></span> Lead Scoring
                 </a>
                 @endif
                 @if($canSeeAttribution)
                 <a href="/mktg-admin/attribution"
                    class="nav-link {{ request()->is('mktg-admin/attribution*') ? 'active' : '' }}">
-                    <span class="nav-icon">🎯</span> Attribution
+                    <span class="nav-icon"><x-icon name="target" size="16" /></span> Attribution
                 </a>
                 @endif
                 @if($canSeeLeadSources)
                 <a href="/mktg-admin/lead-sources"
                    class="nav-link {{ request()->is('mktg-admin/lead-sources*') ? 'active' : '' }}">
-                    <span class="nav-icon">📡</span> Lead Kaynakları
+                    <span class="nav-icon"><x-icon name="radar" size="16" /></span> Lead Kaynakları
                 </a>
                 @endif
                 @if($canSeeDealers)
                 <a href="/mktg-admin/dealers"
                    class="nav-link {{ request()->is('mktg-admin/dealers*') ? 'active' : '' }}">
-                    <span class="nav-icon">🏪</span> Bayi İlişkileri
+                    <span class="nav-icon"><x-icon name="building-2" size="16" /></span> Bayi İlişkileri
                 </a>
                 @endif
             </div>
@@ -433,13 +433,13 @@
                 @if($canSeeKpi)
                 <a href="/mktg-admin/kpi"
                    class="nav-link {{ request()->is('mktg-admin/kpi*') ? 'active' : '' }}">
-                    <span class="nav-icon">📊</span> KPI & Raporlar
+                    <span class="nav-icon"><x-icon name="bar-chart-3" size="16" /></span> KPI & Raporlar
                 </a>
                 @endif
                 @if($canSeeReports)
                 <a href="/mktg-admin/reports/scheduled"
                    class="nav-link {{ request()->is('mktg-admin/reports*') ? 'active' : '' }}">
-                    <span class="nav-icon">📈</span> Zamanlanmış Raporlar
+                    <span class="nav-icon"><x-icon name="trending-up" size="16" /></span> Zamanlanmış Raporlar
                 </a>
                 @endif
             </div>
@@ -450,19 +450,19 @@
                 @if($canSeeScoringCfg)
                 <a href="/mktg-admin/scoring/config"
                    class="nav-link {{ request()->is('mktg-admin/scoring/config*') ? 'active' : '' }}">
-                    <span class="nav-icon">⚙️</span> Scoring Yapılandırma
+                    <span class="nav-icon"><x-icon name="sliders" size="16" /></span> Scoring Yapılandırma
                 </a>
                 @endif
                 @if($canSeeTeam)
                 <a href="/mktg-admin/team"
                    class="nav-link {{ request()->is('mktg-admin/team*') ? 'active' : '' }}">
-                    <span class="nav-icon">👥</span> Ekip
+                    <span class="nav-icon"><x-icon name="users" size="16" /></span> Ekip
                 </a>
                 @endif
                 @if($canSeeSettings)
                 <a href="/mktg-admin/settings"
                    class="nav-link {{ request()->is('mktg-admin/settings*') ? 'active' : '' }}">
-                    <span class="nav-icon">⚙️</span> Ayarlar
+                    <span class="nav-icon"><x-icon name="settings" size="16" /></span> Ayarlar
                 </a>
                 @endif
             </div>
@@ -472,11 +472,11 @@
                 <div class="nav-section-label">Hesap</div>
                 <a href="/mktg-admin/notifications"
                    class="nav-link {{ request()->is('mktg-admin/notifications*') ? 'active' : '' }}">
-                    <span class="nav-icon">🔔</span> Bildirimler
+                    <span class="nav-icon"><x-icon name="bell" size="16" /></span> Bildirimler
                 </a>
                 <a href="/mktg-admin/profile"
                    class="nav-link {{ request()->is('mktg-admin/profile*','my-contracts*') ? 'active' : '' }}">
-                    <span class="nav-icon">👤</span> Profil & Sözleşmeler
+                    <span class="nav-icon"><x-icon name="user" size="16" /></span> Profil & Sözleşmeler
                 </a>
             </div>
             @endif
@@ -484,10 +484,10 @@
 
         <div class="sidebar-footer">
             <a href="{{ route('marketing.handbook') }}" class="nav-link {{ request()->routeIs('marketing.handbook') ? 'active' : '' }}" style="margin-bottom:6px;">
-                <span class="nav-icon">📖</span> Kılavuz
+                <span class="nav-icon"><x-icon name="book-open" size="16" /></span> Kılavuz
             </a>
             <a href="/logout" class="nav-link logout">
-                <span class="nav-icon">🚪</span> Çıkış Yap
+                <span class="nav-icon"><x-icon name="log-out" size="16" /></span> Çıkış Yap
             </a>
         </div>
     </aside>
@@ -499,7 +499,7 @@
         <header class="topbar">
             <div class="topbar-left">
                 <button class="icon-btn" id="premium-menu-btn"
-                        style="display:none;">☰</button>
+                        style="display:none;"><x-icon name="menu" size="18" /></button>
                 <a href="/mktg-admin/dashboard" class="icon-btn" id="premium-back-btn" title="Geri dön" style="font-size:22px;line-height:1;width:44px;height:44px;flex-shrink:0;border:1px solid var(--u-line,#e5e7eb);background:var(--u-card,#fff);border-radius:10px;text-decoration:none;display:flex;align-items:center;justify-content:center;">&#8592;</a>
                 <div>
                     <div class="topbar-title">{{ $pageTitle ?? ($topMode === 'sales' ? 'Sales Panel' : 'Marketing Admin') }}</div>
@@ -528,7 +528,7 @@
 
         @if(!empty($urgentBulletins) && $urgentBulletins->isNotEmpty())
         <div style="background:#dc2626;color:#fff;padding:9px 22px;font-size:13px;font-weight:600;display:flex;gap:12px;align-items:center;flex-shrink:0;">
-            <span>🚨</span><span>{{ $urgentBulletins->first()->title }}</span>
+            <span><x-icon name="alert-triangle" size="16" /></span><span>{{ $urgentBulletins->first()->title }}</span>
             <a href="/bulletins" style="color:#fff;text-decoration:underline;margin-left:auto;font-size:12px;">Tümünü Gör →</a>
         </div>
         @endif

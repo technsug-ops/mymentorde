@@ -32,11 +32,11 @@
                     @elseif($step->template_id)
                         Template ID: {{ $step->template_id }}
                     @else
-                        <span class="u-muted">⚠ template/view yok</span>
+                        <span class="u-muted"><x-icon name="circle-alert" size="14" /> template/view yok</span>
                     @endif
                     {{ $step->subject_override ? ' — '.$step->subject_override : '' }}
                     @if($step->ab_test_id)
-                        <span class="badge info" style="font-size:10px;margin-left:6px;">🧪 A/B #{{ $step->ab_test_id }}</span>
+                        <span class="badge info" style="font-size:10px;margin-left:6px;"><x-icon name="flask" size="12" /> A/B #{{ $step->ab_test_id }}</span>
                     @endif
                 </div>
                 <div class="u-muted" style="font-size:var(--tx-xs);">{{ $step->delay_hours }} saat sonra</div>
@@ -78,7 +78,7 @@
 
 <details class="card" style="margin-top:0;">
     <summary class="det-sum">
-        <h3>📖 Kullanım Kılavuzu — Drip Serisi Adımları</h3>
+        <h3><x-icon name="book-open" size="18" /> Kullanım Kılavuzu — Drip Serisi Adımları</h3>
         <span class="det-chev">▼</span>
     </summary>
     <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;padding-top:12px;">

@@ -278,12 +278,12 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
     {{-- Rehber --}}
     <details class="card">
         <summary class="det-sum">
-            <h3>📖 Kullanım Kılavuzu — E-posta Kampanyaları</h3>
+            <h3><x-icon name="book-open" size="18" /> Kullanım Kılavuzu — E-posta Kampanyaları</h3>
             <span class="det-chev">▼</span>
         </summary>
         <div style="padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
             <div>
-                <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">📧 Kampanya İş Akışı</strong>
+                <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="mail" size="14" /> Kampanya İş Akışı</strong>
                 <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                     <li>Yeni kampanya → Şablon seç → Segment belirle → Gönderim zamanı ayarla</li>
                     <li><strong>draft → scheduled → sending → sent</strong> durum akışı</li>
@@ -292,7 +292,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
                 </ul>
             </div>
             <div>
-                <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">📊 Performans Metrikleri</strong>
+                <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="bar-chart-3" size="14" /> Performans Metrikleri</strong>
                 <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                     <li>Gönderilen/Açılan/Tıklanan oranlarını Stats sekmesinden izle</li>
                     <li>Bireysel alıcı durumlarını Send Log sekmesinden incele</li>

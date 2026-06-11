@@ -32,7 +32,7 @@
 {{-- ─── Rol Hiyerarşisi ─── --}}
 <section class="panel" style="padding:0;overflow:hidden;margin-bottom:14px;">
     <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-weight:700;font-size:var(--tx-sm);">🏗 Rol Hiyerarşisi</div>
+        <div style="font-weight:700;font-size:var(--tx-sm);display:inline-flex;align-items:center;gap:6px;"><x-icon name="network" size="16" aria-label="rol hiyerarşisi" /> Rol Hiyerarşisi</div>
         <div style="font-size:11px;color:var(--u-muted);">{{ $userCountByRole->sum() }} iç kullanıcı</div>
     </div>
     <div style="padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
@@ -82,7 +82,7 @@
 @endif
 <section class="panel" style="margin-bottom:14px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0;" id="newTplToggle">
-        <div style="font-weight:700;font-size:var(--tx-sm);">➕ Yeni Şablon Oluştur</div>
+        <div style="font-weight:700;font-size:var(--tx-sm);display:inline-flex;align-items:center;gap:6px;"><x-icon name="plus" size="16" aria-label="yeni şablon" /> Yeni Şablon Oluştur</div>
         <button type="button" id="newTplBtn" style="font-size:11px;padding:4px 12px;border:1.5px solid var(--u-line);border-radius:6px;background:var(--u-bg);color:var(--u-muted);cursor:pointer;font-weight:700;">Göster</button>
     </div>
     <div id="newTplForm" style="display:none;margin-top:14px;">
@@ -130,7 +130,7 @@ $deptGroups = [
 ];
 @endphp
 <section class="panel" style="padding:0;overflow:hidden;margin-bottom:14px;">
-    <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);">📋 Rol Şablonları</div>
+    <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="clipboard-list" size="16" aria-label="rol şablonları" /> Rol Şablonları</div>
 
     @foreach($deptGroups as $deptKey => $dept)
     @php $deptTemplates = $templates->filter(fn($t) => in_array($t->parent_role, $dept['roles']))->sortByDesc('is_system'); @endphp
@@ -182,7 +182,7 @@ $deptGroups = [
 
 {{-- ─── İzin Kataloğu ─── --}}
 <section class="panel" style="padding:0;overflow:hidden;margin-bottom:14px;">
-    <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);">🔑 İzin Kataloğu</div>
+    <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="key-round" size="16" aria-label="izin kataloğu" /> İzin Kataloğu</div>
     <div style="padding:14px 16px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
     @foreach($permissions as $category => $perms)
     <div>
@@ -208,7 +208,7 @@ $deptGroups = [
 @endphp
 <section class="panel" style="padding:0;overflow:hidden;" id="role-table">
     <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-        <div style="font-weight:700;font-size:var(--tx-sm);">👥 Kullanıcı — Rol Atamaları
+        <div style="font-weight:700;font-size:var(--tx-sm);display:inline-flex;align-items:center;gap:6px;"><x-icon name="users" size="16" aria-label="kullanıcılar" /> Kullanıcı — Rol Atamaları
             @if($filterRole) <span style="font-size:11px;font-weight:400;color:#1e40af;">({{ $filterRole }} filtresi)</span>@endif
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">

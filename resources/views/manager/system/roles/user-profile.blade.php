@@ -56,10 +56,10 @@
 
         {{-- Aktif Şablon Atamaları --}}
         <section class="panel" style="padding:0;overflow:hidden;">
-            <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);">📋 Aktif Şablon Atamaları</div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="clipboard-list" size="16" aria-label="aktif şablon atamaları" /> Aktif Şablon Atamaları</div>
             @if($activeAssignments->isEmpty())
             <div style="padding:20px 16px;background:#fffbeb;border-bottom:1px solid var(--u-line);">
-                <div style="font-size:12px;color:#92400e;font-weight:600;">⚠ Aktif şablon ataması yok.</div>
+                <div style="font-size:12px;color:#92400e;font-weight:600;display:flex;align-items:center;gap:6px;"><x-icon name="alert-triangle" size="14" aria-label="uyarı" /> Aktif şablon ataması yok.</div>
                 <div style="font-size:11px;color:#92400e;margin-top:2px;">İzinler <strong>varsayılan rol kurallarından</strong> hesaplanıyor.</div>
             </div>
             @else
@@ -87,7 +87,7 @@
         {{-- Yeni Şablon Atama --}}
         @if($availableTemplates->isNotEmpty())
         <section class="panel">
-            <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:12px;">➕ Şablon Ata</div>
+            <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:12px;display:inline-flex;align-items:center;gap:6px;"><x-icon name="plus" size="16" aria-label="şablon ata" /> Şablon Ata</div>
             <form method="POST" action="/manager/system/roles/users/{{ $user->id }}/assign">
                 @csrf
                 <div style="margin-bottom:10px;">
@@ -107,7 +107,7 @@
         {{-- Geçmiş Atamalar --}}
         @if($revokedAssignments->isNotEmpty())
         <section class="panel" style="padding:0;overflow:hidden;">
-            <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);">🗂 Geçmiş Atamalar</div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="archive" size="16" aria-label="geçmiş atamalar" /> Geçmiş Atamalar</div>
             @foreach($revokedAssignments as $asgn)
             <div style="padding:8px 16px;border-bottom:1px solid var(--u-line);opacity:.6;">
                 <div style="font-size:11px;font-weight:600;color:var(--u-text);">{{ $asgn->template?->name ?? '?' }}</div>
@@ -124,7 +124,7 @@
     {{-- Sağ: Etkin İzinler --}}
     <section class="panel" style="padding:0;overflow:hidden;">
         <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-weight:700;font-size:var(--tx-sm);">🔑 Etkin İzinler</div>
+            <div style="font-weight:700;font-size:var(--tx-sm);display:inline-flex;align-items:center;gap:6px;"><x-icon name="key-round" size="16" aria-label="etkin izinler" /> Etkin İzinler</div>
             <div style="display:flex;gap:6px;align-items:center;font-size:10px;">
                 <span style="background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:4px;font-weight:700;">Şablondan</span>
                 <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:4px;font-weight:700;">Varsayılan</span>

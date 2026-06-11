@@ -52,7 +52,8 @@
 .li-status-active { color:#15803d; font-weight:700; }
 .li-status-inactive { color:#94a3b8; }
 
-.li-type-emoji { font-size:18px; margin-right:6px; }
+.li-type-emoji { font-size:18px; margin-right:6px; display:inline-flex; align-items:center; }
+.li-stat-lbl-row { display:inline-flex; align-items:center; gap:6px; }
 </style>
 @endpush
 
@@ -62,7 +63,7 @@
     <div class="li-stats">
         <div class="li-stat ok">
             <div class="li-stat-num">{{ $totals['matched'] }}</div>
-            <div class="li-stat-lbl">✓ Sağlıklı (Eşleşen)</div>
+            <div class="li-stat-lbl li-stat-lbl-row"><x-icon name="circle-check" size="14" aria-label="sağlıklı" /> Sağlıklı (Eşleşen)</div>
         </div>
         <div class="li-stat">
             <div class="li-stat-num">{{ $totals['all'] }}</div>
@@ -70,17 +71,17 @@
         </div>
         <div class="li-stat warn">
             <div class="li-stat-num">{{ $totals['missing'] }}</div>
-            <div class="li-stat-lbl">⚠ Eksik (Route var, registry yok)</div>
+            <div class="li-stat-lbl li-stat-lbl-row"><x-icon name="alert-triangle" size="14" aria-label="eksik" /> Eksik (Route var, registry yok)</div>
         </div>
         <div class="li-stat danger">
             <div class="li-stat-num">{{ $totals['dead'] }}</div>
-            <div class="li-stat-lbl">✕ Ölü (Registry var, route yok)</div>
+            <div class="li-stat-lbl li-stat-lbl-row"><x-icon name="x-circle" size="14" aria-label="ölü" /> Ölü (Registry var, route yok)</div>
         </div>
     </div>
 
     @if(count($missing) > 0)
         <div class="li-alert warn">
-            <strong>⚠ {{ count($missing) }} eksik registry kaydı</strong> — sistemde public route var ama <code>config/public_landings.php</code>'a kaydedilmemiş. Yeni eklediğin sayfalar burada listelenmeli ki diğer manager'lar da bilsin:
+            <strong style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="alert-triangle" size="16" aria-label="uyarı" /> {{ count($missing) }} eksik registry kaydı</strong> — sistemde public route var ama <code>config/public_landings.php</code>'a kaydedilmemiş. Yeni eklediğin sayfalar burada listelenmeli ki diğer manager'lar da bilsin:
             <ul>
                 @foreach(array_slice($missing, 0, 15) as $path)
                     <li><code>{{ $path }}</code> &mdash; <a href="{{ url($path) }}" target="_blank">aç</a></li>
@@ -94,7 +95,7 @@
 
     @if(count($dead) > 0)
         <div class="li-alert danger">
-            <strong>✕ {{ count($dead) }} ölü registry kaydı</strong> — config'te tanımlı ama route artık yok (silinmiş?). Temizle veya tekrar route ekle:
+            <strong style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="x-circle" size="16" aria-label="ölü kayıt" /> {{ count($dead) }} ölü registry kaydı</strong> — config'te tanımlı ama route artık yok (silinmiş?). Temizle veya tekrar route ekle:
             <ul>
                 @foreach($dead as $entry)
                     <li><code>{{ $entry['path'] }}</code> — {{ $entry['name'] ?? '' }}</li>
@@ -105,11 +106,11 @@
 
     @php
         $typeMeta = [
-            'marketing' => ['emoji' => '📢', 'label' => 'Marketing / Tanıtım'],
-            'form'      => ['emoji' => '📝', 'label' => 'Form / Conversion'],
-            'widget'    => ['emoji' => '🧩', 'label' => 'Public Widget'],
-            'legal'     => ['emoji' => '⚖️', 'label' => 'Yasal'],
-            'utility'   => ['emoji' => '🔧', 'label' => 'Utility'],
+            'marketing' => ['icon' => 'megaphone',      'label' => 'Marketing / Tanıtım'],
+            'form'      => ['icon' => 'clipboard-list', 'label' => 'Form / Conversion'],
+            'widget'    => ['icon' => 'package',        'label' => 'Public Widget'],
+            'legal'     => ['icon' => 'scale',          'label' => 'Yasal'],
+            'utility'   => ['icon' => 'wrench',         'label' => 'Utility'],
         ];
     @endphp
 
@@ -117,7 +118,7 @@
         @if(! empty($grouped[$type]))
             <div class="li-section">
                 <h3>
-                    <span class="li-type-emoji">{{ $typeMeta[$type]['emoji'] }}</span>
+                    <span class="li-type-emoji"><x-icon name="{{ $typeMeta[$type]['icon'] }}" size="18" aria-label="{{ $typeMeta[$type]['label'] }}" /></span>
                     {{ $typeMeta[$type]['label'] }}
                     <span class="count-pill">{{ count($grouped[$type]) }}</span>
                 </h3>
@@ -164,7 +165,7 @@
                             <td>
                                 <div class="li-actions">
                                     @if(! str_contains((string) $entry['path'], '{'))
-                                        <a class="li-btn" href="{{ url($entry['path']) }}" target="_blank">👁 Aç</a>
+                                        <a class="li-btn" href="{{ url($entry['path']) }}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="external-link" size="13" aria-label="aç" /> Aç</a>
                                     @else
                                         <span class="li-btn" style="opacity:.5;cursor:default;">{slug}</span>
                                     @endif
@@ -173,7 +174,7 @@
                                             try { $editUrl = route($entry['edit_route']); } catch (\Throwable $e) { $editUrl = null; }
                                         @endphp
                                         @if($editUrl)
-                                            <a class="li-btn primary" href="{{ $editUrl }}">⚙ Düzenle</a>
+                                            <a class="li-btn primary" href="{{ $editUrl }}" style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="settings" size="13" aria-label="düzenle" /> Düzenle</a>
                                         @endif
                                     @endif
                                 </div>
@@ -187,7 +188,7 @@
     @endforeach
 
     <div class="li-alert" style="background:var(--u-bg); border:1px solid var(--u-line); color:var(--u-muted);">
-        <strong>📝 Yeni public landing eklediğinde:</strong>
+        <strong style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="pencil" size="14" aria-label="not" /> Yeni public landing eklediğinde:</strong>
         <ul>
             <li><code>config/public_landings.php</code>'a entry ekle (path, name, type, description, edit_notes, tier, owner)</li>
             <li>Bu sayfayı yenile — eksik uyarısı kaybolacak</li>

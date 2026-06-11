@@ -7,8 +7,8 @@
         'title' => 'Aday Öğrenciler',
         'sub'   => 'Tüm lead akışı, atamalar ve dönüşüm durumu bir arada.',
         'icon'  => 'users',          // SVG icon adı (x-icon component)
-                                     // — geriye dönük uyumluluk: emoji de kabul edilir
-                                     // (örn. '👥'). Yeni kodda SVG adı tercih edilmeli.
+                                     // — geriye dönük uyumluluk: emoji karakteri de kabul edilir
+                                     // (legacy). Yeni kodda SADECE SVG adı kullanılmalı.
         'bg'    => 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1400&q=80',
         'tone'  => 'blue',  // blue|purple|green|amber|red|slate|indigo|teal
         'stats' => [
@@ -35,7 +35,7 @@
 
     /**
      * Icon değer kontrolü — string'in SVG icon adı (örn. "users") mı yoksa
-     * emoji (örn. "👥") mı olduğunu belirler.
+     * eski emoji karakteri mi olduğunu belirler.
      * Heuristic: a-z + tire + rakam içeriyorsa SVG name varsayılır,
      * aksi halde emoji/karakter olarak çıktı verilir.
      */

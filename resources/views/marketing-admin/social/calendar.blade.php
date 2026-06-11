@@ -210,11 +210,11 @@ $platformColors = [
                                     $platform = strtolower((string) ($post->platform ?? 'other'));
                                     [$bg, $fg] = $platformColors[$platform] ?? ['#8a9bb0','#fff'];
                                     $label = \Illuminate\Support\Str::limit((string) ($post->caption ?? $post->post_type ?? $platform), 24) ?: ucfirst($platform);
-                                    $statusIcon = match($post->status ?? '') {
-                                        'published' => '✓',
-                                        'scheduled' => '⏱',
-                                        'draft'     => '✏',
-                                        'failed'    => '✗',
+                                    $statusIconName = match($post->status ?? '') {
+                                        'published' => 'circle-check',
+                                        'scheduled' => 'clock',
+                                        'draft'     => 'pencil',
+                                        'failed'    => 'x-circle',
                                         default     => '',
                                     };
                                     $title = "[#{$post->id}] {$post->status} · {$platform}\n{$post->caption}";
@@ -222,7 +222,7 @@ $platformColors = [
                                 <span class="cal-event"
                                       style="background:{{ $bg }};color:{{ $fg }};"
                                       title="{{ $title }}">
-                                    {{ $statusIcon }} {{ $label }}
+                                    @if($statusIconName)<x-icon :name="$statusIconName" size="12" />@endif {{ $label }}
                                 </span>
                             @endforeach
 
@@ -286,7 +286,7 @@ $platformColors = [
 {{-- Rehber --}}
 <details class="card" style="margin-top:0;">
     <summary class="det-sum">
-        <h3>📖 Kullanım Kılavuzu — İçerik Takvimi</h3>
+        <h3><x-icon name="book-open" size="18" /> Kullanım Kılavuzu — İçerik Takvimi</h3>
         <span class="det-chev">▼</span>
     </summary>
     <div style="padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">

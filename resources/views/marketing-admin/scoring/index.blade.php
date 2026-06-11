@@ -123,7 +123,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
     {{-- Rehber --}}
     <details class="card">
         <summary class="det-sum">
-            <h3>📖 Kullanım Kılavuzu — Lead Scoring</h3>
+            <h3><x-icon name="book-open" size="16" /> Kullanım Kılavuzu — Lead Scoring</h3>
             <span class="det-chev">▼</span>
         </summary>
         <ol style="margin:0;padding-left:18px;font-size:var(--tx-sm);color:var(--u-muted,#64748b);line-height:1.7;">

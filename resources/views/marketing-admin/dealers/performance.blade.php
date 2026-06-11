@@ -68,7 +68,7 @@
                         <span title="Telefon">☎ {{ $dealer->phone }}</span>&nbsp;
                     @endif
                     @if($dealer->whatsapp)
-                        <span title="WhatsApp">💬 {{ $dealer->whatsapp }}</span>
+                        <span title="WhatsApp"><x-icon name="message-circle" size="12" /> {{ $dealer->whatsapp }}</span>
                     @endif
                     @if(!$dealer->email && !$dealer->phone && !$dealer->whatsapp)
                         <span style="color:#b05c00;">İletişim bilgisi girilmemis</span>
@@ -324,12 +324,12 @@ function updateChannelHint(channel, email, phone, whatsapp) {
 
 <details class="card" style="margin-top:0;">
     <summary class="det-sum">
-        <h3>📖 Kullanım Kılavuzu — Bayi Performans Raporu</h3>
+        <h3><x-icon name="book-open" size="16" /> Kullanım Kılavuzu — Bayi Performans Raporu</h3>
         <span class="det-chev">▼</span>
     </summary>
     <div style="padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div>
-            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">📊 Performans Metrikleri</strong>
+            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="bar-chart-3" size="12" /> Performans Metrikleri</strong>
             <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                 <li><strong>Lead Sayısı:</strong> Bayi referansıyla gelen toplam aday</li>
                 <li><strong>Dönüşüm Oranı:</strong> Converted / Lead × 100 — bayi kalitesini gösterir</li>
@@ -338,7 +338,7 @@ function updateChannelHint(channel, email, phone, whatsapp) {
             </ul>
         </div>
         <div>
-            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">📬 İletişim & Aksiyonlar</strong>
+            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="inbox" size="12" /> İletişim & Aksiyonlar</strong>
             <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                 <li>Mesaj gönder → bayiye e-posta veya WhatsApp bildirimi</li>
                 <li>Düşük performanslı bayiler için eğitim materyali paylaş</li>

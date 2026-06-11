@@ -36,14 +36,14 @@
     'label' => 'Partner Ağı',
     'title' => 'Bayi Yönetimi',
     'sub'   => 'Partner ağı, komisyon durumu ve kazançlar. Her bayinin referans performansını ve ödeme durumunu tek panelden yönet.',
-    'icon'  => '🤝',
+    'icon'  => 'handshake',
     'bg'    => 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1400&q=80',
     'tone'  => 'amber',
     'stats' => [
-        ['icon' => '🏢', 'text' => ($kpis['total'] ?? 0) . ' bayi'],
-        ['icon' => '🟢', 'text' => ($kpis['active'] ?? 0) . ' aktif'],
-        ['icon' => '💶', 'text' => '€' . number_format(($kpis['earned'] ?? 0), 0, ',', '.') . ' kazanç'],
-        ['icon' => '⏳', 'text' => '€' . number_format(($kpis['pending'] ?? 0), 0, ',', '.') . ' bekleyen'],
+        ['icon' => 'building-2', 'text' => ($kpis['total'] ?? 0) . ' bayi'],
+        ['icon' => 'circle-check', 'text' => ($kpis['active'] ?? 0) . ' aktif'],
+        ['icon' => 'euro', 'text' => '€' . number_format(($kpis['earned'] ?? 0), 0, ',', '.') . ' kazanç'],
+        ['icon' => 'hourglass', 'text' => '€' . number_format(($kpis['pending'] ?? 0), 0, ',', '.') . ' bekleyen'],
     ],
 ])
 
@@ -182,11 +182,13 @@
                                 <button class="qa-del-btn archive" data-qa-delete-mode="archive"
                                         data-qa-delete-url="{{ route('manager.quick-admin.dealer.delete', $d['id']) }}"
                                         data-qa-delete-label="Bayi {{ $d['name'] }} ({{ $d['code'] }})"
-                                        title="Arşivle (geri alınabilir, leadler bağlı kalır)">🗑</button>
+                                        aria-label="Bayiyi arşivle"
+                                        title="Arşivle (geri alınabilir, leadler bağlı kalır)"><x-icon name="archive" size="14" /></button>
                                 <button class="qa-del-btn force" data-qa-delete-mode="force"
                                         data-qa-delete-url="{{ route('manager.quick-admin.dealer.delete', $d['id']) }}"
                                         data-qa-delete-label="Bayi {{ $d['name'] }} ({{ $d['code'] }})"
-                                        title="KALICI sil (leadler dealer'sız kalır, email tekrar kullanılabilir)">🔥</button>
+                                        aria-label="Bayiyi kalıcı sil"
+                                        title="KALICI sil (leadler dealer'sız kalır, email tekrar kullanılabilir)"><x-icon name="flame" size="14" /></button>
                             @endif
                         </td>
                     </tr>
@@ -198,7 +200,7 @@
     </div>
 </section>
 
-{{-- Soft/hard delete handler (archive 🗑 + force 🔥) — addon partial --}}
+{{-- Soft/hard delete handler (archive + force) — addon partial --}}
 @includeIf('manager.partials._lead-delete-script')
 
 @endsection

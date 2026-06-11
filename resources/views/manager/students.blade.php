@@ -27,13 +27,13 @@
     'label' => 'Aktif Öğrenciler',
     'title' => 'Öğrenci Yönetimi',
     'sub'   => 'Dönüşen tüm öğrenciler, ödeme durumları ve risk seviyeleri. Proaktif müdahale için öncelikleri belirle.',
-    'icon'  => '🎓',
+    'icon'  => 'graduation-cap',
     'bg'    => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1400&q=80',
     'tone'  => 'purple',
     'stats' => [
-        ['icon' => '🟢', 'text' => ($kpis['active'] ?? 0) . ' aktif'],
-        ['icon' => '📁', 'text' => ($kpis['archived'] ?? 0) . ' arşiv'],
-        ['icon' => '⚠️', 'text' => ($kpis['high_risk'] ?? 0) . ' yüksek risk'],
+        ['icon' => 'circle-check', 'text' => ($kpis['active'] ?? 0) . ' aktif'],
+        ['icon' => 'archive',     'text' => ($kpis['archived'] ?? 0) . ' arşiv'],
+        ['icon' => 'alert-triangle', 'text' => ($kpis['high_risk'] ?? 0) . ' yüksek risk'],
     ],
 ])
 
@@ -174,15 +174,15 @@
                         <td>
                             <a class="mgr-detail-btn" href="/manager/students/{{ urlencode($s->student_id) }}">Detay →</a>
                             @if(!$s->is_archived)
-                                <button type="button" class="qa-del-btn archive" title="Arşivle (geri alınabilir)"
+                                <button type="button" class="qa-del-btn archive" title="Arşivle (geri alınabilir)" aria-label="Öğrenciyi arşivle"
                                         data-qa-delete-mode="archive"
                                         data-qa-delete-url="{{ route('manager.quick-admin.student.delete', $s->id) }}"
-                                        data-qa-delete-label="Öğrenci '{{ $s->student_id }}'">🗑</button>
+                                        data-qa-delete-label="Öğrenci '{{ $s->student_id }}'"><x-icon name="archive" size="14" /></button>
                             @endif
-                            <button type="button" class="qa-del-btn force" title="KALICI Sil (geri alınamaz)"
+                            <button type="button" class="qa-del-btn force" title="KALICI Sil (geri alınamaz)" aria-label="Öğrenciyi kalıcı sil"
                                     data-qa-delete-mode="force"
                                     data-qa-delete-url="{{ route('manager.quick-admin.student.delete', $s->id) }}"
-                                    data-qa-delete-label="Öğrenci '{{ $s->student_id }}'">🔥</button>
+                                    data-qa-delete-label="Öğrenci '{{ $s->student_id }}'"><x-icon name="flame" size="14" /></button>
                         </td>
                     </tr>
                 @empty

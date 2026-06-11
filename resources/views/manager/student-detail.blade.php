@@ -45,11 +45,11 @@
     @if(! empty($studentId))
         <a href="{{ route('manager.student.uni-assist-guide.show', $studentId) }}"
            style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:linear-gradient(135deg,#c8102e,#9f1239); color:#fff; border-radius:8px; font-size:13px; font-weight:700; text-decoration:none; margin-left:auto;">
-            🎓 Uni-Assist →
+            <x-icon name="graduation-cap" size="14" /> Uni-Assist →
         </a>
         <a href="{{ route('manager.student.visa-guide.show', $studentId) }}"
            style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:linear-gradient(135deg,#003c8f,#002966); color:#fff; border-radius:8px; font-size:13px; font-weight:700; text-decoration:none;">
-            🛂 Vize →
+            <x-icon name="plane" size="14" /> Vize →
         </a>
         {{-- Application Guides — addon partial, hata olsa bile student-detail çalışır --}}
         @includeIf('manager.partials.application-guides-buttons', ['guestId' => $guest?->id ?? null, 'studentId' => $studentId])
@@ -181,7 +181,7 @@
 
     {{-- SAĞ: Güncelleme Formu --}}
     <div>
-        {{-- 🔐 Şifre Sıfırlama — addon partial, hata olsa bile student-detail çalışır --}}
+        {{-- Şifre Sıfırlama — addon partial, hata olsa bile student-detail çalışır --}}
         @includeIf('manager.partials.password-reset-card', [
             'email'       => $studentUser?->email ?? trim((string) ($guest?->email ?? '')),
             'name'        => $guest
@@ -241,7 +241,7 @@
 
         {{-- Vize Durumu --}}
         <section class="panel gd-panel">
-            <h2>🛂 Vize Durumu</h2>
+            <h2 style="display:flex;align-items:center;gap:8px;"><x-icon name="plane" size="18" /> Vize Durumu</h2>
             @if($visa)
             <table class="gd-table">
                 <tr><td class="lbl">Vize Türü</td>
@@ -268,7 +268,7 @@
 
         {{-- Konut Durumu --}}
         <section class="panel gd-panel">
-            <h2>🏠 Konut Durumu</h2>
+            <h2 style="display:flex;align-items:center;gap:8px;"><x-icon name="home" size="18" /> Konut Durumu</h2>
             @if($accommodation)
             <table class="gd-table">
                 <tr><td class="lbl">Tür</td>
@@ -295,7 +295,7 @@
 
         {{-- Üniversite Başvuruları --}}
         <section class="panel gd-panel">
-            <h2>🏛 Üniversite Başvuruları</h2>
+            <h2 style="display:flex;align-items:center;gap:8px;"><x-icon name="landmark" size="18" /> Üniversite Başvuruları</h2>
             @if($uniApplications->isEmpty())
                 <p style="font-size:var(--tx-sm);color:var(--u-muted);">Başvuru kaydı girilmemiş.</p>
             @else
@@ -338,8 +338,8 @@
                         @if(\Illuminate\Support\Facades\Route::has('manager.student.document-tokens.store')
                             && \Illuminate\Support\Facades\Route::has('manager.student.document-tokens.index'))
                         <button type="button" id="docReqOpenBtn"
-                                style="padding:8px 14px;border:none;border-radius:8px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#1e40af,#3b5fcc);cursor:pointer;display:inline-flex;align-items:center;gap:6px;justify-content:center;">
-                            📲 Belge Talep Et
+                                style="padding:8px 14px;border:none;border-radius:8px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#1e40af,#3b5fcc);cursor:pointer;display:inline-flex;align-items:center;gap:6px;justify-content:center;" aria-label="Belge talep et">
+                            <x-icon name="smartphone" size="14" /> Belge Talep Et
                         </button>
                         @endif
                     @endcan
@@ -368,8 +368,8 @@
 <div id="docReqModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center;padding:16px;">
     <div style="background:#fff;border-radius:14px;max-width:520px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);">
         <div style="padding:18px 22px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;">
-            <strong style="font-size:15px;">📲 Belge Talep Linki Oluştur</strong>
-            <button type="button" id="docReqCloseBtn" style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;">✕</button>
+            <strong style="font-size:15px;display:inline-flex;align-items:center;gap:8px;"><x-icon name="smartphone" size="16" /> Belge Talep Linki Oluştur</strong>
+            <button type="button" id="docReqCloseBtn" aria-label="Kapat" style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;">✕</button>
         </div>
         <div style="padding:18px 22px;">
             <p style="font-size:13px;color:#475569;line-height:1.5;margin:0 0 14px;">
@@ -421,21 +421,21 @@
                 </label>
             </div>
             <button type="button" id="docReqGenBtn"
-                    style="margin-top:16px;width:100%;padding:12px 18px;border:none;border-radius:10px;background:linear-gradient(135deg,#1e40af,#3b5fcc);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">
-                🔗 Linki Oluştur
+                    style="margin-top:16px;width:100%;padding:12px 18px;border:none;border-radius:10px;background:linear-gradient(135deg,#1e40af,#3b5fcc);color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;" aria-label="Linki oluştur">
+                <x-icon name="link" size="15" /> Linki Oluştur
             </button>
             <div id="docReqResult" style="display:none;margin-top:16px;padding:14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;">
-                <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:8px;">✅ Link hazır — öğrenciye gönder:</div>
+                <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:8px;display:flex;align-items:center;gap:6px;"><x-icon name="circle-check" size="14" /> Link hazır — öğrenciye gönder:</div>
                 <input type="text" id="docReqUrl" readonly
                        style="width:100%;padding:8px 10px;border:1px solid #bbf7d0;border-radius:6px;font-family:ui-monospace,monospace;font-size:11.5px;background:#fff;margin-bottom:10px;">
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
                     <button type="button" id="docReqCopyBtn"
-                            style="flex:1;min-width:100px;padding:8px 12px;border:1px solid #16a34a;background:#fff;color:#166534;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">
-                        📋 Kopyala
+                            style="flex:1;min-width:100px;padding:8px 12px;border:1px solid #16a34a;background:#fff;color:#166534;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;" aria-label="Linki kopyala">
+                        <x-icon name="copy" size="13" /> Kopyala
                     </button>
                     <a id="docReqWhatsAppBtn" target="_blank" href="#"
-                       style="flex:1;min-width:100px;padding:8px 12px;background:#25d366;color:#fff;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;text-align:center;">
-                        💬 WhatsApp'la Gönder
+                       style="flex:1;min-width:100px;padding:8px 12px;background:#25d366;color:#fff;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:5px;" aria-label="WhatsApp ile gönder">
+                        <x-icon name="message-circle" size="13" /> WhatsApp'la Gönder
                     </a>
                 </div>
                 <div style="font-size:11px;color:#65a30d;margin-top:8px;">
@@ -517,7 +517,7 @@
         })
         .then(r => r.json().then(d => ({ ok:r.ok, data:d })))
         .then(res => {
-            genBtn.disabled = false; genBtn.textContent = '🔗 Linki Oluştur';
+            genBtn.disabled = false; genBtn.textContent = 'Linki Oluştur';
             if (!res.ok) { alert(res.data.error || 'Hata oluştu.'); return; }
             urlInput.value = res.data.url;
             var msg = "Merhaba, MentorDE'den belge talebimiz var. Lütfen linke tıklayıp belgeyi yükleyin:\n\n" + res.data.url;
@@ -533,14 +533,14 @@
             }
             resultBox.style.display = 'block';
         })
-        .catch(() => { genBtn.disabled = false; genBtn.textContent = '🔗 Linki Oluştur'; alert('Bağlantı hatası.'); });
+        .catch(() => { genBtn.disabled = false; genBtn.textContent = 'Linki Oluştur'; alert('Bağlantı hatası.'); });
     });
 
     copyBtn.addEventListener('click', function(){
         urlInput.select();
         navigator.clipboard.writeText(urlInput.value).then(function(){
-            copyBtn.textContent = '✓ Kopyalandı';
-            setTimeout(function(){ copyBtn.textContent = '📋 Kopyala'; }, 2000);
+            copyBtn.textContent = 'Kopyalandı';
+            setTimeout(function(){ copyBtn.textContent = 'Kopyala'; }, 2000);
         }).catch(function(){ document.execCommand('copy'); });
     });
 })();
@@ -549,6 +549,6 @@
 @endcan
 @endmodule
 
-{{-- 🔐 Şifre Sıfırla JS handler — artık partial içinde, burası temizlendi --}}
+{{-- Şifre Sıfırla JS handler — artık partial içinde, burası temizlendi --}}
 
 @endsection

@@ -14,7 +14,7 @@
     'label' => 'Otomasyon Sistemi',
     'title' => 'Workflows & Automation',
     'sub'   => 'Lead besleme, e-posta dizisi, hatırlatma ve tetikleyici workflow tanımları. Manuel işleri otomasyona çevir.',
-    'icon'  => '⚡',
+    'icon'  => 'zap',
     'bg'    => 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1400&q=80',
     'tone'  => 'amber',
     'stats' => [],
@@ -142,12 +142,12 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
 
 <details class="card" style="margin-top:0;">
     <summary class="det-sum">
-        <h3>📖 Kullanım Kılavuzu — Otomasyon Workflow'ları</h3>
+        <h3><x-icon name="book-open" size="18" /> Kullanım Kılavuzu — Otomasyon Workflow'ları</h3>
         <span class="det-chev">▼</span>
     </summary>
     <div style="padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div>
-            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">🔧 Workflow Oluşturma</strong>
+            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="wrench" size="14" /> Workflow Oluşturma</strong>
             <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                 <li>Yeni Workflow → Builder'da node ekle → kaydet → aktifleştir</li>
                 <li>Tetikleyici: Yeni başvuru, durum değişimi, belge yükleme vb.</li>
@@ -156,7 +156,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
             </ul>
         </div>
         <div>
-            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">📈 Önerilen Workflow'lar</strong>
+            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="trending-up" size="14" /> Önerilen Workflow'lar</strong>
             <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                 <li><strong>Hoş Geldin Serisi:</strong> Yeni başvuru → 3 adım e-posta dizisi</li>
                 <li><strong>Belge Hatırlatma:</strong> Eksik belge → 7 günde bir hatırlatma</li>

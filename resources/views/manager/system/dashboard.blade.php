@@ -89,26 +89,26 @@
 
 {{-- ─── Hızlı Erişim ─── --}}
 <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));gap:8px;margin-bottom:14px;">
-    <a href="/manager/system/security" class="sys-quick"><span class="sq-icon">🛡</span><span class="sq-label">Güvenlik Paneli</span></a>
-    <a href="/manager/system/ip-rules" class="sys-quick"><span class="sq-icon">🌐</span><span class="sq-label">IP Kuralları</span></a>
-    <a href="/manager/audit-log"       class="sys-quick"><span class="sq-icon">🔍</span><span class="sq-label">Denetim Kayıtları</span></a>
-    <a href="/manager/gdpr-dashboard"  class="sys-quick"><span class="sq-icon">🔒</span><span class="sq-label">GDPR Paneli</span></a>
-    <a href="/manager/notification-stats" class="sys-quick"><span class="sq-icon">🔔</span><span class="sq-label">Bildirim İstat.</span></a>
-    <a href="/manager/webhooks"        class="sys-quick"><span class="sq-icon">🔗</span><span class="sq-label">Webhook Logları</span></a>
-    <a href="/manager/theme"           class="sys-quick"><span class="sq-icon">🎨</span><span class="sq-label">Tema Yönetimi</span></a>
-    <a href="/manager/brand"           class="sys-quick"><span class="sq-icon">🏷</span><span class="sq-label">Marka Ayarları</span></a>
-    <a href="{{ route('system.post-deploy.show') }}" class="sys-quick"><span class="sq-icon">🚀</span><span class="sq-label">Post-Deploy Bakımı</span></a>
+    <a href="/manager/system/security" class="sys-quick"><span class="sq-icon"><x-icon name="shield" size="20" aria-label="kalkan" /></span><span class="sq-label">Güvenlik Paneli</span></a>
+    <a href="/manager/system/ip-rules" class="sys-quick"><span class="sq-icon"><x-icon name="globe" size="20" aria-label="ag" /></span><span class="sq-label">IP Kuralları</span></a>
+    <a href="/manager/audit-log"       class="sys-quick"><span class="sq-icon"><x-icon name="search" size="20" aria-label="arama" /></span><span class="sq-label">Denetim Kayıtları</span></a>
+    <a href="/manager/gdpr-dashboard"  class="sys-quick"><span class="sq-icon"><x-icon name="lock" size="20" aria-label="kilit" /></span><span class="sq-label">GDPR Paneli</span></a>
+    <a href="/manager/notification-stats" class="sys-quick"><span class="sq-icon"><x-icon name="bell" size="20" aria-label="zil" /></span><span class="sq-label">Bildirim İstat.</span></a>
+    <a href="/manager/webhooks"        class="sys-quick"><span class="sq-icon"><x-icon name="link" size="20" aria-label="baglanti" /></span><span class="sq-label">Webhook Logları</span></a>
+    <a href="/manager/theme"           class="sys-quick"><span class="sq-icon"><x-icon name="palette" size="20" aria-label="palet" /></span><span class="sq-label">Tema Yönetimi</span></a>
+    <a href="/manager/brand"           class="sys-quick"><span class="sq-icon"><x-icon name="tag" size="20" aria-label="etiket" /></span><span class="sq-label">Marka Ayarları</span></a>
+    <a href="{{ route('system.post-deploy.show') }}" class="sys-quick"><span class="sq-icon"><x-icon name="rocket" size="20" aria-label="roket" /></span><span class="sq-label">Post-Deploy Bakımı</span></a>
 </div>
 
 {{-- Portal Önizleme — Manager herhangi bir kullanıcının portalını önizleyebilir --}}
 <section class="panel" style="padding:14px 16px;margin-bottom:12px;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--u-line);">
-        <span style="font-size:11px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.3px;">👁 Portal Önizleme</span>
+        <span style="font-size:11px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.3px;display:inline-flex;align-items:center;gap:5px;"><x-icon name="eye" size="14" aria-label="onizleme" /> Portal Önizleme</span>
         <span style="font-size:11px;color:var(--u-muted);">Öğrenci / Eğitim Danışmanı / Dealer portallarını manager olarak görüntüle</span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
         <div style="background:var(--u-bg);border:1px solid var(--u-line);border-radius:8px;padding:10px 12px;">
-            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;">🎓 Öğrenci Portal</div>
+            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;display:flex;align-items:center;gap:5px;"><x-icon name="graduation-cap" size="14" aria-label="ogrenci" /> Öğrenci Portal</div>
             <div style="display:flex;gap:6px;">
                 <input id="pvStudentId" placeholder="BCS100001..." style="flex:1;min-width:0;border:1px solid var(--u-line);border-radius:6px;padding:6px 10px;font-size:12px;outline:none;">
                 <button class="btn" type="button" onclick="pvOpen('student','pvStudentId')" style="font-size:11px;padding:6px 12px;background:#1e40af;color:#fff;border:none;border-radius:6px;cursor:pointer;">Aç →</button>
@@ -116,7 +116,7 @@
             <div style="font-size:10px;color:var(--u-muted);margin-top:4px;">Öğrenci ID ile</div>
         </div>
         <div style="background:var(--u-bg);border:1px solid var(--u-line);border-radius:8px;padding:10px 12px;">
-            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;">👔 Eğitim Danışmanı Portal</div>
+            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;display:flex;align-items:center;gap:5px;"><x-icon name="user-tie" size="14" aria-label="egitim danismani" /> Eğitim Danışmanı Portal</div>
             <div style="display:flex;gap:6px;">
                 <input id="pvSeniorEmail" placeholder="senior@example.com" style="flex:1;min-width:0;border:1px solid var(--u-line);border-radius:6px;padding:6px 10px;font-size:12px;outline:none;">
                 <button class="btn" type="button" onclick="pvOpen('senior','pvSeniorEmail')" style="font-size:11px;padding:6px 12px;background:#1e40af;color:#fff;border:none;border-radius:6px;cursor:pointer;">Aç →</button>
@@ -124,7 +124,7 @@
             <div style="font-size:10px;color:var(--u-muted);margin-top:4px;">E-posta ile</div>
         </div>
         <div style="background:var(--u-bg);border:1px solid var(--u-line);border-radius:8px;padding:10px 12px;">
-            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;">🤝 Dealer Portal</div>
+            <div style="font-size:10px;font-weight:700;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;display:flex;align-items:center;gap:5px;"><x-icon name="handshake" size="14" aria-label="bayi" /> Dealer Portal</div>
             <div style="display:flex;gap:6px;">
                 <input id="pvDealerCode" placeholder="LEA-000001..." style="flex:1;min-width:0;border:1px solid var(--u-line);border-radius:6px;padding:6px 10px;font-size:12px;outline:none;">
                 <button class="btn" type="button" onclick="pvOpen('dealer','pvDealerCode')" style="font-size:11px;padding:6px 12px;background:#1e40af;color:#fff;border:none;border-radius:6px;cursor:pointer;">Aç →</button>
@@ -145,7 +145,7 @@ window.pvOpen = function(type, inputId) {
 
     {{-- Aktif Oturumlar --}}
     <section class="panel" style="padding:0;overflow:hidden;">
-        <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);">💻 Aktif Oturumlar (Son 30 dk)</div>
+        <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="monitor" size="16" aria-label="monitor" /> Aktif Oturumlar (Son 30 dk)</div>
         @if($recentSessions->isEmpty())
         <div style="padding:30px;text-align:center;color:var(--u-muted);font-size:13px;">Aktif oturum bulunamadı.</div>
         @else
@@ -164,7 +164,7 @@ window.pvOpen = function(type, inputId) {
     {{-- Başarısız İşler --}}
     <section class="panel" style="padding:0;overflow:hidden;">
         <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-weight:700;font-size:var(--tx-sm);">💥 Başarısız İşler</div>
+            <div style="font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="bolt" size="16" aria-label="kritik" /> Başarısız İşler</div>
             @if($failedJobCount > 0)
             <span style="background:#fee2e2;color:#dc2626;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;">{{ $failedJobCount }} bekliyor</span>
             @endif
@@ -192,7 +192,7 @@ window.pvOpen = function(type, inputId) {
 
     {{-- Rol Dağılımı --}}
     <section class="panel" style="padding:0;overflow:hidden;">
-        <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);">👥 Rol Dağılımı</div>
+        <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="users" size="16" aria-label="kullanicilar" /> Rol Dağılımı</div>
         <div style="padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px;">
         @foreach($roleCounts as $role => $cnt)
         <div style="background:var(--u-bg);border:1px solid var(--u-line);border-radius:8px;padding:8px 12px;text-align:center;min-width:90px;">
@@ -206,7 +206,7 @@ window.pvOpen = function(type, inputId) {
     {{-- Son Sistem Olayları --}}
     <section class="panel" style="padding:0;overflow:hidden;">
         <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-weight:700;font-size:var(--tx-sm);">📋 Son Sistem Olayları</div>
+            <div style="font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="clipboard-list" size="16" aria-label="liste" /> Son Sistem Olayları</div>
             <a href="/manager/audit-log" style="font-size:11px;color:#1e40af;font-weight:700;text-decoration:none;">Tümü →</a>
         </div>
         @if($recentEvents->isEmpty())
@@ -235,7 +235,7 @@ window.pvOpen = function(type, inputId) {
 @if($anomalies->isNotEmpty())
 <section class="panel" style="padding:0;overflow:hidden;margin-bottom:12px;">
     <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-weight:700;font-size:var(--tx-sm);">⚠ Güvenlik Anomalileri</div>
+        <div style="font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="alert-triangle" size="16" aria-label="uyari" /> Güvenlik Anomalileri</div>
         <a href="/manager/system/security" style="font-size:11px;color:#1e40af;font-weight:700;text-decoration:none;">Güvenlik Paneli →</a>
     </div>
     @foreach($anomalies as $a)

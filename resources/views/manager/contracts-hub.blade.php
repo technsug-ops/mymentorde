@@ -33,7 +33,8 @@
 .ch-search { flex:1; min-width:220px; position:relative; }
 .ch-search input { width:100%; box-sizing:border-box; font-size:12px; padding:9px 12px 9px 34px; border:1px solid var(--u-line,#e5e9f0); border-radius:7px; background:#fff; color:var(--u-text,#0f172a); outline:none; }
 .ch-search input:focus { border-color:#1e40af; box-shadow:0 0 0 2px rgba(30,64,175,.12); }
-.ch-search::before { content:'🔍'; position:absolute; left:11px; top:50%; transform:translateY(-50%); font-size:13px; opacity:.6; }
+.ch-search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); opacity:.55; color:var(--u-muted,#64748b); pointer-events:none; }
+.ch-search-icon svg { width:14px; height:14px; }
 .ch-view-toggle { display:flex; gap:0; border:1px solid var(--u-line,#e5e9f0); border-radius:7px; overflow:hidden; }
 .ch-view-toggle button { padding:8px 14px; background:#fff; border:none; font-size:11px; font-weight:600; color:var(--u-muted,#64748b); cursor:pointer; transition:all .12s; }
 .ch-view-toggle button:not(:last-child) { border-right:1px solid var(--u-line,#e5e9f0); }
@@ -119,11 +120,11 @@
     'label' => 'Sözleşme Merkezi',
     'title' => 'Sözleşme Yönetimi',
     'sub'   => 'İmzalanmış, bekleyen ve iptal edilen tüm sözleşmeler kategori ağacında. Şablon yönetimi ve yeni kayıt oluşturma da bu merkezden.',
-    'icon'  => '📜',
+    'icon'  => 'scroll',
     'bg'    => 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1400&q=80',
     'tone'  => 'slate',
     'stats' => [
-        ['icon' => '📋', 'text' => ($totalCount ?? 0) . ' toplam kayıt'],
+        ['icon' => 'clipboard-list', 'text' => ($totalCount ?? 0) . ' toplam kayıt'],
     ],
 ])
 
@@ -136,7 +137,7 @@
         {{-- Tümü --}}
         <div class="ch-cat">
             <div class="ch-cat-head active" data-cat="all">
-                <span>📋 Tümü</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="clipboard-list" size="14" /> Tümü</span>
                 <span class="ch-cat-count">{{ $totalCount }}</span>
             </div>
         </div>
@@ -164,11 +165,12 @@
         {{-- Toolbar --}}
         <div class="ch-toolbar">
             <div class="ch-search">
+                <span class="ch-search-icon" aria-hidden="true"><x-icon name="search" size="14" /></span>
                 <input type="text" id="chSearch" placeholder="İsim, soyisim, e-posta veya ID ile ara...">
             </div>
             <div class="ch-view-toggle">
-                <button type="button" id="chViewList" class="active">📋 Liste</button>
-                <button type="button" id="chViewGrid">🔳 Grid</button>
+                <button type="button" id="chViewList" class="active" aria-label="Liste görünümü"><x-icon name="list" size="13" /> Liste</button>
+                <button type="button" id="chViewGrid" aria-label="Grid görünümü"><x-icon name="kanban" size="13" /> Grid</button>
             </div>
             <div class="ch-count-pill"><strong id="chVisibleCount">{{ $rows->count() }}</strong> / {{ $totalCount }}</div>
         </div>
@@ -215,9 +217,9 @@
                                 <td><span class="ch-badge {{ $row['status'] }}">{{ $row['status_label'] }}</span></td>
                                 <td style="text-align:right;white-space:nowrap;">
                                     @if(!empty($row['has_file']) && !empty($row['preview_url']))
-                                        <button type="button" class="btn ch-preview-btn" data-preview-url="{{ $row['preview_url'] }}" data-download-url="{{ $row['download_url'] }}" data-title="{{ $row['title'] }} — {{ $row['owner_name'] }}" style="background:#1e40af;color:#fff;margin-right:4px;border:none;cursor:pointer;">👁 Önizle</button>
+                                        <button type="button" class="btn ch-preview-btn" data-preview-url="{{ $row['preview_url'] }}" data-download-url="{{ $row['download_url'] }}" data-title="{{ $row['title'] }} — {{ $row['owner_name'] }}" style="background:#1e40af;color:#fff;margin-right:4px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;" aria-label="Sözleşmeyi önizle"><x-icon name="eye" size="13" /> Önizle</button>
                                     @else
-                                        <span class="sub" style="margin-right:4px;color:#94a3b8;" title="Dosya yok">📄 —</span>
+                                        <span class="sub" style="margin-right:4px;color:#94a3b8;display:inline-flex;align-items:center;gap:5px;" title="Dosya yok"><x-icon name="file-text" size="13" /> —</span>
                                     @endif
                                     <a class="btn" href="{{ $row['view_url'] }}">Aç</a>
                                 </td>
@@ -253,9 +255,9 @@
                                 </span>
                                 <span style="display:flex;gap:6px;align-items:center;">
                                     @if(!empty($row['has_file']) && !empty($row['preview_url']))
-                                        <button type="button" class="ch-preview-btn" data-preview-url="{{ $row['preview_url'] }}" data-download-url="{{ $row['download_url'] }}" data-title="{{ $row['title'] }} — {{ $row['owner_name'] }}" style="color:#1e40af;font-weight:700;background:none;border:none;cursor:pointer;padding:0;font-size:11px;">👁 Önizle</button>
+                                        <button type="button" class="ch-preview-btn" data-preview-url="{{ $row['preview_url'] }}" data-download-url="{{ $row['download_url'] }}" data-title="{{ $row['title'] }} — {{ $row['owner_name'] }}" style="color:#1e40af;font-weight:700;background:none;border:none;cursor:pointer;padding:0;font-size:11px;display:inline-flex;align-items:center;gap:4px;" aria-label="Sözleşmeyi önizle"><x-icon name="eye" size="12" /> Önizle</button>
                                     @else
-                                        <span style="color:#94a3b8;" title="Dosya yok">📄 —</span>
+                                        <span style="color:#94a3b8;display:inline-flex;align-items:center;gap:4px;" title="Dosya yok"><x-icon name="file-text" size="12" /> —</span>
                                     @endif
                                     <a href="{{ $row['view_url'] }}">Aç →</a>
                                 </span>
@@ -275,7 +277,7 @@
 <section class="ch-files-section">
     <div class="ch-files-head">
         <div>
-            <div class="ch-files-title">📁 Sözleşme Dosyaları</div>
+            <div class="ch-files-title" style="display:flex;align-items:center;gap:8px;"><x-icon name="folder-open" size="17" /> Sözleşme Dosyaları</div>
             <div class="ch-files-sub">PDF yüklü tüm sözleşmeler — önizlemek için tıkla</div>
         </div>
         <span class="ch-count-pill"><strong>{{ $filesOnly->count() }}</strong> dosya</span>
@@ -283,7 +285,7 @@
     <div class="ch-files-grid">
         @foreach($filesOnly as $row)
         <div class="ch-file-card ch-preview-btn" data-preview-url="{{ $row['preview_url'] }}" data-download-url="{{ $row['download_url'] }}" data-title="{{ $row['title'] }} — {{ $row['owner_name'] }}">
-            <div class="ch-file-icon">📄</div>
+            <div class="ch-file-icon" aria-hidden="true"><x-icon name="file-text" size="22" /></div>
             <div class="ch-file-title" title="{{ $row['title'] }}">{{ $row['title'] }}</div>
             <div class="ch-file-meta">
                 <span>{{ $row['contract_no'] }}</span>
@@ -309,9 +311,9 @@
         <div class="ch-modal-head">
             <div class="ch-modal-title" id="chPreviewTitle">Önizleme</div>
             <div class="ch-modal-actions">
-                <a id="chPreviewDownload" class="btn btn-primary" href="#">⬇ İndir</a>
-                <a id="chPreviewOpen" class="btn alt" href="#" target="_blank">↗ Yeni Sekme</a>
-                <button type="button" class="ch-modal-close" id="chPreviewClose">✕</button>
+                <a id="chPreviewDownload" class="btn btn-primary" href="#" style="display:inline-flex;align-items:center;gap:6px;" aria-label="Sözleşmeyi indir"><x-icon name="download" size="14" /> İndir</a>
+                <a id="chPreviewOpen" class="btn alt" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;" aria-label="Yeni sekmede aç"><x-icon name="external-link" size="14" /> Yeni Sekme</a>
+                <button type="button" class="ch-modal-close" id="chPreviewClose" aria-label="Kapat">✕</button>
             </div>
         </div>
         <div class="ch-modal-body">

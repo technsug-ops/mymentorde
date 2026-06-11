@@ -76,7 +76,7 @@
 
     <details class="card">
         <summary class="det-sum">
-            <h3>📖 Kullanım Kılavuzu — E-posta Kampanya İstatistikleri</h3>
+            <h3><x-icon name="book-open" size="18" /> Kullanım Kılavuzu — E-posta Kampanya İstatistikleri</h3>
             <span class="det-chev">▼</span>
         </summary>
         <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;padding-top:12px;">

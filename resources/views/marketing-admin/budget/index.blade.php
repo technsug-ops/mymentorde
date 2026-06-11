@@ -110,7 +110,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
     {{-- Form --}}
     <details class="card" id="bg-form-det" {{ $isUpdate ? 'open' : '' }}>
         <summary class="det-sum">
-            <h3>{{ $isUpdate ? '✏️ Bütçe Güncelle — '.$selected->period : '+ Yeni Bütçe' }}</h3>
+            <h3>@if($isUpdate)<x-icon name="pencil" size="16" /> Bütçe Güncelle — {{ $selected->period }}@else + Yeni Bütçe @endif</h3>
             <span class="det-chev">▼</span>
         </summary>
         <form method="POST" action="{{ $formAction }}" style="display:flex;flex-direction:column;gap:10px;">
@@ -187,7 +187,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
     {{-- Rehber --}}
     <details class="card">
         <summary class="det-sum">
-            <h3>📖 Kullanım Kılavuzu — Pazarlama Bütçesi</h3>
+            <h3><x-icon name="book-open" size="16" /> Kullanım Kılavuzu — Pazarlama Bütçesi</h3>
             <span class="det-chev">▼</span>
         </summary>
         <ol style="margin:0;padding-left:18px;font-size:var(--tx-sm);color:var(--u-muted,#64748b);line-height:1.7;">

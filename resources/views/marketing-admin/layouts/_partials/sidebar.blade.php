@@ -85,13 +85,13 @@
         </a>
         @can('dam.view')
         <a class="{{ request()->is('mktg-admin/digital-assets*') ? 'active' : '' }}" href="{{ route('marketing-admin.dam.index') }}">
-            📁 Dijital Varlıklar
+            <x-icon name="folder" size="16" /> Dijital Varlıklar
         </a>
         @endcan
         @php $isComHub = request()->is('mktg-admin/tasks*') || request()->is('im*'); @endphp
         <div class="nav-group {{ $isComHub ? 'open has-active' : '' }}" id="ng-com-hub">
             <button class="nav-group-btn" type="button" data-toggle-group="ng-com-hub">
-                <span>💬 İletişim Merkezi</span>
+                <span><x-icon name="message-circle" size="14" /> İletişim Merkezi</span>
                 <span class="nav-caret">▾</span>
             </button>
             <div class="nav-sub">
@@ -132,9 +132,9 @@
                 @if($canSeeTracking)
                 <a class="{{ request()->is('mktg-admin/tracking-links*') ? 'active' : '' }}" href="/mktg-admin/tracking-links">Tracking Linkler</a>
                 @endif
-                <a href="{{ route('uni-match.landing') }}" target="_blank" rel="noopener">🎯 UniMatch (Public Wizard)</a>
+                <a href="{{ route('uni-match.landing') }}" target="_blank" rel="noopener"><x-icon name="target" size="14" /> UniMatch (Public Wizard)</a>
                 @can('manager.access')
-                <a href="{{ route('manager.unimatch-funnel.index') }}" class="{{ request()->is('manager/unimatch-funnel*') ? 'active' : '' }}">📊 UniMatch Funnel + CSV</a>
+                <a href="{{ route('manager.unimatch-funnel.index') }}" class="{{ request()->is('manager/unimatch-funnel*') ? 'active' : '' }}"><x-icon name="bar-chart-3" size="14" /> UniMatch Funnel + CSV</a>
                 @endcan
                 @if($canSeeEvents)
                 <a class="{{ request()->is('mktg-admin/events*') ? 'active' : '' }}" href="/mktg-admin/events">Etkinlikler</a>

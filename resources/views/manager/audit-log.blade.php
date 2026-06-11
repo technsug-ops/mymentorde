@@ -41,7 +41,7 @@
 .al-event-badge.default  { background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; }
 
 .al-empty { padding:40px 20px; text-align:center; color:var(--u-muted,#64748b); font-size:13px; }
-.al-empty::before { content:'📋'; display:block; font-size:32px; margin-bottom:8px; }
+.al-empty svg { display:block; margin:0 auto 8px; }
 .al-pagination { margin-top:12px; }
 </style>
 @endpush
@@ -51,7 +51,7 @@
 {{-- Hero --}}
 <div class="al-hero">
     <div class="al-hero-info">
-        <h1 class="title">🔍 Denetim Kayıtları</h1>
+        <h1 class="title" style="display:flex;align-items:center;gap:8px;"><x-icon name="search" size="20" aria-label="arama" /> Denetim Kayıtları</h1>
         <p class="sub">Sistem ve kişisel veri olaylarının kronolojik kaydı — erişim, değişiklik ve admin aksiyonları</p>
     </div>
     <span class="al-hero-badge">GDPR Madde 30</span>
@@ -60,7 +60,7 @@
 {{-- Filter --}}
 <section class="al-filter">
     <div class="al-filter-head">
-        <span class="al-filter-title">🔎 Filtrele</span>
+        <span class="al-filter-title" style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="filter" size="14" aria-label="filtre" /> Filtrele</span>
         <span class="al-filter-sub">Mesaj, olay tipi veya aktör ile ara</span>
     </div>
     <form method="GET" class="al-filter-form">
@@ -80,7 +80,7 @@
 {{-- Table --}}
 <div class="al-table-wrap">
     @if($logs->isEmpty())
-        <div class="al-empty">Filtrelere uygun kayıt bulunamadı.</div>
+        <div class="al-empty"><x-icon name="clipboard-list" size="32" aria-label="liste" />Filtrelere uygun kayıt bulunamadı.</div>
     @else
         <div style="overflow-x:auto;">
             <table class="al-table">

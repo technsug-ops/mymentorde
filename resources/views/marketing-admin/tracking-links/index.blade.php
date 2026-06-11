@@ -109,7 +109,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
     {{-- Rehber --}}
     <details class="card">
         <summary class="det-sum">
-            <h3>📖 Kullanım Kılavuzu — Tracking Links</h3>
+            <h3><x-icon name="book-open" size="16" /> Kullanım Kılavuzu — Tracking Links</h3>
             <span class="det-chev">▼</span>
         </summary>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">

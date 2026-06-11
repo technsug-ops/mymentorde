@@ -5,11 +5,11 @@
 @section('content')
 <div class="page-header">
     <div>
-        <h1>📥 Toplu Aday Öğrenci Aktarımı</h1>
+        <h1 style="display:inline-flex;align-items:center;gap:10px;"><x-icon name="upload" size="24" aria-label="Toplu içeri aktarım" /> Toplu Aday Öğrenci Aktarımı</h1>
         <div class="muted">Eski kayıtlarınızı CSV/Excel dosyasıyla sisteme aktarın</div>
     </div>
-    <a href="{{ route('manager.bulk-import.template') }}" class="btn" style="background:#16a34a;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600;">
-        ⬇ CSV Şablonu İndir
+    <a href="{{ route('manager.bulk-import.template') }}" class="btn" style="background:#16a34a;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px;" aria-label="CSV şablonu indir">
+        <x-icon name="download" size="15" /> CSV Şablonu İndir
     </a>
 </div>
 
@@ -18,13 +18,13 @@
 @endif
 @if($errors->any())
 <div style="margin-bottom:14px;padding:10px 16px;border-radius:8px;background:#fee2e2;color:#991b1b;font-weight:600;font-size:13px;border:1px solid #fecaca;">
-    @foreach($errors->all() as $err)<div>⚠ {{ $err }}</div>@endforeach
+    @foreach($errors->all() as $err)<div>{{ $err }}</div>@endforeach
 </div>
 @endif
 
 {{-- Kullanım Kılavuzu --}}
 <div class="card" style="padding:16px;margin-bottom:16px;border-left:4px solid #3b82f6;">
-    <div class="card-title">📘 Nasıl Kullanılır?</div>
+    <div class="card-title" style="display:flex;align-items:center;gap:8px;"><x-icon name="book-open" size="18" /> Nasıl Kullanılır?</div>
     <ol style="font-size:13px;line-height:1.9;padding-left:20px;margin:8px 0 0;">
         <li>Yukarıdan <strong>CSV Şablonu İndir</strong> butonuna tıklayın.</li>
         <li>İndirilen dosyayı Excel ile açın (UTF-8 uyumlu), eski kayıtlarınızı her satıra ekleyin.</li>
@@ -45,7 +45,7 @@
                style="display:block;width:100%;padding:12px;border:2px dashed var(--u-line);border-radius:8px;background:var(--u-bg);cursor:pointer;font-size:13px;">
         <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;">
             <span class="muted" style="font-size:12px;">Virgül (,) veya noktalı virgül (;) ayraçlı CSV desteklenir.</span>
-            <button type="submit" class="btn" style="background:#1e40af;color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;">🔍 Önizle</button>
+            <button type="submit" class="btn" style="background:#1e40af;color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;display:inline-flex;align-items:center;gap:6px;" aria-label="Önizle"><x-icon name="search" size="15" /> Önizle</button>
         </div>
     </form>
 </div>
@@ -54,12 +54,12 @@
 <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px;">
     <div style="padding:14px 18px;background:linear-gradient(to right, #eff6ff, transparent);border-bottom:1px solid var(--u-line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
         <div>
-            <div style="font-size:14px;font-weight:700;color:#1e40af;">🧪 Önizleme Sonuçları ({{ $preview['total'] }} satır)</div>
+            <div style="font-size:14px;font-weight:700;color:#1e40af;display:flex;align-items:center;gap:7px;"><x-icon name="check-square" size="16" /> Önizleme Sonuçları ({{ $preview['total'] }} satır)</div>
             <div class="muted" style="font-size:11px;">Yüklendi: {{ $preview['uploaded_at'] }}</div>
         </div>
         <div style="display:flex;gap:18px;font-size:13px;font-weight:700;">
             <span style="color:#16a34a;">✓ {{ $preview['ok'] }} geçerli</span>
-            @if($preview['err'] > 0)<span style="color:#dc2626;">⚠ {{ $preview['err'] }} hatalı</span>@endif
+            @if($preview['err'] > 0)<span style="color:#dc2626;">{{ $preview['err'] }} hatalı</span>@endif
             @if($preview['duplicates'] > 0)<span style="color:#d97706;">↪ {{ $preview['duplicates'] }} mükerrer</span>@endif
         </div>
     </div>
@@ -89,7 +89,7 @@
                     @if($item['duplicate'])
                         <span style="background:#fef3c7;color:#92400e;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:700;">↪ MÜKERRER</span>
                     @elseif($hasErr)
-                        <span style="background:#fee2e2;color:#991b1b;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:700;" title="{{ implode(' | ', $item['errors']) }}">⚠ HATA</span>
+                        <span style="background:#fee2e2;color:#991b1b;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:700;" title="{{ implode(' | ', $item['errors']) }}">HATA</span>
                     @else
                         <span style="background:#dcfce7;color:#166534;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:700;">✓ GEÇERLİ</span>
                     @endif
@@ -99,7 +99,7 @@
             <tr style="background:rgba(239,68,68,.04);">
                 <td></td>
                 <td colspan="5" style="padding:4px 10px 8px;font-size:11px;color:#991b1b;">
-                    @foreach($item['errors'] as $err)<div>⚠ {{ $err }}</div>@endforeach
+                    @foreach($item['errors'] as $err)<div>{{ $err }}</div>@endforeach
                 </td>
             </tr>
             @endif

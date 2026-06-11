@@ -32,11 +32,11 @@
 {{-- Kural Listesi --}}
 <section class="panel" style="padding:0;overflow:hidden;">
     <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-weight:700;font-size:var(--tx-sm);">🌐 Mevcut Kurallar ({{ $rules->count() }})</div>
+        <div style="font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="globe" size="16" aria-label="ag" /> Mevcut Kurallar ({{ $rules->count() }})</div>
     </div>
     @if($rules->isEmpty())
     <div style="padding:40px;text-align:center;color:var(--u-muted);font-size:13px;">
-        <div style="font-size:28px;margin-bottom:8px;">🌐</div>
+        <div style="margin-bottom:8px;color:var(--u-muted);"><x-icon name="globe" size="28" aria-label="ag" /></div>
         Henüz IP kuralı tanımlanmamış.
     </div>
     @else
@@ -82,14 +82,14 @@
 
 {{-- Yeni Kural Formu --}}
 <section class="panel">
-    <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:14px;">➕ Yeni Kural Ekle</div>
+    <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:14px;display:flex;align-items:center;gap:6px;"><x-icon name="plus" size="16" aria-label="ekle" /> Yeni Kural Ekle</div>
     <form method="POST" action="/manager/system/ip-rules">
         @csrf
         <div style="margin-bottom:12px;">
             <label style="font-size:11px;font-weight:700;color:var(--u-muted);display:block;margin-bottom:4px;">Kural Türü</label>
             <select name="rule_type" required style="width:100%;padding:8px 12px;border:1.5px solid var(--u-line);border-radius:8px;font-size:13px;background:var(--u-bg);color:var(--u-text);">
-                <option value="whitelist">✅ Beyaz Liste (İzin Ver)</option>
-                <option value="blacklist">🚫 Kara Liste (Engelle)</option>
+                <option value="whitelist">Beyaz Liste (İzin Ver)</option>
+                <option value="blacklist">Kara Liste (Engelle)</option>
             </select>
         </div>
         <div style="margin-bottom:12px;">

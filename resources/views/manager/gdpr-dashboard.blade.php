@@ -69,12 +69,12 @@ $gdprActive = 'policies';
 {{-- Hero --}}
 <div class="gd-hero">
     <div class="gd-hero-info">
-        <h1 class="title">🔒 GDPR / DSGVO Uyum Paneli</h1>
+        <h1 class="title" style="display:inline-flex;align-items:center;gap:8px;"><x-icon name="shield-check" size="20" aria-label="gdpr uyum" /> GDPR / DSGVO Uyum Paneli</h1>
         <p class="sub">Kişisel veri uyumu, rıza yönetimi ve veri saklama politikaları</p>
     </div>
     <div class="gd-hero-actions">
-        <a class="btn alt" href="{{ url('/manager/requests') }}">🗑 Silme Talepleri</a>
-        <a class="btn alt" href="{{ url('/config') }}#gdpr">⚙️ Ayarlar</a>
+        <a class="btn alt" href="{{ url('/manager/requests') }}" style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="trash" size="14" aria-label="silme" /> Silme Talepleri</a>
+        <a class="btn alt" href="{{ url('/config') }}#gdpr" style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="settings" size="14" aria-label="ayarlar" /> Ayarlar</a>
     </div>
 </div>
 
@@ -102,7 +102,7 @@ $gdprActive = 'policies';
 @if($pendingErasures > 0)
 <div class="gd-alert">
     <div>
-        <div class="gd-alert-title">⚠️ {{ $pendingErasures }} bekleyen silme talebi var</div>
+        <div class="gd-alert-title" style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="alert-triangle" size="14" aria-label="uyarı" /> {{ $pendingErasures }} bekleyen silme talebi var</div>
         <div class="gd-alert-sub">GDPR kapsamındaki silme talepleri 30 gün içinde işlenmelidir.</div>
     </div>
     <a href="{{ url('/manager/requests') }}" class="btn warn">İncele →</a>
@@ -112,7 +112,7 @@ $gdprActive = 'policies';
 <div class="grid2" style="gap:12px;margin-bottom:12px;">
     {{-- Rıza Kayıtları --}}
     <section class="gd-section">
-        <h3>📋 Rıza Kayıtları</h3>
+        <h3 style="display:flex;align-items:center;gap:6px;"><x-icon name="clipboard-list" size="16" aria-label="rıza kayıtları" /> Rıza Kayıtları</h3>
 
         <div class="gd-consent-head">
             <span class="gd-consent-label">Aktif rıza oranı</span>
@@ -140,23 +140,23 @@ $gdprActive = 'policies';
 
     {{-- Hızlı Erişim --}}
     <section class="gd-section">
-        <h3>⚡ Hızlı Erişim</h3>
+        <h3 style="display:flex;align-items:center;gap:6px;"><x-icon name="zap" size="16" aria-label="hızlı erişim" /> Hızlı Erişim</h3>
         <div style="display:flex;flex-direction:column;gap:8px;">
             <a class="gdpr-link-btn" href="{{ url('/manager/requests') }}">
-                🗑️ Silme Talepleri
+                <x-icon name="trash" size="14" aria-label="silme" /> Silme Talepleri
                 @if($pendingErasures > 0)
                 <span class="badge warn" style="margin-left:auto;font-size:10px;">{{ $pendingErasures }}</span>
                 @endif
             </a>
             <a class="gdpr-link-btn" href="{{ url('/config') }}#gdpr">
-                ⚙️ Veri Saklama Ayarları
+                <x-icon name="settings" size="14" aria-label="ayarlar" /> Veri Saklama Ayarları
             </a>
             <a class="gdpr-link-btn" href="{{ url('/manager/notification-stats') }}">
-                📊 Bildirim İstatistikleri
+                <x-icon name="bar-chart-3" size="14" aria-label="istatistikler" /> Bildirim İstatistikleri
             </a>
         </div>
         <div class="gd-note">
-            <div class="gd-note-title">📋 GDPR / DSGVO Uyum Notu</div>
+            <div class="gd-note-title" style="display:inline-flex;align-items:center;gap:6px;"><x-icon name="info" size="14" aria-label="uyum notu" /> GDPR / DSGVO Uyum Notu</div>
             <div class="gd-note-body">
                 Veri saklama politikaları her gece 03:00'te otomatik çalışır.
                 Silme talepleri 30 gün içinde işlenmelidir.
@@ -167,7 +167,7 @@ $gdprActive = 'policies';
 
 {{-- Veri Saklama Politikaları --}}
 <section class="gd-section">
-    <h3>🗄️ Aktif Veri Saklama Politikaları</h3>
+    <h3 style="display:flex;align-items:center;gap:6px;"><x-icon name="archive" size="16" aria-label="veri saklama" /> Aktif Veri Saklama Politikaları</h3>
     @if($retentionPolicies->isEmpty())
     <div style="padding:24px;text-align:center;">
         <div style="font-size:12px;color:var(--u-muted,#64748b);margin-bottom:8px;">Henüz politika tanımlanmamış.</div>
@@ -192,32 +192,32 @@ $gdprActive = 'policies';
 {{-- ════ YASAL METİN EDİTÖRÜ (3 kind × 3 locale) ════ --}}
 @php
     $kinds = [
-        'privacy' => ['emoji' => '📜', 'label' => 'Gizlilik / Veri Koruma', 'placeholders' => [
+        'privacy' => ['icon' => 'scroll', 'label' => 'Gizlilik / Veri Koruma', 'placeholders' => [
             'tr' => 'Kişisel Verilerin Korunması Aydınlatma Metni (KVKK)',
             'de' => 'Datenschutzerklärung (DSGVO)',
             'en' => 'Privacy Policy (GDPR)',
         ]],
-        'cookie'  => ['emoji' => '🍪', 'label' => 'Çerez Politikası', 'placeholders' => [
+        'cookie'  => ['icon' => 'circle-dot', 'label' => 'Çerez Politikası', 'placeholders' => [
             'tr' => 'Çerez Politikası',
             'de' => 'Cookie-Richtlinie',
             'en' => 'Cookie Policy',
         ]],
-        'terms'   => ['emoji' => '📋', 'label' => 'Kullanım Şartları', 'placeholders' => [
+        'terms'   => ['icon' => 'clipboard-list', 'label' => 'Kullanım Şartları', 'placeholders' => [
             'tr' => 'Kullanım Şartları ve Hizmet Sözleşmesi',
             'de' => 'Nutzungsbedingungen / AGB',
             'en' => 'Terms of Use / Service Agreement',
         ]],
-        'imprint' => ['emoji' => '🏛️', 'label' => 'Impressum / Künye', 'placeholders' => [
+        'imprint' => ['icon' => 'landmark', 'label' => 'Impressum / Künye', 'placeholders' => [
             'tr' => 'Künye / Şirket Bilgileri',
             'de' => 'Impressum (DDG § 5 zorunlu)',
             'en' => 'Imprint / Company Info',
         ]],
-        'tom' => ['emoji' => '🛡️', 'label' => 'TOM — Teknik ve Organizasyonel Önlemler', 'placeholders' => [
+        'tom' => ['icon' => 'shield', 'label' => 'TOM — Teknik ve Organizasyonel Önlemler', 'placeholders' => [
             'tr' => 'Erişim kontrolü, şifreleme, yedekleme, çalışan eğitimi, fiziksel güvenlik...',
             'de' => 'TOM nach Art. 32 DSGVO — Zugangskontrolle, Verschlüsselung, Backup...',
             'en' => 'Technical and Organizational Measures (Art. 32 GDPR)',
         ]],
-        'incident_plan' => ['emoji' => '🚨', 'label' => 'Veri İhlali Acil Eylem Planı', 'placeholders' => [
+        'incident_plan' => ['icon' => 'alert-triangle', 'label' => 'Veri İhlali Acil Eylem Planı', 'placeholders' => [
             'tr' => 'Veri ihlali tespiti → 72 saat bildirim → LDI NRW şablonu...',
             'de' => 'Datenpannen-Notfallplan (Art. 33-34 DSGVO) — 72h Meldepflicht...',
             'en' => 'Data Breach Notification Plan (Art. 33-34 GDPR)',
@@ -236,7 +236,7 @@ $gdprActive = 'policies';
 
     @foreach($kinds as $kindKey => $kindMeta)
         <section class="gd-section">
-            <h3>{{ $kindMeta['emoji'] }} {{ $kindMeta['label'] }}
+            <h3 style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><x-icon name="{{ $kindMeta['icon'] }}" size="16" aria-label="{{ $kindMeta['label'] }}" /> {{ $kindMeta['label'] }}
                 <span style="font-size:11px;font-weight:600;color:var(--u-muted,#64748b);margin-left:8px;">— 3 dil</span>
             </h3>
 
@@ -288,11 +288,11 @@ $gdprActive = 'policies';
 
     {{-- Sticky save bar --}}
     <div style="position:sticky;bottom:0;background:var(--u-card,#fff);padding:14px 18px;border-top:1px solid var(--u-line,#e5e9f0);border-radius:0 0 10px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 -2px 8px rgba(0,0,0,.04);margin-top:14px;">
-        <div style="font-size:12px;color:var(--u-muted,#64748b);">
-            💾 Kaydet butonu 6 yasal metnin (Gizlilik · Çerez · Kullanım · Impressum · TOM · Acil Plan) TR/DE/EN dillerini topluca günceller (toplam 18 alan).
+        <div style="font-size:12px;color:var(--u-muted,#64748b);display:inline-flex;align-items:center;gap:6px;">
+            <x-icon name="save" size="14" aria-label="kaydet" /> Kaydet butonu 6 yasal metnin (Gizlilik · Çerez · Kullanım · Impressum · TOM · Acil Plan) TR/DE/EN dillerini topluca günceller (toplam 18 alan).
         </div>
-        <button type="submit" class="btn ok" style="padding:10px 24px;font-size:13px;font-weight:700;">
-            💾 Tümünü Kaydet
+        <button type="submit" class="btn ok" style="padding:10px 24px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;">
+            <x-icon name="save" size="16" aria-label="kaydet" /> Tümünü Kaydet
         </button>
     </div>
 </form>

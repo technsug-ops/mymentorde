@@ -80,12 +80,12 @@
     {{-- Rehber --}}
     <details class="card">
         <summary class="det-sum">
-            <h3>📖 Kullanım Kılavuzu — Oluşturulan Raporlar</h3>
+            <h3><x-icon name="book-open" size="16" /> Kullanım Kılavuzu — Oluşturulan Raporlar</h3>
             <span class="det-chev">▼</span>
         </summary>
         <div style="padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
             <div>
-                <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">📁 Rapor Arşivi</strong>
+                <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="folder" size="14" /> Rapor Arşivi</strong>
                 <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                     <li>KPI Dashboard'dan oluşturulan tüm snapshot'lar burada arşivlenir</li>
                     <li>Her rapor: dönem aralığı, oluşturan kişi ve tarih içerir</li>

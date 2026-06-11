@@ -14,7 +14,7 @@
     'label' => 'Performans Özeti',
     'title' => 'KPI Dashboard',
     'sub'   => 'Dönem bazlı pazarlama ve satış performans metrikleri. Hedef vs gerçek karşılaştırması, trendler ve sapma uyarıları.',
-    'icon'  => '📊',
+    'icon'  => 'bar-chart-3',
     'bg'    => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=80',
     'tone'  => 'teal',
     'stats' => [],
@@ -398,7 +398,7 @@ var _kpiExtProv  = {!! json_encode($_jsExtProv) !!};
     {{-- 9. REHBER --}}
     <details class="card">
         <summary class="det-sum">
-            <h3>📖 Kullanım Kılavuzu — KPI Dashboard</h3>
+            <h3><x-icon name="book-open" size="16" /> Kullanım Kılavuzu — KPI Dashboard</h3>
             <span class="det-chev">▼</span>
         </summary>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:var(--tx-sm);line-height:1.7;color:var(--u-muted,#64748b);">

@@ -94,9 +94,9 @@ $maxScore = $leads->max('lead_score') ?: 100;
                     @endphp
                     <tr>
                         <td style="font-size:var(--tx-xs);color:var(--u-muted,#64748b);font-weight:700;{{ $rankStyle }}">
-                            @if($rank === 1) 🥇
-                            @elseif($rank === 2) 🥈
-                            @elseif($rank === 3) 🥉
+                            @if($rank === 1) <x-icon name="award" size="18" />
+                            @elseif($rank === 2) <x-icon name="award" size="16" />
+                            @elseif($rank === 3) <x-icon name="award" size="14" />
                             @else {{ $rank }}
                             @endif
                         </td>
@@ -139,12 +139,12 @@ $maxScore = $leads->max('lead_score') ?: 100;
 
 <details class="card" style="margin-top:0;">
     <summary class="det-sum">
-        <h3>📖 Kullanım Kılavuzu — Lead Skor Sıralaması</h3>
+        <h3><x-icon name="book-open" size="16" /> Kullanım Kılavuzu — Lead Skor Sıralaması</h3>
         <span class="det-chev">▼</span>
     </summary>
     <div style="padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div>
-            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">🏆 Tier Sistemi</strong>
+            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="trophy" size="14" /> Tier Sistemi</strong>
             <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                 <li><strong>Hot (80+):</strong> Satış odaklı acil temas — öncelikli takip</li>
                 <li><strong>Warm (50–79):</strong> Nitelikli lead — besleyici içerik gönder</li>
@@ -152,7 +152,7 @@ $maxScore = $leads->max('lead_score') ?: 100;
             </ul>
         </div>
         <div>
-            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;">📈 Aksiyon Rehberi</strong>
+            <strong style="font-size:var(--tx-xs);display:block;margin-bottom:6px;"><x-icon name="trending-up" size="14" /> Aksiyon Rehberi</strong>
             <ul style="margin:0;padding-left:16px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);line-height:1.8;">
                 <li>Hot leade 24 saat içinde temas et — yanıt oranı hızla düşer</li>
                 <li>Warm leadi ısıtmak için vaka çalışması ve referans paylaş</li>

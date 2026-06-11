@@ -49,7 +49,7 @@
 
         {{-- Atanmış Kullanıcılar --}}
         <section class="panel" style="padding:0;overflow:hidden;">
-            <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);">👥 Atanmış Kullanıcılar ({{ $assignments->count() }})</div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="users" size="16" aria-label="atanmış kullanıcılar" /> Atanmış Kullanıcılar ({{ $assignments->count() }})</div>
             @if($assignments->isEmpty())
             <div style="padding:30px;text-align:center;color:var(--u-muted);font-size:13px;">Bu şablona henüz kullanıcı atanmadı.</div>
             @else
@@ -78,7 +78,7 @@
         {{-- Kullanıcı Atama --}}
         @if($assignableUsers->isNotEmpty())
         <section class="panel">
-            <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:12px;">➕ Kullanıcı Ata</div>
+            <div style="font-weight:700;font-size:var(--tx-sm);margin-bottom:12px;display:inline-flex;align-items:center;gap:6px;"><x-icon name="plus" size="16" aria-label="kullanıcı ata" /> Kullanıcı Ata</div>
             <form method="POST" action="/manager/system/roles/users/0/assign" id="assignForm">
                 @csrf
                 <input type="hidden" name="role_template_id" value="{{ $template->id }}">
@@ -101,7 +101,7 @@
     {{-- Sağ: İzinler --}}
     <div style="display:flex;flex-direction:column;gap:12px;">
         <section class="panel" style="padding:0;overflow:hidden;">
-            <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);">🔑 Şablon İzinleri</div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);font-weight:700;font-size:var(--tx-sm);display:flex;align-items:center;gap:6px;"><x-icon name="key-round" size="16" aria-label="şablon izinleri" /> Şablon İzinleri</div>
 
             @if(!$template->is_system)
             {{-- Düzenlenebilir form --}}
@@ -130,8 +130,8 @@
 
             @else
             {{-- Sistem şablonu — sadece görüntüle --}}
-            <div style="padding:8px 14px;background:#fef9c3;border-bottom:1px solid #fde68a;font-size:11px;color:#92400e;">
-                ⚠ Sistem şablonları düzenlenemez.
+            <div style="padding:8px 14px;background:#fef9c3;border-bottom:1px solid #fde68a;font-size:11px;color:#92400e;display:flex;align-items:center;gap:6px;">
+                <x-icon name="alert-triangle" size="14" aria-label="uyarı" /> Sistem şablonları düzenlenemez.
             </div>
             <div style="padding:14px 16px;display:flex;flex-direction:column;gap:4px;">
             @if($template->permissions->isEmpty())

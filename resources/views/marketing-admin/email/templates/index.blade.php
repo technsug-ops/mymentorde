@@ -95,7 +95,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
     {{-- Rehber --}}
     <details class="card">
         <summary class="det-sum">
-            <h3>📖 Kullanım Kılavuzu — E-posta Şablonları</h3>
+            <h3><x-icon name="book-open" size="18" /> Kullanım Kılavuzu — E-posta Şablonları</h3>
             <span class="det-chev">▼</span>
         </summary>
         <p style="font-size:var(--tx-sm);color:var(--u-muted,#64748b);margin:0 0 14px;line-height:1.6;">
@@ -119,7 +119,7 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
                     <div style="display:flex;gap:8px;padding:8px 10px;"><span style="min-width:80px;font-weight:600;">Send Log</span><span style="color:var(--u-muted);">Her e-postanın gönderim geçmişi</span></div>
                 </div>
                 <div style="margin-top:10px;background:color-mix(in srgb,var(--u-brand,#1e40af) 5%,var(--u-card,#fff));border:1px solid var(--u-line,#e2e8f0);border-radius:8px;padding:10px;font-size:var(--tx-xs);color:var(--u-muted,#64748b);">
-                    💡 Template'lerde <code style="background:var(--u-line,#e2e8f0);padding:1px 4px;border-radius:3px;">@{{name}}</code>, <code style="background:var(--u-line,#e2e8f0);padding:1px 4px;border-radius:3px;">@{{email}}</code> gibi değişkenler gönderim sırasında otomatik doldurulur.
+                    <x-icon name="lightbulb" size="14" /> Template'lerde <code style="background:var(--u-line,#e2e8f0);padding:1px 4px;border-radius:3px;">@{{name}}</code>, <code style="background:var(--u-line,#e2e8f0);padding:1px 4px;border-radius:3px;">@{{email}}</code> gibi değişkenler gönderim sırasında otomatik doldurulur.
                 </div>
             </div>
         </div>
@@ -137,7 +137,13 @@ details[open] .det-sum { margin-bottom:14px; padding-bottom:10px; border-bottom:
         @endphp
         <details class="card" {{ $isEdit ? 'open' : '' }}>
             <summary class="det-sum">
-                <h3>{{ $isEdit ? '✏️ Template Düzenle #'.$editing->id : '+ Yeni Template' }}</h3>
+                <h3>
+                    @if($isEdit)
+                        <x-icon name="pencil" size="18" /> Template Düzenle #{{ $editing->id }}
+                    @else
+                        <x-icon name="plus" size="18" /> Yeni Template
+                    @endif
+                </h3>
                 <span class="det-chev">▼</span>
             </summary>
             <form method="POST" action="{{ $formAction }}" style="margin-top:12px;">
