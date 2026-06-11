@@ -762,6 +762,7 @@ footer a:hover { color:#fff; }
             <a href="#portallar">Portallar</a>
             <a href="#moduller">Modüller</a>
             <a href="#ai">AI Asistan</a>
+            <a href="/randevu">Uzmanlar</a>
             <a href="#fiyat">Fiyatlandırma</a>
             <a href="#partner">Partner</a>
         </div>

@@ -438,7 +438,7 @@
                 <div class="nav-section-label">Randevu</div>
                 <a href="/manager/booking-pricing"
                    class="nav-link {{ request()->is('manager/booking-pricing*') ? 'active' : '' }}">
-                    <span class="nav-icon">💰</span> Randevu Fiyatlandırması
+                    <span class="nav-icon"><x-icon name="euro" size="16" /></span> Fiyatlandırma
                 </a>
             </div>
             @endmodule

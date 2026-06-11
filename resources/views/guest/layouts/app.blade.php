@@ -249,6 +249,10 @@
                    class="nav-link {{ request()->is('guest/randevu','randevu','book*') ? 'active' : '' }}">
                     <x-icon name="calendar" size="18" class="nav-icon" aria-label="Randevu Al" /> Randevu Al
                 </a>
+                <a href="{{ route('guest.booking.directory') }}"
+                   class="nav-link {{ request()->routeIs('guest.booking.directory*') ? 'active' : '' }}">
+                    <x-icon name="users" size="18" class="nav-icon" aria-label="Uzman Havuzu" /> Uzman Havuzu
+                </a>
                 @endpageVisible
                 @endmodule
                 @pageVisible('messages')

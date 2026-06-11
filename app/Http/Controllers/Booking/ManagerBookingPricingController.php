@@ -51,14 +51,31 @@ class ManagerBookingPricingController extends Controller
     public function updatePricing(Request $request): RedirectResponse
     {
         $cid = $this->companyId();
+
+        // price_eur alias'ını price_net'e normalize et (form v1 cockpit price_eur kullanıyor)
+        if ($request->has('rules')) {
+            $rules = $request->input('rules', []);
+            if (is_array($rules)) {
+                foreach ($rules as $i => $r) {
+                    if (!isset($r['price_net']) && isset($r['price_eur'])) {
+                        $rules[$i]['price_net'] = $r['price_eur'];
+                    }
+                }
+                $request->merge(['rules' => $rules]);
+            }
+        }
+
         $data = $request->validate([
-            'is_free'                   => 'nullable|boolean',
-            'currency'                  => 'required|string|size:3',
-            'cancellation_window_hours' => 'required|integer|min:0|max:168',
-            'rules'                     => 'required|array|min:1',
-            'rules.*.duration'          => 'required|integer|min:15|max:240',
-            'rules.*.price_net'         => 'required|numeric|min:0|max:9999',
-            'rules.*.enabled'           => 'nullable|boolean',
+            'is_free'                    => 'nullable|boolean',
+            'currency'                   => 'required|string|size:3',
+            'cancellation_window_hours'  => 'required|integer|min:0|max:168',
+            'allow_invitee_reschedule'   => 'nullable|boolean',
+            'max_advance_booking_days'   => 'required|integer|min:1|max:365',
+            'booking_terms'              => 'nullable|string|max:4000',
+            'rules'                      => 'required|array|min:1',
+            'rules.*.duration'           => 'required|integer|min:15|max:240',
+            'rules.*.price_net'          => 'required|numeric|min:0|max:999',
+            'rules.*.enabled'            => 'nullable|boolean',
         ]);
 
         $rules = collect($data['rules'])
@@ -72,11 +89,16 @@ class ManagerBookingPricingController extends Controller
 
         $pricing = $this->ensurePricing($cid);
         $pricing->update([
-            'is_free'                   => (bool) ($data['is_free'] ?? false),
-            'currency'                  => strtoupper($data['currency']),
-            'cancellation_window_hours' => (int) $data['cancellation_window_hours'],
-            'pricing_rules'             => $rules,
+            'is_free'                    => (bool) ($data['is_free'] ?? false),
+            'currency'                   => strtoupper($data['currency']),
+            'cancellation_window_hours'  => (int) $data['cancellation_window_hours'],
+            'allow_invitee_reschedule'   => (bool) ($data['allow_invitee_reschedule'] ?? false),
+            'max_advance_booking_days'   => (int) $data['max_advance_booking_days'],
+            'booking_terms'              => $data['booking_terms'] ?? null,
+            'pricing_rules'              => $rules,
         ]);
+
+        CompanyBookingPricing::flushCache($cid);
 
         return back()->with('status', 'Fiyatlandırma güncellendi.');
     }
@@ -204,10 +226,13 @@ class ManagerBookingPricingController extends Controller
         return CompanyBookingPricing::firstOrCreate(
             ['company_id' => $cid],
             [
-                'is_free'                   => true,
-                'currency'                  => 'EUR',
-                'cancellation_window_hours' => 24,
-                'pricing_rules'             => CompanyBookingPricing::defaultRules(),
+                'is_free'                    => true,
+                'currency'                   => 'EUR',
+                'cancellation_window_hours'  => 24,
+                'allow_invitee_reschedule'   => true,
+                'max_advance_booking_days'   => 60,
+                'booking_terms'              => null,
+                'pricing_rules'              => CompanyBookingPricing::defaultRules(),
             ]
         );
     }

@@ -233,6 +233,12 @@
                    class="nav-link {{ request()->is('student/appointments*') ? 'active' : '' }}">
                     <x-icon name="calendar" size="18" class="nav-icon" aria-label="Randevular" /> Randevular
                 </a>
+                @module('booking')
+                <a href="/student/booking-directory"
+                   class="nav-link {{ request()->is('student/booking-directory*') ? 'active' : '' }}">
+                    <x-icon name="users" size="18" class="nav-icon" aria-label="Uzman Havuzu" /> Uzman Havuzu
+                </a>
+                @endmodule
                 <a href="/student/calendar"
                    class="nav-link {{ request()->is('student/calendar*') ? 'active' : '' }}">
                     <x-icon name="calendar" size="18" class="nav-icon" aria-label="Takvimim" /> Takvimim

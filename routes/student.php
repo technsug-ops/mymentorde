@@ -182,4 +182,14 @@ Route::middleware(['company.context', 'auth', 'verified', 'student.role', 'throt
     // ── Kılavuz ──────────────────────────────────────────────────────────────
     Route::get('/student/help', [HandbookController::class, 'student'])->name('student.handbook');
     Route::get('/student/help/download', [HandbookController::class, 'download'])->defaults('role', 'student')->name('student.handbook.download');
+
+    // ── Marketplace Phase 4: Senior Directory ────────────────────────────────
+    // Sözleşmeli student için ücretsiz; paylaşımlı havuzdan ek danışman seçimi
+    Route::prefix('/student/booking-directory')->middleware(['module:booking'])->group(function (): void {
+        $pbc = \App\Http\Controllers\Booking\PortalBookingController::class;
+        Route::get('/',                [$pbc, 'directory'])->middleware('throttle:120,1')->name('student.booking.directory');
+        Route::get('/{slug}',          [$pbc, 'show'])->middleware('throttle:120,1')->name('student.booking.directory.show');
+        Route::post('/{slug}/slots',   [$pbc, 'slots'])->middleware('throttle:120,1')->name('student.booking.directory.slots');
+        Route::post('/{slug}/confirm', [$pbc, 'confirm'])->middleware('throttle:30,1')->name('student.booking.directory.confirm');
+    });
 });

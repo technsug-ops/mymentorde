@@ -26,6 +26,13 @@ class SeniorBookingSetting extends Model
         'display_name',
         'welcome_message',
         'is_active',
+        // Marketplace Phase 4 — public /randevu directory meta
+        'tagline',
+        'bio',
+        'languages',
+        'topics',
+        'avatar_url',
+        'directory_order',
     ];
 
     protected $casts = [
@@ -35,6 +42,9 @@ class SeniorBookingSetting extends Model
         'max_future_days'  => 'integer',
         'is_public'        => 'boolean',
         'is_active'        => 'boolean',
+        'languages'        => 'array',
+        'topics'           => 'array',
+        'directory_order'  => 'integer',
     ];
 
     public function senior(): BelongsTo

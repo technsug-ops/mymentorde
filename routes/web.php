@@ -325,7 +325,11 @@ Route::middleware(['company.context', 'module:discount_codes'])->group(function 
 // aksi halde login student/guest gereklidir (controller kontrol eder).
 Route::middleware(['company.context', 'module:booking'])->group(function (): void {
     $bc = \App\Http\Controllers\Booking\PublicBookingController::class;
-    Route::get('/randevu', [\App\Http\Controllers\Booking\BookingLandingController::class, 'index'])
+    // Marketplace Phase 4 — modern senior directory (yeni controller)
+    Route::get('/randevu', [\App\Http\Controllers\Booking\PublicBookingDirectoryController::class, 'index'])
+        ->middleware('throttle:60,1')->name('booking.public.directory');
+    // Eski track-bazlı landing — yedek olarak ayrı URL'de erişilebilir (waitlist akışı kullanır)
+    Route::get('/randevu/kategori', [\App\Http\Controllers\Booking\BookingLandingController::class, 'index'])
         ->middleware('throttle:60,1')->name('booking.landing');
     Route::post('/randevu/sirada', [\App\Http\Controllers\Booking\BookingLandingController::class, 'joinWaitlist'])
         ->middleware('throttle:5,1')->name('booking.waitlist.join');

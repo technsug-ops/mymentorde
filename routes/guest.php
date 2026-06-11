@@ -130,4 +130,14 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     // ── Kılavuz ──────────────────────────────────────────────────────────────
     Route::get('/help', [HandbookController::class, 'guest'])->name('guest.handbook');
     Route::get('/help/download', [HandbookController::class, 'download'])->defaults('role', 'guest')->name('guest.handbook.download');
+
+    // ── Marketplace Phase 4: Senior Directory ────────────────────────────────
+    // Paylaşımlı havuzdan senior seçimi (mevcut /guest/randevu atanmış advisor'a gider)
+    Route::prefix('/booking-directory')->middleware(['module:booking', 'page.visible:appointments'])->group(function (): void {
+        $pbc = \App\Http\Controllers\Booking\PortalBookingController::class;
+        Route::get('/',                  [$pbc, 'directory'])->middleware('throttle:120,1')->name('guest.booking.directory');
+        Route::get('/{slug}',            [$pbc, 'show'])->middleware('throttle:120,1')->name('guest.booking.directory.show');
+        Route::post('/{slug}/slots',     [$pbc, 'slots'])->middleware('throttle:120,1')->name('guest.booking.directory.slots');
+        Route::post('/{slug}/confirm',   [$pbc, 'confirm'])->middleware('throttle:30,1')->name('guest.booking.directory.confirm');
+    });
 });
