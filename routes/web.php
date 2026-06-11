@@ -812,12 +812,48 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
-        // Gemini API key'i temizle: bas/son tirnak ('"' veya "'") ve gorunmez
-        // boslukları (NBSP, ZWNJ, ZWSP, normal whitespace) strip et.
-        // 9 Mayis kayit sirasinda key sarili (quoted) saklanmis — Google API
-        // malformed key olarak reddediyor.
-        // Kullanim: /_deploy/run-pending?cleanup=fix-gemini-key-quotes
+        // Gemini key JSON format kurtarma — kritik bug fix.
+        // marketing_admin_settings.setting_value JSON kolonu, dogru format: '"AIzaSy..."'
+        // (tirnak DAHIL JSON string). Onceki fix-gemini-key-quotes endpoint tirnaklari
+        // sildi -> JSON parse fail -> CHECK constraint violation (MySQL 4025).
+        // Bu endpoint: mevcut value'yu plaintext olarak alir, json_encode ile tirnaklar.
+        // Kullanim: /_deploy/run-pending?cleanup=restore-gemini-json-format
+        if ($request->query('cleanup') === 'restore-gemini-json-format') {
+            $rows = DB::table('marketing_admin_settings')
+                ->where('setting_key', 'ai_labs_gemini_key')
+                ->get();
+            $fixed = 0;
+            foreach ($rows as $row) {
+                $raw = (string) $row->setting_value;
+                // Eger zaten valid JSON ise dokunma
+                $decoded = json_decode($raw, true);
+                if (is_string($decoded) && $decoded !== '') {
+                    $output .= ">>> restore-gemini-json-format: id={$row->id} zaten valid JSON, atlandi\n";
+                    continue;
+                }
+                // Plaintext value -> JSON-encode (tirnaklarla sar)
+                $clean = trim($raw, "\"' \t\n\r\0\x0B");
+                $jsonValue = json_encode($clean, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                DB::statement(
+                    "UPDATE marketing_admin_settings SET setting_value = ?, updated_at = NOW() WHERE id = ?",
+                    [$jsonValue, $row->id]
+                );
+                $fixed++;
+                $output .= ">>> restore-gemini-json-format: id={$row->id} JSON formatina restore edildi (" . strlen($clean) . " char)\n";
+            }
+            $output .= ">>> restore-gemini-json-format: {$fixed} satir duzeltildi\n";
+        }
+
+        // [DEPRECATED — KULLANMA] Gemini API key tirnak temizleme.
+        // setting_value JSON kolonu oldugu icin tirnak silmek JSON formatini bozar.
+        // CHECK constraint violation (4025) verir. Kullanmak yerine: restore-gemini-json-format
+        // veya UI'dan yeniden paste etme.
         if ($request->query('cleanup') === 'fix-gemini-key-quotes') {
+            $output .= ">>> fix-gemini-key-quotes: DEPRECATED. JSON kolonu boznur. Kullan: ?cleanup=restore-gemini-json-format\n";
+        }
+
+        // [DISABLED — eski kullanim ornegi]
+        if (false && $request->query('cleanup') === 'fix-gemini-key-quotes') {
             $rows = DB::table('marketing_admin_settings')
                 ->where('setting_key', 'ai_labs_gemini_key')
                 ->get();
@@ -856,9 +892,13 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             if (!$row || empty($row->setting_value)) {
                 $output .= ">>> test-gemini: ai_labs_gemini_key kaydedilmemis\n";
             } else {
-                $key = (string) $row->setting_value;
+                // setting_value JSON kolonu — decode et, '"AIzaSy..."' -> 'AIzaSy...'
+                $rawValue = (string) $row->setting_value;
+                $decoded  = json_decode($rawValue, true);
+                $key      = is_string($decoded) ? $decoded : $rawValue;
                 $output .= ">>> test-gemini:\n";
-                $output .= "    key length: " . strlen($key) . "\n";
+                $output .= "    raw length: " . strlen($rawValue) . " (JSON ile)\n";
+                $output .= "    actual key length: " . strlen($key) . "\n";
                 $output .= "    key head: '" . substr($key, 0, 6) . "...'\n";
                 $url = 'https://generativelanguage.googleapis.com/v1beta/models?key=' . urlencode($key);
                 $ch = curl_init($url);
