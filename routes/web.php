@@ -900,6 +900,30 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // Sadece 'discover' page key'i icin tum rollere ait visibility kayitlarini sil.
+        // 404 donen /guest/discover, /student/discover icin hizli kurtarma.
+        // Default TRUE mantigi geri gelir (page_visibility module kapali ise zaten TRUE).
+        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=fix-discover-visibility
+        if ($request->query('cleanup') === 'fix-discover-visibility') {
+            if (Schema::hasTable('role_page_visibility')) {
+                $beforeRows = DB::table('role_page_visibility')
+                    ->where('page_key', 'discover')
+                    ->get(['company_id', 'role', 'page_key', 'is_visible']);
+                $output .= ">>> fix-discover-visibility:\n";
+                foreach ($beforeRows as $r) {
+                    $output .= "    once: company {$r->company_id} | {$r->role} | discover = " . ($r->is_visible ? 'TRUE' : 'FALSE') . "\n";
+                }
+                $deleted = DB::table('role_page_visibility')->where('page_key', 'discover')->delete();
+                $output .= "    {$deleted} satir silindi (default TRUE'ya dondu)\n";
+                if (Schema::hasTable('companies')) {
+                    DB::table('companies')->select('id')->get()->each(function ($c) {
+                        \Illuminate\Support\Facades\Cache::forget("page_visibility:{$c->id}");
+                    });
+                    $output .= "    page_visibility cache flush edildi\n";
+                }
+            }
+        }
+
         // SOS: tum role_page_visibility kayitlarini sil (manager UI'sinden yanlis kayit
         // yazildiginda default-true mantigina geri don). Bu YIKICI — manager'in
         // kasten kapattigi sayfalar da acilir.
