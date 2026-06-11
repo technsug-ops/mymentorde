@@ -91,6 +91,7 @@ class AuthController extends Controller
         $role = (string) optional(Auth::user())->role;
 
         return match ($role) {
+            User::ROLE_PLATFORM_OWNER => redirect('/platform/dashboard'),
             User::ROLE_MANAGER,
             User::ROLE_SYSTEM_ADMIN,
             User::ROLE_OPERATIONS_ADMIN,
