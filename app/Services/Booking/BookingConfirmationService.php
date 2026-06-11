@@ -11,6 +11,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Public booking oluştur + student_appointment'a yansıt + mail bildirimi.
@@ -154,7 +155,7 @@ class BookingConfirmationService
             throw new \DomainException('Bu randevu zaten aktif değil.');
         }
 
-        return DB::transaction(function () use ($booking, $reason, $canceledBy) {
+        $fresh = DB::transaction(function () use ($booking, $reason, $canceledBy) {
             $statusKey = $canceledBy === 'senior' ? 'canceled_by_senior' : 'canceled_by_invitee';
             $booking->update([
                 'status'       => $statusKey,
@@ -181,6 +182,62 @@ class BookingConfirmationService
 
             return $booking->fresh();
         });
+
+        // Cross-cancel mail notification — kim iptal etti, KARSI tarafa mail gider
+        // (kendisine bilgi mail gerek yok, zaten iptal eden buton/onay sayfasi gordu).
+        try {
+            $this->sendCancellationMails($fresh, $reason, $canceledBy);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('booking.cancellation_mail_failed', [
+                'booking_id' => $fresh->id,
+                'error'      => $e->getMessage(),
+            ]);
+        }
+
+        return $fresh;
+    }
+
+    /**
+     * Iptal sonrasi her iki tarafa bilgi mail.
+     * - 'invitee' iptal ettiyse → senior'a mail (Mentorde sistemi adina)
+     * - 'senior'  iptal ettiyse → invitee'ye mail
+     */
+    private function sendCancellationMails(PublicBooking $booking, string $reason, string $canceledBy): void
+    {
+        $whenStr = optional($booking->starts_at)->format('d.m.Y H:i');
+
+        if ($canceledBy === 'invitee') {
+            // Senior'a mail — invitee iptal etti, slot tekrar musait
+            $senior = \App\Models\User::query()
+                ->withoutGlobalScopes()
+                ->where('id', $booking->senior_user_id)
+                ->first();
+            if ($senior && !empty($senior->email)) {
+                $body = "Merhaba {$senior->name},\n\n"
+                    . "Bir randevunuz iptal edildi.\n\n"
+                    . "Randevu: {$whenStr} ({$booking->duration_minutes} dk)\n"
+                    . "İptal eden: {$booking->invitee_name} ({$booking->invitee_email})\n"
+                    . "Gerekçe: {$reason}\n\n"
+                    . "Bu zaman dilimi artık tekrar müsait. Yeni randevular için randevu sayfanız hala aktif.\n\n"
+                    . "— MentorDE Randevu Sistemi";
+                Mail::raw($body, function ($m) use ($senior, $whenStr) {
+                    $m->to($senior->email)->subject("Randevu iptal edildi — {$whenStr}");
+                });
+            }
+        } elseif ($canceledBy === 'senior') {
+            // Invitee'ye mail — senior iptal etti, yeni saat secsin
+            if (!empty($booking->invitee_email)) {
+                $body = "Merhaba {$booking->invitee_name},\n\n"
+                    . "Üzgünüz, danışmanınız randevunuzu iptal etmek zorunda kaldı.\n\n"
+                    . "Randevu: {$whenStr}\n"
+                    . "Gerekçe: {$reason}\n\n"
+                    . "Lütfen yeni bir saat için randevu sayfasına tekrar göz atın. Sorularınız için bize yazabilirsiniz.\n\n"
+                    . "— MentorDE Randevu Sistemi";
+                Mail::raw($body, function ($m) use ($booking, $whenStr) {
+                    $m->to($booking->invitee_email)->subject("Randevunuz iptal edildi — {$whenStr}");
+                });
+            }
+        }
     }
 
     private function assertSlotAvailable(
