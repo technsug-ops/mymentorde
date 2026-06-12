@@ -1024,6 +1024,61 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // Platform Owner role'unu Manager'a geri dusur (sahip ayrimi icin).
+        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=demote-to-manager&email=USER_EMAIL
+        if ($request->query('cleanup') === 'demote-to-manager') {
+            $email = strtolower(trim((string) $request->query('email', '')));
+            if ($email === '') {
+                $output .= ">>> demote-to-manager: email parametresi gerekli\n";
+            } else {
+                $user = \App\Models\User::query()
+                    ->whereRaw('lower(email) = ?', [$email])
+                    ->first();
+                if (!$user) {
+                    $output .= ">>> demote-to-manager: {$email} bulunamadi\n";
+                } else {
+                    $oldRole = (string) $user->role;
+                    $user->role = \App\Models\User::ROLE_MANAGER;
+                    $user->save();
+                    $output .= ">>> demote-to-manager: {$email}\n";
+                    $output .= "    {$oldRole} -> manager\n";
+                }
+            }
+        }
+
+        // Yeni Platform Owner kullanici olustur (mevcut bir hesabi yukseltmek yerine).
+        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=create-platform-owner
+        //          &email=NEW_EMAIL&name=NAME&password=PWD&company=1
+        if ($request->query('cleanup') === 'create-platform-owner') {
+            $email = strtolower(trim((string) $request->query('email', '')));
+            $name  = trim((string) $request->query('name', 'Platform Owner'));
+            $pwd   = (string) $request->query('password', '');
+            $cid   = (int) $request->query('company', 1);
+            if ($email === '' || strlen($pwd) < 8) {
+                $output .= ">>> create-platform-owner: email + en az 8 karakter password gerekli\n";
+                $output .= "    ornek: &email=owner@mentorde.com&name=Owner&password=GucluParola2026\n";
+            } else {
+                $exists = \App\Models\User::query()->whereRaw('lower(email) = ?', [$email])->first();
+                if ($exists) {
+                    $output .= ">>> create-platform-owner: {$email} zaten var (id={$exists->id}, role={$exists->role})\n";
+                    $output .= "    Mevcut hesabi yukseltmek icin: ?cleanup=promote-platform-owner&email={$email}\n";
+                } else {
+                    $user = \App\Models\User::create([
+                        'name'              => $name,
+                        'email'             => $email,
+                        'password'          => bcrypt($pwd),
+                        'role'              => \App\Models\User::ROLE_PLATFORM_OWNER,
+                        'company_id'        => $cid,
+                        'is_active'         => true,
+                        'email_verified_at' => now(),
+                    ]);
+                    $output .= ">>> create-platform-owner: yeni kullanici olusturuldu\n";
+                    $output .= "    id={$user->id} | role=platform_owner | email={$email} | company_id={$cid}\n";
+                    $output .= "    Login: panel.mentorde.com/login -> {$email}\n";
+                }
+            }
+        }
+
         // Platform Owner rolune yukselt — Mentorde sahibinin kendi hesabini
         // 'platform_owner' rolune cevirir. SaaS yetki ayrimi Faz 1 deploy sonrasi
         // bir kerelik calistirilir.
