@@ -1,0 +1,1 @@
+document.querySelectorAll(".extra-preset-btn").forEach(t=>{t.addEventListener("click",()=>{const e=t.closest("form");if(!e)return;const r=e.querySelector('input[name="extra_code"]'),a=e.querySelector('input[name="extra_title"]');r&&(r.value=t.getAttribute("data-extra-code")||""),a&&(a.value=t.getAttribute("data-extra-title")||"")})});
