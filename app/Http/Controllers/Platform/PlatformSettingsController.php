@@ -132,10 +132,29 @@ class PlatformSettingsController extends Controller
     }
 
     /**
-     * Audit log — audit_trails varsa kayda al, yoksa Log::info fallback.
+     * Audit log — yeni PlatformAuditLog'a yaz (platform owner gozu),
+     * eski audit_trails'e de yaz (manager paneliyle entegrasyon icin),
+     * her ikisi de fail ederse Log::info fallback.
      */
     private function logAudit(string $action, array $old, array $new, Request $request): void
     {
+        // 1) Yeni platform audit log
+        try {
+            \App\Models\PlatformAuditLog::record(
+                $action,
+                [
+                    'target_type' => 'platform_setting',
+                    'old'         => $old,
+                    'new'         => $new,
+                    'changed_keys'=> array_keys($new),
+                ],
+                \App\Models\PlatformAuditLog::SEVERITY_WARNING
+            );
+        } catch (\Throwable $e) {
+            // ignore — fallback'lar var
+        }
+
+        // 2) Eski audit_trails (manager paneli iceren ortak gorunum)
         try {
             if (Schema::hasTable('audit_trails')) {
                 AuditTrail::create([

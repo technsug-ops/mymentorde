@@ -214,6 +214,13 @@
                 <input type="month" name="period" id="gen-period" class="plat-input" value="{{ now()->format('Y-m') }}">
                 <small style="color:var(--plat-muted);font-size:11px;">Boşsa: bu ay</small>
             </div>
+            <div class="plat-form-group">
+                <label class="plat-form-label" for="gen-promo">Promo Kod (opsiyonel)</label>
+                <input type="text" name="promo_code" id="gen-promo" class="plat-input"
+                       maxlength="50" placeholder="örn SUMMER25"
+                       style="text-transform:uppercase;font-family:ui-monospace,monospace;">
+                <small style="color:var(--plat-muted);font-size:11px;">Geçerli kod faturaya otomatik indirim olarak işlenir.</small>
+            </div>
             <div class="bill-modal-actions">
                 <button type="button" class="plat-btn plat-btn-ghost" id="close-generate-modal">İptal</button>
                 <button type="submit" class="plat-btn plat-btn-primary">

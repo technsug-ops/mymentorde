@@ -280,6 +280,18 @@ class PlatformController extends Controller
         $companyModel->save();
         ModuleAccess::flushCache((int) $companyModel->id);
 
+        \App\Models\PlatformAuditLog::record(
+            'platform.company.tier_changed',
+            [
+                'target_type' => 'company',
+                'target_id'   => $companyModel->id,
+                'company'     => $companyModel->name,
+                'new_tier'    => $tier,
+                'mrr_eur'     => (float) $companyModel->mrr_eur,
+            ],
+            \App\Models\PlatformAuditLog::SEVERITY_WARNING
+        );
+
         return back()->with('success', "Tier güncellendi: {$companyModel->name} → " . ($this->tierLabels()[$tier] ?? $tier));
     }
 
@@ -314,6 +326,18 @@ class PlatformController extends Controller
             'doc_request_monthly_limit' => $quotaValue,
         ])->save();
         ModuleAccess::flushCache((int) $companyModel->id);
+
+        \App\Models\PlatformAuditLog::record(
+            'platform.company.modules_updated',
+            [
+                'target_type'                => 'company',
+                'target_id'                  => $companyModel->id,
+                'company'                    => $companyModel->name,
+                'enabled_modules'            => $clean,
+                'doc_request_monthly_limit'  => $quotaValue,
+            ],
+            \App\Models\PlatformAuditLog::SEVERITY_INFO
+        );
 
         return back()->with('success', "{$companyModel->name} modülleri güncellendi (" . count($clean) . " aktif)");
     }
@@ -397,6 +421,19 @@ class PlatformController extends Controller
 
         if ($company) {
             ModuleAccess::flushCache((int) $company->id);
+
+            \App\Models\PlatformAuditLog::record(
+                'platform.company.created',
+                [
+                    'target_type'  => 'company',
+                    'target_id'    => $company->id,
+                    'company'      => $company->name,
+                    'code'         => $company->code,
+                    'tier'         => $company->subscription_tier,
+                    'admin_email'  => strtolower(trim($request->input('admin_email'))),
+                ],
+                \App\Models\PlatformAuditLog::SEVERITY_WARNING
+            );
         }
 
         return redirect()
@@ -441,8 +478,18 @@ class PlatformController extends Controller
             'impersonating_original_user_id' => $user->id,
         ]);
 
-        // Audit log (graceful)
+        // Audit log (graceful) — hem yeni PlatformAuditLog tablosuna hem
+        // eski Log::info'a yaz (geciste her ikisi de tutulsun).
         try {
+            \App\Models\PlatformAuditLog::record(
+                'platform.impersonate.start',
+                [
+                    'target_type'         => 'company',
+                    'target_id'           => $target->id,
+                    'target_company_name' => $target->name,
+                ],
+                \App\Models\PlatformAuditLog::SEVERITY_WARNING
+            );
             \Illuminate\Support\Facades\Log::info('platform.impersonate.start', [
                 'platform_owner_id'   => $user->id,
                 'platform_owner_email'=> $user->email,
@@ -467,13 +514,26 @@ class PlatformController extends Controller
 
         // Audit log
         try {
+            $duration = session('impersonating_started_at')
+                ? now()->diffInSeconds(\Carbon\Carbon::parse(session('impersonating_started_at')))
+                : null;
+
+            \App\Models\PlatformAuditLog::record(
+                'platform.impersonate.stop',
+                [
+                    'target_type'         => 'company',
+                    'target_id'           => session('impersonating_company_id'),
+                    'target_company_name' => $companyName,
+                    'duration_seconds'    => $duration,
+                ],
+                \App\Models\PlatformAuditLog::SEVERITY_INFO
+            );
+
             \Illuminate\Support\Facades\Log::info('platform.impersonate.stop', [
                 'platform_owner_id'   => $user?->id,
                 'platform_owner_email'=> $user?->email,
                 'target_company_name' => $companyName,
-                'duration_seconds'    => session('impersonating_started_at')
-                    ? now()->diffInSeconds(\Carbon\Carbon::parse(session('impersonating_started_at')))
-                    : null,
+                'duration_seconds'    => $duration,
             ]);
         } catch (\Throwable $e) {
         }

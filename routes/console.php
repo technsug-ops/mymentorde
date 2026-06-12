@@ -86,6 +86,13 @@ Schedule::command('archive:audit-trails --days=90 --chunk=1000')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/audit-archive.log'));
 
+// platform_audit_logs (Platform Owner audit) — 1 yıl üzeri kayıtları sil
+// Her ayın 1'i 04:00 — GDPR retention için yeterli, tablo şişmez
+Schedule::command('audit:prune --days=365')
+    ->monthlyOn(1, '04:00')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/platform-audit-prune.log'));
+
 Schedule::command('gdpr:enforce-retention')
     ->dailyAt('03:00')
     ->withoutOverlapping()
@@ -323,6 +330,30 @@ Schedule::command('billing:generate-monthly --send')
     ->monthlyOn(1, '03:00')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/billing-monthly.log'));
+
+// ─── Platform Owner — Zamanlanmis broadcast'lari gonder ──────────────────────
+// Her 5 dakikada bir, scheduled_for <= now olan platform broadcast'larini gonderir.
+Schedule::command('platform:send-scheduled-broadcasts')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/platform-broadcasts.log'));
+
+// ─── Trial Nurture Mail — Trial day3/7/14/17 kampanyasi ─────────────────────
+// Her gun 09:00'da TrialService::getNurtureCandidates uzerinden
+// bekleyen company'lere nurture mail gonderir. Hata oranini dusuk tutmak
+// icin tek calismada 200 mail tavanli.
+Schedule::command('trial:send-nurture --limit=200')
+    ->dailyAt('09:00')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/trial-nurture.log'));
+
+// ─── Platform Customer Health — Gunluk skor hesaplama + alert ───────────────
+// Her gun 06:00'da tum aktif sirketler icin sub-score'lar + risk_flags hesaplar.
+// --alerts ile critical (<20) sirketler icin Platform Owner email'ine bildirim.
+Schedule::command('platform:recompute-health --alerts')
+    ->dailyAt('06:00')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/customer-health.log'));
 
 // ─── Google Calendar 2-way Sync (Pull) ───────────────────────────────────────
 // Portal'a Google'dan değişen event'leri çeker. Push observer ile anında,

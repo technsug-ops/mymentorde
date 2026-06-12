@@ -189,6 +189,22 @@ class PlatformSecurityController extends Controller
 
     private function logAudit(string $action, array $old, array $new, Request $request): void
     {
+        // 1) Yeni platform audit log (platform owner panel)
+        try {
+            \App\Models\PlatformAuditLog::record(
+                $action,
+                [
+                    'target_type' => 'platform_security',
+                    'old'         => $old,
+                    'new'         => $new,
+                ],
+                \App\Models\PlatformAuditLog::SEVERITY_CRITICAL
+            );
+        } catch (\Throwable $e) {
+            // ignore
+        }
+
+        // 2) Eski audit_trails (kanonik denetim)
         try {
             if (Schema::hasTable('audit_trails')) {
                 AuditTrail::create([

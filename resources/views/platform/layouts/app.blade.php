@@ -167,6 +167,12 @@
             <a href="{{ route('platform.companies') }}" class="{{ request()->routeIs('platform.companies') || request()->routeIs('platform.companies.show') || request()->routeIs('platform.companies.create') ? 'active' : '' }}">
                 <x-icon name="building-2" size="16" /> Şirketler
             </a>
+            <a href="{{ route('platform.customer-health') }}" class="{{ request()->routeIs('platform.customer-health') || request()->routeIs('platform.customer-health.*') ? 'active' : '' }}">
+                <x-icon name="heart" size="16" /> Customer Sağlık
+            </a>
+            <a href="{{ route('platform.broadcasts') }}" class="{{ request()->routeIs('platform.broadcasts') || request()->routeIs('platform.broadcasts.*') ? 'active' : '' }}">
+                <x-icon name="megaphone" size="16" /> Duyurular
+            </a>
 
             <div class="plat-nav-label">Analiz & Faturalama</div>
             <a href="{{ route('platform.analytics') }}" class="{{ request()->routeIs('platform.analytics') || request()->routeIs('platform.analytics.export') ? 'active' : '' }}">
@@ -178,6 +184,12 @@
             <a href="{{ route('platform.mrr-trend') }}" class="{{ request()->routeIs('platform.mrr-trend') || request()->routeIs('platform.mrr-trend.export') ? 'active' : '' }}">
                 <x-icon name="trending-up" size="16" /> MRR Trendi
             </a>
+            <a href="{{ route('platform.trial') }}" class="{{ request()->routeIs('platform.trial') || request()->routeIs('platform.trial.*') ? 'active' : '' }}">
+                <x-icon name="hourglass" size="16" /> Trial Yonetimi
+            </a>
+            <a href="{{ route('platform.promo-codes') }}" class="{{ request()->routeIs('platform.promo-codes') || request()->routeIs('platform.promo-codes.*') ? 'active' : '' }}">
+                <x-icon name="tag" size="16" /> İndirim Kodları
+            </a>
 
             <div class="plat-nav-label">Sistem</div>
             <a href="{{ route('platform.settings') }}" class="{{ request()->routeIs('platform.settings') || request()->routeIs('platform.settings.*') ? 'active' : '' }}">
@@ -188,6 +200,9 @@
             </a>
             <a href="{{ route('platform.security') }}" class="{{ request()->routeIs('platform.security') || request()->routeIs('platform.security.*') ? 'active' : '' }}">
                 <x-icon name="shield" size="16" /> Güvenlik
+            </a>
+            <a href="{{ route('platform.audit-log') }}" class="{{ request()->routeIs('platform.audit-log') || request()->routeIs('platform.audit-log.*') ? 'active' : '' }}">
+                <x-icon name="shield" size="16" /> Denetim Kayıtları
             </a>
 
             <div class="plat-nav-label">Diğer</div>

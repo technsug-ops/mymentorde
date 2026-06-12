@@ -700,6 +700,8 @@
                 </div>
             @endif
 
+            @include('partials.broadcast-banner')
+
             @yield('content')
         </div>
     </div>{{-- /main --}}

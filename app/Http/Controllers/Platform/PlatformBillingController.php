@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\PlatformInvoice;
 use App\Models\PlatformPaymentMethod;
+use App\Models\PromoCode;
 use App\Services\Platform\BillingService;
+use App\Services\Platform\PromoCodeService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,8 +29,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class PlatformBillingController extends Controller
 {
-    public function __construct(private readonly BillingService $billing)
-    {
+    public function __construct(
+        private readonly BillingService $billing,
+        private readonly PromoCodeService $promoService,
+    ) {
     }
 
     // ────────────────────────────────────────────────────────────────────────
@@ -191,6 +195,7 @@ class PlatformBillingController extends Controller
         $validator = Validator::make($request->all(), [
             'company_id' => ['required', 'integer', 'exists:companies,id'],
             'period'     => ['nullable', 'date_format:Y-m'],
+            'promo_code' => ['nullable', 'string', 'max:50'],
         ]);
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
@@ -208,9 +213,59 @@ class PlatformBillingController extends Controller
 
         $invoice = $this->billing->generateInvoiceFor($company, $period);
 
+        // ── Promo kod (opsiyonel) — varsa fatura tutarini guncelle, redemption olustur
+        $promoCodeRaw = trim((string) $request->input('promo_code', ''));
+        $promoMessage = '';
+        if ($promoCodeRaw !== '') {
+            $promo = PromoCode::query()
+                ->where('code', strtoupper($promoCodeRaw))
+                ->first();
+
+            if (!$promo) {
+                $promoMessage = " — Promo kod bulunamadı: {$promoCodeRaw}";
+            } elseif (!$promo->canBeUsedBy($company)) {
+                $promoMessage = " — Promo kod uygulanamadı ({$promo->code}): geçersiz/süresi dolmuş/tier uyumsuz/zaten kullanılmış.";
+            } else {
+                $amount = (float) $invoice->amount_eur;
+                $discount = $this->promoService->calculateDiscount($promo, $amount);
+                if ($discount > 0) {
+                    $newAmount = round($amount - $discount, 2);
+                    $taxRate   = (float) $invoice->tax_rate_pct;
+                    $newTax    = round($newAmount * ($taxRate / 100), 2);
+                    $newTotal  = round($newAmount + $newTax, 2);
+
+                    $invoice->amount_eur     = $newAmount;
+                    $invoice->tax_amount_eur = $newTax;
+                    $invoice->total_eur      = $newTotal;
+                    $existingNotes = trim((string) $invoice->notes);
+                    $promoNote = "Promo kod: {$promo->code} (€" . number_format($discount, 2, ',', '.') . ' indirim)';
+                    $invoice->notes = $existingNotes === '' ? $promoNote : $existingNotes . "\n" . $promoNote;
+                    $invoice->save();
+
+                    $promo->apply($company, $discount, [$invoice->id]);
+                    $promoMessage = " — Promo {$promo->code} uygulandı: €" . number_format($discount, 2, ',', '.') . ' indirim';
+                }
+            }
+        }
+
+        \App\Models\PlatformAuditLog::record(
+            'platform.billing.invoice_generated',
+            [
+                'target_type'    => 'invoice',
+                'target_id'      => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'company_id'     => $company->id,
+                'company'        => $company->name,
+                'period'         => $period->format('Y-m'),
+                'total_eur'      => (float) $invoice->total_eur,
+                'promo_applied'  => $promoMessage !== '' ? trim($promoMessage, ' —') : null,
+            ],
+            \App\Models\PlatformAuditLog::SEVERITY_INFO
+        );
+
         return redirect()
             ->route('platform.billing.show', $invoice)
-            ->with('success', "Fatura oluşturuldu: {$invoice->invoice_number} ({$company->name})");
+            ->with('success', "Fatura oluşturuldu: {$invoice->invoice_number} ({$company->name}){$promoMessage}");
     }
 
     // ────────────────────────────────────────────────────────────────────────
@@ -223,8 +278,34 @@ class PlatformBillingController extends Controller
         $ok = $this->billing->sendInvoice($invoice);
 
         if (!$ok) {
+            \App\Models\PlatformAuditLog::record(
+                'platform.billing.invoice_send_failed',
+                [
+                    'target_type'    => 'invoice',
+                    'target_id'      => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                    'company_id'     => $invoice->company_id,
+                    'reason'         => 'billing_email_or_smtp',
+                ],
+                \App\Models\PlatformAuditLog::SEVERITY_WARNING
+            );
             return back()->with('error', 'Fatura gönderilemedi. Billing email eksik veya mail hatası — log\'a bakın.');
         }
+
+        \App\Models\PlatformAuditLog::record(
+            'platform.billing.invoice_sent',
+            [
+                'target_type'    => 'invoice',
+                'target_id'      => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'company_id'     => $invoice->company_id,
+                'company'        => $invoice->company?->name,
+                'recipient'      => $invoice->company?->billing_email,
+                'total_eur'      => (float) $invoice->total_eur,
+            ],
+            \App\Models\PlatformAuditLog::SEVERITY_INFO
+        );
+
         return back()->with('success', "Fatura gönderildi: {$invoice->invoice_number} → {$invoice->company?->billing_email}");
     }
 
@@ -236,6 +317,19 @@ class PlatformBillingController extends Controller
     {
         $stripeId = trim((string) $request->input('stripe_invoice_id', ''));
         $this->billing->markPaid($invoice, $stripeId !== '' ? $stripeId : null);
+
+        \App\Models\PlatformAuditLog::record(
+            'platform.billing.invoice_paid',
+            [
+                'target_type'        => 'invoice',
+                'target_id'          => $invoice->id,
+                'invoice_number'     => $invoice->invoice_number,
+                'company_id'         => $invoice->company_id,
+                'total_eur'          => (float) $invoice->total_eur,
+                'stripe_invoice_id'  => $stripeId !== '' ? $stripeId : null,
+            ],
+            \App\Models\PlatformAuditLog::SEVERITY_WARNING
+        );
 
         return back()->with('success', "Fatura ödendi olarak işaretlendi: {$invoice->invoice_number}");
     }

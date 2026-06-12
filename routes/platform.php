@@ -9,6 +9,9 @@
  * Faz 2 (06-2026): Subscription tier yonetimi, modul toggle, company CRUD.
  */
 
+use App\Http\Controllers\Platform\AuditLogController;
+use App\Http\Controllers\Platform\BroadcastController;
+use App\Http\Controllers\Platform\CustomerHealthController;
 use App\Http\Controllers\Platform\PlatformAnalyticsController;
 use App\Http\Controllers\Platform\PlatformBillingController;
 use App\Http\Controllers\Platform\PlatformController;
@@ -16,6 +19,8 @@ use App\Http\Controllers\Platform\PlatformInfrastructureController;
 use App\Http\Controllers\Platform\PlatformMRRController;
 use App\Http\Controllers\Platform\PlatformSecurityController;
 use App\Http\Controllers\Platform\PlatformSettingsController;
+use App\Http\Controllers\Platform\PromoCodeController;
+use App\Http\Controllers\Platform\TrialController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(function (): void {
@@ -76,6 +81,27 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
         ->name('platform.mrr-trend.export');
 
     // ────────────────────────────────────────────────────────────────────────
+    // TRIAL YONETIMI (Faz 8) — Aktif trial'lar, conversion, manuel uzatma, nurture
+    // ────────────────────────────────────────────────────────────────────────
+
+    Route::get('/trial', [TrialController::class, 'index'])
+        ->name('platform.trial');
+
+    Route::post('/trial/{company}/extend', [TrialController::class, 'extend'])
+        ->whereNumber('company')
+        ->middleware('throttle:10,1')
+        ->name('platform.trial.extend');
+
+    Route::post('/trial/{company}/convert', [TrialController::class, 'convert'])
+        ->whereNumber('company')
+        ->middleware('throttle:10,1')
+        ->name('platform.trial.convert');
+
+    Route::post('/trial/nurture-send', [TrialController::class, 'nurtureSend'])
+        ->middleware('throttle:5,1')
+        ->name('platform.trial.nurture-send');
+
+    // ────────────────────────────────────────────────────────────────────────
     // BILLING (Faz 7) — Platform'un musteri company'lere kestigi faturalar
     // ────────────────────────────────────────────────────────────────────────
 
@@ -103,6 +129,54 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
         ->whereNumber('invoice')
         ->middleware('throttle:10,1')
         ->name('platform.billing.mark-paid');
+
+    // ────────────────────────────────────────────────────────────────────────
+    // PROMO CODES — İndirim kodları (Platform Owner)
+    // ────────────────────────────────────────────────────────────────────────
+
+    Route::get('/promo-codes', [PromoCodeController::class, 'index'])
+        ->name('platform.promo-codes');
+
+    Route::get('/promo-codes/create', [PromoCodeController::class, 'create'])
+        ->name('platform.promo-codes.create');
+
+    Route::post('/promo-codes', [PromoCodeController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('platform.promo-codes.store');
+
+    Route::get('/promo-codes/{id}', [PromoCodeController::class, 'show'])
+        ->whereNumber('id')
+        ->name('platform.promo-codes.show');
+
+    Route::post('/promo-codes/{id}', [PromoCodeController::class, 'update'])
+        ->whereNumber('id')
+        ->middleware('throttle:10,1')
+        ->name('platform.promo-codes.update');
+
+    Route::delete('/promo-codes/{id}', [PromoCodeController::class, 'destroy'])
+        ->whereNumber('id')
+        ->middleware('throttle:10,1')
+        ->name('platform.promo-codes.destroy');
+
+    // ────────────────────────────────────────────────────────────────────────
+    // CUSTOMER HEALTH (Faz 8) — Sağlık skorları, churn risk, recompute
+    // ────────────────────────────────────────────────────────────────────────
+
+    Route::get('/customer-health', [CustomerHealthController::class, 'index'])
+        ->name('platform.customer-health');
+
+    Route::get('/customer-health/{company}', [CustomerHealthController::class, 'show'])
+        ->whereNumber('company')
+        ->name('platform.customer-health.show');
+
+    Route::post('/customer-health/{company}/recompute', [CustomerHealthController::class, 'recompute'])
+        ->whereNumber('company')
+        ->middleware('throttle:30,1')
+        ->name('platform.customer-health.recompute');
+
+    Route::post('/customer-health/recompute-all', [CustomerHealthController::class, 'recomputeAll'])
+        ->middleware('throttle:5,1')
+        ->name('platform.customer-health.recompute-all');
 
     // ────────────────────────────────────────────────────────────────────────
     // SYSTEM (Faz 2 sistem sayfaları) — Settings + Infrastructure + Security
@@ -137,4 +211,51 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
     Route::post('/security', [PlatformSecurityController::class, 'update'])
         ->middleware('throttle:30,1')
         ->name('platform.security.update');
+
+    // ────────────────────────────────────────────────────────────────────────
+    // AUDIT LOG — Denetim Kayitlari (cross-tenant event akisi)
+    // ────────────────────────────────────────────────────────────────────────
+
+    Route::get('/audit-log', [AuditLogController::class, 'index'])
+        ->name('platform.audit-log');
+
+    Route::get('/audit-log/export.csv', [AuditLogController::class, 'export'])
+        ->middleware('throttle:5,1')
+        ->name('platform.audit-log.export');
+
+    Route::get('/audit-log/{id}', [AuditLogController::class, 'show'])
+        ->whereNumber('id')
+        ->name('platform.audit-log.show');
+
+    // ────────────────────────────────────────────────────────────────────────
+    // BROADCASTS — Cross-tenant duyuru / kampanya sistemi
+    // ────────────────────────────────────────────────────────────────────────
+
+    Route::get('/broadcasts', [BroadcastController::class, 'index'])
+        ->name('platform.broadcasts');
+
+    Route::get('/broadcasts/create', [BroadcastController::class, 'create'])
+        ->name('platform.broadcasts.create');
+
+    Route::post('/broadcasts', [BroadcastController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('platform.broadcasts.store');
+
+    Route::get('/broadcasts/{id}', [BroadcastController::class, 'show'])
+        ->whereNumber('id')
+        ->name('platform.broadcasts.show');
+
+    Route::post('/broadcasts/{id}/send', [BroadcastController::class, 'send'])
+        ->whereNumber('id')
+        ->middleware('throttle:5,1')
+        ->name('platform.broadcasts.send');
+
+    Route::post('/broadcasts/{id}/cancel', [BroadcastController::class, 'cancel'])
+        ->whereNumber('id')
+        ->middleware('throttle:10,1')
+        ->name('platform.broadcasts.cancel');
+
+    Route::get('/broadcasts/{id}/preview', [BroadcastController::class, 'preview'])
+        ->whereNumber('id')
+        ->name('platform.broadcasts.preview');
 });

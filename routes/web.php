@@ -1299,3 +1299,44 @@ Route::get('/_deploy/tail-log', function (\Illuminate\Http\Request $request) {
     $out .= implode("\n", $rows);
     return response($out, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
 })->middleware('throttle:60,10')->name('deploy.tail-log');
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Platform Broadcast tracking — signed URL, no auth
+// Email open pixel ve CTA click redirect endpoint'leri.
+// ─────────────────────────────────────────────────────────────────────────────
+
+Route::get('/b/open/{recipient_id}', function (int $recipient_id) {
+    if (! request()->hasValidSignature()) {
+        // Pikseli yine de don, ama tracking'i atla
+        return response(base64_decode('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='), 200, [
+            'Content-Type'  => 'image/gif',
+            'Cache-Control' => 'no-store',
+        ]);
+    }
+    try {
+        app(\App\Services\Platform\BroadcastService::class)->trackOpen($recipient_id);
+    } catch (\Throwable $e) {
+        // sessizce devam et — pikselin donmesi her zaman onemli
+    }
+    return response(base64_decode('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='), 200, [
+        'Content-Type'  => 'image/gif',
+        'Cache-Control' => 'no-store',
+    ]);
+})->where('recipient_id', '[0-9]+')
+  ->middleware('throttle:600,1')
+  ->name('broadcast.track.open');
+
+Route::get('/b/click/{recipient_id}', function (int $recipient_id) {
+    $url = (string) request()->query('url', '');
+    if (! request()->hasValidSignature() || $url === '' || ! preg_match('#^https?://#i', $url)) {
+        return redirect('/');
+    }
+    try {
+        app(\App\Services\Platform\BroadcastService::class)->trackClick($recipient_id);
+    } catch (\Throwable $e) {
+        // redirect her zaman gerceklesmeli
+    }
+    return redirect()->away($url);
+})->where('recipient_id', '[0-9]+')
+  ->middleware('throttle:300,1')
+  ->name('broadcast.track.click');
