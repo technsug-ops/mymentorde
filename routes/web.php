@@ -1074,6 +1074,81 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // Pusher broadcaster auth'i sunucu tarafindan simulate eder ve
+        // dolu/bos response + exception trace'i gosterir. Frontend
+        // /broadcasting/auth 200 + bos body donduren sorunu tesis icin.
+        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=test-pusher-auth&email=USER_EMAIL&channel=private-manager.1
+        if ($request->query('cleanup') === 'test-pusher-auth') {
+            $email = strtolower(trim((string) $request->query('email', 'manager@panel.mentorde.com')));
+            $channel = (string) $request->query('channel', 'private-manager.1');
+            try {
+                $user = \App\Models\User::query()->whereRaw('lower(email) = ?', [$email])->first();
+                if (!$user) {
+                    $output .= ">>> test-pusher-auth: user '{$email}' yok\n";
+                } else {
+                    $output .= ">>> test-pusher-auth: user id={$user->id} role={$user->role} company_id={$user->company_id}\n";
+                    $output .= "    channel: {$channel}\n";
+
+                    // ENV degerleri kontrolu
+                    $output .= "    --- env values ---\n";
+                    $output .= "    BROADCAST_DRIVER:    " . (config('broadcasting.default') ?: 'NULL') . "\n";
+                    $output .= "    PUSHER_APP_KEY:      " . (config('broadcasting.connections.pusher.key') ? substr(config('broadcasting.connections.pusher.key'), 0, 8) . '...' : 'NULL') . "\n";
+                    $output .= "    PUSHER_APP_SECRET:   " . (config('broadcasting.connections.pusher.secret') ? 'SET (' . strlen(config('broadcasting.connections.pusher.secret')) . ' chars)' : 'NULL') . "\n";
+                    $output .= "    PUSHER_APP_ID:       " . (config('broadcasting.connections.pusher.app_id') ?: 'NULL') . "\n";
+                    $output .= "    PUSHER_APP_CLUSTER:  " . (config('broadcasting.connections.pusher.options.cluster') ?: 'NULL') . "\n";
+
+                    // Mock request olustur
+                    $req = \Illuminate\Http\Request::create('/broadcasting/auth', 'POST', [
+                        'channel_name' => $channel,
+                        'socket_id'    => '12345.67890',
+                    ]);
+                    $req->setUserResolver(fn() => $user);
+
+                    $broadcaster = app(\Illuminate\Contracts\Broadcasting\Broadcaster::class);
+                    $output .= "    broadcaster class: " . get_class($broadcaster) . "\n";
+
+                    $response = $broadcaster->auth($req);
+                    $output .= "    --- auth response ---\n";
+                    $output .= "    type: " . gettype($response) . "\n";
+                    if (is_object($response)) {
+                        $output .= "    class: " . get_class($response) . "\n";
+                        if (method_exists($response, 'getContent')) {
+                            $output .= "    content: " . substr((string) $response->getContent(), 0, 500) . "\n";
+                        }
+                    } else {
+                        $output .= "    value: " . substr(json_encode($response), 0, 500) . "\n";
+                    }
+                }
+            } catch (\Throwable $e) {
+                $output .= ">>> test-pusher-auth EXCEPTION:\n";
+                $output .= "    class: " . get_class($e) . "\n";
+                $output .= "    msg:   " . $e->getMessage() . "\n";
+                $output .= "    file:  " . $e->getFile() . ':' . $e->getLine() . "\n";
+                $output .= "    trace:\n" . substr($e->getTraceAsString(), 0, 1500) . "\n";
+            }
+        }
+
+        // Laravel log son N satirini gosterir.
+        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=tail-log&lines=80
+        if ($request->query('cleanup') === 'tail-log') {
+            $lines = max(10, min(500, (int) $request->query('lines', 80)));
+            $logPath = storage_path('logs/laravel.log');
+            if (!file_exists($logPath)) {
+                $output .= ">>> tail-log: {$logPath} bulunamadi\n";
+            } else {
+                $fp = fopen($logPath, 'r');
+                if ($fp) {
+                    fseek($fp, -32768, SEEK_END);
+                    $tail = fread($fp, 32768);
+                    fclose($fp);
+                    $arr = explode("\n", $tail);
+                    $arr = array_slice($arr, -$lines);
+                    $output .= ">>> tail-log (son {$lines} satir):\n";
+                    $output .= implode("\n", $arr) . "\n";
+                }
+            }
+        }
+
         // Platform Owner role'unu Manager'a geri dusur (sahip ayrimi icin).
         // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=demote-to-manager&email=USER_EMAIL
         if ($request->query('cleanup') === 'demote-to-manager') {
