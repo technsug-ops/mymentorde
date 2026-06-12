@@ -198,6 +198,9 @@
             <a href="{{ route('platform.infrastructure') }}" class="{{ request()->routeIs('platform.infrastructure') || request()->routeIs('platform.infrastructure.*') ? 'active' : '' }}">
                 <x-icon name="server" size="16" /> Altyapı
             </a>
+            <a href="{{ route('platform.backups.index') }}" class="{{ request()->routeIs('platform.backups.*') ? 'active' : '' }}">
+                <x-icon name="database" size="16" /> Yedekler
+            </a>
             <a href="{{ route('platform.security') }}" class="{{ request()->routeIs('platform.security') || request()->routeIs('platform.security.*') ? 'active' : '' }}">
                 <x-icon name="shield" size="16" /> Güvenlik
             </a>

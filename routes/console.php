@@ -79,6 +79,13 @@ Schedule::command('export:audit-report --type=all')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/audit-export.log'));
 
+// DB backup — günlük 03:00, 14 gün retention (storage/app/backups/)
+// KAS shared host'ta SSH yok, pure-PHP dump (mysqldump binary'siz)
+Schedule::command('backup:create --keep=14')
+    ->dailyAt('03:00')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/backup.log'));
+
 // audit_trails 90+ gün eski kayıtlar → jsonl.gz dump + DB'den sil
 // Haftalık çalışır — GDPR 3 yıl retention için yeterli, OLTP tablosu şişmez
 Schedule::command('archive:audit-trails --days=90 --chunk=1000')

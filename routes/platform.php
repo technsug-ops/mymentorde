@@ -205,6 +205,22 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
         ->middleware('throttle:5,1')
         ->name('platform.infrastructure.dump-autoload');
 
+    // Backup — DB yedek listesi + manuel tetik + indirme
+    $backup = \App\Http\Controllers\Platform\PlatformBackupController::class;
+    Route::get('/backups',  [$backup, 'index'])
+        ->name('platform.backups.index');
+    Route::post('/backups', [$backup, 'create'])
+        ->middleware('throttle:3,1')
+        ->name('platform.backups.create');
+    Route::get('/backups/{filename}/download', [$backup, 'download'])
+        ->where('filename', 'db_[A-Za-z0-9_-]+\.sql\.gz')
+        ->middleware('throttle:10,1')
+        ->name('platform.backups.download');
+    Route::delete('/backups/{filename}', [$backup, 'destroy'])
+        ->where('filename', 'db_[A-Za-z0-9_-]+\.sql\.gz')
+        ->middleware('throttle:10,1')
+        ->name('platform.backups.destroy');
+
     // Güvenlik
     Route::get('/security', [PlatformSecurityController::class, 'index'])
         ->name('platform.security');

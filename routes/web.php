@@ -381,6 +381,20 @@ Route::middleware(['company.context'])->group(function () {
     Route::get('/saas',     fn () => redirect()->route('public.platform-landing'))->middleware('throttle:120,1');
     Route::get('/urun',     fn () => redirect()->route('public.platform-landing'))->middleware('throttle:120,1');
 
+    // Public Status Page — sistem servislerinin anlık durumu
+    $status = \App\Http\Controllers\Public\StatusController::class;
+    Route::get('/durum',  [$status, 'show'])->middleware('throttle:60,1')->name('public.status');
+    Route::get('/status', fn () => redirect()->route('public.status'))->middleware('throttle:60,1');
+    Route::get('/health', fn () => response()->json(['ok' => true, 'ts' => now()->toIso8601String()]))->middleware('throttle:600,1')->name('public.health');
+
+    // PWA icon — dinamik PNG (GD library), manifest-{role}.json'lardaki referans
+    Route::get('/icons/{role}-icon-{size}.png',
+        [\App\Http\Controllers\PwaIconController::class, 'show']
+    )->where('role', 'guest|student|senior|manager|dealer')
+     ->where('size', '192|512')
+     ->middleware('throttle:120,1')
+     ->name('public.pwa-icon');
+
     // Public Pricing / Fiyatlandırma — 4 tier yan yana + 14 gün trial CTA
     Route::get('/fiyatlar', function () {
         return view('public.pricing');
