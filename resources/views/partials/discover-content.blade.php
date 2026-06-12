@@ -8,11 +8,27 @@
 .dc-hero {
     color:#fff; border-radius:14px; margin-bottom:20px; overflow:hidden;
     box-shadow:0 6px 24px rgba(0,0,0,.14); position:relative;
-    background:#1e3a8a url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1400&q=80') center/cover;
+    background:linear-gradient(135deg, #1e3a8a 0%, #4f46e5 55%, #6366f1 100%);
 }
+/* Dekoratif soft radial light spots — external image yerine pure CSS */
 .dc-hero::before {
     content:''; position:absolute; inset:0;
-    background:linear-gradient(135deg, rgba(30,58,138,.92) 0%, rgba(79,70,229,.85) 100%);
+    background:
+        radial-gradient(circle at 18% 22%, rgba(255,255,255,.16), transparent 38%),
+        radial-gradient(circle at 82% 78%, rgba(99,102,241,.30), transparent 45%),
+        radial-gradient(circle at 50% 105%, rgba(255,255,255,.10), transparent 50%);
+    pointer-events:none;
+}
+/* Sağ üstte minimal grid pattern (Almanya semantic vibe) */
+.dc-hero::after {
+    content:''; position:absolute; top:0; right:0; width:42%; height:100%;
+    background-image:
+        linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: linear-gradient(to left, rgba(0,0,0,.8), transparent 100%);
+    -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,.8), transparent 100%);
+    pointer-events:none;
 }
 .dc-hero-body { position:relative; display:flex; align-items:center; gap:24px; padding:24px 28px; }
 .dc-hero-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:8px; }

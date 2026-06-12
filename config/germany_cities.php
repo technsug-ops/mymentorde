@@ -200,11 +200,11 @@ return [
 
         // 📹 Video İçerikleri — youtube_id alanını doldurun
         'videos' => [
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'München\'de Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'München\'de bir öğrencinin günlük yaşamını anlatan vlog.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'TU München Kampüs Turu', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'TUM kampüslerinin (Garching, Innenstadt) detaylı turu.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'LMU München — Her Şey Hakkında', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Ludwig-Maximilians-Universität tanıtım ve öğrenci deneyimleri.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'München\'de Konut & Yurt Bulmak', 'category' => 'yaşam', 'duration' => '8:24', 'description' => 'Studentenwerk yurtları, WG arama, kira bütçesi.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Oktoberfest Rehberi — Öğrenci Gözünden', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Oktoberfest\'e nasıl gidilir, bütçe nasıl tutturulur.'],
+            ['youtube_id' => '', 'title' => 'München\'de Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'München\'de bir öğrencinin günlük yaşamını anlatan vlog.'],
+            ['youtube_id' => '', 'title' => 'TU München Kampüs Turu', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'TUM kampüslerinin (Garching, Innenstadt) detaylı turu.'],
+            ['youtube_id' => '', 'title' => 'LMU München — Her Şey Hakkında', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Ludwig-Maximilians-Universität tanıtım ve öğrenci deneyimleri.'],
+            ['youtube_id' => '', 'title' => 'München\'de Konut & Yurt Bulmak', 'category' => 'yaşam', 'duration' => '8:24', 'description' => 'Studentenwerk yurtları, WG arama, kira bütçesi.'],
+            ['youtube_id' => '', 'title' => 'Oktoberfest Rehberi — Öğrenci Gözünden', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Oktoberfest\'e nasıl gidilir, bütçe nasıl tutturulur.'],
         ],
     ],
 
@@ -308,11 +308,11 @@ return [
         ],
 
         'videos' => [
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Berlin\'de Öğrenci Olmak', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Almanya\'nın en büyük öğrenci şehrinde yaşam deneyimi.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'TU Berlin Kampüs Turu', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'TU Berlin bölümleri, kütüphane, Mensa ve kampüs hayatı.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'FU & HU Berlin — Hangisini Seçmeli?', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Freie Universität ve Humboldt Universität karşılaştırması.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Berlin\'de Ucuz Yaşamanın Sırları', 'category' => 'yaşam', 'duration' => '8:24', 'description' => 'Bütçe dostu market, mensa, ücretsiz etkinlikler.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Neukölln & Kreuzberg — Türk Mahallesi', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Berlin\'deki Türk topluluğu ve Türkçe hizmetler.'],
+            ['youtube_id' => '', 'title' => 'Berlin\'de Öğrenci Olmak', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Almanya\'nın en büyük öğrenci şehrinde yaşam deneyimi.'],
+            ['youtube_id' => '', 'title' => 'TU Berlin Kampüs Turu', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'TU Berlin bölümleri, kütüphane, Mensa ve kampüs hayatı.'],
+            ['youtube_id' => '', 'title' => 'FU & HU Berlin — Hangisini Seçmeli?', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Freie Universität ve Humboldt Universität karşılaştırması.'],
+            ['youtube_id' => '', 'title' => 'Berlin\'de Ucuz Yaşamanın Sırları', 'category' => 'yaşam', 'duration' => '8:24', 'description' => 'Bütçe dostu market, mensa, ücretsiz etkinlikler.'],
+            ['youtube_id' => '', 'title' => 'Neukölln & Kreuzberg — Türk Mahallesi', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Berlin\'deki Türk topluluğu ve Türkçe hizmetler.'],
         ],
     ],
 
@@ -384,10 +384,10 @@ return [
         ],
 
         'videos' => [
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Hamburg\'da Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Liman şehrinde üniversite yaşamı ve öğrenci semtleri.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'HAW Hamburg Tanıtımı', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Hamburg Uygulamalı Bilimler Üniversitesi — bölümler ve öğrenci hayatı.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Hamburg Liman Turu & Speicherstadt', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Miniatur Wunderland, liman ve UNESCO mirasındaki depo binalar.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Airbus Hamburg\'da Staj Deneyimi', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Havacılık mühendisliği öğrencisi Airbus staj deneyimini anlatıyor.'],
+            ['youtube_id' => '', 'title' => 'Hamburg\'da Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Liman şehrinde üniversite yaşamı ve öğrenci semtleri.'],
+            ['youtube_id' => '', 'title' => 'HAW Hamburg Tanıtımı', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Hamburg Uygulamalı Bilimler Üniversitesi — bölümler ve öğrenci hayatı.'],
+            ['youtube_id' => '', 'title' => 'Hamburg Liman Turu & Speicherstadt', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Miniatur Wunderland, liman ve UNESCO mirasındaki depo binalar.'],
+            ['youtube_id' => '', 'title' => 'Airbus Hamburg\'da Staj Deneyimi', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Havacılık mühendisliği öğrencisi Airbus staj deneyimini anlatıyor.'],
         ],
     ],
 
@@ -459,10 +459,10 @@ return [
         ],
 
         'videos' => [
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Frankfurt\'ta Finans Kariyeri Başlatmak', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Deutsche Bank ve EZB\'de staj/iş fırsatları.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Goethe Üniversitesi Frankfurt Tanıtımı', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Campus Westend ve ekonomi bölümü turu.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Frankfurt\'ta Öğrenci Olmak', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Sachsenhausen, Museumsufer ve öğrenci bütçesiyle Frankfurt.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Frankfurt Havalimanı\'nda Çalışmak', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Öğrenci part-time iş fırsatları Fraport AG.'],
+            ['youtube_id' => '', 'title' => 'Frankfurt\'ta Finans Kariyeri Başlatmak', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Deutsche Bank ve EZB\'de staj/iş fırsatları.'],
+            ['youtube_id' => '', 'title' => 'Goethe Üniversitesi Frankfurt Tanıtımı', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Campus Westend ve ekonomi bölümü turu.'],
+            ['youtube_id' => '', 'title' => 'Frankfurt\'ta Öğrenci Olmak', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Sachsenhausen, Museumsufer ve öğrenci bütçesiyle Frankfurt.'],
+            ['youtube_id' => '', 'title' => 'Frankfurt Havalimanı\'nda Çalışmak', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Öğrenci part-time iş fırsatları Fraport AG.'],
         ],
     ],
 
@@ -534,10 +534,10 @@ return [
         ],
 
         'videos' => [
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Köln\'de Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Zülpicher Viertel, Mensa, uygun fiyatlı Köln yaşamı.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Universität zu Köln Tanıtımı', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Almanya\'nın en büyük üniversitelerinden birinin kampüs turu.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Köln Katedrali ve Ren Kıyısı Turu', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'UNESCO mirası Dom\'dan Severin köprüsüne şehir yürüyüşü.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'RTL & WDR: Medya Kariyeri Köln\'de', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Medya ve yayıncılık sektöründe staj deneyimi.'],
+            ['youtube_id' => '', 'title' => 'Köln\'de Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Zülpicher Viertel, Mensa, uygun fiyatlı Köln yaşamı.'],
+            ['youtube_id' => '', 'title' => 'Universität zu Köln Tanıtımı', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Almanya\'nın en büyük üniversitelerinden birinin kampüs turu.'],
+            ['youtube_id' => '', 'title' => 'Köln Katedrali ve Ren Kıyısı Turu', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'UNESCO mirası Dom\'dan Severin köprüsüne şehir yürüyüşü.'],
+            ['youtube_id' => '', 'title' => 'RTL & WDR: Medya Kariyeri Köln\'de', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Medya ve yayıncılık sektöründe staj deneyimi.'],
         ],
     ],
 
@@ -610,10 +610,10 @@ return [
         ],
 
         'videos' => [
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Stuttgart\'ta Mühendislik Okumak', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Uni Stuttgart\'tan mezunların Mercedes ve Bosch\'taki kariyer yolculukları.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Uni Stuttgart Kampüs Turu', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Stadtmitte ve Vaihingen kampüslerinin detaylı tanıtımı.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Mercedes-Benz Müzesi & Staj Deneyimi', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Otomotiv tutkunu öğrenciler için Mercedes-Benz staj süreci.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Stuttgart Şarap Vadileri & Şehir Yaşamı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Neckar vadisi, bağlar, Schlossplatz ve öğrenci hangoutları.'],
+            ['youtube_id' => '', 'title' => 'Stuttgart\'ta Mühendislik Okumak', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Uni Stuttgart\'tan mezunların Mercedes ve Bosch\'taki kariyer yolculukları.'],
+            ['youtube_id' => '', 'title' => 'Uni Stuttgart Kampüs Turu', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Stadtmitte ve Vaihingen kampüslerinin detaylı tanıtımı.'],
+            ['youtube_id' => '', 'title' => 'Mercedes-Benz Müzesi & Staj Deneyimi', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Otomotiv tutkunu öğrenciler için Mercedes-Benz staj süreci.'],
+            ['youtube_id' => '', 'title' => 'Stuttgart Şarap Vadileri & Şehir Yaşamı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Neckar vadisi, bağlar, Schlossplatz ve öğrenci hangoutları.'],
         ],
     ],
 
@@ -694,9 +694,9 @@ return [
         ],
 
         'videos' => [
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Düsseldorf\'ta Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Japantown, Königsallee ve öğrenci semti Bilk.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'HHU Düsseldorf Kampüs Turu', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Heinrich-Heine Üniversitesi kampüsü ve tıp fakültesi.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Tasarım ve Moda Kariyeri Düsseldorf', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'HSD mezunlarının moda sektöründeki kariyer hikayeleri.'],
+            ['youtube_id' => '', 'title' => 'Düsseldorf\'ta Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Japantown, Königsallee ve öğrenci semti Bilk.'],
+            ['youtube_id' => '', 'title' => 'HHU Düsseldorf Kampüs Turu', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Heinrich-Heine Üniversitesi kampüsü ve tıp fakültesi.'],
+            ['youtube_id' => '', 'title' => 'Tasarım ve Moda Kariyeri Düsseldorf', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'HSD mezunlarının moda sektöründeki kariyer hikayeleri.'],
         ],
     ],
 
@@ -778,10 +778,10 @@ return [
         ],
 
         'videos' => [
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Dresden\'de Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Neustadt, Elbe kıyısı ve öğrenci bütçesiyle Dresden.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'TU Dresden — Exzellenzuniversität', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'TU Dresden kampüsü ve mühendislik programları.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Silicon Saxony: Çip Endüstrisinde Kariyer', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Infineon ve GlobalFoundries Dresden staj deneyimi.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Frauenkirche ve Zwinger — Dresden Turu', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Tarihi merkezi keşfet.'],
+            ['youtube_id' => '', 'title' => 'Dresden\'de Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Neustadt, Elbe kıyısı ve öğrenci bütçesiyle Dresden.'],
+            ['youtube_id' => '', 'title' => 'TU Dresden — Exzellenzuniversität', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'TU Dresden kampüsü ve mühendislik programları.'],
+            ['youtube_id' => '', 'title' => 'Silicon Saxony: Çip Endüstrisinde Kariyer', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Infineon ve GlobalFoundries Dresden staj deneyimi.'],
+            ['youtube_id' => '', 'title' => 'Frauenkirche ve Zwinger — Dresden Turu', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Tarihi merkezi keşfet.'],
         ],
     ],
 
@@ -866,9 +866,9 @@ return [
         ],
 
         'videos' => [
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Hannover\'da Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Linden, Maschsee ve öğrenci bütçesiyle Hannover.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Leibniz Üniversitesi Kampüs Turu', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'LUH kampüsünün ve mühendislik bölümlerinin tanıtımı.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Volkswagen & Continental Staj Deneyimi', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Hannover\'daki büyük otomotiv şirketlerinde staj.'],
+            ['youtube_id' => '', 'title' => 'Hannover\'da Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Linden, Maschsee ve öğrenci bütçesiyle Hannover.'],
+            ['youtube_id' => '', 'title' => 'Leibniz Üniversitesi Kampüs Turu', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'LUH kampüsünün ve mühendislik bölümlerinin tanıtımı.'],
+            ['youtube_id' => '', 'title' => 'Volkswagen & Continental Staj Deneyimi', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Hannover\'daki büyük otomotiv şirketlerinde staj.'],
         ],
     ],
 
@@ -952,11 +952,11 @@ return [
         ],
 
         'videos' => [
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Nürnberg\'de Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Tarihi kent, Wöhrder Wiese ve öğrenci bütçesiyle Nürnberg.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'FAU Erlangen-Nürnberg Kampüs Turu', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Friedrich-Alexander Üniversitesi\'nin iki kampüsü.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Siemens Staj Deneyimi — Nürnberg', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Elektrik-elektronik mühendisliği öğrencisi Siemens stajını anlatıyor.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Adidas Merkezi & Herzogenaurach Turu', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Adidas kampüsü ziyareti ve intern deneyimi.'],
-            ['youtube_id' => 'LzLOhMsjpsw', 'title' => 'Nürnberg Noel Pazarı — Christkindlesmarkt', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Dünyanın en ünlü Noel pazarının içinden.'],
+            ['youtube_id' => '', 'title' => 'Nürnberg\'de Öğrenci Hayatı', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Tarihi kent, Wöhrder Wiese ve öğrenci bütçesiyle Nürnberg.'],
+            ['youtube_id' => '', 'title' => 'FAU Erlangen-Nürnberg Kampüs Turu', 'category' => 'üniversite', 'duration' => '8:24', 'description' => 'Friedrich-Alexander Üniversitesi\'nin iki kampüsü.'],
+            ['youtube_id' => '', 'title' => 'Siemens Staj Deneyimi — Nürnberg', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Elektrik-elektronik mühendisliği öğrencisi Siemens stajını anlatıyor.'],
+            ['youtube_id' => '', 'title' => 'Adidas Merkezi & Herzogenaurach Turu', 'category' => 'kariyer', 'duration' => '8:24', 'description' => 'Adidas kampüsü ziyareti ve intern deneyimi.'],
+            ['youtube_id' => '', 'title' => 'Nürnberg Noel Pazarı — Christkindlesmarkt', 'category' => 'şehir', 'duration' => '8:24', 'description' => 'Dünyanın en ünlü Noel pazarının içinden.'],
         ],
     ],
 ];

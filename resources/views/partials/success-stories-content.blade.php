@@ -105,17 +105,30 @@
 }
 .ss-story-photo {
     position:relative; height:200px; overflow:hidden;
-    background:color-mix(in srgb, var(--s-color) 10%, var(--u-bg));
+    display:flex; align-items:center; justify-content:center;
 }
-.ss-story-photo img {
-    width:100%; height:100%; object-fit:cover;
-    object-position:center 25%;
+.ss-story-photo-avatar {
+    width:100px; height:100px; border-radius:50%;
+    background:rgba(255,255,255,.18);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:800; font-size:36px; letter-spacing:-1px;
+    border:3px solid rgba(255,255,255,.32);
+    box-shadow:0 8px 28px rgba(0,0,0,.18);
     transition:transform .4s;
+    backdrop-filter: blur(4px);
 }
-.ss-story:hover .ss-story-photo img { transform:scale(1.05); }
+.ss-story:hover .ss-story-photo-avatar { transform:scale(1.06); }
+/* Dekoratif radial pattern */
+.ss-story-photo::before {
+    content:''; position:absolute; inset:0;
+    background:
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,.18), transparent 40%),
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,.12), transparent 50%);
+    pointer-events:none;
+}
 .ss-story-photo::after {
-    content:''; position:absolute; inset:auto 0 0 0; height:55%;
-    background:linear-gradient(to bottom, transparent, rgba(0,0,0,.75));
+    content:''; position:absolute; inset:auto 0 0 0; height:40%;
+    background:linear-gradient(to bottom, transparent, rgba(0,0,0,.35));
     pointer-events:none;
 }
 .ss-story-photo-badge {
@@ -140,10 +153,11 @@
     border-color:color-mix(in srgb, var(--s-color) 35%, var(--u-line));
 }
 .ss-story-quote-mark {
-    font-family:Georgia, serif; font-size:48px; line-height:.7;
-    color:var(--s-color); opacity:.25; margin-bottom:4px;
-    font-weight:700;
+    font-family:Georgia, "Times New Roman", serif; font-size:54px; line-height:.7;
+    color:var(--s-color); opacity:.22; margin-bottom:4px;
+    font-weight:700; user-select:none;
 }
+.ss-story-quote-mark::before { content: '\201C'; } /* Sol açma çift tırnak " */
 .ss-story-quote {
     font-size:13.5px; line-height:1.6; color:var(--u-text);
     display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical;
@@ -331,23 +345,17 @@ $avatarGradients = [
 $hasCms = isset($cmsStories) && $cmsStories->isNotEmpty();
 
 $staticStories = [
-    ['initials'=>'AK','name'=>'Ahmet K.','program'=>'TU München — Mak. Müh.','source'=>'Google',
-     'photo'=>'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&q=80','city'=>'Münih',
+    ['initials'=>'AK','name'=>'Ahmet K.','program'=>'TU München — Mak. Müh.','source'=>'Google','city'=>'Münih',
      'quote'=>$brandName . ' olmadan bu süreci tek başıma yönetemezdim. Uni-assist başvurusundan vize sürecine kadar her adımda yanımda oldular. Şu an TU München\'de 2. yılımdayım.'],
-    ['initials'=>'ZY','name'=>'Zeynep Y.','program'=>'TU Berlin — Bilgisayar Müh.','source'=>'Trustpilot',
-     'photo'=>'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80','city'=>'Berlin',
+    ['initials'=>'ZY','name'=>'Zeynep Y.','program'=>'TU Berlin — Bilgisayar Müh.','source'=>'Trustpilot','city'=>'Berlin',
      'quote'=>'Belge sürecinde çok zorlandım. Apostil ve yeminli tercüme için nereye gideceğimi bilmiyordum. Danışmanım adım adım rehberlik etti. TU Berlin\'e kabul aldım!'],
-    ['initials'=>'MS','name'=>'Murat S.','program'=>'HAW Hamburg — İşletme','source'=>$brandName,
-     'photo'=>'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=600&q=80','city'=>'Hamburg',
+    ['initials'=>'MS','name'=>'Murat S.','program'=>'HAW Hamburg — İşletme','source'=>$brandName,'city'=>'Hamburg',
      'quote'=>'Almanca B2 sınavına hazırlanırken hem çalışıyor hem de başvuru sürecini yürütmek çok zordu. ' . $brandName . '\'nin sistematik takibi sayesinde hiçbir belge eksik kalmadı.'],
-    ['initials'=>'EA','name'=>'Elif A.','program'=>'Uni Stuttgart — Elektrik Müh.','source'=>'Google',
-     'photo'=>'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80','city'=>'Stuttgart',
+    ['initials'=>'EA','name'=>'Elif A.','program'=>'Uni Stuttgart — Elektrik Müh.','source'=>'Google','city'=>'Stuttgart',
      'quote'=>'Türkiye\'de lise mezunuydum. Studienkolleg süreci çok karmaşık görünüyordu. Danışmanım doğrudan üniversiteye geçiş için alternatif bir yol gösterdi. Harika!'],
-    ['initials'=>'KD','name'=>'Kemal D.','program'=>'Goethe Uni — Finans','source'=>'Trustpilot',
-     'photo'=>'https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?w=600&q=80','city'=>'Frankfurt',
+    ['initials'=>'KD','name'=>'Kemal D.','program'=>'Goethe Uni — Finans','source'=>'Trustpilot','city'=>'Frankfurt',
      'quote'=>'Goethe Uni\'ye kabul aldığımda inanamadım. Motivasyon mektubum için AI asistan ve danışman birlikte çok yardımcı oldu. Keşke daha önce başlasaydım.'],
-    ['initials'=>'NT','name'=>'Neslihan T.','program'=>'TH Köln — Medya Tasarımı','source'=>$brandName,
-     'photo'=>'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&q=80','city'=>'Köln',
+    ['initials'=>'NT','name'=>'Neslihan T.','program'=>'TH Köln — Medya Tasarımı','source'=>$brandName,'city'=>'Köln',
      'quote'=>'Portfolyo hazırlığı ve yetenek sınavına danışmanımla birlikte hazırlandım. TH Köln tasarım programına kabul — çok mutluyum!'],
 ];
 
@@ -417,8 +425,14 @@ foreach ($allStories as $st) {
         ['city'=>'Köln',      'count'=>8,  'img'=>'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Kranh%C3%A4user_Cologne%2C_April_2018_-01.jpg/600px-Kranh%C3%A4user_Cologne%2C_April_2018_-01.jpg', 'slug'=>'cologne'],
         ['city'=>'Stuttgart', 'count'=>7,  'img'=>'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Neues_Schloss_Schlossplatzspringbrunnen_Schlossplatz_Stuttgart_2015_01.jpg/600px-Neues_Schloss_Schlossplatzspringbrunnen_Schlossplatz_Stuttgart_2015_01.jpg', 'slug'=>'stuttgart'],
     ] as $cityTile)
-    <a class="ss-city-tile" href="{{ $cityTileRoute($cityTile['slug']) }}">
-        <img src="{{ $cityTile['img'] }}" alt="{{ $cityTile['city'] }}" loading="lazy">
+    @php
+        // Şehir adı hash'ine göre tutarlı gradient — image fail durumunda fallback
+        $cityHash = abs(crc32($cityTile['city']));
+        $cityGradFallback = $avatarGradients[$cityHash % count($avatarGradients)];
+    @endphp
+    <a class="ss-city-tile" href="{{ $cityTileRoute($cityTile['slug']) }}" style="background:{{ $cityGradFallback }};">
+        <img src="{{ $cityTile['img'] }}" alt="{{ $cityTile['city'] }}" loading="lazy"
+             onerror="this.style.display='none'">
         <span class="ss-city-tile-count">{{ $cityTile['count'] }}</span>
         <span class="ss-city-tile-label">{{ $cityTile['city'] }}</span>
     </a>
@@ -447,14 +461,6 @@ foreach ($allStories as $st) {
 {{-- ══════ Story Grid ══════ --}}
 <div class="ss-story-grid">
 @if($hasCms)
-    @php
-        $cmsPhotos = ['https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&q=80',
-                      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80',
-                      'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=600&q=80',
-                      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80',
-                      'https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?w=600&q=80',
-                      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&q=80'];
-    @endphp
     @foreach($cmsStories as $i => $story)
     @php
         $tags       = is_array($story->tags) ? $story->tags : [];
@@ -462,7 +468,8 @@ foreach ($allStories as $st) {
         $sm         = $srcMeta[$source] ?? ['color'=>'#6366f1'];
         $initials   = $story->cover_image_alt ?: strtoupper(mb_substr($story->title_tr ?? 'M', 0, 2));
         $gradient   = $avatarGradients[$i % count($avatarGradients)];
-        $storyPhoto = $story->cover_image_url ?? $cmsPhotos[$i % count($cmsPhotos)];
+        // CMS'de explicit cover_image_url varsa onu hero olarak göster, yoksa gradient avatar fallback
+        $hasCover = !empty($story->cover_image_url);
     @endphp
     <div class="ss-story" data-source="{{ $source }}" style="--s-color:{{ $sm['color'] }};" onclick="ssOpenModal(this)">
         <template class="ss-full-content">{!! str_replace('\n', '', $story->content_tr) !!}</template>
@@ -472,8 +479,13 @@ foreach ($allStories as $st) {
         <template class="ss-full-source-color">{{ $sm['color'] }}</template>
         <template class="ss-full-source">{{ $source }}</template>
 
-        <div class="ss-story-photo">
-            <img src="{{ $storyPhoto }}" alt="{{ $story->title_tr }}" loading="lazy">
+        <div class="ss-story-photo" style="background:{{ $gradient }};">
+            @if($hasCover)
+                <img src="{{ $story->cover_image_url }}" alt="{{ $story->title_tr }}" loading="lazy"
+                     style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+            @else
+                <div class="ss-story-photo-avatar">{{ $initials }}</div>
+            @endif
             <span class="ss-story-photo-badge">{{ $source }}</span>
             @if(!empty($story->summary_tr))
             <span class="ss-story-photo-city"><x-icon name="map-pin" size="13" /> {{ \Illuminate\Support\Str::limit($story->summary_tr, 30) }}</span>
@@ -506,8 +518,8 @@ foreach ($allStories as $st) {
         <template class="ss-full-source-color">{{ $sm['color'] }}</template>
         <template class="ss-full-source">{{ $s['source'] }}</template>
 
-        <div class="ss-story-photo">
-            <img src="{{ $s['photo'] }}" alt="{{ $s['name'] }}" loading="lazy">
+        <div class="ss-story-photo" style="background:{{ $gradient }};">
+            <div class="ss-story-photo-avatar">{{ $s['initials'] }}</div>
             <span class="ss-story-photo-badge">{{ $s['source'] }}</span>
             @if(!empty($s['city']))
             <span class="ss-story-photo-city"><x-icon name="map-pin" size="13" /> {{ $s['city'] }}</span>
