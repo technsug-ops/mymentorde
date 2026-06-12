@@ -1074,6 +1074,35 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // .env dosyasindan PUSHER/BROADCAST satirlarini gosterir + opcache/config:cache state.
+        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=show-env-pusher
+        if ($request->query('cleanup') === 'show-env-pusher') {
+            $envPath = base_path('.env');
+            if (!file_exists($envPath)) {
+                $output .= ">>> show-env-pusher: .env yok\n";
+            } else {
+                $lines = file($envPath, FILE_IGNORE_NEW_LINES);
+                $output .= ">>> show-env-pusher: .env'deki broadcast/pusher satirlari:\n";
+                foreach ($lines as $i => $line) {
+                    if (preg_match('/^(BROADCAST|PUSHER|VITE_PUSHER)/', $line)) {
+                        // secret'i maskele
+                        $shown = preg_replace('/(SECRET=)([^\s]+)/', '$1***(' . strlen('$2') . 'c)', $line);
+                        $shown = preg_replace('/(SECRET=)(.{4})(.+)/', '$1$2***', $line);
+                        $output .= "    L" . ($i+1) . ": " . $shown . "\n";
+                    }
+                }
+
+                $cachedConfig = base_path('bootstrap/cache/config.php');
+                $output .= "    --- runtime state ---\n";
+                $output .= "    bootstrap/cache/config.php: " . (file_exists($cachedConfig) ? 'EXISTS (config:cache aktif!)' : 'YOK (env her requestte okunuyor)') . "\n";
+                $output .= "    config('broadcasting.default'):   " . config('broadcasting.default') . "\n";
+                $output .= "    env('BROADCAST_DRIVER'):          " . (env('BROADCAST_DRIVER') ?: 'NULL') . "\n";
+                $output .= "    env('BROADCAST_CONNECTION'):      " . (env('BROADCAST_CONNECTION') ?: 'NULL') . "\n";
+                $output .= "    \$_ENV['BROADCAST_DRIVER']:        " . ($_ENV['BROADCAST_DRIVER'] ?? 'NULL') . "\n";
+                $output .= "    getenv('BROADCAST_DRIVER'):       " . (getenv('BROADCAST_DRIVER') ?: 'NULL') . "\n";
+            }
+        }
+
         // Pusher broadcaster auth'i sunucu tarafindan simulate eder ve
         // dolu/bos response + exception trace'i gosterir. Frontend
         // /broadcasting/auth 200 + bos body donduren sorunu tesis icin.
