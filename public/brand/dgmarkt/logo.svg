@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 180" role="img" aria-label="DGmarkt — Digital Operations &amp; SaaS">
+    <defs>
+        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"  stop-color="#3b3098"/>
+            <stop offset="48%" stop-color="#4338ca"/>
+            <stop offset="100%" stop-color="#0ea5e9"/>
+        </linearGradient>
+        <linearGradient id="logoShine" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"  stop-color="#ffffff" stop-opacity=".22"/>
+            <stop offset="55%" stop-color="#ffffff" stop-opacity="0"/>
+        </linearGradient>
+    </defs>
+
+    <!-- ICON MARK (140x140 sol) -->
+    <g transform="translate(10,20)">
+        <rect width="140" height="140" rx="30" fill="url(#logoGrad)"/>
+        <rect width="140" height="140" rx="30" fill="url(#logoShine)"/>
+
+        <g fill="#ffffff" opacity=".22">
+            <rect x="93"  y="24" width="28" height="4" rx="2"/>
+            <rect x="100" y="32" width="22" height="4" rx="2"/>
+            <rect x="86"  y="40" width="36" height="4" rx="2"/>
+        </g>
+
+        <text x="70" y="98"
+              font-family="'Space Grotesk', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif"
+              font-weight="800"
+              font-size="76"
+              letter-spacing="-3"
+              text-anchor="middle"
+              fill="#ffffff">DG</text>
+
+        <circle cx="114" cy="114" r="6" fill="#ffffff" opacity=".95"/>
+        <circle cx="114" cy="114" r="2.4" fill="url(#logoGrad)"/>
+    </g>
+
+    <!-- WORDMARK (sağ) -->
+    <text x="178" y="98"
+          font-family="'Space Grotesk', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif"
+          font-weight="800"
+          font-size="72"
+          letter-spacing="-2.5"
+          fill="#0f172a">dgmarkt</text>
+
+    <text x="180" y="138"
+          font-family="'Space Grotesk', system-ui, -apple-system, sans-serif"
+          font-weight="500"
+          font-size="18"
+          letter-spacing=".5"
+          fill="#64748b">Digital Operations · Web · SaaS</text>
+</svg>

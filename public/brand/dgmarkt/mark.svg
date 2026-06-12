@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="DGmarkt logo">
+    <defs>
+        <linearGradient id="dgmGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"  stop-color="#3b3098"/>
+            <stop offset="48%" stop-color="#4338ca"/>
+            <stop offset="100%" stop-color="#0ea5e9"/>
+        </linearGradient>
+        <linearGradient id="dgmShine" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"  stop-color="#ffffff" stop-opacity=".22"/>
+            <stop offset="55%" stop-color="#ffffff" stop-opacity="0"/>
+        </linearGradient>
+    </defs>
+
+    <!-- Rounded square tile with diagonal gradient -->
+    <rect width="256" height="256" rx="56" fill="url(#dgmGrad)"/>
+
+    <!-- Subtle gloss top-left -->
+    <rect width="256" height="256" rx="56" fill="url(#dgmShine)"/>
+
+    <!-- Stacked horizontal accent bars (ascending widths) — multi-service stack metaphor -->
+    <g fill="#ffffff" opacity=".22">
+        <rect x="172" y="46"  width="48" height="6"  rx="3"/>
+        <rect x="184" y="60"  width="36" height="6"  rx="3"/>
+        <rect x="160" y="74"  width="60" height="6"  rx="3"/>
+    </g>
+
+    <!-- DG monogram in white -->
+    <text x="128" y="178"
+          font-family="'Space Grotesk', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif"
+          font-weight="800"
+          font-size="138"
+          letter-spacing="-6"
+          text-anchor="middle"
+          fill="#ffffff">DG</text>
+
+    <!-- Accent dot bottom-right (marker / "markt" pin) -->
+    <circle cx="208" cy="206" r="10" fill="#ffffff" opacity=".95"/>
+    <circle cx="208" cy="206" r="4"  fill="url(#dgmGrad)"/>
+</svg>

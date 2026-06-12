@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'DGmarkt Platform — Owner Console')</title>
-    @include('partials.favicon')
+    {{-- DGmarkt favicon (Platform Owner panelinde, Mentorde'nin favicon'ını ezer) --}}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('brand/dgmarkt/favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ asset('brand/dgmarkt/mark.svg') }}">
 
     <link rel="stylesheet" href="{{ Vite::asset('resources/css/premium.css') }}">
 
@@ -34,9 +36,10 @@
         .plat-app { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
         .plat-sidebar { background: linear-gradient(180deg, #0d0a1e 0%, #1a1535 100%); border-right: 1px solid var(--plat-border); padding: 18px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
         .plat-brand { display: flex; align-items: center; gap: 10px; padding: 0 18px 18px; border-bottom: 1px solid var(--plat-border); margin-bottom: 14px; }
-        .plat-brand-mark { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--plat-accent), var(--plat-accent-2)); display: flex; align-items: center; justify-content: center; color: #fff; }
+        .plat-brand-mark { width: 40px; height: 40px; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+        .plat-brand-mark img { width: 100%; height: 100%; display: block; }
         .plat-brand-text { display: flex; flex-direction: column; }
-        .plat-brand-title { font-size: 15px; font-weight: 800; color: #fff; }
+        .plat-brand-title { font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -.3px; }
         .plat-brand-sub { font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--plat-accent-2); }
 
         .plat-nav { padding: 0 12px; }
@@ -152,10 +155,12 @@
     {{-- SIDEBAR --}}
     <aside class="plat-sidebar">
         <div class="plat-brand">
-            <div class="plat-brand-mark"><x-icon name="crown" size="20" /></div>
+            <div class="plat-brand-mark">
+                <img src="{{ asset('brand/dgmarkt/mark.svg') }}" alt="DGmarkt" loading="eager">
+            </div>
             <div class="plat-brand-text">
-                <span class="plat-brand-title">DGmarkt</span>
-                <span class="plat-brand-sub">Platform</span>
+                <span class="plat-brand-title">dgmarkt</span>
+                <span class="plat-brand-sub">Owner Console</span>
             </div>
         </div>
 

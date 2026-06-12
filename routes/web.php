@@ -381,6 +381,10 @@ Route::middleware(['company.context'])->group(function () {
     Route::get('/saas',     fn () => redirect()->route('public.platform-landing'))->middleware('throttle:120,1');
     Route::get('/urun',     fn () => redirect()->route('public.platform-landing'))->middleware('throttle:120,1');
 
+    // DGmarkt brand kit showcase — logo varyantları + palet + tipografi
+    Route::get('/brand/dgmarkt', fn () => view('public.brand.dgmarkt'))
+        ->middleware('throttle:60,1')->name('public.brand.dgmarkt');
+
     // Public Status Page — sistem servislerinin anlık durumu
     $status = \App\Http\Controllers\Public\StatusController::class;
     Route::get('/durum',  [$status, 'show'])->middleware('throttle:60,1')->name('public.status');
