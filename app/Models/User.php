@@ -74,6 +74,15 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
     public const ROLE_MARKETING_STAFF = 'marketing_staff';
 
     /**
+     * Read-only Auditor — denetim/uyum için tüm sayfaları görür ama yazma yok.
+     * SOC 2 / ISO 27001 "minimum yetki ilkesi" + risk azaltma + compliance officer
+     * + yatırımcı/avukat erişimi senaryolari için. EnsureReadOnly middleware
+     * POST/PUT/DELETE/PATCH istekleri 403 ile bloklar (allowlist hariç:
+     * logout, dismiss benzeri benign actionlar). UI'de "READ-ONLY" rozeti gösterir.
+     */
+    public const ROLE_AUDITOR = 'auditor';
+
+    /**
      * Platform Owner — Mentorde SaaS sahibi. Cross-company yetki, modul toggle,
      * billing, sistem admin yetkileri. Customer Manager'larin uzerinde tek rol.
      * Customer'larin enabled_modules JSON'unu degistirebilir = premium feature
@@ -88,6 +97,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         self::ROLE_OPERATIONS_ADMIN,
         self::ROLE_FINANCE_ADMIN,
         self::ROLE_MARKETING_ADMIN,  // marketing admin de co-manager olarak /manager/* erişebilir
+        self::ROLE_AUDITOR,          // read-only auditor — tüm manager sayfalarına erişir, yazma yok
     ];
 
     public const MARKETING_ACCESS_ROLES = [

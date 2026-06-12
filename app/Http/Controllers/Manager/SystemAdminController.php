@@ -289,6 +289,7 @@ class SystemAdminController extends Controller
             'finance_admin','finance_staff',
             'marketing_admin','marketing_staff',
             'sales_admin','sales_staff',
+            'auditor', // Read-only Auditor — denetim için tüm sayfaları görür, yazma yok
         ];
         $users = User::whereIn('role', $internalRoles)
             ->when($cid > 0, fn ($q) => $q->where('company_id', $cid))

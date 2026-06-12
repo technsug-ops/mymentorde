@@ -46,6 +46,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // (Global append etmek $request->session() exception fırlatır.)
         $middleware->appendToGroup('web', \App\Http\Middleware\EnsureTrialActive::class);
 
+        // Read-only Auditor — POST/PUT/DELETE bloklar (yalnızca ROLE_AUDITOR için).
+        // Diğer roller bu middleware'den şeffaf geçer.
+        $middleware->appendToGroup('web', \App\Http\Middleware\EnsureReadOnly::class);
+
         $middleware->alias([
             'platform.owner' => \App\Http\Middleware\EnsurePlatformOwner::class,
             'manager.role' => \App\Http\Middleware\EnsureManagerRole::class,

@@ -1218,6 +1218,60 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // Read-only Auditor kullanici olustur (test/manuel) — POST/PUT/DELETE bloklanir.
+        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=create-auditor
+        //          &email=auditor@example.com&name=Audit&password=Min8Chars&company=1
+        if ($request->query('cleanup') === 'create-auditor') {
+            $email = strtolower(trim((string) $request->query('email', '')));
+            $name  = trim((string) $request->query('name', 'Read-only Auditor'));
+            $pwd   = (string) $request->query('password', '');
+            $cid   = (int) $request->query('company', 1);
+            if ($email === '' || strlen($pwd) < 8) {
+                $output .= ">>> create-auditor: email + en az 8 karakter password gerekli\n";
+                $output .= "    ornek: &email=auditor@panel.mentorde.com&name=Auditor&password=Audit2026!\n";
+            } else {
+                $exists = \App\Models\User::query()->whereRaw('lower(email) = ?', [$email])->first();
+                if ($exists) {
+                    $output .= ">>> create-auditor: {$email} zaten var (id={$exists->id}, role={$exists->role})\n";
+                    $output .= "    Mevcut hesabi auditor yapmak icin: ?cleanup=promote-auditor&email={$email}\n";
+                } else {
+                    $user = \App\Models\User::create([
+                        'name'              => $name,
+                        'email'             => $email,
+                        'password'          => bcrypt($pwd),
+                        'role'              => \App\Models\User::ROLE_AUDITOR,
+                        'company_id'        => $cid,
+                        'is_active'         => true,
+                        'email_verified_at' => now(),
+                    ]);
+                    $output .= ">>> create-auditor: olusturuldu\n";
+                    $output .= "    id={$user->id} email={$user->email} role=auditor company_id={$cid}\n";
+                    $output .= "    Login: {$email} / {$pwd}\n";
+                    $output .= "    Login sonrasi tum manager sayfalarini gorebilir ama POST/PUT/DELETE bloklanir.\n";
+                }
+            }
+        }
+
+        // Mevcut bir hesabi Read-only Auditor'a yukselt/dusur.
+        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=promote-auditor&email=USER_EMAIL
+        if ($request->query('cleanup') === 'promote-auditor') {
+            $email = strtolower(trim((string) $request->query('email', '')));
+            if ($email === '') {
+                $output .= ">>> promote-auditor: email parametresi gerekli\n";
+            } else {
+                $user = \App\Models\User::query()->whereRaw('lower(email) = ?', [$email])->first();
+                if (!$user) {
+                    $output .= ">>> promote-auditor: {$email} bulunamadi\n";
+                } else {
+                    $oldRole = (string) $user->role;
+                    $user->role = \App\Models\User::ROLE_AUDITOR;
+                    $user->save();
+                    $output .= ">>> promote-auditor: {$email}\n";
+                    $output .= "    {$oldRole} -> auditor (read-only, yazma yok)\n";
+                }
+            }
+        }
+
         // Platform Owner role'unu Manager'a geri dusur (sahip ayrimi icin).
         // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=demote-to-manager&email=USER_EMAIL
         if ($request->query('cleanup') === 'demote-to-manager') {

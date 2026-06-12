@@ -703,6 +703,18 @@
             @include('partials.broadcast-banner')
             @include('partials.trial-banner')
 
+            {{-- Read-only Auditor banner — bu hesap yazma yapamaz --}}
+            @if(auth()->check() && (string) auth()->user()->role === \App\Models\User::ROLE_AUDITOR)
+                <div style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;padding:10px 18px;border-radius:10px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;box-shadow:0 4px 14px rgba(220,38,38,.28);">
+                    <x-icon name="eye" size="18" />
+                    <div style="flex:1;min-width:200px;">
+                        <strong>READ-ONLY hesap</strong>
+                        <div style="font-size:11px;opacity:.92;margin-top:2px;">Sadece görüntüleme yetkin var. Form gönderimi, silme, düzenleme işlemleri engellenir.</div>
+                    </div>
+                    <span style="background:rgba(255,255,255,.18);padding:4px 10px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border:1px solid rgba(255,255,255,.22);">Auditor</span>
+                </div>
+            @endif
+
             @yield('content')
         </div>
     </div>{{-- /main --}}
