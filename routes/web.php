@@ -381,6 +381,15 @@ Route::middleware(['company.context'])->group(function () {
     Route::get('/saas',     fn () => redirect()->route('public.platform-landing'))->middleware('throttle:120,1');
     Route::get('/urun',     fn () => redirect()->route('public.platform-landing'))->middleware('throttle:120,1');
 
+    // Trial expired payment wall (Customer Manager middleware EnsureTrialActive yönlendirir)
+    $trialExp = \App\Http\Controllers\Public\TrialExpiredController::class;
+    Route::get('/trial-expired',
+        [$trialExp, 'show']
+    )->middleware(['auth', 'throttle:60,1'])->name('public.trial-expired');
+    Route::post('/trial-banner/dismiss',
+        [$trialExp, 'dismissBanner']
+    )->middleware(['auth', 'throttle:60,1'])->name('public.trial-banner.dismiss');
+
     // DGmarkt brand kit showcase — logo varyantları + palet + tipografi
     Route::get('/brand/dgmarkt', fn () => view('public.brand.dgmarkt'))
         ->middleware('throttle:60,1')->name('public.brand.dgmarkt');

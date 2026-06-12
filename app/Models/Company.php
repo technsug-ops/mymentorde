@@ -54,6 +54,20 @@ class Company extends Model
         return $this->trial_ends_at->lt($now ?? \Carbon\CarbonImmutable::now());
     }
 
+    /** Trial mu (ücretsiz dönemde mi)? */
+    public function isTrial(): bool
+    {
+        return $this->subscription_tier === self::TIER_TRIAL;
+    }
+
+    /** Trial bitişine kalan gün (negatifse expired). NULL = trial değil veya date yok. */
+    public function trialDaysRemaining(?\Carbon\CarbonInterface $now = null): ?int
+    {
+        if (!$this->isTrial() || !$this->trial_ends_at) return null;
+        $now = $now ?? \Carbon\CarbonImmutable::now()->startOfDay();
+        return (int) round($now->diffInDays($this->trial_ends_at, false));
+    }
+
     /**
      * D11: Bu ay icin uretilen doc_request token sayisi (quota gating icin).
      */

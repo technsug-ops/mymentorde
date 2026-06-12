@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Mail\WelcomeNewCompanyMail;
 use App\Models\Company;
 use App\Models\User;
 use App\Support\ModuleAccess;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -182,6 +184,18 @@ class SignupController extends Controller
             'email'      => $user->email,
             'ip'         => $request->ip(),
         ]);
+
+        // Welcome email — queue'ya düşer, response'u yavaşlatmaz
+        try {
+            Mail::to($user->email, $user->name)
+                ->send(new WelcomeNewCompanyMail($company, $user));
+        } catch (\Throwable $e) {
+            // Mail fail signup'ı bozmasın — log + devam
+            Log::warning('public.signup: welcome mail failed (non-fatal)', [
+                'email' => $user->email,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         // Auto-login + redirect
         Auth::login($user);

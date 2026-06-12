@@ -701,6 +701,7 @@
             @endif
 
             @include('partials.broadcast-banner')
+            @include('partials.trial-banner')
 
             @yield('content')
         </div>

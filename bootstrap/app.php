@@ -41,6 +41,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // Şifre değiştirme zorunluluğu — manager reset sonrası geçici şifrenin tek-kullanımlık olmasını sağlar
         $middleware->append(\App\Http\Middleware\EnsurePasswordChanged::class);
 
+        // Trial süresi dolmuş Customer Manager'ları /trial-expired payment wall'a yönlendirir.
+        // Allowlist (my-plan, logout, trial-expired) bypass eder. Platform Owner exempt.
+        $middleware->append(\App\Http\Middleware\EnsureTrialActive::class);
+
         $middleware->alias([
             'platform.owner' => \App\Http\Middleware\EnsurePlatformOwner::class,
             'manager.role' => \App\Http\Middleware\EnsureManagerRole::class,
