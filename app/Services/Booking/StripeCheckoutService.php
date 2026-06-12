@@ -241,6 +241,19 @@ class StripeCheckoutService
             $this->materializeBookingArtifacts($booking);
         });
 
+        // Real-time ping → senior + manager. Webhook idempotent, Pusher down olursa
+        // hicbir state etkilenmez (booking zaten paid).
+        try {
+            $fresh = $booking->fresh() ?: $booking;
+            broadcast(new \App\Events\PaymentReceived($fresh));
+            broadcast(new \App\Events\NewBookingReceived($fresh));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('stripe.payment.broadcast_failed', [
+                'booking_id' => $booking->id,
+                'error'      => $e->getMessage(),
+            ]);
+        }
+
         return ['status' => 'paid', 'booking_id' => $booking->id, 'message' => 'confirmed'];
     }
 

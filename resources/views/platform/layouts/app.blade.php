@@ -258,5 +258,7 @@
     </main>
 </div>
 @stack('scripts')
+{{-- Real-time bildirim (Pusher) — addon: down olursa sayfa etkilenmez --}}
+@include('partials.notification-toast')
 </body>
 </html>

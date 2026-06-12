@@ -140,6 +140,17 @@ class BookingConfirmationService
 
                 // 5. Mail bildirim (fail-safe)
                 $this->sendConfirmationMails($booking, $settings, $senior);
+
+                // 6. Real-time ping (Pusher) — addon: down olursa booking
+                // akışı etkilenmez, sadece anlık toast düşmez.
+                try {
+                    broadcast(new \App\Events\NewBookingReceived($booking));
+                } catch (\Throwable $e) {
+                    Log::warning('booking.broadcast_failed', [
+                        'booking_id' => $booking->id,
+                        'error'      => $e->getMessage(),
+                    ]);
+                }
             }
             // pending_payment path → Stripe redirect Phase 5'te eklenecek
 
@@ -206,6 +217,16 @@ class BookingConfirmationService
             $this->sendCancellationMails($fresh, $reason, $canceledBy);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('booking.cancellation_mail_failed', [
+                'booking_id' => $fresh->id,
+                'error'      => $e->getMessage(),
+            ]);
+        }
+
+        // Real-time ping — karsi tarafa anlik toast (Pusher down → email fallback yeterli).
+        try {
+            broadcast(new \App\Events\BookingCanceled($fresh, $reason, $canceledBy));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('booking.cancel.broadcast_failed', [
                 'booking_id' => $fresh->id,
                 'error'      => $e->getMessage(),
             ]);

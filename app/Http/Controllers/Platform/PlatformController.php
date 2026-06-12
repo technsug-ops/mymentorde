@@ -238,6 +238,7 @@ class PlatformController extends Controller
     public function updateTier(Request $request, int $company): RedirectResponse
     {
         $companyModel = Company::query()->where('id', $company)->firstOrFail();
+        $previousTier = (string) $companyModel->subscription_tier;
 
         $validator = Validator::make($request->all(), [
             'subscription_tier'      => ['required', 'string', 'in:' . implode(',', Company::TIERS)],
@@ -291,6 +292,18 @@ class PlatformController extends Controller
             ],
             \App\Models\PlatformAuditLog::SEVERITY_WARNING
         );
+
+        // Real-time ping: tenant manager'i + tum platform_owner'lar gorur.
+        if ($previousTier !== (string) $tier) {
+            try {
+                broadcast(new \App\Events\TierUpgraded($companyModel, (string) $tier, $previousTier ?: null));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('tier.broadcast_failed', [
+                    'company_id' => $companyModel->id,
+                    'error'      => $e->getMessage(),
+                ]);
+            }
+        }
 
         return back()->with('success', "Tier güncellendi: {$companyModel->name} → " . ($this->tierLabels()[$tier] ?? $tier));
     }

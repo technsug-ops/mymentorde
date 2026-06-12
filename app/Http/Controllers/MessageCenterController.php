@@ -390,6 +390,26 @@ class MessageCenterController extends Controller
             ]);
         }
 
+        // Real-time ping → karsi tarafa anlik toast (user.{recipient_id} kanali).
+        try {
+            $recipientUserId = $this->resolveDmRecipientUserId($thread, (int) $user->id);
+            if ($recipientUserId > 0) {
+                broadcast(new \App\Events\MessageReceived(
+                    recipientId: $recipientUserId,
+                    senderName: (string) ($user->name ?? $user->email),
+                    preview: $preview,
+                    threadUrl: '/messages?thread=' . (int) $thread->id,
+                    messageId: (int) $msg->id,
+                    threadId: (int) $thread->id,
+                ));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('messages-center.send: broadcast failed', [
+                'thread_id' => (int) $thread->id,
+                'error'     => $e->getMessage(),
+            ]);
+        }
+
         // Participant (guest/student) mesaj gönderdi → advisor away ise auto-reply
         $isParticipantSender = in_array($user->role, ['guest', 'student'], true);
         if ($isParticipantSender) {
@@ -430,6 +450,44 @@ class MessageCenterController extends Controller
             'Ek bilgi gerekiyor. Lutfen detaylari bu mesaja cevap olarak paylasin.',
             'Islem tamamlandi. Farkli bir konuda yardim gerekirse yazabilirsiniz.',
         ];
+    }
+
+    /**
+     * Real-time broadcast karsi taraf user_id'si:
+     *   - Sender advisor ise → participant (guest_user veya student user) bul
+     *   - Sender participant ise → thread.advisor_user_id
+     * Bulamazsa 0 dondurur (broadcast skip edilir).
+     */
+    private function resolveDmRecipientUserId(DmThread $thread, int $senderUserId): int
+    {
+        $advisorId = (int) ($thread->advisor_user_id ?? 0);
+
+        // Eger sender advisor degilse → recipient = advisor
+        if ($advisorId > 0 && $advisorId !== $senderUserId) {
+            return $advisorId;
+        }
+
+        // Sender advisor → recipient participant
+        if ((string) $thread->thread_type === 'guest') {
+            $guest = \App\Models\GuestApplication::query()
+                ->find((int) ($thread->guest_application_id ?? 0));
+            if ($guest && (int) ($guest->guest_user_id ?? 0) > 0) {
+                return (int) $guest->guest_user_id;
+            }
+        } else {
+            $studentId = trim((string) ($thread->student_id ?? ''));
+            if ($studentId !== '') {
+                $studentUser = User::query()
+                    ->where('student_id', $studentId)
+                    ->where('is_active', true)
+                    ->first(['id']);
+                if ($studentUser) {
+                    return (int) $studentUser->id;
+                }
+            }
+        }
+
+        return 0;
     }
 
     private function queueParticipantNotification(DmThread $thread, string $message, string $triggeredBy): void

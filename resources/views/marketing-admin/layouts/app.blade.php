@@ -712,5 +712,7 @@ document.addEventListener('alpine:init',function(){
 <x-analytics.consent-banner />
 @include('partials.cookie-consent')
 @include('partials.theme-mode-guard')
+{{-- Real-time bildirim (Pusher) — addon: down olursa sayfa etkilenmez --}}
+@include('partials.notification-toast')
 </body>
 </html>

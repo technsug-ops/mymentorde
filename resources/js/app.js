@@ -3,6 +3,10 @@ import persist from '@alpinejs/persist';
 import focus from '@alpinejs/focus';
 import collapse from '@alpinejs/collapse';
 
+// Real-time bildirim (Pusher) — Echo'yu window'a koyar, notifications.js auto-init eder
+import './echo';
+import './notifications';
+
 Alpine.plugin(persist);
 Alpine.plugin(focus);
 Alpine.plugin(collapse);

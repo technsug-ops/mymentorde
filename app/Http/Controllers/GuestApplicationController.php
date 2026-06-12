@@ -268,6 +268,14 @@ class GuestApplicationController extends Controller
 
         $this->queueOnRegisterNotifications($row, $assignedSeniorEmail, $generatedPassword);
 
+        // Real-time ping → manager paneli anlik bildirim alir (Pusher).
+        // Down olursa registration akisi etkilenmez; toast dusmez sadece.
+        try {
+            broadcast(new \App\Events\NewLeadCreated($row));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         // Geçici şifre cache'e yaz (5 dk) — tracking token ile çek
         if ($generatedPassword) {
             \Cache::put("apply_password_{$row->tracking_token}", [

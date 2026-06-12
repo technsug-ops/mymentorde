@@ -81,15 +81,21 @@ class SecurityHeaders
         // Cloudflare Turnstile (CAPTCHA) — script + iframe domain'leri
         $turnstile = ' https://challenges.cloudflare.com';
 
+        // Pusher (real-time bildirim) — pusher-js CDN bundle vite ile yukleniyor,
+        // gercek WebSocket trafigi ws-*.pusher.com & sockjs-*.pusher.com uzerinden.
+        $pusherScript  = ' https://*.pusher.com https://*.pusherapp.com https://*.pusher-js.com';
+        $pusherConnect = ' wss://*.pusher.com wss://*.pusherapp.com https://*.pusher.com https://*.pusherapp.com https://sockjs-eu.pusher.com https://sockjs-us.pusher.com https://sockjs-ap1.pusher.com';
+
         $csp = implode('; ', [
             "default-src 'self'",
             // Production: nonce kaldırıldı — unsafe-inline aktif. Tüm view'lar nonce'a geçirildiğinde geri eklenecek.
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.qrserver.com" . $posthogScript . $turnstile . $viteScript,
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.qrserver.com" . $posthogScript . $turnstile . $pusherScript . $viteScript,
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net" . $viteStyle,
             "font-src 'self' data:",
             "img-src 'self' data: https: blob:",
-            "connect-src 'self' https:" . $posthogConnect . $viteConnect,
+            "connect-src 'self' https:" . $posthogConnect . $pusherConnect . $viteConnect,
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://open.spotify.com https://docs.google.com https://www.canva.com" . $turnstile,
+            "media-src 'self' data:",
             "worker-src 'self' blob:",
             "object-src 'none'",
             "base-uri 'self'",

@@ -28,6 +28,8 @@ export default defineConfig({
                 'resources/css/portal-unified-v2.css',
                 'resources/css/minimalist.css',
                 'resources/js/app.js',
+                'resources/js/echo.js',
+                'resources/js/notifications.js',
                 'resources/js/student-document-builder.jsx',
                 // ── Static portal JS (40+ files) — vanilla JS, kasıtlı seçim ──
                 'resources/js/apply-form.js',
