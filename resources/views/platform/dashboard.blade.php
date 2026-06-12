@@ -1,13 +1,13 @@
 @extends('platform.layouts.app')
 
-@section('title', 'Platform Dashboard — MentorDE')
+@section('title', 'Platform Dashboard — DGmarkt')
 
 @section('content')
 
 <div class="plat-page-header">
     <div>
         <h1 class="plat-page-title">Platform Dashboard</h1>
-        <p class="plat-page-sub">Mentorde SaaS — cross-company genel bakış</p>
+        <p class="plat-page-sub">DGmarkt SaaS — cross-company genel bakış</p>
     </div>
     <a href="{{ route('platform.companies.create') }}" class="plat-btn plat-btn-primary">
         <x-icon name="plus" size="16" /> Yeni Şirket

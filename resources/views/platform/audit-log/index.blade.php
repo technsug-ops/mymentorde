@@ -1,6 +1,6 @@
 @extends('platform.layouts.app')
 
-@section('title', 'Denetim Kayitlari - MentorDE Platform')
+@section('title', 'Denetim Kayitlari - DGmarkt Platform')
 
 @php
     /** @var \Illuminate\Pagination\LengthAwarePaginator $logs */

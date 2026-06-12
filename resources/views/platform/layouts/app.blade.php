@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'MentorDE Platform — Owner Console')</title>
+    <title>@yield('title', 'DGmarkt Platform — Owner Console')</title>
     @include('partials.favicon')
 
     <link rel="stylesheet" href="{{ Vite::asset('resources/css/premium.css') }}">
@@ -154,7 +154,7 @@
         <div class="plat-brand">
             <div class="plat-brand-mark"><x-icon name="crown" size="20" /></div>
             <div class="plat-brand-text">
-                <span class="plat-brand-title">MentorDE</span>
+                <span class="plat-brand-title">DGmarkt</span>
                 <span class="plat-brand-sub">Platform</span>
             </div>
         </div>
@@ -217,7 +217,7 @@
         {{-- Topbar --}}
         <div class="plat-topbar">
             <div class="plat-topbar-title">
-                <strong>MentorDE Platform</strong>
+                <strong>DGmarkt Platform</strong>
                 <span>Owner Console</span>
             </div>
             <div class="plat-user">

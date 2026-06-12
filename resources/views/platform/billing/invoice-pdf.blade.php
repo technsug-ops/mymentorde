@@ -55,10 +55,10 @@
     <table class="pdf-header-row">
         <tr>
             <td style="width:60%;">
-                <div class="pdf-brand">MentorDE</div>
+                <div class="pdf-brand">DGmarkt</div>
                 <div class="pdf-brand-sub">Mentoring Platform</div>
                 <div style="margin-top:14px;font-size:9pt;color:#6b7280;line-height:1.6;">
-                    Mentorde GmbH<br>
+                    DGmarkt GmbH<br>
                     Berlin, Deutschland<br>
                     billing@mentorde.com
                 </div>
@@ -116,7 +116,7 @@
         <tr>
             <td>
                 <div class="desc">
-                    Mentorde Abonelik — {{ config("subscription_tiers.{$invoice->tier}.label", ucfirst($invoice->tier)) }}
+                    DGmarkt Abonelik — {{ config("subscription_tiers.{$invoice->tier}.label", ucfirst($invoice->tier)) }}
                 </div>
                 <div class="desc-sub">
                     Dönem: {{ optional($invoice->period_start)->format('d.m.Y') }} — {{ optional($invoice->period_end)->format('d.m.Y') }}
@@ -147,7 +147,7 @@
 {{-- FOOTER --}}
 <div class="pdf-footer">
     <p><strong>Ödeme Koşulları:</strong> Faturanın tarihinden itibaren 14 gün içinde ödenmelidir.</p>
-    <p><strong>Banka Bilgileri:</strong> Mentorde GmbH — IBAN: DE00 0000 0000 0000 0000 00 — BIC: XXXXDEXXX</p>
+    <p><strong>Banka Bilgileri:</strong> DGmarkt GmbH — IBAN: DE00 0000 0000 0000 0000 00 — BIC: XXXXDEXXX</p>
     <p><strong>Açıklama:</strong> Lütfen ödeme açıklamasında fatura numarasını ({{ $invoice->invoice_number }}) belirtin.</p>
     <p style="margin-top:10px;">
         Sorular için: <strong>billing@mentorde.com</strong><br>

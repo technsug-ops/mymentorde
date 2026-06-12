@@ -1,6 +1,6 @@
 @extends('platform.layouts.app')
 
-@section('title', 'Platform Ayarları — MentorDE')
+@section('title', 'Platform Ayarları — DGmarkt')
 
 @push('styles')
 <style>

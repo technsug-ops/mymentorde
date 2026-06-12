@@ -1,6 +1,6 @@
 @extends('platform.layouts.app')
 
-@section('title', 'Audit Event #' . $log->id . ' - MentorDE Platform')
+@section('title', 'Audit Event #' . $log->id . ' - DGmarkt Platform')
 
 @php
     /** @var \App\Models\PlatformAuditLog $log */

@@ -1,6 +1,6 @@
 @extends('platform.layouts.app')
 
-@section('title', 'MRR Trendi — MentorDE Platform')
+@section('title', 'MRR Trendi — DGmarkt Platform')
 
 @push('styles')
 <style>

@@ -1,6 +1,6 @@
 @extends('platform.layouts.app')
 
-@section('title', 'Yeni Duyuru — MentorDE Platform')
+@section('title', 'Yeni Duyuru — DGmarkt Platform')
 
 @section('content')
     <div class="plat-page-header">

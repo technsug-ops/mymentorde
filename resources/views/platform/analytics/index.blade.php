@@ -1,6 +1,6 @@
 @extends('platform.layouts.app')
 
-@section('title', 'Platform Analytics — MentorDE')
+@section('title', 'Platform Analytics — DGmarkt')
 
 @push('styles')
 <style>
