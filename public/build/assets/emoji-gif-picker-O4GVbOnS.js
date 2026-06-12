@@ -1,1 +1,0 @@
-document.addEventListener("click",function(e){e.target.closest(".eg-picker-wrap")||document.querySelectorAll(".eg-emoji-picker.open,.eg-gif-picker.open").forEach(function(c){c.classList.remove("open")})});
