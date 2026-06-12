@@ -13,11 +13,25 @@
 .lg-hero {
     color:#fff; border-radius:14px; margin-bottom:20px; overflow:hidden;
     box-shadow:0 6px 24px rgba(0,0,0,.14); position:relative;
-    background:#2563eb url('https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=1400&q=80') center/cover;
+    background:linear-gradient(135deg, #2563eb 0%, #4f46e5 55%, #7c3aed 100%);
 }
 .lg-hero::before {
     content:''; position:absolute; inset:0;
-    background:linear-gradient(135deg, rgba(37,99,235,.92) 0%, rgba(124,58,237,.82) 100%);
+    background:
+        radial-gradient(circle at 16% 24%, rgba(255,255,255,.16), transparent 38%),
+        radial-gradient(circle at 84% 76%, rgba(124,58,237,.30), transparent 45%);
+    pointer-events:none;
+}
+/* Sağ üst minimal grid pattern */
+.lg-hero::after {
+    content:''; position:absolute; top:0; right:0; width:42%; height:100%;
+    background-image:
+        linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: linear-gradient(to left, rgba(0,0,0,.8), transparent 100%);
+    -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,.8), transparent 100%);
+    pointer-events:none;
 }
 .lg-hero-body { position:relative; display:flex; align-items:center; gap:24px; padding:26px 28px; }
 .lg-hero-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:8px; }
@@ -98,13 +112,29 @@
 }
 .lg-housing-photo {
     position:relative; height:140px; overflow:hidden;
-    background:color-mix(in srgb, var(--h-color) 10%, var(--u-bg));
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg, var(--h-color), color-mix(in srgb, var(--h-color) 50%, #0f172a));
 }
-.lg-housing-photo img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
-.lg-housing-card:hover .lg-housing-photo img { transform:scale(1.06); }
+.lg-housing-photo-icon {
+    width:64px; height:64px; border-radius:18px;
+    background:rgba(255,255,255,.18); border:2px solid rgba(255,255,255,.28);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; backdrop-filter:blur(6px);
+    transition:transform .4s;
+}
+.lg-housing-photo-icon svg { width:32px; height:32px; }
+.lg-housing-card:hover .lg-housing-photo-icon { transform:scale(1.08) rotate(-3deg); }
+/* Dekoratif radial spotlight */
+.lg-housing-photo::before {
+    content:''; position:absolute; inset:0;
+    background:
+        radial-gradient(circle at 25% 25%, rgba(255,255,255,.14), transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(0,0,0,.15), transparent 55%);
+    pointer-events:none;
+}
 .lg-housing-photo::after {
     content:''; position:absolute; inset:0;
-    background:linear-gradient(to bottom, rgba(0,0,0,0) 40%, rgba(0,0,0,.55));
+    background:linear-gradient(to bottom, rgba(0,0,0,0) 40%, rgba(0,0,0,.35));
     pointer-events:none;
 }
 .lg-housing-price {
@@ -287,16 +317,13 @@ $cityIconMap = [
 <div class="lg-section-title"><x-icon name="home" size="18" aria-label="Konut" /> Konut Seçenekleri</div>
 <div class="lg-housing-grid">
     @foreach([
-        ['Studentenwohnheim', 'Yurt', 'En ucuz seçenek. Studentenwerk listelerine yazılın — bekleme listesi uzun olabilir.', '€150–400', '#16a34a',
-         'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600&q=80'],
-        ['WG (Paylaşımlı Ev)', 'WG', 'En popüler seçenek. WG-Gesucht.de ve Immobilienscout24 kullanın.', '€300–600', '#0891b2',
-         'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'],
-        ['Tek Kişilik Daire', 'Apartment', 'En pahalı seçenek. Refah düzeyi yüksek öğrenciler için uygun.', '€600–1200', '#f59e0b',
-         'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&q=80'],
-    ] as [$title, $short, $desc, $price, $color, $img])
+        ['Studentenwohnheim', 'Yurt', 'En ucuz seçenek. Studentenwerk listelerine yazılın — bekleme listesi uzun olabilir.', '€150–400', '#16a34a', 'building-2'],
+        ['WG (Paylaşımlı Ev)', 'WG', 'En popüler seçenek. WG-Gesucht.de ve Immobilienscout24 kullanın.', '€300–600', '#0891b2', 'users'],
+        ['Tek Kişilik Daire', 'Apartment', 'En pahalı seçenek. Refah düzeyi yüksek öğrenciler için uygun.', '€600–1200', '#f59e0b', 'home'],
+    ] as [$title, $short, $desc, $price, $color, $icon])
     <div class="lg-housing-card" style="--h-color:{{ $color }};">
         <div class="lg-housing-photo">
-            <img src="{{ $img }}" alt="{{ $title }}" loading="lazy">
+            <div class="lg-housing-photo-icon"><x-icon :name="$icon" size="32" /></div>
             <span class="lg-housing-price">{{ $price }}/ay</span>
         </div>
         <div class="lg-housing-body">

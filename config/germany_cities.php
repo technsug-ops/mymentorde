@@ -792,7 +792,7 @@ return [
         'emoji'       => '🌿',
         'tagline'     => 'Teknoloji, fuarlar ve sakin öğrenci yaşamı',
         'hero_color'  => 'linear-gradient(135deg,#16a34a,#0891b2)',
-        'hero_video_id' => 'LzLOhMsjpsw',
+        'hero_video_id' => '',
 
         'hero_video_thumb' => 'https://images.unsplash.com/photo-1584267385494-9fdd9a71ad75?w=800&q=80',
         'cost_index'  => 2,

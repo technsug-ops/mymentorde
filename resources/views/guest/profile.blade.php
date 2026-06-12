@@ -10,11 +10,24 @@
 .gp-hero {
     color:#fff; border-radius:14px; margin-bottom:20px; overflow:hidden;
     box-shadow:0 6px 24px rgba(0,0,0,.14); position:relative;
-    background:#2563eb url('https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1400&q=80') center/cover;
+    background:linear-gradient(135deg, #2563eb 0%, #1e40af 55%, #0e7490 100%);
 }
 .gp-hero::before {
     content:''; position:absolute; inset:0;
-    background:linear-gradient(135deg, rgba(37,99,235,.92) 0%, rgba(14,116,144,.85) 100%);
+    background:
+        radial-gradient(circle at 18% 28%, rgba(255,255,255,.16), transparent 38%),
+        radial-gradient(circle at 82% 72%, rgba(14,165,233,.30), transparent 45%);
+    pointer-events:none;
+}
+.gp-hero::after {
+    content:''; position:absolute; top:0; right:0; width:38%; height:100%;
+    background-image:
+        linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px);
+    background-size: 26px 26px;
+    mask-image: linear-gradient(to left, rgba(0,0,0,.8), transparent 100%);
+    -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,.8), transparent 100%);
+    pointer-events:none;
 }
 .gp-hero-body { position:relative; display:flex; align-items:center; gap:22px; padding:24px 26px; flex-wrap:wrap; }
 
