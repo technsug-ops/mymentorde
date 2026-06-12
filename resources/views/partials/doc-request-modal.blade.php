@@ -60,10 +60,19 @@
             @endif
             <div style="display:flex;flex-direction:column;gap:12px;">
                 <label style="display:flex;flex-direction:column;gap:4px;">
-                    <span style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;">İstenen Belge</span>
+                    <span style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                        <span>İstenen Belge(ler)</span>
+                        <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;text-transform:none;letter-spacing:0;color:#475569;cursor:pointer;">
+                            <input type="checkbox" data-dr-multi style="width:13px;height:13px;cursor:pointer;accent-color:#1e40af;">
+                            <span>📋 Çoklu belge (D5)</span>
+                        </label>
+                    </span>
                     <select data-dr-cat style="padding:9px 11px;border-radius:8px;border:1px solid #cbd5e1;font-size:13px;">
                         <option value="">— Yükleniyor —</option>
                     </select>
+                    <span data-dr-multi-hint style="display:none;font-size:11px;color:#64748b;line-height:1.4;">
+                        💡 Çoklu mod aktif — Ctrl/Cmd+click ile birden fazla belge seç. Aday tek linkten hepsini sırayla yükler.
+                    </span>
                 </label>
                 <label style="display:flex;flex-direction:column;gap:4px;">
                     <span style="font-size:11.5px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;">Geçerlilik Süresi</span>
@@ -172,6 +181,8 @@
     if (!modal || !btn) return;
 
     var catSelect    = modal.querySelector('[data-dr-cat]');
+    var multiToggle  = modal.querySelector('[data-dr-multi]');
+    var multiHint    = modal.querySelector('[data-dr-multi-hint]');
     var expirySelect = modal.querySelector('[data-dr-expiry]');
     var msgInput     = modal.querySelector('[data-dr-msg]');
     var emailInput   = modal.querySelector('[data-dr-email]');
@@ -194,6 +205,23 @@
     }
     if (chWhatsApp) chWhatsApp.addEventListener('change', refreshChannelWarn);
     if (phoneInput) phoneInput.addEventListener('input', refreshChannelWarn);
+
+    // D5: Multi-doc toggle — select'i multiple yap, hint'i göster
+    if (multiToggle) {
+        multiToggle.addEventListener('change', function(){
+            if (this.checked) {
+                catSelect.setAttribute('multiple', 'multiple');
+                catSelect.setAttribute('size', '7');
+                catSelect.style.height = 'auto';
+                if (multiHint) multiHint.style.display = 'block';
+            } else {
+                catSelect.removeAttribute('multiple');
+                catSelect.removeAttribute('size');
+                catSelect.style.height = '';
+                if (multiHint) multiHint.style.display = 'none';
+            }
+        });
+    }
 
     function loadCategories(){
         catSelect.innerHTML = '<option value="">— Yükleniyor —</option>';
@@ -241,8 +269,23 @@
     modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
 
     genBtn.addEventListener('click', function(){
-        var cat = catSelect.value;
-        if (!cat) { alert('Lütfen bir belge seç.'); return; }
+        // D5: Multi-doc modu varsa seçili tüm option'ları topla
+        var isMulti = multiToggle && multiToggle.checked;
+        var selectedCodes = [];
+        if (isMulti) {
+            var opts = catSelect.selectedOptions || [];
+            for (var i = 0; i < opts.length; i++) {
+                if (opts[i].value) selectedCodes.push(opts[i].value);
+            }
+            if (selectedCodes.length === 0) {
+                alert('Çoklu mod aktif — Ctrl/Cmd+click ile en az 1 belge seç.');
+                return;
+            }
+        } else {
+            if (!catSelect.value) { alert('Lütfen bir belge seç.'); return; }
+            selectedCodes = [catSelect.value];
+        }
+        var cat = selectedCodes[0]; // legacy fallback için
 
         // ── Kanal secimleri ──
         var channels = [];
@@ -266,7 +309,9 @@
             method:'POST',
             headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest'},
             body: JSON.stringify({
-                category_code: cat,
+                // D5: Tek mod → category_code, çoklu mod → category_codes array
+                category_code: isMulti ? null : cat,
+                category_codes: isMulti ? selectedCodes : null,
                 expires_hours: parseInt(expirySelect.value, 10) || 48,
                 custom_message: msgInput.value || null,
                 recipient_email: (emailInput && emailInput.value) ? emailInput.value.trim() : null,

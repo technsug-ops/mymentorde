@@ -44,6 +44,8 @@ class DocumentUploadToken extends Model
         'target_student_id',
         // Belge bilgileri
         'category_code',
+        'category_codes',           // D5: Multi-doc per token (JSON array)
+        'uploaded_category_codes',  // D5: Hangileri yüklendi (JSON array)
         'category_name',
         'document_name_de',
         'custom_message',
@@ -66,15 +68,17 @@ class DocumentUploadToken extends Model
     ];
 
     protected $casts = [
-        'expires_at'             => 'datetime',
-        'last_used_at'           => 'datetime',
-        'reminder_first_sent_at' => 'datetime',
-        'reminder_final_sent_at' => 'datetime',
-        'whatsapp_first_sent_at' => 'datetime',
-        'whatsapp_final_sent_at' => 'datetime',
-        'notification_channels'  => 'array',
-        'max_uses'               => 'integer',
-        'used_count'             => 'integer',
+        'expires_at'              => 'datetime',
+        'last_used_at'            => 'datetime',
+        'reminder_first_sent_at'  => 'datetime',
+        'reminder_final_sent_at'  => 'datetime',
+        'whatsapp_first_sent_at'  => 'datetime',
+        'whatsapp_final_sent_at'  => 'datetime',
+        'notification_channels'   => 'array',
+        'category_codes'          => 'array', // D5
+        'uploaded_category_codes' => 'array', // D5
+        'max_uses'                => 'integer',
+        'used_count'              => 'integer',
     ];
 
     /**
@@ -147,15 +151,49 @@ class DocumentUploadToken extends Model
         return !$this->isExpired() && !$this->isExhausted();
     }
 
-    public function markUsed(?string $ip = null, ?string $ua = null, ?int $documentId = null): void
+    public function markUsed(?string $ip = null, ?string $ua = null, ?int $documentId = null, ?string $categoryCode = null): void
     {
-        $this->forceFill([
+        $payload = [
             'used_count'           => $this->used_count + 1,
             'last_used_at'         => CarbonImmutable::now(),
             'last_used_ip'         => $ip,
             'last_used_user_agent' => $ua ? mb_substr($ua, 0, 255) : null,
             'document_id'          => $documentId ?? $this->document_id,
-        ])->save();
+        ];
+
+        // D5: Multi-doc mode — yüklenmiş kategoriyi listeye ekle
+        if ($categoryCode !== null && $this->isMultiCategory()) {
+            $uploaded = (array) ($this->uploaded_category_codes ?? []);
+            if (!in_array($categoryCode, $uploaded, true)) {
+                $uploaded[] = $categoryCode;
+            }
+            $payload['uploaded_category_codes'] = $uploaded;
+        }
+
+        $this->forceFill($payload)->save();
+    }
+
+    /**
+     * D5: Çoklu belge talebi modu mu?
+     */
+    public function isMultiCategory(): bool
+    {
+        $codes = (array) ($this->category_codes ?? []);
+        return count($codes) > 1;
+    }
+
+    /**
+     * D5: Henüz yüklenmemiş kategoriler (multi-doc mode için).
+     * @return array<int,string>
+     */
+    public function remainingCategoryCodes(): array
+    {
+        if (!$this->isMultiCategory()) {
+            return [];
+        }
+        $all = array_values((array) ($this->category_codes ?? []));
+        $uploaded = array_values((array) ($this->uploaded_category_codes ?? []));
+        return array_values(array_diff($all, $uploaded));
     }
 
     public function isFor(string $type): bool

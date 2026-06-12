@@ -38,14 +38,30 @@ class PublicDocumentUploadController extends Controller
             ]);
         }
 
+        // D5: Multi-doc mode için kalan kategorileri çöz
+        $remainingCategories = [];
+        if ($row->isMultiCategory()) {
+            $remaining = $row->remainingCategoryCodes();
+            if (!empty($remaining)) {
+                $remainingCategories = DocumentCategory::query()
+                    ->whereIn('code', $remaining)
+                    ->get(['code', 'name_tr', 'name_de'])
+                    ->all();
+            }
+        }
+
         return view('public.document-upload.form', [
-            'token'      => $row,
-            'guestName'  => $this->resolveDisplayName($row),
-            'docName'    => $row->category_name ?? $row->category_code,
-            'docNameDe'  => $row->document_name_de,
-            'message'    => $row->custom_message,
-            'expiresAt'  => $row->expires_at,
-            'expiresIn'  => $row->expires_at?->diffForHumans(null, ['parts' => 2]),
+            'token'               => $row,
+            'guestName'           => $this->resolveDisplayName($row),
+            'docName'             => $row->category_name ?? $row->category_code,
+            'docNameDe'           => $row->document_name_de,
+            'message'             => $row->custom_message,
+            'expiresAt'           => $row->expires_at,
+            'expiresIn'           => $row->expires_at?->diffForHumans(null, ['parts' => 2]),
+            'isMulti'             => $row->isMultiCategory(),
+            'remainingCategories' => $remainingCategories,
+            'uploadedCount'       => (int) $row->used_count,
+            'totalCount'          => (int) $row->max_uses,
         ]);
     }
 
@@ -59,9 +75,23 @@ class PublicDocumentUploadController extends Controller
 
         $request->validate([
             'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240', new ValidFileMagicBytes()],
+            // D5: Multi-doc'da kullanıcı hangi kategori için yüklediğini belirtir
+            'category_code' => ['nullable', 'string', 'max:64', 'regex:/^[A-Za-z0-9_-]+$/'],
         ]);
 
-        $category = DocumentCategory::query()->where('code', $row->category_code)->first();
+        // D5: Multi-doc mode'da category_code formdan gelir, single mode'da token'dan
+        $useCategoryCode = $row->category_code;
+        if ($row->isMultiCategory()) {
+            $useCategoryCode = (string) $request->input('category_code', '');
+            $remaining = $row->remainingCategoryCodes();
+            if ($useCategoryCode === '' || !in_array($useCategoryCode, $remaining, true)) {
+                return back()->withErrors([
+                    'category_code' => 'Geçersiz kategori seçimi. Lütfen kalan listeden bir belge türü seçin.',
+                ]);
+            }
+        }
+
+        $category = DocumentCategory::query()->where('code', $useCategoryCode)->first();
         if (!$category) {
             abort(404, 'Belge kategorisi bulunamadı.');
         }
@@ -138,20 +168,30 @@ class PublicDocumentUploadController extends Controller
             ip: $request->ip(),
             ua: (string) $request->userAgent(),
             documentId: $doc->id,
+            categoryCode: $useCategoryCode, // D5: multi-doc'da uploaded listesini artırır
         );
+        $row->refresh();
 
         Log::info('public.document-upload: success', [
             'token_id'    => $row->id,
             'document_id' => $doc->id,
             'target_type' => $row->target_type,
             'target_id'   => $row->target_id,
-            'category'    => $row->category_code,
+            'category'    => $useCategoryCode,
+            'is_multi'    => $row->isMultiCategory(),
+            'remaining'   => $row->isMultiCategory() ? count($row->remainingCategoryCodes()) : 0,
             'ip'          => $request->ip(),
         ]);
 
+        // D5: Multi-doc + hala kalan kategori varsa kullanıcıyı yine form'a yönlendir
+        if ($row->isMultiCategory() && $row->isUsable() && !empty($row->remainingCategoryCodes())) {
+            return redirect()->route('public.document-upload.show', ['token' => $row->token])
+                ->with('success', $category->name_tr . ' başarıyla yüklendi. Lütfen kalan belgeleri de yükleyin.');
+        }
+
         return view('public.document-upload.success', [
             'token'    => $row,
-            'docName'  => $row->category_name ?? $row->category_code,
+            'docName'  => $category->name_tr ?? $useCategoryCode,
         ]);
     }
 

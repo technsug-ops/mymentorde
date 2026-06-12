@@ -109,6 +109,48 @@ body {
     font-size: 12.5px; line-height: 1.5;
 }
 
+.success-flash {
+    background: #f0fdf4; border: 1px solid #bbf7d0; color: #14532d;
+    padding: 12px 14px; border-radius: 10px; margin-bottom: 14px;
+    font-size: 12.5px; line-height: 1.5;
+}
+
+/* D5: Multi-doc progress + category picker */
+.multi-progress {
+    background: linear-gradient(135deg, #f0f7ff, #eff6ff);
+    border: 1px solid #c7d8f7; border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 16px;
+}
+.multi-progress .pp-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 700; color: #1e40af; margin-bottom: 8px;
+}
+.multi-progress .pp-bar {
+    background: #dbeafe; border-radius: 999px; height: 8px; overflow: hidden;
+}
+.multi-progress .pp-fill {
+    background: linear-gradient(90deg, #1e40af, #3b5fcc);
+    height: 100%; border-radius: 999px; transition: width .3s;
+}
+.cat-picker {
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 14px;
+}
+.cat-picker .label {
+    font-size: 11px; font-weight: 700; color: #64748b;
+    text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px;
+}
+.cat-picker select {
+    width: 100%; padding: 11px 12px; border-radius: 10px;
+    border: 1.5px solid #cbd5e1; background: #fff;
+    font-size: 14px; font-weight: 600; color: #0f172a;
+    font-family: inherit; cursor: pointer;
+}
+.cat-picker select:focus { outline: none; border-color: #3b5fcc; }
+.cat-picker .name-de {
+    font-size: 11px; color: #6d28d9; margin-top: 4px; font-weight: 600;
+}
+
 .foot {
     text-align: center; padding: 16px; border-top: 1px solid #f1f5f9;
     font-size: 10.5px; color: #94a3b8;
@@ -136,19 +178,63 @@ body {
     <div class="body">
 
         <div class="greeting">
-            👋 Merhaba <strong>{{ $guestName }}</strong>! Danışmanın senden aşağıdaki belgeyi istedi:
+            👋 Merhaba <strong>{{ $guestName }}</strong>!
+            @if($isMulti ?? false)
+                Danışmanın senden aşağıdaki <strong>{{ $totalCount }} belgeyi</strong> istedi:
+            @else
+                Danışmanın senden aşağıdaki belgeyi istedi:
+            @endif
         </div>
 
-        <div class="doc-info">
-            <div class="label">📄 İstenilen Belge</div>
-            <div class="name">{{ $docName }}</div>
-            @if($docNameDe)
-                <div class="name-de">🇩🇪 {{ $docNameDe }}</div>
+        @if(($isMulti ?? false))
+            {{-- D5: Multi-doc progress + kategori seçici --}}
+            @php
+                $remainingCount = max(0, $totalCount - $uploadedCount);
+                $progressPct = $totalCount > 0 ? min(100, intval(($uploadedCount / $totalCount) * 100)) : 0;
+            @endphp
+            <div class="multi-progress">
+                <div class="pp-head">
+                    <span>📋 İlerleme</span>
+                    <span>{{ $uploadedCount }} / {{ $totalCount }} yüklendi</span>
+                </div>
+                <div class="pp-bar"><div class="pp-fill" style="width: {{ $progressPct }}%"></div></div>
+            </div>
+
+            @if(session('success'))
+                <div class="success-flash">✅ {{ session('success') }}</div>
             @endif
+
+            <div class="cat-picker">
+                <div class="label">📄 Hangi belgeyi yüklüyorsun?</div>
+                <select name="category_code" id="category-code" required form="upload-form">
+                    <option value="">— Belge türünü seç —</option>
+                    @foreach($remainingCategories as $cat)
+                        <option value="{{ $cat->code }}" data-de="{{ $cat->name_de }}">
+                            {{ $cat->name_tr }}
+                        </option>
+                    @endforeach
+                </select>
+                <div class="name-de" id="cat-de-hint" style="display:none;"></div>
+            </div>
+
             @if($message)
-                <div class="custom-msg">💬 {{ $message }}</div>
+                <div class="doc-info">
+                    <div class="label">💬 Danışman notu</div>
+                    <div class="custom-msg" style="border-top:0; padding-top:0; margin-top:0;">{{ $message }}</div>
+                </div>
             @endif
-        </div>
+        @else
+            <div class="doc-info">
+                <div class="label">📄 İstenilen Belge</div>
+                <div class="name">{{ $docName }}</div>
+                @if($docNameDe)
+                    <div class="name-de">🇩🇪 {{ $docNameDe }}</div>
+                @endif
+                @if($message)
+                    <div class="custom-msg">💬 {{ $message }}</div>
+                @endif
+            </div>
+        @endif
 
         @if($expiresIn)
             <div class="expiry">⏱️ Bu link {{ $expiresIn }} sonra geçerliliğini yitirir</div>
@@ -247,10 +333,34 @@ body {
         submitBtn.disabled = true;
     });
 
-    document.getElementById('upload-form').addEventListener('submit', function(){
+    document.getElementById('upload-form').addEventListener('submit', function(e){
+        // D5: Multi-doc'da kategori seçilmemişse engelle
+        var catSel = document.getElementById('category-code');
+        if (catSel && !catSel.value) {
+            e.preventDefault();
+            alert('Lütfen önce hangi belge türünü yüklediğini seç.');
+            catSel.focus();
+            return false;
+        }
         submitBtn.disabled = true;
         submitBtn.innerHTML = '⏳ Yükleniyor...';
     });
+
+    // D5: Kategori seçilince Almanca adını göster
+    var catSelect = document.getElementById('category-code');
+    var deHint = document.getElementById('cat-de-hint');
+    if (catSelect && deHint) {
+        catSelect.addEventListener('change', function(){
+            var opt = this.options[this.selectedIndex];
+            var de = opt ? opt.getAttribute('data-de') : '';
+            if (de && de.trim() !== '') {
+                deHint.textContent = '🇩🇪 ' + de;
+                deHint.style.display = 'block';
+            } else {
+                deHint.style.display = 'none';
+            }
+        });
+    }
 })();
 </script>
 

@@ -194,6 +194,39 @@ class ManagerDocumentRequestController extends Controller
         );
     }
 
+    // ── Ticket (D3 — destek talebine ek belge yükleme) endpoint'leri ──────
+    public function indexForTicket(Request $request, \App\Models\GuestTicket $ticket)
+    {
+        return $this->indexFor(
+            $request,
+            DocumentUploadToken::TARGET_TICKET,
+            (string) $ticket->id,
+            (int) ($ticket->company_id ?? 1),
+            'Ticket #' . $ticket->id . ' — ' . mb_substr((string) $ticket->subject, 0, 40)
+        );
+    }
+
+    public function storeForTicket(Request $request, \App\Models\GuestTicket $ticket)
+    {
+        return $this->storeFor(
+            $request,
+            DocumentUploadToken::TARGET_TICKET,
+            (string) $ticket->id,
+            (int) ($ticket->company_id ?? 1),
+            'Ticket #' . $ticket->id . ' — ' . mb_substr((string) $ticket->subject, 0, 40)
+        );
+    }
+
+    public function destroyForTicket(Request $request, \App\Models\GuestTicket $ticket, DocumentUploadToken $token)
+    {
+        return $this->destroyFor(
+            $request,
+            DocumentUploadToken::TARGET_TICKET,
+            (string) $ticket->id,
+            $token
+        );
+    }
+
     public function destroyForContract(Request $request, BusinessContract $businessContract, DocumentUploadToken $token)
     {
         return $this->destroyFor(
@@ -261,7 +294,10 @@ class ManagerDocumentRequestController extends Controller
         }
 
         $data = $request->validate([
-            'category_code'           => 'required|string|max:64|regex:/^[A-Za-z0-9_-]+$/',
+            // D5: artik category_code TEK basina veya category_codes array olabilir
+            'category_code'           => 'nullable|string|max:64|regex:/^[A-Za-z0-9_-]+$/',
+            'category_codes'          => 'nullable|array|min:1|max:10',
+            'category_codes.*'        => 'string|max:64|regex:/^[A-Za-z0-9_-]+$/',
             'expires_hours'           => 'nullable|integer|min:1|max:168', // max 7 gün
             'custom_message'          => 'nullable|string|max:500',
             'recipient_email'         => 'nullable|email|max:180', // D7: hatirlatma icin alici
@@ -271,10 +307,35 @@ class ManagerDocumentRequestController extends Controller
             'notification_channels.*' => 'in:email,whatsapp',
         ]);
 
-        $category = DocumentCategory::where('code', $data['category_code'])->first();
-        if (!$category) {
-            return response()->json(['error' => 'Belge kategorisi bulunamadı.'], 422);
+        // ── D5: Multi-doc mode tespit ──
+        $categoryCodes = array_values(array_unique($data['category_codes'] ?? []));
+        $isMulti = count($categoryCodes) > 1;
+
+        // Tek kategori → ya direkt category_code ya da category_codes[0]
+        if (!$isMulti) {
+            $singleCode = $data['category_code'] ?? ($categoryCodes[0] ?? null);
+            if (!$singleCode) {
+                return response()->json(['error' => 'En az bir belge kategorisi seçilmeli.'], 422);
+            }
+            $categoryCodes = [$singleCode];
         }
+
+        // Tüm kategoriler DB'de var mı?
+        $categories = DocumentCategory::query()
+            ->whereIn('code', $categoryCodes)
+            ->get()
+            ->keyBy('code');
+
+        if ($categories->count() !== count($categoryCodes)) {
+            $missing = array_diff($categoryCodes, $categories->keys()->all());
+            return response()->json([
+                'error' => 'Belge kategorisi bulunamadı: ' . implode(', ', $missing),
+            ], 422);
+        }
+
+        // Tek mod için primary kategori (eski davranış)
+        $primaryCode = $categoryCodes[0];
+        $category = $categories[$primaryCode];
 
         // ── Kanal cozumleme ──
         // 1. UI'dan gelen channels (varsa) onceliklidir
@@ -299,23 +360,30 @@ class ManagerDocumentRequestController extends Controller
 
         $expiresAt = CarbonImmutable::now()->addHours((int) ($data['expires_hours'] ?? 48));
 
+        // D5: Multi-doc'da category_name "X belge" özet, max_uses = kategori sayısı
+        $categoryNameForToken = $isMulti
+            ? count($categoryCodes) . ' belge (' . $categories->pluck('name_tr')->take(2)->implode(', ') . (count($categoryCodes) > 2 ? '…' : '') . ')'
+            : ($category->name_tr ?? $primaryCode);
+
         $token = DocumentUploadToken::create([
-            'company_id'            => $companyId,
-            'token'                 => DocumentUploadToken::generateToken(),
-            'target_type'           => $targetType,
-            'target_id'             => $targetId,
-            'target_display_name'   => $displayName,
-            'category_code'         => $data['category_code'],
-            'category_name'         => $category->name_tr ?? $data['category_code'],
-            'document_name_de'      => $category->name_de ?? null,
-            'custom_message'        => $data['custom_message'] ?? null,
-            'recipient_email'       => $data['recipient_email'] ?? null,
-            'recipient_phone'       => $data['recipient_phone'] ?? null,
-            'notification_channels' => $channels,
-            'created_by_user_id'    => $request->user()?->id,
-            'max_uses'              => 1,
-            'used_count'            => 0,
-            'expires_at'            => $expiresAt,
+            'company_id'             => $companyId,
+            'token'                  => DocumentUploadToken::generateToken(),
+            'target_type'            => $targetType,
+            'target_id'              => $targetId,
+            'target_display_name'    => $displayName,
+            'category_code'          => $isMulti ? null : $primaryCode, // multi'de null
+            'category_codes'         => $isMulti ? $categoryCodes : null, // multi'de doldu
+            'uploaded_category_codes' => $isMulti ? [] : null,
+            'category_name'          => $categoryNameForToken,
+            'document_name_de'       => $category->name_de ?? null,
+            'custom_message'         => $data['custom_message'] ?? null,
+            'recipient_email'        => $data['recipient_email'] ?? null,
+            'recipient_phone'        => $data['recipient_phone'] ?? null,
+            'notification_channels'  => $channels,
+            'created_by_user_id'     => $request->user()?->id,
+            'max_uses'               => $isMulti ? count($categoryCodes) : 1,
+            'used_count'             => 0,
+            'expires_at'             => $expiresAt,
         ]);
 
         $tokenUrl = url('/u/' . $token->token);
@@ -411,21 +479,24 @@ class ManagerDocumentRequestController extends Controller
     private function serializeToken(DocumentUploadToken $t): array
     {
         return [
-            'id'             => $t->id,
-            'token'          => $t->token,
-            'url'            => url('/u/' . $t->token),
-            'category_code'  => $t->category_code,
-            'category_name'  => $t->category_name,
-            'document_name_de' => $t->document_name_de,
-            'custom_message' => $t->custom_message,
-            'expires_at'     => $t->expires_at?->toIso8601String(),
-            'is_expired'     => $t->isExpired(),
-            'is_used'        => $t->isExhausted(),
-            'used_count'     => $t->used_count,
-            'max_uses'       => $t->max_uses,
-            'last_used_at'   => $t->last_used_at?->toIso8601String(),
-            'document_id'    => $t->document_id,
-            'created_at'     => $t->created_at?->toIso8601String(),
+            'id'                      => $t->id,
+            'token'                   => $t->token,
+            'url'                     => url('/u/' . $t->token),
+            'category_code'           => $t->category_code,
+            'category_codes'          => $t->category_codes,
+            'uploaded_category_codes' => $t->uploaded_category_codes,
+            'is_multi'                => $t->isMultiCategory(),
+            'category_name'           => $t->category_name,
+            'document_name_de'        => $t->document_name_de,
+            'custom_message'          => $t->custom_message,
+            'expires_at'              => $t->expires_at?->toIso8601String(),
+            'is_expired'              => $t->isExpired(),
+            'is_used'                 => $t->isExhausted(),
+            'used_count'              => $t->used_count,
+            'max_uses'                => $t->max_uses,
+            'last_used_at'            => $t->last_used_at?->toIso8601String(),
+            'document_id'             => $t->document_id,
+            'created_at'              => $t->created_at?->toIso8601String(),
         ];
     }
 }

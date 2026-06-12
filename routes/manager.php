@@ -185,6 +185,12 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::post('/manager/business-contracts/{businessContract}/document-tokens',         [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'storeForContract'])->name('manager.contract.document-tokens.store');
     Route::delete('/manager/business-contracts/{businessContract}/document-tokens/{token}', [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'destroyForContract'])->name('manager.contract.document-tokens.destroy');
 
+    // Ticket detay + D3 doc_request entegrasyonu (TARGET_TICKET)
+    Route::get('/manager/tickets/{ticket}',                                  [\App\Http\Controllers\Manager\ManagerTicketController::class, 'show'])->name('manager.tickets.show');
+    Route::get('/manager/tickets/{ticket}/document-tokens',                  [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'indexForTicket'])->name('manager.ticket.document-tokens.index');
+    Route::post('/manager/tickets/{ticket}/document-tokens',                 [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'storeForTicket'])->name('manager.ticket.document-tokens.store');
+    Route::delete('/manager/tickets/{ticket}/document-tokens/{token}',       [\App\Http\Controllers\Manager\ManagerDocumentRequestController::class, 'destroyForTicket'])->name('manager.ticket.document-tokens.destroy');
+
     // ─── Belge Talep Analytics (doc_request KPI + funnel + hatırlatma etkisi) ────
     // KPI + funnel + kategori bazlı performans + aylık trend + CSV export.
     // Sadece doc_request modülü aktif olanlar erişebilir (controller'da assert).

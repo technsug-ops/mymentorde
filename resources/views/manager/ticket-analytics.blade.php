@@ -199,7 +199,11 @@
                 </div>
                 <span class="u-muted">{{ optional($t->created_at)->format('d.m.Y H:i') }}</span>
             </div>
-            <div style="font-size:13px;font-weight:600;">#{{ $t->id }} · {{ $t->subject }}</div>
+            <div style="font-size:13px;font-weight:600;">
+                <a href="{{ route('manager.tickets.show', $t->id) }}" style="color:#1e40af;text-decoration:none;">
+                    #{{ $t->id }} · {{ $t->subject }}
+                </a>
+            </div>
             @if($t->assignee)
             <div class="u-muted" style="font-size:11px;">Atanan: {{ $t->assignee }}</div>
             @endif
