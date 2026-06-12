@@ -39,7 +39,8 @@ class EnsureTrialActive
 
     public function handle(Request $request, Closure $next): Response
     {
-        // Fail-open: middleware'in herhangi bir hatası → app çökmesin, devam etsin
+        // Defensive safety net — middleware'in herhangi bir beklenmeyen hatası
+        // app'i çökertmesin (fail-open).
         try {
             return $this->doHandle($request, $next);
         } catch (\Throwable $e) {
@@ -53,7 +54,7 @@ class EnsureTrialActive
 
     private function doHandle(Request $request, Closure $next): Response
     {
-        // Path allowlist kontrolü (en başta) — session/user gerektirmez
+        // Path allowlist (her zaman serbest — login/logout/my-plan/trial-expired)
         $path = ltrim($request->path(), '/');
         foreach (self::ALLOWED_PATHS as $allowed) {
             if ($path === $allowed || str_starts_with($path, $allowed . '/')) {
@@ -61,24 +62,9 @@ class EnsureTrialActive
             }
         }
 
-        // _deploy + api + sanctum + telescope vb. teknik route'lar bypass
-        if (
-            str_starts_with($path, '_deploy') ||
-            str_starts_with($path, 'api/') ||
-            str_starts_with($path, 'sanctum/') ||
-            str_starts_with($path, 'telescope') ||
-            str_starts_with($path, 'horizon') ||
-            str_starts_with($path, 'build/') ||
-            str_starts_with($path, 'fonts/') ||
-            str_starts_with($path, 'icons/') ||
-            str_starts_with($path, 'brand/') ||
-            str_starts_with($path, 'u/') // public document upload
-        ) {
-            return $next($request);
-        }
-
-        // Platform Owner impersonation aktifse trial block bypass
-        if ($request->hasSession() && $request->session()->get('impersonating_company_id')) {
+        // Platform Owner impersonation aktifse trial block bypass.
+        // Web group içinde olduğumuz için session her zaman hazırdır.
+        if ($request->session()->get('impersonating_company_id')) {
             return $next($request);
         }
 
@@ -87,7 +73,7 @@ class EnsureTrialActive
             return $next($request); // auth middleware ayrı handle eder
         }
 
-        // Sadece Customer Manager'lar için kontrol (Platform Owner exempt)
+        // Platform Owner exempt — kendi panelinde trial gating yok.
         if ((string) $user->role === User::ROLE_PLATFORM_OWNER) {
             return $next($request);
         }
