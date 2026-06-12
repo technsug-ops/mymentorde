@@ -39,17 +39,47 @@ class EnsureTrialActive
 
     public function handle(Request $request, Closure $next): Response
     {
-        // Platform Owner impersonation aktifse trial block bypass
-        if ($request->session()->get('impersonating_company_id')) {
+        // Fail-open: middleware'in herhangi bir hatası → app çökmesin, devam etsin
+        try {
+            return $this->doHandle($request, $next);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('EnsureTrialActive non-fatal error', [
+                'error' => $e->getMessage(),
+                'path'  => $request->path(),
+            ]);
             return $next($request);
         }
+    }
 
-        // Path allowlist kontrolü (en başta)
+    private function doHandle(Request $request, Closure $next): Response
+    {
+        // Path allowlist kontrolü (en başta) — session/user gerektirmez
         $path = ltrim($request->path(), '/');
         foreach (self::ALLOWED_PATHS as $allowed) {
             if ($path === $allowed || str_starts_with($path, $allowed . '/')) {
                 return $next($request);
             }
+        }
+
+        // _deploy + api + sanctum + telescope vb. teknik route'lar bypass
+        if (
+            str_starts_with($path, '_deploy') ||
+            str_starts_with($path, 'api/') ||
+            str_starts_with($path, 'sanctum/') ||
+            str_starts_with($path, 'telescope') ||
+            str_starts_with($path, 'horizon') ||
+            str_starts_with($path, 'build/') ||
+            str_starts_with($path, 'fonts/') ||
+            str_starts_with($path, 'icons/') ||
+            str_starts_with($path, 'brand/') ||
+            str_starts_with($path, 'u/') // public document upload
+        ) {
+            return $next($request);
+        }
+
+        // Platform Owner impersonation aktifse trial block bypass
+        if ($request->hasSession() && $request->session()->get('impersonating_company_id')) {
+            return $next($request);
         }
 
         $user = $request->user();
