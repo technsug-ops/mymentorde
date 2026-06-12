@@ -9,7 +9,6 @@
     'title' => 'Gelir Dashboard',
     'sub'   => 'Paket bazlı gelir, danışman performansı ve tahsilat oranları. Hangi paketler en çok döndürüyor, hangi danışman en çok kazandırıyor?',
     'icon'  => '💶',
-    'bg'    => 'https://images.unsplash.com/photo-1579621970590-9d624316904b?w=1400&q=80',
     'tone'  => 'green',
     'stats' => [
         ['icon' => '💰', 'text' => '€' . number_format(($totalEarned ?? 0), 0, ',', '.') . ' toplam'],

@@ -148,7 +148,6 @@
     'title' => 'Aday Öğrencilerim',
     'sub'   => 'Senin referansınla gelen tüm lead\'ler, aşama durumu ve dönüşüm performansı. Her yeni başvuru burada görünür.',
     'icon'  => '🎯',
-    'bg'    => 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1400&q=80',
     'tone'  => 'blue',
     'stats' => [
         ['icon' => '📥', 'text' => ($dealerStats['guest_total'] ?? 0) . ' toplam lead'],

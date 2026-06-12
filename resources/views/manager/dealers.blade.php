@@ -37,7 +37,6 @@
     'title' => 'Bayi Yönetimi',
     'sub'   => 'Partner ağı, komisyon durumu ve kazançlar. Her bayinin referans performansını ve ödeme durumunu tek panelden yönet.',
     'icon'  => 'handshake',
-    'bg'    => 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1400&q=80',
     'tone'  => 'amber',
     'stats' => [
         ['icon' => 'building-2', 'text' => ($kpis['total'] ?? 0) . ' bayi'],

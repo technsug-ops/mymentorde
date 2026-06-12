@@ -28,7 +28,6 @@
     'title' => 'Öğrenci Yönetimi',
     'sub'   => 'Dönüşen tüm öğrenciler, ödeme durumları ve risk seviyeleri. Proaktif müdahale için öncelikleri belirle.',
     'icon'  => 'graduation-cap',
-    'bg'    => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1400&q=80',
     'tone'  => 'purple',
     'stats' => [
         ['icon' => 'circle-check', 'text' => ($kpis['active'] ?? 0) . ' aktif'],

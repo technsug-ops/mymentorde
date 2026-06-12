@@ -19,7 +19,6 @@
     'title' => 'Danışman Performans Panosu',
     'sub'   => 'Her danışmanın lead dönüşümü, öğrenci memnuniyeti, görev tamamlama ve gelir katkısı. Takım performansını tek panelde karşılaştır.',
     'icon'  => '🏆',
-    'bg'    => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=80',
     'tone'  => 'teal',
     'stats' => $mgrHeroStats,
 ])

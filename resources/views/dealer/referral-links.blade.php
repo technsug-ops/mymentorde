@@ -130,7 +130,6 @@
     'title' => 'Referans Linkleri',
     'sub'   => 'UTM takibi, QR kod üretimi ve kaynak bazlı performans analizi. Hangi link en çok dönüşüm getiriyor, tek bakışta gör.',
     'icon'  => '🔗',
-    'bg'    => 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1400&q=80',
     'tone'  => 'purple',
     'stats' => [
         ['icon' => '📥', 'text' => ($dsHero['guest_total'] ?? 0) . ' toplam lead'],

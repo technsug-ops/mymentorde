@@ -1,4 +1,4 @@
-﻿@extends('dealer.layouts.app')
+@extends('dealer.layouts.app')
 
 @section('title', 'Takvimim')
 @section('page_title', 'Takvimim')
@@ -66,7 +66,6 @@
     'title' => 'Takvimim',
     'sub'   => 'Lead gelişleri, dönüşümler ve ödemeler — tüm referans aktivitelerin kronolojik sırayla. Hangi aylar yoğun, görselle anla.',
     'icon'  => '📅',
-    'bg'    => 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=1400&q=80',
     'tone'  => 'indigo',
     'stats' => [
         ['icon' => '🔵', 'text' => 'Lead'],

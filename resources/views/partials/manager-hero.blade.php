@@ -1,21 +1,24 @@
 {{--
   Manager portal Option B hero — parametrik.
 
+  Görsel: tone bazlı brandbook gradient + radial light spots + sağ üst grid pattern.
+  External CDN bağımlılığı YOK (pure CSS).
+
   Kullanım:
     @include('partials.manager-hero', [
         'label' => 'Aday Öğrenci Yönetimi',
         'title' => 'Aday Öğrenciler',
         'sub'   => 'Tüm lead akışı, atamalar ve dönüşüm durumu bir arada.',
         'icon'  => 'users',          // SVG icon adı (x-icon component)
-                                     // — geriye dönük uyumluluk: emoji karakteri de kabul edilir
-                                     // (legacy). Yeni kodda SADECE SVG adı kullanılmalı.
-        'bg'    => 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1400&q=80',
-        'tone'  => 'blue',  // blue|purple|green|amber|red|slate|indigo|teal
+        'tone'  => 'blue',           // blue|purple|green|amber|red|slate|indigo|teal|rose
         'stats' => [
-            ['icon' => 'bar-chart-3', 'text' => '142 toplam'],   // SVG icon adı veya emoji
+            ['icon' => 'bar-chart-3', 'text' => '142 toplam'],
             ['icon' => 'circle-check', 'text' => '28 dönüşen'],
         ],
     ])
+
+  Not: 'bg' parametresi deprecated — geriye dönük uyumluluk için kabul edilir
+  ama yok sayılır. Tüm hero'lar gradient + pattern ile render edilir.
 --}}
 @php
     $mhTones = [
@@ -48,11 +51,26 @@
 .mgr-hero {
     color:#fff; border-radius:14px; margin-bottom:16px; overflow:hidden;
     box-shadow:0 6px 24px rgba(0,0,0,.1); position:relative;
-    background:{!! $mhBgCss !!};
+    background:linear-gradient(135deg, {{ $mh['start'] }} 0%, {{ $mh['end'] }} 100%), {{ $mh['fallback'] }};
 }
+/* Dekoratif radial light spots — external image yerine pure CSS */
 .mgr-hero::before {
     content:''; position:absolute; inset:0;
-    background:linear-gradient(135deg, {{ $mh['start'] }} 0%, {{ $mh['end'] }} 100%);
+    background:
+        radial-gradient(circle at 18% 22%, rgba(255,255,255,.14), transparent 38%),
+        radial-gradient(circle at 82% 78%, rgba(255,255,255,.10), transparent 45%);
+    pointer-events:none;
+}
+/* Sağ üst minimal grid pattern */
+.mgr-hero::after {
+    content:''; position:absolute; top:0; right:0; width:42%; height:100%;
+    background-image:
+        linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size: 26px 26px;
+    mask-image: linear-gradient(to left, rgba(0,0,0,.75), transparent 100%);
+    -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,.75), transparent 100%);
+    pointer-events:none;
 }
 .mgr-hero-body { position:relative; display:flex; align-items:center; gap:20px; padding:22px 26px; }
 .mgr-hero-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:7px; }

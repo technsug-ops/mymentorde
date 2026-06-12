@@ -29,7 +29,6 @@
     'title' => 'Eğitim Danışmanları',
     'sub'   => 'Danışman portföyü, öğrenci yükleri ve kapasite dağılımı. Yük dengesini ve atanamayan lead riskini tek bakışta gör.',
     'icon'  => 'user-tie',
-    'bg'    => 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1400&q=80',
     'tone'  => 'indigo',
     'stats' => [
         ['icon' => 'users', 'text' => ($kpis['total'] ?? 0) . ' danışman'],

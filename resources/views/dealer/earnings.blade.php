@@ -172,7 +172,6 @@
     'title' => 'Kazançlarım',
     'sub'   => 'Referansından dönen öğrencilerden bu ay ve tüm zamanlar toplam kazancın, bekleyen ve ödenmiş tutarlar bir arada.',
     'icon'  => '💶',
-    'bg'    => 'https://images.unsplash.com/photo-1579621970590-9d624316904b?w=1400&q=80',
     'tone'  => 'green',
     'stats' => [
         ['icon' => '💰', 'text' => '€' . number_format((float) ($summary['earned'] ?? 0), 0, ',', '.') . ' toplam'],

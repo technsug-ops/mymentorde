@@ -24,7 +24,6 @@
     'title' => 'Sales Pipeline',
     'sub'   => 'Lead → Qualified → Proposal → Closed dönüşüm hunisi. Hangi aşamada kayıp yaşanıyor, sales döngüsü ne kadar sürüyor?',
     'icon'  => '🎯',
-    'bg'    => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1400&q=80',
     'tone'  => 'blue',
     'stats' => [],
 ])

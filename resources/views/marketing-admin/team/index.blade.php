@@ -10,7 +10,6 @@
     'title' => 'Ekip Yönetimi',
     'sub'   => 'Marketing ve sales ekibinin üyeleri, rolleri ve yetki grupları. Yeni üye ekle, rol ata, izin setlerini yönet.',
     'icon'  => 'users',
-    'bg'    => 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1400&q=80',
     'tone'  => 'indigo',
     'stats' => [],
 ])

@@ -34,7 +34,6 @@
     'title' => 'Aday Öğrenci Yönetimi',
     'sub'   => 'Tüm başvuru akışı, danışman atamaları ve dönüşüm durumu. Yeni gelen lead\'leri hızlıca önceliklendir.',
     'icon'  => 'users',
-    'bg'    => 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1400&q=80',
     'tone'  => 'blue',
     'stats' => [
         ['icon' => 'bar-chart-3', 'text' => ($kpis['total'] ?? 0) . ' toplam'],

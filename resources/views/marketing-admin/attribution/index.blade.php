@@ -16,7 +16,6 @@
     'title' => 'Dönüşüm Atıf Analizi',
     'sub'   => 'Multi-touch attribution: bir öğrencinin dönüşümünde hangi reklamlar, linkler ve temas noktaları rol oynadı?',
     'icon'  => 'compass',
-    'bg'    => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1400&q=80',
     'tone'  => 'purple',
     'stats' => [],
 ])

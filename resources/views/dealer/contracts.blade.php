@@ -10,7 +10,6 @@
     'title' => 'Sözleşmelerim',
     'sub'   => config('brand.name', 'MentorDE') . ' ile imzaladığın ortaklık ve operasyon sözleşmeleri — durum, son tarih ve imza akışı bir arada.',
     'icon'  => '📜',
-    'bg'    => 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1400&q=80',
     'tone'  => 'slate',
     'stats' => [
         ['icon' => '📄', 'text' => $contracts->count() . ' sözleşme'],

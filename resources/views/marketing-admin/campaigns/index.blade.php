@@ -14,7 +14,6 @@
     'title' => 'Kampanyalar',
     'sub'   => 'Google/Meta/TikTok reklam kampanyaları, bütçe kullanımı ve dönüşüm metrikleri. Hangi kanal ROI açısından kazandırıyor, tek bakışta gör.',
     'icon'  => '📢',
-    'bg'    => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1400&q=80',
     'tone'  => 'rose',
     'stats' => [
         ['icon' => '📊', 'text' => (isset($campaigns) ? $campaigns->count() : 0) . ' kampanya'],

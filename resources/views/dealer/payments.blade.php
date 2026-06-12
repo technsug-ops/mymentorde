@@ -170,7 +170,6 @@
     'title' => 'Ödemelerim',
     'sub'   => 'Birikmiş komisyon, bekleyen talepler ve net kullanılabilir tutar. Ödeme talebini buradan başlat, hesaplarını yönet.',
     'icon'  => '💳',
-    'bg'    => 'https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=1400&q=80',
     'tone'  => 'teal',
     'stats' => [
         ['icon' => '💰', 'text' => '€' . number_format($totalPending ?? 0, 0, ',', '.') . ' birikmiş'],

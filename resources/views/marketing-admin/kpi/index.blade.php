@@ -1,4 +1,4 @@
-﻿@extends('marketing-admin.layouts.app')
+@extends('marketing-admin.layouts.app')
 
 @section('title', 'KPI Dashboard')
 @section('page_subtitle', 'KPI & Raporlar — dönem bazlı pazarlama ve satış performans analizi')
@@ -15,7 +15,6 @@
     'title' => 'KPI Dashboard',
     'sub'   => 'Dönem bazlı pazarlama ve satış performans metrikleri. Hedef vs gerçek karşılaştırması, trendler ve sapma uyarıları.',
     'icon'  => 'bar-chart-3',
-    'bg'    => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=80',
     'tone'  => 'teal',
     'stats' => [],
 ])

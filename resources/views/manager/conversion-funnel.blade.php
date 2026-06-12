@@ -9,7 +9,6 @@
     'title' => 'Dönüşüm Hunisi',
     'sub'   => 'Bu aralıkta oluşturulan lead\'lerin şu ana kadar ilerlediği aşamalar. Hangi adımda kayıp yaşanıyor, nerede müdahale lazım?',
     'icon'  => '🎯',
-    'bg'    => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1400&q=80',
     'tone'  => 'rose',
     'stats' => [
         ['icon' => '📥', 'text' => number_format(($totalLeads ?? 0), 0, ',', '.') . ' lead'],

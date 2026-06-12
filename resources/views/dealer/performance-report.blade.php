@@ -90,7 +90,6 @@
     'title' => 'Performans Raporu',
     'sub'   => 'Aylık lead/dönüşüm/kazanç trendleri ve toplam istatistiklerin. Hangi ay pik yaptı, nerede yavaşladı görebilirsin.',
     'icon'  => '🏆',
-    'bg'    => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=80',
     'tone'  => 'teal',
     'stats' => [
         ['icon' => '📥', 'text' => ($ds['guest_total'] ?? 0) . ' toplam lead'],

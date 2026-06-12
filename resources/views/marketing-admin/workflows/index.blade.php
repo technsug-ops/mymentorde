@@ -15,7 +15,6 @@
     'title' => 'Workflows & Automation',
     'sub'   => 'Lead besleme, e-posta dizisi, hatırlatma ve tetikleyici workflow tanımları. Manuel işleri otomasyona çevir.',
     'icon'  => 'zap',
-    'bg'    => 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1400&q=80',
     'tone'  => 'amber',
     'stats' => [],
 ])
