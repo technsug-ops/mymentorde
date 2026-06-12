@@ -1041,6 +1041,7 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
                 $envContent = file_exists($envPath) ? file_get_contents($envPath) : '';
                 $updates = [
                     'BROADCAST_DRIVER'        => 'pusher',
+                    'BROADCAST_CONNECTION'    => 'pusher',
                     'PUSHER_APP_ID'           => $appId,
                     'PUSHER_APP_KEY'          => $key,
                     'PUSHER_APP_SECRET'       => $secretP,
