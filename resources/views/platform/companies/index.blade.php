@@ -110,6 +110,13 @@
                         <a href="{{ route('platform.companies.show', $c->id) }}" class="plat-btn plat-btn-ghost plat-btn-sm">
                             <x-icon name="eye" size="12" /> Detay
                         </a>
+                        <form method="POST" action="{{ route('platform.companies.impersonate', $c->id) }}" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="plat-btn plat-btn-ghost plat-btn-sm" title="Bu sirketin Manager paneline gecici eris"
+                                    onclick="return confirm('Impersonate baslatilacak: {{ addslashes($c->name) }}\n\nManager paneli o sirketin context'inde acilacak. Tum islemler audit log\'a kaydedilir.');">
+                                <x-icon name="user" size="12" /> Gir
+                            </button>
+                        </form>
                     </td>
                 </tr>
             @empty

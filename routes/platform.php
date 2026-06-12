@@ -51,6 +51,16 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
         ->middleware('throttle:30,1')
         ->name('platform.companies.modules');
 
+    // Impersonate — Customer Manager paneline gecici erisim
+    Route::post('/companies/{company}/impersonate', [PlatformController::class, 'impersonate'])
+        ->whereNumber('company')
+        ->middleware('throttle:30,1')
+        ->name('platform.companies.impersonate');
+
+    // Impersonate sonlandir
+    Route::post('/stop-impersonating', [PlatformController::class, 'stopImpersonating'])
+        ->name('platform.stop-impersonating');
+
     // ── Analytics — cross-company KPI'lar, tier dağılım, modül heatmap, top companies, booking funnel
     Route::get('/analytics', [PlatformAnalyticsController::class, 'index'])
         ->name('platform.analytics');

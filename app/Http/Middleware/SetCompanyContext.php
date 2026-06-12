@@ -34,12 +34,20 @@ class SetCompanyContext
 
         $user = $request->user();
         $hasSession = $request->hasSession();
+
+        // Platform Owner impersonate aktifse ONCELIK ona: o company'nin context'inde calisir.
+        $impersonatingCompanyId = $hasSession
+            ? (int) $request->session()->get('impersonating_company_id', 0)
+            : 0;
+
         $sessionCompanyId = $hasSession
             ? (int) $request->session()->get('current_company_id', 0)
             : 0;
         $userCompanyId = (int) ($user->company_id ?? 0);
 
-        $companyId = $sessionCompanyId > 0 ? $sessionCompanyId : $userCompanyId;
+        $companyId = $impersonatingCompanyId > 0
+            ? $impersonatingCompanyId
+            : ($sessionCompanyId > 0 ? $sessionCompanyId : $userCompanyId);
         $company = null;
 
         if ($companyId > 0) {

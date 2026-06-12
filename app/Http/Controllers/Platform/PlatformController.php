@@ -417,4 +417,75 @@ class PlatformController extends Controller
         }
         return $out;
     }
+
+    /**
+     * Impersonate olarak Customer Manager paneline gecici erisim.
+     * Audit log + session marker + flash mesaj.
+     */
+    public function impersonate(Request $request, int $company): RedirectResponse
+    {
+        $user = $request->user();
+        if (!$user || (string) $user->role !== \App\Models\User::ROLE_PLATFORM_OWNER) {
+            abort(403);
+        }
+        $target = \App\Models\Company::query()->find($company);
+        if (!$target) {
+            return back()->withErrors(['impersonate' => 'Sirket bulunamadi.']);
+        }
+
+        // Session marker
+        session([
+            'impersonating_company_id'   => $target->id,
+            'impersonating_company_name' => $target->name,
+            'impersonating_started_at'   => now()->toIso8601String(),
+            'impersonating_original_user_id' => $user->id,
+        ]);
+
+        // Audit log (graceful)
+        try {
+            \Illuminate\Support\Facades\Log::info('platform.impersonate.start', [
+                'platform_owner_id'   => $user->id,
+                'platform_owner_email'=> $user->email,
+                'target_company_id'   => $target->id,
+                'target_company_name' => $target->name,
+                'ip'                  => $request->ip(),
+            ]);
+        } catch (\Throwable $e) {
+        }
+
+        return redirect('/manager/dashboard')
+            ->with('status', "Impersonate baslatildi: {$target->name}");
+    }
+
+    /**
+     * Impersonate sonlandir.
+     */
+    public function stopImpersonating(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $companyName = session('impersonating_company_name', '?');
+
+        // Audit log
+        try {
+            \Illuminate\Support\Facades\Log::info('platform.impersonate.stop', [
+                'platform_owner_id'   => $user?->id,
+                'platform_owner_email'=> $user?->email,
+                'target_company_name' => $companyName,
+                'duration_seconds'    => session('impersonating_started_at')
+                    ? now()->diffInSeconds(\Carbon\Carbon::parse(session('impersonating_started_at')))
+                    : null,
+            ]);
+        } catch (\Throwable $e) {
+        }
+
+        session()->forget([
+            'impersonating_company_id',
+            'impersonating_company_name',
+            'impersonating_started_at',
+            'impersonating_original_user_id',
+        ]);
+
+        return redirect('/platform/companies')
+            ->with('status', "Impersonate sonlandirildi: {$companyName}");
+    }
 }

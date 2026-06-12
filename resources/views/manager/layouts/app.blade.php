@@ -682,6 +682,24 @@
                 </div>
             @endif
 
+            @if(session('impersonating_company_id'))
+                <div style="background:linear-gradient(135deg,#7e58bf,#5b3a9e);color:#fff;padding:10px 16px;border-radius:10px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;box-shadow:0 4px 14px rgba(126,88,191,.3);">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <x-icon name="eye" size="18" />
+                        <div>
+                            <strong>Impersonate aktif:</strong> {{ session('impersonating_company_name', '?') }}
+                            <div style="font-size:11px;opacity:.85;">Platform Owner olarak Customer panelini goruntuluyorsun. Tum islemler audit log'a kaydediliyor.</div>
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ route('platform.stop-impersonating') }}" style="margin:0;">
+                        @csrf
+                        <button type="submit" style="background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                            <x-icon name="log-out" size="14" /> Impersonate'i Bitir
+                        </button>
+                    </form>
+                </div>
+            @endif
+
             @yield('content')
         </div>
     </div>{{-- /main --}}
