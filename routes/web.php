@@ -381,6 +381,18 @@ Route::middleware(['company.context'])->group(function () {
     Route::get('/saas',     fn () => redirect()->route('public.platform-landing'))->middleware('throttle:120,1');
     Route::get('/urun',     fn () => redirect()->route('public.platform-landing'))->middleware('throttle:120,1');
 
+    // Public Pricing / Fiyatlandırma — 4 tier yan yana + 14 gün trial CTA
+    Route::get('/fiyatlar', function () {
+        return view('public.pricing');
+    })->middleware('throttle:120,1')->name('public.pricing');
+    Route::get('/pricing',  fn () => redirect()->route('public.pricing'))->middleware('throttle:120,1');
+
+    // Public Self-service Signup Wizard — Trial provisioning + auto-login
+    $signup = \App\Http\Controllers\Public\SignupController::class;
+    Route::get('/kayit',  [$signup, 'show'])->middleware('throttle:60,1')->name('public.signup.show');
+    Route::post('/kayit', [$signup, 'store'])->middleware('throttle:5,1')->name('public.signup.store');
+    Route::get('/signup', fn () => redirect()->route('public.signup.show'))->middleware('throttle:60,1');
+
     // Public Dealer Başvuru Formu — landing CTA'ları buraya yönlendirir
     $dealerApp = \App\Http\Controllers\Dealer\DealerApplicationController::class;
     Route::get('/satis-ortagi/basvuru',         [$dealerApp, 'create'])->middleware('throttle:30,1')->name('public.dealer-application.create');

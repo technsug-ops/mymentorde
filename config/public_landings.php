@@ -26,6 +26,30 @@
 return [
     // ── MARKETING / TANITIM ──────────────────────────────────────────────
     [
+        'path' => '/fiyatlar',
+        'name' => 'Fiyatlandırma (4 Tier)',
+        'type' => 'marketing',
+        'description' => 'Public pricing sayfası — Trial/Basic/Gold/Premium 4 tier yan yana, fiyatlar config/subscription_tiers.php\'den. CTA "14 gün ücretsiz başla" → /kayit. FAQ + final CTA bölümü.',
+        'edit_route' => null,
+        'edit_notes' => 'resources/views/public/pricing.blade.php (statik) + config/subscription_tiers.php (mrr/modules/limits) — fiyat değişikliğinde config güncelle, view otomatik refresh.',
+        'is_active' => true,
+        'tags' => ['saas', 'b2b', 'pricing', 'conversion'],
+        'owner' => 'marketing',
+        'tier' => 'critical',
+    ],
+    [
+        'path' => '/kayit',
+        'name' => 'Self-service Signup Wizard',
+        'type' => 'form',
+        'description' => '14 gün trial otomatik provision — Company + Manager user creation, audit log, auto-login. URL: /kayit?tier=gold (preset tier).',
+        'edit_route' => null,
+        'edit_notes' => 'app/Http/Controllers/Public/SignupController.php + resources/views/public/signup.blade.php — tier seçimi pricing landing\'den gelir. Throttle 5/saat IP başına.',
+        'is_active' => true,
+        'tags' => ['saas', 'signup', 'trial', 'conversion'],
+        'owner' => 'product',
+        'tier' => 'critical',
+    ],
+    [
         'path' => '/platform',
         'name' => 'Platform Tanıtım (SaaS Satış)',
         'type' => 'marketing',

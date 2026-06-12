@@ -194,6 +194,24 @@ button.btn.btn-primary:hover, button.btn.primary:hover {
     $riskLabel  = match($stats['risk_level']) { 'low'=>'Düşük', 'good'=>'İyi', 'medium'=>'Orta', 'high'=>'Yüksek', 'critical'=>'Kritik', default=>strtoupper((string)($stats['risk_level'])) };
 @endphp
 
+{{-- Self-service signup welcome banner ?welcome=1 --}}
+@if(request()->query('welcome') === '1')
+    <div style="margin:0 0 18px;padding:18px 22px;background:linear-gradient(135deg, #7e58bf 0%, #5a3a8d 100%);color:#fff;border-radius:14px;box-shadow:0 14px 36px rgba(126,88,191,.28);display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div style="font-size:34px;flex:0 0 auto;">🎉</div>
+        <div style="flex:1;min-width:240px;">
+            <div style="font-size:18px;font-weight:700;letter-spacing:-.3px;">Hoş geldin {{ $mgdName }}!</div>
+            <div style="font-size:13.5px;opacity:.92;margin-top:4px;">
+                14 gün boyunca tüm Gold özellikleri açık. İlk öğrencini ekle, danışmanlarını davet et ve sistemi tanı.
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="/manager/students" style="padding:9px 16px;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.32);border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">📚 Öğrenci ekle</a>
+            <a href="/manager/users" style="padding:9px 16px;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.32);border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">👥 Danışman davet et</a>
+            <a href="?" style="padding:9px 14px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;">Kapat ✕</a>
+        </div>
+    </div>
+@endif
+
 {{-- ── Hero ── --}}
 <div class="mgd-hero">
     <div class="mgd-hero-top">
