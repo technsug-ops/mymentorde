@@ -1024,6 +1024,56 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // Pusher backend credentials'i .env'e yaz + config cache invalidate.
+        // .env'e elle yazmaya gerek yok — bu endpoint .env'i patch eder.
+        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=set-pusher
+        //          &app_id=XXX&key=XXX&pusher_secret=XXX&cluster=eu
+        if ($request->query('cleanup') === 'set-pusher') {
+            $appId    = (string) $request->query('app_id', '');
+            $key      = (string) $request->query('key', '');
+            $secretP  = (string) $request->query('pusher_secret', '');
+            $cluster  = (string) $request->query('cluster', 'eu');
+
+            if ($appId === '' || $key === '' || $secretP === '') {
+                $output .= ">>> set-pusher: app_id + key + pusher_secret zorunlu\n";
+            } else {
+                $envPath = base_path('.env');
+                $envContent = file_exists($envPath) ? file_get_contents($envPath) : '';
+                $updates = [
+                    'BROADCAST_DRIVER'        => 'pusher',
+                    'PUSHER_APP_ID'           => $appId,
+                    'PUSHER_APP_KEY'          => $key,
+                    'PUSHER_APP_SECRET'       => $secretP,
+                    'PUSHER_APP_CLUSTER'      => $cluster,
+                    'PUSHER_PORT'             => '443',
+                    'PUSHER_SCHEME'           => 'https',
+                    'VITE_PUSHER_APP_KEY'     => $key,
+                    'VITE_PUSHER_APP_CLUSTER' => $cluster,
+                ];
+                $patched = 0;
+                foreach ($updates as $envKey => $envValue) {
+                    if (preg_match("/^{$envKey}=.*$/m", $envContent)) {
+                        $envContent = preg_replace("/^{$envKey}=.*$/m", "{$envKey}={$envValue}", $envContent);
+                    } else {
+                        $envContent .= "\n{$envKey}={$envValue}";
+                    }
+                    $patched++;
+                }
+                @file_put_contents($envPath, $envContent);
+                $output .= ">>> set-pusher: .env'e {$patched} satir yazildi/guncellendi\n";
+
+                try {
+                    \Illuminate\Support\Facades\Artisan::call('config:clear');
+                    \Illuminate\Support\Facades\Artisan::call('view:clear');
+                    $output .= "    config:clear + view:clear OK\n";
+                } catch (\Throwable $e) {
+                    $output .= "    cache clear hata: " . $e->getMessage() . "\n";
+                }
+                $output .= "    Pusher: app_id={$appId}, cluster={$cluster}, key={$key}\n";
+                $output .= "    Frontend echo.js fallback hardcoded — bir sonraki request'te real-time aktif.\n";
+            }
+        }
+
         // Platform Owner role'unu Manager'a geri dusur (sahip ayrimi icin).
         // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=demote-to-manager&email=USER_EMAIL
         if ($request->query('cleanup') === 'demote-to-manager') {

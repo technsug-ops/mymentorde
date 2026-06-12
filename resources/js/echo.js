@@ -11,7 +11,10 @@
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
-const PUSHER_KEY = import.meta.env.VITE_PUSHER_APP_KEY || '';
+// Pusher Channels — public key (browser'da gorunur, secret degil)
+// Vite env tercihen kullanilir; build sirasinda env yoksa burada hardcoded
+// fallback devreye girer. Secret backend .env'de (PUSHER_APP_SECRET) kalir.
+const PUSHER_KEY = import.meta.env.VITE_PUSHER_APP_KEY || 'eafaa89808c434d2214d';
 const PUSHER_CLUSTER = import.meta.env.VITE_PUSHER_APP_CLUSTER || 'eu';
 
 if (PUSHER_KEY) {
