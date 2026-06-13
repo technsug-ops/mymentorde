@@ -110,6 +110,11 @@ Route::middleware(['company.context', 'auth', 'verified', 'guest.role', 'throttl
     Route::get('/city/{slug}',       [GuestInfoController::class, 'cityDetail'])->name('guest.city-detail')->where('slug', '[a-z-]+');
     Route::get('/document-guide',    [GuestInfoController::class, 'documentGuidePage'])->middleware('page.visible:document_guide')->name('guest.document-guide');
 
+    // Yeni içerik rehberleri (2026 Haziran — backlog/discovery)
+    Route::get('/dil-sertifikasi',   [GuestInfoController::class, 'languageComparisonPage'])->name('guest.language-comparison');
+    Route::get('/studienkolleg',     [GuestInfoController::class, 'studienkollegPage'])->name('guest.studienkolleg');
+    Route::get('/saglik-sigortasi',  [GuestInfoController::class, 'healthInsurancePage'])->name('guest.health-insurance');
+
     // ── Global Arama ─────────────────────────────────────────────────────────
     Route::get('/search', [GuestContentController::class, 'globalSearch'])->middleware('throttle:60,1')->name('guest.search');
 

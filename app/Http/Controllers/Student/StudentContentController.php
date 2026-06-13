@@ -135,6 +135,24 @@ class StudentContentController extends Controller
         return view('student.info.vize-guide', $base);
     }
 
+    public function infoLanguageComparison(Request $request)
+    {
+        return view('student.info.language-comparison',
+            $this->baseData($request, 'info', 'Almanca Dil Sertifikası Rehberi', ''));
+    }
+
+    public function infoStudienkolleg(Request $request)
+    {
+        return view('student.info.studienkolleg-guide',
+            $this->baseData($request, 'info', 'Studienkolleg Rehberi', ''));
+    }
+
+    public function infoHealthInsurance(Request $request)
+    {
+        return view('student.info.health-insurance',
+            $this->baseData($request, 'info', 'Sağlık Sigortası Rehberi', ''));
+    }
+
     public function infoCityDetail(Request $request, string $slug)
     {
         $cities = \App\Models\GermanyCity::allAsConfig();

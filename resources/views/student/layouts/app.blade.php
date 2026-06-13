@@ -310,6 +310,18 @@
                    class="nav-link {{ request()->routeIs('student.info.success-stories') ? 'active' : '' }}">
                     <x-icon name="award" size="18" class="nav-icon" aria-label="Başarı Hikayeleri" /> Başarı Hikayeleri
                 </a>
+                <a href="{{ route('student.info.language-comparison') }}"
+                   class="nav-link {{ request()->routeIs('student.info.language-comparison') ? 'active' : '' }}">
+                    <x-icon name="message-square" size="18" class="nav-icon" aria-label="Dil sertifikası" /> Dil Sertifikası
+                </a>
+                <a href="{{ route('student.info.studienkolleg') }}"
+                   class="nav-link {{ request()->routeIs('student.info.studienkolleg') ? 'active' : '' }}">
+                    <x-icon name="bookmark" size="18" class="nav-icon" aria-label="Studienkolleg" /> Studienkolleg
+                </a>
+                <a href="{{ route('student.info.health-insurance') }}"
+                   class="nav-link {{ request()->routeIs('student.info.health-insurance') ? 'active' : '' }}">
+                    <x-icon name="shield" size="18" class="nav-icon" aria-label="Sağlık sigortası" /> Sağlık Sigortası
+                </a>
                 @pageVisible('discover')
                 <a href="{{ route('student.discover') }}"
                    class="nav-link {{ request()->routeIs('student.discover') ? 'active' : '' }}">

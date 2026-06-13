@@ -152,6 +152,11 @@ Route::middleware(['company.context', 'auth', 'verified', 'student.role', 'throt
     Route::get('/student/info/vize-guide',       [StudentContentController::class, 'infoVizeGuide'])->name('student.info.vize-guide');
     Route::get('/student/info/city/{slug}',      [StudentContentController::class, 'infoCityDetail'])->name('student.info.city-detail')->where('slug', '[a-z-]+');
 
+    // Yeni içerik rehberleri (2026 Haziran)
+    Route::get('/student/info/language-comparison', [StudentContentController::class, 'infoLanguageComparison'])->name('student.info.language-comparison');
+    Route::get('/student/info/studienkolleg',       [StudentContentController::class, 'infoStudienkolleg'])->name('student.info.studienkolleg');
+    Route::get('/student/info/health-insurance',    [StudentContentController::class, 'infoHealthInsurance'])->name('student.info.health-insurance');
+
     // ── Content Hub (Keşfet) ─────────────────────────────────────────────────
     Route::get('/student/discover',                   [StudentContentController::class, 'discoverPage'])->name('student.discover');
     Route::get('/student/discover/more',              [StudentContentController::class, 'discoverMore'])->name('student.discover.more');

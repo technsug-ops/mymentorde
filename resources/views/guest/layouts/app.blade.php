@@ -308,6 +308,18 @@
                     <x-icon name="shield-check" size="18" class="nav-icon" aria-label="Vize ve Sperrkonto" /> Vize & Sperrkonto
                 </a>
                 @endpageVisible
+                <a href="{{ route('guest.language-comparison') }}"
+                   class="nav-link {{ request()->routeIs('guest.language-comparison') ? 'active' : '' }}">
+                    <x-icon name="message-square" size="18" class="nav-icon" aria-label="Dil sertifikası" /> Dil Sertifikası
+                </a>
+                <a href="{{ route('guest.studienkolleg') }}"
+                   class="nav-link {{ request()->routeIs('guest.studienkolleg') ? 'active' : '' }}">
+                    <x-icon name="bookmark" size="18" class="nav-icon" aria-label="Studienkolleg" /> Studienkolleg
+                </a>
+                <a href="{{ route('guest.health-insurance') }}"
+                   class="nav-link {{ request()->routeIs('guest.health-insurance') ? 'active' : '' }}">
+                    <x-icon name="shield" size="18" class="nav-icon" aria-label="Sağlık sigortası" /> Sağlık Sigortası
+                </a>
                 @pageVisible('discover')
                 <a href="{{ route('guest.discover') }}"
                    class="nav-link {{ request()->routeIs('guest.discover') ? 'active' : '' }}">

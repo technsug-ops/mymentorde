@@ -174,6 +174,30 @@ class GuestInfoController extends Controller
         return view('guest.document-guide', $data);
     }
 
+    public function languageComparisonPage(Request $request)
+    {
+        $guest = $this->resolveGuest($request);
+        $data  = $this->buildViewData($request, $guest);
+
+        return view('guest.language-comparison', $data);
+    }
+
+    public function studienkollegPage(Request $request)
+    {
+        $guest = $this->resolveGuest($request);
+        $data  = $this->buildViewData($request, $guest);
+
+        return view('guest.studienkolleg-guide', $data);
+    }
+
+    public function healthInsurancePage(Request $request)
+    {
+        $guest = $this->resolveGuest($request);
+        $data  = $this->buildViewData($request, $guest);
+
+        return view('guest.health-insurance', $data);
+    }
+
     public function cityDetail(Request $request, string $slug)
     {
         $cities = GermanyCity::allAsConfig();
