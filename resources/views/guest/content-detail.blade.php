@@ -257,6 +257,14 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
 @endif
 
 {{-- Content body by type --}}
+@php
+    // G13: placeholder/geçersiz embed URL'lerinde kırık Google iframe ("dosya mevcut
+    // değil") yerine zarif bilgi kartı göster. Gerçek embed URL'leri normal render olur.
+    $cdIsPlaceholderEmbed = function ($u) {
+        $u = (string) $u;
+        return $u === '' || str_contains($u, 'placeholder') || str_contains($u, 'YOUR_') || str_contains($u, 'example.com');
+    };
+@endphp
 <div class="cd-body cd-article" id="cd-body-content">
     @if($item->type === 'video_feature' && $item->video_url)
         <div class="cd-video-wrap">
@@ -267,15 +275,29 @@ $linkedCity = $linkedCitySlug ? $cities[$linkedCitySlug] : null;
         @if($item->content_tr){!! $item->rendered_content_tr !!}@endif
 
     @elseif($item->type === 'podcast' && $item->video_url)
-        <div class="cd-embed-wrap">
-            <iframe src="{{ $item->video_url }}" style="min-height:152px;"></iframe>
-        </div>
+        @if($cdIsPlaceholderEmbed($item->video_url))
+            <div class="cd-embed-wrap" style="padding:28px;text-align:center;color:var(--u-muted,#64748b);">
+                🎧 <strong style="color:var(--u-text,#1e293b);">Podcast yakında</strong><br>
+                <span style="font-size:13px;">Bu bölümün ses kaydı hazırlanıyor; içeriği aşağıdan okuyabilirsin.</span>
+            </div>
+        @else
+            <div class="cd-embed-wrap">
+                <iframe src="{{ $item->video_url }}" style="min-height:152px;"></iframe>
+            </div>
+        @endif
         @if($item->content_tr){!! $item->rendered_content_tr !!}@endif
 
     @elseif($item->type === 'presentation' && $item->video_url)
-        <div class="cd-embed-wrap">
-            <iframe src="{{ $item->video_url }}" style="min-height:400px;" allowfullscreen></iframe>
-        </div>
+        @if($cdIsPlaceholderEmbed($item->video_url))
+            <div class="cd-embed-wrap" style="padding:32px;text-align:center;color:var(--u-muted,#64748b);">
+                📊 <strong style="color:var(--u-text,#1e293b);">Sunum hazırlanıyor</strong><br>
+                <span style="font-size:13px;">Görsel sunum yakında eklenecek; özet içeriği aşağıda bulabilirsin.</span>
+            </div>
+        @else
+            <div class="cd-embed-wrap">
+                <iframe src="{{ $item->video_url }}" style="min-height:400px;" allowfullscreen></iframe>
+            </div>
+        @endif
         @if($item->content_tr){!! $item->rendered_content_tr !!}@endif
 
     @elseif($item->type === 'experience')
