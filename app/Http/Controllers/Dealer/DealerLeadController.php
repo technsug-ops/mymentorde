@@ -53,6 +53,33 @@ class DealerLeadController extends Controller
         $base = $this->baseData($request);
         abort_if(empty($base['dealerCode']), 403, 'Dealer code missing');
 
+        // Duplicate guard: aynı bayi altında aynı ad+soyad (+ varsa email/telefon)
+        // ile mükerrer yönlendirmeyi engelle. Çift gönderim / yenileme kaynaklı
+        // aynı öğrencinin 2-3 kez kaydını önler.
+        $firstName = trim((string) $data['first_name']);
+        $lastName  = trim((string) $data['last_name']);
+        $emailNorm = strtolower(trim((string) ($data['email'] ?? ''))) ?: null;
+        $phoneNorm = trim((string) $data['phone']);
+
+        $dupe = GuestApplication::query()
+            ->where('dealer_code', $base['dealerCode'])
+            ->whereRaw('LOWER(first_name) = ?', [mb_strtolower($firstName)])
+            ->whereRaw('LOWER(last_name) = ?', [mb_strtolower($lastName)])
+            ->where(function ($q) use ($emailNorm, $phoneNorm) {
+                if ($emailNorm) {
+                    $q->where('email', $emailNorm);
+                }
+                if ($phoneNorm !== '') {
+                    $q->orWhere('phone', $phoneNorm);
+                }
+            })
+            ->first();
+
+        if ($dupe) {
+            return redirect('/dealer/leads/' . $dupe->id)
+                ->with('status', 'Bu öğrenci zaten yönlendirilmiş — mevcut kayda yönlendirildiniz.');
+        }
+
         $guest = GuestApplication::query()->create([
             'tracking_token'      => $this->generateTrackingToken(),
             'first_name'          => trim((string) $data['first_name']),
@@ -102,13 +129,20 @@ class DealerLeadController extends Controller
         $this->taskAutomationService->ensureGuestRegistrationReviewTask($guest);
         $this->taskAutomationService->ensureGuestTicketTask($guest, $ticket);
 
-        $this->eventLogService->log('dealer_lead_created', [
-            'guest_id'             => (int) $guest->id,
-            'guest_tracking_token' => (string) $guest->tracking_token,
-            'dealer_code'          => (string) ($base['dealerCode'] ?? ''),
-            'dealer_user'          => (string) ($request->user()?->email ?? ''),
-            'ticket_id'            => (int) $ticket->id,
-        ], 'dealer', (string) ($request->user()?->email ?? 'dealer'));
+        $this->eventLogService->log(
+            'dealer_lead_created',
+            'guest',
+            (string) $guest->id,
+            'Dealer panelinden yeni yonlendirme olusturuldu.',
+            [
+                'guest_id'             => (int) $guest->id,
+                'guest_tracking_token' => (string) $guest->tracking_token,
+                'dealer_code'          => (string) ($base['dealerCode'] ?? ''),
+                'dealer_user'          => (string) ($request->user()?->email ?? ''),
+                'ticket_id'            => (int) $ticket->id,
+            ],
+            (string) ($request->user()?->email ?? 'dealer'),
+        );
 
         $this->queueDealerLeadNotifications($guest, (string) ($request->user()?->email ?? ''));
 
