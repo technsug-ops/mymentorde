@@ -177,7 +177,37 @@
             </tbody>
         </table>
     @elseif(!$parentDealer)
-        <div style="font-size:12px;color:var(--u-muted);">Bu bölge bayisinin henüz alt bayisi yok.</div>
+        <div style="font-size:12px;color:var(--u-muted);margin-bottom:12px;">Bu bölge bayisinin henüz alt bayisi yok.</div>
+    @endif
+
+    @if(!$parentDealer)
+        {{-- Override (üst pay) — yalnız bölge bayisi --}}
+        <div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--u-line,#e5e9f0);">
+            <div style="font-size:11px;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px;">
+                Override (Üst Pay) — alt bayilerin getirisi üzerinden bu bölge bayisine ek komisyon
+            </div>
+            <form method="POST" action="/manager/dealers/{{ $dealer->code }}/override" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+                @csrf
+                <div>
+                    <label style="display:block;font-size:11px;color:var(--u-muted);margin-bottom:3px;">Yöntem</label>
+                    <select name="override_basis" style="padding:7px 10px;border:1px solid var(--u-line,#cbd5e1);border-radius:6px;font-size:13px;">
+                        <option value="percent_of_sub" {{ ($dealer->override_basis ?? 'percent_of_sub') === 'percent_of_sub' ? 'selected' : '' }}>Alt bayi hak edişinin %'si</option>
+                        <option value="fixed_eur" {{ ($dealer->override_basis ?? '') === 'fixed_eur' ? 'selected' : '' }}>Öğrenci başına sabit €</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block;font-size:11px;color:var(--u-muted);margin-bottom:3px;">% (percent_of_sub)</label>
+                    <input type="number" step="0.01" min="0" max="100" name="override_rate_percent" value="{{ $dealer->override_rate_percent }}"
+                           style="width:110px;padding:7px 10px;border:1px solid var(--u-line,#cbd5e1);border-radius:6px;font-size:13px;">
+                </div>
+                <div>
+                    <label style="display:block;font-size:11px;color:var(--u-muted);margin-bottom:3px;">€ (fixed_eur)</label>
+                    <input type="number" step="0.01" min="0" name="override_rate_eur" value="{{ $dealer->override_rate_eur }}"
+                           style="width:110px;padding:7px 10px;border:1px solid var(--u-line,#cbd5e1);border-radius:6px;font-size:13px;">
+                </div>
+                <button type="submit" class="btn" style="font-size:12px;padding:8px 16px;background:#1e40af;color:#fff;border:none;border-radius:6px;cursor:pointer;">Kaydet</button>
+            </form>
+        </div>
     @endif
 </section>
 

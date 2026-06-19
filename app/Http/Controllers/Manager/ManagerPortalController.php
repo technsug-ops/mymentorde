@@ -658,6 +658,33 @@ class ManagerPortalController extends Controller
         ));
     }
 
+    /**
+     * Bölge bayisinin override (üst pay) oranını günceller.
+     * Sadece bölge bayisi (parent_dealer_id null) için anlamlıdır.
+     */
+    public function updateDealerOverride(Request $request, string $code): \Illuminate\Http\RedirectResponse
+    {
+        \App\Support\ModuleAccess::assertEnabled('dealer');
+        $cid    = $this->companyId();
+        $dealer = Dealer::where('code', $code)->firstOrFail();
+        abort_if($cid > 0 && (int) ($dealer->company_id ?? 0) !== $cid, 403);
+        abort_if(!$dealer->isRegional(), 422, 'Override yalnizca bolge bayilerine tanimlanir.');
+
+        $validated = $request->validate([
+            'override_basis'        => ['required', 'in:percent_of_sub,fixed_eur'],
+            'override_rate_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'override_rate_eur'     => ['nullable', 'numeric', 'min:0', 'max:100000'],
+        ]);
+
+        $dealer->update([
+            'override_basis'        => $validated['override_basis'],
+            'override_rate_percent' => $validated['override_basis'] === 'percent_of_sub' ? ($validated['override_rate_percent'] ?? 0) : null,
+            'override_rate_eur'     => $validated['override_basis'] === 'fixed_eur' ? ($validated['override_rate_eur'] ?? 0) : null,
+        ]);
+
+        return back()->with('status', "Override oranı güncellendi: {$dealer->name}");
+    }
+
     // ─── BAYİ TİPİ YÖNETİMİ ─────────────────────────────────────────────────
 
     public function dealerTypes(): View

@@ -50,15 +50,21 @@ class DealerRevenueService
             ];
         })->values()->all();
 
-        return DealerStudentRevenue::query()->updateOrCreate(
+        $row = DealerStudentRevenue::query()->updateOrCreate(
             ['dealer_id' => $dealerId, 'student_id' => $studentId],
             [
                 'dealer_type' => $dealerType,
+                'is_override' => false,
                 'milestone_progress' => $progress,
                 'total_earned' => 0,
                 'total_pending' => 0,
             ]
         );
+
+        // Getiriyi alt bayi yaptıysa bölge bayisi override satırını da hazırla.
+        $this->syncOverrideForStudent($studentId);
+
+        return $row;
     }
 
     /**
@@ -70,7 +76,11 @@ class DealerRevenueService
             return;
         }
 
-        $dsRevs = DealerStudentRevenue::query()->where('student_id', $studentId)->get();
+        // Override satırları ayrı yönetilir (syncOverrideForStudent) — burada hariç.
+        $dsRevs = DealerStudentRevenue::query()
+            ->where('student_id', $studentId)
+            ->where('is_override', false)
+            ->get();
         if ($dsRevs->isEmpty()) {
             return;
         }
@@ -102,6 +112,9 @@ class DealerRevenueService
                 $dsRev->save();
             }
         });
+
+        // Alt bayilerin getirisi değişti — bölge bayisi override satırlarını senkronla.
+        $this->syncOverrideForStudent($studentId);
     }
 
     /**
@@ -117,7 +130,11 @@ class DealerRevenueService
             return;
         }
 
-        $dsRevs = DealerStudentRevenue::query()->where('student_id', $studentId)->get();
+        // Override satırları ayrı yönetilir (syncOverrideForStudent) — burada hariç.
+        $dsRevs = DealerStudentRevenue::query()
+            ->where('student_id', $studentId)
+            ->where('is_override', false)
+            ->get();
         if ($dsRevs->isEmpty()) {
             return;
         }
@@ -159,10 +176,78 @@ class DealerRevenueService
             }
         });
 
-        // Auto-payout checks run after transaction commits
-        foreach ($dsRevs as $dsRev) {
-            $dsRev->refresh();
+        // Alt bayilerin getirisi değişti — bölge bayisi override satırlarını senkronla.
+        $this->syncOverrideForStudent($studentId);
+
+        // Auto-payout checks run after transaction commits — normal + override satırları.
+        $allRevs = DealerStudentRevenue::query()->where('student_id', $studentId)->get();
+        foreach ($allRevs as $dsRev) {
             $this->checkAndCreateAutoPayoutRequest($dsRev);
+        }
+    }
+
+    /**
+     * Bir öğrenciyi ALT bayi getirdiyse, bölge bayisi (parent) için override
+     * DealerStudentRevenue satırını oluştur/güncelle. Override tutarı alt bayinin
+     * toplamından türetilir (mirror milestone yok):
+     *   - percent_of_sub: alt bayi earned/pending × override_rate_percent
+     *   - fixed_eur:      öğrenci başına sabit override_rate_eur (alt earned>0 ise earned)
+     */
+    private function syncOverrideForStudent(string $studentId): void
+    {
+        $subRevs = DealerStudentRevenue::query()
+            ->where('student_id', $studentId)
+            ->where('is_override', false)
+            ->get();
+
+        foreach ($subRevs as $subRev) {
+            $sub = Dealer::query()->where('code', $subRev->dealer_id)->first();
+            if (!$sub || !$sub->parent_dealer_id) {
+                continue; // sadece ALT bayilerin getirisi override üretir
+            }
+            $regional = $sub->parent;
+            if (!$regional) {
+                continue;
+            }
+
+            $basis   = (string) ($regional->override_basis ?: 'percent_of_sub');
+            $earned  = 0.0;
+            $pending = 0.0;
+
+            if ($basis === 'fixed_eur') {
+                $fixed   = (float) ($regional->override_rate_eur ?? 0);
+                $earned  = ((float) $subRev->total_earned) > 0 ? $fixed : 0.0;
+                $pending = ($earned <= 0 && ((float) $subRev->total_pending) > 0) ? $fixed : 0.0;
+            } else { // percent_of_sub (varsayılan)
+                $pct     = (float) ($regional->override_rate_percent ?? 0) / 100;
+                $earned  = round(((float) $subRev->total_earned) * $pct, 2);
+                $pending = round(((float) $subRev->total_pending) * $pct, 2);
+            }
+
+            // Override yapılandırılmamışsa (oran 0) satır oluşturma — gürültü olmasın.
+            if ($earned <= 0 && $pending <= 0) {
+                continue;
+            }
+
+            $status = $pending > 0 ? 'triggered' : 'paid';
+
+            DealerStudentRevenue::query()->updateOrCreate(
+                ['dealer_id' => $regional->code, 'student_id' => $studentId],
+                [
+                    'origin_dealer_id'   => $sub->code,
+                    'is_override'        => true,
+                    'dealer_type'        => (string) ($regional->dealer_type_code ?? $subRev->dealer_type),
+                    'milestone_progress' => [[
+                        'milestone_id'      => 'override',
+                        'status'            => $status,
+                        'calculated_amount' => $earned > 0 ? $earned : $pending,
+                        'currency'          => 'EUR',
+                        'origin'            => $sub->code,
+                    ]],
+                    'total_earned'  => $earned,
+                    'total_pending' => $pending,
+                ]
+            );
         }
     }
 
@@ -203,7 +288,9 @@ class DealerRevenueService
             return;
         }
 
-        $dealer = Dealer::query()->where('id', $dsRev->dealer_id)->first();
+        // dealer_id CODE tutar (id değil) — code ile eşle. Bu hem normal hem
+        // override satırlarda doğru bayiye gider.
+        $dealer = Dealer::query()->where('code', $dsRev->dealer_id)->first();
         if (!$dealer) {
             return;
         }

@@ -310,6 +310,9 @@
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                     <span class="earn-item-sid">{{ $r->student_id }}</span>
                     @if($r->dealer_type)<span class="earn-item-type">{{ $r->dealer_type }}</span>@endif
+                    @if($r->is_override)
+                        <span class="earn-item-type" style="background:#ede9fe;color:#6d28d9;">Override · alt bayi {{ $r->origin_dealer_id }}</span>
+                    @endif
                     <span class="earn-badge {{ $st['badge'] }}">{{ $st['label'] }}</span>
                 </div>
                 <div class="earn-item-amounts">

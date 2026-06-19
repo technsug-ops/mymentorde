@@ -28,6 +28,9 @@ class Dealer extends Model
         'signup_bonus_amount',
         'signup_bonus_status',
         'signup_bonus_unlocked_at',
+        'override_rate_eur',
+        'override_rate_percent',
+        'override_basis',
     ];
 
     protected $casts = [
@@ -36,6 +39,8 @@ class Dealer extends Model
         'archived_at' => 'datetime',
         'signup_bonus_amount' => 'decimal:2',
         'signup_bonus_unlocked_at' => 'datetime',
+        'override_rate_eur' => 'decimal:2',
+        'override_rate_percent' => 'decimal:2',
     ];
 
     // ── Hiyerarşi (2 seviye: bölge → alt bayi) ────────────────
