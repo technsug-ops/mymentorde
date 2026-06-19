@@ -130,6 +130,18 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
         ->middleware('throttle:10,1')
         ->name('platform.billing.mark-paid');
 
+    // Yanlis kesilen faturayi iptal et (gonderilmis/gecikmis -> cancelled, audit korunur)
+    Route::post('/billing/{invoice}/cancel', [PlatformBillingController::class, 'cancel'])
+        ->whereNumber('invoice')
+        ->middleware('throttle:10,1')
+        ->name('platform.billing.cancel');
+
+    // Taslak/iptal faturayi tamamen sil (promo redemption geri alinir, PDF silinir)
+    Route::delete('/billing/{invoice}', [PlatformBillingController::class, 'destroy'])
+        ->whereNumber('invoice')
+        ->middleware('throttle:10,1')
+        ->name('platform.billing.destroy');
+
     // ────────────────────────────────────────────────────────────────────────
     // PROMO CODES — İndirim kodları (Platform Owner)
     // ────────────────────────────────────────────────────────────────────────

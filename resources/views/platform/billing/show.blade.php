@@ -61,6 +61,29 @@
                 </button>
             </form>
         @endif
+
+        {{-- İPTAL ET — gonderilmis/gecikmis fatura void edilir (audit korunur) --}}
+        @if(in_array($invoice->status, ['sent', 'overdue'], true))
+            <form method="POST" action="{{ route('platform.billing.cancel', $invoice) }}" style="margin:0;"
+                  onsubmit="return confirm('{{ $invoice->invoice_number }} faturası iptal edilecek (cancelled). Devam edilsin mi?');">
+                @csrf
+                <button type="submit" class="plat-btn plat-btn-ghost">
+                    <x-icon name="x" size="14" /> İptal Et
+                </button>
+            </form>
+        @endif
+
+        {{-- SİL — sadece taslak/iptal faturalar tamamen silinebilir --}}
+        @if(in_array($invoice->status, ['draft', 'cancelled'], true))
+            <form method="POST" action="{{ route('platform.billing.destroy', $invoice) }}" style="margin:0;"
+                  onsubmit="return confirm('{{ $invoice->invoice_number }} faturası KALICI olarak silinecek (promo varsa geri alınır). Bu işlem geri alınamaz. Devam?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="plat-btn plat-btn-ghost" style="color:#dc2626;border-color:#dc2626;">
+                    <x-icon name="trash" size="14" /> Sil
+                </button>
+            </form>
+        @endif
     </div>
 </div>
 

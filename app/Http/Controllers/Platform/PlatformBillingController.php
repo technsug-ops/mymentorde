@@ -333,4 +333,109 @@ class PlatformBillingController extends Controller
 
         return back()->with('success', "Fatura ödendi olarak işaretlendi: {$invoice->invoice_number}");
     }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // CANCEL — Yanlis kesilen faturayi iptal et (void)
+    // ────────────────────────────────────────────────────────────────────────
+    //
+    // Gonderilmis/gecikmis fatura musteriye gitmis olabilir; silmek yerine
+    // 'cancelled' statusune ceker (audit izi korunur). Odenmis fatura finansal
+    // kayittir, iptal edilemez. Taslak icin sil (destroy) kullanilmali.
+
+    public function cancel(PlatformInvoice $invoice): RedirectResponse
+    {
+        if ($invoice->status === PlatformInvoice::STATUS_PAID) {
+            return back()->with('error', "Ödenmiş fatura iptal edilemez: {$invoice->invoice_number} (finansal kayıt).");
+        }
+        if ($invoice->status === PlatformInvoice::STATUS_CANCELLED) {
+            return back()->with('error', "Fatura zaten iptal edilmiş: {$invoice->invoice_number}.");
+        }
+
+        $oldStatus = $invoice->status;
+        $this->reversePromoRedemptions($invoice);
+        $invoice->status = PlatformInvoice::STATUS_CANCELLED;
+        $invoice->save();
+
+        \App\Models\PlatformAuditLog::record(
+            'platform.billing.invoice_cancelled',
+            [
+                'target_type'    => 'invoice',
+                'target_id'      => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'company_id'     => $invoice->company_id,
+                'old_status'     => $oldStatus,
+                'total_eur'      => (float) $invoice->total_eur,
+            ],
+            \App\Models\PlatformAuditLog::SEVERITY_WARNING
+        );
+
+        return back()->with('success', "Fatura iptal edildi: {$invoice->invoice_number}");
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // DESTROY — Taslak/iptal faturayi tamamen sil
+    // ────────────────────────────────────────────────────────────────────────
+    //
+    // Sadece taslak (draft) ve iptal (cancelled) faturalar silinebilir.
+    // Gonderilmis/odenmis fatura silinmez — once cancel edilmeli.
+    // Promo uygulanmissa redemption geri alinir, PDF dosyasi silinir.
+
+    public function destroy(PlatformInvoice $invoice): RedirectResponse
+    {
+        if (! in_array($invoice->status, [PlatformInvoice::STATUS_DRAFT, PlatformInvoice::STATUS_CANCELLED], true)) {
+            return back()->with('error', "Sadece taslak veya iptal edilmiş fatura silinebilir: {$invoice->invoice_number} ({$invoice->statusLabel()}). Önce iptal edin.");
+        }
+
+        $number    = $invoice->invoice_number;
+        $companyId  = $invoice->company_id;
+        $totalEur   = (float) $invoice->total_eur;
+        $oldStatus  = $invoice->status;
+
+        $this->reversePromoRedemptions($invoice);
+
+        if ($invoice->pdf_path && Storage::exists($invoice->pdf_path)) {
+            Storage::delete($invoice->pdf_path);
+        }
+
+        $invoice->delete();
+
+        \App\Models\PlatformAuditLog::record(
+            'platform.billing.invoice_deleted',
+            [
+                'target_type'    => 'invoice',
+                'target_id'      => null,
+                'invoice_number' => $number,
+                'company_id'     => $companyId,
+                'old_status'     => $oldStatus,
+                'total_eur'      => $totalEur,
+            ],
+            \App\Models\PlatformAuditLog::SEVERITY_WARNING
+        );
+
+        return redirect()
+            ->route('platform.billing.index')
+            ->with('success', "Fatura silindi: {$number}");
+    }
+
+    /**
+     * Bu faturaya bagli promo redemption(lar)i geri al:
+     *   - PromoCode current_uses-- (0'in altina dusmez)
+     *   - redemption kaydini sil
+     * Boylece iptal/silinen fatura promo kullanim hakkini geri verir.
+     */
+    private function reversePromoRedemptions(PlatformInvoice $invoice): void
+    {
+        $redemptions = \App\Models\PromoCodeRedemption::query()
+            ->where('company_id', $invoice->company_id)
+            ->get()
+            ->filter(fn ($r) => in_array($invoice->id, (array) $r->invoice_ids, true));
+
+        foreach ($redemptions as $redemption) {
+            $promo = PromoCode::query()->find($redemption->promo_code_id);
+            if ($promo && $promo->current_uses > 0) {
+                $promo->decrement('current_uses');
+            }
+            $redemption->delete();
+        }
+    }
 }
