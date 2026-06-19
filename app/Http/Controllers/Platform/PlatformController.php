@@ -478,6 +478,11 @@ class PlatformController extends Controller
         if (!$user || (string) $user->role !== \App\Models\User::ROLE_PLATFORM_OWNER) {
             abort(403);
         }
+        // Veri guvenligi / DSGVO: impersonation varsayilan KAPALI. Platform Owner
+        // musteri sirketlerinin verisine dogrudan giremez (config/platform.php).
+        if (! config('platform.impersonation_enabled', false)) {
+            abort(403, 'Impersonation devre disi: Platform Owner musteri sirketlerine giremez (veri guvenligi).');
+        }
         $target = \App\Models\Company::query()->find($company);
         if (!$target) {
             return back()->withErrors(['impersonate' => 'Sirket bulunamadi.']);
