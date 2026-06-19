@@ -285,6 +285,39 @@ class AppServiceProvider extends ServiceProvider
             $view->with('aiLabsName', $name);
         });
 
+        // Guest layout: atanan danışman kartını (chat header) TÜM guest sayfalarında
+        // sağla. Controller (dashboard) zaten set ettiyse dokunma. Aksi halde chat
+        // header "Destek Ekibi" yerine atanan danışmanın adını gösterir (G17).
+        View::composer('guest.layouts.app', function ($view): void {
+            $data = $view->getData();
+            if (array_key_exists('seniorCard', $data) && !empty($data['seniorCard'])) {
+                return; // controller zaten doldurdu
+            }
+            if (!auth()->check()) {
+                return;
+            }
+            try {
+                $guest = app(\App\Services\GuestResolverService::class)->resolve(request());
+                $email = strtolower(trim((string) ($guest?->assigned_senior_email ?? '')));
+                if ($email === '') {
+                    return;
+                }
+                $senior = \App\Models\User::query()->where('email', $email)->first(['id', 'name', 'email']);
+                if (!$senior) {
+                    return;
+                }
+                $view->with('seniorCard', [
+                    'name'   => (string) ($senior->name ?? 'Danışmanım'),
+                    'email'  => (string) ($senior->email ?? ''),
+                    'photo'  => null,
+                    'title'  => 'Eğitim Danışmanı',
+                    'dm_url' => '/guest/messages',
+                ]);
+            } catch (\Throwable $e) {
+                // sessizce geç — chat header fallback'e düşer
+            }
+        });
+
         View::composer('manager.layouts.app', function ($view): void {
             if (!auth()->check()) {
                 $view->with('pendingLeaveCount', 0);

@@ -345,10 +345,12 @@
                 <div class="gm-qa-icon" style="background:rgba(22,163,74,.1);">💰</div>
                 Maliyet Hesapla
             </a>
+            @pageVisible('ai_assistant')
             <a href="{{ route('guest.ai-assistant') }}" class="gm-qa-link">
                 <div class="gm-qa-icon" style="background:rgba(124,58,237,.1);">🤖</div>
                 AI Asistan
             </a>
+            @endpageVisible
         </div>
 
     </aside>
