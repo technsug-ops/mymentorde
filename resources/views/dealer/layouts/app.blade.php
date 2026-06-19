@@ -262,6 +262,10 @@
                     <x-icon name="calendar" size="18" class="nav-icon" aria-label="Takvimim" /> Takvimim
                 </a>
                 @endif
+                <a href="/dealer/mini-site"
+                   class="nav-link {{ request()->is('dealer/mini-site') ? 'active' : '' }}">
+                    <x-icon name="globe" size="18" class="nav-icon" aria-label="Mini-Site" /> Mini-Site
+                </a>
             </div>
 
             {{-- Hesap — tüm tierlar --}}

@@ -31,6 +31,20 @@ class Dealer extends Model
         'override_rate_eur',
         'override_rate_percent',
         'override_basis',
+        'public_slug',
+        'site_enabled',
+        'site_logo_path',
+        'site_accent_color',
+        'site_hero_title',
+        'site_hero_subtitle',
+        'site_hero_image_path',
+        'site_about_text',
+        'site_phone',
+        'site_whatsapp',
+        'site_instagram',
+        'custom_domain',
+        'custom_domain_verified_at',
+        'custom_domain_token',
     ];
 
     protected $casts = [
@@ -41,6 +55,8 @@ class Dealer extends Model
         'signup_bonus_unlocked_at' => 'datetime',
         'override_rate_eur' => 'decimal:2',
         'override_rate_percent' => 'decimal:2',
+        'site_enabled' => 'boolean',
+        'custom_domain_verified_at' => 'datetime',
     ];
 
     // ── Hiyerarşi (2 seviye: bölge → alt bayi) ────────────────

@@ -209,6 +209,29 @@
             </form>
         </div>
     @endif
+
+    {{-- Mini-site moderasyonu — tüm bayiler --}}
+    <div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--u-line,#e5e9f0);">
+        <div style="font-size:11px;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px;">
+            Mini-Site (White-Label)
+            @if($dealer->public_slug)
+                · <a href="/p/{{ $dealer->public_slug }}?preview=1" target="_blank" style="color:#1e40af;text-transform:none;letter-spacing:0;">/p/{{ $dealer->public_slug }} (önizle)</a>
+            @endif
+        </div>
+        <form method="POST" action="/manager/dealers/{{ $dealer->code }}/mini-site" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+            @csrf
+            <div>
+                <label style="display:block;font-size:11px;color:var(--u-muted);margin-bottom:3px;">Slug (/p/...)</label>
+                <input type="text" name="public_slug" value="{{ $dealer->public_slug }}" pattern="[a-z0-9\-]+" maxlength="64"
+                       style="width:200px;padding:7px 10px;border:1px solid var(--u-line,#cbd5e1);border-radius:6px;font-size:13px;font-family:monospace;">
+            </div>
+            <label style="display:flex;gap:6px;align-items:center;font-size:13px;color:#475569;cursor:pointer;">
+                <input type="checkbox" name="site_enabled" value="1" {{ $dealer->site_enabled ? 'checked' : '' }}>
+                Yayında
+            </label>
+            <button type="submit" class="btn" style="font-size:12px;padding:8px 16px;background:#15803d;color:#fff;border:none;border-radius:6px;cursor:pointer;">Kaydet</button>
+        </form>
+    </div>
 </section>
 
 {{-- KPI Çubuğu --}}

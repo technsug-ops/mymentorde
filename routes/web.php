@@ -428,74 +428,21 @@ Route::middleware(['company.context'])->group(function () {
 
     // Public Satış Ortağı (dealer) landing — MentorDE Satış Ortaklığı Programı tanıtımı
     Route::get('/satis-ortagi', function () {
-        $cfg = config('dealer_landing');
         $theme = \App\Support\PortalTheme::resolve();
-        $managerAccent = $theme['accent_manager'] ?? '#1e40af';
-
-        // Günlük deterministic artış — bugüne kadar her günün artışını topla
-        $growthStart = \Carbon\Carbon::parse($cfg['growth_start_date'])->startOfDay();
-        $today = \Carbon\Carbon::today();
-        $daysElapsed = max(0, (int) $growthStart->diffInDays($today));
-
-        $dailyGrowth = $cfg['daily_growth'];
-
-        // Tek günün artışını deterministic hesapla (date + key hash bazlı)
-        $computeDailyIncrement = function (string $dateStr, string $key, array $dist): int {
-            $seed = crc32($dateStr . ':' . $key);
-            $roll = $seed % 100; // 0-99
-            if ($roll < $dist['skip_pct']) return 0;
-            if ($roll < $dist['skip_pct'] + $dist['single_pct']) return 1;
-            return 2;
-        };
-
-        // Tüm günleri iteratif topla (cache'li olsa daha iyi — şimdilik 30 gün'den az olduğu için OK)
-        $growth = ['sellers' => 0, 'applications' => 0, 'students' => 0, 'commissions_eur' => 0];
-        $commissionRange = $dailyGrowth['commissions_eur_per_application'] ?? [180, 380];
-
-        for ($i = 0; $i <= $daysElapsed; $i++) {
-            $dateStr = $growthStart->copy()->addDays($i)->toDateString();
-
-            $appInc = $computeDailyIncrement($dateStr, 'applications', $dailyGrowth['applications']);
-            $growth['applications'] += $appInc;
-
-            $growth['sellers'] += $computeDailyIncrement($dateStr, 'sellers', $dailyGrowth['sellers']);
-            $growth['students'] += $computeDailyIncrement($dateStr, 'students', $dailyGrowth['students']);
-
-            // Commissions: her yeni application için random €180-380 (deterministic)
-            if ($appInc > 0) {
-                for ($j = 0; $j < $appInc; $j++) {
-                    $commSeed = crc32($dateStr . ':comm:' . $j);
-                    $growth['commissions_eur'] += $commissionRange[0] + ($commSeed % ($commissionRange[1] - $commissionRange[0]));
-                }
-            }
-        }
-
-        $counters = [
-            'sellers' => (int) $cfg['historical_sellers']
-                + $growth['sellers']
-                + \App\Models\User::query()->withoutGlobalScopes()
-                    ->whereIn('role', ['dealer'])
-                    ->where('is_active', true)
-                    ->count(),
-            'applications' => (int) $cfg['historical_applications']
-                + $growth['applications']
-                + \App\Models\GuestApplication::query()->withoutGlobalScopes()->count(),
-            'students' => (int) $cfg['historical_students']
-                + $growth['students']
-                + \App\Models\User::query()->withoutGlobalScopes()
-                    ->where('role', 'student')
-                    ->count(),
-            'commissions_eur' => (int) $cfg['historical_commissions_eur'] + $growth['commissions_eur'],
-        ];
-
         return view('public.dealer-landing', [
-            'counters' => $counters,
-            'managerAccent' => $managerAccent,
+            'counters' => \App\Support\DealerLandingData::counters(),
+            'managerAccent' => $theme['accent_manager'] ?? '#1e40af',
         ]);
     })
         ->middleware('throttle:120,1')->name('public.dealer-landing');
     Route::get('/partner',      fn () => redirect()->route('public.dealer-landing'))
         ->middleware('throttle:120,1'); // alias
+
+    // Bayi white-label mini-site — /p/{slug}
+    Route::get('/p/{slug}', [\App\Http\Controllers\Public\DealerMiniSiteController::class, 'show'])
+        ->where('slug', '[a-z0-9-]{3,64}')
+        ->middleware('throttle:120,1')
+        ->name('public.dealer-minisite');
 
     // Public AI Labs FAQ — Manager'ın yayınladığı SSS'lar
     Route::get('/sss', [\App\Http\Controllers\AiLabs\PublicFaqController::class, 'index'])

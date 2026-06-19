@@ -685,6 +685,43 @@ class ManagerPortalController extends Controller
         return back()->with('status', "Override oranı güncellendi: {$dealer->name}");
     }
 
+    /**
+     * Bayi mini-site moderasyonu: slug atama + yayına alma (site_enabled).
+     */
+    public function updateDealerMiniSite(Request $request, string $code): \Illuminate\Http\RedirectResponse
+    {
+        \App\Support\ModuleAccess::assertEnabled('dealer');
+        $cid    = $this->companyId();
+        $dealer = Dealer::where('code', $code)->firstOrFail();
+        abort_if($cid > 0 && (int) ($dealer->company_id ?? 0) !== $cid, 403);
+
+        $reserved = ['admin','api','manager','dealer','apply','p','satis-ortagi','platform','kayit','fiyatlar','pricing','login','randevu','uzman','go','promo','share','brand','partner','signup','sss','uni-match'];
+
+        $validated = $request->validate([
+            'public_slug'  => ['nullable', 'string', 'min:3', 'max:64', 'regex:/^[a-z0-9-]+$/',
+                               \Illuminate\Validation\Rule::unique('dealers', 'public_slug')->ignore($dealer->id)],
+            'site_enabled' => ['nullable', 'boolean'],
+        ]);
+
+        if (!empty($validated['public_slug']) && in_array($validated['public_slug'], $reserved, true)) {
+            return back()->withErrors(['public_slug' => 'Bu slug rezerve.']);
+        }
+
+        // Yayına almak için slug zorunlu
+        $enable = $request->boolean('site_enabled');
+        $slug   = $validated['public_slug'] ?: $dealer->public_slug;
+        if ($enable && empty($slug)) {
+            return back()->withErrors(['public_slug' => 'Yayına almak için önce bir slug atayın.']);
+        }
+
+        $dealer->update([
+            'public_slug'  => $slug,
+            'site_enabled' => $enable,
+        ]);
+
+        return back()->with('status', $enable ? "Mini-site yayına alındı: /p/{$slug}" : 'Mini-site ayarı güncellendi (yayında değil).');
+    }
+
     // ─── BAYİ TİPİ YÖNETİMİ ─────────────────────────────────────────────────
 
     public function dealerTypes(): View

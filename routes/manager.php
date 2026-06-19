@@ -122,6 +122,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/dealers',                          [ManagerPortalController::class, 'dealers'])->name('manager.dealers.index');
     Route::get('/manager/dealers/{code}',                   [ManagerPortalController::class, 'dealerShow'])->name('manager.dealers.show');
     Route::post('/manager/dealers/{code}/override',         [ManagerPortalController::class, 'updateDealerOverride'])->name('manager.dealers.override');
+    Route::post('/manager/dealers/{code}/mini-site',        [ManagerPortalController::class, 'updateDealerMiniSite'])->name('manager.dealers.mini-site');
     Route::get('/manager/dealer-types',                     [ManagerPortalController::class, 'dealerTypes'])->name('manager.dealer-types.index');
     Route::post('/manager/dealer-types/{code}',             [ManagerPortalController::class, 'updateDealerType'])->name('manager.dealer-types.update');
     Route::get('/manager/commissions',                      [ManagerPortalController::class, 'commissions'])->name('manager.commissions');

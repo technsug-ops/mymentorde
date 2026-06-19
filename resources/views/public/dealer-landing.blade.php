@@ -6,6 +6,10 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @php
  $hdrBrand = $brandName ?? config('brand.name', 'MentorDE');
+ // Mini-site (bayi) CTA'ları başvuruyu o bayiye etiketler; /satis-ortagi'da default form.
+ $applyUrl = $applyUrl ?? route('public.dealer-application.create');
+ // Bayi accent rengi (sanitize) — sağlanırsa primary'yi override eder (white-label).
+ $accentColor = isset($accentColor) && preg_match('/^#[0-9a-fA-F]{6}$/', (string) $accentColor) ? $accentColor : null;
 @endphp
 <title>Satış Ortaklığı Programı — {{ $hdrBrand }} · Birlikte Kazanalım</title>
 @include('partials.favicon')
@@ -545,6 +549,17 @@ section { padding:70px 0; }
 footer { background:#1a0f2e; color:rgba(255,255,255,.7); padding:36px 0; font-size:13px; text-align:center; }
 footer a { color:var(--accent); }
 </style>
+@if($accentColor)
+{{-- Bayi mini-site accent override (white-label) — sanitize edilmiş hex --}}
+<style>
+:root{
+ --primary:{{ $accentColor }};
+ --primary-dark:{{ $accentColor }};
+ --primary-deep:{{ $accentColor }};
+ --accent:{{ $accentColor }};
+}
+</style>
+@endif
 </head>
 <body>
 
@@ -572,7 +587,7 @@ footer a { color:var(--accent); }
  <a href="#faq">SSS</a>
  <a href="#basvuru">Başvur</a>
  </div>
- <a href="{{ route('public.dealer-application.create') }}"
+ <a href="{{ $applyUrl }}"
  class="d-nav-cta"
  data-track="cta_clicked"
  data-ph-cta-name="nav_register"
@@ -585,13 +600,21 @@ footer a { color:var(--accent); }
  <div class="container hero-grid">
  <div>
  <span class="hero-badge"> Satış Ortaklığı Programı 2026</span>
+ @if(!empty($heroTitle))
+ <h1>{{ $heroTitle }}</h1>
+ @else
  <h1>Satış Ortağımız Olun,<br><em>Birlikte Kazanalım</em></h1>
+ @endif
  <p class="hero-lead">
+ @if(!empty($heroSubtitle))
+ {{ $heroSubtitle }}
+ @else
  Almanya eğitim hayalini olan her aday için €200–€750 arası komisyon kazanın.
  Sıfır yatırım, sıfır risk. Yönlendirmeyi siz yapın — vize, belge ve okul sürecini biz yönetelim.
+ @endif
  </p>
  <div class="hero-ctas">
- <a href="{{ route('public.dealer-application.create') }}"
+ <a href="{{ $applyUrl }}"
  class="btn-primary"
  data-track="cta_clicked"
  data-ph-cta-name="hero_register"
@@ -703,7 +726,7 @@ footer a { color:var(--accent); }
  <div class="step-num">1</div>
  <div class="step-icon"></div>
  <h3>Hesabınızı Oluşturun</h3>
- <p><a href="{{ route('public.dealer-application.create') }}" data-track="cta_clicked" data-ph-cta-name="step_register">panel.mentorde.com</a> adresinden ücretsiz kaydınızı tamamlayın. <strong>100€ Hoş Geldin Bonusu</strong> anında hesabınıza tanımlansın.</p>
+ <p><a href="{{ $applyUrl }}" data-track="cta_clicked" data-ph-cta-name="step_register">panel.mentorde.com</a> adresinden ücretsiz kaydınızı tamamlayın. <strong>100€ Hoş Geldin Bonusu</strong> anında hesabınıza tanımlansın.</p>
  </div>
  <div class="step">
  <div class="step-num">2</div>
@@ -996,7 +1019,7 @@ footer a { color:var(--accent); }
  <div style="font-size:56px; margin-bottom:18px;"></div>
  <h3 style="color:var(--primary-deep); margin:0 0 10px;">Web & Mobil Uyumlu</h3>
  <p style="color:var(--muted); font-size:14px; margin:0 0 20px;">Masaüstü, tablet, telefon — her cihazda eksiksiz çalışır. İstediğiniz yerden adaylarınızı takip edin.</p>
- <a href="{{ route('public.dealer-application.create') }}"
+ <a href="{{ $applyUrl }}"
  class="btn-primary"
  style="font-size:14px; padding:12px 24px;"
  data-track="cta_clicked"
@@ -1123,7 +1146,7 @@ footer a { color:var(--accent); }
  </div>
 
  <div style="text-align:center; margin-top:32px;">
- <a href="{{ route('public.dealer-application.create') }}"
+ <a href="{{ $applyUrl }}"
  class="btn-primary"
  data-track="cta_clicked"
  data-ph-cta-name="calc_register"
@@ -1310,7 +1333,7 @@ footer a { color:var(--accent); }
  </div>
 
  <div style="text-align:center; margin-top:32px;">
- <a href="{{ route('public.dealer-application.create') }}"
+ <a href="{{ $applyUrl }}"
  class="btn-primary"
  data-track="cta_clicked"
  data-ph-cta-name="slider_register"
@@ -1504,7 +1527,7 @@ footer a { color:var(--accent); }
  </div>
 
  <div class="inline-form-note">
- Daha detaylı başvurmak istersen <a href="{{ route('public.dealer-application.create') }}" style="color:var(--primary); font-weight:700;">tam form burada →</a>
+ Daha detaylı başvurmak istersen <a href="{{ $applyUrl }}" style="color:var(--primary); font-weight:700;">tam form burada →</a>
  </div>
 
  <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px; margin:12px 0;">
@@ -1528,7 +1551,7 @@ footer a { color:var(--accent); }
  <div class="container">
  <h2>Hemen Hesabınızı Oluşturun<br>ve Kazanmaya Başlayın</h2>
  <p>Almanya eğitim fırsatlarını çevrenizle buluşturun, birlikte kazanalım.</p>
- <a href="{{ route('public.dealer-application.create') }}"
+ <a href="{{ $applyUrl }}"
  class="btn-primary"
  data-track="cta_clicked"
  data-ph-cta-name="footer_register"

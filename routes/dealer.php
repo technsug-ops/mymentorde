@@ -6,6 +6,7 @@ use App\Http\Controllers\HandbookController;
 use App\Http\Controllers\Dealer\DealerEarningsController;
 use App\Http\Controllers\Dealer\DealerLeadController;
 use App\Http\Controllers\Dealer\DealerPerformanceController;
+use App\Http\Controllers\Dealer\DealerMiniSiteController;
 use App\Http\Controllers\Dealer\DealerProfileController;
 use App\Http\Controllers\Dealer\DealerSubDealerController;
 use App\Http\Controllers\DealerPortalController;
@@ -37,6 +38,10 @@ Route::middleware(['company.context', 'auth', 'dealer.role', 'module:dealer'])->
         Route::get('/dealer/sub-dealers/create', [DealerSubDealerController::class, 'create'])->name('dealer.sub-dealers.create');
         Route::post('/dealer/sub-dealers', [DealerSubDealerController::class, 'store'])->middleware('throttle:20,1')->name('dealer.sub-dealers.store');
     });
+
+    // ── Mini-site (white-label) — tüm bayiler ─────────────────────────────────
+    Route::get('/dealer/mini-site', [DealerMiniSiteController::class, 'edit'])->name('dealer.mini-site');
+    Route::post('/dealer/mini-site', [DealerMiniSiteController::class, 'update'])->middleware('throttle:30,1')->name('dealer.mini-site.update');
 
     // ── Danışmanlık (Destek Yetkisi Gerekli) ─────────────────────────────────
     Route::middleware('dealer.type.permission:canAccessSupport')->group(function () {
