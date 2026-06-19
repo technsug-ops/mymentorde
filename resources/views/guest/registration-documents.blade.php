@@ -261,6 +261,19 @@
         </div></div>
         @endif
         <div class="section-card"><div style="padding:32px;text-align:center;"><div style="font-size:36px;margin-bottom:12px;">☕</div><h3 style="font-size:16px;font-weight:700;margin-bottom:6px;">Rahatla, danışmanın çalışıyor</h3><p style="font-size:13px;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.6;">Belgelerinin incelenmesi genellikle 1-3 iş günü sürer. Sonuç çıkınca seni bilgilendireceğiz.</p></div></div>
+
+        {{-- G10: Zorunlular tamam olsa da isteğe bağlı belgeler yüklenebilmeli --}}
+        @if($otherItems->count() > 0)
+        <div class="section-card">
+            <div class="section-header"><h4>📝 İsteğe Bağlı Belgeler ({{ $otherItems->count() }})</h4><span style="font-size:11px;color:var(--light);">Zorunlu değil — istersen şimdi ekleyebilirsin</span></div>
+            <div class="doc-list">
+                @foreach($otherItems as $oi)
+                    @php $oiwFid = 'oiw-' . preg_replace('/[^a-z0-9]/', '-', strtolower((string)($oi['category_code'] ?? 'x'))); @endphp
+                    <div class="doc-card" data-cat="{{ $oi['top_category_code'] ?? '' }}" data-req="0" data-up="0"><div class="doc-icon-wrap waiting">📄</div><div class="doc-info"><div class="doc-name">{{ $oi['name'] ?: '-' }}</div><div class="doc-meta"><span>{{ $documentTopCategoryLabels[$oi['top_category_code'] ?? ''] ?? '' }}</span><span>{{ $oi['accepted'] ?? 'pdf,jpg,png' }} — max {{ (int)($oi['max_mb'] ?? 10) }}MB</span></div></div><div class="doc-actions"><button class="doc-btn" type="button" data-upload="{{ $oiwFid }}">📤 Yükle</button></div><div class="upload-zone" id="uz-{{ $oiwFid }}"><form method="post" action="{{ route('guest.registration.documents.upload') }}" enctype="multipart/form-data" style="margin:0;">@csrf<input type="hidden" name="category_code" value="{{ $oi['category_code'] }}"><div class="upload-zone-inner"><span class="uz-icon">📎</span><div class="uz-text">Dosyanı sürükle veya <strong><label for="{{ $oiwFid }}" style="cursor:pointer;">seç</label></strong></div><input type="file" name="file" id="{{ $oiwFid }}" required style="display:none;" data-fname-target="sf-{{ $oiwFid }}"><div class="selected-file" id="sf-{{ $oiwFid }}">📄 <span class="sf-name"></span> <button class="doc-btn small primary" type="submit">Gönder</button></div></div></form></div></div>
+                @endforeach
+            </div>
+        </div>
+        @endif
     @endif
 
     @if($scenario === 'start' || $scenario === 'progress')

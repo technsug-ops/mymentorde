@@ -378,11 +378,11 @@ $cityIconMap = [
     @endforeach
 </div>
 
-{{-- ══════ Footer ══════ --}}
+{{-- ══════ Footer ══════ (G15: diğer rehber sayfalarıyla tutarlı yön — sol ← geri, sağ → ileri) --}}
 <div style="text-align:center;padding:8px 0 16px;">
-    @if($lgCostRoute)
-    <a href="{{ $lgCostRoute }}" style="color:var(--u-brand,#2563eb);font-size:var(--tx-sm);font-weight:600;text-decoration:none;">Kişisel Maliyet Hesapla →</a>
-    &nbsp;·&nbsp;
-    @endif
     <a href="{{ $lgDashboardRoute }}" style="color:var(--u-brand,#2563eb);font-size:var(--tx-sm);font-weight:600;text-decoration:none;">← Dashboard</a>
+    @if($lgCostRoute)
+    &nbsp;·&nbsp;
+    <a href="{{ $lgCostRoute }}" style="color:var(--u-brand,#2563eb);font-size:var(--tx-sm);font-weight:600;text-decoration:none;">Kişisel Maliyet Hesapla →</a>
+    @endif
 </div>

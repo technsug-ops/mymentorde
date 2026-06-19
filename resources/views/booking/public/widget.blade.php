@@ -129,7 +129,9 @@
     </div>
 
     <div class="bw-footer">
-        Randevu sistemi · <a href="/" style="color:var(--muted);">{{ $brandName ?? 'MentorDE' }}</a>
+        {{-- iframe icinde acildiginda href="/" portali widget icine yukluyordu (ic ice).
+             Yeni sekmede ac (G2). --}}
+        Randevu sistemi · <a href="/" target="_blank" rel="noopener" style="color:var(--muted);">{{ $brandName ?? 'MentorDE' }}</a>
     </div>
 </div>
 

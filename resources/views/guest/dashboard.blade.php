@@ -411,8 +411,8 @@
         ],
         'docs'  => [
             'icon'   => 'file-text',
-            'title'  => 'Belgelerini yükle',
-            'sub'    => 'Başvurun için gerekli belgeleri yükle. PDF veya fotoğraf formatında olabilir.',
+            'title'  => 'Zorunlu belgeleri yükle',
+            'sub'    => 'Başvurun için zorunlu belgeleri yükle (isteğe bağlı belgeleri sonradan ekleyebilirsin). PDF veya fotoğraf olabilir.',
             'url'    => route('guest.registration.documents'),
             'action' => 'Yükle →',
             'meta'   => ["{$docsRequiredTotal} belge gerekli", 'Fotoğraf da olur'],
@@ -607,7 +607,7 @@
         </div>
         <div class="gdb-cl-item {{ $docsCompleted ? 'done' : 'active' }}">
             <div class="gdb-cl-check">@if($docsCompleted)<x-icon name="check" size="11" aria-label="Tamam" />@else 2 @endif</div>
-            <div class="gdb-cl-text">Belgelerini yükle</div>
+            <div class="gdb-cl-text">Zorunlu belgeleri yükle</div>
             <span class="gdb-cl-tag {{ $docsCompleted ? 'done' : 'active' }}">
                 {{ $docsCompleted ? 'Tamam' : 'Şimdi' }}
             </span>
