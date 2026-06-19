@@ -183,14 +183,9 @@
                    class="nav-link {{ request()->is('dealer/leads') ? 'active' : '' }}">
                     <x-icon name="users" size="18" class="nav-icon" aria-label="Yönlendirmelerim" /> Yönlendirmelerim
                 </a>
-                {{-- Tier 2+ : Süreç takibi görünür --}}
-                @if($tierPerms->can('canViewProcessDetails'))
-                <a href="/dealer/leads?view=process"
-                   class="nav-link {{ request()->is('dealer/leads') && request('view')==='process' ? 'active' : '' }}"
-                   style="font-size:11px;padding-left:28px;">
-                    <x-icon name="refresh-cw" size="13" class="nav-icon" aria-label="Süreç Takibi" /> Süreç Takibi
-                </a>
-                @endif
+                {{-- #2: "Süreç Takibi" sub-link kaldırıldı — /dealer/leads?view=process
+                     ile aynı sayfaya gidiyordu (view param hiçbir yerde işlenmiyordu),
+                     mükerrer menü oluşturuyordu. Süreç takibi zaten Yönlendirmelerim'de. --}}
             </div>
 
             {{-- Bayi Ağım — yalnızca Bölge Bayisi --}}

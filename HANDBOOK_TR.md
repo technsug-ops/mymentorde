@@ -1180,13 +1180,13 @@ C: Ödeme planı danışmanınızla görüşülerek belirlenir. Banka havalesi i
 ### Danışman & İletişim
 
 **S: Danışmanımla nasıl iletişime geçerim?**
-C: Mesajlar sayfasından doğrudan mesaj gönderebilirsiniz. Ayrıca Destek Talebi oluşturarak bilet açabilirsiniz.
+C: Panelinizdeki mesajlaşma alanından veya Destek Talebi oluşturarak danışmanınıza/ekibimize ulaşabilirsiniz.
 
 **S: Danışmanım ne kadar sürede cevap verir?**
 C: Danışmanlar genellikle 24 saat içinde yanıt verir. Acil durumlar için Destek Talebi açmanız önerilir.
 
 **S: Randevu nasıl alırım?**
-C: Süreç Takvimi sayfasından müsait saatleri görebilir ve online randevu oluşturabilirsiniz.
+C: Aday öğrenciler "Randevularım" sayfasından müsait saatleri görüp online randevu oluşturabilir.
 
 ### Almanya Süreci
 
@@ -1206,9 +1206,6 @@ C: Uluslararası öğrenci başvurularını değerlendiren merkezi bir kurumdur.
 
 **S: Sistemde hata görüyorum, ne yapmalıyım?**
 C: Hatanın ekran görüntüsünü alın, Destek Talebi oluşturup ekran görüntüsünü ekleyin. Tarayıcı konsolunu (F12) kontrol etmeniz de faydalı olabilir.
-
-**S: AI Asistan ne kadar doğru bilgi verir?**
-C: AI Asistan genel rehberlik sağlar. Kesin bilgi ve güncel kurallar için mutlaka danışmanınıza danışın. AI önerileri hukuki taahhüt niteliği taşımaz.
 
 **S: Mobil cihazdan kullanabilir miyim?**
 C: Evet, MentorDE tamamen responsive tasarıma sahiptir. Tüm sayfalar mobil, tablet ve masaüstü cihazlarda düzgün çalışır.
