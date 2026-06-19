@@ -443,7 +443,7 @@ class PlatformController extends Controller
                     'company'      => $company->name,
                     'code'         => $company->code,
                     'tier'         => $company->subscription_tier,
-                    'admin_email'  => strtolower(trim($request->input('admin_email'))),
+                    // admin_email audit'e yazilmaz — tenant kisisel verisi (izolasyon).
                 ],
                 \App\Models\PlatformAuditLog::SEVERITY_WARNING
             );

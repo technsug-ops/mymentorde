@@ -131,7 +131,6 @@
             <table class="plat-table">
                 <thead>
                 <tr>
-                    <th>Kullanici</th>
                     <th>Company</th>
                     <th>Durum</th>
                     <th>Gonderim</th>
@@ -142,10 +141,6 @@
                 <tbody>
                 @foreach ($recipients as $rec)
                     <tr>
-                        <td>
-                            <strong style="color:#fff;">{{ $rec->user?->name ?? '—' }}</strong>
-                            <div style="font-size:11px; color:var(--plat-muted);">{{ $rec->user?->email ?? '' }}</div>
-                        </td>
                         <td>{{ $rec->company?->name ?? '—' }}</td>
                         <td>
                             @php

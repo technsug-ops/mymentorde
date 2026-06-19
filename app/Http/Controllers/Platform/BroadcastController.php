@@ -182,8 +182,10 @@ class BroadcastController extends Controller
     {
         $broadcast = PlatformBroadcast::with('createdBy')->findOrFail($id);
 
+        // Tenant izolasyonu: alici bireysel kimligi (isim/email) Platform Owner'a
+        // gosterilmez — sadece sirket + teslim durumu. Kisisel veri sizmaz.
         $recipients = $broadcast->recipients()
-            ->with(['user:id,name,email,company_id', 'company:id,name'])
+            ->with(['company:id,name'])
             ->orderByDesc('id')
             ->paginate(30);
 
