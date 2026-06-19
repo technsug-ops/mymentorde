@@ -1327,6 +1327,32 @@ Route::get('/_deploy/run-pending', function (\Illuminate\Http\Request $request) 
             }
         }
 
+        // Bir kullanicinin sifresini sifirla (email + en az 8 karakter yeni sifre).
+        // Mailbox'i olmayan teknik hesaplar (owner@mentorde.com gibi) icin
+        // "sifremi unuttum" calismaz; bu endpoint guvenli sifre sifirlama saglar.
+        // Kullanim: /_deploy/run-pending?secret=XXX&cleanup=set-user-password&email=USER_EMAIL&password=YeniParola2026
+        if ($request->query('cleanup') === 'set-user-password') {
+            $email = strtolower(trim((string) $request->query('email', '')));
+            $pwd   = (string) $request->query('password', '');
+            if ($email === '' || strlen($pwd) < 8) {
+                $output .= ">>> set-user-password: email + en az 8 karakter password gerekli\n";
+                $output .= "    ornek: &email=owner@mentorde.com&password=YeniGucluParola\n";
+            } else {
+                $user = \App\Models\User::query()
+                    ->whereRaw('lower(email) = ?', [$email])
+                    ->first();
+                if (!$user) {
+                    $output .= ">>> set-user-password: {$email} bulunamadi\n";
+                } else {
+                    $user->password = bcrypt($pwd);
+                    $user->save();
+                    $output .= ">>> set-user-password: {$email}\n";
+                    $output .= "    id={$user->id} | role={$user->role} | sifre guncellendi\n";
+                    $output .= "    Login: panel.mentorde.com/login -> {$email}\n";
+                }
+            }
+        }
+
         // Platform Owner rolune yukselt — Mentorde sahibinin kendi hesabini
         // 'platform_owner' rolune cevirir. SaaS yetki ayrimi Faz 1 deploy sonrasi
         // bir kerelik calistirilir.
