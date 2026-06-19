@@ -156,11 +156,22 @@ class DealerEarningsController extends Controller
         $data = $this->baseData($request);
         abort_if(empty($data['dealerCode']), 403, 'Dealer code missing');
 
+        // IBAN normalize: boşlukları sil + büyük harf (TR12 3456 ... -> TR12345...)
+        $request->merge([
+            'iban' => strtoupper(preg_replace('/\s+/', '', (string) $request->input('iban', ''))),
+        ]);
+
         $validated = $request->validate([
             'bank_name'      => ['required', 'string', 'max:120'],
-            'iban'           => ['required', 'string', 'max:50'],
+            // Yapısal IBAN: 2 harf ülke + 2 kontrol hanesi + 11-30 alfanümerik (15-34 toplam).
+            // Kısa (6-7 karakter) veya rastgele harf girişlerini reddeder (D1/D2).
+            'iban'           => ['required', 'string', 'regex:/^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$/', 'min:15', 'max:34'],
             'account_holder' => ['required', 'string', 'max:160'],
             'is_default'     => ['nullable', 'boolean'],
+        ], [
+            'iban.regex' => 'Geçerli bir IBAN girin (ülke kodu + kontrol hanesi ile, örn. TR ile başlayan 26 haneli).',
+            'iban.min'   => 'IBAN çok kısa görünüyor.',
+            'iban.max'   => 'IBAN çok uzun görünüyor.',
         ]);
 
         $isDefault = $request->boolean('is_default');

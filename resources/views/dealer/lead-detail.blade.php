@@ -214,12 +214,12 @@
         </section>
 
         <section class="panel">
-            <h2>Otomasyon Durumu</h2>
+            <h2>Operasyon Otomasyonu</h2>
             <div class="list">
-                <div class="item"><strong>Ticket:</strong> {{ $tickets->count() }}</div>
-                <div class="item"><strong>Task:</strong> {{ $tasks->count() }}</div>
-                <div class="item"><strong>Event:</strong> {{ $events->count() }}</div>
-                <div class="item"><strong>Bildirim Kuyruğu:</strong> {{ $notifications->count() }}</div>
+                <div class="item"><strong>Operasyon ticketi:</strong> {{ $tickets->count() }} <span style="color:var(--u-muted,#64748b);font-size:11px;">(sistemin açtığı inceleme — öğrencinin destek talebi değil)</span></div>
+                <div class="item"><strong>Açılan görev:</strong> {{ $tasks->count() }}</div>
+                <div class="item"><strong>Sistem olayı:</strong> {{ $events->count() }}</div>
+                <div class="item"><strong>Bekleyen bildirim:</strong> {{ $notifications->count() }}</div>
             </div>
             <div class="panel muted" style="margin-top:8px;">
                 Lead oluşturulduğunda operasyon ticketi + task tetiklenmesi beklenir. Bu panel dealer tarafında takip kolaylığı için audit özeti verir.

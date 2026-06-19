@@ -82,16 +82,45 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($milestones as $ms)
+                @php
+                    // Teknik trigger/JSON yerine kullanıcı dilinde açıklama (D6 — kod sızmasın)
+                    $triggerLabel = function ($type) {
+                        return match ((string) $type) {
+                            'student_confirmed', 'manual' => 'Öğrenci kaydı onaylandığında',
+                            'document_approved'           => 'Belgeler onaylandığında',
+                            'payment_received'            => 'Ödeme alındığında',
+                            'visa_approved'               => 'Vize onaylandığında',
+                            'school_confirmed'            => 'Okul kabulü geldiğinde',
+                            ''                            => 'Süreç ilerledikçe',
+                            default                       => 'Süreç ilerledikçe',
+                        };
+                    };
+                    $condParts = function ($cond) {
+                        $cond = is_array($cond) ? $cond : [];
+                        $out = [];
+                        if (!empty($cond['requires_payment']))             $out[] = 'ödeme alınmış olmalı';
+                        if (!empty($cond['requires_school_confirm']))      $out[] = 'okul onayı tamamlanmış olmalı';
+                        if (!empty($cond['requires_consultation_verified']))$out[] = 'danışmanlık doğrulanmış olmalı';
+                        if (($cond['value'] ?? '') === 'visa_approval')     $out[] = 'vize onay belgesi yüklenmiş olmalı';
+                        return $out;
+                    };
+                    $revLabel = match ((string) $ms->revenue_type) {
+                        'percentage' => 'Yüzde komisyon',
+                        'fixed'      => 'Sabit tutar',
+                        'hybrid'     => 'Yüzde + sabit',
+                        default      => (string) $ms->revenue_type,
+                    };
+                    $conds = $condParts($ms->trigger_condition);
+                @endphp
                 <tr>
                     <td><strong>{{ $ms->name_tr }}</strong></td>
                     <td style="font-size:12px;color:var(--u-muted,#64748b);">
-                        {{ $ms->trigger_type }}
-                        @if($ms->trigger_condition)
-                            <br><span style="font-family:monospace;font-size:11px;">{{ json_encode($ms->trigger_condition) }}</span>
+                        {{ $triggerLabel($ms->trigger_type) }}
+                        @if(!empty($conds))
+                            <br><span style="font-size:11px;">Koşul: {{ implode(', ', $conds) }}</span>
                         @endif
                     </td>
-                    <td>{{ $ms->revenue_type }}</td>
+                    <td>{{ $revLabel }}</td>
                     <td>
                         @if($ms->percentage !== null)
                             <span style="font-weight:700;color:#16a34a;">%{{ $ms->percentage }}</span>
