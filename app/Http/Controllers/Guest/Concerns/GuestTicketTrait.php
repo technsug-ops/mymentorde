@@ -52,17 +52,10 @@ trait GuestTicketTrait
 
         $ticket = GuestTicket::query()->create($ticketData);
 
-        $replyData = [
-            'guest_ticket_id' => (int) $ticket->id,
-            'author_role'     => 'guest',
-            'author_email'    => (string) optional($request->user())->email,
-            'message'         => strip_tags(trim((string) $data['message'])),
-        ];
-        if (isset($ticketData['attachment_path'])) {
-            $replyData['attachment_path'] = $ticketData['attachment_path'];
-            $replyData['attachment_name'] = $ticketData['attachment_name'];
-        }
-        GuestTicketReply::query()->create($replyData);
+        // NOT: Açılış mesajı ticket->message alanında tutulur ve tüm view'larda
+        // bir kez render edilir. Burada AYRICA ilk reply oluşturmak, ticket
+        // detayında mesajın 2 kez görünmesine yol açıyordu (G5/G8) — kaldırıldı.
+        // İlk ek (attachment) ticket kaydında saklanır.
         $this->taskAutomationService->ensureGuestTicketTask($guest, $ticket);
         $this->eventLogService->log(
             eventType: 'guest_ticket_opened',

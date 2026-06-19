@@ -200,11 +200,13 @@
 @section('content')
 @php
     $total  = $tickets->count();
-    // "Açık" = henüz tamamlanmamış statuslar (in_progress dahil, resolved ve closed hariç)
-    $openStatuses = ['open', 'in_progress'];
-    $open   = $tickets->whereIn('status', $openStatuses)->count();
-    $closed = $tickets->whereIn('status', ['closed', 'resolved'])->count();
-    $urgent = $tickets->whereIn('priority', ['urgent','high'])->whereIn('status', $openStatuses)->count();
+    // "Açık" = kapanmamış TÜM statuslar (open, in_progress, waiting_response …);
+    // sadece closed/resolved kapalı sayılır. Yanıt verilen (waiting_response)
+    // ticket "açık"tan düşmemeli — G7/G9.
+    $closedStatuses = ['closed', 'resolved'];
+    $open   = $tickets->whereNotIn('status', $closedStatuses)->count();
+    $closed = $tickets->whereIn('status', $closedStatuses)->count();
+    $urgent = $tickets->whereIn('priority', ['urgent','high'])->whereNotIn('status', $closedStatuses)->count();
 @endphp
 
 {{-- ── KPI Bar ── --}}
