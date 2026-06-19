@@ -73,6 +73,13 @@
             </form>
         @endif
 
+        {{-- DÜZENLE — sadece taslak fatura duzenlenebilir --}}
+        @if($invoice->status === 'draft')
+            <a href="{{ route('platform.billing.edit', $invoice) }}" class="plat-btn plat-btn-ghost">
+                <x-icon name="pencil" size="14" /> Düzenle
+            </a>
+        @endif
+
         {{-- SİL — sadece taslak/iptal faturalar tamamen silinebilir --}}
         @if(in_array($invoice->status, ['draft', 'cancelled'], true))
             <form method="POST" action="{{ route('platform.billing.destroy', $invoice) }}" style="margin:0;"

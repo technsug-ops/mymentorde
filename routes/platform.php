@@ -130,6 +130,15 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
         ->middleware('throttle:10,1')
         ->name('platform.billing.mark-paid');
 
+    // Taslak fatura duzenle (tutar + KDV orani + not; KDV/toplam yeniden hesaplanir)
+    Route::get('/billing/{invoice}/edit', [PlatformBillingController::class, 'edit'])
+        ->whereNumber('invoice')
+        ->name('platform.billing.edit');
+    Route::put('/billing/{invoice}', [PlatformBillingController::class, 'update'])
+        ->whereNumber('invoice')
+        ->middleware('throttle:20,1')
+        ->name('platform.billing.update');
+
     // Yanlis kesilen faturayi iptal et (gonderilmis/gecikmis -> cancelled, audit korunur)
     Route::post('/billing/{invoice}/cancel', [PlatformBillingController::class, 'cancel'])
         ->whereNumber('invoice')

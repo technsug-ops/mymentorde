@@ -417,6 +417,71 @@ class PlatformBillingController extends Controller
             ->with('success', "Fatura silindi: {$number}");
     }
 
+    // ────────────────────────────────────────────────────────────────────────
+    // EDIT / UPDATE — Taslak fatura duzenle (tutar + KDV orani + not)
+    // ────────────────────────────────────────────────────────────────────────
+    //
+    // Sadece taslak (draft) fatura duzenlenebilir; gonderilmis/odenmis kilitli.
+    // KDV tutari ve toplam, tutar + KDV oranindan yeniden hesaplanir.
+
+    public function edit(PlatformInvoice $invoice): View|RedirectResponse
+    {
+        if ($invoice->status !== PlatformInvoice::STATUS_DRAFT) {
+            return redirect()
+                ->route('platform.billing.show', $invoice)
+                ->with('error', "Sadece taslak fatura düzenlenebilir: {$invoice->invoice_number} ({$invoice->statusLabel()}).");
+        }
+
+        $invoice->load('company');
+
+        return view('platform.billing.edit', ['invoice' => $invoice]);
+    }
+
+    public function update(Request $request, PlatformInvoice $invoice): RedirectResponse
+    {
+        if ($invoice->status !== PlatformInvoice::STATUS_DRAFT) {
+            return redirect()
+                ->route('platform.billing.show', $invoice)
+                ->with('error', "Sadece taslak fatura düzenlenebilir: {$invoice->invoice_number} ({$invoice->statusLabel()}).");
+        }
+
+        $validated = Validator::make($request->all(), [
+            'amount_eur'   => ['required', 'numeric', 'min:0', 'max:1000000'],
+            'tax_rate_pct' => ['required', 'numeric', 'min:0', 'max:100'],
+            'notes'        => ['nullable', 'string', 'max:2000'],
+        ])->validate();
+
+        $amount  = round((float) $validated['amount_eur'], 2);
+        $taxRate = round((float) $validated['tax_rate_pct'], 2);
+        $taxAmt  = round($amount * ($taxRate / 100), 2);
+        $total   = round($amount + $taxAmt, 2);
+
+        $invoice->update([
+            'amount_eur'     => $amount,
+            'tax_rate_pct'   => $taxRate,
+            'tax_amount_eur' => $taxAmt,
+            'total_eur'      => $total,
+            'notes'          => trim((string) ($validated['notes'] ?? '')),
+        ]);
+
+        \App\Models\PlatformAuditLog::record(
+            'platform.billing.invoice_updated',
+            [
+                'target_type'    => 'invoice',
+                'target_id'      => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'company_id'     => $invoice->company_id,
+                'amount_eur'     => $amount,
+                'total_eur'      => $total,
+            ],
+            \App\Models\PlatformAuditLog::SEVERITY_INFO
+        );
+
+        return redirect()
+            ->route('platform.billing.show', $invoice)
+            ->with('success', "Fatura güncellendi: {$invoice->invoice_number}");
+    }
+
     /**
      * Bu faturaya bagli promo redemption(lar)i geri al:
      *   - PromoCode current_uses-- (0'in altina dusmez)
