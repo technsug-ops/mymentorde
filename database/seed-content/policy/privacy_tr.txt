@@ -119,15 +119,6 @@ Yukarıda yer alan Aydınlatma Metni kapsamında tarafıma gerekli bilgilendirme
 
 özgür irademle, açık ve bilgilendirilmiş şekilde rıza gösterdiğimi kabul ederim. Verdiğim açık rızayı dilediğim zaman geri alma hakkına sahip olduğumu, bu geri almanın geri alma öncesinde gerçekleştirilen veri işleme faaliyetlerinin hukuka uygunluğunu etkilemeyeceğini bildiğimi beyan ederim.
 
-(Aşağıdaki alanlardan uygun olanı doldurunuz)
+Bu açık rıza, online başvuru/kayıt ekranındaki onay kutusu işaretlenerek dijital olarak verilir; ayrı bir ıslak imza gerekmez. Onay tarihi, IP adresi ve sürüm bilgisi sistem tarafından kayıt altına alınır. 18 yaşından küçük başvuru sahipleri için açık rıza, veli/yasal temsilci tarafından verilmelidir.
 
-Öğrenci (18 Yaş ve Üzeri İse)
-Ad Soyad: ________________________
-Tarih: ________________________
-İmza: ________________________
-
-Veli / Yasal Temsilci (Öğrenci 18 Yaşından Küçük İse)
-Öğrencinin Adı Soyadı: ________________________
-Veli Ad Soyad: ________________________
-Tarih: ________________________
-İmza: ________________________
+(Islak imzalı onay gereken durumlarda — örn. resmi makam talepleri — basılı form danışmanınız tarafından ayrıca temin edilir.)

@@ -151,7 +151,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 (function(){
     var BANNER_VERSION = '2026-04-28-v2'; // değişirse banner tekrar gösterilir
     var STORAGE_KEY = 'cookie_consent';
