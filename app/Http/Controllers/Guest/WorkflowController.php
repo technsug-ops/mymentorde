@@ -337,15 +337,46 @@ class WorkflowController extends Controller
         return redirect()->route('guest.services')->with('status', 'Paket secimi kaydedildi.');
     }
 
+    /** Custom (paketsiz) seçim için minimum hizmet sayısı (G16). */
+    private const CUSTOM_MIN_SERVICES = 3;
+
     public function confirmPackage(Request $request)
     {
         $guest = $this->resolveGuest($request);
         abort_if(!$guest, 404, 'Guest kaydi bulunamadi.');
-        abort_if(trim((string) ($guest->selected_package_code ?? '')) === '', 422, 'Oncelikle bir paket secmelisiniz.');
+
+        $hasPackage   = trim((string) ($guest->selected_package_code ?? '')) !== ''
+                        && (string) $guest->selected_package_code !== 'pkg_custom';
+        $extras       = is_array($guest->selected_extra_services) ? $guest->selected_extra_services : [];
+        $extrasCount  = count($extras);
+
+        // G16: Paket seçmeden de en az 3 hizmetle ("Özel Seçim") devam edilebilir.
+        if (!$hasPackage) {
+            abort_if(
+                $extrasCount < self::CUSTOM_MIN_SERVICES,
+                422,
+                'Paket seçmeden devam etmek için en az ' . self::CUSTOM_MIN_SERVICES . ' hizmet seçmelisiniz.'
+            );
+
+            // Custom seçim: sentetik paket kodu + ek hizmetler toplamından fiyat
+            $extrasConfig = config('service_packages.extra_services', []);
+            $total = collect($extras)->sum(function ($x) use ($extrasConfig) {
+                $found = collect($extrasConfig)->firstWhere('code', $x['code'] ?? '');
+                return (int) ($found['price_amount'] ?? 0);
+            });
+            $guest->fill([
+                'selected_package_code'  => 'pkg_custom',
+                'selected_package_title' => 'Özel Hizmet Seçimi (' . $extrasCount . ' hizmet)',
+                'selected_package_price' => number_format((int) $total, 0, ',', '.') . ' EUR',
+            ]);
+        }
 
         $guest->forceFill([
-            'package_selected_at' => now(),
-            'status_message'      => 'Paket secimi kesinlestirildi. Sozlesme asamasi bekleniyor.',
+            'selected_package_code'  => $guest->selected_package_code,
+            'selected_package_title' => $guest->selected_package_title,
+            'selected_package_price' => $guest->selected_package_price,
+            'package_selected_at'    => now(),
+            'status_message'         => 'Paket secimi kesinlestirildi. Sozlesme asamasi bekleniyor.',
         ])->save();
 
         return redirect()->route('guest.services')->with('package_confirmed', true);
@@ -906,10 +937,12 @@ class WorkflowController extends Controller
         $packagesConfig = config('service_packages.packages', []);
         $extrasConfig   = config('service_packages.extra_services', []);
         $selCode        = trim((string) ($guest->selected_package_code ?? ''));
-        abort_if($selCode === '', 422, 'Önce bir paket seçin.');
+        abort_if($selCode === '', 422, 'Önce bir paket seçin veya en az 3 hizmet seçin.');
 
-        $pkg = collect($packagesConfig)->firstWhere('code', $selCode);
-        if (!$pkg) {
+        // G16: Custom (paketsiz) seçimde config'de paket yok; tutar yalnız ek hizmetlerden.
+        $isCustom = ($selCode === 'pkg_custom');
+        $pkg = $isCustom ? null : collect($packagesConfig)->firstWhere('code', $selCode);
+        if (!$isCustom && !$pkg) {
             return redirect()->route('guest.services')->withErrors(['payment' => 'Seçili paket bulunamadı.']);
         }
 

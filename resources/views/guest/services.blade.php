@@ -474,6 +474,41 @@
         </div>
         @endif
 
+        {{-- G16: Paket seçmeden Özel Seçim (en az 3 hizmet) --}}
+        @if(empty($selectedPackageCode) && !empty($selectedExtras))
+        @php
+            $customMin = 3;
+            $extrasCnt = count($selectedExtras);
+            $customTotal = collect($selectedExtras)->sum(function($x) {
+                $found = collect(config('service_packages.extra_services', []))->firstWhere('code', $x['code'] ?? '');
+                return (int) ($found['price_amount'] ?? 0);
+            });
+        @endphp
+        <div style="background:linear-gradient(135deg,#3730a3,#6d28d9);border-radius:12px;padding:18px 22px;margin-top:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                <div>
+                    <div style="font-size:var(--tx-xs);color:rgba(255,255,255,.7);font-weight:600;">ÖZEL SEÇİM (PAKETSİZ)</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:2px;">{{ $extrasCnt }} hizmet seçildi · paket almadan devam edebilirsin</div>
+                </div>
+                <div style="font-size:24px;font-weight:800;color:#fff;">{{ number_format($customTotal, 0, ',', '.') }} EUR</div>
+            </div>
+            <div style="margin-top:14px;text-align:right;">
+                @if($extrasCnt >= $customMin)
+                    <form method="POST" action="{{ route('guest.services.confirm') }}" style="display:inline;">
+                        @csrf
+                        <button type="submit" style="padding:12px 28px;border-radius:10px;background:#fff;color:#3730a3;font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(0,0,0,.15);">
+                            ✅ Özel Seçimle Devam Et
+                        </button>
+                    </form>
+                @else
+                    <div style="font-size:12.5px;color:rgba(255,255,255,.9);background:rgba(0,0,0,.15);border-radius:8px;padding:8px 12px;display:inline-block;">
+                        Paketsiz devam için en az {{ $customMin }} hizmet seç — <strong>{{ $extrasCnt }}/{{ $customMin }}</strong>
+                    </div>
+                @endif
+            </div>
+        </div>
+        @endif
+
         {{-- Comparison Table --}}
         @if(!empty($comparisonTable['packages']))
         <div class="card" style="margin:0;">
