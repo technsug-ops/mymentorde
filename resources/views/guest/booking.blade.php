@@ -1,6 +1,6 @@
 @extends('guest.layouts.app')
 
-@section('title', 'Randevu Al')
+@section('title', 'Randevularım')
 
 @push('head')
 <style>
@@ -38,15 +38,44 @@
 @section('content')
 <div class="gb-wrap">
     <div class="gb-head">
-        <h1>📅 Randevu Al</h1>
-        <p>Danışmanının takviminden uygun bir saat seç. Bilgilerin sistemden otomatik gelir, tekrar girmen gerekmez.</p>
+        <h1>📅 Randevularım</h1>
+        <p>Yaklaşan ve geçmiş randevularını buradan takip et; aşağıdan yeni randevu alabilirsin.</p>
         @if(!empty($seniorName))
             <span class="gb-senior">👤 Danışman: {{ $seniorName }}</span>
         @endif
     </div>
 
+    @php
+        $gbStatusLabel = fn($s) => match((string)$s) {
+            'confirmed' => ['Onaylandı', '#16a34a', '#dcfce7'],
+            'pending'   => ['Bekliyor', '#b45309', '#fef3c7'],
+            'completed' => ['Tamamlandı', '#475569', '#e2e8f0'],
+            'canceled'  => ['İptal', '#dc2626', '#fee2e2'],
+            'no_show'   => ['Gelinmedi', '#dc2626', '#fee2e2'],
+            default     => [ucfirst((string)$s), '#475569', '#e2e8f0'],
+        };
+    @endphp
+
+    {{-- Yaklaşan randevular --}}
+    @if(!empty($upcomingBookings) && $upcomingBookings->count() > 0)
+    <div style="background:#fff;border:1px solid var(--u-line,#e2e8f0);border-radius:14px;padding:18px 20px;margin-bottom:18px;">
+        <div style="font-weight:800;font-size:15px;margin-bottom:12px;color:#1e293b;">🔜 Yaklaşan Randevular ({{ $upcomingBookings->count() }})</div>
+        @foreach($upcomingBookings as $b)
+            @php [$lbl,$c,$bg] = $gbStatusLabel($b->status); @endphp
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #f1f5f9;flex-wrap:wrap;">
+                <div>
+                    <div style="font-weight:700;font-size:14px;color:#1e293b;">{{ $b->starts_at?->format('d.m.Y · H:i') }}@if($b->ends_at)–{{ $b->ends_at->format('H:i') }}@endif</div>
+                    <div style="font-size:12.5px;color:#64748b;">👤 {{ $b->senior_name }}</div>
+                </div>
+                <span style="background:{{ $bg }};color:{{ $c }};padding:3px 12px;border-radius:999px;font-size:12px;font-weight:700;">{{ $lbl }}</span>
+            </div>
+        @endforeach
+    </div>
+    @endif
+
     @if(!empty($bookingSlug) && !empty($bookingEmbedUrl))
         {{-- Atanmış danışmanın takvimi var (gerekirse otomatik default'larla aktive edildi) --}}
+        <div style="font-weight:800;font-size:15px;margin:4px 0 12px;color:#1e293b;">➕ Yeni Randevu Al</div>
         <div class="gb-frame-wrap">
             <iframe class="gb-frame"
                     src="{{ $bookingEmbedUrl }}"
@@ -74,6 +103,23 @@
                 <a href="{{ route('guest.messages') }}" class="gb-empty-btn alt">💬 Mesaj Bırak</a>
             </div>
         </div>
+    @endif
+
+    {{-- Geçmiş randevular --}}
+    @if(!empty($pastBookings) && $pastBookings->count() > 0)
+    <div style="background:#fff;border:1px solid var(--u-line,#e2e8f0);border-radius:14px;padding:18px 20px;margin-top:18px;">
+        <div style="font-weight:800;font-size:15px;margin-bottom:12px;color:#1e293b;">🕘 Geçmiş Randevular ({{ $pastBookings->count() }})</div>
+        @foreach($pastBookings as $b)
+            @php [$lbl,$c,$bg] = $gbStatusLabel($b->status); @endphp
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #f1f5f9;flex-wrap:wrap;opacity:.85;">
+                <div>
+                    <div style="font-weight:600;font-size:13.5px;color:#334155;">{{ $b->starts_at?->format('d.m.Y · H:i') }}</div>
+                    <div style="font-size:12px;color:#94a3b8;">👤 {{ $b->senior_name }}</div>
+                </div>
+                <span style="background:{{ $bg }};color:{{ $c }};padding:3px 12px;border-radius:999px;font-size:12px;font-weight:700;">{{ $lbl }}</span>
+            </div>
+        @endforeach
+    </div>
     @endif
 </div>
 @endsection

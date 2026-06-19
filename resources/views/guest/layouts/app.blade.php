@@ -247,7 +247,7 @@
                 @pageVisible('appointments')
                 <a href="{{ route('guest.booking') }}"
                    class="nav-link {{ request()->is('guest/randevu','randevu','book*') ? 'active' : '' }}">
-                    <x-icon name="calendar" size="18" class="nav-icon" aria-label="Randevu Al" /> Randevu Al
+                    <x-icon name="calendar" size="18" class="nav-icon" aria-label="Randevularım" /> Randevularım
                 </a>
                 <a href="{{ route('guest.booking.directory') }}"
                    class="nav-link {{ request()->routeIs('guest.booking.directory*') ? 'active' : '' }}">

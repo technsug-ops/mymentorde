@@ -610,6 +610,40 @@ class PortalController extends Controller
         $data['emptyReason']     = $emptyReason;
         $data['autoProvisioned'] = $autoProvisioned;
 
+        // G11: Aday öğrencinin mevcut randevuları (yaklaşan + geçmiş) — "Randevularım"
+        $upcomingBookings = collect();
+        $pastBookings     = collect();
+        if ($guest) {
+            $guestEmail = strtolower(trim((string) ($guest->email ?? '')));
+            $allBookings = \App\Models\PublicBooking::query()
+                ->where(function ($q) use ($guest, $guestEmail) {
+                    $q->where('guest_application_id', (int) $guest->id);
+                    if ($guestEmail !== '') {
+                        $q->orWhereRaw('LOWER(invitee_email) = ?', [$guestEmail]);
+                    }
+                })
+                ->orderByDesc('starts_at')
+                ->limit(100)
+                ->get(['id', 'senior_user_id', 'starts_at', 'ends_at', 'status', 'invitee_name', 'amount_gross_cents', 'currency', 'payment_status']);
+
+            $seniorNames = \App\Models\User::query()->withoutGlobalScopes()
+                ->whereIn('id', $allBookings->pluck('senior_user_id')->filter()->unique()->all())
+                ->pluck('name', 'id');
+
+            $now = now();
+            foreach ($allBookings as $b) {
+                $b->senior_name = (string) ($seniorNames[$b->senior_user_id] ?? 'Danışman');
+                if ($b->status !== 'canceled' && $b->starts_at && $b->starts_at->greaterThanOrEqualTo($now)) {
+                    $upcomingBookings->push($b);
+                } else {
+                    $pastBookings->push($b);
+                }
+            }
+            $upcomingBookings = $upcomingBookings->sortBy('starts_at')->values();
+        }
+        $data['upcomingBookings'] = $upcomingBookings;
+        $data['pastBookings']     = $pastBookings;
+
         return view('guest.booking', $data);
     }
 
