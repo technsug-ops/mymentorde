@@ -602,6 +602,10 @@ class ManagerPortalController extends Controller
             ->where('role', \App\Models\User::ROLE_DEALER)
             ->first();
 
+        // Hiyerarşi (2 seviye): üst bayi + alt bayiler
+        $parentDealer = $dealer->parent_dealer_id ? $dealer->parent : null;
+        $childDealers = $dealer->children()->orderBy('name')->get(['id', 'code', 'name', 'email', 'is_active']);
+
         $revenues = DealerStudentRevenue::where('dealer_id', $code)->get();
         $payouts  = DealerPayoutRequest::where('dealer_code', $code)->with('account')->latest()->paginate(25)->withQueryString();
 
@@ -649,7 +653,8 @@ class ManagerPortalController extends Controller
         return view('manager.dealer-detail', compact(
             'dealer', 'revenues', 'payouts', 'leads', 'revenueStats',
             'utmLinks', 'leadStatsByCode', 'utmStats',
-            'application', 'dealerType', 'dealerUser'
+            'application', 'dealerType', 'dealerUser',
+            'parentDealer', 'childDealers'
         ));
     }
 

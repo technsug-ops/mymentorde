@@ -139,6 +139,48 @@
     </div>
 </section>
 
+{{-- Hiyerarşi (2 seviye: bölge → alt bayi) --}}
+<section class="panel gd-panel">
+    <h2 style="display:flex;align-items:center;gap:8px;"><x-icon name="git-branch" size="18" />
+        Bayi Hiyerarşisi
+        <span class="muted">{{ $dealer->parent_dealer_id ? '· Alt Bayi' : '· Bölge Bayisi' }}</span>
+    </h2>
+
+    @if($parentDealer)
+        <div style="font-size:13px;margin-bottom:8px;">
+            <strong>Üst Bayi (Bölge):</strong>
+            <a href="/manager/dealers/{{ $parentDealer->code }}" style="color:#1e40af;text-decoration:none;font-weight:600;">
+                {{ $parentDealer->name }} <span style="font-family:monospace;font-size:12px;">({{ $parentDealer->code }})</span>
+            </a>
+        </div>
+    @endif
+
+    @if($childDealers->isNotEmpty())
+        <div style="font-size:11px;color:var(--u-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;">
+            Alt Bayiler ({{ $childDealers->count() }})
+        </div>
+        <table class="gd-list-table">
+            <thead><tr><th>Alt Bayi</th><th>Kod</th><th>E-posta</th><th>Durum</th></tr></thead>
+            <tbody>
+                @foreach($childDealers as $child)
+                    <tr>
+                        <td class="gd-pri">
+                            <a href="/manager/dealers/{{ $child->code }}" style="color:#1e40af;text-decoration:none;">{{ $child->name }}</a>
+                        </td>
+                        <td style="font-family:monospace;">{{ $child->code }}</td>
+                        <td class="gd-sub">{{ $child->email ?: '—' }}</td>
+                        <td>
+                            <span class="badge {{ $child->is_active ? 'ok' : '' }}">{{ $child->is_active ? 'Aktif' : 'Pasif' }}</span>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @elseif(!$parentDealer)
+        <div style="font-size:12px;color:var(--u-muted);">Bu bölge bayisinin henüz alt bayisi yok.</div>
+    @endif
+</section>
+
 {{-- KPI Çubuğu --}}
 <div class="gd-kpi-row">
     <div class="gd-kpi"><div class="lbl">Öğrenci</div><div class="val">{{ $revenueStats['students'] }}</div></div>

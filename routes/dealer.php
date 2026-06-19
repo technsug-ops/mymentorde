@@ -7,6 +7,7 @@ use App\Http\Controllers\Dealer\DealerEarningsController;
 use App\Http\Controllers\Dealer\DealerLeadController;
 use App\Http\Controllers\Dealer\DealerPerformanceController;
 use App\Http\Controllers\Dealer\DealerProfileController;
+use App\Http\Controllers\Dealer\DealerSubDealerController;
 use App\Http\Controllers\DealerPortalController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,13 @@ Route::middleware(['company.context', 'auth', 'dealer.role', 'module:dealer'])->
     Route::post('/dealer/payments/accounts', [DealerEarningsController::class, 'addPayoutAccount'])->name('dealer.payments.accounts.store');
     Route::delete('/dealer/payments/accounts/{id}', [DealerEarningsController::class, 'deletePayoutAccount'])->name('dealer.payments.accounts.delete');
     Route::post('/dealer/payments/request', [DealerEarningsController::class, 'requestPayout'])->name('dealer.payments.request');
+
+    // ── Alt Bayiler (yalnızca Bölge Bayisi) ──────────────────────────────────
+    Route::middleware('dealer.regional')->group(function () {
+        Route::get('/dealer/sub-dealers', [DealerSubDealerController::class, 'index'])->name('dealer.sub-dealers');
+        Route::get('/dealer/sub-dealers/create', [DealerSubDealerController::class, 'create'])->name('dealer.sub-dealers.create');
+        Route::post('/dealer/sub-dealers', [DealerSubDealerController::class, 'store'])->middleware('throttle:20,1')->name('dealer.sub-dealers.store');
+    });
 
     // ── Danışmanlık (Destek Yetkisi Gerekli) ─────────────────────────────────
     Route::middleware('dealer.type.permission:canAccessSupport')->group(function () {

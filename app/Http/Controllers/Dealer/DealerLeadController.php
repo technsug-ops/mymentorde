@@ -115,7 +115,7 @@ class DealerLeadController extends Controller
         // Bonus: locked → pending (ilk lead yönlendirildi)
         if ($base['dealer'] instanceof \App\Models\Dealer) {
             $base['dealer']->advanceBonusToPending();
-            \Illuminate\Support\Facades\Cache::forget("dealer_stats_{$base['dealerCode']}");
+            $this->forgetDealerStatsCache((string) $base['dealerCode']);
         }
 
         return redirect('/dealer/leads')->with('status', 'Yönlendirme kaydedildi. Guest kaydı oluşturuldu.');
@@ -136,9 +136,9 @@ class DealerLeadController extends Controller
         $convertedCount = 0;
         $stagesData     = ['new' => 0, 'contacted' => 0, 'qualified' => 0, 'converted' => 0, 'lost' => 0];
 
-        if (!empty($data['dealerCode'])) {
+        if (!empty($data['scopeCodes'])) {
             $baseQuery = GuestApplication::query()
-                ->where('dealer_code', $data['dealerCode'])
+                ->whereIn('dealer_code', $data['scopeCodes'])
                 ->when($q !== '', function ($qr) use ($q) {
                     $qr->where(function ($x) use ($q) {
                         $x->where('first_name', 'like', "%{$q}%")
@@ -192,8 +192,9 @@ class DealerLeadController extends Controller
     public function leadDetail(Request $request, GuestApplication $lead)
     {
         $data = $this->baseData($request);
-        abort_if(empty($data['dealerCode']), 403, 'Dealer code missing');
-        abort_if((string) ($lead->dealer_code ?? '') !== (string) $data['dealerCode'], 403, 'Bu lead bu dealer hesabina ait degil.');
+        abort_if(empty($data['scopeCodes']), 403, 'Dealer code missing');
+        // Bölge bayisi alt bayilerinin lead'lerini de görür (scopeCodes); alt bayi sadece kendini.
+        abort_if(!in_array((string) ($lead->dealer_code ?? ''), $data['scopeCodes'], true), 403, 'Bu lead bu dealer hesabina ait degil.');
 
         /** @var \App\Support\DealerTierPermissions $tierPerms */
         $tierPerms             = $data['tierPerms'];
@@ -243,8 +244,9 @@ class DealerLeadController extends Controller
 
         $commissionRevenue = null;
         if (!empty($lead->converted_student_id)) {
+            // Revenue lead'in sahibi bayinin code'una bağlıdır (alt bayi olabilir).
             $commissionRevenue = \App\Models\DealerStudentRevenue::query()
-                ->where('dealer_id', $data['dealerCode'])
+                ->where('dealer_id', (string) ($lead->dealer_code ?? $data['dealerCode']))
                 ->where('student_id', $lead->converted_student_id)
                 ->first();
         }
@@ -307,7 +309,7 @@ class DealerLeadController extends Controller
     {
         $data = $this->baseData($request);
         abort_if(empty($data['dealerCode']), 403);
-        abort_if((string) ($lead->dealer_code ?? '') !== (string) $data['dealerCode'], 403);
+        abort_if(!in_array((string) ($lead->dealer_code ?? ''), $data['scopeCodes'], true), 403);
 
         $validated = $request->validate([
             'lead_status'          => ['nullable', 'in:new,contacted,qualified,converted,lost'],
@@ -335,8 +337,9 @@ class DealerLeadController extends Controller
         if (!empty($updates)) {
             $lead->forceFill($updates)->save();
 
-            // Dealer stats cache'ini temizle — sayaçlar hemen güncellensin
-            \Illuminate\Support\Facades\Cache::forget("dealer_stats_{$data['dealerCode']}");
+            // Dealer stats cache'ini temizle — sayaçlar hemen güncellensin.
+            // Lead'in sahibi alt bayi ise hem onun hem bölge bayisinin cache'i silinir.
+            $this->forgetDealerStatsCache((string) ($lead->dealer_code ?? $data['dealerCode']));
         }
 
         return redirect("/dealer/leads/{$lead->id}")->with('status', 'Lead bilgileri güncellendi.');
@@ -345,7 +348,7 @@ class DealerLeadController extends Controller
     public function leadTickets(Request $request, GuestApplication $lead): \Illuminate\Http\JsonResponse
     {
         $data = $this->baseData($request);
-        abort_if((string) ($lead->dealer_code ?? '') !== (string) $data['dealerCode'], 403);
+        abort_if(!in_array((string) ($lead->dealer_code ?? ''), $data['scopeCodes'], true), 403);
 
         $tickets = GuestTicket::where('guest_application_id', (int) $lead->id)
             ->with(['replies' => fn ($q) => $q->latest()->limit(5)])
@@ -357,7 +360,7 @@ class DealerLeadController extends Controller
     public function leadTimeline(Request $request, GuestApplication $lead): \Illuminate\Http\JsonResponse
     {
         $data = $this->baseData($request);
-        abort_if((string) ($lead->dealer_code ?? '') !== (string) $data['dealerCode'], 403);
+        abort_if(!in_array((string) ($lead->dealer_code ?? ''), $data['scopeCodes'], true), 403);
 
         $events = SystemEventLog::where('entity_type', 'guest')
             ->where('entity_id', (string) $lead->id)

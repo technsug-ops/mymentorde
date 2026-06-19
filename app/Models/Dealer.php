@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Dealer extends Model
@@ -11,6 +13,7 @@ class Dealer extends Model
     use BelongsToCompany, SoftDeletes;
     protected $fillable = [
         'company_id',
+        'parent_dealer_id',
         'code',
         'internal_sequence',
         'name',
@@ -34,6 +37,46 @@ class Dealer extends Model
         'signup_bonus_amount' => 'decimal:2',
         'signup_bonus_unlocked_at' => 'datetime',
     ];
+
+    // ── Hiyerarşi (2 seviye: bölge → alt bayi) ────────────────
+
+    /** Üst bayi (bölge). Alt bayide dolu, bölge bayisinde null. */
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_dealer_id');
+    }
+
+    /** Bu bölge bayisinin alt bayileri. */
+    public function children(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_dealer_id');
+    }
+
+    /** parent_dealer_id null => bölge bayisi (kendi alt bayisi olabilir). */
+    public function isRegional(): bool
+    {
+        return $this->parent_dealer_id === null;
+    }
+
+    /** parent_dealer_id dolu => alt bayi. */
+    public function isSub(): bool
+    {
+        return $this->parent_dealer_id !== null;
+    }
+
+    /**
+     * Görünürlük roll-up için bu bayinin kapsadığı dealer CODE'ları.
+     * Bölge bayisi: kendi + tüm alt bayileri. Alt bayi: sadece kendi.
+     * DealerStudentRevenue.dealer_id ve guest_applications.dealer_code CODE tutar.
+     */
+    public function scopeCodes(): array
+    {
+        if ($this->isRegional()) {
+            $childCodes = $this->children()->pluck('code')->all();
+            return array_values(array_filter(array_merge([$this->code], $childCodes)));
+        }
+        return [$this->code];
+    }
 
     // ── Bonus helpers ─────────────────────────────────────────
 

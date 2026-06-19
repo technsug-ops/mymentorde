@@ -193,6 +193,17 @@
                 @endif
             </div>
 
+            {{-- Bayi Ağım — yalnızca Bölge Bayisi --}}
+            @if($__sidebarDealer && $__sidebarDealer->isRegional())
+            <div class="nav-section">
+                <div class="nav-section-label">Bayi Ağım</div>
+                <a href="/dealer/sub-dealers"
+                   class="nav-link {{ request()->is('dealer/sub-dealers*') ? 'active' : '' }}">
+                    <x-icon name="git-branch" size="18" class="nav-icon" aria-label="Alt Bayilerim" /> Alt Bayilerim
+                </a>
+            </div>
+            @endif
+
             {{-- Finans — tüm tierlar --}}
             <div class="nav-section">
                 <div class="nav-section-label">Finans</div>

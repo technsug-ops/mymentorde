@@ -19,24 +19,47 @@ use Illuminate\Support\Str;
  */
 trait DealerPortalTrait
 {
+    /**
+     * Görünürlük roll-up için bu kullanıcının bayisinin kapsadığı dealer CODE'ları.
+     * Bölge bayisi: kendi + alt bayileri. Alt bayi: sadece kendi.
+     */
+    protected function dealerScopeCodes(?Dealer $dealer, string $fallbackCode): array
+    {
+        if ($dealer) {
+            $codes = $dealer->scopeCodes();
+        } else {
+            $codes = $fallbackCode !== '' ? [$fallbackCode] : [];
+        }
+        return array_values(array_unique(array_map(
+            fn ($c) => strtoupper(trim((string) $c)),
+            array_filter($codes)
+        )));
+    }
+
     protected function baseData(Request $request): array
     {
         $user       = $request->user();
         $dealerCode = strtoupper(trim((string) ($user->dealer_code ?? '')));
         $dealer     = $dealerCode !== '' ? Dealer::query()->where('code', $dealerCode)->first() : null;
 
-        $dealerStats = Cache::remember("dealer_stats_{$dealerCode}", 300, function () use ($dealerCode) {
-            if ($dealerCode === '') {
+        // Bölge bayisi kendi + alt bayilerinin verisini görür; alt bayi sadece kendini.
+        $scopeCodes = $this->dealerScopeCodes($dealer, $dealerCode);
+
+        $dealerStats = Cache::remember("dealer_stats_{$dealerCode}", 300, function () use ($scopeCodes, $dealerCode) {
+            if (empty($scopeCodes)) {
                 return ['guest_total' => 0, 'student_total' => 0, 'converted_total' => 0,
                         'conversion_rate' => 0, 'total_earned' => 0.0, 'total_pending' => 0.0, 'month_earned' => 0.0];
             }
 
+            // Lead/öğrenci sayıları: bölge bayisi için ağ geneli (kendi + alt bayiler).
             $studentAssignments = StudentAssignment::query()
-                ->where('dealer_id', $dealerCode)
+                ->whereIn('dealer_id', $scopeCodes)
                 ->latest('updated_at')
                 ->limit(500)
                 ->get(['student_id', 'updated_at']);
 
+            // Para (kazanç) SADECE kendi code'u: alt bayinin kazancı bölgeninki değildir;
+            // bölgenin override geliri zaten kendi code'unda kayıtlıdır (Faz 2).
             $revenues = DealerStudentRevenue::query()
                 ->where('dealer_id', $dealerCode)
                 ->latest('updated_at')
@@ -44,7 +67,7 @@ trait DealerPortalTrait
                 ->get(['student_id', 'total_earned', 'total_pending', 'updated_at']);
 
             $guestLeads = GuestApplication::query()
-                ->where('dealer_code', $dealerCode)
+                ->whereIn('dealer_code', $scopeCodes)
                 ->latest()
                 ->limit(500)
                 ->get(['id', 'converted_student_id', 'lead_status', 'created_at']);
@@ -94,12 +117,35 @@ trait DealerPortalTrait
 
         return [
             'dealerCode'  => $dealerCode,
+            'scopeCodes'  => $scopeCodes,
+            'isRegional'  => $dealer?->isRegional() ?? false,
             'dealer'      => $dealer,
             'dealerStats' => $dealerStats,
             'dealerLink'  => $dealerCode !== '' ? url('/apply').'?ref='.urlencode($dealerCode) : null,
             'tierPerms'   => $tierPerms,
             'bonus'       => $bonus,
         ];
+    }
+
+    /**
+     * Bir dealer code'unun stats cache'ini ve (varsa) üst bayisinin cache'ini sil.
+     * Alt bayide değişiklik olunca bölge bayisinin roll-up görünümü de bayatlamamalı.
+     */
+    protected function forgetDealerStatsCache(string $dealerCode): void
+    {
+        $dealerCode = strtoupper(trim($dealerCode));
+        if ($dealerCode === '') {
+            return;
+        }
+        Cache::forget("dealer_stats_{$dealerCode}");
+
+        $dealer = Dealer::query()->where('code', $dealerCode)->first();
+        if ($dealer && $dealer->parent_dealer_id) {
+            $parentCode = (string) optional($dealer->parent)->code;
+            if ($parentCode !== '') {
+                Cache::forget("dealer_stats_" . strtoupper($parentCode));
+            }
+        }
     }
 
     protected function generateTrackingToken(): string

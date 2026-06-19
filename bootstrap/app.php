@@ -61,6 +61,7 @@ return Application::configure(basePath: dirname(__DIR__))
              'guest.owns.document' => \App\Http\Middleware\EnsureGuestOwnsDocument::class,
              'student.owns.document' => \App\Http\Middleware\EnsureStudentOwnsDocument::class,
              'dealer.role' => \App\Http\Middleware\EnsureDealerRole::class,
+             'dealer.regional' => \App\Http\Middleware\EnsureRegionalDealer::class,
             'dealer.type.permission' => \App\Http\Middleware\CheckDealerTypePermission::class,
             'field.rule.validator' => \App\Http\Middleware\FieldRuleValidator::class,
             'process.outcome.visibility' => \App\Http\Middleware\CheckProcessOutcomeVisibility::class,
