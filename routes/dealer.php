@@ -71,6 +71,7 @@ Route::middleware(['company.context', 'auth', 'dealer.role', 'module:dealer'])->
     // ── Profil & Ayarlar ─────────────────────────────────────────────────────
     Route::get('/dealer/profile', [DealerProfileController::class, 'profile'])->name('dealer.profile');
     Route::post('/dealer/profile', [DealerProfileController::class, 'updateProfile'])->name('dealer.profile.update');
+    Route::post('/dealer/profile/photo', [DealerProfileController::class, 'uploadProfilePhoto'])->middleware('throttle:10,1')->name('dealer.profile.photo');
     Route::get('/dealer/settings', [DealerProfileController::class, 'settings'])->name('dealer.settings');
     Route::post('/dealer/settings', [DealerProfileController::class, 'updateSettings'])->name('dealer.settings.update');
     Route::post('/dealer/settings/password', [DealerProfileController::class, 'changePassword'])->name('dealer.settings.password');

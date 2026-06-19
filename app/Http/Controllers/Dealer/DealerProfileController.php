@@ -60,6 +60,32 @@ class DealerProfileController extends Controller
         return back()->with('status', 'Profil kaydedildi.');
     }
 
+    /**
+     * Dealer profil fotoğrafı yükleme (D7) — guest pattern'i ile aynı:
+     * ImageOptimizationService ile optimize, User.photo_url'e kaydet.
+     */
+    public function uploadProfilePhoto(Request $request)
+    {
+        $user = $request->user();
+        abort_if(!$user, 403);
+
+        $data = $request->validate([
+            'profile_photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096', new \App\Rules\ValidFileMagicBytes()],
+        ]);
+
+        $old = trim((string) ($user->photo_url ?? ''));
+        if ($old !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($old)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($old);
+        }
+
+        $path = app(\App\Services\ImageOptimizationService::class)
+            ->optimizeProfilePhoto($data['profile_photo'], "dealer-profile/{$user->id}", 'profile_' . now()->format('Ymd_His'));
+
+        $user->forceFill(['photo_url' => $path])->save();
+
+        return redirect()->route('dealer.profile')->with('status', 'Profil fotoğrafı güncellendi.');
+    }
+
     public function settings(Request $request)
     {
         $data  = $this->baseData($request);

@@ -83,8 +83,21 @@
 @endphp
 
 {{-- Hero --}}
+@php $dealerPhoto = auth()->user()?->photo_url ? \Illuminate\Support\Facades\Storage::disk('public')->url(auth()->user()->photo_url) : null; @endphp
 <div class="dprf-hero">
-    <div class="dprf-avatar">{{ $initials }}</div>
+    <div style="position:relative;flex-shrink:0;">
+        @if($dealerPhoto)
+            <img src="{{ $dealerPhoto }}" alt="profil" class="dprf-avatar" style="object-fit:cover;padding:0;">
+        @else
+            <div class="dprf-avatar">{{ $initials }}</div>
+        @endif
+        <form method="POST" action="{{ route('dealer.profile.photo') }}" enctype="multipart/form-data" id="dealerPhotoForm" style="margin:0;">
+            @csrf
+            <label for="dealerPhotoInput" title="Fotoğraf değiştir"
+                   style="position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:#fff;border:1px solid var(--border,#e2e8f0);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,.15);">📷</label>
+            <input type="file" id="dealerPhotoInput" name="profile_photo" accept="image/png,image/jpeg,image/webp" style="display:none;">
+        </form>
+    </div>
     <div class="dprf-info">
         <div class="dprf-name">{{ $displayName ?: 'İsim belirtilmedi' }}</div>
         <div class="dprf-email">{{ auth()->user()?->email ?? '-' }}</div>
@@ -181,5 +194,17 @@
         'Kısa tanıtım manager panelinde dealer kartında özet olarak gösterilir.',
     ]
 ])
+
+@push('scripts')
+<script nonce="{{ $cspNonce ?? '' }}">
+// Profil fotoğrafı seçilince formu otomatik gönder (CSP-safe, inline onchange yerine)
+(function(){
+    var i = document.getElementById('dealerPhotoInput');
+    if (i) i.addEventListener('change', function(){
+        if (i.files && i.files[0]) document.getElementById('dealerPhotoForm').submit();
+    });
+})();
+</script>
+@endpush
 
 @endsection

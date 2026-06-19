@@ -4,7 +4,7 @@
 @section('page_title', 'Destek Talepleri')
 
 @push('head')
-<script>if(localStorage.getItem('mentorde_design')==='minimalist'){document.documentElement.classList.add('jm-minimalist');}</script>
+<script nonce="{{ $cspNonce ?? '' }}">if(localStorage.getItem('mentorde_design')==='minimalist'){document.documentElement.classList.add('jm-minimalist');}</script>
 <style>
 /* Tickets sayfasında gchat FAB'ı gizle — form zaten var, üst üste binmesin */
 .gchat-fab, .gchat-panel { display: none !important; }
@@ -519,8 +519,8 @@
 
 </div>{{-- /gt-layout --}}
 
-<script defer src="{{ Vite::asset('resources/js/emoji-gif-picker.js') }}" defer></script>
-<script>
+<script defer src="{{ Vite::asset('resources/js/emoji-gif-picker.js') }}"></script>
+<script nonce="{{ $cspNonce ?? '' }}">
 function gtToggle(id) {
     var el = document.getElementById('ticket-' + id);
     if (el) el.classList.toggle('expanded');

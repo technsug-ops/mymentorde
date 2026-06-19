@@ -51,6 +51,8 @@ Kabul & Ödeme Takibi
 
 ### Teknoloji Altyapısı
 
+MentorDE; verilerinizin güvenliği ve kesintisiz hizmet için modern ve güvenilir teknolojiler üzerine kuruludur. Tüm ödemeler güvenli altyapı üzerinden alınır, hesabınız iki adımlı doğrulama (2FA) ile korunur ve belgeleriniz şifreli olarak saklanır. Kullandığımız başlıca bileşenler:
+
 | Bileşen | Teknoloji |
 |---------|-----------|
 | Backend | PHP 8.4 / Laravel 12 |

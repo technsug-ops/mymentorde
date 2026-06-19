@@ -51,6 +51,8 @@ Admission & Payment Monitoring
 
 ### Technology Stack
 
+MentorDE is built on modern, reliable technologies to keep your data secure and the service uninterrupted. All payments are processed over a secure infrastructure, your account is protected with two-factor authentication (2FA), and your documents are stored encrypted. The main components we use:
+
 | Component | Technology |
 |-----------|------------|
 | Backend | PHP 8.4 / Laravel 12 |
