@@ -20,7 +20,7 @@ use Throwable;
  *
  *  compose()           : istek datasini PlatformBroadcast'a doker (draft).
  *  resolveRecipients() : target_segment + tiers + company_ids'e gore user listesi
- *                        (manager + senior rolleri — duyuru icin uygun seyirci).
+ *                        (SADECE manager rolu — musteri admin / hesap sahibi).
  *  send()              : email/in_app/both kanalindan gerçek gonderim, sent_count
  *                        ve recipient kayitlarini günceller.
  *  sendImmediate()     : controller'in "Simdi Gonder" butonu icin wrapper.
@@ -59,7 +59,8 @@ class BroadcastService
      * Target_segment + tier + company_ids'e gore alici user listesi.
      *
      * Donus: User collection — yalnizca aktif, in-app/email icin kullanilir.
-     * Sadece manager + senior rolleri hedeflenir (customer panel kullanicilari).
+     * Sadece manager rolu hedeflenir (musteri admin); senior/ogrenci son
+     * kullanicilara Platform duyurusu gitmez.
      */
     public function resolveRecipients(PlatformBroadcast $b): Collection
     {
@@ -99,10 +100,13 @@ class BroadcastService
             return collect();
         }
 
-        // 3) Bu company'lerdeki yetkili user'lar (manager + senior)
+        // 3) Bu company'lerdeki SADECE manager'lar (musteri admin / hesap sahibi).
+        //    Platform Owner duyurusu satici -> musteri admin iletisimidir; senior/
+        //    ogrenci gibi son kullanicilara GITMEZ — onlar sirketin kendi ic duyuru
+        //    sisteminin (manager -> kullanicilar) seyircisidir. Karismayi onler.
         return User::query()
             ->whereIn('company_id', $companyIds)
-            ->whereIn('role', ['manager', 'senior'])
+            ->where('role', User::ROLE_MANAGER)
             ->whereNotNull('email')
             ->get();
     }

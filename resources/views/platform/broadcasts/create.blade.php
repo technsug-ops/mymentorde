@@ -40,6 +40,11 @@
                 </div>
 
                 <h3 class="plat-card-title" style="margin-top:20px;"><x-icon name="target" size="14" /> Hedefleme</h3>
+                <p style="color:var(--plat-muted); font-size:12px; margin:-6px 0 14px;">
+                    <x-icon name="info" size="12" /> Bu duyuru yalnızca seçilen şirketlerin <strong>Manager</strong> hesaplarına gider
+                    (müşteri admini). Senior/öğrenci gibi son kullanıcılar Platform duyurusu almaz —
+                    onlara duyuru şirketin kendi iç sisteminden yapılır.
+                </p>
 
                 <div class="plat-form-group">
                     <label class="plat-form-label">Kanal</label>
