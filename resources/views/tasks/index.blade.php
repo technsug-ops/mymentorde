@@ -613,7 +613,7 @@ a.tb-stat:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); background:#f0f6ff; }
             {{-- ── Kompakt satır ── --}}
             <div class="tl-cols tl-row {{ $tkCls }}" id="task-{{ $row->id }}" onclick="tkDetailOpen({{ $row->id }})" title="Görevi aç">
                 <div class="tl-c tl-c-check" onclick="event.stopPropagation()">
-                    <input type="checkbox" class="task-select" value="{{ $row->id }}" style="width:15px;height:15px;min-height:0;cursor:pointer;">
+                    <input type="checkbox" class="task-select" name="task_ids[]" form="taskBulkForm" value="{{ $row->id }}" style="width:15px;height:15px;min-height:0;cursor:pointer;">
                 </div>
                 <div class="tl-c tl-c-name" onclick="event.stopPropagation()">
                     <span class="tl-num">#{{ $row->id }}</span>
@@ -1025,33 +1025,25 @@ window.tlToggle = function(id) {
     if (row) row.classList.toggle('tl-open', open);
 };
 
-/* ── Toplu seçim: seçili task_ids[]'i taskBulkForm'a enjekte + preview ──
-   (task-board.js Vite build'inde olmadığı için seçim mantığı burada inline.
-    Hem Toplu Güncelle hem Seçilenleri Sil aynı formu kullanır.) */
+/* ── Toplu seçim: SADECE kozmetik (sayaç + tümünü-seç). task_ids artık
+   checkbox'larda native name="task_ids[]" + form="taskBulkForm" ile gönderiliyor
+   (JS'e bağımlı DEĞİL — inline JS prod'da çalışmasa bile silme/güncelleme çalışır). */
 (function () {
     var boxes = document.querySelectorAll('.task-select');
-    var form  = document.getElementById('taskBulkForm');
     var prev  = document.getElementById('bulkTaskPreview');
     var all   = document.getElementById('select-all');
-    if (!boxes.length || !form) return;
-    function sync() {
-        var ids = Array.prototype.slice.call(boxes)
-            .filter(function (b) { return b.checked; })
-            .map(function (b) { return b.value; });
-        if (prev) prev.value = ids.length ? (ids.length + ' task seçili') : '';
-        form.querySelectorAll('input[name="task_ids[]"].dyn').forEach(function (i) { i.remove(); });
-        ids.forEach(function (v) {
-            var inp = document.createElement('input');
-            inp.type = 'hidden'; inp.name = 'task_ids[]'; inp.value = v; inp.className = 'dyn';
-            form.appendChild(inp);
-        });
+    if (!boxes.length) return;
+    function count() {
+        var n = Array.prototype.slice.call(boxes).filter(function (b) { return b.checked; }).length;
+        if (prev) prev.value = n ? (n + ' task seçili') : '';
+        if (all) all.checked = n > 0 && n === boxes.length;
     }
-    boxes.forEach(function (b) { b.addEventListener('change', sync); });
+    boxes.forEach(function (b) { b.addEventListener('change', count); });
     if (all) all.addEventListener('change', function () {
         boxes.forEach(function (b) { b.checked = all.checked; });
-        sync();
+        count();
     });
-    sync();
+    count();
 })();
 
 /* ── Task Board: override task-kanban.js to use /tasks endpoints ── */
