@@ -174,6 +174,33 @@ class TaskAutomationService
         );
     }
 
+    /**
+     * Aday öğrenci "başvuru hazırlık"a (docs_pending köprüsü) girince senior'a
+     * açılan TEK actionable kickoff task'ı. Idempotent (student_id başına bir kez).
+     */
+    public function ensureApplicationPrepTask(StudentAssignment $assignment, ?string $displayName = null): ?MarketingTask
+    {
+        $assignee = $this->resolveStudentAssignee((string) $assignment->student_id, (int) ($assignment->company_id ?: 0));
+        if (!$assignee) {
+            return null;
+        }
+
+        $name = trim((string) ($displayName ?: $assignment->display_name ?: $assignment->student_id));
+
+        return $this->createTaskIfMissing(
+            companyId: (int) ($assignment->company_id ?: 1),
+            sourceType: 'application_prep_started',
+            sourceId: (string) $assignment->student_id,
+            title: '📋 Başvuru hazırlığını başlat: ' . $name,
+            description: 'Aday öğrenci evrak aşamasına (docs_pending) geçti. Başvuru hazırlık sürecini başlat: belgeler, uni-assist, vize ön hazırlık. Öğrenci: ' . (string) $assignment->student_id,
+            priority: 'high',
+            department: 'advisory',
+            dueDate: now()->addHours(MarketingTask::defaultSlaHours('high')),
+            assigneeUserId: (int) $assignee->id,
+            relatedStudentId: (string) $assignment->student_id
+        );
+    }
+
     public function ensureStudentOutcomeTask(ProcessOutcome $outcome): ?MarketingTask
     {
         $assignment = StudentAssignment::query()

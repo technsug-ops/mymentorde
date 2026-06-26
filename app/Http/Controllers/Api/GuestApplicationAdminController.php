@@ -97,24 +97,42 @@ class GuestApplicationAdminController extends Controller
         ]);
 
         $studentTypeCode = $this->mapApplicationTypeToStudentTypeCode((string) $guestApplication->application_type);
-        $student = $this->generateStudentIdentityFromType($studentTypeCode);
         $seniorEmail = trim((string) ($data['senior_email'] ?? ''));
         if ($seniorEmail === '') {
             $seniorEmail = $this->pickAutoSeniorEmail($companyId) ?: null;
         }
 
-        $assignment = StudentAssignment::query()->create([
-            'company_id' => $companyId > 0 ? $companyId : null,
-            'student_id' => $student['student_id'],
-            'internal_sequence' => $student['internal_sequence'],
-            'senior_email' => $seniorEmail,
-            'branch' => trim((string) ($data['branch'] ?? $guestApplication->branch ?? '')) ?: null,
-            'risk_level' => 'normal',
-            'payment_status' => 'ok',
-            'dealer_id' => trim((string) ($data['dealer_id'] ?? $guestApplication->dealer_code ?? '')) ?: null,
-            'student_type' => $studentTypeCode,
-            'is_archived' => false,
-        ]);
+        // Köprülenmiş aday (docs_pending'te StudentBridgeService ile oluşmuş takip kaydı)
+        // → yeniden kullan, YENİ öğrenci yaratma (mükerrer önleme).
+        $bridgedSid = trim((string) ($guestApplication->converted_student_id ?? ''));
+        $assignment = $bridgedSid !== ''
+            ? StudentAssignment::query()->where('student_id', $bridgedSid)->first()
+            : null;
+
+        if ($assignment) {
+            // Köprü kaydını finalize et: eksik alanları doldur, senior boşsa ata.
+            $assignment->forceFill([
+                'senior_email' => $assignment->senior_email ?: $seniorEmail,
+                'branch'       => $assignment->branch ?: (trim((string) ($data['branch'] ?? $guestApplication->branch ?? '')) ?: null),
+                'dealer_id'    => $assignment->dealer_id ?: (trim((string) ($data['dealer_id'] ?? $guestApplication->dealer_code ?? '')) ?: null),
+                'is_archived'  => false,
+            ])->save();
+            $seniorEmail = $assignment->senior_email; // sonraki adımlar için
+        } else {
+            $student = $this->generateStudentIdentityFromType($studentTypeCode);
+            $assignment = StudentAssignment::query()->create([
+                'company_id' => $companyId > 0 ? $companyId : null,
+                'student_id' => $student['student_id'],
+                'internal_sequence' => $student['internal_sequence'],
+                'senior_email' => $seniorEmail,
+                'branch' => trim((string) ($data['branch'] ?? $guestApplication->branch ?? '')) ?: null,
+                'risk_level' => 'normal',
+                'payment_status' => 'ok',
+                'dealer_id' => trim((string) ($data['dealer_id'] ?? $guestApplication->dealer_code ?? '')) ?: null,
+                'student_type' => $studentTypeCode,
+                'is_archived' => false,
+            ]);
+        }
 
         // Dealer komisyon kaydını otomatik başlat
         $dealerIdStr = trim((string) ($assignment->dealer_id ?? ''));

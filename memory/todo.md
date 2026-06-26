@@ -1,39 +1,44 @@
-# TODO — VIP rolü (owner ile premium arası) — TAMAM
+# TODO — Aday öğrenci → süreç takibi köprüsü + görevli alanı
 
-**26 Haziran:** Yeni `vip` rolü (UI: "VIP Ortak"). owner (altyapı sahibi) ile manager/premium arası üst yetkili. Kendi şirketi/ağı kapsamında: bayi ağı + raporlar + başvuru onay/red + denetim (read-only). Platform-altyapıya (modül/güvenlik/IP/GDPR/rol) EREMEZ.
+**Karar (26 Haziran, Filiz Özkan drozkanf@gmail.com ile başla):**
+1. Aday öğrenci "evrak bekliyor" (docs_pending) → otomatik **StudentAssignment** (takip kaydı) oluş → Süreç Takibi + Student Pipeline kanban "başvuru hazırlık" (application_prep).
+2. GuestApplication'a **görevli (sales staff)** alanı ekle (assigned_staff_email); takipçi=senior (assigned_senior_email) ayrı.
 
-- [x] User: ROLE_VIP + ADMIN_PANEL_ROLES
-- [x] EnsureSystemAccess middleware (`system.access`) + bootstrap alias
-- [x] Owner-only route'lar sertleştirildi: gdpr, webhooks, ropa, avv → system.access (mevcut açık da kapandı)
-- [x] Layout: $__isVip + VIP audit-log linki + SaaS Planım gizli; "Sistem (Platform)" zaten owner-only
-- [x] AuthController redirectByRole: VIP → /manager/dashboard (yoksa login'de logout!)
-- [x] `php artisan mentorde:make-vip {email}` komutu (+ --revert)
-- [x] role kolonu string(32), 'vip' uyumlu; lint+route:list+view:clear ✓
-- NOT: landing-inventory/page-visibility guard'sız bırakıldı (low-sens, link VIP'e gizli, hariç tutma listesinde değil)
+## Kök neden (Filiz'in aday öğrencileri görünmüyor)
+`assignedStudentIds()` SADECE StudentAssignment'tan çekiyor (converted). Aday öğrenci GuestApplication.assigned_senior_email'de → süreç takibine düşmüyor. İki paralel dünya, köprü yok.
 
-**DEPLOY SONRASI:** `php artisan mentorde:make-vip <email>` ile hesabı VIP yap.
+## Faz A — Görevli (sales staff) alanı [GÜVENLİ]
+- [ ] migration: guest_applications.assigned_staff_email + assigned_staff_at + assigned_staff_by
+- [ ] GuestApplication: fillable + assignedStaff() relation
+- [ ] guestAssignStaff() endpoint (guestAssignSenior deseni) + route
+- [ ] Lead pipeline / guest detay UI: görevli atama (senior ataması yanında)
 
----
+## DURUM: Faz B çekirdeği TAMAM (commit bekliyor)
+- [x] StudentBridgeService (idempotent, converted_to_student=false, kickoff task)
+- [x] convert() reuse (mükerrer öğrenci önleme) — lokalde doğrulandı
+- [x] guestPipelineMove docs_pending hook
+- [x] /system/bridge-docs-pending backfill endpoint
+- [x] Lokalde test: köprü+task+idempotent+süreç takibinde görünme ✓
+- [ ] KALAN: Faz A görevli alanı; sales/manager pipeline move hook; student pipeline application_prep görsel doğrulama (prod)
 
-# (önceki) Bayi çoklu rol (lead-gen + freelance) + plan editable — TAMAM (commit 936032a)
+## Faz B — docs_pending → application_prep köprüsü [KRİTİK]
+- [ ] StudentBridgeService::bridgeFromGuest(guest): StudentAssignment oluştur (idempotent),
+      guest.converted_student_id set et, converted_to_student=FALSE bırak, senior=assigned_senior_email.
+      student_id üretimi convert() ile aynı (generateStudentIdentity — servise çıkar/paylaş).
+- [ ] convert() REUSE: converted_student_id doluysa + StudentAssignment varsa yeni oluşturma,
+      sadece finalize et (converted_to_student=true, lead_status, user rolü). MÜKERRER ÖĞRENCİ ÖNLE.
+- [ ] Hook: lead_status → docs_pending olan yerlerde köprüyü çağır (senior guestPipelineMove +
+      sales/manager pipeline move). assigned_senior_email yoksa köprü kurma (senior gerek).
+- [ ] Backfill: mevcut docs_pending + assigned_senior_email guest'ler (Filiz'inkiler) → köprü.
+      /system/bridge-docs-pending web endpoint (KAS SSH yok).
+- [ ] student pipeline / process-tracking: bridged öğrenci ProcessOutcome'suz → application_prep'te görünür (doğrula).
 
-**Karar (26 Haziran):** Kapasite + tek primary tier yaklaşımı. `dealer_type_code` primary kalır (freelance = izin superset), "çift rol" `roles` JSON kapasite seti olarak eklenir. Komisyon lead'in `referral_type`'ına göre zaten ayrışıyor. M2M YOK (30 dosya riski).
-
-## Adımlar — HEPSİ TAMAM (kod), prod migrate bekliyor
-- [x] 1. Migration: `dealers.roles` + `dealer_applications.roles` JSON nullable + backfill
-- [x] 2. Dealer model: roles cast + sabitler + helper'lar (rolesList/hasRole/primaryTypeForRoles/roleLabels)
-- [x] 3. DealerApplication model: roles cast + rolesList + rolesFromPlan
-- [x] 4. Başvuru detay editable form (CSP-safe)
-- [x] 5. updateRoles() + onaylı dealer senkron
-- [x] 6. provisionDealerFromApplication roles entegrasyonu
-- [x] 7. Routes (manager + mktg-admin + manager.dealers.roles) — route:list ✓
-- [x] 8. Bayi detay editable + updateDealerRoles()
-- [x] 9. php -l temiz, route:list ✓, view:clear ✓ (lokal MySQL kapalı → migrate prod'da)
-
-## DEPLOY SONRASI ŞART
-`php artisan migrate --force` (roles kolonları + backfill) — yoksa 500.
+## Riskler
+- convert() + ContractWorkflowController conversion path'leri köprüyü yeniden kullanmalı (mükerrer önle).
+- StudentAssignment::create yerleri: GuestApplicationAdminController:106 (ana), StudentAssignmentController upsert.
+- addon-independence: köprü try/catch, fail olursa pipeline move bozulmasın.
 
 ## Notlar
-- DealerType kodları: lead_generation, freelance_danisman, b2b_partner
-- primaryTypeForRoles: freelance varsa freelance_danisman, yoksa lead_generation
-- show.blade satır 156-159'da mevcut inline onclick var (CSP riski) — yeni kodda tekrarlama
+- docs_pending = lead_status 'docs_pending' (Evrak Bekliyor)
+- application_prep = PIPELINE_STEPS ilk kolon (Başvuru Hazırlık)
+- Senior guest pipeline move: SeniorPipelineController::guestPipelineMove

@@ -316,6 +316,43 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response($report, 200)->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:5,1')->name('system.backfill-dealers');
 
+    // Köprü backfill: docs_pending + senior atanmış + henüz köprülenmemiş aday
+    // öğrencileri süreç takibine bağlar (StudentAssignment + başvuru hazırlık + kickoff task).
+    // Idempotent. Filiz gibi mevcut aday öğrenciler için tek seferlik tetikleyici.
+    Route::get('/system/bridge-docs-pending', function (\Illuminate\Http\Request $request) {
+        $svc = app(\App\Services\StudentBridgeService::class);
+
+        $emailFilter = trim((string) $request->query('senior', '')); // opsiyonel: ?senior=drozkanf@gmail.com
+        $guests = \App\Models\GuestApplication::query()->withoutGlobalScopes()
+            ->where('lead_status', 'docs_pending')
+            ->whereNotNull('assigned_senior_email')
+            ->where('assigned_senior_email', '!=', '')
+            ->where(function ($q) {
+                $q->whereNull('converted_student_id')->orWhere('converted_student_id', '');
+            })
+            ->when($emailFilter !== '', fn ($q) => $q->whereRaw('lower(assigned_senior_email) = ?', [strtolower($emailFilter)]))
+            ->orderBy('id')
+            ->get();
+
+        $lines = []; $bridged = 0; $skip = 0; $fail = 0;
+        foreach ($guests as $g) {
+            try {
+                $a = $svc->bridgeFromGuest($g);
+                if ($a) { $bridged++; $lines[] = "OK   guest#{$g->id} {$g->assigned_senior_email} → {$a->student_id}"; }
+                else    { $skip++;    $lines[] = "SKIP guest#{$g->id} (senior yok?)"; }
+            } catch (\Throwable $e) {
+                $fail++; $lines[] = "FAIL guest#{$g->id} — " . $e->getMessage();
+            }
+        }
+
+        $report  = "docs_pending + senior atanmış + köprülenmemiş: {$guests->count()}\n";
+        $report .= "Köprülendi: {$bridged} | Atlandı: {$skip} | Hata: {$fail}\n\n";
+        $report .= ($lines ? implode("\n", $lines) : '(köprülenecek aday yok)') . "\n";
+        $report .= "\nNot: ?senior=email ile tek senior'a sınırlayabilirsin.\n";
+
+        return response($report, 200)->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:5,1')->name('system.bridge-docs-pending');
+
     // Prod test temizliği: 11 canonical user dışındakileri siler, emailleri @panel.mentorde.com yapar.
     // Önce GET ile rapor sayfası (dry-run), sonra POST ile gerçek çalıştırma.
     Route::get('/system/cleanup-prod-test', function () {

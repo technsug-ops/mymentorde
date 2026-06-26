@@ -147,6 +147,16 @@ class SeniorPipelineController extends Controller
             \Log::warning('EventLogService failed in guestPipelineMove: ' . $e->getMessage());
         }
 
+        // "Evrak Bekliyor" (docs_pending) → süreç takibine köprüle: StudentAssignment
+        // (başvuru hazırlık) + senior'a kickoff task. Idempotent + addon (fail olursa move bozulmaz).
+        if ($stage === 'docs_pending') {
+            try {
+                app(\App\Services\StudentBridgeService::class)->bridgeFromGuest($guest, $seniorEmail);
+            } catch (\Throwable $e) {
+                \Log::warning('student_bridge_failed in guestPipelineMove: ' . $e->getMessage());
+            }
+        }
+
         return response()->json(['ok' => true]);
     }
 
