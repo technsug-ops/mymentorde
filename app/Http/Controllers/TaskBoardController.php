@@ -423,6 +423,48 @@ class TaskBoardController extends Controller
             ->with('status', "{$updated} task toplu guncellendi.");
     }
 
+    /**
+     * Seçili task'ları toplu sil (soft delete — geri alınabilir).
+     * destroy + bulkUpdate ile aynı yetki deseni (dept admin / global viewer + canManage).
+     */
+    public function bulkDelete(Request $request): RedirectResponse
+    {
+        $user   = $request->user();
+        $role   = (string) optional($user)->role;
+        $userId = (int) optional($user)->id;
+
+        if (! $this->isDeptAdmin($role) && ! $this->isGlobalViewer($role)) {
+            abort(403, 'Toplu silme yetkiniz yok.');
+        }
+
+        $data = $request->validate([
+            'task_ids'   => ['required', 'array', 'min:1'],
+            'task_ids.*' => ['integer'],
+        ]);
+
+        $ids = collect((array) $data['task_ids'])
+            ->map(fn ($v) => (int) $v)->filter(fn ($v) => $v > 0)->unique()->values();
+
+        if ($ids->isEmpty()) {
+            return redirect($request->headers->get('referer', '/tasks'))
+                ->withErrors(['bulk' => 'Silmek icin task secin.']);
+        }
+
+        $rows = MarketingTask::query()->whereIn('id', $ids->all())->get();
+        $deleted = 0;
+        foreach ($rows as $row) {
+            if (! $this->canManage($request, $row)) {
+                continue;
+            }
+            TaskActivityLog::record((int) $row->id, $userId, 'deleted');
+            $row->delete(); // soft delete
+            $deleted++;
+        }
+
+        return redirect($request->headers->get('referer', '/tasks'))
+            ->with('status', "{$deleted} task silindi (geri alınabilir).");
+    }
+
     public function markDone(Request $request, int $id): RedirectResponse
     {
         $user   = $request->user();

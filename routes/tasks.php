@@ -22,6 +22,7 @@ Route::middleware(['company.context', 'auth', 'task.access'])->group(function ()
     Route::post('/tasks', [TaskBoardController::class, 'store']);
     Route::put('/tasks/{id}', [TaskBoardController::class, 'update']);
     Route::post('/tasks/bulk-update', [TaskBoardController::class, 'bulkUpdate']);
+    Route::post('/tasks/bulk-delete', [TaskBoardController::class, 'bulkDelete']);
     Route::post('/tasks/{id}/done', [TaskBoardController::class, 'markDone']);
     Route::post('/tasks/{id}/reopen', [TaskBoardController::class, 'reopen']);
     Route::delete('/tasks/{id}', [TaskBoardController::class, 'destroy']);

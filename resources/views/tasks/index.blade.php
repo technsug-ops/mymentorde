@@ -519,8 +519,12 @@ a.tb-stat:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); background:#f0f6ff; }
                     @endforeach
                 </select>
             </div>
-            <div class="actions">
+            <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button class="btn" type="submit">Toplu Güncelle</button>
+                {{-- Aynı forma formaction ile bağlı: seçili task_ids[] zaten enjekte edilmiş --}}
+                <button class="btn" type="submit" formaction="/tasks/bulk-delete"
+                        style="background:#dc2626;color:#fff;"
+                        onclick="return confirm('Seçili tasklar silinsin mi?\n\n(Soft delete — geri alınabilir.)')">🗑 Seçilenleri Sil</button>
             </div>
         </form>
 
@@ -1020,6 +1024,35 @@ window.tlToggle = function(id) {
     if (btn) btn.classList.toggle('open', open);
     if (row) row.classList.toggle('tl-open', open);
 };
+
+/* ── Toplu seçim: seçili task_ids[]'i taskBulkForm'a enjekte + preview ──
+   (task-board.js Vite build'inde olmadığı için seçim mantığı burada inline.
+    Hem Toplu Güncelle hem Seçilenleri Sil aynı formu kullanır.) */
+(function () {
+    var boxes = document.querySelectorAll('.task-select');
+    var form  = document.getElementById('taskBulkForm');
+    var prev  = document.getElementById('bulkTaskPreview');
+    var all   = document.getElementById('select-all');
+    if (!boxes.length || !form) return;
+    function sync() {
+        var ids = Array.prototype.slice.call(boxes)
+            .filter(function (b) { return b.checked; })
+            .map(function (b) { return b.value; });
+        if (prev) prev.value = ids.length ? (ids.length + ' task seçili') : '';
+        form.querySelectorAll('input[name="task_ids[]"].dyn').forEach(function (i) { i.remove(); });
+        ids.forEach(function (v) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden'; inp.name = 'task_ids[]'; inp.value = v; inp.className = 'dyn';
+            form.appendChild(inp);
+        });
+    }
+    boxes.forEach(function (b) { b.addEventListener('change', sync); });
+    if (all) all.addEventListener('change', function () {
+        boxes.forEach(function (b) { b.checked = all.checked; });
+        sync();
+    });
+    sync();
+})();
 
 /* ── Task Board: override task-kanban.js to use /tasks endpoints ── */
 (function () {
