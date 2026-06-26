@@ -152,6 +152,15 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
     // Deploy sonrası manager buradan migrate + cache clear tetikler.
     Route::post('/system/post-deploy', function () {
         $output = [];
+        // KAS'ta SSH yok → OPcache eski derlenmiş PHP'yi sunabilir (deploy sonrası
+        // kod degisikligi etkisiz kalir). optimize:clear bunu temizlemez; opcache_reset eder.
+        try {
+            $output['opcache_reset'] = function_exists('opcache_reset')
+                ? (opcache_reset() ? 'sifirlandi' : 'devre disi/sifirlanamadi')
+                : 'opcache yok';
+        } catch (\Throwable $e) {
+            $output['opcache_reset_error'] = $e->getMessage();
+        }
         try {
             \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
             $output['migrate'] = trim(\Illuminate\Support\Facades\Artisan::output());
