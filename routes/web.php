@@ -230,6 +230,45 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         }
     })->middleware('throttle:3,1')->name('system.seed-demo-student');
 
+    // VIP hesabı oluştur/yükselt — KAS SSH yok, buradan tek-tıkla tetiklenir.
+    // Hedef e-posta HARDCODED (keyfi hesap yükseltilemez = güvenli). Idempotent.
+    Route::get('/system/make-vip', function () {
+        $email = 'admin@panel.mentorde.com';
+        $u     = \App\Models\User::query()->where('email', $email)->first();
+
+        if ($u) {
+            if ((string) $u->role === \App\Models\User::ROLE_VIP) {
+                $msg = "Zaten VIP: {$email} — çıkış yapıp tekrar girin.";
+            } else {
+                $old = (string) $u->role;
+                $u->forceFill(['role' => \App\Models\User::ROLE_VIP])->save();
+                $msg = "✓ Yükseltildi: {$email} ({$old} → vip). Çıkış yapıp tekrar girin.";
+            }
+        } else {
+            // Şifre kodda saklanmaz: runtime'da rastgele üretilir, bir kez gösterilir.
+            $tempPass  = \Illuminate\Support\Str::random(16);
+            $companyId = (int) (\App\Models\Company::query()->where('is_active', true)->orderBy('id')->value('id') ?? 1);
+            $u = new \App\Models\User();
+            $u->forceFill([
+                'name'              => 'VIP Ortak',
+                'email'             => $email,
+                'role'              => \App\Models\User::ROLE_VIP,
+                'company_id'        => $companyId,
+                'is_active'         => true,
+                'email_verified_at' => now(),
+                'password'          => \Illuminate\Support\Facades\Hash::make($tempPass),
+            ])->save();
+
+            // Şifre belirleme daveti de gönder (e-posta çalışıyorsa kendi şifresini kurar).
+            try { \Illuminate\Support\Facades\Password::sendResetLink(['email' => $email]); } catch (\Throwable) {}
+
+            $msg = "✓ Oluşturuldu: {$email}\nTek seferlik geçici şifre: {$tempPass}\n"
+                 . "(Bu şifre hiçbir yerde saklanmaz — şimdi not alın. E-posta ile şifre belirleme bağlantısı da gönderildi.)";
+        }
+
+        return response($msg . "\n", 200)->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:5,1')->name('system.make-vip');
+
     // Prod test temizliği: 11 canonical user dışındakileri siler, emailleri @panel.mentorde.com yapar.
     // Önce GET ile rapor sayfası (dry-run), sonra POST ile gerçek çalıştırma.
     Route::get('/system/cleanup-prod-test', function () {
