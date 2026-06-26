@@ -250,24 +250,30 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/audit-log', [ManagerPortalController::class, 'auditLog'])->name('manager.audit-log');
 
     // ─── ROPA — Verarbeitungsverzeichnis (DSGVO Art. 30) ────────────────────
+    // Platform-altyapı/uyumluluk → sadece Platform Owner + System Admin (VIP/manager BLOKLI).
     $ropa = \App\Http\Controllers\Manager\ManagerProcessingActivityController::class;
-    Route::get('/manager/ropa',                       [$ropa, 'index'])->name('manager.ropa.index');
-    Route::get('/manager/ropa/export-csv',            [$ropa, 'exportCsv'])->name('manager.ropa.export-csv');
-    Route::get('/manager/ropa/create',                [$ropa, 'create'])->name('manager.ropa.create');
-    Route::post('/manager/ropa',                      [$ropa, 'store'])->name('manager.ropa.store');
-    Route::get('/manager/ropa/{activity}/edit',       [$ropa, 'edit'])->name('manager.ropa.edit');
-    Route::put('/manager/ropa/{activity}',            [$ropa, 'update'])->name('manager.ropa.update');
-    Route::delete('/manager/ropa/{activity}',         [$ropa, 'destroy'])->name('manager.ropa.destroy');
+    Route::middleware('system.access')->group(function () use ($ropa): void {
+        Route::get('/manager/ropa',                       [$ropa, 'index'])->name('manager.ropa.index');
+        Route::get('/manager/ropa/export-csv',            [$ropa, 'exportCsv'])->name('manager.ropa.export-csv');
+        Route::get('/manager/ropa/create',                [$ropa, 'create'])->name('manager.ropa.create');
+        Route::post('/manager/ropa',                      [$ropa, 'store'])->name('manager.ropa.store');
+        Route::get('/manager/ropa/{activity}/edit',       [$ropa, 'edit'])->name('manager.ropa.edit');
+        Route::put('/manager/ropa/{activity}',            [$ropa, 'update'])->name('manager.ropa.update');
+        Route::delete('/manager/ropa/{activity}',         [$ropa, 'destroy'])->name('manager.ropa.destroy');
+    });
 
     // ─── AVV Registry — Auftragsverarbeitungsverträge (DSGVO Art. 28) ───────
+    // Platform-altyapı/uyumluluk → sadece Platform Owner + System Admin (VIP/manager BLOKLI).
     $avv = \App\Http\Controllers\Manager\ManagerAvvRegistryController::class;
-    Route::get('/manager/avv',                        [$avv, 'index'])->name('manager.avv.index');
-    Route::get('/manager/avv/create',                 [$avv, 'create'])->name('manager.avv.create');
-    Route::post('/manager/avv',                       [$avv, 'store'])->name('manager.avv.store');
-    Route::get('/manager/avv/{avv}/edit',             [$avv, 'edit'])->name('manager.avv.edit');
-    Route::put('/manager/avv/{avv}',                  [$avv, 'update'])->name('manager.avv.update');
-    Route::delete('/manager/avv/{avv}',               [$avv, 'destroy'])->name('manager.avv.destroy');
-    Route::get('/manager/avv/{avv}/download',         [$avv, 'downloadPdf'])->name('manager.avv.download');
+    Route::middleware('system.access')->group(function () use ($avv): void {
+        Route::get('/manager/avv',                        [$avv, 'index'])->name('manager.avv.index');
+        Route::get('/manager/avv/create',                 [$avv, 'create'])->name('manager.avv.create');
+        Route::post('/manager/avv',                       [$avv, 'store'])->name('manager.avv.store');
+        Route::get('/manager/avv/{avv}/edit',             [$avv, 'edit'])->name('manager.avv.edit');
+        Route::put('/manager/avv/{avv}',                  [$avv, 'update'])->name('manager.avv.update');
+        Route::delete('/manager/avv/{avv}',               [$avv, 'destroy'])->name('manager.avv.destroy');
+        Route::get('/manager/avv/{avv}/download',         [$avv, 'downloadPdf'])->name('manager.avv.download');
+    });
 
     // ─── Sistem Admin Paneli ─────────────────────────────────────────────────
     Route::get('/manager/system',                            [SystemAdminController::class, 'dashboard'])->name('manager.system.dashboard');
@@ -284,10 +290,12 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/system/roles/{template}',           [SystemAdminController::class, 'roleTemplateDetail'])->name('manager.system.roles.detail');
     Route::post('/manager/system/roles/{template}/permissions', [SystemAdminController::class, 'updateTemplatePermissions'])->name('manager.system.roles.permissions');
 
-    // ─── Webhook Logları ────────────────────────────────────────────────────
-    Route::get('/manager/webhooks',                  [WebhookController::class, 'index'])->name('manager.webhooks.index');
-    Route::post('/manager/webhooks/{log}/retry',     [WebhookController::class, 'retry'])->name('manager.webhooks.retry');
-    Route::delete('/manager/webhooks/{log}',         [WebhookController::class, 'destroy'])->name('manager.webhooks.destroy');
+    // ─── Webhook Logları → sadece Platform Owner + System Admin (VIP/manager BLOKLI) ──
+    Route::middleware('system.access')->group(function (): void {
+        Route::get('/manager/webhooks',                  [WebhookController::class, 'index'])->name('manager.webhooks.index');
+        Route::post('/manager/webhooks/{log}/retry',     [WebhookController::class, 'retry'])->name('manager.webhooks.retry');
+        Route::delete('/manager/webhooks/{log}',         [WebhookController::class, 'destroy'])->name('manager.webhooks.destroy');
+    });
 
     // ─── HR Devam Raporu & KPI (Manager) ────────────────────────────────────
     Route::get('/manager/hr/attendance', [HrAttendanceController::class, 'managerReport'])->name('manager.hr.attendance');
@@ -400,8 +408,11 @@ Route::middleware(['company.context', 'auth', 'manager.or.permission:student.ass
     Route::get('/manager/contract-template/print/{guestId}', [ContractPrintController::class, 'printContract'])->name('manager.contract-template.print');
     Route::get('/manager/contract-template/pdf/{guestId}', [ContractPrintController::class, 'downloadPdf'])->name('manager.contract-template.pdf');
     Route::get('/manager/notification-stats', [ManagerAnalyticsController::class, 'notificationStats'])->name('manager.notification-stats');
-    Route::get('/manager/gdpr-dashboard', [ManagerAnalyticsController::class, 'gdprDashboard'])->name('manager.gdpr-dashboard');
-    Route::post('/manager/gdpr-dashboard/policy', [ManagerAnalyticsController::class, 'gdprPolicySave'])->name('manager.gdpr.policy.save');
+    // GDPR Uyumluluk → sadece Platform Owner + System Admin (VIP/manager BLOKLI)
+    Route::middleware('system.access')->group(function (): void {
+        Route::get('/manager/gdpr-dashboard', [ManagerAnalyticsController::class, 'gdprDashboard'])->name('manager.gdpr-dashboard');
+        Route::post('/manager/gdpr-dashboard/policy', [ManagerAnalyticsController::class, 'gdprPolicySave'])->name('manager.gdpr.policy.save');
+    });
 
     // Business Contracts (Dealer / Staff)
     Route::get('/manager/business-contracts',                        [BusinessContractController::class, 'index'])->name('manager.business-contracts.index');

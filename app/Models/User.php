@@ -90,8 +90,18 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
      */
     public const ROLE_PLATFORM_OWNER = 'platform_owner';
 
+    /**
+     * VIP Ortak — owner ile premium (customer manager) arasında üst yetkili.
+     * İş/ağ yetkisi yüksek: tüm bayi ağı + alt bayiler, oversight raporları,
+     * başvuru onay/red, denetim kayıtları (read-only) — kendi şirketi/ağı kapsamında.
+     * Platform-altyapısına (modül toggle, güvenlik/IP, GDPR, rol yönetimi) EREMEZ;
+     * bunlar Platform Owner + System Admin'de kalır. [system.access middleware]
+     */
+    public const ROLE_VIP = 'vip';
+
     public const ADMIN_PANEL_ROLES = [
         self::ROLE_PLATFORM_OWNER,   // ← Mentorde sahibi (top-level), Customer Manager'larin uzerinde
+        self::ROLE_VIP,              // ← üst yetkili ortak, owner ile manager arasında
         self::ROLE_MANAGER,
         self::ROLE_SYSTEM_ADMIN,
         self::ROLE_OPERATIONS_ADMIN,

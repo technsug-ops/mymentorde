@@ -529,7 +529,20 @@
 
             @php
                 $__isPlatformOwner = in_array((string) (auth()->user()?->role ?? ''), [\App\Models\User::ROLE_PLATFORM_OWNER, \App\Models\User::ROLE_SYSTEM_ADMIN], true);
+                $__isVip = (string) (auth()->user()?->role ?? '') === \App\Models\User::ROLE_VIP;
             @endphp
+
+            {{-- VIP Ortak (owner ile premium arası) — denetim read-only. Owner'a zaten
+                 üstteki "Sistem (Platform)" bölümünde audit var; VIP'e burada gösterilir. --}}
+            @if($__isVip)
+            <div class="nav-section">
+                <div class="nav-section-label">VIP Oversight</div>
+                <a href="/manager/audit-log"
+                   class="nav-link {{ request()->is('manager/audit-log*') ? 'active' : '' }}">
+                    <span class="nav-icon">🔍</span> Denetim Kayıtları
+                </a>
+            </div>
+            @endif
 
             {{-- Platform-seviye sistem yonetimi (modul toggle, GDPR, denetim, IP kurali, vb.)
                  → Sadece Platform Owner + System Admin. Customer Manager BLOKLI. --}}
@@ -581,8 +594,8 @@
             </div>
             @endif
 
-            {{-- Customer Manager icin "Planim" linki — Platform Owner'a gizle, o /platform'da yonetiyor --}}
-            @if(!$__isPlatformOwner)
+            {{-- Customer Manager icin "Planim" linki — Platform Owner + VIP'e gizle (SaaS musterisi degiller) --}}
+            @if(!$__isPlatformOwner && !$__isVip)
             <div class="nav-section">
                 <div class="nav-section-label">SaaS Planım</div>
                 <a href="{{ route('manager.my-plan') }}"

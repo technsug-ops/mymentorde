@@ -93,6 +93,7 @@ class AuthController extends Controller
         return match ($role) {
             User::ROLE_PLATFORM_OWNER => redirect('/platform/dashboard'),
             User::ROLE_MANAGER,
+            User::ROLE_VIP,
             User::ROLE_SYSTEM_ADMIN,
             User::ROLE_OPERATIONS_ADMIN,
             User::ROLE_FINANCE_ADMIN,
