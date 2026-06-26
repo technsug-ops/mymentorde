@@ -269,6 +269,44 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response($msg . "\n", 200)->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:5,1')->name('system.make-vip');
 
+    // Onaylı ama bayi hesabı oluşmamış başvuruları provision et (backfill).
+    // fe16350 öncesi onaylanan başvurular approved_dealer_id=null kaldı → Bayi
+    // Yönetimi'nde görünmüyor. Idempotent: zaten provision edilmişleri atlar.
+    Route::get('/system/backfill-dealers', function () {
+        $svc      = app(\App\Services\DealerProvisioningService::class);
+        $approved = \App\Models\DealerApplication::withoutGlobalScopes()
+            ->where('status', 'approved')->orderBy('id')->get();
+
+        $lines = [];
+        $new = 0; $skip = 0; $fail = 0; $cids = [];
+        foreach ($approved as $app) {
+            $cids[(int) ($app->company_id ?? 0)] = true;
+            $r = $svc->fromApplication($app);
+            if (!$r['ok'])           { $fail++; $lines[] = "FAIL #{$app->id} {$app->email} — {$r['message']}"; }
+            elseif ($r['skipped'])   { $skip++; }
+            else                     { $new++;  $lines[] = "NEW  #{$app->id} {$app->email} → {$r['dealer_code']}"; }
+        }
+
+        // Etkilenen şirketlerin Bayi Yönetimi cache'ini temizle ki hemen görünsün.
+        foreach (array_keys($cids) as $cid) {
+            \Illuminate\Support\Facades\Cache::forget("mgr_dealers_{$cid}");
+        }
+
+        $dealerByCompany = \App\Models\Dealer::withoutGlobalScopes()
+            ->selectRaw('company_id, count(*) c')->groupBy('company_id')->get();
+
+        $report  = "ONAYLI BAŞVURU: {$approved->count()}\n";
+        $report .= "Yeni provision: {$new} | Zaten vardı: {$skip} | Hata: {$fail}\n\n";
+        $report .= ($lines ? implode("\n", $lines) : '(yeni provision edilen yok)') . "\n\n";
+        $report .= "Dealer company dağılımı (toplam " . \App\Models\Dealer::withoutGlobalScopes()->count() . "):\n";
+        foreach ($dealerByCompany as $row) {
+            $report .= "  company {$row->company_id}: {$row->c} bayi\n";
+        }
+        $report .= "\nNot: Görünmüyorsa company_id eşleşmesini kontrol et (bayinin company_id'si = giriş yaptığın yöneticinin şirketi olmalı).\n";
+
+        return response($report, 200)->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:5,1')->name('system.backfill-dealers');
+
     // Prod test temizliği: 11 canonical user dışındakileri siler, emailleri @panel.mentorde.com yapar.
     // Önce GET ile rapor sayfası (dry-run), sonra POST ile gerçek çalıştırma.
     Route::get('/system/cleanup-prod-test', function () {
