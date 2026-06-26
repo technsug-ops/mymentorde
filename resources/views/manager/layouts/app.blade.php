@@ -254,6 +254,22 @@
                         <span class="nav-icon">🎚️</span> Bayi Tip Yönetimi
                     </a>
                     @endif
+                    {{-- Bayi Başvuruları — Bayi Yönetimi ile aynı bölümde (HR'a değil buraya ait). --}}
+                    @php
+                        $pendingDealerApps = \Illuminate\Support\Facades\Cache::remember('pending_dealer_apps_count', 120, function () {
+                            try {
+                                return \App\Models\DealerApplication::withoutGlobalScopes()->whereIn('status', ['pending', 'in_review'])->count();
+                            } catch (\Throwable) { return 0; }
+                        });
+                    @endphp
+                    <a href="/manager/dealer-applications"
+                       class="nav-link {{ request()->is('manager/dealer-applications*') ? 'active' : '' }}"
+                       style="justify-content:space-between;">
+                        <span><span class="nav-icon">🤝</span> Bayi Başvuruları</span>
+                        @if ($pendingDealerApps > 0)
+                            <span style="background:#dc2626;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:1px 7px;min-width:18px;text-align:center;line-height:16px;">{{ $pendingDealerApps }}</span>
+                        @endif
+                    </a>
                 @endmodule
                 {{-- 7) Toplu İçe Aktar --}}
                 <a href="/manager/bulk-import/guests"
@@ -295,21 +311,6 @@
                 <a href="/manager/hr/salary"
                    class="nav-link {{ request()->is('manager/hr/salary*') ? 'active' : '' }}">
                     <span class="nav-icon">💳</span> Bordro Profilleri
-                </a>
-                @php
-                    $pendingDealerApps = \Illuminate\Support\Facades\Cache::remember('pending_dealer_apps_count', 120, function () {
-                        try {
-                            return \App\Models\DealerApplication::whereIn('status', ['pending', 'in_review'])->count();
-                        } catch (\Throwable) { return 0; }
-                    });
-                @endphp
-                <a href="/manager/dealer-applications"
-                   class="nav-link {{ request()->is('manager/dealer-applications*') ? 'active' : '' }}"
-                   style="justify-content:space-between;">
-                    <span><span class="nav-icon">🤝</span> Dealer Başvuruları</span>
-                    @if ($pendingDealerApps > 0)
-                        <span style="background:#dc2626;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:1px 7px;min-width:18px;text-align:center;line-height:16px;">{{ $pendingDealerApps }}</span>
-                    @endif
                 </a>
             </div>
 
