@@ -72,8 +72,11 @@ class DealerProvisioningService
                 'password'    => Hash::make(Str::random(40)),
             ]);
             $userId = $user->id;
+            // Yeni hesap → "hoş geldiniz, şifrenizi belirleyin" (reset değil).
+            // Aynı token mekanizması, doğru metin. (DealerWelcomeNotification)
             try {
-                Password::sendResetLink(['email' => $email]);
+                $token = Password::broker()->createToken($user);
+                $user->notify(new \App\Notifications\DealerWelcomeNotification($token));
             } catch (\Throwable) {
             }
         }

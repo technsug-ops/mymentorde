@@ -126,7 +126,9 @@ class DealerSubDealerController extends Controller
         ]);
 
         try {
-            Password::sendResetLink(['email' => $user->email]);
+            // Yeni hesap → "hoş geldiniz, şifrenizi belirleyin" (reset maili değil)
+            $token = Password::broker()->createToken($user);
+            $user->notify(new \App\Notifications\DealerWelcomeNotification($token));
         } catch (\Throwable $e) {
             // davet maili gönderilemese de hesap oluştu; manager/bölge bayisi tekrar tetikleyebilir
         }
