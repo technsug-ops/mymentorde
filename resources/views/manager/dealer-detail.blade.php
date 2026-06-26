@@ -97,6 +97,13 @@
                 <strong>Telefon:</strong> {{ $dealer->phone ?: '—' }}<br>
                 <strong>WhatsApp:</strong> {{ $dealer->whatsapp ?: '—' }}<br>
                 <strong>Bayi Tipi:</strong> {{ $dealerType?->name_tr ?? $dealer->dealer_type_code ?? '—' }}<br>
+                <strong>Roller:</strong>
+                @forelse($dealer->roleLabels() as $rl)
+                    <span class="badge ok" style="font-size:10px;">{{ $rl }}</span>
+                @empty
+                    <span class="muted">—</span>
+                @endforelse
+                <br>
                 <strong>Kayıt:</strong> {{ $dealer->created_at?->format('d.m.Y') ?? '—' }}<br>
                 <strong>Bonus Durum:</strong>
                 @php $bs = $dealer->signup_bonus_status ?? 'locked'; @endphp
@@ -137,6 +144,29 @@
         </div>
         @endif
     </div>
+</section>
+
+{{-- Çalışma Rolleri — düzenlenebilir (lead-gen / freelance çoklu) --}}
+<section class="panel gd-panel">
+    <h2 style="display:flex;align-items:center;gap:8px;"><x-icon name="sliders" size="18" /> Çalışma Rolleri</h2>
+    <p class="muted" style="font-size:12px;margin:0 0 10px;">
+        Bayi birden çok modelde çalışabilir. <strong>Freelance</strong> seçili olunca panel izinleri (öğrenci detayı, mesajlaşma) açılır; lead komisyonu her lead'in türüne göre hesaplanır.
+    </p>
+    @php $dRoles = $dealer->rolesList(); @endphp
+    <form method="POST" action="{{ route('manager.dealers.roles', $dealer->code) }}" style="display:grid;gap:8px;max-width:480px;">
+        @csrf
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;">
+            <input type="checkbox" name="roles[]" value="lead_generation" {{ in_array('lead_generation', $dRoles, true) ? 'checked' : '' }}>
+            🤝 Lead Generation (Referral)
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;">
+            <input type="checkbox" name="roles[]" value="freelance" {{ in_array('freelance', $dRoles, true) ? 'checked' : '' }}>
+            🎯 Freelance Danışman
+        </label>
+        <div>
+            <button type="submit" class="btn" style="background:#0891b2;color:#fff;">💾 Rolleri Kaydet</button>
+        </div>
+    </form>
 </section>
 
 {{-- Hiyerarşi (2 seviye: bölge → alt bayi) --}}

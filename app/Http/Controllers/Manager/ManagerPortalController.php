@@ -686,6 +686,34 @@ class ManagerPortalController extends Controller
     }
 
     /**
+     * Bayinin çalışma rollerini günceller (lead-gen / freelance — çoklu seçim).
+     * roles primary dealer_type_code'u belirler (freelance = izin superset).
+     */
+    public function updateDealerRoles(Request $request, string $code): \Illuminate\Http\RedirectResponse
+    {
+        \App\Support\ModuleAccess::assertEnabled('dealer');
+        $cid    = $this->companyId();
+        $dealer = Dealer::where('code', $code)->firstOrFail();
+        abort_if($cid > 0 && (int) ($dealer->company_id ?? 0) !== $cid, 403);
+
+        $validated = $request->validate([
+            'roles'   => ['required', 'array', 'min:1'],
+            'roles.*' => ['in:lead_generation,freelance'],
+        ]);
+        $roles = array_values(array_unique($validated['roles']));
+
+        $dealer->update([
+            'roles'            => $roles,
+            'dealer_type_code' => Dealer::primaryTypeForRoles($roles),
+        ]);
+
+        return back()->with('status', 'Çalışma rolleri güncellendi: ' . implode(', ', array_map(
+            fn ($r) => Dealer::ROLE_LABELS[$r] ?? $r,
+            $roles
+        )));
+    }
+
+    /**
      * Bayi mini-site moderasyonu: slug atama + yayına alma (site_enabled).
      */
     public function updateDealerMiniSite(Request $request, string $code): \Illuminate\Http\RedirectResponse

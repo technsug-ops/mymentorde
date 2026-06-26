@@ -123,6 +123,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/dealers/{code}',                   [ManagerPortalController::class, 'dealerShow'])->name('manager.dealers.show');
     Route::post('/manager/dealers/{code}/override',         [ManagerPortalController::class, 'updateDealerOverride'])->name('manager.dealers.override');
     Route::post('/manager/dealers/{code}/mini-site',        [ManagerPortalController::class, 'updateDealerMiniSite'])->name('manager.dealers.mini-site');
+    Route::post('/manager/dealers/{code}/roles',            [ManagerPortalController::class, 'updateDealerRoles'])->name('manager.dealers.roles');
     Route::get('/manager/dealer-types',                     [ManagerPortalController::class, 'dealerTypes'])->name('manager.dealer-types.index');
     Route::post('/manager/dealer-types/{code}',             [ManagerPortalController::class, 'updateDealerType'])->name('manager.dealer-types.update');
     Route::get('/manager/commissions',                      [ManagerPortalController::class, 'commissions'])->name('manager.commissions');
@@ -689,6 +690,7 @@ Route::middleware(['company.context', 'auth', 'verified', 'analytics.access'])->
     Route::get('/manager/dealer-applications',                [$dealerApps, 'index'])->name('manager.dealer-applications.index');
     Route::get('/manager/dealer-applications/{id}',          [$dealerApps, 'show'])->where('id', '[0-9]+')->name('manager.dealer-applications.show');
     Route::post('/manager/dealer-applications/{id}/status',  [$dealerApps, 'updateStatus'])->where('id', '[0-9]+')->middleware('throttle:30,1')->name('manager.dealer-applications.status');
+    Route::post('/manager/dealer-applications/{id}/roles',   [$dealerApps, 'updateRoles'])->where('id', '[0-9]+')->middleware('throttle:30,1')->name('manager.dealer-applications.roles');
 
     $userIntel = \App\Http\Controllers\Manager\ManagerUserIntelligenceController::class;
     Route::get('/manager/user-intelligence',                  [$userIntel, 'index'])->name('manager.user-intelligence');

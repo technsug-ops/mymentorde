@@ -1,27 +1,22 @@
-# İndirim Kodu — Public Share Page (TAMAMLANDI)
+# TODO — Bayi çoklu rol (lead-gen + freelance) + plan editable
 
-**Tamamlanma:** 2026-06-09
+**Karar (26 Haziran):** Kapasite + tek primary tier yaklaşımı. `dealer_type_code` primary kalır (freelance = izin superset), "çift rol" `roles` JSON kapasite seti olarak eklenir. Komisyon lead'in `referral_type`'ına göre zaten ayrışıyor. M2M YOK (30 dosya riski).
 
-Önceki backlog plan'ı: 12 madde. Hepsi tamamlandı ve canlıya alındı.
+## Adımlar — HEPSİ TAMAM (kod), prod migrate bekliyor
+- [x] 1. Migration: `dealers.roles` + `dealer_applications.roles` JSON nullable + backfill
+- [x] 2. Dealer model: roles cast + sabitler + helper'lar (rolesList/hasRole/primaryTypeForRoles/roleLabels)
+- [x] 3. DealerApplication model: roles cast + rolesList + rolesFromPlan
+- [x] 4. Başvuru detay editable form (CSP-safe)
+- [x] 5. updateRoles() + onaylı dealer senkron
+- [x] 6. provisionDealerFromApplication roles entegrasyonu
+- [x] 7. Routes (manager + mktg-admin + manager.dealers.roles) — route:list ✓
+- [x] 8. Bayi detay editable + updateDealerRoles()
+- [x] 9. php -l temiz, route:list ✓, view:clear ✓ (lokal MySQL kapalı → migrate prod'da)
 
-## Sonuç
+## DEPLOY SONRASI ŞART
+`php artisan migrate --force` (roles kolonları + backfill) — yoksa 500.
 
-- ✅ Migration `add_landing_fields_to_discount_codes` (5 kolon)
-- ✅ Model fillable + cast
-- ✅ Manager form `Paylaşım kartı` (template selector + 4 metin)
-- ✅ Manager controller validation + save
-- ✅ Manager index: `🔗 Linki Kopyala` + `👁 Önizle` butonları
-- ✅ Public route `GET /promo/{code}` (throttle:60,1)
-- ✅ PromoController — code resolve, expired view fallback
-- ✅ Templates 1-5 (Classic, Bold, Premium, Playful, Urgency) + styles
-- ✅ html2canvas: `📥 Görsel İndir` butonu PNG indirir
-- ✅ Open Graph + Twitter Card meta (og:image fallback chain)
-- ✅ PostHog event: `discount_code_landing_viewed` + `discount_code_landing_expired_viewed`
-- ⚪ Smoke test — user prod doğrulaması bekleniyor
-
-## Sonraki ileride yapılabilir (opsiyonel)
-
-- **Promo OG image** — `public/img/promo-og.png` (1200x630, brand identity) eklendiğinde otomatik kullanılır
-- **Brand OG image** — `public/img/brand-og.png` fallback olarak da çalışır
-- **PNG önizleme thumbnails** — manager index'inde her kart için template thumbnail
-- **A/B test** — manager template seçerken hangisinin daha çok download olduğunu PostHog'dan ölç (template_id breakdown)
+## Notlar
+- DealerType kodları: lead_generation, freelance_danisman, b2b_partner
+- primaryTypeForRoles: freelance varsa freelance_danisman, yoksa lead_generation
+- show.blade satır 156-159'da mevcut inline onclick var (CSP riski) — yeni kodda tekrarlama

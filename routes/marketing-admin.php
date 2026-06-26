@@ -365,6 +365,7 @@ Route::middleware(['company.context', 'auth', 'marketing.access', 'module:market
             Route::get('/dealer-applications',                       [$dapps, 'index'])->name('dealer-applications.index');
             Route::get('/dealer-applications/{id}',                  [$dapps, 'show'])->where('id', '[0-9]+')->name('dealer-applications.show');
             Route::post('/dealer-applications/{id}/status',          [$dapps, 'updateStatus'])->where('id', '[0-9]+')->middleware('throttle:30,1')->name('dealer-applications.status');
+            Route::post('/dealer-applications/{id}/roles',           [$dapps, 'updateRoles'])->where('id', '[0-9]+')->middleware('throttle:30,1')->name('dealer-applications.roles');
 
         });
     });

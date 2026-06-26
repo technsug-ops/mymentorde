@@ -72,6 +72,47 @@ class DealerApplicationController extends Controller
         return view('manager.dealer-applications.show', compact('app'));
     }
 
+    /**
+     * Çalışma rollerini güncelle (lead-gen / freelance — çoklu seçim).
+     * preferred_plan primary olarak senkronlanır; başvuru zaten onaylıysa
+     * bağlı bayi hesabının roles + primary dealer_type_code'u da güncellenir.
+     */
+    public function updateRoles(Request $request, int $id)
+    {
+        $this->ensureModuleEnabled();
+        $this->ensureAdmin($request);
+
+        $data = $request->validate([
+            'roles'   => ['required', 'array', 'min:1'],
+            'roles.*' => ['in:lead_generation,freelance'],
+        ]);
+
+        $app   = DealerApplication::withoutGlobalScopes()->findOrFail($id);
+        $roles = array_values(array_unique($data['roles']));
+
+        $app->update([
+            'roles'          => $roles,
+            // primary: freelance varsa freelance, yoksa lead_generation
+            'preferred_plan' => in_array('freelance', $roles, true) ? 'freelance' : 'lead_generation',
+        ]);
+
+        // Onaylı başvuruysa bağlı bayiyi de senkronla (idempotent).
+        if ($app->approved_dealer_id) {
+            $dealer = Dealer::withoutGlobalScopes()->find($app->approved_dealer_id);
+            if ($dealer) {
+                $dealer->update([
+                    'roles'            => $roles,
+                    'dealer_type_code' => Dealer::primaryTypeForRoles($roles),
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Çalışma rolleri güncellendi: ' . implode(', ', array_map(
+            fn ($r) => Dealer::ROLE_LABELS[$r] ?? $r,
+            $roles
+        )));
+    }
+
     public function updateStatus(Request $request, int $id)
     {
         $this->ensureModuleEnabled();
@@ -126,12 +167,9 @@ class DealerApplicationController extends Controller
             return ' — (uyarı: e-posta yok, bayi hesabı oluşturulamadı)';
         }
 
-        // preferred_plan → dealer_type_code eşlemesi
-        $typeCode = match ((string) $app->preferred_plan) {
-            'freelance' => 'freelance_danisman',
-            'lead_generation' => 'lead_generation',
-            default => 'lead_generation', // 'unsure' vb.
-        };
+        // Roller (çoklu) → primary dealer_type_code. roles boşsa plan'dan türet.
+        $roles    = $app->rolesList();
+        $typeCode = Dealer::primaryTypeForRoles($roles);
 
         $companyId = (int) ($app->company_id ?: (\App\Models\Company::query()->where('is_active', true)->orderBy('id')->value('id') ?? 1));
         $name = trim(($app->first_name ?? '') . ' ' . ($app->last_name ?? '')) ?: ($app->company_name ?: 'Bayi');
@@ -147,6 +185,7 @@ class DealerApplicationController extends Controller
             'email'             => $email,
             'phone'             => $app->phone ?: null,
             'dealer_type_code'  => $typeCode,
+            'roles'             => $roles,
             'is_active'         => true,
             'is_archived'       => false,
         ]);

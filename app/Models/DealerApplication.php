@@ -18,7 +18,7 @@ class DealerApplication extends Model
         'company_id',
         'first_name', 'last_name', 'email', 'phone', 'city', 'country',
         'company_name', 'tax_number', 'business_type',
-        'preferred_plan', 'expected_monthly_volume', 'education_experience', 'experience_details',
+        'preferred_plan', 'roles', 'expected_monthly_volume', 'education_experience', 'experience_details',
         'heard_from', 'referrer_email', 'motivation',
         'utm_source', 'utm_medium', 'utm_campaign',
         'status', 'reviewed_by', 'reviewed_at', 'review_note', 'rejected_reason',
@@ -30,10 +30,27 @@ class DealerApplication extends Model
         'education_experience' => 'boolean',
         'expected_monthly_volume' => 'integer',
         'reviewed_at' => 'datetime',
+        'roles' => 'array',
     ];
 
     public const STATUSES = ['pending', 'in_review', 'approved', 'rejected', 'waitlist'];
     public const PLANS = ['lead_generation', 'freelance', 'unsure'];
+
+    /** Etkin roller — kayıt boşsa preferred_plan'dan türet (geriye dönük uyum). */
+    public function rolesList(): array
+    {
+        $roles = is_array($this->roles) ? array_values(array_filter($this->roles)) : [];
+        return !empty($roles) ? $roles : self::rolesFromPlan((string) $this->preferred_plan);
+    }
+
+    /** preferred_plan → roles eşlemesi (unsure → lead_generation varsayılan). */
+    public static function rolesFromPlan(string $plan): array
+    {
+        return match ($plan) {
+            'freelance' => [Dealer::ROLE_FREELANCE],
+            default     => [Dealer::ROLE_LEAD_GENERATION], // lead_generation, unsure
+        };
+    }
 
     public function getFullNameAttribute(): string
     {

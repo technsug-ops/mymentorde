@@ -21,6 +21,7 @@ class Dealer extends Model
         'phone',
         'whatsapp',
         'dealer_type_code',
+        'roles',
         'is_active',
         'is_archived',
         'archived_by',
@@ -51,6 +52,7 @@ class Dealer extends Model
         'is_active' => 'boolean',
         'is_archived' => 'boolean',
         'archived_at' => 'datetime',
+        'roles' => 'array',
         'signup_bonus_amount' => 'decimal:2',
         'signup_bonus_unlocked_at' => 'datetime',
         'override_rate_eur' => 'decimal:2',
@@ -58,6 +60,60 @@ class Dealer extends Model
         'site_enabled' => 'boolean',
         'custom_domain_verified_at' => 'datetime',
     ];
+
+    // ── Çalışma rolleri (kapasite seti) ───────────────────────────────────────
+    // Bir bayi birden çok rolde çalışabilir. dealer_type_code primary tier'dır;
+    // roles sadece hangi iş modellerinde çalıştığını belirtir.
+    public const ROLE_LEAD_GENERATION = 'lead_generation';
+    public const ROLE_FREELANCE        = 'freelance';
+    public const ROLE_B2B_PARTNER      = 'b2b_partner';
+
+    /** UI'da açılıp kapatılabilen roller (b2b ayrı bir tier, toggle dışı). */
+    public const TOGGLEABLE_ROLES = [self::ROLE_LEAD_GENERATION, self::ROLE_FREELANCE];
+
+    public const ROLE_LABELS = [
+        self::ROLE_LEAD_GENERATION => 'Lead Generation (Referral)',
+        self::ROLE_FREELANCE        => 'Freelance Danışman',
+        self::ROLE_B2B_PARTNER      => 'B2B Partner',
+    ];
+
+    public const ROLE_TO_TYPE = [
+        self::ROLE_LEAD_GENERATION => 'lead_generation',
+        self::ROLE_FREELANCE        => 'freelance_danisman',
+        self::ROLE_B2B_PARTNER      => 'b2b_partner',
+    ];
+
+    /** Etkin roller — kayıt boşsa primary type'tan türet (geriye dönük uyum). */
+    public function rolesList(): array
+    {
+        $roles = is_array($this->roles) ? array_values(array_filter($this->roles)) : [];
+        if (!empty($roles)) {
+            return $roles;
+        }
+        return array_keys(array_filter(self::ROLE_TO_TYPE, fn ($t) => $t === $this->dealer_type_code));
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return in_array($role, $this->rolesList(), true);
+    }
+
+    public function roleLabels(): array
+    {
+        return array_map(fn ($r) => self::ROLE_LABELS[$r] ?? $r, $this->rolesList());
+    }
+
+    /**
+     * Rol setinden primary dealer_type_code seç: en yetkili (izin superset)
+     * tier kazanır — freelance > lead_generation. Boşsa lead_generation.
+     */
+    public static function primaryTypeForRoles(array $roles): string
+    {
+        if (in_array(self::ROLE_B2B_PARTNER, $roles, true))      return 'b2b_partner';
+        if (in_array(self::ROLE_FREELANCE, $roles, true))        return 'freelance_danisman';
+        if (in_array(self::ROLE_LEAD_GENERATION, $roles, true))  return 'lead_generation';
+        return 'lead_generation';
+    }
 
     // ── Hiyerarşi (2 seviye: bölge → alt bayi) ────────────────
 

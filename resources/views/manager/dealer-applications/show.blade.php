@@ -104,6 +104,32 @@
         @endif
     </div>
 
+    {{-- Çalışma Rolleri — düzenlenebilir. Bir bayi hem lead-gen hem freelance olabilir. --}}
+    <div class="das-card" style="border-left:4px solid #0891b2;">
+        <h3>🎚️ Çalışma Rolleri (düzenlenebilir)</h3>
+        @php $currentRoles = $app->rolesList(); @endphp
+        <p style="font-size:12px;color:#64748b;margin:0 0 12px;">
+            Bayi birden çok modelde çalışabilir. <strong>Freelance</strong> seçiliyse panel izinleri (öğrenci detayı, mesajlaşma) otomatik açılır; lead bazlı komisyon yine her lead'in türüne göre hesaplanır.
+        </p>
+        <form method="POST" action="{{ \App\Support\PanelRouting::url('dealer-applications', 'roles', $app->id) }}" class="das-action-form">
+            @csrf
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" name="roles[]" value="lead_generation" {{ in_array('lead_generation', $currentRoles, true) ? 'checked' : '' }}>
+                🤝 Lead Generation (Referral) — isim/iletişim paylaşımı
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" name="roles[]" value="freelance" {{ in_array('freelance', $currentRoles, true) ? 'checked' : '' }}>
+                🎯 Freelance Danışman — aktif yönlendirme & ön ikna
+            </label>
+            <div>
+                <button type="submit" class="das-btn" style="background:#0891b2;">💾 Rolleri Kaydet</button>
+                @if ($app->approved_dealer_id)
+                    <span style="font-size:12px;color:#92400e;margin-left:10px;">⚠ Onaylı başvuru — kaydedince bağlı bayi hesabı da güncellenir.</span>
+                @endif
+            </div>
+        </form>
+    </div>
+
     <div class="das-card">
         <h3>📍 Kaynak & Motivasyon</h3>
         <div class="das-row"><span class="key">Nereden Duydu</span><span class="val">{{ ucfirst(str_replace('_', ' ', (string) $app->heard_from)) ?: '—' }}</span></div>
