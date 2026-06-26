@@ -240,6 +240,30 @@ class TicketCenterController extends Controller
         return $this->redirectBackToCenter($request)->with('status', "{$updated} ticket durumu toplu guncellendi.");
     }
 
+    /**
+     * Ticket'ı sil (soft delete — geri alınabilir, deleted_at set edilir).
+     * Test verisi temizliği için. Company + role-department scope'lu.
+     */
+    public function destroy(Request $request, GuestTicket $ticket): RedirectResponse
+    {
+        $this->authorizeManage($request);
+
+        $currentCompanyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
+        if ($currentCompanyId > 0 && (int) ($ticket->company_id ?? 0) !== $currentCompanyId) {
+            abort(403);
+        }
+
+        $roleScopedDepartment = $this->resolveScopedDepartmentForRole((string) optional($request->user())->role);
+        if ($roleScopedDepartment !== null && (string) ($ticket->department ?? 'operations') !== $roleScopedDepartment) {
+            abort(403);
+        }
+
+        $label = '#' . $ticket->id . ' ' . ($ticket->subject ?: '');
+        $ticket->delete(); // soft delete — geri alınabilir
+
+        return $this->redirectBackToCenter($request)->with('status', "Ticket silindi (geri alınabilir): {$label}");
+    }
+
     public function convertToDm(Request $request, GuestTicket $ticket): RedirectResponse
     {
         $this->authorizeManage($request);

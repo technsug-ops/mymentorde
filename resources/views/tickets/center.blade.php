@@ -426,6 +426,15 @@
                     @csrf
                     <button type="submit" class="btn-sm btn-dm">DM'ye Çevir (Mesaj Merkezi)</button>
                 </form>
+
+                {{-- Sil (test verisi temizliği — soft delete, geri alınabilir) --}}
+                <form method="POST" action="{{ route('tickets.center.delete', $row->id) }}" style="margin-top:8px;"
+                      onclick="event.stopPropagation()"
+                      onsubmit="return confirm('Bu ticket silinsin mi?\n\n{{ '#'.$row->id }} {{ addslashes($row->subject ?? '') }}\n\n(Soft delete — geri alınabilir.)')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn-sm" style="background:#dc2626;color:#fff;">🗑 Sil</button>
+                </form>
             </div>
             @endforeach
         </div>

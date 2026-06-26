@@ -78,6 +78,7 @@ Route::middleware(['company.context', 'auth', 'task.access'])->group(function ()
     Route::post('/tickets-center/bulk-status', [TicketCenterController::class, 'bulkStatus']);
     Route::post('/tickets-center/{ticket}/route', [TicketCenterController::class, 'routeTicket']);
     Route::post('/tickets-center/{ticket}/convert-to-dm', [TicketCenterController::class, 'convertToDm'])->name('tickets.center.convert-dm');
+    Route::delete('/tickets-center/{ticket}', [TicketCenterController::class, 'destroy'])->name('tickets.center.delete');
 
     // ── Manager Requests ──────────────────────────────────────────────────────
     Route::get('/manager/requests', [ManagerRequestController::class, 'index'])->name('manager.requests.index');
