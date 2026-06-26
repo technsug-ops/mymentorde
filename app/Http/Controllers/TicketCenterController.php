@@ -264,6 +264,42 @@ class TicketCenterController extends Controller
         return $this->redirectBackToCenter($request)->with('status', "Ticket silindi (geri alınabilir): {$label}");
     }
 
+    /**
+     * Seçili ticket'ları toplu sil (soft delete). bulkStatus ile aynı scope deseni.
+     */
+    public function bulkDelete(Request $request): RedirectResponse
+    {
+        $this->authorizeManage($request);
+        $currentCompanyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
+        $roleScopedDepartment = $this->resolveScopedDepartmentForRole((string) optional($request->user())->role);
+
+        $data = $request->validate([
+            'ticket_ids'   => ['required', 'array', 'min:1'],
+            'ticket_ids.*' => ['integer'],
+        ]);
+
+        $ids = collect((array) $data['ticket_ids'])->map(fn ($v) => (int) $v)->filter(fn ($v) => $v > 0)->values();
+        if ($ids->isEmpty()) {
+            return $this->redirectBackToCenter($request)->withErrors(['ticket_ids' => 'Silmek icin ticket secin.']);
+        }
+
+        $tickets = GuestTicket::query()
+            ->whereIn('id', $ids->all())
+            ->when($currentCompanyId > 0, fn ($q) => $q->where('company_id', $currentCompanyId))
+            ->get();
+
+        $deleted = 0;
+        foreach ($tickets as $ticket) {
+            if ($roleScopedDepartment !== null && (string) ($ticket->department ?? 'operations') !== $roleScopedDepartment) {
+                continue;
+            }
+            $ticket->delete(); // soft delete
+            $deleted++;
+        }
+
+        return $this->redirectBackToCenter($request)->with('status', "{$deleted} ticket silindi (geri alınabilir).");
+    }
+
     public function convertToDm(Request $request, GuestTicket $ticket): RedirectResponse
     {
         $this->authorizeManage($request);

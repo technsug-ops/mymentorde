@@ -292,6 +292,12 @@
             <button type="submit" name="status" value="closed" class="btn-sm btn-close-t">Seçilenleri Kapat</button>
             <button type="submit" name="status" value="open"   class="btn-sm btn-route" style="background:#059669;">Seçilenleri Yeniden Aç</button>
         </form>
+        <form method="POST" action="/tickets-center/bulk-delete" id="bulkDeleteForm" style="margin-top:8px;"
+              onsubmit="return confirm('Seçili ticket\'lar silinsin mi?\n\n(Soft delete — geri alınabilir.)')">
+            @csrf
+            <input type="hidden" name="current_department" value="{{ $routeDepartment ?? '' }}">
+            <button type="submit" class="btn-sm" style="background:#dc2626;color:#fff;">🗑 Seçilenleri Sil</button>
+        </form>
     </section>
 
     {{-- Ticket list --}}
@@ -471,5 +477,41 @@ window.tcToggle = function(id, e) {
     var isOpen = detail.classList.toggle('tc-open');
     if (row) row.classList.toggle('tc-open', isOpen);
 };
+
+// ── Toplu seçim: checkbox'ları sayar + bulk formlara ticket_ids[] enjekte eder ──
+// (ticket-center.js Vite build'inde olmadığı için seçim mantığı burada inline.)
+(function () {
+    var boxes     = document.querySelectorAll('.ticket-select');
+    var selectAll = document.getElementById('selectAllTickets');
+    var preview   = document.getElementById('bulkTicketIds');
+    var countEl   = document.getElementById('ticketSelectedCount');
+    var forms     = ['bulkRouteForm', 'bulkStatusForm', 'bulkDeleteForm']
+        .map(function (id) { return document.getElementById(id); })
+        .filter(Boolean);
+    if (!boxes.length) return;
+
+    function sync() {
+        var ids = Array.prototype.slice.call(boxes)
+            .filter(function (b) { return b.checked; })
+            .map(function (b) { return b.value; });
+        if (preview) preview.value = ids.join(',');
+        if (countEl) countEl.textContent = ids.length + ' seçili';
+        if (selectAll) selectAll.checked = boxes.length > 0 && ids.length === boxes.length;
+        forms.forEach(function (f) {
+            f.querySelectorAll('input[name="ticket_ids[]"].dyn').forEach(function (i) { i.remove(); });
+            ids.forEach(function (v) {
+                var inp = document.createElement('input');
+                inp.type = 'hidden'; inp.name = 'ticket_ids[]'; inp.value = v; inp.className = 'dyn';
+                f.appendChild(inp);
+            });
+        });
+    }
+    boxes.forEach(function (b) { b.addEventListener('change', sync); });
+    if (selectAll) selectAll.addEventListener('change', function () {
+        boxes.forEach(function (b) { b.checked = selectAll.checked; });
+        sync();
+    });
+    sync();
+})();
 </script>
 @endsection
