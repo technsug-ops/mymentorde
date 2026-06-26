@@ -395,7 +395,7 @@
     {{-- Haftalık lead trendi (mini bar chart) --}}
     <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:18px 20px;">
         <div style="font-size:13px;font-weight:700;color:var(--text,#111);margin-bottom:12px;">Haftalık Lead Trendi</div>
-        @php $maxWeek = max(1, max(array_column($weeklyLeads, 'count'))); @endphp
+        @php $maxWeek = max(1, max(array_column($weeklyLeads, 'count') ?: [0])); @endphp
         <div style="display:flex;align-items:flex-end;gap:6px;height:80px;">
             @foreach($weeklyLeads as $wk)
                 <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">

@@ -112,9 +112,10 @@
         @php
             $dealerUser     = auth()->user();
             $dealerInitials = strtoupper(substr(preg_replace('/\s+/', '', ($dealerUser?->name ?? 'DE')), 0, 2));
-            // $tierPerms layout'ta her zaman hazır olsun
+            // $__sidebarDealer her zaman tanımlı olsun (satır ~192 isRegional kontrolü +
+            // manager preview için null-safe). tierPerms controller'dan gelmemişse türet.
+            $__sidebarDealer = \App\Models\Dealer::where('code', strtoupper(trim((string)($dealerUser?->dealer_code ?? ''))))->first();
             if (!isset($tierPerms)) {
-                $__sidebarDealer = \App\Models\Dealer::where('code', strtoupper(trim((string)($dealerUser?->dealer_code ?? ''))))->first();
                 $tierPerms = \App\Support\DealerTierPermissions::for($__sidebarDealer);
             }
         @endphp

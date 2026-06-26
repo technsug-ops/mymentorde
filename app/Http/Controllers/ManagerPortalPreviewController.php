@@ -133,16 +133,16 @@ class ManagerPortalPreviewController extends Controller
             'earningsHero'        => ['total' => 0, 'month' => 0, 'pending' => 0, 'next_milestone' => null, 'month_label' => now()->format('F Y')],
             'leadPipeline'        => ['new' => 0, 'contacted' => 0, 'docs_pending' => 0, 'contract_stage' => 0, 'converted' => 0],
             // ── Preview için defansif default'lar — DealerPortalController ile sync ──
-            'tierPerms'           => $dealer ? \App\Models\DealerTierPermissions::for($dealer) : null,
+            'tierPerms'           => $dealer ? \App\Support\DealerTierPermissions::for($dealer) : null,
             'tierProgress'        => $dealer
                 ? app(\App\Services\DealerTierResolverService::class)->progress($dealer)
                 : ['current_tier' => null, 'next_tier' => null, 'progress_pct' => 0, 'metrics' => []],
-            'referralAnalysis'    => collect(),
+            'referralAnalysis'    => [], // live: array (blade array fonksiyonlarıyla işler)
             'avgConversionDays'   => 0,
-            'weeklyLeads'         => collect(),
+            'weeklyLeads'         => [], // live: array — blade array_column() çağırır
             'statusDistribution'  => collect(),
-            'monthlyActivity'     => collect(),
-            'trainingProgress'    => ['completed' => 0, 'total' => 0, 'pct' => 0, 'next_lesson' => null],
+            'monthlyActivity'     => [], // live: array
+            'trainingProgress'    => 0, // DealerPortalController ile sync: scalar yüzde (blade %{{ }} olarak basar)
             'activityFeed'        => collect(),
             'bonus'               => [
                 'amount'      => (float) ($dealer?->signup_bonus_amount ?? 100),
