@@ -348,7 +348,34 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         $report  = "docs_pending + senior atanmış + köprülenmemiş: {$guests->count()}\n";
         $report .= "Köprülendi: {$bridged} | Atlandı: {$skip} | Hata: {$fail}\n\n";
         $report .= ($lines ? implode("\n", $lines) : '(köprülenecek aday yok)') . "\n";
-        $report .= "\nNot: ?senior=email ile tek senior'a sınırlayabilirsin.\n";
+
+        // ── TEŞHİS: senior'a atanmış TÜM aday öğrenciler hangi statüde? ──
+        $diagQ = \App\Models\GuestApplication::query()->withoutGlobalScopes()
+            ->whereNotNull('assigned_senior_email')->where('assigned_senior_email', '!=', '')
+            ->when($emailFilter !== '', fn ($q) => $q->whereRaw('lower(assigned_senior_email) = ?', [strtolower($emailFilter)]));
+        $byStatus = (clone $diagQ)->selectRaw('lead_status, count(*) c')->groupBy('lead_status')->pluck('c', 'lead_status');
+        $report .= "\n── TEŞHİS" . ($emailFilter !== '' ? " ({$emailFilter})" : ' (tüm seniorlar)') . " — atanmış aday öğrenciler statü dağılımı:\n";
+        if ($byStatus->isEmpty()) {
+            $report .= "  (bu senior'a atanmış aday öğrenci YOK — e-posta eşleşmesini kontrol et)\n";
+        } else {
+            foreach ($byStatus as $st => $c) {
+                $report .= "  " . ($st ?: '(boş)') . ": {$c}\n";
+            }
+        }
+        $report .= "\nNot: Köprü sadece 'docs_pending' (Evrak Bekliyor) için kurulur.\n";
+        $report .= "Tüm atanmışları statü farketmeksizin köprülemek istersen: &all=1 ekle.\n";
+
+        // Opsiyonel: ?all=1 → statü farketmeksizin tüm atanmış + köprülenmemiş aday'ı köprüle
+        if ($request->boolean('all')) {
+            $allGuests = (clone $diagQ)->where(function ($q) {
+                $q->whereNull('converted_student_id')->orWhere('converted_student_id', '');
+            })->orderBy('id')->get();
+            $b2 = 0; $f2 = 0;
+            foreach ($allGuests as $g) {
+                try { if ($svc->bridgeFromGuest($g)) { $b2++; } } catch (\Throwable $e) { $f2++; }
+            }
+            $report .= "\n[ALL] Statü farketmeksizin köprülenen: {$b2} | hata: {$f2}\n";
+        }
 
         return response($report, 200)->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:5,1')->name('system.bridge-docs-pending');
