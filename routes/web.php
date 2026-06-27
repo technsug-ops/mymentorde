@@ -504,6 +504,16 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response()->json(['ok' => true, 'output' => $out]);
     })->middleware('throttle:10,1')->name('system.run-queue');
 
+    // KAS cron'a yapıştırılacak TAM URL'i göster (token APP_KEY'den türer).
+    Route::get('/system/cron-url', function () {
+        $url = url('/system/cron/run-queue') . '?token=' . mentordeCronToken();
+        $txt = "KAS URL-CRON için tam adres (her dakika çağır):\n\n{$url}\n\n"
+            . "Kurulum: KAS Control Center → Tools → Cronjobs → Neuer Cronjob →\n"
+            . "  · Typ: URL (wget/curl)\n  · Adres: yukarıdaki URL\n  · Intervall: her 1 dakika\n\n"
+            . "Token gizlidir; bu adresi kimseyle paylaşma. APP_KEY değişirse token da değişir.\n";
+        return response($txt, 200)->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:10,1')->name('system.cron-url');
+
     // Mail render testi (markdown hint-path fix doğrulama, c2a6139). x-mail bileşeni
     // kullanan 7 şablonu dummy veriyle RENDER eder → "No hint path defined for [mail]"
     // hatası gider mi? ?send=adres@x ile gerçekten de gönderir (contract-completed).
@@ -753,6 +763,41 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         }
     })->middleware('throttle:5,1')->name('system.repair-registration-fields');
 });
+
+// ── KAS URL-CRON: mail kuyruğunu işle (auth GEREKMEZ, token korumalı) ──────
+// /system/run-queue manager-auth ardında olduğu için cron (oturumsuz) onu
+// çalıştıramaz. Bu endpoint APP_KEY'den türeyen sabit gizli token ile korunur.
+// Doğru URL'i öğrenmek için manager olarak /system/cron-url aç.
+if (!function_exists('mentordeCronToken')) {
+    function mentordeCronToken(): string
+    {
+        return substr(hash_hmac('sha256', 'system-run-queue', (string) config('app.key')), 0, 32);
+    }
+}
+Route::get('/system/cron/run-queue', function (\Illuminate\Http\Request $request) {
+    if (!hash_equals(mentordeCronToken(), (string) $request->query('token', ''))) {
+        return response('forbidden', 403)->header('Content-Type', 'text/plain');
+    }
+    $out = [];
+    try {
+        \Illuminate\Support\Facades\Artisan::call('queue:work', [
+            '--queue' => 'notifications,default', '--stop-when-empty' => true,
+            '--max-time' => 50, '--tries' => 3,
+        ]);
+        $out['queue_work'] = trim(\Illuminate\Support\Facades\Artisan::output());
+    } catch (\Throwable $e) {
+        $out['queue_work_error'] = $e->getMessage();
+    }
+    try {
+        \Illuminate\Support\Facades\Artisan::call('notifications:dispatch', ['--limit' => 100]);
+        $out['notifications_dispatch'] = trim(\Illuminate\Support\Facades\Artisan::output());
+    } catch (\Throwable $e) {
+        $out['notifications_dispatch_error'] = $e->getMessage();
+    }
+    $out['pending_jobs'] = \Illuminate\Support\Facades\DB::table('jobs')->count();
+    return response()->json(['ok' => true, 'output' => $out]);
+})->middleware('throttle:120,1')->name('system.cron.run-queue');
+
 Route::get('/go/{code}', TrackedLinkRedirectController::class)->name('tracked-link.redirect');
 
 // DAM4 — Public share link access (auth gerekmez, expires + password protected)
