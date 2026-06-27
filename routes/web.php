@@ -514,7 +514,21 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
             return response("Log dosyası yok ({$dir})\n", 200)->header('Content-Type', 'text/plain; charset=utf-8');
         }
         usort($files, fn ($a, $b) => filemtime($b) <=> filemtime($a));
-        $file = $files[0];
+
+        // Varsayılan: UYGULAMA log'u (laravel-*.log) — deploy-webhook.log değil.
+        // ?file=deploy → deploy webhook log'u, ?file=<isim parçası> → eşleşen ilk.
+        $fileFilter = trim((string) $request->query('file', ''));
+        $pick = null;
+        if ($fileFilter !== '') {
+            foreach ($files as $f) {
+                if (stripos(basename($f), $fileFilter) !== false) { $pick = $f; break; }
+            }
+        } else {
+            foreach ($files as $f) {
+                if (stripos(basename($f), 'laravel') !== false) { $pick = $f; break; }
+            }
+        }
+        $file = $pick ?: $files[0];
 
         $want = max(20, min(1000, (int) $request->query('lines', 120)));
         // Dosyanın son ~512KB'ını oku (büyük log'larda bellek dostu).
