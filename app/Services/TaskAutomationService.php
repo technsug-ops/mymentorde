@@ -411,13 +411,15 @@ class TaskAutomationService
         $sourceType = 'conversation_response_due';
         $sourceId = (string) $thread->id;
 
+        // KONU BAZLI: thread başına TEK task. status filtresi YOK — done olmuş
+        // task yeni katılımcı mesajında yeniden açılır (her mesajda yeni task açılmaz).
         $existing = MarketingTask::query()
             ->withoutGlobalScope('company')
             ->where('company_id', $companyId)
             ->where('source_type', $sourceType)
             ->where('source_id', $sourceId)
             ->where('assigned_user_id', $advisorUserId)
-            ->where('status', '!=', 'done')
+            ->orderByDesc('id')
             ->first();
 
         if ($existing) {
