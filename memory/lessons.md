@@ -5,6 +5,21 @@ Aynı hatayı bir daha yapmamak için her seansın başında gözden geçirilmel
 
 ---
 
+## 19 Haziran 2026 — Admin kayıt yönetimi: list+generate yetmez, CRUD tam olmalı
+
+**Olay:** Platform Owner Faturalama modülü smoke test'inde kullanıcı uyardı: "fatura yanlış kesildiğinde silme veya değiştirme opsiyonumuz olmalı". Modül sadece generate/send/mark-paid içeriyordu; düzenle/iptal/sil yoktu.
+
+**Kural:** Bir admin "kayıt üreten" (fatura, sözleşme, sipariş vb.) modül kurarken **baştan** edit + cancel/void + delete ekle. Operatör hata yapacak; geri dönüş yolu olmadan canlıya çıkarma.
+
+**Pattern (muhasebe-güvenli statü kuralları):**
+- Taslak (draft) → düzenle + sil (hard delete)
+- Gönderilmiş/gecikmiş → iptal et (void = `cancelled` statüsü, audit korunur), sil yok
+- Ödenmiş → kilitli (finansal kayıt, hiçbir değişiklik yok)
+- Türev alanlar (KDV, toplam) edit'te **yeniden hesaplanır**; bağlı yan kayıtlar (promo redemption) silme/iptalde **geri alınır** (`current_uses--`)
+- Her işlem `PlatformAuditLog`'a yazılır
+
+---
+
 ## 3 Mayıs 2026 — UniMatch full revamp seansı
 
 ### 1. Schedule edilen agent sandbox'ı external CDN'e erişemiyor

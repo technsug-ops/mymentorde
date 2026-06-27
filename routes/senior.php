@@ -21,6 +21,8 @@ Route::middleware(['company.context', 'auth', 'senior.role'])->group(function ()
     Route::get('/senior/dashboard', [SeniorDashboardController::class, 'index'])->name('senior.dashboard');
     Route::get('/senior/guests/{guest}', [SeniorPortalController::class, 'guestDetail'])->name('senior.guest.detail');
     Route::post('/senior/guests/{guest}/activity', [SeniorPortalController::class, 'storeGuestActivity'])->middleware('throttle:30,1')->name('senior.guest.activity.store');
+    Route::post('/senior/guest-activity/{note}/update', [SeniorPortalController::class, 'updateGuestActivity'])->whereNumber('note')->middleware('throttle:30,1')->name('senior.guest.activity.update');
+    Route::post('/senior/guest-activity/{note}/archive', [SeniorPortalController::class, 'archiveGuestActivity'])->whereNumber('note')->middleware('throttle:30,1')->name('senior.guest.activity.archive');
     Route::get('/senior/guest-activity-attachment/{note}/{idx}', [SeniorPortalController::class, 'guestActivityAttachment'])->whereNumber(['note', 'idx'])->name('senior.guest.activity.attachment');
     Route::get('/senior/guests/{guest}/documents/{document}/serve', [SeniorPortalController::class, 'guestDocumentServe'])->name('senior.guest.document.serve');
     Route::get('/senior/guests/{guest}/documents/{document}/download', [SeniorPortalController::class, 'guestDocumentDownload'])->name('senior.guest.document.download');
@@ -125,6 +127,8 @@ Route::middleware(['company.context', 'auth', 'senior.role'])->group(function ()
     // Student 360° & Batch Review
     Route::get('/senior/students/{studentId}', [SeniorStudentController::class, 'studentDetail'])->name('senior.student-detail');
     Route::post('/senior/students/{studentId}/activity', [SeniorStudentController::class, 'storeActivity'])->middleware('throttle:30,1')->name('senior.student.activity.store');
+    Route::post('/senior/student-activity/{note}/update', [SeniorStudentController::class, 'updateActivity'])->whereNumber('note')->middleware('throttle:30,1')->name('senior.student.activity.update');
+    Route::post('/senior/student-activity/{note}/archive', [SeniorStudentController::class, 'archiveActivity'])->whereNumber('note')->middleware('throttle:30,1')->name('senior.student.activity.archive');
     Route::get('/senior/activity-attachment/{note}/{idx}', [SeniorStudentController::class, 'activityAttachment'])->whereNumber(['note', 'idx'])->name('senior.activity.attachment');
     Route::get('/senior/batch-review', [SeniorStudentController::class, 'batchReview'])->name('senior.batch-review');
     Route::post('/senior/batch-review/{document}/action', [SeniorStudentController::class, 'batchReviewAction'])->middleware('throttle:30,1')->name('senior.batch-review.action');

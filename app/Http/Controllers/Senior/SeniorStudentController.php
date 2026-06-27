@@ -169,11 +169,24 @@ class SeniorStudentController extends Controller
             ->where('student_id', $studentId)
             ->get(['id', 'service_label', 'account_username', 'is_visible_to_student', 'created_at']);
 
+        $showArchived = $request->boolean('archived');
         $notes = InternalNote::query()
             ->where('student_id', $studentId)
-            ->latest()
-            ->limit(20)
-            ->get(['id', 'category', 'priority', 'is_pinned', 'content', 'created_at']);
+            ->when($showArchived, fn ($q) => $q->whereNotNull('archived_at'), fn ($q) => $q->whereNull('archived_at'))
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get(); // tüm kolonlar (attachments, created_by, archived_at gerekli)
+        $archivedCount = InternalNote::where('student_id', $studentId)->whereNotNull('archived_at')->count();
+        $activityCtx = [
+            'storeAction'  => route('senior.student.activity.store', $studentId),
+            'updateRoute'  => 'senior.student.activity.update',
+            'archiveRoute' => 'senior.student.activity.archive',
+            'attachRoute'  => 'senior.activity.attachment',
+            'baseUrl'      => route('senior.student-detail', $studentId),
+            'showArchived' => $showArchived,
+            'archivedCount' => $archivedCount,
+        ];
 
         $uniApps = StudentUniversityApplication::query()
             ->where('student_id', $studentId)
@@ -210,6 +223,9 @@ class SeniorStudentController extends Controller
             'tickets'       => $tickets,
             'vaults'        => $vaults,
             'notes'         => $notes,
+            'showArchived'  => $showArchived,
+            'archivedCount' => $archivedCount,
+            'activityCtx'   => $activityCtx,
             'uniApps'       => $uniApps,
             'instDocs'      => $instDocs,
             'visa'          => $visa,
@@ -279,6 +295,39 @@ class SeniorStudentController extends Controller
             $att['name'] ?? null,
             ['Content-Type' => $att['mime'] ?? 'application/octet-stream']
         );
+    }
+
+    /** Öğrenci aktivitesini düzenle (içerik/tip/öncelik). Silme YOK. */
+    public function updateActivity(Request $request, InternalNote $note)
+    {
+        $assignedIds = $this->assignedStudentIds($request);
+        abort_if(!$assignedIds->contains((string) $note->student_id), 403);
+
+        $data = $request->validate([
+            'content'       => ['required', 'string', 'max:5000'],
+            'activity_type' => ['nullable', 'string', 'in:meeting,call,whatsapp,email,note,document,general'],
+            'priority'      => ['nullable', 'in:low,medium,high'],
+        ]);
+        $note->update([
+            'content'  => $data['content'],
+            'category' => $data['activity_type'] ?? $note->category,
+            'priority' => $data['priority'] ?? $note->priority,
+        ]);
+        return back()->with('status', 'Aktivite güncellendi.');
+    }
+
+    /** Öğrenci aktivitesini arşivle/arşivden çıkar (silme yok). */
+    public function archiveActivity(Request $request, InternalNote $note)
+    {
+        $assignedIds = $this->assignedStudentIds($request);
+        abort_if(!$assignedIds->contains((string) $note->student_id), 403);
+
+        $unarchive = $request->boolean('unarchive');
+        $note->update([
+            'archived_at' => $unarchive ? null : now(),
+            'archived_by' => $unarchive ? null : $this->seniorEmail($request),
+        ]);
+        return back()->with('status', $unarchive ? 'Aktivite arşivden çıkarıldı.' : 'Aktivite arşive alındı.');
     }
 
     // ── Toplu Belge İnceleme ─────────────────────────────────────────────────

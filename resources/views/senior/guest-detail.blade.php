@@ -16,7 +16,7 @@
     @endif
 </div>
 
-@include('senior.partials.guest-activity-log')
+@include('senior.partials.activity-log', ['ctx' => $activityCtx])
 
 @if($guest->converted_to_student)
 <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:var(--tx-sm);">

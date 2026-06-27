@@ -14,6 +14,8 @@ class InternalNote extends Model
         'priority',
         'is_pinned',
         'attachments',
+        'archived_at',
+        'archived_by',
         'created_by',
         'created_by_role',
     ];
@@ -21,5 +23,6 @@ class InternalNote extends Model
     protected $casts = [
         'is_pinned' => 'boolean',
         'attachments' => 'array',
+        'archived_at' => 'datetime',
     ];
 }

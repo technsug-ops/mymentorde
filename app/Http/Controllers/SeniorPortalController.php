@@ -405,7 +405,7 @@ class SeniorPortalController extends Controller
 
     // ── Guest Detay (salt okunur) ────────────────────────────────────────────
 
-    public function guestDetail(\App\Models\GuestApplication $guest): \Illuminate\Contracts\View\View
+    public function guestDetail(Request $request, \App\Models\GuestApplication $guest): \Illuminate\Contracts\View\View
     {
         $cid = auth()->user()->company_id ?? 0;
         abort_if($cid > 0 && (int) $guest->company_id !== $cid, 403);
@@ -414,15 +414,67 @@ class SeniorPortalController extends Controller
             ? \App\Models\StudentAssignment::where('student_id', $guest->converted_student_id)->first()
             : null;
 
-        // Aday öğrenci aktivite günlüğü (görüşme/rapor + görsel)
+        // Aday öğrenci aktivite günlüğü (görüşme/rapor + görsel). Arşivlenenler ayrı.
+        $showArchived = $request->boolean('archived');
         $notes = \App\Models\InternalNote::query()
             ->where('guest_application_id', $guest->id)
+            ->when($showArchived, fn ($q) => $q->whereNotNull('archived_at'), fn ($q) => $q->whereNull('archived_at'))
             ->orderByDesc('is_pinned')
             ->orderByDesc('created_at')
             ->limit(50)
             ->get();
+        $archivedCount = \App\Models\InternalNote::where('guest_application_id', $guest->id)->whereNotNull('archived_at')->count();
 
-        return view('senior.guest-detail', compact('guest', 'student', 'notes'));
+        // Aktivite log partial route bağlamı (aday öğrenci)
+        $activityCtx = [
+            'storeAction'  => route('senior.guest.activity.store', $guest->id),
+            'updateRoute'  => 'senior.guest.activity.update',
+            'archiveRoute' => 'senior.guest.activity.archive',
+            'attachRoute'  => 'senior.guest.activity.attachment',
+            'baseUrl'      => route('senior.guest.detail', $guest->id),
+            'showArchived' => $showArchived,
+            'archivedCount' => $archivedCount,
+        ];
+
+        return view('senior.guest-detail', compact('guest', 'student', 'notes', 'showArchived', 'archivedCount', 'activityCtx'));
+    }
+
+    /** Aday öğrenci aktivitesini düzenle (içerik/tip/öncelik). Silme YOK. */
+    public function updateGuestActivity(Request $request, \App\Models\InternalNote $note): \Illuminate\Http\RedirectResponse
+    {
+        $this->guestNoteGuard($note);
+        $data = $request->validate([
+            'content'       => ['required', 'string', 'max:5000'],
+            'activity_type' => ['nullable', 'string', 'in:meeting,call,whatsapp,email,note,document,general'],
+            'priority'      => ['nullable', 'in:low,medium,high'],
+        ]);
+        $note->update([
+            'content'  => $data['content'],
+            'category' => $data['activity_type'] ?? $note->category,
+            'priority' => $data['priority'] ?? $note->priority,
+        ]);
+        return back()->with('status', 'Aktivite güncellendi.');
+    }
+
+    /** Aday öğrenci aktivitesini arşivle (silme yok — geri alınabilir). */
+    public function archiveGuestActivity(Request $request, \App\Models\InternalNote $note): \Illuminate\Http\RedirectResponse
+    {
+        $this->guestNoteGuard($note);
+        $unarchive = $request->boolean('unarchive');
+        $note->update([
+            'archived_at' => $unarchive ? null : now(),
+            'archived_by' => $unarchive ? null : $this->seniorEmail($request),
+        ]);
+        return back()->with('status', $unarchive ? 'Aktivite arşivden çıkarıldı.' : 'Aktivite arşive alındı.');
+    }
+
+    /** guest note erişim guard'ı (aynı şirket + guest'e bağlı). */
+    private function guestNoteGuard(\App\Models\InternalNote $note): void
+    {
+        $cid   = (int) (auth()->user()->company_id ?? 0);
+        $guest = $note->guest_application_id ? \App\Models\GuestApplication::find($note->guest_application_id) : null;
+        abort_if(!$guest, 404);
+        abort_if($cid > 0 && (int) $guest->company_id !== $cid, 403);
     }
 
     /** Aday öğrenci (guest) için aktivite/görüşme kaydı ekle — opsiyonel görsel ekleriyle. */
