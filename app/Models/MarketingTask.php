@@ -98,6 +98,7 @@ class MarketingTask extends Model
         'review_requested_at',
         'cancelled_at',
         'cancelled_by_user_id',
+        'cancel_reason',
         'checklist_total',
         'checklist_done',
         'template_id',

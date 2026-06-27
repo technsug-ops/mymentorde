@@ -124,14 +124,18 @@ class TaskWorkflowController extends Controller
             return redirect($request->headers->get('referer', '/tasks'))
                 ->withErrors(['status' => 'Bu görev iptal edilemez.']);
         }
+        $data = $request->validate([
+            'cancel_reason' => ['nullable', 'string', 'in:customer_withdrew,duplicate,wrong_task,process_changed,no_longer_needed,resolved_elsewhere,other'],
+        ]);
         $old = (string) $row->status;
         $row->update([
             'status'               => 'cancelled',
             'cancelled_at'         => now(),
             'cancelled_by_user_id' => $userId,
+            'cancel_reason'        => $data['cancel_reason'] ?? null,
             'hold_reason'          => null,
         ]);
-        TaskActivityLog::record($id, $userId, 'status_changed', $old, 'cancelled');
+        TaskActivityLog::record($id, $userId, 'status_changed', $old, 'cancelled', ['cancel_reason' => $data['cancel_reason'] ?? null]);
 
         return redirect($request->headers->get('referer', '/tasks'))->with('status', 'Görev iptal edildi.');
     }

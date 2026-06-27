@@ -166,6 +166,14 @@ class InternalMessagingController extends Controller
             (array) ($data['participants'] ?? [])
         );
 
+        // Grup/ekip YALNIZCA personel rolleri içersin — öğrenci/aday öğrenci
+        // (student/guest) üye OLAMAZ. UI'da görünse bile sunucuda filtrelenir.
+        $participantIds = \App\Models\User::query()
+            ->whereIn('id', array_values(array_unique(array_map('intval', $participantIds))))
+            ->whereIn('role', self::ALLOWED_ROLES)
+            ->pluck('id')
+            ->all();
+
         $conv = $this->service->createGroup(
             $data['title'],
             $participantIds,

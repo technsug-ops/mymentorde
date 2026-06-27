@@ -672,9 +672,7 @@ a.tb-stat:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); background:#f0f6ff; }
                         <form method="POST" action="/tasks/{{ $row->id }}/done">@csrf
                             <button class="btn ok" type="submit">✓ Tamamla</button>
                         </form>
-                        <form method="POST" action="/tasks/{{ $row->id }}/cancel" onsubmit="return confirm('İptal edilsin mi?');">@csrf
-                            <button class="btn warn" type="submit">✗ İptal</button>
-                        </form>
+                        @include('tasks.partials.cancel', ['taskId' => $row->id])
                     @elseif($row->status === 'in_progress')
                         <form method="POST" action="/tasks/{{ $row->id }}/request-review">@csrf
                             <button class="btn ok" type="submit">→ İncelemeye Gönder</button>
@@ -685,9 +683,7 @@ a.tb-stat:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); background:#f0f6ff; }
                             <input type="text" name="hold_reason" placeholder="Bekleme nedeni" maxlength="255" style="font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--u-line);width:160px;" required>
                             <button class="btn alt" type="submit" style="font-size:12px;padding:4px 10px;">⏸ Beklet</button>
                         </form>
-                        <form method="POST" action="/tasks/{{ $row->id }}/cancel" onsubmit="return confirm('İptal edilsin mi?');">@csrf
-                            <button class="btn warn" type="submit" style="font-size:12px;padding:4px 10px;">✗ İptal</button>
-                        </form>
+                        @include('tasks.partials.cancel', ['taskId' => $row->id])
                     @elseif($row->status === 'in_review')
                         @if($canApprove || ($isDeptAdmin && (int)$row->assigned_user_id !== $authUserId))
                             <form method="POST" action="/tasks/{{ $row->id }}/approve">@csrf
@@ -701,16 +697,12 @@ a.tb-stat:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); background:#f0f6ff; }
                         <form method="POST" action="/tasks/{{ $row->id }}/resume">@csrf
                             <button class="btn ok" type="submit">▶ Devam Et</button>
                         </form>
-                        <form method="POST" action="/tasks/{{ $row->id }}/cancel" onsubmit="return confirm('İptal edilsin mi?');">@csrf
-                            <button class="btn warn" type="submit" style="font-size:12px;padding:4px 10px;">✗ İptal</button>
-                        </form>
+                        @include('tasks.partials.cancel', ['taskId' => $row->id])
                     @elseif($row->status === 'blocked')
                         <form method="POST" action="/tasks/{{ $row->id }}/resume">@csrf
                             <button class="btn alt" type="submit">▶ Engel Kalktı</button>
                         </form>
-                        <form method="POST" action="/tasks/{{ $row->id }}/cancel" onsubmit="return confirm('İptal edilsin mi?');">@csrf
-                            <button class="btn warn" type="submit" style="font-size:12px;padding:4px 10px;">✗ İptal</button>
-                        </form>
+                        @include('tasks.partials.cancel', ['taskId' => $row->id])
                     @elseif($row->status === 'done' || $row->status === 'cancelled')
                         <form method="POST" action="/tasks/{{ $row->id }}/reopen">@csrf
                             <button class="btn alt" type="submit">↺ Yeniden Aç</button>
