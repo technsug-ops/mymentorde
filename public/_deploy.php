@@ -126,13 +126,33 @@ if (!$zip->extractTo($projectRoot)) {
 $zip->close();
 $logFn('INFO', "Extracted {$fileCount} files successfully");
 
+// ── 5b. PHP 8.4 CLI binary tespiti ──────────────────────────────────
+// KAS'ta web subdomain PHP 8.4 ama exec('php ...') sistem default CLI'ı
+// (PHP 7.4.33) çağırıyor → composer/artisan "requires >= 8.4.0" ile patlıyor.
+// Versiyonlu binary adlarını sırayla dene; bulamazsan bu script'in kendi
+// binary'sini (PHP_BINARY — webhook 8.4 altında çalışıyor) kullan.
+$phpBin = 'php';
+$phpCands = ['php8.4', 'php-8.4', 'php84', '/usr/bin/php8.4', '/usr/local/bin/php8.4'];
+if (defined('PHP_BINARY') && PHP_BINARY) {
+    $phpCands[] = PHP_BINARY;
+}
+foreach ($phpCands as $cand) {
+    $vOut = []; $vCode = 1;
+    @exec(escapeshellarg($cand) . ' -v 2>&1', $vOut, $vCode);
+    if ($vCode === 0 && preg_match('/PHP\s+(\d+)\.(\d+)/', implode("\n", $vOut), $m) && (int) $m[1] >= 8) {
+        $phpBin = $cand;
+        break;
+    }
+}
+$logFn('INFO', "PHP CLI binary: {$phpBin}");
+
 // ── 6. Composer autoload refresh (yeni class'lar için) ──────────────
 $composerOk = false;
 $composerOut = [];
 if (is_file($projectRoot . '/composer.phar')) {
     @exec(
         'cd ' . escapeshellarg($projectRoot)
-        . ' && php composer.phar dump-autoload --optimize --no-dev 2>&1',
+        . ' && ' . escapeshellarg($phpBin) . ' composer.phar dump-autoload --optimize --no-dev 2>&1',
         $composerOut,
         $composerCode
     );
@@ -160,7 +180,7 @@ foreach ($artisanCmds as $cmd) {
     $out = [];
     @exec(
         'cd ' . escapeshellarg($projectRoot)
-        . ' && php artisan ' . escapeshellarg($cmd) . ' 2>&1',
+        . ' && ' . escapeshellarg($phpBin) . ' artisan ' . escapeshellarg($cmd) . ' 2>&1',
         $out,
         $code
     );
