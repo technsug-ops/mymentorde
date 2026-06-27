@@ -8,6 +8,7 @@ class InternalNote extends Model
 {
     protected $fillable = [
         'student_id',
+        'guest_application_id',
         'content',
         'category',
         'priority',

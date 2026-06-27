@@ -414,7 +414,76 @@ class SeniorPortalController extends Controller
             ? \App\Models\StudentAssignment::where('student_id', $guest->converted_student_id)->first()
             : null;
 
-        return view('senior.guest-detail', compact('guest', 'student'));
+        // Aday öğrenci aktivite günlüğü (görüşme/rapor + görsel)
+        $notes = \App\Models\InternalNote::query()
+            ->where('guest_application_id', $guest->id)
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get();
+
+        return view('senior.guest-detail', compact('guest', 'student', 'notes'));
+    }
+
+    /** Aday öğrenci (guest) için aktivite/görüşme kaydı ekle — opsiyonel görsel ekleriyle. */
+    public function storeGuestActivity(Request $request, \App\Models\GuestApplication $guest): \Illuminate\Http\RedirectResponse
+    {
+        $cid = (int) (auth()->user()->company_id ?? 0);
+        abort_if($cid > 0 && (int) $guest->company_id !== $cid, 403);
+
+        $data = $request->validate([
+            'content'       => ['required', 'string', 'max:5000'],
+            'activity_type' => ['nullable', 'string', 'in:meeting,call,whatsapp,email,note,document,general'],
+            'priority'      => ['nullable', 'in:low,medium,high'],
+            'images'        => ['nullable', 'array', 'max:6'],
+            'images.*'      => \App\Support\FileUploadRules::image(false),
+        ]);
+
+        $attachments = [];
+        foreach ((array) $request->file('images', []) as $img) {
+            if (!$img) {
+                continue;
+            }
+            $path = $img->store('activity-attachments/' . date('Y-m')); // private disk
+            $attachments[] = [
+                'path' => $path,
+                'name' => $img->getClientOriginalName(),
+                'mime' => $img->getMimeType(),
+            ];
+        }
+
+        \App\Models\InternalNote::create([
+            'guest_application_id' => $guest->id,
+            'content'              => $data['content'],
+            'category'             => $data['activity_type'] ?? 'meeting',
+            'priority'             => $data['priority'] ?? 'medium',
+            'is_pinned'            => false,
+            'attachments'          => $attachments,
+            'created_by'           => $this->seniorEmail($request),
+            'created_by_role'      => 'senior',
+        ]);
+
+        return back()->with('status', 'Aktivite kaydedildi.');
+    }
+
+    /** Aday öğrenci aktivite görselini güvenli servis et (aynı şirket). */
+    public function guestActivityAttachment(Request $request, \App\Models\InternalNote $note, int $idx)
+    {
+        $cid   = (int) (auth()->user()->company_id ?? 0);
+        $guest = $note->guest_application_id
+            ? \App\Models\GuestApplication::find($note->guest_application_id)
+            : null;
+        abort_if(!$guest, 404);
+        abort_if($cid > 0 && (int) $guest->company_id !== $cid, 403);
+
+        $att = ($note->attachments ?? [])[$idx] ?? null;
+        abort_if(!$att || empty($att['path']) || !\Illuminate\Support\Facades\Storage::exists($att['path']), 404);
+
+        return \Illuminate\Support\Facades\Storage::response(
+            $att['path'],
+            $att['name'] ?? null,
+            ['Content-Type' => $att['mime'] ?? 'application/octet-stream']
+        );
     }
 
     // ── Sub-task Toggle ──────────────────────────────────────────────────────

@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['company.context', 'auth', 'senior.role'])->group(function (): void {
     Route::get('/senior/dashboard', [SeniorDashboardController::class, 'index'])->name('senior.dashboard');
     Route::get('/senior/guests/{guest}', [SeniorPortalController::class, 'guestDetail'])->name('senior.guest.detail');
+    Route::post('/senior/guests/{guest}/activity', [SeniorPortalController::class, 'storeGuestActivity'])->middleware('throttle:30,1')->name('senior.guest.activity.store');
+    Route::get('/senior/guest-activity-attachment/{note}/{idx}', [SeniorPortalController::class, 'guestActivityAttachment'])->whereNumber(['note', 'idx'])->name('senior.guest.activity.attachment');
     Route::get('/senior/guests/{guest}/documents/{document}/serve', [SeniorPortalController::class, 'guestDocumentServe'])->name('senior.guest.document.serve');
     Route::get('/senior/guests/{guest}/documents/{document}/download', [SeniorPortalController::class, 'guestDocumentDownload'])->name('senior.guest.document.download');
     Route::get('/senior/guests/{guest}/documents/zip', [SeniorPortalController::class, 'guestDocumentsZip'])->name('senior.guest.documents.zip');
