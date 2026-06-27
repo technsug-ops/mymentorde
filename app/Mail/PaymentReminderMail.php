@@ -59,6 +59,6 @@ class PaymentReminderMail extends Mailable
 
     public function content(): Content
     {
-        return new Content(view: 'mail.payment-reminder');
+        return new Content(markdown: 'mail.payment-reminder');
     }
 }

@@ -29,6 +29,6 @@ class VisaMissingFieldsMail extends Mailable
 
     public function content(): Content
     {
-        return new Content(view: 'mail.visa-missing-fields');
+        return new Content(markdown: 'mail.visa-missing-fields');
     }
 }

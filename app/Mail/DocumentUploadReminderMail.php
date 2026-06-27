@@ -64,7 +64,7 @@ class DocumentUploadReminderMail extends Mailable implements ShouldQueue
 
     public function content(): Content
     {
-        return new Content(view: 'mail.document-upload-reminder');
+        return new Content(markdown: 'mail.document-upload-reminder');
     }
 
     public function attachments(): array

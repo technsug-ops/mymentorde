@@ -45,7 +45,7 @@ class ContractCompletedMail extends Mailable
 
     public function content(): Content
     {
-        return new Content(view: 'mail.contract-completed');
+        return new Content(markdown: 'mail.contract-completed');
     }
 
     /**

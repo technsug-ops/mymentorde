@@ -33,6 +33,6 @@ class PaymentReceivedMail extends Mailable
 
     public function content(): Content
     {
-        return new Content(view: 'mail.payment-received');
+        return new Content(markdown: 'mail.payment-received');
     }
 }

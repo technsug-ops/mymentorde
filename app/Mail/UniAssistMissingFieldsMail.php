@@ -29,6 +29,6 @@ class UniAssistMissingFieldsMail extends Mailable
 
     public function content(): Content
     {
-        return new Content(view: 'mail.uni-assist-missing-fields');
+        return new Content(markdown: 'mail.uni-assist-missing-fields');
     }
 }
