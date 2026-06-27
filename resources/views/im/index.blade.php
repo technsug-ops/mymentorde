@@ -124,7 +124,7 @@
 window.__im = {
     currentUserId: {{ (int) $currentUser->id }},
     selectedConvId: {{ $selected ? (int) $selected->id : 'null' }},
-    pollInterval: 10000,
+    pollInterval: 3000, // 10s -> 3s: mesaj gecikmesini azalt (#4)
     routes: {
         send: '/im/conversations/__ID__/send',
         read: '/im/conversations/__ID__/read',

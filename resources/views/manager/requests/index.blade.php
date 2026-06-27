@@ -118,8 +118,8 @@
                 </select>
             </div>
         </div>
-        <input name="subject" placeholder="Talep başlığı *" required style="width:100%;max-width:480px;margin-bottom:6px;">
-        <textarea name="description" placeholder="Açıklama (opsiyonel)" style="width:100%;max-width:600px;height:72px;margin-bottom:8px;display:block;"></textarea>
+        <input name="subject" placeholder="Talep başlığı *" required autocomplete="off" autocorrect="off" spellcheck="false" style="width:100%;max-width:480px;margin-bottom:6px;">
+        <textarea name="description" placeholder="Açıklama (opsiyonel)" autocomplete="off" style="width:100%;max-width:600px;height:72px;margin-bottom:8px;display:block;"></textarea>
         <button type="submit" style="padding:7px 18px;background:#1e40af;color:#fff;border:none;border-radius:7px;font-size:var(--tx-sm);font-weight:600;cursor:pointer;">Talep Oluştur</button>
     </form>
 </section>
