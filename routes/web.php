@@ -504,6 +504,46 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response()->json(['ok' => true, 'output' => $out]);
     })->middleware('throttle:10,1')->name('system.run-queue');
 
+    // Mail render testi (markdown hint-path fix doğrulama, c2a6139). x-mail bileşeni
+    // kullanan 7 şablonu dummy veriyle RENDER eder → "No hint path defined for [mail]"
+    // hatası gider mi? ?send=adres@x ile gerçekten de gönderir (contract-completed).
+    Route::get('/system/test-mail', function (\Illuminate\Http\Request $request) {
+        $bank = ['account_holder' => 'MentorDE GmbH', 'bank_name' => 'Test Bank', 'iban' => 'DE00 0000 0000 0000 0000 00', 'bic' => 'TESTDEFF'];
+        // Not: document-upload-reminder bir DocumentUploadToken modeli ister
+        // (DB), render testine dahil edilmedi; aynı kök neden fix'i (markdown:)
+        // onu da kapsar. welcome-new-company ise şirket modeli ister, atlandı.
+        $mailables = [
+            'contract-completed'        => fn () => new \App\Mail\ContractCompletedMail('Test Kullanıcı', 'Test Sözleşme', 'TEST-001', [], ['Ek madde 1'], url('/'), '2.750 EUR', 'TEST #STU-1', $bank, 14),
+            'payment-received'          => fn () => new \App\Mail\PaymentReceivedMail('Test Kullanıcı', 'Test Sözleşme', 'STU-1', '2.750 EUR', '29.04.2026', url('/'), 'Test Danışman'),
+            'payment-reminder'          => fn () => new \App\Mail\PaymentReminderMail('Test Kullanıcı', 'Test Sözleşme', 'TEST-001', '2.750 EUR', 'TEST #STU-1', $bank, url('/'), 1, 5, 15),
+            'uni-assist-missing-fields' => fn () => new \App\Mail\UniAssistMissingFieldsMail('Test Kullanıcı', ['VPD numarası'], 'Not', url('/')),
+            'visa-missing-fields'       => fn () => new \App\Mail\VisaMissingFieldsMail('Test Kullanıcı', ['Sperrkonto'], 'Not', url('/')),
+        ];
+
+        $results = [];
+        foreach ($mailables as $key => $factory) {
+            try {
+                $html = $factory()->render();
+                $results[$key] = 'RENDER OK (' . strlen($html) . ' byte)';
+            } catch (\Throwable $e) {
+                $results[$key] = 'FAIL: ' . $e->getMessage();
+            }
+        }
+
+        $sendTo = trim((string) $request->query('send', ''));
+        if ($sendTo !== '' && filter_var($sendTo, FILTER_VALIDATE_EMAIL)) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($sendTo)->sendNow($mailables['contract-completed']());
+                $results['_sent_contract_completed_to'] = $sendTo . ' (sendNow — kuyruğa girmeden)';
+            } catch (\Throwable $e) {
+                $results['_send_error'] = $e->getMessage();
+            }
+        }
+
+        $allOk = !collect($results)->contains(fn ($v) => str_starts_with($v, 'FAIL'));
+        return response()->json(['ok' => $allOk, 'results' => $results], $allOk ? 200 : 500);
+    })->middleware('throttle:10,1')->name('system.test-mail');
+
     // Teşhis: en yeni log dosyasındaki son hata bloğu + son satırlar (#21 vb.).
     // KAS'ta storage/logs'a erişmek zor; bu endpoint manager-guarded tail verir.
     // ?lines=200 (varsayılan 120), ?full=1 → sadece ham son satırlar.
