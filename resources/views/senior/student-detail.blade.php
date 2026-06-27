@@ -87,7 +87,7 @@
     <button class="s360-tab" onclick="s360Tab('outcomes',this)">🔄 Süreç ({{ $outcomes->count() }})</button>
     <button class="s360-tab" onclick="s360Tab('randevular',this)">📅 Randevular ({{ $appointments->count() }})</button>
     <button class="s360-tab" onclick="s360Tab('tickets',this)">🎫 Tickets ({{ $tickets->count() }})</button>
-    <button class="s360-tab" onclick="s360Tab('notlar',this)">📝 Notlar ({{ $notes->count() }})</button>
+    <button class="s360-tab" onclick="s360Tab('notlar',this)">📋 Aktivite &amp; Rapor ({{ $notes->count() }})</button>
     <button class="s360-tab" onclick="s360Tab('universite',this)">🎓 Üniversite ({{ $uniApps->count() }})</button>
     <button class="s360-tab" onclick="s360Tab('gelen',this)">📬 Gelen Bel. ({{ $instDocs->count() }})</button>
     <button class="s360-tab" onclick="s360Tab('vize',this)">🛂 Vize</button>
