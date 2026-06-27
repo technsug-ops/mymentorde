@@ -38,6 +38,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Authenticated kullanıcıların presence durumunu günceller (heartbeat)
         $middleware->append(\App\Http\Middleware\UpdateUserPresence::class);
 
+        // Cron'suz kuyruk boşaltma (#27): KAS'ta cronjob hakkı yok + worker yok.
+        // Panel trafiğine binip terminate fazında (yanıttan sonra) job işler.
+        // Session kullanmaz → global append güvenli.
+        $middleware->append(\App\Http\Middleware\DrainQueueOnTraffic::class);
+
         // Şifre değiştirme zorunluluğu — manager reset sonrası geçici şifrenin tek-kullanımlık olmasını sağlar
         $middleware->append(\App\Http\Middleware\EnsurePasswordChanged::class);
 
