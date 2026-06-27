@@ -79,6 +79,44 @@ class StudentBridgeService
         return $assignment;
     }
 
+    /**
+     * Köprüyü geri al: bridge ile oluşmuş takip kaydını + kickoff task'ı kaldır,
+     * guest bağını temizle. SADECE köprü kaydı için (converted_to_student=false).
+     * Tam dönüşmüş (sözleşmeli) öğrenciye DOKUNMAZ.
+     *
+     * @return bool  Geri alındıysa true.
+     */
+    public function rollbackBridge(GuestApplication $guest): bool
+    {
+        // Tam dönüşmüş öğrenci → köprü değil, dokunma
+        if ((bool) $guest->converted_to_student) {
+            return false;
+        }
+        $sid = trim((string) ($guest->converted_student_id ?? ''));
+        if ($sid === '') {
+            return false;
+        }
+
+        // Takip kaydını soft-delete et (geri alınabilir)
+        StudentAssignment::query()->withoutGlobalScopes()
+            ->where('student_id', $sid)->get()
+            ->each(fn ($a) => $a->delete());
+
+        // Kickoff task'ı kaldır (soft delete)
+        try {
+            \App\Models\MarketingTask::query()->withoutGlobalScopes()
+                ->where('source_type', 'application_prep_started')
+                ->where('source_id', $sid)->get()
+                ->each(fn ($t) => $t->delete());
+        } catch (\Throwable) {
+        }
+
+        // Guest bağını temizle (yeniden aday öğrenci olur)
+        $guest->forceFill(['converted_student_id' => null])->save();
+
+        return true;
+    }
+
     /** application_type → student type code (convert() ile aynı eşleme). */
     public function mapApplicationTypeToStudentTypeCode(string $applicationType): string
     {

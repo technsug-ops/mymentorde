@@ -380,6 +380,37 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response($report, 200)->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:5,1')->name('system.bridge-docs-pending');
 
+    // Köprü GERİ AL: bridge ile oluşmuş (converted_to_student=false) takip kayıtlarını +
+    // kickoff task'ları kaldırır, guest bağını temizler. Aday öğrenciler tekrar sadece
+    // aday olur (Aktif Öğrenciler'den çıkar). Tam dönüşmüş öğrenciye dokunmaz.
+    Route::get('/system/bridge-rollback', function (\Illuminate\Http\Request $request) {
+        $svc = app(\App\Services\StudentBridgeService::class);
+        $emailFilter = trim((string) $request->query('senior', ''));
+
+        $guests = \App\Models\GuestApplication::query()->withoutGlobalScopes()
+            ->whereNotNull('converted_student_id')->where('converted_student_id', '!=', '')
+            ->where('converted_to_student', false)
+            ->when($emailFilter !== '', fn ($q) => $q->whereRaw('lower(assigned_senior_email) = ?', [strtolower($emailFilter)]))
+            ->orderBy('id')->get();
+
+        $lines = []; $done = 0; $fail = 0;
+        foreach ($guests as $g) {
+            try {
+                $sid = (string) $g->converted_student_id;
+                if ($svc->rollbackBridge($g)) { $done++; $lines[] = "GERİ ALINDI guest#{$g->id} → {$sid}"; }
+            } catch (\Throwable $e) {
+                $fail++; $lines[] = "FAIL guest#{$g->id} — " . $e->getMessage();
+            }
+        }
+
+        $report  = "Köprü kaydı (converted_to_student=false): {$guests->count()}\n";
+        $report .= "Geri alındı: {$done} | Hata: {$fail}\n\n";
+        $report .= ($lines ? implode("\n", $lines) : '(geri alınacak köprü kaydı yok)') . "\n";
+        $report .= "\nNot: ?senior=email ile sınırlayabilirsin. Geri alma soft-delete (kurtarılabilir).\n";
+
+        return response($report, 200)->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:5,1')->name('system.bridge-rollback');
+
     // Prod test temizliği: 11 canonical user dışındakileri siler, emailleri @panel.mentorde.com yapar.
     // Önce GET ile rapor sayfası (dry-run), sonra POST ile gerçek çalıştırma.
     Route::get('/system/cleanup-prod-test', function () {
