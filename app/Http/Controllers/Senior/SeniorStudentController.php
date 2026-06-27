@@ -55,8 +55,12 @@ class SeniorStudentController extends Controller
             ->limit(1000)
             ->get(['student_id', 'branch', 'dealer_id', 'risk_level', 'payment_status', 'is_archived', 'updated_at']);
 
+        // Aday Öğrenci Havuzu: SADECE henüz dönüşmemiş adaylar. Dönüşmüş guest
+        // (converted_to_student=true) Aktif Öğrenciler'de görünür, havuzda DEĞİL
+        // (senkron sorunu: Survey hem öğrenci hem aday görünüyordu).
         $guestPoolQuery = GuestApplication::query()
             ->where('assigned_senior_email', $email)
+            ->where('converted_to_student', false)
             ->latest('updated_at');
         if ($q !== '') {
             $guestPoolQuery->where(function ($w) use ($q) {

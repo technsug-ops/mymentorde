@@ -472,6 +472,43 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response()->json(['ok' => true, 'output' => $out]);
     })->middleware('throttle:10,1')->name('system.run-queue');
 
+    // Teşhis: bir öğrencinin/adayın guest + StudentAssignment durumunu döker
+    // (senkron sorunu için). ?q=Survey
+    Route::get('/system/student-state', function (\Illuminate\Http\Request $request) {
+        $q = trim((string) $request->query('q', ''));
+        if ($q === '') {
+            return response("?q=isim/email/student_id ver\n", 200)->header('Content-Type', 'text/plain; charset=utf-8');
+        }
+        $guests = \App\Models\GuestApplication::query()->withoutGlobalScopes()
+            ->where(function ($w) use ($q) {
+                $w->where('first_name', 'like', "%{$q}%")->orWhere('last_name', 'like', "%{$q}%")
+                  ->orWhere('email', 'like', "%{$q}%")->orWhere('converted_student_id', 'like', "%{$q}%");
+            })->limit(20)->get();
+
+        $r = "=== GUEST ===\n";
+        foreach ($guests as $g) {
+            $r .= "guest#{$g->id} {$g->first_name} {$g->last_name} <{$g->email}>\n"
+                . "  assigned_senior_email: " . ($g->assigned_senior_email ?: '(yok)') . "\n"
+                . "  converted_to_student:  " . var_export((bool) $g->converted_to_student, true) . "\n"
+                . "  converted_student_id:  " . ($g->converted_student_id ?: '(yok)') . "\n"
+                . "  lead_status:           " . ($g->lead_status ?: '-') . "\n";
+            $sid = (string) ($g->converted_student_id ?? '');
+            if ($sid !== '') {
+                $as = \App\Models\StudentAssignment::withTrashed()->withoutGlobalScopes()->where('student_id', $sid)->get();
+                if ($as->isEmpty()) {
+                    $r .= "  >> StudentAssignment YOK ({$sid})\n";
+                }
+                foreach ($as as $a) {
+                    $r .= "  >> StudentAssignment {$a->student_id}: senior=" . ($a->senior_email ?: '(yok)')
+                        . " is_archived=" . var_export((bool) $a->is_archived, true)
+                        . " deleted_at=" . ($a->deleted_at ? (string) $a->deleted_at : 'null') . "\n";
+                }
+            }
+            $r .= "\n";
+        }
+        return response($r ?: "(bulunamadı)\n", 200)->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:10,1')->name('system.student-state');
+
     // Prod test temizliği: 11 canonical user dışındakileri siler, emailleri @panel.mentorde.com yapar.
     // Önce GET ile rapor sayfası (dry-run), sonra POST ile gerçek çalıştırma.
     Route::get('/system/cleanup-prod-test', function () {
