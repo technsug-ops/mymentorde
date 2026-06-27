@@ -448,6 +448,30 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response($report, 200)->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:5,1')->name('system.fix-converted-senior');
 
+    // Bekleyen bildirim/mail kuyruğunu işle (#27). KAS'ta queue worker/cron yoksa
+    // job'lar 'jobs' tablosunda takılı kalır, mail gitmez. Bu endpoint elle veya
+    // KAS URL-cron ile (her dakika) tetiklenebilir.
+    Route::get('/system/run-queue', function () {
+        $out = [];
+        try {
+            \Illuminate\Support\Facades\Artisan::call('queue:work', [
+                '--queue' => 'notifications,default', '--stop-when-empty' => true,
+                '--max-time' => 50, '--tries' => 3,
+            ]);
+            $out['queue_work'] = trim(\Illuminate\Support\Facades\Artisan::output());
+        } catch (\Throwable $e) {
+            $out['queue_work_error'] = $e->getMessage();
+        }
+        try {
+            \Illuminate\Support\Facades\Artisan::call('notifications:dispatch', ['--limit' => 100]);
+            $out['notifications_dispatch'] = trim(\Illuminate\Support\Facades\Artisan::output());
+        } catch (\Throwable $e) {
+            $out['notifications_dispatch_error'] = $e->getMessage();
+        }
+        $out['pending_jobs'] = \Illuminate\Support\Facades\DB::table('jobs')->count();
+        return response()->json(['ok' => true, 'output' => $out]);
+    })->middleware('throttle:10,1')->name('system.run-queue');
+
     // Prod test temizliği: 11 canonical user dışındakileri siler, emailleri @panel.mentorde.com yapar.
     // Önce GET ile rapor sayfası (dry-run), sonra POST ile gerçek çalıştırma.
     Route::get('/system/cleanup-prod-test', function () {
