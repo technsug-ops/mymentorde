@@ -514,6 +514,39 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response($txt, 200)->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:10,1')->name('system.cron-url');
 
+    // Teşhis: prod'da ETKİN mail yapılandırması (gizli anahtarlar maskeli).
+    // "sendNow başarılı ama mail gelmiyor" → çoğu zaman MAIL_MAILER=log demek.
+    Route::get('/system/mail-config', function () {
+        $default = (string) config('mail.default');
+        $apiKey  = (string) config('services.resend.key', env('RESEND_API_KEY', ''));
+        $mask = fn (string $s) => $s === '' ? '(BOŞ!)' : (strlen($s) <= 8 ? '***' : substr($s, 0, 4) . '…' . substr($s, -4) . ' (' . strlen($s) . ' karakter)');
+
+        $info = [
+            'MAIL_MAILER (etkin)'  => $default,
+            'mail.from.address'    => (string) config('mail.from.address'),
+            'mail.from.name'       => (string) config('mail.from.name'),
+            'resend.api_key'       => $mask($apiKey),
+            'smtp.host'            => (string) config('mail.mailers.smtp.host'),
+            'smtp.port'            => (string) config('mail.mailers.smtp.port'),
+            'APP_ENV'              => (string) config('app.env'),
+        ];
+
+        $verdict = match (true) {
+            $default === 'log'   => '⚠ MAIL_MAILER=log → mail GÖNDERİLMİYOR, sadece laravel.log\'a yazılıyor. .env\'de MAIL_MAILER=resend yap.',
+            $default === 'array' => '⚠ MAIL_MAILER=array → mail hiçbir yere gitmez (test sürücüsü).',
+            $default === 'resend' && $apiKey === '' => '⚠ resend seçili ama RESEND_API_KEY BOŞ → gönderim başarısız olur.',
+            $default === 'resend' => '✓ resend + API key var. Gelmiyorsa: from-address domain Resend\'de doğrulanmış mı + spam + Resend dashboard delivery log.',
+            default => 'ℹ Mailer=' . $default . '. Gelmiyorsa SMTP/credential + from-address kontrol.',
+        };
+
+        $txt = "ETKİN MAIL YAPILANDIRMASI (prod)\n" . str_repeat('─', 50) . "\n";
+        foreach ($info as $k => $v) {
+            $txt .= str_pad($k, 22) . ': ' . $v . "\n";
+        }
+        $txt .= "\nSONUÇ: " . $verdict . "\n";
+        return response($txt, 200)->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:10,1')->name('system.mail-config');
+
     // Mail render testi (markdown hint-path fix doğrulama, c2a6139). x-mail bileşeni
     // kullanan 7 şablonu dummy veriyle RENDER eder → "No hint path defined for [mail]"
     // hatası gider mi? ?send=adres@x ile gerçekten de gönderir (contract-completed).
