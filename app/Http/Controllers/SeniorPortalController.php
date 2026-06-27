@@ -779,15 +779,58 @@ class SeniorPortalController extends Controller
             ->get([
                 'id', 'converted_student_id', 'first_name', 'last_name', 'email',
                 'contract_status', 'contract_requested_at', 'contract_signed_file_path',
-                'selected_package_title', 'selected_extra_services',
+                'selected_package_code', 'selected_package_title', 'selected_extra_services',
             ]);
 
         return view('senior.contracts', [
             'contracts'    => $contracts,
             'counts'       => $counts,
             'filters'      => compact('q', 'status', 'type'),
+            'packageMap'   => $this->buildPackageServiceMap(),
             'sidebarStats' => $this->sidebarStats($request),
         ]);
+    }
+
+    /**
+     * Paket kodu → içerdiği kategori + hizmetler haritası (config/service_packages).
+     * Sözleşme listesinde pakete tıklayınca içindeki hizmetler açılsın diye (#17).
+     */
+    private function buildPackageServiceMap(): array
+    {
+        $extraCfg = collect(config('service_packages.extra_services', []))->keyBy('code');
+        $catCfg   = collect(config('service_packages.service_categories', []))->keyBy('key');
+
+        $map = [];
+        foreach (config('service_packages.packages', []) as $p) {
+            $code = (string) ($p['code'] ?? '');
+            if ($code === '') {
+                continue;
+            }
+
+            $categories = [];
+            foreach (($p['included_categories'] ?? []) as $ck) {
+                if ($c = $catCfg->get($ck)) {
+                    $categories[] = ['title' => $c['title'] ?? $ck, 'icon' => $c['icon'] ?? '', 'color' => $c['color'] ?? '#888'];
+                }
+            }
+
+            $services = [];
+            foreach (($p['included_extras'] ?? []) as $exCode) {
+                if ($ex = $extraCfg->get($exCode)) {
+                    $services[] = ['title' => $ex['title'] ?? $exCode, 'category' => $ex['category'] ?? '', 'price' => $ex['price'] ?? ''];
+                }
+            }
+
+            $map[$code] = [
+                'title'      => $p['title'] ?? $code,
+                'price'      => $p['price'] ?? '',
+                'includes'   => $p['includes'] ?? '',
+                'categories' => $categories,
+                'services'   => $services,
+            ];
+        }
+
+        return $map;
     }
 
     // ── Servisler ────────────────────────────────────────────────────────────

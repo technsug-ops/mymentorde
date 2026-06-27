@@ -99,11 +99,17 @@ $counts    = $counts ?? [];
     @forelse($contracts as $row)
     @php
         $extras   = collect(is_array($row->selected_extra_services) ? $row->selected_extra_services : [])
-            ->map(fn($x) => trim((string)($x['title'] ?? '')))->filter()->values();
+            ->map(fn($x) => [
+                'title' => trim((string)($x['title'] ?? '')),
+                'price' => trim((string)($x['price'] ?? '')),
+            ])->filter(fn($x) => $x['title'] !== '')->values();
         $cs       = $row->contract_status ?? '';
         $bCls     = $statusBadge[$cs] ?? '';
         $isGuest  = !$row->converted_student_id;
         $fullName = trim(($row->first_name ?? '').' '.($row->last_name ?? ''));
+        $pkgCode  = trim((string)($row->selected_package_code ?? ''));
+        $pkg      = $packageMap[$pkgCode] ?? null;
+        $pkgTitle = trim((string)($row->selected_package_title ?? '')) ?: ($pkg['title'] ?? '');
     @endphp
     <div style="padding:16px 18px;border-bottom:1px solid var(--u-line);transition:background .12s;" onmouseover="this.style.background='var(--u-bg)'" onmouseout="this.style.background=''">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
@@ -125,14 +131,49 @@ $counts    = $counts ?? [];
                     @endif
                 </div>
 
-                {{-- Package + extras --}}
-                @if(trim((string)($row->selected_package_title ?? '')) !== '')
-                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                    <span style="background:#eef2fd;border:1px solid #c9d5f0;border-radius:999px;padding:2px 10px;color:#3b5bdb;font-weight:700;font-size:var(--tx-xs);">{{ $row->selected_package_title }}</span>
-                    @foreach($extras as $ex)
-                        <span style="background:var(--u-bg);border:1px solid var(--u-line);border-radius:999px;padding:2px 8px;color:var(--u-muted);font-size:var(--tx-xs);">+ {{ $ex }}</span>
-                    @endforeach
-                </div>
+                {{-- Package + extras (pakete tıkla → içindeki hizmetler açılır, #17) --}}
+                @if($pkgTitle !== '')
+                <details style="margin-top:2px;">
+                    <summary style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;cursor:pointer;list-style:none;">
+                        <span style="background:#eef2fd;border:1px solid #c9d5f0;border-radius:999px;padding:2px 10px;color:#3b5bdb;font-weight:700;font-size:var(--tx-xs);">
+                            📦 {{ $pkgTitle }}@if($pkg && $pkg['price'] !== '') · {{ $pkg['price'] }}@endif
+                            <span style="opacity:.6;font-weight:600;margin-left:2px;">▾</span>
+                        </span>
+                        @foreach($extras as $ex)
+                            <span style="background:var(--u-bg);border:1px solid var(--u-line);border-radius:999px;padding:2px 8px;color:var(--u-muted);font-size:var(--tx-xs);">+ {{ $ex['title'] }}</span>
+                        @endforeach
+                    </summary>
+
+                    <div style="margin-top:8px;padding:10px 12px;background:var(--u-bg);border:1px solid var(--u-line);border-radius:10px;max-width:640px;">
+                        @if($pkg)
+                            @if(!empty($pkg['categories']))
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+                                @foreach($pkg['categories'] as $cat)
+                                    <span style="display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid var(--u-line);border-radius:999px;padding:2px 9px;font-size:var(--tx-xs);font-weight:600;color:{{ $cat['color'] }};">{{ $cat['icon'] }} {{ $cat['title'] }}</span>
+                                @endforeach
+                            </div>
+                            @endif
+
+                            <div style="font-size:var(--tx-xs);color:var(--u-muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Paket içeriği</div>
+                            <ul style="margin:0 0 4px;padding-left:16px;display:grid;grid-template-columns:1fr 1fr;gap:1px 16px;">
+                                @foreach($pkg['services'] as $sv)
+                                    <li style="font-size:var(--tx-xs);color:var(--u-text);">{{ $sv['title'] }}</li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <div style="font-size:var(--tx-xs);color:var(--u-muted);">Paket içeriği katalogda bulunamadı ({{ $pkgCode ?: 'kod yok' }}).</div>
+                        @endif
+
+                        @if($extras->isNotEmpty())
+                            <div style="font-size:var(--tx-xs);color:var(--u-muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin:8px 0 4px;">Ek hizmetler</div>
+                            <ul style="margin:0;padding-left:16px;">
+                                @foreach($extras as $ex)
+                                    <li style="font-size:var(--tx-xs);color:var(--u-text);">{{ $ex['title'] }}@if($ex['price'] !== '') <span style="color:var(--u-muted);">· {{ $ex['price'] }}</span>@endif</li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+                </details>
                 @endif
             </div>
 
