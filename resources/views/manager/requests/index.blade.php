@@ -178,7 +178,12 @@
             'marketing'  => 'marketing',
             default      => 'operations',
         };
-        $taskLink = '/tasks/'.($linkedTask?->department ?: $suggestedDept);
+        {{-- Departmana kısıtlı roller (senior/mentor → advisory) başka departman
+            kuyruğuna gidince 403 alır. Onları genel /tasks board'a yönlendir (kendi
+            scope'unu gösterir). Global/yetkili roller departman kuyruğuna gidebilir. --}}
+        $taskDept     = $linkedTask?->department ?: $suggestedDept;
+        $viewerScoped = in_array((string) auth()->user()?->role, ['senior', 'mentor'], true);
+        $taskLink     = $viewerScoped ? '/tasks' : '/tasks/'.$taskDept;
 
         $statusBadge = match((string)($row->status ?? '')) {
             'open'     => 'info',

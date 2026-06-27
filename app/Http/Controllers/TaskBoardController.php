@@ -224,7 +224,15 @@ class TaskBoardController extends Controller
             $status = 'blocked';
         }
 
+        // KRİTİK: company_id set edilmezse task NULL company ile oluşur ve
+        // liste (company_id filtreli) onu göstermez → "eklendi" der ama görünmez.
+        $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
+        if ($companyId <= 0) {
+            $companyId = (int) (optional($user)->company_id ?: 0);
+        }
+
         $task = MarketingTask::query()->create([
+            'company_id'               => $companyId > 0 ? $companyId : null,
             'title'                    => trim((string) $data['title']),
             'description'              => trim((string) ($data['description'] ?? '')),
             'status'                   => $status,
