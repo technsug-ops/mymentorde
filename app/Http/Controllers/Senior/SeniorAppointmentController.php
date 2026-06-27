@@ -194,6 +194,13 @@ class SeniorAppointmentController extends Controller
 
         $appointment->update(array_merge($data, ['status' => 'confirmed']));
 
+        // #16: Online randevuda link verilmemişse otomatik toplantı linki üret
+        // (Jitsi — API/entegrasyon gerektirmez, anında çalışır). Manuel link girilirse korunur.
+        if ($appointment->channel === 'online' && trim((string) $appointment->meeting_url) === '') {
+            $room = 'MentorDE-' . $appointment->id . '-' . \Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(8));
+            $appointment->update(['meeting_url' => 'https://meet.jit.si/' . $room]);
+        }
+
         try {
             $factory     = app(IntegrationFactory::class);
             $adapter     = $factory->getCalendarService();
