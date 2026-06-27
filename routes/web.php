@@ -547,31 +547,35 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         }
         fclose($fh);
 
-        $tail = array_slice($all, -$want);
-
-        // Son hata bloğunu bul: son ".ERROR"/".CRITICAL"/"Exception" satırından sonrası.
-        $startIdx = null;
-        foreach ($tail as $i => $ln) {
-            if (preg_match('/\.(ERROR|CRITICAL|ALERT|EMERGENCY):|Exception|Stack trace/i', $ln)) {
-                $startIdx = $i;
-            }
-        }
-
         $header = $matchNote
             . "DOSYA: " . basename($file) . "  (" . round($size / 1024) . " KB, "
             . date('Y-m-d H:i:s', filemtime($file)) . ")\n"
             . str_repeat('─', 60) . "\n";
 
-        if ($request->boolean('full') || $startIdx === null) {
-            $body = implode("\n", $tail);
-            $note = $startIdx === null ? "(Belirgin ERROR satırı bulunamadı — ham son {$want} satır)\n\n" : '';
-            return response($header . $note . $body . "\n", 200)->header('Content-Type', 'text/plain; charset=utf-8');
+        if ($request->boolean('full')) {
+            return response($header . implode("\n", array_slice($all, -$want)) . "\n", 200)
+                ->header('Content-Type', 'text/plain; charset=utf-8');
         }
 
-        // Hata bloğu: başlangıçtan biraz öncesi + sonrası (stack trace dahil).
-        $from = max(0, $startIdx - 3);
-        $block = implode("\n", array_slice($tail, $from));
-        return response($header . "SON HATA BLOĞU:\n\n" . $block . "\n", 200)
+        // TÜM buffer'da son Laravel hata BAŞLIK satırını bul:
+        // "[2026-..] local.ERROR: <mesaj> {"exception":"...at /path:line)" — mesaj+sınıf+dosya
+        // ilk satırdadır. Dev stack trace'ler 120 satırı aştığı için tail içinde aramak yetmez.
+        $errIdx = null;
+        foreach ($all as $i => $ln) {
+            if (preg_match('/^\[[\d\-: ]+\]\s+[\w-]+\.(ERROR|CRITICAL|ALERT|EMERGENCY):/', $ln)) {
+                $errIdx = $i;
+            }
+        }
+
+        if ($errIdx === null) {
+            return response($header . "(Belirgin ERROR başlık satırı bulunamadı — ham son {$want} satır)\n\n"
+                . implode("\n", array_slice($all, -$want)) . "\n", 200)
+                ->header('Content-Type', 'text/plain; charset=utf-8');
+        }
+
+        // Hata başlığından itibaren $want satır (mesaj + sınıf + ilk app frame'leri).
+        $block = implode("\n", array_slice($all, $errIdx, $want));
+        return response($header . "SON HATA (satır " . ($errIdx + 1) . "):\n\n" . $block . "\n", 200)
             ->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:20,1')->name('system.last-error');
 
