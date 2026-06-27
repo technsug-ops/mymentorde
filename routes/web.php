@@ -547,6 +547,41 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response($txt, 200)->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:10,1')->name('system.mail-config');
 
+    // Teşhis: Resend API'sine DİREKT vur, ham yanıtı göster (kesin teslimat cevabı).
+    // {"id":"..."} → Resend kabul etti (sorun DNS/spam/bounce, dashboard'a bak).
+    // {"statusCode":403/422,...} → domain doğrulanmamış vb., mesaj net söyler.
+    Route::get('/system/mail-probe', function (\Illuminate\Http\Request $request) {
+        $to  = trim((string) $request->query('to', ''));
+        if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            return response("?to=adres@x ver\n", 200)->header('Content-Type', 'text/plain; charset=utf-8');
+        }
+        $key  = (string) config('services.resend.key', env('RESEND_API_KEY', ''));
+        $from = trim((string) config('mail.from.name')) . ' <' . trim((string) config('mail.from.address')) . '>';
+        if ($key === '') {
+            return response("RESEND_API_KEY boş\n", 200)->header('Content-Type', 'text/plain; charset=utf-8');
+        }
+
+        $resp = \Illuminate\Support\Facades\Http::withToken($key)
+            ->acceptJson()
+            ->post('https://api.resend.com/emails', [
+                'from'    => $from,
+                'to'      => [$to],
+                'subject' => 'MentorDE Resend Probe ' . substr(md5($to . $key), 0, 6),
+                'html'    => '<p>Bu bir teslimat testidir. Bu maili aldıysan Resend teslimatı çalışıyor.</p>',
+            ]);
+
+        $txt = "RESEND API PROBE\n" . str_repeat('─', 50) . "\n"
+            . "From  : {$from}\n"
+            . "To    : {$to}\n"
+            . "HTTP  : " . $resp->status() . "\n"
+            . "Body  : " . $resp->body() . "\n\n"
+            . ($resp->successful()
+                ? "✓ Resend KABUL etti (id yukarıda). Mail gelmiyorsa: spam + Resend dashboard → Emails → bu id'nin delivery durumu (delivered/bounced)."
+                : "⚠ Resend REDDETTI. Yukarıdaki 'message' alanı sebebi söyler (genelde: domain doğrulanmamış / from-address bu domain'e ait değil).")
+            . "\n";
+        return response($txt, 200)->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:10,1')->name('system.mail-probe');
+
     // Mail render testi (markdown hint-path fix doğrulama, c2a6139). x-mail bileşeni
     // kullanan 7 şablonu dummy veriyle RENDER eder → "No hint path defined for [mail]"
     // hatası gider mi? ?send=adres@x ile gerçekten de gönderir (contract-completed).
