@@ -504,6 +504,60 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response()->json(['ok' => true, 'output' => $out]);
     })->middleware('throttle:10,1')->name('system.run-queue');
 
+    // Teşhis: en yeni log dosyasındaki son hata bloğu + son satırlar (#21 vb.).
+    // KAS'ta storage/logs'a erişmek zor; bu endpoint manager-guarded tail verir.
+    // ?lines=200 (varsayılan 120), ?full=1 → sadece ham son satırlar.
+    Route::get('/system/last-error', function (\Illuminate\Http\Request $request) {
+        $dir = storage_path('logs');
+        $files = glob($dir . DIRECTORY_SEPARATOR . '*.log') ?: [];
+        if (!$files) {
+            return response("Log dosyası yok ({$dir})\n", 200)->header('Content-Type', 'text/plain; charset=utf-8');
+        }
+        usort($files, fn ($a, $b) => filemtime($b) <=> filemtime($a));
+        $file = $files[0];
+
+        $want = max(20, min(1000, (int) $request->query('lines', 120)));
+        // Dosyanın son ~512KB'ını oku (büyük log'larda bellek dostu).
+        $size = filesize($file);
+        $chunk = 512 * 1024;
+        $fh = fopen($file, 'rb');
+        if ($size > $chunk) {
+            fseek($fh, -$chunk, SEEK_END);
+            fgets($fh); // ilk yarım satırı at
+        }
+        $all = [];
+        while (($ln = fgets($fh)) !== false) {
+            $all[] = rtrim($ln, "\r\n");
+        }
+        fclose($fh);
+
+        $tail = array_slice($all, -$want);
+
+        // Son hata bloğunu bul: son ".ERROR"/".CRITICAL"/"Exception" satırından sonrası.
+        $startIdx = null;
+        foreach ($tail as $i => $ln) {
+            if (preg_match('/\.(ERROR|CRITICAL|ALERT|EMERGENCY):|Exception|Stack trace/i', $ln)) {
+                $startIdx = $i;
+            }
+        }
+
+        $header = "DOSYA: " . basename($file) . "  (" . round($size / 1024) . " KB, "
+            . date('Y-m-d H:i:s', filemtime($file)) . ")\n"
+            . str_repeat('─', 60) . "\n";
+
+        if ($request->boolean('full') || $startIdx === null) {
+            $body = implode("\n", $tail);
+            $note = $startIdx === null ? "(Belirgin ERROR satırı bulunamadı — ham son {$want} satır)\n\n" : '';
+            return response($header . $note . $body . "\n", 200)->header('Content-Type', 'text/plain; charset=utf-8');
+        }
+
+        // Hata bloğu: başlangıçtan biraz öncesi + sonrası (stack trace dahil).
+        $from = max(0, $startIdx - 3);
+        $block = implode("\n", array_slice($tail, $from));
+        return response($header . "SON HATA BLOĞU:\n\n" . $block . "\n", 200)
+            ->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:20,1')->name('system.last-error');
+
     // Teşhis: bir öğrencinin/adayın guest + StudentAssignment durumunu döker
     // (senkron sorunu için). ?q=Survey
     Route::get('/system/student-state', function (\Illuminate\Http\Request $request) {
