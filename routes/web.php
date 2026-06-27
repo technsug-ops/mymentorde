@@ -415,9 +415,12 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
     // convert() eskiden assigned_senior_email'i kullanmıyordu -> öğrenci başka/boş
     // senior'a düşüp aday'ın danışmanının "Öğrencilerim"inde görünmüyordu.
     // ?student=Survey veya ?senior=email ile sınırlanabilir. Idempotent.
+    // ?create=1 → converted_student_id var ama StudentAssignment YOK/soft-deleted
+    //   ise eksik kaydı (aynı student_id ile) yeniden oluşturur/geri alır.
     Route::get('/system/fix-converted-senior', function (\Illuminate\Http\Request $request) {
         $studentFilter = trim((string) $request->query('student', ''));
         $seniorFilter  = trim((string) $request->query('senior', ''));
+        $doCreate      = $request->boolean('create');
 
         $guests = \App\Models\GuestApplication::query()->withoutGlobalScopes()
             ->where('converted_to_student', true)
@@ -426,16 +429,45 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
             ->when($seniorFilter !== '', fn ($q) => $q->whereRaw('lower(assigned_senior_email)=?', [strtolower($seniorFilter)]))
             ->get();
 
-        $lines = []; $fixed = 0; $ok = 0; $missing = 0;
+        $lines = []; $fixed = 0; $ok = 0; $missing = 0; $created = 0; $restored = 0;
         foreach ($guests as $g) {
             $sid = (string) $g->converted_student_id;
             $name = trim(($g->first_name ?? '') . ' ' . ($g->last_name ?? ''));
             if ($studentFilter !== '' && stripos($name, $studentFilter) === false && stripos($sid, $studentFilter) === false) {
                 continue;
             }
-            $a = \App\Models\StudentAssignment::query()->withoutGlobalScopes()->where('student_id', $sid)->first();
-            if (!$a) { $missing++; $lines[] = "YOK  {$name} ({$sid}) — StudentAssignment bulunamadı"; continue; }
             $want = strtolower(trim((string) $g->assigned_senior_email));
+
+            // withTrashed: soft-deleted köprü kaydını da yakala.
+            $a = \App\Models\StudentAssignment::withTrashed()->withoutGlobalScopes()
+                ->where('student_id', $sid)->first();
+
+            if (!$a) {
+                if (!$doCreate) { $missing++; $lines[] = "YOK  {$name} ({$sid}) — StudentAssignment bulunamadı (?create=1 ile oluştur)"; continue; }
+                $seq = ((int) \App\Models\StudentAssignment::withTrashed()->withoutGlobalScopes()->max('internal_sequence')) + 1;
+                \App\Models\StudentAssignment::query()->create([
+                    'company_id'        => (int) ($g->company_id ?? 0) > 0 ? (int) $g->company_id : null,
+                    'student_id'        => $sid,
+                    'internal_sequence' => $seq,
+                    'senior_email'      => $g->assigned_senior_email,
+                    'branch'            => trim((string) ($g->branch ?? '')) ?: null,
+                    'risk_level'        => 'normal',
+                    'payment_status'    => 'ok',
+                    'dealer_id'         => trim((string) ($g->dealer_code ?? '')) ?: null,
+                    'is_archived'       => false,
+                ]);
+                $created++; $lines[] = "OLUŞTURULDU {$name} ({$sid}) → {$want}";
+                continue;
+            }
+
+            if (method_exists($a, 'trashed') && $a->trashed()) {
+                if (!$doCreate) { $missing++; $lines[] = "SİLİNMİŞ {$name} ({$sid}) — soft-deleted (?create=1 ile geri al)"; continue; }
+                $a->restore();
+                $a->forceFill(['senior_email' => $g->assigned_senior_email, 'is_archived' => false])->save();
+                $restored++; $lines[] = "GERİ ALINDI {$name} ({$sid}) → {$want}";
+                continue;
+            }
+
             $have = strtolower(trim((string) $a->senior_email));
             if ($have === $want) { $ok++; continue; }
             $a->forceFill(['senior_email' => $g->assigned_senior_email, 'is_archived' => false])->save();
@@ -443,7 +475,7 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         }
 
         $report = "Dönüşmüş + atanmış danışmanlı: {$guests->count()}\n"
-            . "Düzeltildi: {$fixed} | Zaten doğru: {$ok} | StudentAssignment yok: {$missing}\n\n"
+            . "Düzeltildi: {$fixed} | Oluşturuldu: {$created} | Geri alındı: {$restored} | Zaten doğru: {$ok} | Eksik: {$missing}\n\n"
             . ($lines ? implode("\n", $lines) : '(düzeltilecek yok)') . "\n";
         return response($report, 200)->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:5,1')->name('system.fix-converted-senior');
