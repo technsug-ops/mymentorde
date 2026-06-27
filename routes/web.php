@@ -411,6 +411,43 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response($report, 200)->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:5,1')->name('system.bridge-rollback');
 
+    // Dönüşmüş öğrencinin danışmanını adayın atanmış danışmanına eşitle (#13).
+    // convert() eskiden assigned_senior_email'i kullanmıyordu -> öğrenci başka/boş
+    // senior'a düşüp aday'ın danışmanının "Öğrencilerim"inde görünmüyordu.
+    // ?student=Survey veya ?senior=email ile sınırlanabilir. Idempotent.
+    Route::get('/system/fix-converted-senior', function (\Illuminate\Http\Request $request) {
+        $studentFilter = trim((string) $request->query('student', ''));
+        $seniorFilter  = trim((string) $request->query('senior', ''));
+
+        $guests = \App\Models\GuestApplication::query()->withoutGlobalScopes()
+            ->where('converted_to_student', true)
+            ->whereNotNull('converted_student_id')->where('converted_student_id', '!=', '')
+            ->whereNotNull('assigned_senior_email')->where('assigned_senior_email', '!=', '')
+            ->when($seniorFilter !== '', fn ($q) => $q->whereRaw('lower(assigned_senior_email)=?', [strtolower($seniorFilter)]))
+            ->get();
+
+        $lines = []; $fixed = 0; $ok = 0; $missing = 0;
+        foreach ($guests as $g) {
+            $sid = (string) $g->converted_student_id;
+            $name = trim(($g->first_name ?? '') . ' ' . ($g->last_name ?? ''));
+            if ($studentFilter !== '' && stripos($name, $studentFilter) === false && stripos($sid, $studentFilter) === false) {
+                continue;
+            }
+            $a = \App\Models\StudentAssignment::query()->withoutGlobalScopes()->where('student_id', $sid)->first();
+            if (!$a) { $missing++; $lines[] = "YOK  {$name} ({$sid}) — StudentAssignment bulunamadı"; continue; }
+            $want = strtolower(trim((string) $g->assigned_senior_email));
+            $have = strtolower(trim((string) $a->senior_email));
+            if ($have === $want) { $ok++; continue; }
+            $a->forceFill(['senior_email' => $g->assigned_senior_email, 'is_archived' => false])->save();
+            $fixed++; $lines[] = "DÜZELTİLDİ {$name} ({$sid}): '{$have}' → '{$want}'";
+        }
+
+        $report = "Dönüşmüş + atanmış danışmanlı: {$guests->count()}\n"
+            . "Düzeltildi: {$fixed} | Zaten doğru: {$ok} | StudentAssignment yok: {$missing}\n\n"
+            . ($lines ? implode("\n", $lines) : '(düzeltilecek yok)') . "\n";
+        return response($report, 200)->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:5,1')->name('system.fix-converted-senior');
+
     // Prod test temizliği: 11 canonical user dışındakileri siler, emailleri @panel.mentorde.com yapar.
     // Önce GET ile rapor sayfası (dry-run), sonra POST ile gerçek çalıştırma.
     Route::get('/system/cleanup-prod-test', function () {

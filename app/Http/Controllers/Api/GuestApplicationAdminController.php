@@ -98,6 +98,11 @@ class GuestApplicationAdminController extends Controller
 
         $studentTypeCode = $this->mapApplicationTypeToStudentTypeCode((string) $guestApplication->application_type);
         $seniorEmail = trim((string) ($data['senior_email'] ?? ''));
+        // Adayın ZATEN atanmış danışmanını koru (request'te senior gelmezse) — dönüşen
+        // öğrenci, aday aşamasındaki senior'ın (örn. Filiz) "Öğrencilerim"ine düşsün.
+        if ($seniorEmail === '') {
+            $seniorEmail = trim((string) ($guestApplication->assigned_senior_email ?? ''));
+        }
         if ($seniorEmail === '') {
             $seniorEmail = $this->pickAutoSeniorEmail($companyId) ?: null;
         }
