@@ -518,15 +518,17 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         // Varsayılan: UYGULAMA log'u (laravel-*.log) — deploy-webhook.log değil.
         // ?file=deploy → deploy webhook log'u, ?file=<isim parçası> → eşleşen ilk.
         $fileFilter = trim((string) $request->query('file', ''));
+        $needle = $fileFilter !== '' ? $fileFilter : 'laravel';
         $pick = null;
-        if ($fileFilter !== '') {
-            foreach ($files as $f) {
-                if (stripos(basename($f), $fileFilter) !== false) { $pick = $f; break; }
-            }
-        } else {
-            foreach ($files as $f) {
-                if (stripos(basename($f), 'laravel') !== false) { $pick = $f; break; }
-            }
+        foreach ($files as $f) {
+            if (stripos(basename($f), $needle) !== false) { $pick = $f; break; }
+        }
+        // Eşleşme yoksa: kullanıcıya mevcut log dosyalarını göster (ne var, hangi boyut).
+        $matchNote = '';
+        if (!$pick) {
+            $list = array_map(fn ($f) => '  · ' . basename($f) . ' (' . round(filesize($f) / 1024) . ' KB, ' . date('Y-m-d H:i', filemtime($f)) . ')', $files);
+            $matchNote = "'{$needle}' içeren log YOK. Mevcut log dosyaları:\n" . implode("\n", $list)
+                . "\n\n→ En yeni dosya gösteriliyor. Belirli dosya için ?file=<isim parçası>\n" . str_repeat('─', 60) . "\n";
         }
         $file = $pick ?: $files[0];
 
@@ -555,7 +557,8 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
             }
         }
 
-        $header = "DOSYA: " . basename($file) . "  (" . round($size / 1024) . " KB, "
+        $header = $matchNote
+            . "DOSYA: " . basename($file) . "  (" . round($size / 1024) . " KB, "
             . date('Y-m-d H:i:s', filemtime($file)) . ")\n"
             . str_repeat('─', 60) . "\n";
 
