@@ -514,6 +514,58 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response($txt, 200)->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:10,1')->name('system.cron-url');
 
+    // #23 — Doküman kategorilerinde geçersiz top_category_code ('kök', 'kok' vb.)
+    // normalize. Audit: dağılımı göster + kanonik olmayanları işaretle.
+    // ?fix=1 → geçersizleri DocumentCategory::normalizeTopCategoryCode ile düzeltir.
+    Route::get('/system/doc-categories-audit', function (\Illuminate\Http\Request $request) {
+        $canonical = array_keys(\App\Models\DocumentCategory::topCategoryOptions());
+        $tables    = ['document_categories', 'guest_required_documents'];
+        $doFix     = $request->boolean('fix');
+        $out       = "DOKÜMAN top_category_code AUDIT" . ($doFix ? " (FIX MODU)" : "") . "\n"
+                   . "Kanonik: " . implode(', ', $canonical) . "\n" . str_repeat('─', 60) . "\n";
+
+        foreach ($tables as $tbl) {
+            if (!\Illuminate\Support\Facades\Schema::hasColumn($tbl, 'top_category_code')) {
+                $out .= "\n[{$tbl}] top_category_code kolonu YOK — atlandı\n";
+                continue;
+            }
+            $dist = \Illuminate\Support\Facades\DB::table($tbl)
+                ->select('top_category_code', \Illuminate\Support\Facades\DB::raw('count(*) as c'))
+                ->groupBy('top_category_code')->orderByDesc('c')->get();
+
+            $out .= "\n[{$tbl}] dağılım:\n";
+            $bad = [];
+            foreach ($dist as $row) {
+                $code = (string) ($row->top_category_code ?? '');
+                $isCanon = in_array($code, $canonical, true) || $code === '';
+                $flag = $isCanon ? '  ' : '⚠ ';
+                $out .= "  {$flag}" . str_pad($code === '' ? '(boş)' : $code, 28) . " : {$row->c}\n";
+                if (!$isCanon) {
+                    $bad[$code] = \App\Models\DocumentCategory::normalizeTopCategoryCode($code);
+                }
+            }
+
+            if (!$bad) {
+                $out .= "  → Geçersiz kod yok ✓\n";
+                continue;
+            }
+            $out .= "  Geçersiz → normalize hedefi:\n";
+            foreach ($bad as $from => $to) {
+                $out .= "    '{$from}' → '{$to}'\n";
+            }
+            if ($doFix) {
+                foreach ($bad as $from => $to) {
+                    $n = \Illuminate\Support\Facades\DB::table($tbl)
+                        ->where('top_category_code', $from)->update(['top_category_code' => $to]);
+                    $out .= "    ✓ DÜZELTİLDİ '{$from}'→'{$to}': {$n} satır\n";
+                }
+            } else {
+                $out .= "  (Düzeltmek için ?fix=1 ekle)\n";
+            }
+        }
+        return response($out . "\n", 200)->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:10,1')->name('system.doc-categories-audit');
+
     // Teşhis: prod'da ETKİN mail yapılandırması (gizli anahtarlar maskeli).
     // "sendNow başarılı ama mail gelmiyor" → çoğu zaman MAIL_MAILER=log demek.
     Route::get('/system/mail-config', function () {
