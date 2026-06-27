@@ -219,6 +219,68 @@ class SeniorStudentController extends Controller
         ]);
     }
 
+    // ── Öğrenci Aktivite Günlüğü (ClickUp tarzı: not/rapor + görsel) ─────────
+
+    /**
+     * Görüşme/aktivite kaydı ekle (InternalNote) — opsiyonel görsel ekleriyle.
+     * Görseller private diske kaydedilir, attachments JSON'a path/name/mime yazılır.
+     */
+    public function storeActivity(Request $request, string $studentId)
+    {
+        $assignedIds = $this->assignedStudentIds($request);
+        abort_if(!$assignedIds->contains($studentId), 403, 'Bu öğrenci size atanmamış.');
+
+        $data = $request->validate([
+            'content'       => ['required', 'string', 'max:5000'],
+            'activity_type' => ['nullable', 'string', 'in:meeting,call,whatsapp,email,note,document,general'],
+            'priority'      => ['nullable', 'in:low,medium,high'],
+            'images'        => ['nullable', 'array', 'max:6'],
+            'images.*'      => \App\Support\FileUploadRules::image(false),
+        ]);
+
+        $attachments = [];
+        foreach ((array) $request->file('images', []) as $img) {
+            if (!$img) {
+                continue;
+            }
+            $path = $img->store('activity-attachments/' . date('Y-m')); // private (local) disk
+            $attachments[] = [
+                'path' => $path,
+                'name' => $img->getClientOriginalName(),
+                'mime' => $img->getMimeType(),
+            ];
+        }
+
+        InternalNote::create([
+            'student_id'      => $studentId,
+            'content'         => $data['content'],
+            'category'        => $data['activity_type'] ?? 'meeting',
+            'priority'        => $data['priority'] ?? 'medium',
+            'is_pinned'       => false,
+            'attachments'     => $attachments,
+            'created_by'      => $this->seniorEmail($request),
+            'created_by_role' => 'senior',
+        ]);
+
+        return back()->with('status', 'Aktivite kaydedildi.');
+    }
+
+    /** Aktivite görselini güvenli servis et (senior öğrenciye atanmış olmalı). */
+    public function activityAttachment(Request $request, InternalNote $note, int $idx)
+    {
+        $assignedIds = $this->assignedStudentIds($request);
+        abort_if(!$assignedIds->contains((string) $note->student_id), 403);
+
+        $att = ($note->attachments ?? [])[$idx] ?? null;
+        abort_if(!$att || empty($att['path']) || !\Illuminate\Support\Facades\Storage::exists($att['path']), 404);
+
+        return \Illuminate\Support\Facades\Storage::response(
+            $att['path'],
+            $att['name'] ?? null,
+            ['Content-Type' => $att['mime'] ?? 'application/octet-stream']
+        );
+    }
+
     // ── Toplu Belge İnceleme ─────────────────────────────────────────────────
 
     public function batchReview(Request $request)
