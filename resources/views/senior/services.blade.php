@@ -82,7 +82,7 @@
 }
 .sr-stu-card:hover { border-color: var(--u-brand); box-shadow: 0 4px 14px rgba(0,0,0,.12); }
 .sr-stu-card.has-pkg { border-left: 4px solid var(--u-brand); }
-details.sr-stu-card > summary { list-style: none; }
+details.sr-stu-card > summary { list-style: none; cursor: pointer; display: flex; flex-direction: column; gap: 9px; }
 details.sr-stu-card > summary::-webkit-details-marker { display: none; }
 details.sr-stu-card[open] { box-shadow: 0 4px 14px rgba(0,0,0,.10); }
 .sr-stu-card-top  { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
@@ -96,6 +96,48 @@ details.sr-stu-card[open] { box-shadow: 0 4px 14px rgba(0,0,0,.10); }
     white-space: nowrap;
 }
 .sr-stu-noextra { font-size: 11px; color: var(--u-muted); font-style: italic; }
+
+/* Student card polish — avatar + checklist breakdown */
+.sr-stu-ava {
+    width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; color: #fff; letter-spacing: .5px;
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    box-shadow: 0 2px 6px rgba(124,58,237,.25);
+}
+.sr-stu-head { display: flex; align-items: center; gap: 11px; }
+.sr-toggle-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; color: var(--u-brand);
+    background: rgba(124,58,237,.07); border: 1px solid rgba(124,58,237,.18);
+    border-radius: 999px; padding: 4px 11px; width: fit-content;
+    transition: background .15s;
+}
+details.sr-stu-card:hover .sr-toggle-pill { background: rgba(124,58,237,.13); }
+.sr-toggle-pill .sr-chev { transition: transform .2s; font-size: 9px; }
+details.sr-stu-card[open] .sr-toggle-pill .sr-chev { transform: rotate(180deg); }
+.sr-break-group { margin-top: 4px; }
+.sr-break-label {
+    font-size: 10px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase;
+    color: var(--u-muted); margin: 10px 0 6px; display: flex; align-items: center; gap: 5px;
+}
+.sr-break-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 12.5px; color: var(--u-text); padding: 4px 0; line-height: 1.35;
+}
+.sr-break-check {
+    flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; margin-top: 1px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 900; color: #fff;
+    background: #10b981;
+}
+.sr-break-check.extra { background: #7c3aed; }
+.sr-break-price { color: var(--u-muted); font-weight: 600; font-size: 11px; margin-left: auto; white-space: nowrap; }
+.sr-cat-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #fff; border: 1px solid var(--u-line);
+    border-radius: 999px; padding: 3px 9px; font-size: 10.5px; font-weight: 700;
+}
 
 /* Filter bar */
 .sr-stu-filter {
@@ -287,13 +329,17 @@ details.sr-stu-card[open] { box-shadow: 0 4px 14px rgba(0,0,0,.10); }
                 $badgeCls = match($pkgCode) { 'pkg_premium'=>'badge warn', 'pkg_plus'=>'badge info', 'pkg_basic'=>'badge ok', default=>'' };
                 $pkg      = $packageMap[$pkgCode] ?? null;
                 $svcCount = ($pkg ? count($pkg['services']) : 0) + count($extras);
+                $initials = collect(explode(' ', $name))->filter()->take(2)->map(fn($w) => mb_strtoupper(mb_substr($w, 0, 1)))->implode('') ?: '👤';
             @endphp
             <details class="sr-stu-card {{ $pkgCode ? 'has-pkg' : '' }}">
-                <summary style="cursor:pointer;list-style:none;">
+                <summary>
                     <div class="sr-stu-card-top">
-                        <div>
-                            <div class="sr-stu-name">{{ $name ?: '-' }}</div>
-                            <div class="sr-stu-id">{{ $row->converted_student_id ?? '-' }}</div>
+                        <div class="sr-stu-head">
+                            <div class="sr-stu-ava">{{ $initials }}</div>
+                            <div>
+                                <div class="sr-stu-name">{{ $name ?: '-' }}</div>
+                                <div class="sr-stu-id">{{ $row->converted_student_id ?? '-' }}</div>
+                            </div>
                         </div>
                         @if($pkgLabel)
                             <span class="{{ $badgeCls }}" style="font-size:10px;padding:2px 8px;white-space:nowrap;flex-shrink:0;">{{ $pkgLabel }}</span>
@@ -303,37 +349,37 @@ details.sr-stu-card[open] { box-shadow: 0 4px 14px rgba(0,0,0,.10); }
                         @endif
                     </div>
                     @if($svcCount > 0)
-                        <div style="margin-top:6px;font-size:11px;color:#7c3aed;font-weight:700;">▾ {{ $svcCount }} hizmet — dökümü gör</div>
+                        <span class="sr-toggle-pill">📋 {{ $svcCount }} hizmet <span class="sr-chev">▼</span></span>
                     @else
                         <span class="sr-stu-noextra">Hizmet seçilmemiş</span>
                     @endif
                 </summary>
 
-                {{-- #22 — Tam hizmet dökümü: paket içeriği + ek servisler --}}
-                <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--u-line,#e2e8f0);">
+                {{-- #22 — Tam hizmet dökümü: paket içeriği (checklist) + ek servisler --}}
+                <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--u-line,#e2e8f0);">
                     @if($pkg)
                         @if(!empty($pkg['categories']))
-                        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
+                        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;">
                             @foreach($pkg['categories'] as $cat)
-                                <span style="display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid var(--u-line,#e2e8f0);border-radius:999px;padding:2px 8px;font-size:10px;font-weight:600;color:{{ $cat['color'] }};">{{ $cat['icon'] }} {{ $cat['title'] }}</span>
+                                <span class="sr-cat-chip" style="color:{{ $cat['color'] }};">{{ $cat['icon'] }} {{ $cat['title'] }}</span>
                             @endforeach
                         </div>
                         @endif
-                        <div style="font-size:10px;color:var(--u-muted,#64748b);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">📦 Paket içeriği</div>
-                        <ul style="margin:0 0 8px;padding-left:16px;">
+                        <div class="sr-break-label">📦 Paket içeriği</div>
+                        <div class="sr-break-group">
                             @foreach($pkg['services'] as $sv)
-                                <li style="font-size:12px;color:var(--u-text,#1e293b);margin-bottom:2px;">{{ $sv['title'] }}</li>
+                                <div class="sr-break-item"><span class="sr-break-check">✓</span> <span>{{ $sv['title'] }}</span></div>
                             @endforeach
-                        </ul>
+                        </div>
                     @endif
 
                     @if(!empty($extras))
-                        <div style="font-size:10px;color:var(--u-muted,#64748b);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">➕ Ek hizmetler</div>
-                        <ul style="margin:0;padding-left:16px;">
+                        <div class="sr-break-label">➕ Ek hizmetler</div>
+                        <div class="sr-break-group">
                             @foreach($extras as $e)
-                                <li style="font-size:12px;color:var(--u-text,#1e293b);margin-bottom:2px;">{{ $e['title'] ?? '-' }}@if(!empty($e['price'])) <span style="color:var(--u-muted,#94a3b8);">· {{ $e['price'] }}</span>@endif</li>
+                                <div class="sr-break-item"><span class="sr-break-check extra">+</span> <span>{{ $e['title'] ?? '-' }}</span>@if(!empty($e['price']))<span class="sr-break-price">{{ $e['price'] }}</span>@endif</div>
                             @endforeach
-                        </ul>
+                        </div>
                     @endif
 
                     @unless($pkg || !empty($extras))
