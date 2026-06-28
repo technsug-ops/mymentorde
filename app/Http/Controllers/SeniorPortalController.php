@@ -862,8 +862,11 @@ class SeniorPortalController extends Controller
                 : [];
         })->countBy()->all();
 
-        // Arama yaparken student_assignments.display_name'den de eşleşenleri bul
+        // Arama yaparken student_assignments.display_name'den de eşleşenleri bul.
+        // $matchedSids her zaman tanımlı olmalı — aşağıdaki when() closure'u onu
+        // use ile yakalıyor; $q boşken tanımsız kalırsa "Undefined variable" 500'ü olur.
         $searchSids = $studentIds->all();
+        $matchedSids = [];
         if ($q !== '') {
             $matchedSids = \DB::table('student_assignments')
                 ->whereIn('student_id', $studentIds->all())
