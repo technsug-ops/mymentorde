@@ -1,4 +1,4 @@
-@extends('manager.layouts.app')
+@extends(in_array(auth()->user()?->role, ['senior','mentor'], true) ? 'senior.layouts.app' : 'manager.layouts.app')
 @section('title', ($aiLabsName ?? 'AI Labs') . ' — Ayarlar')
 @section('page_title','⚙️ ' . ($aiLabsName ?? 'MentorDE AI Labs') . ' — Ayarlar')
 

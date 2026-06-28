@@ -1,4 +1,4 @@
-@extends('manager.layouts.app')
+@extends(in_array(auth()->user()?->role, ['senior','mentor'], true) ? 'senior.layouts.app' : 'manager.layouts.app')
 @section('title', $draft->title)
 @section('page_title', ($template['icon'] ?? '📄') . ' ' . $draft->title)
 
