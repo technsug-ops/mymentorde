@@ -69,11 +69,11 @@
         $stBadge = match($st) { 'approved' => 'ok', 'rejected' => 'danger', default => 'info' };
         $stIcon  = match($st) { 'approved' => '✅', 'rejected' => '❌', default => '📤' };
     @endphp
-    <div style="padding:14px 16px;border-bottom:1px solid var(--u-line);{{ $st==='rejected' ? 'border-left:3px solid #dc2626;' : '' }}transition:background .12s;"
+    <div id="doc-row-{{ $doc->id }}" data-status="{{ $st }}" style="padding:14px 16px;border-bottom:1px solid var(--u-line);{{ $st==='rejected' ? 'border-left:3px solid #dc2626;' : '' }}transition:background .12s;"
          onmouseover="this.style.background='var(--u-bg)'" onmouseout="this.style.background=''">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
             <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
-                <div style="width:36px;height:36px;border-radius:50%;background:{{ $stColor }}18;display:flex;align-items:center;justify-content:center;font-size:var(--tx-base);flex-shrink:0;">{{ $stIcon }}</div>
+                <div class="doc-row-ico" style="width:36px;height:36px;border-radius:50%;background:{{ $stColor }}18;display:flex;align-items:center;justify-content:center;font-size:var(--tx-base);flex-shrink:0;">{{ $stIcon }}</div>
                 <div style="min-width:0;">
                     <div style="font-weight:700;font-size:var(--tx-sm);color:var(--u-text);">🎓 {{ $doc->student_id }}</div>
                     <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-top:2px;">
@@ -86,12 +86,22 @@
             </div>
             <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
                 <div style="text-align:right;">
-                    <span class="badge {{ $stBadge }}">{{ ucfirst($st ?: '—') }}</span>
+                    <span class="badge {{ $stBadge }} doc-row-badge">{{ ucfirst($st ?: '—') }}</span>
                     <div style="font-size:var(--tx-xs);color:var(--u-muted);margin-top:4px;">{{ optional($doc->updated_at)->format('d.m.Y H:i') }}</div>
                 </div>
                 <a href="/senior/registration/documents/{{ $doc->id }}/download"
                    style="font-size:var(--tx-xs);padding:6px 13px;border:1px solid var(--u-line);border-radius:7px;background:var(--u-bg);color:var(--u-text);text-decoration:none;font-weight:600;white-space:nowrap;">⬇ İndir</a>
+                {{-- #15: satır içi Onayla / Reddet (yüklenen veya red'den dönen için) --}}
+                <div class="doc-row-actions" style="display:{{ $st==='approved' ? 'none' : 'flex' }};gap:6px;">
+                    <button type="button" data-doc-approve="{{ $doc->id }}"
+                        style="font-size:var(--tx-xs);padding:6px 13px;border:none;border-radius:7px;background:#16a34a;color:#fff;font-weight:700;cursor:pointer;white-space:nowrap;">✅ Onayla</button>
+                    <button type="button" data-doc-reject="{{ $doc->id }}"
+                        style="font-size:var(--tx-xs);padding:6px 13px;border:1px solid #dc2626;border-radius:7px;background:#fff;color:#dc2626;font-weight:700;cursor:pointer;white-space:nowrap;">❌ Reddet</button>
+                </div>
             </div>
+        </div>
+        <div class="doc-row-note" style="margin-top:8px;font-size:var(--tx-xs);color:#b91c1c;{{ $doc->review_note ? '' : 'display:none;' }}">
+            📝 <span class="doc-row-note-text">{{ $doc->review_note }}</span>
         </div>
     </div>
     @empty
@@ -111,5 +121,63 @@
     @endif
 </div>
 @endif
+
+{{-- #15 — satır içi belge onay/red (AJAX, /senior/batch-review/{id}/action) --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    var CSRF = '{{ csrf_token() }}';
+    function action(id, act, note){
+        return fetch('/senior/batch-review/' + id + '/action', {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN':CSRF, 'Accept':'application/json' },
+            body: JSON.stringify({ action: act, note: note || null })
+        }).then(function(r){ return r.json(); });
+    }
+    function applyState(id, status, note){
+        var row = document.getElementById('doc-row-' + id);
+        if(!row) return;
+        row.dataset.status = status;
+        var badge = row.querySelector('.doc-row-badge');
+        var ico   = row.querySelector('.doc-row-ico');
+        var acts  = row.querySelector('.doc-row-actions');
+        var noteWrap = row.querySelector('.doc-row-note');
+        var noteText = row.querySelector('.doc-row-note-text');
+        if(status === 'approved'){
+            if(badge){ badge.textContent='Approved'; badge.className='badge ok doc-row-badge'; }
+            if(ico) ico.textContent='✅';
+            if(acts) acts.style.display='none';
+            row.style.borderLeft='';
+        } else if(status === 'rejected'){
+            if(badge){ badge.textContent='Rejected'; badge.className='badge danger doc-row-badge'; }
+            if(ico) ico.textContent='❌';
+            if(acts) acts.style.display='flex';
+            row.style.borderLeft='3px solid #dc2626';
+        }
+        if(note && noteWrap && noteText){ noteText.textContent=note; noteWrap.style.display=''; }
+    }
+    document.querySelectorAll('[data-doc-approve]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var id = btn.getAttribute('data-doc-approve');
+            btn.disabled = true; btn.textContent = '...';
+            action(id, 'approve').then(function(res){
+                if(res && res.ok){ applyState(id, 'approved'); }
+                else { btn.disabled=false; btn.textContent='✅ Onayla'; alert('Onaylanamadı.'); }
+            }).catch(function(){ btn.disabled=false; btn.textContent='✅ Onayla'; alert('Bağlantı hatası.'); });
+        });
+    });
+    document.querySelectorAll('[data-doc-reject]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var id = btn.getAttribute('data-doc-reject');
+            var reason = prompt('Reddetme sebebi (öğrenci görecek):', '');
+            if(reason === null) return;
+            btn.disabled = true;
+            action(id, 'reject', reason).then(function(res){
+                if(res && res.ok){ applyState(id, 'rejected', reason); }
+                else { btn.disabled=false; alert('Reddedilemedi.'); }
+            }).catch(function(){ btn.disabled=false; alert('Bağlantı hatası.'); });
+        });
+    });
+}());
+</script>
 
 @endsection

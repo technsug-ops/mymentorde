@@ -227,7 +227,7 @@ class SeniorPortalController extends Controller
                 ->when($status !== '' && $status !== 'all', fn ($w) => $w->where('status', $status))
                 ->latest()
                 ->limit(200)
-                ->get(['id', 'student_id', 'document_id', 'standard_file_name', 'status', 'updated_at']);
+                ->get(['id', 'student_id', 'document_id', 'standard_file_name', 'status', 'review_note', 'updated_at']);
 
         return view('senior.registration-documents', [
             'documents'    => $documents,
