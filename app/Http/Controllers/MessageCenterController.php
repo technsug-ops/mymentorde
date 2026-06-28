@@ -18,7 +18,8 @@ use Illuminate\Support\Str;
 class MessageCenterController extends Controller
 {
     public function __construct(
-        private readonly TaskAutomationService $taskAutomationService
+        private readonly TaskAutomationService $taskAutomationService,
+        private readonly NotificationService $notificationService,
     ) {
     }
 
