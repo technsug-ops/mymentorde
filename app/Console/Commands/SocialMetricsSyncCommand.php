@@ -96,12 +96,18 @@ class SocialMetricsSyncCommand extends Command
         $this->info("Tamamlandi: synced={$synced}, skipped={$skipped}, errors={$errors}");
 
         if (! $dryRun && ($synced > 0 || $errors > 0)) {
-            $eventLog->log('social.metrics_sync', [
-                'synced'  => $synced,
-                'skipped' => $skipped,
-                'errors'  => $errors,
-                'dry_run' => false,
-            ]);
+            $eventLog->log(
+                'social.metrics_sync',
+                'social_metrics',
+                null,
+                "Sosyal metrik sync: synced={$synced}, skipped={$skipped}, errors={$errors}",
+                [
+                    'synced'  => $synced,
+                    'skipped' => $skipped,
+                    'errors'  => $errors,
+                    'dry_run' => false,
+                ],
+            );
         }
 
         return $errors > 0 ? self::FAILURE : self::SUCCESS;

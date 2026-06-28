@@ -105,11 +105,22 @@ class DealerAdvisorController extends Controller
             'message'         => trim((string) $validated['message']),
         ]);
 
-        $this->eventLogService->log('dealer_ticket_created', [
-            'ticket_id'   => (int) $ticket->id,
-            'dealer_code' => $data['dealerCode'],
-            'dealer_user' => (string) ($request->user()?->email ?? ''),
-        ], 'dealer', (string) ($request->user()?->email ?? 'dealer'));
+        try {
+            $this->eventLogService->log(
+                'dealer_ticket_created',
+                'guest_ticket',
+                (string) $ticket->id,
+                "Bayi destek talebi olusturuldu #{$ticket->id}",
+                [
+                    'ticket_id'   => (int) $ticket->id,
+                    'dealer_code' => $data['dealerCode'],
+                    'dealer_user' => (string) ($request->user()?->email ?? ''),
+                ],
+                $request->user()?->email,
+            );
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return redirect('/dealer/advisor')->with('status', 'Destek talebiniz oluşturuldu. #'.$ticket->id);
     }

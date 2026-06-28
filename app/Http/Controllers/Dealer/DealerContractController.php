@@ -71,11 +71,22 @@ class DealerContractController extends Controller
             'signed_uploaded_by'   => (string) ($request->user()?->email ?? ''),
         ]);
 
-        $this->eventLogService->log('dealer_contract_signed_uploaded', [
-            'contract_id' => $contract->id,
-            'dealer_id'   => $dealer->id,
-            'dealer_user' => (string) ($request->user()?->email ?? ''),
-        ], 'dealer', (string) ($request->user()?->email ?? 'dealer'));
+        try {
+            $this->eventLogService->log(
+                'dealer_contract_signed_uploaded',
+                'dealer_contract',
+                (string) $contract->id,
+                "Bayi imzali sozlesme yukledi #{$contract->id}",
+                [
+                    'contract_id' => $contract->id,
+                    'dealer_id'   => $dealer->id,
+                    'dealer_user' => (string) ($request->user()?->email ?? ''),
+                ],
+                $request->user()?->email,
+            );
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return redirect()->route('dealer.contracts.show', $contract->id)
             ->with('status', 'İmzalı sözleşme yüklendi. Onay bekleniyor.');

@@ -95,6 +95,9 @@ class FinanceController extends Controller
     {
         $cid    = $this->companyId();
         $period = $request->query('period', now()->format('Y-m'));
+        if (!preg_match('/^\d{4}-\d{2}$/', (string) $period)) {
+            $period = now()->format('Y-m');
+        }
         [$year, $month] = explode('-', $period);
 
         $base = CompanyFinanceEntry::when($cid > 0, fn($q) => $q->where('company_id', $cid));
@@ -357,6 +360,9 @@ class FinanceController extends Controller
         $type     = $request->query('type', '');
         $category = $request->query('category', '');
         $month    = $request->query('month', now()->format('Y-m'));
+        if (!preg_match('/^\d{4}-\d{2}$/', (string) $month)) {
+            $month = now()->format('Y-m');
+        }
 
         [$year, $mo] = explode('-', $month);
 
