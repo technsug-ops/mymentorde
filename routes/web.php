@@ -514,6 +514,101 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response($txt, 200)->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:10,1')->name('system.cron-url');
 
+    // Mükerrer üniversite kayıtları (DE/EN aynı kurum 2 kez) audit + birleştirme.
+    // Program arama university_name_cached exact-match olduğu için DE/EN varyantlar
+    // ayrı görünüp programları bölüyor (örn. Hochschule Bremen 18 + Bremen Univ.
+    // of Applied Sciences 13 = aynı okul). Heuristik: aynı şehir (programların
+    // modal location'ı) + aynı tür (isimden) + tam 1 DE-batch + 1 EN-batch.
+    //   varsayılan        → AUDIT (sadece listeler, değiştirmez)
+    //   ?merge=1          → EN varyantın programlarını DE canonical'a taşır,
+    //                       cached ismi günceller, EN kaydı pasif eder (geri
+    //                       alınabilir: dup.metadata'da taşınan program id'leri)
+    //   &skip=ab12cd,...  → bu dup'ları (son 6 hane) atla (yanlış eşleşmeler)
+    Route::get('/system/uni-dedup-audit', function (\Illuminate\Http\Request $request) {
+        $classify = function (string $name): string {
+            $n = mb_strtolower($name);
+            if (preg_match('/musik|kunst|künste|\barts\b|theolog|kirchlich|pädagog|verwaltung|polizei|\bfilm\b|medien|sport|management school|business school|graduate school/u', $n)) return 'special';
+            if (preg_match('/institut(e)?|max planck|fraunhofer|leibniz|helmholtz/u', $n)) return 'research';
+            if (preg_match('/technische universit|technical university/u', $n)) return 'tu';
+            if (preg_match('/hochschule|applied sciences|fachhochschule/u', $n)) return 'applied';
+            return 'uni';
+        };
+
+        $unis = \Illuminate\Support\Facades\DB::table('universities')->where('is_active', 1)->get(['id', 'name', 'metadata']);
+        $cityOf = [];
+        foreach (\App\Models\Program::query()->active()->selectRaw('university_id, location, count(*) c')
+                     ->whereNotNull('location')->groupBy('university_id', 'location')->orderByDesc('c')->get() as $r) {
+            if (!isset($cityOf[$r->university_id])) $cityOf[$r->university_id] = $r->location;
+        }
+        $pc = [];
+        foreach (\App\Models\Program::query()->active()->selectRaw('university_id, count(*) c')->groupBy('university_id')->get() as $r) {
+            $pc[$r->university_id] = (int) $r->c;
+        }
+
+        $groups = [];
+        foreach ($unis as $u) {
+            $key = ($cityOf[$u->id] ?? '?') . '|' . $classify($u->name);
+            $groups[$key][] = ['name' => $u->name, 'batch' => str_starts_with($u->id, '019de9f1') ? 'EN' : 'DE', 'id' => $u->id, 'pc' => $pc[$u->id] ?? 0];
+        }
+        $pairs = [];
+        foreach ($groups as $list) {
+            $de = array_values(array_filter($list, fn ($x) => $x['batch'] === 'DE'));
+            $en = array_values(array_filter($list, fn ($x) => $x['batch'] === 'EN'));
+            if (count($de) === 1 && count($en) === 1) {
+                $pairs[] = ['canonical' => $de[0], 'dup' => $en[0]];
+            }
+        }
+
+        $skip = array_filter(array_map('trim', explode(',', (string) $request->query('skip', ''))));
+        $doMerge = $request->boolean('merge');
+
+        $out = "MÜKERRER ÜNİVERSİTE AUDIT" . ($doMerge ? " — BİRLEŞTİRME" : " — sadece liste") . "\n"
+             . "Aday çift (1 DE + 1 EN, aynı şehir+tür): " . count($pairs) . "\n"
+             . "Atla (skip): " . ($skip ? implode(',', $skip) : '(yok)') . "\n"
+             . str_repeat('─', 70) . "\n";
+
+        $merged = 0; $movedTotal = 0; $skipped = 0;
+        foreach ($pairs as $p) {
+            $tok = substr($p['dup']['id'], -6);
+            $canId = $p['canonical']['id']; $canName = $p['canonical']['name'];
+            $dupId = $p['dup']['id']; $dupName = $p['dup']['name'];
+
+            if (in_array($tok, $skip, true)) {
+                $skipped++;
+                $out .= "  [ATLA {$tok}] {$canName} <= {$dupName}\n";
+                continue;
+            }
+            $out .= sprintf("  [%s] DE %d  %s  <=  EN %d  %s\n", $tok, $p['canonical']['pc'], mb_strimwidth($canName, 0, 40), $p['dup']['pc'], $dupName);
+
+            if ($doMerge) {
+                $progIds = \App\Models\Program::query()->where('university_id', $dupId)->pluck('id')->all();
+                \App\Models\Program::query()->where('university_id', $dupId)
+                    ->update(['university_id' => $canId, 'university_name_cached' => $canName]);
+                \Illuminate\Support\Facades\DB::table('universities')->where('id', $dupId)->update([
+                    'is_active' => 0,
+                    'metadata'  => json_encode([
+                        'merged_into'  => $canId,
+                        'old_name'     => $dupName,
+                        'program_ids'  => $progIds,
+                        'merged_count' => count($progIds),
+                    ], JSON_UNESCAPED_UNICODE),
+                    'updated_at' => now(),
+                ]);
+                $merged++; $movedTotal += count($progIds);
+            }
+        }
+
+        $out .= str_repeat('─', 70) . "\n";
+        if ($doMerge) {
+            $out .= "BİRLEŞTİRİLDİ: {$merged} çift | Taşınan program: {$movedTotal} | Atlandı: {$skipped}\n"
+                  . "Geri alma: ilgili EN üniversitesi metadata.program_ids ile (is_active=0).\n";
+        } else {
+            $out .= "Toplam aday: " . count($pairs) . " | Atlanacak: {$skipped}\n"
+                  . "Yanlış eşleşmeleri not et, sonra: ?merge=1&skip=tok1,tok2,...\n";
+        }
+        return response($out, 200)->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:10,1')->name('system.uni-dedup-audit');
+
     // #23 — Doküman kategorilerinde geçersiz top_category_code ('kök', 'kok' vb.)
     // normalize. Audit: dağılımı göster + kanonik olmayanları işaretle.
     // ?fix=1 → geçersizleri DocumentCategory::normalizeTopCategoryCode ile düzeltir.
