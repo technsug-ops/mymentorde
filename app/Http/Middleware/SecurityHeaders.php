@@ -21,7 +21,9 @@ class SecurityHeaders
     {
         // Nonce altyapısı: request başına rastgele üretilir, tüm view'lara iletilir.
         // Blade template'lerde: <script nonce="{{ $cspNonce }}"> veya @cspNonce
-        // V6 sprint'inde 'unsafe-inline' kaldırılacak — tüm template'ler nonce aldığında.
+        // NOT: Inline event handler'lar (onclick= vb.) aşağıda script-src-attr ile
+        // KALICI izinli — script-src'ye nonce eklemek onları bozmaz. Bu yüzden
+        // "V6'da unsafe-inline'ı kaldırınca handler'lar bozulur" riski ARTIK YOK.
         $nonce = base64_encode(random_bytes(16));
         app()->instance('csp-nonce', $nonce);
 
@@ -88,8 +90,16 @@ class SecurityHeaders
 
         $csp = implode('; ', [
             "default-src 'self'",
-            // Production: nonce kaldırıldı — unsafe-inline aktif. Tüm view'lar nonce'a geçirildiğinde geri eklenecek.
+            // script-src: <script> BLOKLARI. Şu an 'unsafe-inline' aktif. İleride
+            // <script> sertleştirmek istenirse buraya "'nonce-{$nonce}'" eklenip
+            // 'unsafe-inline' kaldırılabilir — bu, aşağıdaki script-src-attr sayesinde
+            // inline event handler'ları (onclick= vb.) BOZMAZ.
             "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.qrserver.com" . $posthogScript . $turnstile . $pusherScript . $viteScript,
+            // script-src-attr: inline event handler'ları (onclick/onchange/onsubmit/
+            // onmouseover...) AYRI kontrol eder. Kalıcı olarak izinli — proje genelinde
+            // ~100 inline handler var; script-src'ye nonce eklense bile bunlar çalışır.
+            // Bu olmadan nonce eklenince tüm handler'lar bloklanır (tema-toggle bug'ı).
+            "script-src-attr 'unsafe-inline'",
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net" . $viteStyle,
             "font-src 'self' data:",
             "img-src 'self' data: https: blob:",
