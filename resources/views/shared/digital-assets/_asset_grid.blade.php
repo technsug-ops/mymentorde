@@ -38,6 +38,18 @@
         $previewUrl = $isLink ? null : route($routePrefix . '.preview', $asset->id);
         $youtubeId = $isLink ? $extractYoutubeId($asset->external_url) : null;
         $ytThumb   = $youtubeId ? ('https://img.youtube.com/vi/' . $youtubeId . '/hqdefault.jpg') : null;
+        // Görsel olmayan dosyalar için tür-bazlı renkli panel (şık thumbnail hissi)
+        $ext = strtolower((string) ($asset->extension ?? ''));
+        $typeStyle = match(true) {
+            $ext === 'pdf'                              => ['#fee2e2', '#fecaca', '#dc2626', '📕'],
+            in_array($ext, ['doc','docx'])              => ['#dbeafe', '#bfdbfe', '#2563eb', '📘'],
+            in_array($ext, ['xls','xlsx','csv'])        => ['#dcfce7', '#bbf7d0', '#16a34a', '📗'],
+            in_array($ext, ['ppt','pptx'])              => ['#ffedd5', '#fed7aa', '#ea580c', '📙'],
+            in_array($ext, ['zip','rar','7z'])          => ['#fef3c7', '#fde68a', '#d97706', '🗜️'],
+            $asset->category === 'video'                => ['#f3e8ff', '#e9d5ff', '#9333ea', '🎬'],
+            $asset->category === 'audio'                => ['#fce7f3', '#fbcfe8', '#db2777', '🎵'],
+            default                                     => ['#f1f5f9', '#e2e8f0', '#475569', '📄'],
+        };
     @endphp
     <div class="dam-card"
          data-asset-id="{{ $asset->id }}"
@@ -85,7 +97,13 @@
                      style="width:100%;height:100%;object-fit:cover;" loading="lazy"
                      onerror="this.style.display='none';this.parentElement.innerHTML+='<span style=\'font-size:42px;\'>{{ $emoji }}</span>';">
             @else
-                {!! $emoji !!}
+                {{-- Görsel olmayan: renkli tür paneli (büyük ikon + uzantı etiketi) --}}
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,{{ $typeStyle[0] }},{{ $typeStyle[1] }});">
+                    <span style="font-size:46px;line-height:1;">{{ $typeStyle[3] }}</span>
+                    @if($ext !== '')
+                        <span style="font-size:12px;font-weight:800;letter-spacing:1.5px;color:{{ $typeStyle[2] }};background:rgba(255,255,255,.7);padding:2px 10px;border-radius:6px;">{{ strtoupper($ext) }}</span>
+                    @endif
+                </div>
             @endif
 
             {{-- Link badge --}}

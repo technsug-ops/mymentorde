@@ -329,15 +329,15 @@ class DigitalAssetService
 
     /**
      * Standart görünen ad üretir — kullanıcı checkbox'ı işaretlediğinde.
-     * Format: {klasor-slug}_{YYYYMMDD}_{orijinal-slug}.{ext}
-     * Kök klasör için: kok_{YYYYMMDD}_{orijinal-slug}.{ext}
+     * Klasör içi: {klasor-slug}_{YYYYMMDD}_{orijinal-slug}.{ext}
+     * Kök klasör: {YYYYMMDD}_{orijinal-slug}.{ext}  (prefix yok — eskiden 'kok_' eklerdi)
      */
     private function buildStandardName(?string $folderSlug, string $originalBase, string $extension): string
     {
-        $folderPart   = $folderSlug ?: 'kok';
         $datePart     = now()->format('Ymd');
         $originalPart = $this->safeFilename($originalBase);
-        return sprintf('%s_%s_%s.%s', $folderPart, $datePart, $originalPart, $extension);
+        $prefix       = ($folderSlug !== null && trim($folderSlug) !== '') ? $folderSlug . '_' : '';
+        return sprintf('%s%s_%s.%s', $prefix, $datePart, $originalPart, $extension);
     }
 
     private function categorize(string $mime, string $ext): string
