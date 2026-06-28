@@ -385,8 +385,20 @@ class StudentDashboardController extends Controller
             $studentAnalytics['achievementPoints'] = $achievementPoints ?? 0;
         }
 
+        // #18 — Danışmanın "öğrenciye görünür" işaretlediği notlar
+        $advisorNotes = $studentId !== ''
+            ? \App\Models\InternalNote::query()
+                ->where('student_id', $studentId)
+                ->where('is_visible_to_student', true)
+                ->whereNull('archived_at')
+                ->latest()
+                ->limit(20)
+                ->get(['id', 'content', 'next_step', 'category', 'created_at'])
+            : collect();
+
         return view('student.dashboard', [
             'user' => $user,
+            'advisorNotes' => $advisorNotes,
             'studentAnalytics' => $studentAnalytics,
             'studentId' => $studentId,
             'guestApplication' => $guestApplication,

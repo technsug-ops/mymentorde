@@ -70,6 +70,9 @@
             <label style="font-size:var(--tx-xs);color:var(--u-muted);display:flex;align-items:center;gap:6px;">⏰ Hatırlatma:
                 <input type="date" name="follow_up_date">
             </label>
+            <label style="font-size:var(--tx-xs);color:var(--u-muted);display:flex;align-items:center;gap:6px;cursor:pointer;" title="İşaretlersen öğrenci bu notu kendi panelinde görür">
+                <input type="checkbox" name="visible_to_student" value="1"> 👁 Öğrenciye görünür
+            </label>
         </div>
         <label style="font-size:var(--tx-xs);color:var(--u-muted);">📎 Görsel ekle (opsiyonel, en fazla 6 — JPG/PNG/WebP):
             <input type="file" name="images[]" accept="image/*" multiple>
@@ -86,6 +89,7 @@
             <span class="badge">{{ $note->category }}</span>
             <span class="badge {{ $note->priority === 'high' ? 'danger' : ($note->priority === 'medium' ? 'warn' : '') }}">{{ $note->priority }}</span>
             @if($note->archived_at)<span class="badge">🗄 arşiv</span>@endif
+            @if(!empty($note->is_visible_to_student))<span class="badge" style="background:#dcfce7;color:#15803d;">👁 öğrenciye görünür</span>@endif
             <span class="muted" style="font-size:var(--tx-xs);margin-left:auto;">{{ $note->created_at?->format('d.m.Y H:i') }}</span>
         </div>
         @if($note->content)
@@ -145,6 +149,9 @@
                             <input type="text" name="next_step" maxlength="500" placeholder="➡️ Sonraki adım" value="{{ $note->next_step }}" style="width:100%;">
                             <label style="font-size:11px;color:var(--u-muted);display:flex;align-items:center;gap:6px;">⏰ Hatırlatma:
                                 <input type="date" name="follow_up_date" value="{{ $note->follow_up_date ? ($note->follow_up_date instanceof \Carbon\Carbon ? $note->follow_up_date->format('Y-m-d') : \Illuminate\Support\Carbon::parse($note->follow_up_date)->format('Y-m-d')) : '' }}">
+                            </label>
+                            <label style="font-size:11px;color:var(--u-muted);display:flex;align-items:center;gap:6px;cursor:pointer;">
+                                <input type="checkbox" name="visible_to_student" value="1" @checked(!empty($note->is_visible_to_student))> 👁 Öğrenciye görünür
                             </label>
                             <button class="btn" type="submit" style="background:#7e58bf;color:#fff;padding:4px 10px;font-size:12px;">Kaydet</button>
                         </form>

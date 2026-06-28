@@ -14,6 +14,7 @@ class InternalNote extends Model
         'follow_up_date',
         'category',
         'priority',
+        'is_visible_to_student',
         'is_pinned',
         'attachments',
         'archived_at',
@@ -24,6 +25,7 @@ class InternalNote extends Model
 
     protected $casts = [
         'is_pinned' => 'boolean',
+        'is_visible_to_student' => 'boolean',
         'attachments' => 'array',
         'archived_at' => 'datetime',
         'follow_up_date' => 'date',

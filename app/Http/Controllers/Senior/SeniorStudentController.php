@@ -251,13 +251,14 @@ class SeniorStudentController extends Controller
         abort_if(!$assignedIds->contains($studentId), 403, 'Bu öğrenci size atanmamış.');
 
         $data = $request->validate([
-            'content'        => ['required', 'string', 'max:5000'],
-            'next_step'      => ['nullable', 'string', 'max:500'],
-            'follow_up_date' => ['nullable', 'date'],
-            'activity_type'  => ['nullable', 'string', 'in:meeting,call,whatsapp,email,note,document,general'],
-            'priority'       => ['nullable', 'in:low,medium,high'],
-            'images'         => ['nullable', 'array', 'max:6'],
-            'images.*'       => \App\Support\FileUploadRules::image(false),
+            'content'            => ['required', 'string', 'max:5000'],
+            'next_step'          => ['nullable', 'string', 'max:500'],
+            'follow_up_date'     => ['nullable', 'date'],
+            'visible_to_student' => ['nullable', 'boolean'],
+            'activity_type'      => ['nullable', 'string', 'in:meeting,call,whatsapp,email,note,document,general'],
+            'priority'           => ['nullable', 'in:low,medium,high'],
+            'images'             => ['nullable', 'array', 'max:6'],
+            'images.*'           => \App\Support\FileUploadRules::image(false),
         ]);
 
         $attachments = [];
@@ -278,6 +279,7 @@ class SeniorStudentController extends Controller
             'content'         => $data['content'],
             'next_step'       => $data['next_step'] ?? null,
             'follow_up_date'  => $data['follow_up_date'] ?? null,
+            'is_visible_to_student' => $request->boolean('visible_to_student'),
             'category'        => $data['activity_type'] ?? 'meeting',
             'priority'        => $data['priority'] ?? 'medium',
             'is_pinned'       => false,
@@ -312,16 +314,18 @@ class SeniorStudentController extends Controller
         abort_if(!$assignedIds->contains((string) $note->student_id), 403);
 
         $data = $request->validate([
-            'content'        => ['required', 'string', 'max:5000'],
-            'next_step'      => ['nullable', 'string', 'max:500'],
-            'follow_up_date' => ['nullable', 'date'],
-            'activity_type'  => ['nullable', 'string', 'in:meeting,call,whatsapp,email,note,document,general'],
-            'priority'       => ['nullable', 'in:low,medium,high'],
+            'content'            => ['required', 'string', 'max:5000'],
+            'next_step'          => ['nullable', 'string', 'max:500'],
+            'follow_up_date'     => ['nullable', 'date'],
+            'visible_to_student' => ['nullable', 'boolean'],
+            'activity_type'      => ['nullable', 'string', 'in:meeting,call,whatsapp,email,note,document,general'],
+            'priority'           => ['nullable', 'in:low,medium,high'],
         ]);
         $note->update([
             'content'        => $data['content'],
             'next_step'      => $data['next_step'] ?? null,
             'follow_up_date' => $data['follow_up_date'] ?? null,
+            'is_visible_to_student' => $request->boolean('visible_to_student'),
             'category'       => $data['activity_type'] ?? $note->category,
             'priority'       => $data['priority'] ?? $note->priority,
         ]);

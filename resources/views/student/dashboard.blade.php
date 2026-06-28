@@ -229,6 +229,32 @@
 </div>
 @endforeach
 
+{{-- #18 — Danışmanımdan Notlar (senior'ın "öğrenciye görünür" işaretledikleri) --}}
+@if(($advisorNotes ?? collect())->isNotEmpty())
+@php $noteIcons = ['meeting'=>'📅','call'=>'📞','whatsapp'=>'💬','email'=>'✉️','note'=>'📝','document'=>'📎','general'=>'💬']; @endphp
+<div style="background:var(--card,#fff);border:1px solid var(--line,#e5e7eb);border-left:4px solid #7c3aed;border-radius:14px;padding:16px 18px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:18px;">💬</span>
+        <h3 style="margin:0;font-size:15px;font-weight:800;color:var(--text,#0f172a);">Danışmanımdan Notlar</h3>
+        <span style="margin-left:auto;font-size:11px;color:var(--muted,#64748b);">{{ $advisorNotes->count() }} not</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+        @foreach($advisorNotes as $n)
+        <div style="background:var(--bg,#f8fafc);border:1px solid var(--line,#e5e7eb);border-radius:10px;padding:11px 13px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+                <span>{{ $noteIcons[$n->category] ?? '💬' }}</span>
+                <span style="font-size:11px;color:var(--muted,#64748b);margin-left:auto;">{{ $n->created_at?->format('d.m.Y H:i') }}</span>
+            </div>
+            <div style="font-size:13px;color:var(--text,#0f172a);line-height:1.5;white-space:pre-wrap;">{{ $n->content }}</div>
+            @if(!empty($n->next_step))
+            <div style="margin-top:7px;font-size:12px;color:#5b3fa0;background:#f1edfa;border:1px solid #d8cdf0;border-radius:6px;padding:4px 9px;display:inline-block;">➡️ {{ $n->next_step }}</div>
+            @endif
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 {{-- Journey Funnel --}}
 <div class="sd-journey">
     <div class="sd-journey-top">
