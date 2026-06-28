@@ -1324,4 +1324,62 @@
     }
 })();
 </script>
+
+{{-- PDF kapak thumbnail'i — pdf.js ile ilk sayfayı render eder (lazy, sadece görünen kartlar) --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function(){
+    var canvases = document.querySelectorAll('canvas.dam-pdf-thumb');
+    if (!canvases.length || !('IntersectionObserver' in window)) return;
+
+    var PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+    var PDFJS_WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    var libPromise = null;
+    function loadLib(){
+        if (libPromise) return libPromise;
+        libPromise = new Promise(function(resolve, reject){
+            if (window.pdfjsLib) { resolve(window.pdfjsLib); return; }
+            var s = document.createElement('script');
+            s.src = PDFJS;
+            s.onload = function(){
+                try { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER; } catch(e){}
+                resolve(window.pdfjsLib);
+            };
+            s.onerror = reject;
+            document.head.appendChild(s);
+        });
+        return libPromise;
+    }
+
+    function render(canvas){
+        var src = canvas.getAttribute('data-pdf-src');
+        if (!src || canvas.dataset.done) return;
+        canvas.dataset.done = '1';
+        loadLib().then(function(lib){
+            return lib.getDocument(src).promise;
+        }).then(function(pdf){
+            return pdf.getPage(1);
+        }).then(function(page){
+            var parentW = (canvas.parentElement && canvas.parentElement.clientWidth) || 180;
+            var base = page.getViewport({ scale: 1 });
+            var scale = Math.max(0.2, parentW / base.width) * (window.devicePixelRatio || 1);
+            var vp = page.getViewport({ scale: scale });
+            canvas.width = vp.width; canvas.height = vp.height;
+            return page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+        }).then(function(){
+            canvas.style.display = 'block';
+            var panel = canvas.parentElement ? canvas.parentElement.querySelector('.dam-type-panel') : null;
+            if (panel) panel.style.display = 'none';
+        }).catch(function(){
+            canvas.dataset.done = ''; // başarısız → fallback panel kalsın
+        });
+    }
+
+    var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+            if (e.isIntersecting){ render(e.target); io.unobserve(e.target); }
+        });
+    }, { rootMargin: '300px' });
+    canvases.forEach(function(c){ io.observe(c); });
+})();
+</script>
 @endsection

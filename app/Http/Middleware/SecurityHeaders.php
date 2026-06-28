@@ -106,7 +106,7 @@ class SecurityHeaders
             "connect-src 'self' https:" . $posthogConnect . $pusherConnect . $viteConnect,
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://open.spotify.com https://docs.google.com https://www.canva.com" . $turnstile,
             "media-src 'self' data:",
-            "worker-src 'self' blob:",
+            "worker-src 'self' blob: https://cdn.jsdelivr.net",
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",

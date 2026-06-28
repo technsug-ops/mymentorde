@@ -97,13 +97,18 @@
                      style="width:100%;height:100%;object-fit:cover;" loading="lazy"
                      onerror="this.style.display='none';this.parentElement.innerHTML+='<span style=\'font-size:42px;\'>{{ $emoji }}</span>';">
             @else
-                {{-- Görsel olmayan: renkli tür paneli (büyük ikon + uzantı etiketi) --}}
-                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,{{ $typeStyle[0] }},{{ $typeStyle[1] }});">
+                {{-- Görsel olmayan: renkli tür paneli (PDF render edilene kadar fallback) --}}
+                <div class="dam-type-panel" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,{{ $typeStyle[0] }},{{ $typeStyle[1] }});">
                     <span style="font-size:46px;line-height:1;">{{ $typeStyle[3] }}</span>
                     @if($ext !== '')
                         <span style="font-size:12px;font-weight:800;letter-spacing:1.5px;color:{{ $typeStyle[2] }};background:rgba(255,255,255,.7);padding:2px 10px;border-radius:6px;">{{ strtoupper($ext) }}</span>
                     @endif
                 </div>
+                @if($ext === 'pdf')
+                    {{-- PDF kapağı: pdf.js ilk sayfayı buraya render eder (lazy) --}}
+                    <canvas class="dam-pdf-thumb" data-pdf-src="{{ $previewUrl }}"
+                            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#fff;"></canvas>
+                @endif
             @endif
 
             {{-- Link badge --}}
