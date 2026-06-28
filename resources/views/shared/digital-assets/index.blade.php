@@ -1379,12 +1379,21 @@
         });
     }
 
+    // NOT: display:none canvas'in kutusu yok → IO onu "görünür" raporlamaz.
+    // Bu yüzden GÖRÜNÜR parent'ı (.dam-card-preview) gözlemleyip canvas'ı render et.
     var io = new IntersectionObserver(function(entries){
         entries.forEach(function(e){
-            if (e.isIntersecting){ render(e.target); io.unobserve(e.target); }
+            if (e.isIntersecting){
+                var canvas = e.target.querySelector('canvas.dam-pdf-thumb');
+                if (canvas) render(canvas);
+                io.unobserve(e.target);
+            }
         });
     }, { rootMargin: '300px' });
-    canvases.forEach(function(c){ io.observe(c); });
+    canvases.forEach(function(c){
+        var target = c.parentElement || c;
+        io.observe(target);
+    });
 })();
 </script>
 @endsection
