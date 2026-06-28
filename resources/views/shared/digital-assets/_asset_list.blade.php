@@ -65,12 +65,34 @@
             @php
                 $cat = $categoryLabels[$asset->category] ?? $categoryLabels['other'];
                 $isFav = in_array($asset->id, $favoriteIds ?? [], true);
+                $isLink = $asset->source_type === 'link';
+                $previewUrl = $isLink ? null : route($routePrefix . '.preview', $asset->id);
+                $ext = strtolower((string) ($asset->extension ?? ''));
+                $typeStyle = match(true) {
+                    $ext === 'pdf'                       => ['#fee2e2', '#fecaca', '#dc2626', '📕'],
+                    in_array($ext, ['doc','docx'])       => ['#dbeafe', '#bfdbfe', '#2563eb', '📘'],
+                    in_array($ext, ['xls','xlsx','csv']) => ['#dcfce7', '#bbf7d0', '#16a34a', '📗'],
+                    in_array($ext, ['ppt','pptx'])       => ['#ffedd5', '#fed7aa', '#ea580c', '📙'],
+                    $asset->category === 'video'         => ['#f3e8ff', '#e9d5ff', '#9333ea', '🎬'],
+                    default                              => ['#f1f5f9', '#e2e8f0', '#475569', $cat[0]],
+                };
             @endphp
             <tr style="border-bottom:1px solid #f1f5f9;">
                 <td data-col="select" style="{{ $tdBase }}text-align:center;">
                     <input type="checkbox" class="dam-row-check" value="{{ $asset->id }}" style="cursor:pointer">
                 </td>
-                <td data-col="type" style="{{ $tdBase }}text-align:center;font-size:22px;">{!! $cat[0] !!}</td>
+                <td data-col="type" style="padding:6px 4px;text-align:center;">
+                    <div style="width:36px;height:36px;margin:0 auto;border-radius:6px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;font-size:18px;background:linear-gradient(135deg,{{ $typeStyle[0] }},{{ $typeStyle[1] }});">
+                        @if($asset->is_image && !$isLink)
+                            <img src="{{ $previewUrl }}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+                        @elseif($ext === 'pdf' && !$isLink)
+                            <span class="dam-type-panel" style="font-size:16px;">{{ $typeStyle[3] }}</span>
+                            <canvas class="dam-pdf-thumb" data-pdf-src="{{ $previewUrl }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#fff;"></canvas>
+                        @else
+                            {!! $typeStyle[3] !!}
+                        @endif
+                    </div>
+                </td>
                 <td data-col="name" style="padding:10px 10px;overflow:hidden;">
                     <div style="font-weight:600;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $asset->name }}">{{ $asset->name }}</div>
                     @if($asset->description)
