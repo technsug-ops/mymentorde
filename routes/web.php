@@ -609,6 +609,94 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response($out, 200)->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:10,1')->name('system.uni-dedup-audit');
 
+    // Mükerrer üniversite — 2. TUR: isim-bazlı eşleştirme (round-1 sonrası kalanlar).
+    // Round-1 program-location ile eşleşmeyenleri (Bremen gibi) isimdeki ortak
+    // kelimeler (şehir/özel ad) + Jaccard benzerliği ile yakalar. is_active=1 EN
+    // kayıtlar (round-1'de merge edilenler zaten pasif → otomatik dışlanır).
+    //   varsayılan → AUDIT (skor + aday), ?merge=1[&skip=tok,...] → birleştir
+    //   &min=0.6   → minimum benzerlik eşiği (varsayılan 0.5)
+    Route::get('/system/uni-dedup-audit2', function (\Illuminate\Http\Request $request) {
+        $stop = array_flip(['university', 'universitat', 'hochschule', 'fachhochschule', 'of', 'the',
+            'fur', 'and', 'applied', 'sciences', 'technische', 'technical', 'institute', 'institut',
+            'der', 'des', 'die', 'das', 'zu', 'am', 'fh', 'th', 'for', 'science', 'college', 'de', 'uas']);
+        $norm = fn (string $s) => strtr(mb_strtolower($s), ['ä'=>'a','ö'=>'o','ü'=>'u','ß'=>'ss','é'=>'e','è'=>'e','á'=>'a']);
+        $toks = function (string $name) use ($norm, $stop): array {
+            $n = preg_replace('/[^a-z0-9\s]/', ' ', $norm($name));
+            $t = [];
+            foreach (preg_split('/\s+/', $n) as $w) {
+                if (mb_strlen($w) > 2 && !isset($stop[$w])) $t[$w] = 1;
+            }
+            return array_keys($t);
+        };
+        $classify = function (string $name): string {
+            $n = mb_strtolower($name);
+            if (preg_match('/musik|kunst|künste|\barts\b|theolog|kirchlich|pädagog|verwaltung|polizei|\bfilm\b|medien|sport|business school|management school|school of management/u', $n)) return 'special';
+            if (preg_match('/max planck|fraunhofer|leibniz institut|helmholtz/u', $n)) return 'research';
+            if (preg_match('/hochschule|applied sciences|fachhochschule/u', $n)) return 'applied';
+            return 'uni';
+        };
+        $compat = fn (string $a, string $b) => $a === $b || ($a === 'uni' && $b === 'uni');
+
+        $pc = [];
+        foreach (\App\Models\Program::query()->active()->selectRaw('university_id, count(*) c')->groupBy('university_id')->get() as $r) {
+            $pc[$r->university_id] = (int) $r->c;
+        }
+        $active = \Illuminate\Support\Facades\DB::table('universities')->where('is_active', 1)->get(['id', 'name']);
+        $en = []; $de = [];
+        foreach ($active as $u) {
+            $rec = ['id' => $u->id, 'name' => $u->name, 't' => $toks($u->name), 'cls' => $classify($u->name), 'pc' => $pc[$u->id] ?? 0];
+            if (str_starts_with($u->id, '019de9f1')) $en[] = $rec; else $de[] = $rec;
+        }
+
+        $min = max(0.3, min(1.0, (float) $request->query('min', 0.5)));
+        $cands = [];
+        foreach ($en as $e) {
+            if (!$e['t']) continue;
+            $best = null; $bs = 0.0;
+            foreach ($de as $d) {
+                if (!$compat($e['cls'], $d['cls'])) continue;
+                $i = count(array_intersect($e['t'], $d['t']));
+                if (!$i) continue;
+                $u = count(array_unique(array_merge($e['t'], $d['t'])));
+                $j = $u ? $i / $u : 0;
+                if ($j > $bs) { $bs = $j; $best = $d; }
+            }
+            if ($best && $bs >= $min) {
+                $cands[] = ['canonical' => $best, 'dup' => $e, 'score' => $bs];
+            }
+        }
+        usort($cands, fn ($a, $b) => $b['score'] <=> $a['score']);
+
+        $skip = array_filter(array_map('trim', explode(',', (string) $request->query('skip', ''))));
+        $doMerge = $request->boolean('merge');
+        $out = "MÜKERRER ÜNİVERSİTE — 2. TUR (isim eşleştirme)" . ($doMerge ? " — BİRLEŞTİRME" : " — liste") . "\n"
+             . "Aktif EN: " . count($en) . " | DE: " . count($de) . " | min skor: {$min} | aday: " . count($cands) . "\n"
+             . "Skip: " . ($skip ? implode(',', $skip) : '(yok)') . "\n" . str_repeat('─', 72) . "\n";
+
+        $merged = 0; $moved = 0; $skipped = 0;
+        foreach ($cands as $p) {
+            $tok = substr($p['dup']['id'], -6);
+            if (in_array($tok, $skip, true)) { $skipped++; $out .= "  [ATLA {$tok}] {$p['canonical']['name']} <= {$p['dup']['name']}\n"; continue; }
+            $out .= sprintf("  [%s] %.2f  DE %3d %-34s <= EN %3d %s\n", $tok, $p['score'], $p['canonical']['pc'], mb_strimwidth($p['canonical']['name'], 0, 34), $p['dup']['pc'], $p['dup']['name']);
+            if ($doMerge) {
+                $canId = $p['canonical']['id']; $canName = $p['canonical']['name']; $dupId = $p['dup']['id']; $dupName = $p['dup']['name'];
+                $progIds = \App\Models\Program::query()->where('university_id', $dupId)->pluck('id')->all();
+                \App\Models\Program::query()->where('university_id', $dupId)->update(['university_id' => $canId, 'university_name_cached' => $canName]);
+                \Illuminate\Support\Facades\DB::table('universities')->where('id', $dupId)->update([
+                    'is_active' => 0,
+                    'metadata'  => json_encode(['merged_into' => $canId, 'old_name' => $dupName, 'program_ids' => $progIds, 'merged_count' => count($progIds), 'round' => 2], JSON_UNESCAPED_UNICODE),
+                    'updated_at' => now(),
+                ]);
+                $merged++; $moved += count($progIds);
+            }
+        }
+        $out .= str_repeat('─', 72) . "\n";
+        $out .= $doMerge
+            ? "BİRLEŞTİRİLDİ: {$merged} | Taşınan program: {$moved} | Atlandı: {$skipped}\n"
+            : "Aday: " . count($cands) . " | Düşük skorları (0.5-0.7) dikkatle incele.\nMerge: ?merge=1&skip=tok1,tok2,...\n";
+        return response($out, 200)->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:10,1')->name('system.uni-dedup-audit2');
+
     // #23 — Doküman kategorilerinde geçersiz top_category_code ('kök', 'kok' vb.)
     // normalize. Audit: dağılımı göster + kanonik olmayanları işaretle.
     // ?fix=1 → geçersizleri DocumentCategory::normalizeTopCategoryCode ile düzeltir.
