@@ -24,6 +24,7 @@ class DigitalAssetFolder extends Model
         'description',
         'color',
         'icon',
+        'sort_order',
         'is_system',
         'allowed_roles',
         'created_by',
@@ -31,6 +32,7 @@ class DigitalAssetFolder extends Model
 
     protected $casts = [
         'depth'         => 'integer',
+        'sort_order'    => 'integer',
         'is_system'     => 'boolean',
         'allowed_roles' => 'array',
     ];
@@ -60,7 +62,7 @@ class DigitalAssetFolder extends Model
 
     public function children(): HasMany
     {
-        return $this->hasMany(self::class, 'parent_id')->orderBy('name');
+        return $this->hasMany(self::class, 'parent_id')->orderBy('sort_order')->orderBy('name');
     }
 
     public function assets(): HasMany

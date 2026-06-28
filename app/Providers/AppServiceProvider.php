@@ -179,6 +179,11 @@ class AppServiceProvider extends ServiceProvider
                         ->middleware('permission:dam.folder.manage')
                         ->name('folder.move');
 
+                    // Klasör sıralama (yukarı/aşağı)
+                    \Illuminate\Support\Facades\Route::post('/folders/{folder}/reorder', [$ctrl, 'folderReorder'])
+                        ->middleware('permission:dam.folder.manage')
+                        ->name('folder.reorder');
+
                     // E3 — Dosya taşıma
                     \Illuminate\Support\Facades\Route::post('/{asset}/move', [$ctrl, 'assetMove'])
                         ->middleware('permission:dam.update')

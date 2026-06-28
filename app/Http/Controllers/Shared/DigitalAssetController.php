@@ -1013,6 +1013,46 @@ class DigitalAssetController extends Controller
     }
 
     /**
+     * Klasör sıralamasını değiştir (kardeşler arası yukarı/aşağı).
+     * Kardeşlere sıralı sort_order atanır (başlangıçta hepsi 0 olsa bile çalışır).
+     */
+    public function folderReorder(Request $request, int $folder): RedirectResponse
+    {
+        $data = $request->validate([
+            'direction' => ['required', 'in:up,down'],
+        ]);
+
+        $model = DigitalAssetFolder::query()->findOrFail($folder);
+
+        // Aynı parent altındaki kardeşler (mevcut sıralamayla)
+        $siblings = DigitalAssetFolder::query()
+            ->where('parent_id', $model->parent_id)
+            ->orderBy('sort_order')->orderBy('name')
+            ->get()
+            ->values();
+
+        $idx = $siblings->search(fn ($f) => (int) $f->id === (int) $model->id);
+        if ($idx === false) {
+            return back();
+        }
+        $swapWith = $data['direction'] === 'up' ? $idx - 1 : $idx + 1;
+        if ($swapWith < 0 || $swapWith >= $siblings->count()) {
+            return back(); // zaten en ü/altta
+        }
+
+        // Sırayı yer değiştir, sonra hepsine sıralı sort_order yaz (sağlamlık)
+        $ordered = $siblings->all();
+        [$ordered[$idx], $ordered[$swapWith]] = [$ordered[$swapWith], $ordered[$idx]];
+        foreach ($ordered as $pos => $f) {
+            if ((int) $f->sort_order !== $pos * 10) {
+                $f->forceFill(['sort_order' => $pos * 10])->save();
+            }
+        }
+
+        return back()->with('status', 'Sıralama güncellendi.');
+    }
+
+    /**
      * E3 — Dosyayı başka klasöre taşı. null folder_id = root.
      */
     public function assetMove(Request $request, int $asset): RedirectResponse

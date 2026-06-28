@@ -22,6 +22,19 @@
                 style="background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px;color:{{ $isFav ? '#f59e0b' : 'var(--text-muted,#94a3b8)' }};">
             {{ $isFav ? '⭐' : '☆' }}
         </button>
+        {{-- Sıralama okları (yukarı/aşağı) — JS'siz form POST --}}
+        @can('dam.folder.manage')
+            @if(!$node['is_system'])
+            <form method="POST" action="{{ route($routePrefix . '.folder.reorder', $node['id']) }}" style="display:inline;margin:0;line-height:0;">
+                @csrf <input type="hidden" name="direction" value="up">
+                <button type="submit" title="Yukarı taşı" style="background:none;border:none;cursor:pointer;font-size:10px;padding:0 1px;color:var(--text-muted,#94a3b8);">▲</button>
+            </form>
+            <form method="POST" action="{{ route($routePrefix . '.folder.reorder', $node['id']) }}" style="display:inline;margin:0;line-height:0;">
+                @csrf <input type="hidden" name="direction" value="down">
+                <button type="submit" title="Aşağı taşı" style="background:none;border:none;cursor:pointer;font-size:10px;padding:0 1px;color:var(--text-muted,#94a3b8);">▼</button>
+            </form>
+            @endif
+        @endcan
         {{-- Klasör ayar butonu (yeniden adlandır + yetki + açıklama) --}}
         @can('dam.folder.manage')
             @if(!$node['is_system'])

@@ -176,6 +176,7 @@ class DigitalAssetFolderService
     {
         $all = DigitalAssetFolder::query()
             ->orderBy('depth')
+            ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
 
