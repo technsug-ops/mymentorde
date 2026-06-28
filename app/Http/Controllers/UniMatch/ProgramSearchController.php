@@ -199,9 +199,15 @@ class ProgramSearchController extends Controller
         }
 
         if ($f['language'] !== '') {
-            // Exact match — kullanıcı seçtiği değeri net görür.
-            // 'both' programlar için explicit 3. seçenek var (uni-assist tarzı).
-            $q->where('language', $f['language']);
+            // 'en'/'de' seçimi çift dilli (both) programları da KAPSAMALI — onlar da
+            // o dilde veriliyor. Eskiden exact match yüzünden 2964 'both' program
+            // "İngilizce"/"Almanca" filtresinden yanlışlıkla dışlanıyordu (#20).
+            // 'both' filtresi ise sadece açıkça çift dilli programları getirir.
+            $q->whereIn('language', match ($f['language']) {
+                'en'    => ['en', 'both'],
+                'de'    => ['de', 'both'],
+                default => [$f['language']],
+            });
         }
 
         if ($f['subject'] !== '') {
