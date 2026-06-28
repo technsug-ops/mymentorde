@@ -607,6 +607,19 @@ document.addEventListener('alpine:init',function(){
             if(arr) arr.style.transform = isHidden ? '' : 'rotate(-90deg)';
         });
     });
+
+    // ── #25: Tarayıcı autofill'i çalışma alanı form alanlarına sokma ──
+    // Senior'ın şahsi maillerinden/kayıtlı verilerinden alanları doldurmasını
+    // engelle. Login/şifre alanları senior layout'ta olmadığı için güvenli.
+    (function(){
+        document.querySelectorAll('form').forEach(function(f){
+            if(!f.hasAttribute('autocomplete')) f.setAttribute('autocomplete','off');
+        });
+        document.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden]):not([type=submit]):not([type=button]), textarea').forEach(function(el){
+            if(!el.hasAttribute('autocomplete')) el.setAttribute('autocomplete','off');
+            el.setAttribute('data-1p-ignore','');   // 1Password/şifre yöneticisi de karışmasın
+        });
+    }());
 }());
 </script>
 
