@@ -1341,8 +1341,13 @@
             var s = document.createElement('script');
             s.src = PDFJS;
             s.onload = function(){
-                try { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER; } catch(e){}
-                resolve(window.pdfjsLib);
+                // Cross-origin Worker (CDN) tarayıcıda bloklanır → worker JS'ini
+                // fetch edip BLOB (same-origin) olarak yükle. blob: worker-src'de izinli.
+                fetch(PDFJS_WORKER).then(function(r){ return r.text(); }).then(function(code){
+                    var blob = new Blob([code], { type: 'application/javascript' });
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(blob);
+                }).catch(function(){ /* worker yüklenemezse pdf.js main-thread'e düşer */ })
+                  .then(function(){ resolve(window.pdfjsLib); });
             };
             s.onerror = reject;
             document.head.appendChild(s);

@@ -749,6 +749,35 @@ Route::middleware(['company.context', 'auth', 'manager.role'])->group(function (
         return response($out . "\n", 200)->header('Content-Type', 'text/plain; charset=utf-8');
     })->middleware('throttle:10,1')->name('system.doc-categories-audit');
 
+    // DAM: mevcut 'kok_' prefix'li dosya adlarını temizle (yeni yüklemeler zaten temiz).
+    // name + original_filename salt görünen alanlar; fiziksel dosya yolu ayrı, dokunulmaz.
+    Route::get('/system/dam-fix-kok', function (\Illuminate\Http\Request $request) {
+        $rows = \App\Models\DigitalAsset::query()->withoutGlobalScopes()
+            ->where(function ($w) {
+                $w->where('name', 'like', 'kok\_%')->orWhere('original_filename', 'like', 'kok\_%');
+            })->get(['id', 'name', 'original_filename']);
+
+        $fixed = 0; $lines = [];
+        foreach ($rows as $a) {
+            $upd = [];
+            if (str_starts_with((string) $a->name, 'kok_')) {
+                $upd['name'] = preg_replace('/^kok_/', '', (string) $a->name);
+            }
+            if (str_starts_with((string) $a->original_filename, 'kok_')) {
+                $upd['original_filename'] = preg_replace('/^kok_/', '', (string) $a->original_filename);
+            }
+            if ($upd) {
+                $a->forceFill($upd)->save();
+                $fixed++;
+                $lines[] = "#{$a->id}: " . ($upd['name'] ?? $a->name);
+            }
+        }
+        $txt = "DAM 'kok_' prefix temizligi\n" . str_repeat('─', 50) . "\n"
+            . "Bulunan: {$rows->count()} | Düzeltilen: {$fixed}\n\n"
+            . ($lines ? implode("\n", $lines) : '(temizlenecek dosya yok)') . "\n";
+        return response($txt, 200)->header('Content-Type', 'text/plain; charset=utf-8');
+    })->middleware('throttle:10,1')->name('system.dam-fix-kok');
+
     // Teşhis: prod'da ETKİN mail yapılandırması (gizli anahtarlar maskeli).
     // "sendNow başarılı ama mail gelmiyor" → çoğu zaman MAIL_MAILER=log demek.
     Route::get('/system/mail-config', function () {
