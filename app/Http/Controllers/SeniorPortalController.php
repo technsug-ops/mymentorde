@@ -911,6 +911,7 @@ class SeniorPortalController extends Controller
             'filters'           => compact('q', 'package'),
             'packages'          => $packages,
             'serviceCategories' => $serviceCategories,
+            'packageMap'        => $this->buildPackageServiceMap(),
             'pkgCounts'         => $pkgCounts,
             'extraCounts'       => $extraCounts,
             'totalStudents'     => $studentIds->count(),

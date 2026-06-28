@@ -82,6 +82,9 @@
 }
 .sr-stu-card:hover { border-color: var(--u-brand); box-shadow: 0 4px 14px rgba(0,0,0,.12); }
 .sr-stu-card.has-pkg { border-left: 4px solid var(--u-brand); }
+details.sr-stu-card > summary { list-style: none; }
+details.sr-stu-card > summary::-webkit-details-marker { display: none; }
+details.sr-stu-card[open] { box-shadow: 0 4px 14px rgba(0,0,0,.10); }
 .sr-stu-card-top  { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .sr-stu-name  { font-size: 14px; font-weight: 700; color: var(--u-text); line-height: 1.3; }
 .sr-stu-id    { font-size: 11px; color: var(--u-muted); margin-top: 2px; }
@@ -282,30 +285,62 @@
                 $pkgCode  = $row->selected_package_code ?? '';
                 $pkgLabel = $pkgCode ? ($row->selected_package_title ?: $pkgCode) : null;
                 $badgeCls = match($pkgCode) { 'pkg_premium'=>'badge warn', 'pkg_plus'=>'badge info', 'pkg_basic'=>'badge ok', default=>'' };
+                $pkg      = $packageMap[$pkgCode] ?? null;
+                $svcCount = ($pkg ? count($pkg['services']) : 0) + count($extras);
             @endphp
-            <div class="sr-stu-card {{ $pkgCode ? 'has-pkg' : '' }}">
-                <div class="sr-stu-card-top">
-                    <div>
-                        <div class="sr-stu-name">{{ $name ?: '-' }}</div>
-                        <div class="sr-stu-id">{{ $row->converted_student_id ?? '-' }}</div>
+            <details class="sr-stu-card {{ $pkgCode ? 'has-pkg' : '' }}">
+                <summary style="cursor:pointer;list-style:none;">
+                    <div class="sr-stu-card-top">
+                        <div>
+                            <div class="sr-stu-name">{{ $name ?: '-' }}</div>
+                            <div class="sr-stu-id">{{ $row->converted_student_id ?? '-' }}</div>
+                        </div>
+                        @if($pkgLabel)
+                            <span class="{{ $badgeCls }}" style="font-size:10px;padding:2px 8px;white-space:nowrap;flex-shrink:0;">{{ $pkgLabel }}</span>
+                        @else
+                            <span style="font-size:10px;padding:2px 8px;white-space:nowrap;flex-shrink:0;
+                                         background:#f1f5f9;color:#94a3b8;border-radius:6px;font-weight:600;">Paket yok</span>
+                        @endif
                     </div>
-                    @if($pkgLabel)
-                        <span class="{{ $badgeCls }}" style="font-size:10px;padding:2px 8px;white-space:nowrap;flex-shrink:0;">{{ $pkgLabel }}</span>
+                    @if($svcCount > 0)
+                        <div style="margin-top:6px;font-size:11px;color:#7c3aed;font-weight:700;">▾ {{ $svcCount }} hizmet — dökümü gör</div>
                     @else
-                        <span style="font-size:10px;padding:2px 8px;white-space:nowrap;flex-shrink:0;
-                                     background:#f1f5f9;color:#94a3b8;border-radius:6px;font-weight:600;">Paket yok</span>
+                        <span class="sr-stu-noextra">Hizmet seçilmemiş</span>
                     @endif
+                </summary>
+
+                {{-- #22 — Tam hizmet dökümü: paket içeriği + ek servisler --}}
+                <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--u-line,#e2e8f0);">
+                    @if($pkg)
+                        @if(!empty($pkg['categories']))
+                        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
+                            @foreach($pkg['categories'] as $cat)
+                                <span style="display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid var(--u-line,#e2e8f0);border-radius:999px;padding:2px 8px;font-size:10px;font-weight:600;color:{{ $cat['color'] }};">{{ $cat['icon'] }} {{ $cat['title'] }}</span>
+                            @endforeach
+                        </div>
+                        @endif
+                        <div style="font-size:10px;color:var(--u-muted,#64748b);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">📦 Paket içeriği</div>
+                        <ul style="margin:0 0 8px;padding-left:16px;">
+                            @foreach($pkg['services'] as $sv)
+                                <li style="font-size:12px;color:var(--u-text,#1e293b);margin-bottom:2px;">{{ $sv['title'] }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
+
+                    @if(!empty($extras))
+                        <div style="font-size:10px;color:var(--u-muted,#64748b);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">➕ Ek hizmetler</div>
+                        <ul style="margin:0;padding-left:16px;">
+                            @foreach($extras as $e)
+                                <li style="font-size:12px;color:var(--u-text,#1e293b);margin-bottom:2px;">{{ $e['title'] ?? '-' }}@if(!empty($e['price'])) <span style="color:var(--u-muted,#94a3b8);">· {{ $e['price'] }}</span>@endif</li>
+                            @endforeach
+                        </ul>
+                    @endif
+
+                    @unless($pkg || !empty($extras))
+                        <div style="font-size:12px;color:var(--u-muted,#94a3b8);">Bu öğrenci için tanımlı hizmet yok.</div>
+                    @endunless
                 </div>
-                @if(!empty($extras))
-                    <div class="sr-stu-extras-wrap">
-                        @foreach($extras as $e)
-                            <span class="sr-stu-extra-chip">{{ $e['title'] ?? '-' }}</span>
-                        @endforeach
-                    </div>
-                @else
-                    <span class="sr-stu-noextra">Ek servis secilmemis</span>
-                @endif
-            </div>
+            </details>
             @endforeach
         </div>
         @endif
