@@ -445,7 +445,7 @@ Mit freundlichen Grussen
                 </div>
                 <div class="doc-actions" style="margin-top:10px;">
                     <button type="submit" class="doc-btn primary">Referans Mektubu Oluştur</button>
-                    <a class="doc-btn" href="/im">Mesaj Merkezi</a>
+                    <a class="doc-btn" href="/senior/students">Öğrenci Listesine Dön</a>
                 </div>
             </form>
     </section>

@@ -299,6 +299,17 @@ class PortalController extends Controller
         }
         $data['guestAnalytics'] = $guestAnalytics;
 
+        // #18 — Danışmanın "görünür" işaretlediği notlar (aday tarafı)
+        $data['advisorNotes'] = $guest
+            ? \App\Models\InternalNote::query()
+                ->where('guest_application_id', (int) $guest->id)
+                ->where('is_visible_to_student', true)
+                ->whereNull('archived_at')
+                ->latest()
+                ->limit(20)
+                ->get(['id', 'content', 'next_step', 'category', 'created_at'])
+            : collect();
+
         return view('guest.dashboard', $data);
     }
 

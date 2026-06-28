@@ -1,6 +1,6 @@
 @extends('senior.layouts.app')
-@section('title','Gizli Notlar')
-@section('page_title','Gizli Notlar')
+@section('title','Notlarım')
+@section('page_title','Notlarım')
 
 @section('content')
 @php
@@ -18,7 +18,7 @@
 
 {{-- Gradient Header --}}
 <div style="background:linear-gradient(to right,#6d28d9,#7c3aed);border-radius:14px;padding:14px 16px;margin-bottom:14px;color:#fff;">
-    <div style="font-size:16px;font-weight:800;margin-bottom:2px;">📝 Gizli Notlar</div>
+    <div style="font-size:16px;font-weight:800;margin-bottom:2px;">📝 Notlarım</div>
     <div style="font-size:var(--tx-sm);opacity:.8;margin-bottom:10px;">Öğrenci bazlı iç notlar — yalnızca senior ekibi görür</div>
     <div class="mob-chip-grid" style="display:flex;gap:8px;flex-wrap:wrap;">
         @foreach([

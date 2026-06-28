@@ -282,7 +282,7 @@
                     <span class="acc-arrow" style="font-size:12px;opacity:.7;display:inline-block;transition:transform .2s;{{ $isLojistik ? '' : 'transform:rotate(-90deg);' }}">▾</span>
                 </div>
                 <div class="nav-acc-body" style="{{ $isLojistik ? '' : 'display:none;' }}">
-                    <a href="/senior/notes"   class="nav-link {{ request()->is('senior/notes*') ? 'active' : '' }}"><x-icon name="lock" size="18" class="nav-icon" aria-label="Gizli Notlar" /> Gizli Notlar</a>
+                    <a href="/senior/notes"   class="nav-link {{ request()->is('senior/notes*') ? 'active' : '' }}"><x-icon name="sticky-note" size="18" class="nav-icon" aria-label="Notlarım" /> Notlarım</a>
                     <a href="/senior/vault"   class="nav-link {{ request()->is('senior/vault*') ? 'active' : '' }}"><x-icon name="archive" size="18" class="nav-icon" aria-label="Hesap Kasası" /> Hesap Kasası</a>
                 </div>
             </div>
