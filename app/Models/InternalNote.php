@@ -10,6 +10,8 @@ class InternalNote extends Model
         'student_id',
         'guest_application_id',
         'content',
+        'next_step',
+        'follow_up_date',
         'category',
         'priority',
         'is_pinned',
@@ -24,5 +26,6 @@ class InternalNote extends Model
         'is_pinned' => 'boolean',
         'attachments' => 'array',
         'archived_at' => 'datetime',
+        'follow_up_date' => 'date',
     ];
 }
