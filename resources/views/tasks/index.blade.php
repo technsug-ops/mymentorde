@@ -316,6 +316,18 @@ a.tb-stat:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); background:#f0f6ff; }
             <form method="POST" action="/tasks" style="margin-top:12px;">
                 @csrf
                 <div class="row2">
+                    @if(($taskTemplates ?? collect())->isNotEmpty())
+                    {{-- Şablon seçici: seçilince göreve hazır adım listesi (checklist) eklenir --}}
+                    <div class="full" style="background:#f1edfa;border:1px solid #d8cdf0;border-radius:8px;padding:9px 11px;">
+                        <label style="height:auto;display:block;font-size:11px;font-weight:700;color:#5b3fa0;margin-bottom:5px;">📋 Şablon kullan (opsiyonel) — adım listesi otomatik eklenir</label>
+                        <select name="template_id" class="full" style="margin:0;">
+                            <option value="">— Şablonsuz boş görev —</option>
+                            @foreach($taskTemplates as $tpl)
+                                <option value="{{ $tpl->id }}">{{ $tpl->name }} ({{ $tpl->items_count }} adım)</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
                     <input class="full" name="title" placeholder="Baslik" required>
                     <textarea class="full" name="description" placeholder="Aciklama"></textarea>
                     <select name="status">

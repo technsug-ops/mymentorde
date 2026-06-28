@@ -164,6 +164,12 @@ class TaskBoardController extends Controller
             'roleScopedDepartment' => $roleScopedDepartment,
             'routeDepartment'      => $routeDepartment,
             'recentTasks'          => $recentTasks,
+            'taskTemplates'        => \App\Models\TaskTemplate::query()
+                ->where('company_id', app()->bound('current_company_id') ? (int) app('current_company_id') : 0)
+                ->where('is_active', true)
+                ->withCount('items')
+                ->orderBy('name')
+                ->get(['id', 'name', 'category']),
             'stats' => [
                 'total'       => (int) (clone $statsBase)->count(),
                 'todo'        => (int) (clone $statsBase)->where('status', 'todo')->count(),
@@ -270,7 +276,7 @@ class TaskBoardController extends Controller
                 foreach ($items as $item) {
                     TaskChecklist::create([
                         'task_id'    => $task->id,
-                        'title'      => $item->label,
+                        'title'      => $item->title, // kolon 'title' — eskiden yanlış 'label' okunup null oluyordu
                         'is_done'    => false,
                         'sort_order' => $item->sort_order,
                     ]);
