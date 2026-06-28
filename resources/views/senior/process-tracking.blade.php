@@ -3,6 +3,7 @@
 @section('page_title', 'Başvuru & Süreç Takibi')
 
 @section('content')
+@include('senior.partials.student-hub-toggle')
 
 @php
     $stepOptions = [

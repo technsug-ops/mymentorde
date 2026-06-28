@@ -3,6 +3,7 @@
 @section('page_title','Öğrencilerim')
 
 @section('content')
+@include('senior.partials.student-hub-toggle')
 @php
     $assignments = $assignments ?? collect();
     $guestPool   = $guestPool   ?? collect();
