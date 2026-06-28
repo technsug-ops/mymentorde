@@ -230,15 +230,15 @@ class ProgramSearchController extends Controller
 
         if ($f['tuition_max'] !== '') {
             $max = (int) $f['tuition_max'];
+            // NULL = harç bilgisi YOK (kartta "ücret bilgisi yok"). Eskiden NULL'lar
+            // "Ücretsiz" ve "≤€X" filtrelerine dahil ediliyordu → yanlış sonuç (#20):
+            // bilinmeyen ≠ ücretsiz (10147 NULL program "ücretsiz" sayılıyordu).
+            // Harç filtresi yalnızca BİLİNEN değerlere uygulanır.
             if ($max === 0) {
-                // Sadece ücretsiz programlar
-                $q->where(function ($sub) {
-                    $sub->whereNull('tuition_eur_per_semester')->orWhere('tuition_eur_per_semester', 0);
-                });
+                $q->where('tuition_eur_per_semester', 0); // NULL'ı zaten dışlar
             } else {
-                $q->where(function ($sub) use ($max) {
-                    $sub->whereNull('tuition_eur_per_semester')->orWhere('tuition_eur_per_semester', '<=', $max);
-                });
+                $q->whereNotNull('tuition_eur_per_semester')
+                  ->where('tuition_eur_per_semester', '<=', $max);
             }
         }
 
