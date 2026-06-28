@@ -359,7 +359,9 @@ class SeniorDashboardController extends Controller
             ->whereIn('converted_student_id', $studentIds->all())
             ->where('converted_to_student', true)
             ->orderByDesc('id')
-            ->get(['id', 'converted_student_id', 'first_name', 'last_name', 'email', 'registration_form_draft']);
+            ->get(['id', 'converted_student_id', 'first_name', 'last_name', 'email', 'phone',
+                'branch', 'target_city', 'target_term', 'application_country', 'application_type',
+                'registration_form_draft']);
 
         // Guest kaydı olmayan assignments için fallback (display_name'den)
         $guestSids = $guests->pluck('converted_student_id')->all();
@@ -372,9 +374,9 @@ class SeniorDashboardController extends Controller
                     'id' => 'sa_' . $r->id,
                     'converted_student_id' => $r->student_id,
                     'first_name' => $r->display_name ?: $r->student_id,
-                    'last_name' => '',
-                    'email' => '',
-                    'registration_form_draft' => [],
+                    'last_name' => '', 'email' => '', 'phone' => '', 'branch' => '',
+                    'target_city' => '', 'target_term' => '', 'application_country' => '',
+                    'application_type' => '', 'registration_form_draft' => [],
                 ]);
             $guests = $guests->concat($extras)->values();
         }
@@ -382,6 +384,19 @@ class SeniorDashboardController extends Controller
         $selectedGuestId = (int) $request->query('guest_id', $guests->first()?->id ?? 0);
         $selectedGuest = $selectedGuestId > 0 ? $guests->firstWhere('id', $selectedGuestId) : null;
         $builderDraft = is_array($selectedGuest?->registration_form_draft) ? $selectedGuest->registration_form_draft : [];
+
+        // #19 — seçili öğrencinin kişi bilgileriyle doküman alanlarını autofill et.
+        $autofill = [
+            'name'    => $selectedGuest ? trim(($selectedGuest->first_name ?? '') . ' ' . ($selectedGuest->last_name ?? '')) : '',
+            'email'   => (string) ($selectedGuest->email ?? ''),
+            'phone'   => (string) ($selectedGuest->phone ?? ''),
+            'program' => $selectedGuest
+                ? (trim((string) ($selectedGuest->branch ?? '')) ?: (string) data_get($builderDraft, 'target_program', ''))
+                : '',
+            'city'    => (string) ($selectedGuest->target_city ?? ''),
+            'term'    => (string) ($selectedGuest->target_term ?? ''),
+            'country' => (string) ($selectedGuest->application_country ?? ''),
+        ];
 
         return view('senior.document-builder', [
             'students' => $guests,
@@ -393,6 +408,7 @@ class SeniorDashboardController extends Controller
                     ->limit(200)
                     ->get(),
             'builderDraft' => $builderDraft,
+            'autofill' => $autofill,
             'selectedGuestId' => $selectedGuestId,
             'documentBuilderBridge' => [
                 'role' => 'senior',

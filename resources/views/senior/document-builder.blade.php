@@ -185,6 +185,20 @@
             </div>
         </div>
 
+        {{-- #19 — Seçili öğrencinin kişi bilgileri (autofill kaynağı, doğrulama için) --}}
+        @php $af = $autofill ?? []; @endphp
+        @if(!empty($af['name']) || !empty($af['email']))
+        <div style="padding:12px 20px;border-bottom:1px solid var(--u-line);display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;background:var(--u-bg);">
+            <span style="font-size:var(--tx-xs);font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.05em;">👤 Seçili Öğrenci</span>
+            @foreach([['Ad', $af['name'] ?? ''],['E-posta', $af['email'] ?? ''],['Telefon', $af['phone'] ?? ''],['Program', $af['program'] ?? ''],['Şehir', $af['city'] ?? ''],['Dönem', $af['term'] ?? '']] as $pair)
+                @if(trim((string)$pair[1]) !== '')
+                    <span style="font-size:var(--tx-xs);color:var(--u-text);"><span style="color:var(--u-muted);">{{ $pair[0] }}:</span> <strong>{{ $pair[1] }}</strong></span>
+                @endif
+            @endforeach
+            <span style="font-size:11px;color:var(--u-muted);margin-left:auto;">↓ alanlara otomatik dolduruldu</span>
+        </div>
+        @endif
+
         {{-- Tabs + KPI --}}
         <div style="padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
             {{-- Tab pills --}}
@@ -313,11 +327,11 @@ Mit freundlichen Grussen
                     </div>
                     <div>
                         <label class="doc-muted">Belge Başlığı (isteğe bağlı)</label>
-                        <input type="text" name="title" placeholder="örn: Motivationsschreiben - Anonim Aday">
+                        <input type="text" name="title" value="{{ old('title', !empty($af['name']) ? 'Motivationsschreiben - '.$af['name'] : '') }}" placeholder="örn: Motivationsschreiben - Anonim Aday">
                     </div>
                     <div>
                         <label class="doc-muted">Hedef Program</label>
-                        <input type="text" name="target_program" value="{{ old('target_program', data_get($builderDraft ?? [], 'target_program', '')) }}" placeholder="orn: Informatik B.Sc.">
+                        <input type="text" name="target_program" value="{{ old('target_program', ($af['program'] ?? '') ?: data_get($builderDraft ?? [], 'target_program', '')) }}" placeholder="orn: Informatik B.Sc.">
                     </div>
                     <div>
                         <label class="doc-muted">Ek Notlar</label>
@@ -416,7 +430,7 @@ Mit freundlichen Grussen
                     </div>
                     <div>
                         <label class="doc-muted">Belge Başlığı (isteğe bağlı)</label>
-                        <input type="text" name="title" placeholder="örn: Referenz Übersicht - Halil Demoreren">
+                        <input type="text" name="title" value="{{ old('title', !empty($af['name']) ? 'Referenz - '.$af['name'] : '') }}" placeholder="örn: Referenz Übersicht - Halil Demoreren">
                     </div>
                     <div>
                         <label class="doc-muted">Referans / Öğretmen İletişim Bilgisi</label>
