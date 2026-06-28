@@ -51,7 +51,12 @@
             </div>
         </div>
 
-        <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+            {{-- Silme — sola hizalı, tehlike rengi --}}
+            <button type="button" id="dam-folder-delete-btn"
+                    style="margin-right:auto;padding:10px 16px;border-radius:8px;border:1px solid #fecaca;background:#fff;color:#dc2626;cursor:pointer;font-weight:700;font-size:13px;">
+                🗑 Klasörü Sil
+            </button>
             <button type="button" onclick="document.getElementById('dam-folder-edit-modal').close()"
                     style="padding:10px 18px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-weight:600;">
                 Vazgeç

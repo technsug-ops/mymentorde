@@ -973,7 +973,12 @@ class DigitalAssetController extends Controller
         $name     = $model->name;
         $parentId = $model->parent_id;
 
-        $this->folders->delete($model);
+        // Dolu/sistem klasör → servis RuntimeException fırlatır; yakalanmazsa 500.
+        try {
+            $this->folders->delete($model);
+        } catch (\RuntimeException $e) {
+            return back()->with('status', '⚠️ ' . $e->getMessage());
+        }
         \App\Models\DigitalAssetActivityLog::record('folder_delete', 'folder', $folder, $name, $this->user(), [], request()->ip());
 
         // Silinen klasörde kaldık, back() 404 verir. Parent'a veya kök'e yönlendir.

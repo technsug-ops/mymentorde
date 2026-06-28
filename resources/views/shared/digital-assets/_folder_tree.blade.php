@@ -32,7 +32,8 @@
                     data-folder-description="{{ $node['description'] ?? '' }}"
                     data-folder-roles='@json($node['allowed_roles'] ?? [])'
                     data-update-url="{{ route($routePrefix . '.folder.update', $node['id']) }}"
-                    title="Klasör ayarları (ad, açıklama, yetkiler)"
+                    data-delete-url="{{ route($routePrefix . '.folder.destroy', $node['id']) }}"
+                    title="Klasör ayarları (ad, açıklama, yetkiler, sil)"
                     style="background:none;border:none;cursor:pointer;font-size:12px;padding:2px 4px;color:var(--text-muted,#94a3b8);margin-right:4px;">
                 ⚙
             </button>

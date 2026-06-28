@@ -98,7 +98,8 @@
                                     data-folder-description="{{ $currentFolder->description ?? '' }}"
                                     data-folder-roles='@json($currentFolder->allowed_roles ?? [])'
                                     data-update-url="{{ route($routePrefix . '.folder.update', $currentFolder->id) }}"
-                                    title="Klasör ayarları (ad, açıklama, yetkiler)"
+                                    data-delete-url="{{ route($routePrefix . '.folder.destroy', $currentFolder->id) }}"
+                                    title="Klasör ayarları (ad, açıklama, yetkiler, sil)"
                                     style="padding:3px 8px;font-size:11px;border:1px solid #e2e8f0;background:#fff;border-radius:5px;cursor:pointer">⚙ Ayarlar</button>
 
                             <button type="button" id="damFolderMoveBtn"
@@ -1052,12 +1053,33 @@
         folderEditForm.querySelectorAll('.dam-fedit-role').forEach(function(cb){
             cb.checked = Array.isArray(roles) && roles.indexOf(cb.value) !== -1;
         });
+        // Silme URL'ini ve adını modal'da sakla (silme butonu kullanır)
+        folderEditModal.dataset.deleteUrl  = triggerEl.getAttribute('data-delete-url') || '';
+        folderEditModal.dataset.folderName = name;
 
         if (typeof folderEditModal.showModal === 'function') {
             folderEditModal.showModal();
         } else {
             folderEditModal.setAttribute('open', '');
         }
+    }
+
+    // Klasör silme butonu (modal içinde) — DELETE form'u oluşturup gönderir
+    const folderDeleteBtn = document.getElementById('dam-folder-delete-btn');
+    if (folderDeleteBtn && folderEditModal) {
+        folderDeleteBtn.addEventListener('click', function(){
+            const delUrl = folderEditModal.dataset.deleteUrl || '';
+            const fName  = folderEditModal.dataset.folderName || 'bu klasör';
+            if (!delUrl) { alert('Bu klasör silinemez.'); return; }
+            if (!confirm('"' + fName + '" klasörü silinsin mi?\n\nNOT: Klasör BOŞ olmalı. İçinde dosya/alt klasör varsa silinmez — önce taşı veya sil. Bu işlem geri alınamaz.')) return;
+            const f = document.createElement('form');
+            f.method = 'POST';
+            f.action = delUrl;
+            f.innerHTML = '<input type="hidden" name="_token" value="' + csrfToken + '">' +
+                          '<input type="hidden" name="_method" value="DELETE">';
+            document.body.appendChild(f);
+            f.submit();
+        });
     }
 
     // Breadcrumb butonu (mevcut klasör)
