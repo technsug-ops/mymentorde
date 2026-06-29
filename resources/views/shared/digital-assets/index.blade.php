@@ -1355,6 +1355,34 @@
         return libPromise;
     }
 
+    // ── localStorage cache: bir kez render edilen kapak saklanır → sonraki
+    //    açılışlarda pdf.js çalışmadan ANINDA gelir (gecikme kalkar). ──
+    var CACHE_PREFIX = 'dampdf:v1:';
+    function cacheGet(src){ try { return localStorage.getItem(CACHE_PREFIX + src); } catch(e){ return null; } }
+    function cacheSet(src, dataUrl){
+        try { localStorage.setItem(CACHE_PREFIX + src, dataUrl); }
+        catch(e){ // kota dolu → eski dampdf girdilerini temizle, bir kez daha dene
+            try {
+                Object.keys(localStorage).forEach(function(k){ if (k.indexOf(CACHE_PREFIX) === 0) localStorage.removeItem(k); });
+                localStorage.setItem(CACHE_PREFIX + src, dataUrl);
+            } catch(e2){}
+        }
+    }
+    function reveal(canvas){
+        canvas.style.display = 'block';
+        var panel = canvas.parentElement ? canvas.parentElement.querySelector('.dam-type-panel') : null;
+        if (panel) panel.style.display = 'none';
+    }
+    function showCached(canvas, dataUrl){
+        var img = new Image();
+        img.onload = function(){
+            canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            reveal(canvas);
+        };
+        img.src = dataUrl;
+    }
+
     function render(canvas){
         var src = canvas.getAttribute('data-pdf-src');
         if (!src || canvas.dataset.done) return;
@@ -1371,9 +1399,8 @@
             canvas.width = vp.width; canvas.height = vp.height;
             return page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
         }).then(function(){
-            canvas.style.display = 'block';
-            var panel = canvas.parentElement ? canvas.parentElement.querySelector('.dam-type-panel') : null;
-            if (panel) panel.style.display = 'none';
+            reveal(canvas);
+            try { cacheSet(src, canvas.toDataURL('image/jpeg', 0.6)); } catch(e){}
         }).catch(function(){
             canvas.dataset.done = ''; // başarısız → fallback panel kalsın
         });
@@ -1390,9 +1417,12 @@
             }
         });
     }, { rootMargin: '300px' });
+
     canvases.forEach(function(c){
-        var target = c.parentElement || c;
-        io.observe(target);
+        var src = c.getAttribute('data-pdf-src');
+        var cached = src ? cacheGet(src) : null;
+        if (cached){ c.dataset.done = '1'; showCached(c, cached); return; } // anında — pdf.js yok
+        io.observe(c.parentElement || c); // cache yok → lazy render
     });
 })();
 </script>
