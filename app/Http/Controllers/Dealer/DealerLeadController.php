@@ -285,23 +285,32 @@ class DealerLeadController extends Controller
                 ->first();
         }
 
+        // Kullanıcı dilinde label'lar — timeline'a ham kod (status:todo vb.) sızmasın.
+        $leadStTr   = ['new'=>'Yeni','contacted'=>'İletişim kuruldu','qualified'=>'Nitelikli','converted'=>'Dönüştü','lost'=>'Kaybedildi'];
+        $taskStTr   = ['todo'=>'Yapılacak','in_progress'=>'Devam ediyor','review'=>'İncelemede','done'=>'Tamamlandı','cancelled'=>'İptal edildi','blocked'=>'Bloke','on_hold'=>'Beklemede'];
+        $deptTr     = ['operations'=>'Operasyon','sales'=>'Satış','finance'=>'Finans','marketing'=>'Pazarlama','support'=>'Destek','advisory'=>'Danışmanlık'];
+        $ticketStTr = ['open'=>'Açık','in_progress'=>'İşleniyor','answered'=>'Yanıtlandı','closed'=>'Kapatıldı','pending'=>'Beklemede','resolved'=>'Çözüldü'];
+        $notifyStTr = ['sent'=>'Gönderildi','pending'=>'Beklemede','queued'=>'Kuyrukta','failed'=>'Başarısız','processing'=>'İşleniyor','delivered'=>'Teslim edildi'];
+        $roleTr     = ['dealer'=>'Bayi','senior'=>'Danışman','mentor'=>'Mentor','manager'=>'Yönetici','operations'=>'Operasyon','student'=>'Öğrenci','guest'=>'Aday'];
+        $tr = fn (array $map, $key) => $map[(string) $key] ?? (ucfirst((string) $key) ?: '—');
+
         $timeline = collect();
-        $timeline->push(['type' => 'lead', 'title' => 'Lead olusturuldu', 'meta' => 'Dealer paneli | lead_status: '.((string) ($lead->lead_status ?: 'new')), 'when' => $lead->created_at]);
+        $timeline->push(['type' => 'lead', 'title' => 'Aday bayi panelinden oluşturuldu', 'meta' => 'Durum: '.$tr($leadStTr, $lead->lead_status ?: 'new'), 'when' => $lead->created_at]);
 
         foreach ($tickets as $ticket) {
-            $timeline->push(['type' => 'ticket', 'title' => 'Ticket #'.$ticket->id.' ('.((string) ($ticket->department ?: 'operations')).')', 'meta' => 'status:'.((string) ($ticket->status ?: '-')).' | konu: '.((string) ($ticket->subject ?: '-')), 'when' => $ticket->created_at]);
+            $timeline->push(['type' => 'ticket', 'title' => 'Destek talebi #'.$ticket->id.' ('.$tr($deptTr, $ticket->department ?: 'operations').')', 'meta' => 'Durum: '.$tr($ticketStTr, $ticket->status ?: '-').' · Konu: '.((string) ($ticket->subject ?: '-')), 'when' => $ticket->created_at]);
             foreach ($ticket->replies as $reply) {
-                $timeline->push(['type' => 'ticket_reply', 'title' => 'Ticket yanitı #'.$ticket->id, 'meta' => ((string) ($reply->author_role ?: '-')).' | '.((string) ($reply->author_email ?: '-')).' | '.Str::limit((string) ($reply->message ?: ''), 120), 'when' => $reply->created_at]);
+                $timeline->push(['type' => 'ticket_reply', 'title' => 'Talep yanıtı #'.$ticket->id, 'meta' => $tr($roleTr, $reply->author_role ?: '-').' · '.((string) ($reply->author_email ?: '-')).' · '.Str::limit((string) ($reply->message ?: ''), 120), 'when' => $reply->created_at]);
             }
         }
         foreach ($tasks as $task) {
-            $timeline->push(['type' => 'task', 'title' => 'Task #'.$task->id.' - '.((string) ($task->title ?: '-')), 'meta' => 'dept:'.((string) ($task->department ?: '-')).' | status:'.((string) ($task->status ?: '-')), 'when' => $task->created_at]);
+            $timeline->push(['type' => 'task', 'title' => 'Görev: '.((string) ($task->title ?: '-')), 'meta' => $tr($deptTr, $task->department ?: '-').' · '.$tr($taskStTr, $task->status ?: '-'), 'when' => $task->created_at]);
         }
         foreach ($events as $event) {
-            $timeline->push(['type' => 'event', 'title' => 'Sistem Event: '.((string) ($event->event_type ?: '-')), 'meta' => Str::limit((string) ($event->message ?: '-'), 140), 'when' => $event->created_at]);
+            $timeline->push(['type' => 'event', 'title' => 'Sistem kaydı', 'meta' => Str::limit((string) ($event->message ?: '-'), 140), 'when' => $event->created_at]);
         }
         foreach ($notifications as $n) {
-            $timeline->push(['type' => 'notification', 'title' => 'Bildirim Kuyrugu #'.$n->id.' ('.$n->channel.')', 'meta' => 'recipient:'.((string) ($n->recipient_email ?: '-')).' | status:'.((string) ($n->status ?: '-')), 'when' => $n->queued_at ?: $n->created_at]);
+            $timeline->push(['type' => 'notification', 'title' => 'Bildirim ('.$n->channel.')', 'meta' => 'Alıcı: '.((string) ($n->recipient_email ?: '-')).' · Durum: '.$tr($notifyStTr, $n->status ?: '-'), 'when' => $n->queued_at ?: $n->created_at]);
         }
 
         $timeline = $timeline->sortByDesc(fn ($row) => optional($row['when'] ?? null)?->timestamp ?? 0)->values();
