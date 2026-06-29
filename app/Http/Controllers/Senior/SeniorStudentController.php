@@ -53,7 +53,26 @@ class SeniorStudentController extends Controller
         $assignments = $assignmentQuery
             ->latest('updated_at')
             ->limit(1000)
-            ->get(['student_id', 'branch', 'dealer_id', 'risk_level', 'payment_status', 'is_archived', 'updated_at']);
+            ->get(['student_id', 'display_name', 'branch', 'dealer_id', 'risk_level', 'payment_status', 'is_archived', 'updated_at']);
+
+        // Aktif öğrenci isim haritası: dönüşen guest adı > display_name > user adı.
+        // (Kart eskiden sadece STU-xxxx ID gösteriyordu, isim yoktu.)
+        $sids = $assignments->pluck('student_id')->filter()->unique()->values();
+        $studentNames = collect();
+        if ($sids->isNotEmpty()) {
+            $guestNames = GuestApplication::query()->withoutGlobalScopes()
+                ->whereIn('converted_student_id', $sids->all())
+                ->get(['converted_student_id', 'first_name', 'last_name'])
+                ->mapWithKeys(fn ($g) => [$g->converted_student_id => trim(($g->first_name ?? '') . ' ' . ($g->last_name ?? ''))])
+                ->filter();
+            $userNames = \App\Models\User::query()->whereIn('student_id', $sids->all())
+                ->pluck('name', 'student_id')->filter();
+            $studentNames = $sids->mapWithKeys(function ($sid) use ($assignments, $guestNames, $userNames) {
+                $disp = (string) (optional($assignments->firstWhere('student_id', $sid))->display_name ?? '');
+                $name = ($guestNames[$sid] ?? '') ?: ($disp ?: ($userNames[$sid] ?? ''));
+                return [$sid => trim((string) $name)];
+            })->filter();
+        }
 
         // Aday Öğrenci Havuzu: SADECE henüz dönüşmemiş adaylar. Dönüşmüş guest
         // (converted_to_student=true) Aktif Öğrenciler'de görünür, havuzda DEĞİL
@@ -75,6 +94,7 @@ class SeniorStudentController extends Controller
 
         return view('senior.students', [
             'assignments'  => $assignments,
+            'studentNames' => $studentNames,
             'guestPool'    => $guestPool,
             'filters'      => compact('q', 'archived', 'risk'),
             'sidebarStats' => $this->sidebarStats($request),

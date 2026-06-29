@@ -124,14 +124,18 @@
                 $riskCls = match($rl) { 'critical','high' => 'danger', 'medium','normal' => 'warn', default => 'ok' };
                 $pl      = (string) ($row->payment_status ?? '');
                 $payCls  = match($pl) { 'overdue' => 'danger', 'pending' => 'warn', 'paid','ok' => 'ok', default => '' };
-                $initials = strtoupper(substr($row->student_id ?? 'S', 0, 2));
+                $sName    = trim((string) (($studentNames ?? collect())[$row->student_id] ?? ''));
+                $initials = $sName !== ''
+                    ? collect(explode(' ', $sName))->filter()->take(2)->map(fn($w) => mb_strtoupper(mb_substr($w, 0, 1)))->implode('')
+                    : strtoupper(substr($row->student_id ?? 'S', 0, 2));
             @endphp
             @if($loop->index === 2)<div id="acc-active-more" style="display:none;">@endif
             <div style="padding:12px 16px;border-bottom:1px solid var(--u-line);display:flex;align-items:center;gap:10px;transition:background .12s;"
                  onmouseover="this.style.background='var(--u-bg)'" onmouseout="this.style.background=''">
                 <div style="width:34px;height:34px;border-radius:50%;background:var(--u-brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:var(--tx-xs);font-weight:700;flex-shrink:0;">{{ $initials }}</div>
                 <div style="flex:1;min-width:0;">
-                    <div style="font-weight:700;font-size:var(--tx-sm);color:var(--u-text);">{{ $row->student_id }}</div>
+                    <div style="font-weight:700;font-size:var(--tx-sm);color:var(--u-text);">{{ $sName !== '' ? $sName : $row->student_id }}</div>
+                    @if($sName !== '')<div style="font-size:var(--tx-xs);color:var(--u-muted);font-family:monospace;">{{ $row->student_id }}</div>@endif
                     <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px;">
                         <span class="badge {{ $riskCls }}" style="font-size:var(--tx-xs);">{{ $riskLabelMap[$rl] ?? 'Düşük' }}</span>
                         @if($pl)<span class="badge {{ $payCls }}" style="font-size:var(--tx-xs);">{{ $payLabelMap[$pl] ?? $pl }}</span>@endif
@@ -172,10 +176,11 @@
             </summary>
             <div style="opacity:.65;">
                 @foreach($archived as $row)
+                @php $aName = trim((string) (($studentNames ?? collect())[$row->student_id] ?? '')); @endphp
                 <div style="padding:10px 16px;border-top:1px solid var(--u-line);display:flex;align-items:center;gap:10px;">
-                    <div style="width:30px;height:30px;border-radius:50%;background:#9db4cc;color:#fff;display:flex;align-items:center;justify-content:center;font-size:var(--tx-xs);font-weight:700;">{{ strtoupper(substr($row->student_id ?? 'S',0,2)) }}</div>
+                    <div style="width:30px;height:30px;border-radius:50%;background:#9db4cc;color:#fff;display:flex;align-items:center;justify-content:center;font-size:var(--tx-xs);font-weight:700;">{{ strtoupper(substr($aName !== '' ? $aName : ($row->student_id ?? 'S'),0,2)) }}</div>
                     <div style="flex:1;">
-                        <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-text);">{{ $row->student_id }}</div>
+                        <div style="font-size:var(--tx-xs);font-weight:600;color:var(--u-text);">{{ $aName !== '' ? $aName : $row->student_id }}</div>
                         <div style="display:flex;gap:4px;margin-top:2px;">
                             <span class="badge" style="font-size:var(--tx-xs);">arşiv</span>
                             @if($row->branch)<span class="badge" style="font-size:var(--tx-xs);">{{ $row->branch }}</span>@endif
