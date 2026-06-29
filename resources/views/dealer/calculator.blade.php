@@ -82,6 +82,7 @@
                 </tr>
             </thead>
             <tbody>
+                @foreach($milestones as $ms)
                 @php
                     // Teknik trigger/JSON yerine kullanıcı dilinde açıklama (D6 — kod sızmasın)
                     $triggerLabel = function ($type) {
