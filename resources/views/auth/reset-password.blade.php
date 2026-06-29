@@ -118,7 +118,7 @@
             </div>
         </div>
 
-        <button type="submit" class="btn-submit">Şifremi Güncelle</button>
+        <button type="submit" class="btn-submit">Şifremi Belirle</button>
     </form>
 
     <div class="back-link">

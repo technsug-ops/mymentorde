@@ -1373,7 +1373,7 @@ Route::middleware('guest')->group(function (): void {
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'show'])->name('password.reset');
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
     ->name('password.update')
-    ->middleware('throttle:5,1');
+    ->middleware('throttle:20,1'); // şifre belirleme/sıfırlama: kullanıcı birkaç kez deneyebilir (mismatch vb.)
 
 // ── Google OAuth ─────────────────────────────────────────────────────────────
 // guest middleware yok — kullanıcı zaten login'se callback'te session regenerate edilir

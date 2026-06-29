@@ -351,6 +351,9 @@ class DealerLeadController extends Controller
             'lost_reason'          => ['nullable', 'in:no_response,chose_competitor,budget,not_interested,timing,other'],
             'lost_note'            => ['nullable', 'string', 'max:300'],
             'follow_up_date'       => ['nullable', 'date', 'after_or_equal:today'],
+        ], [
+            'follow_up_date.after_or_equal' => 'Takip tarihi bugün veya ileri bir tarih olmalı (geçmiş tarih seçilemez).',
+            'follow_up_date.date'           => 'Geçerli bir takip tarihi girin.',
         ]);
 
         $updates = array_filter([

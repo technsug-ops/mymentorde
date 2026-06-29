@@ -33,15 +33,20 @@ class ResetPasswordController extends Controller
             'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->mixedCase()->numbers()->symbols()],
         ]);
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function (User $user, string $password): void {
-                $user->forceFill(['password' => Hash::make($password)])->save();
-            }
-        );
+        try {
+            $status = Password::reset(
+                $request->only('email', 'password', 'password_confirmation', 'token'),
+                function (User $user, string $password): void {
+                    $user->forceFill(['password' => Hash::make($password)])->save();
+                }
+            );
+        } catch (\Throwable $e) {
+            report($e);
+            return back()->withErrors(['email' => 'Şifre belirlenemedi, lütfen tekrar deneyin. Sorun sürerse yöneticinize bildirin.']);
+        }
 
         if ($status === Password::PASSWORD_RESET) {
-            return redirect('/login')->with('status', __($status));
+            return redirect('/login')->with('status', 'Şifreniz belirlendi. Şimdi giriş yapabilirsiniz.');
         }
 
         return back()->withErrors(['email' => __($status)]);
