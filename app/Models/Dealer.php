@@ -43,6 +43,12 @@ class Dealer extends Model
         'site_phone',
         'site_whatsapp',
         'site_instagram',
+        'site_services',
+        'site_stats',
+        'site_team',
+        'site_address',
+        'site_show_badge',
+        'site_template',
         'custom_domain',
         'custom_domain_verified_at',
         'custom_domain_token',
@@ -58,6 +64,10 @@ class Dealer extends Model
         'override_rate_eur' => 'decimal:2',
         'override_rate_percent' => 'decimal:2',
         'site_enabled' => 'boolean',
+        'site_services' => 'array',
+        'site_stats' => 'array',
+        'site_team' => 'array',
+        'site_show_badge' => 'boolean',
         'custom_domain_verified_at' => 'datetime',
     ];
 

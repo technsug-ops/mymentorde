@@ -9,6 +9,7 @@ use App\Rules\ValidFileMagicBytes;
 use App\Services\EventLogService;
 use App\Services\NotificationService;
 use App\Services\TaskAutomationService;
+use App\Support\PartnerTemplates;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -60,6 +61,22 @@ class DealerMiniSiteController extends Controller
             'site_whatsapp'      => ['nullable', 'string', 'max:50'],
             'site_instagram'     => ['nullable', 'string', 'max:100'],
             'logo'               => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048', new ValidFileMagicBytes()],
+            // Operasyon partner (b2b) çok-bölümlü site alanları — hepsi opsiyonel.
+            'site_address'       => ['nullable', 'string', 'max:300'],
+            'site_show_badge'    => ['nullable', 'boolean'],
+            'site_template'      => ['nullable', Rule::in(array_keys(PartnerTemplates::all()))],
+            'site_services'      => ['nullable', 'array', 'max:12'],
+            'site_services.*.title' => ['nullable', 'string', 'max:120'],
+            'site_services.*.desc'  => ['nullable', 'string', 'max:400'],
+            'site_services.*.icon'  => ['nullable', 'string', 'max:32'],
+            'site_services.*.items' => ['nullable', 'string', 'max:600'],
+            'site_stats'         => ['nullable', 'array', 'max:8'],
+            'site_stats.*.value' => ['nullable', 'string', 'max:40'],
+            'site_stats.*.label' => ['nullable', 'string', 'max:60'],
+            'site_team'          => ['nullable', 'array', 'max:12'],
+            'site_team.*.name'   => ['nullable', 'string', 'max:80'],
+            'site_team.*.title'  => ['nullable', 'string', 'max:80'],
+            'site_team.*.photo'  => ['nullable', 'url', 'max:500'],
         ]);
 
         // Slug rezerve kontrolü
@@ -76,6 +93,12 @@ class DealerMiniSiteController extends Controller
             'site_phone'         => $validated['site_phone'] ?? null,
             'site_whatsapp'      => $validated['site_whatsapp'] ?? null,
             'site_instagram'     => $validated['site_instagram'] ?? null,
+            'site_address'       => $validated['site_address'] ?? null,
+            'site_show_badge'    => $request->boolean('site_show_badge'),
+            'site_template'      => $validated['site_template'] ?? PartnerTemplates::DEFAULT,
+            'site_services'      => $this->cleanCards($validated['site_services'] ?? null, ['title', 'desc', 'icon'], ['title', 'desc'], ['items']),
+            'site_stats'         => $this->cleanCards($validated['site_stats'] ?? null, ['value', 'label'], ['value', 'label']),
+            'site_team'          => $this->cleanCards($validated['site_team'] ?? null, ['name', 'title', 'photo'], ['name']),
         ];
 
         if ($request->hasFile('logo')) {
@@ -108,5 +131,65 @@ class DealerMiniSiteController extends Controller
         }
 
         return redirect('/dealer/mini-site')->with('status', $msg);
+    }
+
+    /**
+     * Repeatable kart girişini temizle: her satırda sadece $keys'i tut (string'e çevir),
+     * $requiredAny anahtarlarından en az biri doluysa satırı sakla. Tümü boşsa null döner
+     * (DB null → view default içeriğine düşer).
+     *
+     * $listKeys: değeri newline'lı metin (veya dizi) olan → temiz string listesine çevrilir.
+     *
+     * @param  array<int,mixed>|null  $rows
+     * @param  list<string>  $keys
+     * @param  list<string>  $requiredAny
+     * @param  list<string>  $listKeys
+     * @return array<int,array<string,mixed>>|null
+     */
+    private function cleanCards($rows, array $keys, array $requiredAny, array $listKeys = []): ?array
+    {
+        if (!is_array($rows)) {
+            return null;
+        }
+        $out = [];
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $card = [];
+            foreach ($keys as $k) {
+                $card[$k] = isset($row[$k]) && is_scalar($row[$k]) ? trim((string) $row[$k]) : '';
+            }
+            $keep = false;
+            foreach ($requiredAny as $rk) {
+                if (($card[$rk] ?? '') !== '') {
+                    $keep = true;
+                    break;
+                }
+            }
+            if (!$keep) {
+                continue;
+            }
+            foreach ($listKeys as $lk) {
+                $raw = $row[$lk] ?? null;
+                if (is_string($raw)) {
+                    $raw = preg_split('/\r\n|\r|\n/', $raw) ?: [];
+                }
+                $list = [];
+                if (is_array($raw)) {
+                    foreach ($raw as $it) {
+                        if (is_scalar($it) && trim((string) $it) !== '') {
+                            $list[] = trim((string) $it);
+                        }
+                        if (count($list) >= 6) {
+                            break;
+                        }
+                    }
+                }
+                $card[$lk] = $list;
+            }
+            $out[] = $card;
+        }
+        return $out === [] ? null : $out;
     }
 }

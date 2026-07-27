@@ -5,13 +5,19 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Dealer;
 use App\Support\DealerLandingData;
+use App\Support\PartnerSiteData;
+use App\Support\PartnerTemplates;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 /**
  * Bayi white-label mini-site — public /p/{slug}.
- * dealer-landing.blade.php'yi bayinin markası (logo/renk/hero) ile render eder.
+ *
+ * İki katman (Partner Frontend F1):
+ *  • Operasyon partner (b2b_partner) → çok-bölümlü öğrenci-lead sitesi (partner-site.blade).
+ *  • Diğer tier'lar (freelance / lead_generation) → mevcut tek-sayfa mini-site (dealer-landing).
+ *
  * CTA'lar /apply/partner/{code}'a gider → lead o bayiye etiketlenir.
  */
 class DealerMiniSiteController extends Controller
@@ -33,6 +39,17 @@ class DealerMiniSiteController extends Controller
 
         $logoUrl = $dealer->site_logo_path ? Storage::disk('public')->url($dealer->site_logo_path) : null;
 
+        // ── Operasyon partner: seçtiği template ile çok-bölümlü öğrenci-odaklı site ──
+        if ($this->isOperationPartner($dealer)) {
+            // Sahibi/manager önizlemede ?tpl=KEY ile diğer template'leri deneyebilir.
+            $tplKey = $dealer->site_template;
+            if ($request->boolean('preview') && PartnerTemplates::isValid($request->query('tpl'))) {
+                $tplKey = $request->query('tpl');
+            }
+            return view(PartnerTemplates::view($tplKey), PartnerSiteData::forDealer($dealer, $logoUrl));
+        }
+
+        // ── Diğer tier'lar: mevcut tek-sayfa mini-site (recruiting landing) ──
         return view('public.dealer-landing', [
             'counters'      => DealerLandingData::counters(),
             'managerAccent' => $dealer->site_accent_color ?: '#1e40af',
@@ -44,5 +61,12 @@ class DealerMiniSiteController extends Controller
             'aboutText'     => $dealer->site_about_text ?: null,
             'applyUrl'      => route('apply.partner', $dealer->code),
         ]);
+    }
+
+    /** Primary tier b2b_partner mı? (rol setinde b2b varsa da say.) */
+    private function isOperationPartner(Dealer $dealer): bool
+    {
+        return $dealer->dealer_type_code === 'b2b_partner'
+            || $dealer->hasRole(Dealer::ROLE_B2B_PARTNER);
     }
 }

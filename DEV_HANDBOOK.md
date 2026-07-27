@@ -526,6 +526,44 @@ Manager (workspace admin)
 
 ---
 
+### Partner Site — Çok-Template Sistemi (`/p/{slug}`)
+
+Operasyon partner (`b2b_partner`) bayileri, kendi kurumsal sitelerini birden fazla hazır
+tasarım arasından seçebilir. Tüm şablonlar **aynı veriyi** kullanır; partner içeriği bir kez
+girer, şablon değişince aynı veriyle dolar.
+
+| Parça | Yer |
+|-------|-----|
+| Veri sözleşmesi | `App\Support\PartnerSiteData::forDealer($dealer, $logoUrl)` + `::icon($key)` |
+| Şablon kayıt defteri | `App\Support\PartnerTemplates` (`DEFAULT`, `resolve/view/isValid/all`) |
+| Şablon blade'leri | `resources/views/public/partner-templates/{key}.blade.php` |
+| DB alanı | `dealers.site_template` (nullable → `aurora`) |
+| Public render | `Public\DealerMiniSiteController@show` |
+| Editör | `Dealer\DealerMiniSiteController` + `dealer/mini-site/edit.blade.php` |
+
+**Yeni şablon eklemek = 2 adım:**
+1. `resources/views/public/partner-templates/{key}.blade.php` oluştur — `PartnerSiteData`
+   sözleşmesindeki değişkenleri kullan (`$services`, `$stats`, `$team`, `$heroTitle`,
+   `$heroSubtitle`, `$aboutText`, `$heroTrust`, `$showBadge`, `$phone/$whatsapp/$instagram/$address`,
+   `$applyUrl`, `$dealer`, `$accentColor`, `$brandName`, `$brandLogoUrl`).
+2. `PartnerTemplates::TEMPLATES` dizisine bir satır ekle (`name`, `desc`, `accent`).
+   Editördeki seçici, validation ve önizleme otomatik çalışır.
+
+**Önizleme:** `/p/{slug}?preview=1&tpl={key}` — kaydetmeden başka şablon denemek için.
+Geçersiz key sessizce `DEFAULT`'a düşer.
+
+**⚠ İki tuzak:**
+- **White-label guard:** `AppServiceProvider`'daki global `View::composer('*')` `brandName`/`brandLogoUrl`'i
+  EZER. Guard `public.dealer-landing` + `public.partner-templates.*` view'larını hariç tutar.
+  **Yeni public white-label view eklerken guard'a dahil et**, yoksa sayfada hep MentorDE markası görünür.
+- **JS yok:** Şablonlar CSP nonce'suz public sayfalarda render olur → inline `onclick` / `<script>`
+  kullanma. Mevcut 3 şablon `script=0, onclick=0` ile doğrulandı.
+
+**Tier yönlendirmesi:** `b2b_partner` (tier VEYA rol seti) → template render; diğerleri
+(freelance / lead_generation) → mevcut `public.dealer-landing` tek sayfa mini-site.
+
+---
+
 ## 6. Temel Servisler
 
 ### İş Mantığı Servisleri

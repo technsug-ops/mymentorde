@@ -476,6 +476,21 @@ Klavye kısayollarıyla hızlı inceleme:
 - Bayi sözleşmesini görüntüle
 - İmzalı sözleşme indir
 
+#### Mini-Site / Partner Sitesi (white-label)
+
+`/dealer/mini-site` → yayında: `/p/{slug}`
+
+- Bayi kendi logo / marka rengi / hero metni / iletişim bilgilerini girer
+- Yayına alma (`site_enabled`) **manager onayına** bağlıdır
+- Sitedeki tüm CTA'lar `/apply/partner/{code}`'a gider → gelen lead otomatik o bayiye etiketlenir
+- **Operasyon partner (b2b_partner)** için genişletilmiş kurumsal site:
+  - Hizmet kartları, istatistik bandı, ekip kartları, adres bölümleri
+  - **Site şablonu seçimi** — şu an 3 tasarım: **Aurora** (canlı gradient), **Minimal**
+    (sade, bol boşluk), **Bold** (koyu, yüksek kontrast). İçerik aynı kalır, sadece görünüm değişir.
+  - Kaydetmeden şablon denemek için: `/p/{slug}?preview=1&tpl={aurora|minimal|bold}`
+  - **"MentorDE rozeti" aç/kapa** — kapatıldığında sayfada MentorDE markası hiç geçmez (tam white-label)
+- Diğer bayi tipleri (freelance / lead generation) tek sayfalık klasik mini-site alır
+
 ---
 
 ### 3.6 Marketing Admin Portalı

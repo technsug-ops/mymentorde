@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partner Frontend Yol Haritası — MentorDE</title>
+<style>
+  :root{
+    --purple:#7e58bf; --purple-d:#6d28d9; --ink:#1e293b; --muted:#64748b;
+    --line:#e7e2f0; --cream:#faf8fd; --card:#ffffff;
+    --green:#16a34a; --amber:#d97706; --red:#dc2626; --blue:#2563eb;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--cream); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65; font-size:15px;
+  }
+  .wrap{max-width:880px; margin:0 auto; padding:40px 24px 80px;}
+  header.doc{
+    background:linear-gradient(135deg,var(--purple),var(--purple-d));
+    color:#fff; border-radius:18px; padding:34px 36px; margin-bottom:28px;
+    box-shadow:0 10px 30px rgba(126,88,191,.25);
+  }
+  header.doc h1{margin:0 0 8px; font-size:27px; font-weight:800; letter-spacing:-.5px;}
+  header.doc .sub{font-size:14px; opacity:.92;}
+  header.doc .meta{margin-top:14px; font-size:12px; opacity:.8; display:flex; gap:16px; flex-wrap:wrap;}
+  header.doc .pill{background:rgba(255,255,255,.18); padding:3px 11px; border-radius:999px;}
+
+  h2{font-size:21px; font-weight:800; margin:38px 0 14px; color:var(--purple-d);
+     padding-bottom:8px; border-bottom:2px solid var(--line);}
+  h3{font-size:16px; font-weight:700; margin:24px 0 10px; color:var(--ink);}
+  p{margin:10px 0;}
+  a{color:var(--purple);}
+  ul,ol{margin:10px 0; padding-left:22px;}
+  li{margin:4px 0;}
+  code{background:#f1edfa; color:var(--purple-d); padding:1px 6px; border-radius:5px;
+       font-family:"SF Mono",Consolas,Monaco,monospace; font-size:13px;}
+
+  table{width:100%; border-collapse:collapse; margin:16px 0; font-size:14px;
+        background:var(--card); border-radius:10px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.05);}
+  th{background:#f3eefb; color:var(--purple-d); text-align:left; padding:10px 13px; font-weight:700; font-size:13px;}
+  td{padding:9px 13px; border-top:1px solid var(--line); vertical-align:top;}
+  tr:hover td{background:#faf8fd;}
+
+  pre{background:#1e1b2e; color:#e8e3f5; padding:18px 20px; border-radius:12px;
+      overflow-x:auto; font-family:"SF Mono",Consolas,Monaco,monospace; font-size:12.5px;
+      line-height:1.55; margin:16px 0; box-shadow:0 4px 14px rgba(0,0,0,.15);}
+
+  blockquote{background:#fff8f0; border-left:4px solid var(--amber); margin:16px 0;
+             padding:12px 16px; border-radius:0 10px 10px 0; color:#7c5e35; font-size:14px;}
+  blockquote.note{background:#f1edfa; border-left-color:var(--purple); color:#5b3fa0;}
+
+  .ok{color:var(--green); font-weight:700;}
+  .warn{color:var(--amber); font-weight:700;}
+  .no{color:var(--red); font-weight:700;}
+
+  .toc{background:var(--card); border:1px solid var(--line); border-radius:12px;
+       padding:18px 22px; margin-bottom:28px; box-shadow:0 1px 4px rgba(0,0,0,.04);}
+  .toc h4{margin:0 0 10px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--muted);}
+  .toc ol{columns:2; column-gap:30px; margin:0; font-size:14px;}
+  @media(max-width:680px){ .toc ol{columns:1;} header.doc{padding:24px;} .wrap{padding:24px 16px 60px;} }
+
+  footer.doc{margin-top:46px; text-align:center; color:var(--muted); font-size:12px;
+             border-top:1px solid var(--line); padding-top:18px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="doc">
+    <h1>🤝 Partner Frontend &amp; Yeni Partner Ekleme</h1>
+    <div class="sub">Yol Haritası — 1 operasyon partner + 3 freelance partner için frontend stratejisi</div>
+    <div class="meta">
+      <span class="pill">📅 30 Haziran 2026</span>
+      <span class="pill">📄 İç doküman</span>
+      <span class="pill">⏳ Taslak / onay bekliyor</span>
+    </div>
+  </header>
+
+  <div class="toc">
+    <h4>İçindekiler</h4>
+    <ol>
+      <li><a href="#s1">Yönetici Özeti</a></li>
+      <li><a href="#s2">Mevcut Durum — Envanter</a></li>
+      <li><a href="#s3">Partner Tipleri</a></li>
+      <li><a href="#s4">Yeni Partner Ekleme Akışı</a></li>
+      <li><a href="#s5">Frontend Stratejisi (2 Katman)</a></li>
+      <li><a href="#s6">Operasyon Partner Sitesi Spec</a></li>
+      <li><a href="#s7">Custom Domain Akışı</a></li>
+      <li><a href="#s8">Faz Planı &amp; Öncelik</a></li>
+      <li><a href="#s9">Teknik Notlar</a></li>
+      <li><a href="#s10">Açık Sorular</a></li>
+    </ol>
+  </div>
+
+  <h2 id="s1">1. Yönetici Özeti</h2>
+  <p>MentorDE'nin partner (bayi) altyapısının <strong>büyük kısmı zaten hazır</strong>:
+  başvuru → onay → otomatik hesap provizyonu, partner CRM paneli, white-label mini-site
+  (<code>/p/slug</code>), tracking link ve tier sistemi çalışıyor. Eksik olan:
+  <strong>operasyon partner için kurumsal, çok-bölümlü web sitesi</strong> ve
+  <strong>kendi alan adı (custom domain)</strong> akışı.</p>
+  <p><strong>Strateji — iki katmanlı frontend:</strong></p>
+  <ul>
+    <li><strong>Freelance partner</strong> → mevcut tek-sayfa mini-site + tracking link (<span class="ok">ek geliştirme gerekmez</span>).</li>
+    <li><strong>Operasyon partner</strong> → çok-bölümlü kurumsal site + custom domain (<span class="no">yeni geliştirme</span>).</li>
+  </ul>
+
+  <h2 id="s2">2. Mevcut Durum — Envanter</h2>
+  <table>
+    <tr><th>Parça</th><th>Durum</th><th>Yer</th></tr>
+    <tr><td>Partner başvuru formu</td><td><span class="ok">✅ Hazır</span></td><td><code>/apply/partner</code></td></tr>
+    <tr><td>Onay → otomatik hesap+user+davet</td><td><span class="ok">✅ Hazır</span></td><td><code>DealerProvisioningService</code></td></tr>
+    <tr><td>Partner CRM paneli</td><td><span class="ok">✅ Hazır</span></td><td><code>/dealer/dashboard</code></td></tr>
+    <tr><td>→ Lead pipeline</td><td><span class="ok">✅</span></td><td><code>/dealer/lead-pipeline</code></td></tr>
+    <tr><td>→ Komisyon / kazanç</td><td><span class="ok">✅</span></td><td><code>/dealer/earnings</code>, <code>/calculator</code></td></tr>
+    <tr><td>→ Profil + fotoğraf</td><td><span class="ok">✅</span></td><td><code>/dealer/profile</code></td></tr>
+    <tr><td>→ Alt-bayi (hiyerarşi)</td><td><span class="ok">✅</span></td><td>2 seviye: bölge → alt-bayi</td></tr>
+    <tr><td><strong>White-label mini-site</strong></td><td><span class="ok">✅ Hazır</span></td><td><code>/p/{slug}</code></td></tr>
+    <tr><td>→ Düzenleyici (logo/renk/hero/slug)</td><td><span class="ok">✅</span></td><td><code>/dealer/mini-site</code></td></tr>
+    <tr><td>Tracking link (attribution)</td><td><span class="ok">✅ Hazır</span></td><td><code>/go/{code}</code></td></tr>
+    <tr><td>Tier / rol sistemi</td><td><span class="ok">✅ Hazır</span></td><td>lead_generation · freelance · b2b_partner</td></tr>
+    <tr><td><strong>Custom domain (kendi alan adı)</strong></td><td><span class="warn">⚠️ Yarım</span></td><td>Schema var, DNS doğrulama yok</td></tr>
+    <tr><td>Çok-bölümlü kurumsal site</td><td><span class="no">❌ Yok</span></td><td>Yapılacak</td></tr>
+  </table>
+  <blockquote class="note"><strong>Teknik not:</strong> "Operasyon partner" iş tarafında bir kavram;
+  teknik olarak en yetkili tier olan <code>b2b_partner</code> rolüne karşılık gelir.
+  3 freelance ise <code>freelance</code> tier'ı.</blockquote>
+
+  <h2 id="s3">3. Partner Tipleri ve İhtiyaçları</h2>
+  <h3>3.1. Freelance Partner (3 kişi) — Bireysel Yönlendirici</h3>
+  <ul>
+    <li><strong>Ne yapar:</strong> Sosyal medya / çevresi üzerinden öğrenci adayı yönlendirir.</li>
+    <li><strong>Frontend ihtiyacı:</strong> Dijital kartvizit düzeyinde tek sayfa + paylaşılabilir link.</li>
+    <li><strong>Mevcut çözüm yeterli:</strong> <code>/p/slug</code> mini-site + <code>/go/{code}</code> tracking link.</li>
+    <li><strong>Aksiyon:</strong> <span class="ok">Ek geliştirme gerekmez</span>; sadece içerik girmeleri lazım.</li>
+  </ul>
+  <h3>3.2. Operasyon Partner (1 firma) — Kurumsal Operasyon Ortağı</h3>
+  <ul>
+    <li><strong>Ne yapar:</strong> Bir bölge/ofis işletir, kendi alt-bayileri olabilir, öğrenciyi (genelde) uçtan uca yönetir.</li>
+    <li><strong>Frontend ihtiyacı:</strong> Gerçek bir <strong>kurumsal web sitesi</strong> — çok bölümlü, kendi alan adıyla.</li>
+    <li><strong>Mevcut çözüm yetersiz:</strong> Tek-sayfa mini-site kurumsal görünüm vermiyor.</li>
+    <li><strong>Aksiyon:</strong> <span class="no">Çok-bölümlü site + custom domain akışı geliştirilecek.</span></li>
+  </ul>
+
+  <h2 id="s4">4. Yeni Partner Ekleme — Adım Adım</h2>
+<pre>1) BAŞVURU
+   - Self-servis: /apply/partner formu doldurur
+   - VEYA: Manager elle ekler (/manager/dealers → + Yeni)
+
+2) ONAY (Manager)
+   - /manager/dealers → başvuruyu "Onayla"
+   - Otomatik: Dealer + User hesabı + davet (şifre belirleme) maili
+
+3) TIER / ROL ATAMA
+   - Operasyon → b2b_partner   |   Freelance → freelance
+   - Kademe (komisyon seviyesi) atanır
+
+4) PARTNER GİRİŞİ
+   - Davet mailinden "Şifremi Belirle" → şifre oluşturur
+   - /dealer/dashboard'a düşer
+
+5) MİNİ-SİTE / SİTE KURULUMU
+   - /dealer/mini-site → slug, logo, marka rengi, hero
+   - Freelance: tek sayfa hazır → /p/slug
+   - Operasyon: çok-bölümlü site + (istenirse) custom domain
+
+6) PAYLAŞIM & DAĞITIM
+   - Tracking link: /go/{code}   |   Site: /p/slug veya firma.com
+
+7) LEAD AKIŞI
+   - Ziyaretçi → "Başvur" CTA → /apply/partner/{code}
+   - Lead otomatik o partnere etiketlenir → pipeline'ına düşer
+   - Komisyon hak edişi otomatik hesaplanır</pre>
+  <blockquote>Adım 1–7 <strong>bugün çalışıyor.</strong> Şifre-belirleme adımı (4) yakın zamanda sağlamlaştırıldı.</blockquote>
+
+  <h2 id="s5">5. Frontend Stratejisi — İki Katman</h2>
+  <h3>Katman A — Freelance (Hafif) <span class="ok">✅ Mevcut</span></h3>
+  <ul>
+    <li><strong>Tek sayfa mini-site</strong> (<code>/p/slug</code>): marka + hero + tek CTA → lead capture.</li>
+    <li><strong>Tracking link</strong> (<code>/go/{code}</code>).</li>
+    <li>Kendi panelinde pipeline + komisyon.</li>
+    <li><strong>Sonuç:</strong> Hazır. Dijital kartvizit + yönlendirme aracı olarak yeterli.</li>
+  </ul>
+  <h3>Katman B — Operasyon (Tam) <span class="no">❌ Yapılacak</span></h3>
+  <ul>
+    <li><strong>Çok-bölümlü kurumsal site</strong> (Hizmetler / Hakkımızda / Ekip / İletişim).</li>
+    <li><strong>Custom domain</strong> (kendi alan adı).</li>
+    <li>Alt-bayi yönetimi (hiyerarşi — mevcut).</li>
+    <li>Kurumsal güven öğeleri (MentorDE partnerlik rozeti, istatistik, yorumlar).</li>
+  </ul>
+  <blockquote class="note"><strong>Tek altyapı, iki görünüm:</strong> Aynı mini-site sistemi,
+  partnerin tier'ına göre (b2b → tam, freelance → tek sayfa) farklı render edilir. Ayrı kod tabanı gerekmez.</blockquote>
+
+  <h2 id="s6">6. Operasyon Partner Web Sitesi — Spec</h2>
+  <h3>6.1. Sayfa Yapısı (Mockup)</h3>
+<pre>┌────────────────────────────────────────────────────┐
+│  [Partner Logo]    Menü: Hizmetler · Hakkımızda      │
+│                    · Ekip · İletişim      [Başvur]   │
+├────────────────────────────────────────────────────┤
+│  HERO                                                │
+│  "Almanya'da Eğitim Yolculuğunuz Burada Başlıyor"    │
+│  Partner sloganı + arka plan görseli                 │
+│  [ Ücretsiz Danışmanlık Al ]   ← büyük CTA           │
+├────────────────────────────────────────────────────┤
+│  HİZMETLER (kart grid)                               │
+│  🎓 Üniversite   🛂 Vize   💰 Finans   🏠 Konaklama  │
+├────────────────────────────────────────────────────┤
+│  HAKKIMIZDA — partner metni + "X+ öğrenci" istatistik│
+├────────────────────────────────────────────────────┤
+│  EKİP / DANIŞMANLAR  (opsiyonel, foto+isim)          │
+├────────────────────────────────────────────────────┤
+│  GÜVEN — MentorDE Yetkili Partner rozeti + yorumlar  │
+├────────────────────────────────────────────────────┤
+│  İLETİŞİM / BAŞVURU FORMU → lead pipeline            │
+│  + WhatsApp + telefon + adres                        │
+├────────────────────────────────────────────────────┤
+│  Powered by MentorDE   (ince alt bilgi)             │
+└────────────────────────────────────────────────────┘</pre>
+
+  <h3>6.2. Freelance vs Operasyon — Net Fark</h3>
+  <table>
+    <tr><th></th><th>Freelance Mini-Site</th><th>Operasyon Sitesi</th></tr>
+    <tr><td><strong>Amaç</strong></td><td>Dijital kartvizit</td><td>Kurumsal web sitesi</td></tr>
+    <tr><td><strong>Bölüm sayısı</strong></td><td>1 (hero + CTA)</td><td>5–6 (çok bölümlü)</td></tr>
+    <tr><td><strong>Alan adı</strong></td><td><code>/p/slug</code></td><td>Kendi domain'i</td></tr>
+    <tr><td><strong>İçerik</strong></td><td>Logo + slogan</td><td>Hizmet + ekip + hakkımızda + yorum</td></tr>
+    <tr><td><strong>Hedef</strong></td><td>Hızlı lead yakalama</td><td>Marka + güven + lead</td></tr>
+  </table>
+
+  <h3>6.3. Düzenlenebilir Alanlar (Panel)</h3>
+  <p>Operasyon partner kendi panelinden düzenleyebilmeli: logo, marka rengi, hero,
+  hizmet kartları, hakkımızda + istatistik, ekip üyeleri, iletişim bilgileri, (ileride) yorumlar.</p>
+
+  <h2 id="s7">7. Custom Domain Akışı (F3b)</h2>
+  <p>Schema hazır (<code>custom_domain</code>, <code>custom_domain_token</code>, <code>custom_domain_verified_at</code>).
+  Eksik: doğrulama + bağlama akışı.</p>
+<pre>1) Partner panelden domain girer: firma.com
+2) Sistem doğrulama token'ı üretir
+3) Partner DNS'ine TXT kaydı ekler:
+   _mentorde-verify.firma.com  TXT  "mentorde-verify=&lt;token&gt;"
+4) Partner "Doğrula" der → sistem DNS TXT'i kontrol eder
+5) Doğrulanınca custom_domain_verified_at set edilir
+6) firma.com → partnerin mini-site'ına yönlenir</pre>
+  <blockquote><strong>Not:</strong> KASSERVER shared hosting'de custom domain bağlama,
+  hosting paneli tarafında ek yapılandırma gerektirebilir. Önce DNS doğrulama mantığı
+  uygulanır; canlı bağlama hosting kısıtlarına göre netleştirilir.</blockquote>
+
+  <h2 id="s8">8. Faz Planı ve Öncelik</h2>
+  <table>
+    <tr><th>Faz</th><th>İş</th><th>Değer</th><th>Süre</th></tr>
+    <tr><td><strong>F1</strong></td><td>Operasyon partner çok-bölümlü site (tier-aware)</td><td>⭐⭐⭐ Yüksek</td><td>~1–2 gün</td></tr>
+    <tr><td><strong>F2</strong></td><td>Mini-site editörünü zenginleştir (hizmet/ekip/hakkımızda)</td><td>⭐⭐ Orta</td><td>~1 gün</td></tr>
+    <tr><td><strong>F3</strong></td><td>Custom domain DNS doğrulama akışı</td><td>⭐⭐ Orta</td><td>~1 gün</td></tr>
+    <tr><td><strong>F4</strong></td><td>Kurumsal güven öğeleri (rozet, istatistik, yorum)</td><td>⭐ Düşük</td><td>~yarım gün</td></tr>
+  </table>
+  <blockquote class="note"><strong>Önerilen başlangıç:</strong> F1 — operasyon partnerin çok-bölümlü sitesi (en görünür değer).</blockquote>
+
+  <h2 id="s9">9. Teknik Notlar (Mevcut Yapı)</h2>
+  <ul>
+    <li><strong>Public mini-site:</strong> <code>Public\DealerMiniSiteController@show</code> → <code>public/dealer-landing.blade.php</code></li>
+    <li><strong>Editör:</strong> <code>Dealer\DealerMiniSiteController</code> → <code>/dealer/mini-site</code></li>
+    <li><strong>Model:</strong> <code>App\Models\Dealer</code> (slug, logo, hero, custom_domain, tier alanları)</li>
+    <li><strong>Tier sabitleri:</strong> <code>ROLE_LEAD_GENERATION</code>, <code>ROLE_FREELANCE</code>, <code>ROLE_B2B_PARTNER</code></li>
+    <li><strong>Lead attribution:</strong> <code>/apply/partner/{code}</code> → guest application'a <code>dealer_code</code></li>
+    <li><strong>Provizyon:</strong> <code>App\Services\DealerProvisioningService</code></li>
+  </ul>
+  <blockquote class="note">Çok-bölümlü site için <code>dealer-landing.blade</code> tier'a göre genişletilir.
+  Yeni alanlar <code>dealers</code> tablosuna (veya <code>dealer_site_sections</code>) nullable eklenir — addon bağımsızlığı korunur.</blockquote>
+
+  <h2 id="s10">10. Açık Sorular (Netleşmesi Gereken)</h2>
+  <ol>
+    <li>Operasyon partner öğrenciyi <strong>uçtan uca mı</strong> yönetiyor, yoksa sadece <strong>lead mi</strong> topluyor?</li>
+    <li>Operasyon partnerin kendi <strong>danışmanları/ekibi</strong> var mı? (Ekip bölümü gerekli mi?)</li>
+    <li>Custom domain <strong>şart mı</strong>, yoksa <code>/p/slug</code> yeterli mi?</li>
+    <li>Operasyon partnerin <strong>alt-bayileri</strong> olacak mı? (Recruiting akışı gerekli mi?)</li>
+  </ol>
+
+  <footer class="doc">MentorDE — Partner Frontend Yol Haritası · İç doküman · 30.06.2026</footer>
+
+</div>
+</body>
+</html>

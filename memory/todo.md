@@ -1,44 +1,62 @@
-# TODO — Aday öğrenci → süreç takibi köprüsü + görevli alanı
+# TODO
 
-**Karar (26 Haziran, Filiz Özkan drozkanf@gmail.com ile başla):**
-1. Aday öğrenci "evrak bekliyor" (docs_pending) → otomatik **StudentAssignment** (takip kaydı) oluş → Süreç Takibi + Student Pipeline kanban "başvuru hazırlık" (application_prep).
-2. GuestApplication'a **görevli (sales staff)** alanı ekle (assigned_staff_email); takipçi=senior (assigned_senior_email) ayrı.
+## ✅ KAPANDI — Aday öğrenci → süreç takibi köprüsü (REDDEDİLDİ)
+**Karar (özet):** Köprü yaklaşımı denendi ve GERİ ALINDI. Aday öğrenciye StudentAssignment
+oluşturma reddedildi.
+- `b848268` köprü eklendi → `b963671` fix(senior): köprü StudentAssignment kayıtlarını
+  temizle + **auto-bridge'i durdur** → `4f5a7c5` `/system/bridge-rollback` eklendi.
+- İlke: aday ≠ öğrenci; process-tracking SADECE dönüşmüş öğrenci içindir.
+- `StudentBridgeService` kodda duruyor ama auto-bridge KAPALI (elle backfill/rollback endpoint'leri var).
+- Faz A (guest_applications.assigned_staff_email / görevli alanı) **hiç yapılmadı** — köprü
+  terk edildiği için gündemde değil.
+- Detay: memory/project_senior_activity_and_aday_separation.md
 
-## Kök neden (Filiz'in aday öğrencileri görünmüyor)
-`assignedStudentIds()` SADECE StudentAssignment'tan çekiyor (converted). Aday öğrenci GuestApplication.assigned_senior_email'de → süreç takibine düşmüyor. İki paralel dünya, köprü yok.
+---
 
-## Faz A — Görevli (sales staff) alanı [GÜVENLİ]
-- [ ] migration: guest_applications.assigned_staff_email + assigned_staff_at + assigned_staff_by
-- [ ] GuestApplication: fillable + assignedStaff() relation
-- [ ] guestAssignStaff() endpoint (guestAssignSenior deseni) + route
-- [ ] Lead pipeline / guest detay UI: görevli atama (senior ataması yanında)
+## ✅ TAMAM — Partner Frontend F2.5: çok-template sistemi (27 Tem doğrulandı + commit)
+Partner sitesi tek tasarımdan **şablon seçmeli** sisteme geçti. Partner içeriğini bir kez girer,
+şablon değiştirince aynı veriyle dolar.
+- Ortak veri sözleşmesi: `App\Support\PartnerSiteData::forDealer()` (services/stats/team/hero/... + `icon()`)
+- Registry: `App\Support\PartnerTemplates` — DEFAULT `aurora`, canlı 3: **aurora / minimal / bold**
+- DB: `dealers.site_template` (nullable → aurora) + F2 bölüm alanları (site_services/stats/team/address/show_badge)
+- Public: `/p/{slug}` seçili şablonu render eder; `?preview=1&tpl={key}` ile diğerleri denenebilir
+  (geçersiz key sessizce default'a düşer)
+- Editör `/dealer/mini-site`: şablon seçici radyo kartları + "Önizle ↗" (sadece b2b_partner'a görünür)
+- White-label guard: `AppServiceProvider` global View composer'ı `public.partner-templates.*` view'larını
+  atlar — yoksa MentorDE markası bayininkini ezerdi
 
-## DURUM: Faz B çekirdeği TAMAM (commit bekliyor)
-- [x] StudentBridgeService (idempotent, converted_to_student=false, kickoff task)
-- [x] convert() reuse (mükerrer öğrenci önleme) — lokalde doğrulandı
-- [x] guestPipelineMove docs_pending hook
-- [x] /system/bridge-docs-pending backfill endpoint
-- [x] Lokalde test: köprü+task+idempotent+süreç takibinde görünme ✓
-- [ ] KALAN: Faz A görevli alanı; sales/manager pipeline move hook; student pipeline application_prep görsel doğrulama (prod)
+**Doğrulama (27 Tem):** 3 şablon da render 200 (script=0, onclick=0 → CSP güvenli) · preview tpl geçişi
+çalışıyor · geçersiz tpl → default · rozet kapalı iken sayfada "MentorDE" geçişi = 0 (tam white-label) ·
+editör POST round-trip: boş kartlar düşüyor, `items` newline→dizi, geçersiz template validation ile reddediliyor.
 
-## Faz B — docs_pending → application_prep köprüsü [KRİTİK]
-- [ ] StudentBridgeService::bridgeFromGuest(guest): StudentAssignment oluştur (idempotent),
-      guest.converted_student_id set et, converted_to_student=FALSE bırak, senior=assigned_senior_email.
-      student_id üretimi convert() ile aynı (generateStudentIdentity — servise çıkar/paylaş).
-- [ ] convert() REUSE: converted_student_id doluysa + StudentAssignment varsa yeni oluşturma,
-      sadece finalize et (converted_to_student=true, lead_status, user rolü). MÜKERRER ÖĞRENCİ ÖNLE.
-- [ ] Hook: lead_status → docs_pending olan yerlerde köprüyü çağır (senior guestPipelineMove +
-      sales/manager pipeline move). assigned_senior_email yoksa köprü kurma (senior gerek).
-- [ ] Backfill: mevcut docs_pending + assigned_senior_email guest'ler (Filiz'inkiler) → köprü.
-      /system/bridge-docs-pending web endpoint (KAS SSH yok).
-- [ ] student pipeline / process-tracking: bridged öğrenci ProcessOutcome'suz → application_prep'te görünür (doğrula).
+**Sıradaki:** yeni şablonlar (hedef ~10, elde 3 — tasarımlar dışarıda hazırlanıyor) · F3 custom domain (ertelendi).
+Yeni template = 2 adım: blade'i `public/partner-templates/{key}.blade.php`'ye koy + `PartnerTemplates::TEMPLATES`'a satır ekle.
 
-## Riskler
-- convert() + ContractWorkflowController conversion path'leri köprüyü yeniden kullanmalı (mükerrer önle).
-- StudentAssignment::create yerleri: GuestApplicationAdminController:106 (ana), StudentAssignmentController upsert.
-- addon-independence: köprü try/catch, fail olursa pipeline move bozulmasın.
+---
 
-## Notlar
-- docs_pending = lead_status 'docs_pending' (Evrak Bekliyor)
-- application_prep = PIPELINE_STEPS ilk kolon (Başvuru Hazırlık)
-- Senior guest pipeline move: SeniorPipelineController::guestPipelineMove
+## ✅ TAMAM — Partner Frontend F1 + F2 (operasyon partner öğrenci-lead sitesi + editör)
+**F1:** b2b_partner → ayrı çok-bölümlü partner-site.blade (hero + hizmetler + süreç + hakkımızda/
+istatistik bandı + neden biz + ekip + rozet + iletişim/başvuru). JS yok (CSP güvenli), accent boyalı.
+**F2:** /dealer/mini-site editörü b2b'ye açıldı — her firma kendi rengi + hizmet/istatistik/ekip
+kartları + adres + "MentorDE rozeti" aç/kapa (kapatınca powered-by da gizlenir = tam white-label).
+Sabit-slot dizi input (JS'siz). Lokal render + view:cache + toggle testleri geçti.
+Sonraki: F3 custom domain (ertelendi).
+
+## 🔨 (arşiv) Partner Frontend F1 — orijinal madde listesi
+**Bağlam:** docs/PARTNER_FRONTEND_YOL_HARITASI.md · Kararlar: operasyon partner SADECE lead
+topluyor (danışmanlık-CRM değil), custom domain F3'e ertelendi, F1 = AYRI yeni blade.
+
+- [ ] migration: dealers'a nullable — site_services (JSON), site_stats (JSON), site_team (JSON),
+      site_address, site_show_badge
+- [ ] Dealer model: cast + fillable
+- [ ] Public/DealerMiniSiteController@show: tier b2b_partner + site_enabled → yeni blade,
+      değilse mevcut dealer-landing davranışı
+- [ ] resources/views/public/partner-site.blade.php (YENİ): hero + hizmetler + hakkımızda/
+      istatistik + ekip + MentorDE partner rozeti + iletişim/başvuru formu → apply.partner CTA.
+      Brandbook #7e58bf default, accent override.
+- [ ] Boş içerikte mantıklı default'lar (hizmetler MentorDE paketlerinden), addon-bağımsız try/catch
+- [ ] Lokal doğrulama (b2b_partner mini-site render + freelance/lead bozulmadı)
+
+### Sonra (bu F1 değil)
+- F2: mini-site editörünü zenginleştir (hizmet/ekip kartları panelden düzenlenebilir)
+- F3: custom domain DNS doğrulama akışı

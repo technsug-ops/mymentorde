@@ -247,6 +247,12 @@ class AppServiceProvider extends ServiceProvider
         // ── Global brand ayarları — tüm portallarda firma adı + logo ────────
         // White-label: önce DB'den (manager panelden) oku, yoksa config('brand.*')'a düş
         View::composer('*', function ($view): void {
+            // White-label public mini-site / partner template'leri: brandName/logo bayinin
+            // markasıyla controller'dan gelir — global markayla EZME (aksi halde hep MentorDE görünür).
+            $vn = (string) $view->name();
+            if ($vn === 'public.dealer-landing' || str_starts_with($vn, 'public.partner-templates.')) {
+                return;
+            }
             $cid = (int) (auth()->user()?->company_id ?? 0);
             $brand = Cache::remember("brand_settings_{$cid}", 300, function () use ($cid): array {
                 $fallbackName = (string) config('brand.name', 'MentorDE');
