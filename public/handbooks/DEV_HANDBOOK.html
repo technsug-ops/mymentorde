@@ -16,14 +16,15 @@ blockquote{border-left:3px solid #1f66d1;padding-left:16px;color:#6b7280;margin:
 hr{border:none;border-top:1px solid #e2e8f0;margin:2rem 0;}
 .footer{text-align:center;margin-top:48px;padding-top:24px;border-top:1px solid #e2e8f0;font-size:.82rem;color:#9ca3af;}
 @media print{body{background:#fff;padding:0;} .wrap{box-shadow:none;padding:24px;}}
-</style></head><body><div class="wrap"><h1>MentorDE — Developer Handbook</h1>
+</style></head><body><div class="wrap">
+<h1 id="mentorde-developer-handbook">MentorDE — Developer Handbook</h1>
 <p><strong>Version 1.0 | 2026</strong></p>
 <blockquote>
 <p>Geliştirici devri, onboarding ve teknik referans için hazırlanmıştır.
 Hem iş mantığını hem teknik implementasyonu kapsar.</p>
 </blockquote>
 <hr />
-<h2>İçindekiler</h2>
+<h2 id="içindekiler">İçindekiler</h2>
 <ol>
 <li><a href="#1-sistem-mimarisi">Sistem Mimarisi</a></li>
 <li><a href="#2-dizin-yap%C4%B1s%C4%B1">Dizin Yapısı</a></li>
@@ -39,8 +40,8 @@ Hem iş mantığını hem teknik implementasyonu kapsar.</p>
 <li><a href="#12-s%C4%B1k-yap%C4%B1lan-hatalar">Sık Yapılan Hatalar</a></li>
 </ol>
 <hr />
-<h2>1. Sistem Mimarisi</h2>
-<h3>Genel Bakış</h3>
+<h2 id="1-sistem-mimarisi">1. Sistem Mimarisi</h2>
+<h3 id="genel-bakış">Genel Bakış</h3>
 <p>MentorDE, Almanya üniversite başvurularını yöneten <strong>çok-portal Laravel ERP</strong>'dir.
 Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır.</p>
 <pre><code>Browser → Nginx → PHP-FPM (Laravel 12 / PHP 8.4) → MySQL
@@ -50,7 +51,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
                                                    → Meta Cloud API (WhatsApp)
                                                    → SMTP (e-posta)
 </code></pre>
-<h3>Portal Grupları</h3>
+<h3 id="portal-grupları">Portal Grupları</h3>
 <table>
 <thead>
 <tr>
@@ -99,7 +100,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 </tr>
 </tbody>
 </table>
-<h3>Temel İş Akışı</h3>
+<h3 id="temel-iş-akışı">Temel İş Akışı</h3>
 <pre><code>1. Aday sisteme kayıt olur → guest rolü atanır
 2. Senior danışman atanır (manager veya sistem tarafından)
 3. Belgeler yüklenir → senior inceler → onaylar
@@ -110,7 +111,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 8. Dealer referans komisyonu izler
 </code></pre>
 <hr />
-<h2>2. Dizin Yapısı</h2>
+<h2 id="2-dizin-yapısı">2. Dizin Yapısı</h2>
 <pre><code>mentorde/
 ├── app/
 │   ├── Console/Commands/          # Artisan komutları (cron işleri)
@@ -161,8 +162,8 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 └── DEV_HANDBOOK.md               # Bu dosya
 </code></pre>
 <hr />
-<h2>3. Veritabanı Şeması</h2>
-<h3>Kullanıcı &amp; RBAC</h3>
+<h2 id="3-veritabanı-şeması">3. Veritabanı Şeması</h2>
+<h3 id="kullanıcı-rbac">Kullanıcı &amp; RBAC</h3>
 <table>
 <thead>
 <tr>
@@ -198,7 +199,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 <code>system_staff</code>, <code>operations_staff</code>, <code>finance_staff</code>,
 <code>senior</code>, <code>mentor</code>, <code>guest</code>, <code>student</code>, <code>dealer</code>,
 <code>marketing_admin</code>, <code>marketing_staff</code>, <code>sales_admin</code>, <code>sales_staff</code></p>
-<h3>Guest &amp; Başvuru</h3>
+<h3 id="guest-başvuru">Guest &amp; Başvuru</h3>
 <table>
 <thead>
 <tr>
@@ -235,7 +236,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 </table>
 <p><strong>guest_applications.pipeline_stage değerleri:</strong>
 <code>new</code> → <code>in_review</code> → <code>docs_pending</code> → <code>docs_complete</code> → <code>contract_sent</code> → <code>converted</code></p>
-<h3>Sözleşme</h3>
+<h3 id="sözleşme">Sözleşme</h3>
 <table>
 <thead>
 <tr>
@@ -262,7 +263,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 </tr>
 </tbody>
 </table>
-<h3>Ödeme</h3>
+<h3 id="ödeme">Ödeme</h3>
 <table>
 <thead>
 <tr>
@@ -290,7 +291,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 </tbody>
 </table>
 <p><strong>Stripe webhook:</strong> <code>POST /webhooks/stripe</code> → <code>PaymentCheckoutController::handleWebhook()</code></p>
-<h3>İçerik (CMS)</h3>
+<h3 id="içerik-cms">İçerik (CMS)</h3>
 <table>
 <thead>
 <tr>
@@ -319,7 +320,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 </table>
 <p><strong>cms_contents.type:</strong> <code>blog</code>, <code>video_feature</code>, <code>podcast</code>, <code>presentation</code>, <code>experience</code>, <code>career_guide</code>, <code>tip</code>
 <strong>cms_contents.category:</strong> <code>student-life</code>, <code>culture-fun</code>, <code>careers</code>, <code>tips-tricks</code>, <code>city-content</code>, <code>uni-content</code></p>
-<h3>Mesajlaşma &amp; Bildirimler</h3>
+<h3 id="mesajlaşma-bildirimler">Mesajlaşma &amp; Bildirimler</h3>
 <table>
 <thead>
 <tr>
@@ -350,7 +351,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 </tr>
 </tbody>
 </table>
-<h3>Görev &amp; Proje</h3>
+<h3 id="görev-proje">Görev &amp; Proje</h3>
 <table>
 <thead>
 <tr>
@@ -377,7 +378,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 </tr>
 </tbody>
 </table>
-<h3>Performans &amp; Lead</h3>
+<h3 id="performans-lead">Performans &amp; Lead</h3>
 <table>
 <thead>
 <tr>
@@ -400,7 +401,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 </tr>
 </tbody>
 </table>
-<h3>Diğer Modüller</h3>
+<h3 id="diğer-modüller">Diğer Modüller</h3>
 <table>
 <thead>
 <tr>
@@ -440,8 +441,8 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 </tbody>
 </table>
 <hr />
-<h2>4. Kimlik Doğrulama &amp; Güvenlik</h2>
-<h3>Login Akışı</h3>
+<h2 id="4-kimlik-doğrulama-güvenlik">4. Kimlik Doğrulama &amp; Güvenlik</h2>
+<h3 id="login-akışı">Login Akışı</h3>
 <pre><code>POST /login
   → AuthController::login()
   → Kredansiyel doğrulama
@@ -450,7 +451,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
     → Evet: /2fa/challenge
     → Hayır: role'e göre dashboard'a yönlendir
 </code></pre>
-<h3>2FA</h3>
+<h3 id="2fa">2FA</h3>
 <ul>
 <li>Kütüphane: <code>pragmarx/google2fa</code></li>
 <li>QR kod: <code>bacon/bacon-qr-code</code> → SVG</li>
@@ -459,14 +460,14 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 <li><strong>2FA zorunlu roller:</strong> <code>manager</code>, <code>system_admin</code>, <code>operations_admin</code>, <code>finance_admin</code></li>
 <li>Middleware: <code>App\Http\Middleware\Require2FA</code> → <code>bootstrap/app.php</code>'de <code>require.2fa</code> olarak kayıtlı</li>
 </ul>
-<h3>Email Doğrulama</h3>
+<h3 id="email-doğrulama">Email Doğrulama</h3>
 <ul>
 <li><code>User implements MustVerifyEmail</code></li>
 <li>Yeni kullanıcılar: <code>User::booted()</code> creating event → <code>email_verified_at = now()</code> (auto-verify)</li>
 <li><code>verified</code> middleware: guest + student route gruplarında aktif</li>
 <li>Controller: <code>Auth\EmailVerificationController</code> → <code>GET /email/verify</code>, <code>POST /email/verify/{id}/{hash}</code></li>
 </ul>
-<h3>RBAC Middleware</h3>
+<h3 id="rbac-middleware">RBAC Middleware</h3>
 <table>
 <thead>
 <tr>
@@ -505,7 +506,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 </tr>
 </tbody>
 </table>
-<h3>Güvenlik Servisleri</h3>
+<h3 id="güvenlik-servisleri">Güvenlik Servisleri</h3>
 <ul>
 <li><code>SecurityAnomalyService</code> — 3 kontrol: anomalous_login, unusual_download, bulk_export (saatlik cron)</li>
 <li><code>RiskScoreService</code> — kullanıcı risk puanlama</li>
@@ -513,7 +514,7 @@ Her kullanıcı rolü ayrı bir portal URL'si ve layout'u üzerinden çalışır
 <li><code>ValidFileMagicBytes</code> — dosya yükleme magic byte doğrulaması</li>
 <li><code>EnsureGuestOwnsDocument</code> / <code>EnsureGuestOwnsTicket</code> — ownership middleware</li>
 </ul>
-<h3>CSP ve Inline Script</h3>
+<h3 id="csp-ve-inline-script">CSP ve Inline Script</h3>
 <p><strong>ÖNEMLİ:</strong> SecurityHeaders her request'te rastgele nonce üretir.
 CSP Level 3'te <code>nonce-*</code> varsa <code>unsafe-inline</code> görmezden gelinir.
 Bu nedenle tüm <code>onclick=&quot;...&quot;</code> attribute'ları <strong>çalışmaz</strong>.</p>
@@ -523,8 +524,8 @@ document.getElementById('btn')?.addEventListener('click', function() { ... });
 &lt;/script&gt;
 </code></pre>
 <hr />
-<h2>5. Portal Yapıları ve Routing</h2>
-<h3>Route Dosya Yapısı</h3>
+<h2 id="5-portal-yapıları-ve-routing">5. Portal Yapıları ve Routing</h2>
+<h3 id="route-dosya-yapısı">Route Dosya Yapısı</h3>
 <p><code>bootstrap/app.php</code>'de tüm route dosyaları include edilir:</p>
 <pre><code class="language-php">-&gt;withRouting(
     web: [
@@ -539,7 +540,7 @@ document.getElementById('btn')?.addEventListener('click', function() { ... });
     api: __DIR__.'/../routes/api.php',
 )
 </code></pre>
-<h3>ViewData Pattern</h3>
+<h3 id="viewdata-pattern">ViewData Pattern</h3>
 <p>Her portal için <code>ViewDataService</code> sınıfı bulunur. Dashboard'dan view'a gönderilen data standart bir <code>build()</code> metodu üzerinden hazırlanır.</p>
 <pre><code class="language-php">// GuestViewDataService
 public function build(Request $request, GuestApplication $guest): array
@@ -552,12 +553,337 @@ public function build(Request $request, GuestApplication $guest): array
     ];
 }
 </code></pre>
-<h3>GuestResolver Pattern</h3>
+<h3 id="guestresolver-pattern">GuestResolver Pattern</h3>
 <p><code>GuestResolverService</code> — auth kullanıcısından <code>GuestApplication</code> modeline ulaşır.
 Senior portal'da: senior'ın atanmış guest'lerini filtreler.</p>
+<h3 id="shared-layout-pattern-role-aware-dynamic-layouts">Shared Layout Pattern (Role-Aware Dynamic Layouts)</h3>
+<p>Bazı sayfalar (Görev Panosu, Ticket Merkezi, Mesaj Merkezi, HR özlük sayfaları) <strong>birden fazla rol</strong> tarafından kullanılır — manager, senior, staff hepsi aynı URL'yi kullanır.</p>
+<p><strong>Problem:</strong> Hardcoded <code>@extends('layouts.staff')</code> yapılırsa, manager/senior da staff layout görür → &quot;yama&quot; izlenimi, tutarsız UX.</p>
+<p><strong>Çözüm:</strong> Her böyle blade dosyasının başında role'e göre dinamik layout seç:</p>
+<pre><code class="language-blade">@php
+    $role = auth()-&gt;user()?-&gt;role;
+    $layout = in_array($role, ['senior','mentor'])
+        ? 'senior.layouts.app'
+        : ($role === 'manager' ? 'manager.layouts.app' : 'layouts.staff');
+@endphp
+@extends($layout)
+</code></pre>
+<p><strong>Uygulandığı dosyalar:</strong></p>
+<ul>
+<li><code>resources/views/tasks/index.blade.php</code></li>
+<li><code>resources/views/tasks/show.blade.php</code></li>
+<li><code>resources/views/tickets/center.blade.php</code></li>
+<li><code>resources/views/messages/center.blade.php</code></li>
+<li><code>resources/views/hr/my/onboarding.blade.php</code></li>
+<li><code>resources/views/hr/my/leaves.blade.php</code></li>
+<li><code>resources/views/hr/my/certifications.blade.php</code></li>
+<li><code>resources/views/hr/my/attendance.blade.php</code></li>
+<li><code>resources/views/manager/requests/index.blade.php</code> (match() pattern)</li>
+</ul>
+<p><strong>Layout section compatibility:</strong></p>
+<p>Tüm 3 layout (manager, senior, staff) aynı section isimlerini yield eder:</p>
+<ul>
+<li><code>@yield('title')</code></li>
+<li><code>@yield('page_title')</code></li>
+<li><code>@yield('page_subtitle')</code></li>
+<li><code>@yield('topbar-actions')</code></li>
+<li><code>@yield('content')</code></li>
+</ul>
+<p>Bu sayede drop-in replacement olarak çalışır, blade içeriği değişmez.</p>
+<h3 id="view-transitions-api-sayfa-geçiş-smoothlaması">View Transitions API (sayfa geçiş smooth'laması)</h3>
+<p>Her portal layout'u şunu içerir:</p>
+<pre><code class="language-html">&lt;meta name=&quot;view-transition&quot; content=&quot;same-origin&quot;&gt;
+&lt;style&gt;
+    @view-transition { navigation: auto; }
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation-duration: 180ms;
+        animation-timing-function: ease-out;
+    }
+    html, body, .app, .main, .content { background: var(--bg, #f1f5f9) !important; }
+&lt;/style&gt;
+</code></pre>
+<ul>
+<li><strong>Chrome 126+</strong> → MPA cross-fade otomatik, beyaz flash azalır (tamamen yok etmez)</li>
+<li><strong>Diğer browserlar</strong> → progressive enhancement, etkilenmez</li>
+<li><strong>bg fallback</strong> → transition sırasında beyaz yerine slate görünür</li>
+</ul>
+<blockquote>
+<p>Not: <code>php artisan serve</code> tek-thread olduğu için local'de TTFB yavaş (1-1.2s), View Transitions flash'ı tamamen gidermez. Prod Apache'de sorun yok. Future work: Laravel Herd / Turbo / SPA wrapper.</p>
+</blockquote>
+<h3 id="fouc-preload-trick-css-async-yükleme">FOUC Preload Trick (CSS async yükleme)</h3>
+<p><code>app.css</code> body sonunda yüklenirse FOUC (flash of unstyled content) olur. Preload + onload swap pattern:</p>
+<pre><code class="language-html">&lt;link rel=&quot;preload&quot; href=&quot;/build/{$__headAppCss}&quot; as=&quot;style&quot; onload=&quot;this.onload=null;this.rel='stylesheet'&quot;&gt;
+&lt;noscript&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;/build/{$__headAppCss}&quot;&gt;&lt;/noscript&gt;
+</code></pre>
+<p>Non-blocking yükleme + FOUC yok. Tüm 5 portal layout'unda uygulandı.</p>
+<h3 id="dam-digital-asset-manager-orta-seviye-enterprise-özellikleri">DAM (Digital Asset Manager) — Orta Seviye Enterprise Özellikleri</h3>
+<p>MentorDE'nin DAM modülü klasör/dosya organizasyonunun ötesinde enterprise-grade özellikler sunar:</p>
+<p><strong>Organizasyon:</strong></p>
+<ul>
+<li>Klasör ağacı (max depth 10, cycle detection, role-scoped)</li>
+<li>Klasör CRUD + move + yıldızlama (kişisel favoriler)</li>
+<li>Dosya CRUD + move + yıldızlama + pin</li>
+<li>Tag sistemi (JSON kolonu, popüler tag'ler cache'li)</li>
+</ul>
+<p><strong>Versiyon kontrolü</strong> (DAM6):</p>
+<ul>
+<li><code>version_group_id</code>: aynı dosyanın versiyonlarını gruplar</li>
+<li><code>version_number</code>: 1, 2, 3, ...</li>
+<li><code>is_current_version</code>: default list sadece bunu gösterir</li>
+<li><code>version_note</code>: upload sırasında açıklama</li>
+<li>Geçmiş versiyonlar detay panelinden erişilebilir, restore/swap mümkün</li>
+</ul>
+<p><strong>Arama (DAM5, DAM6, DAM7):</strong></p>
+<ul>
+<li><strong>E5 tag search</strong> — <code>?tag=xxx</code> JSON-LIKE arama</li>
+<li><strong>E6 gelişmiş filtreler</strong> — category, date range, <strong>uploader</strong>, <strong>size range</strong> (MB)</li>
+<li><strong>DAM5 saved searches</strong> — kullanıcı query'i isimle kaydeder (<code>digital_asset_saved_searches</code> tablosu)</li>
+<li><strong>DAM7 full-text search</strong> — MySQL FULLTEXT index <code>ft_dam_search (name, original_filename, description, doc_code)</code>, boolean mode prefix match (<code>+term*</code>), SQLite'ta LIKE fallback</li>
+</ul>
+<p><strong>Paylaşım ve İndirme (DAM3, DAM4):</strong></p>
+<ul>
+<li><strong>DAM3 bulk download</strong> — <code>POST /bulk-download</code> — seçili asset'leri ZIP olarak indirir, max 200 dosya/istek</li>
+<li><strong>DAM4 share links</strong> — <code>digital_asset_share_links</code> tablosu:
+<ul>
+<li>Token-based access (<code>GET /share/{token}</code> — auth gerekmez)</li>
+<li>Expiring (<code>expires_at</code>)</li>
+<li>Opsiyonel password (bcrypt hash)</li>
+<li>Max download limit</li>
+<li>Revoke flag</li>
+<li>Download counter + last accessed IP</li>
+<li>Password protected link için ayrı blade (<code>share-password.blade.php</code>)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Raporlar (DAM8):</strong></p>
+<ul>
+<li><code>/digital-assets/reports</code> — sadece <code>dam.folder.manage</code> yetkili</li>
+<li>KPI: toplam varlık, toplam boyut, kategori dağılımı</li>
+<li>En çok indirilen 10 asset</li>
+<li>30 gün aktivite özeti (aksiyona göre count)</li>
+<li>En aktif 10 kullanıcı</li>
+<li>Son 20 aktivite feed</li>
+</ul>
+<p><strong>Aktivite logu (DAM2):</strong></p>
+<ul>
+<li><code>digital_asset_activity_log</code> tablosu</li>
+<li>Her CRUD + move + share + download otomatik kayıt</li>
+<li><code>DigitalAssetActivityLog::record($action, $targetType, $targetId, $targetName, $user, $meta, $ip)</code> helper</li>
+<li>Action types: upload, download, update, delete, move, share, folder_create, folder_rename, folder_move, folder_delete</li>
+<li>Kullanıcı silinse bile <code>user_name</code> snapshot korunur</li>
+</ul>
+<p><strong>Kolon seçici (E7):</strong></p>
+<ul>
+<li>Liste view'da kullanıcı hangi kolonları görmek istediğini seçer</li>
+<li>localStorage-based persistence (<code>dam_hidden_cols</code>)</li>
+<li>Ad ve İşlem kolonları zorunlu (kapatılamaz)</li>
+</ul>
+<p><strong>S3 storage desteği (DAM9):</strong></p>
+<ul>
+<li><code>config/filesystems.php</code> → <code>s3</code> disk zaten tanımlı</li>
+<li>Geçiş için:
+<ol>
+<li><code>composer require league/flysystem-aws-s3-v3</code></li>
+<li><code>.env</code> → <code>FILESYSTEM_DISK=s3</code></li>
+<li><code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>, <code>AWS_BUCKET</code>, <code>AWS_DEFAULT_REGION</code> doldur</li>
+</ol>
+</li>
+<li>Kod değişikliği gerektirmez — <code>DigitalAssetService::store()</code> Laravel disk abstraction kullanır</li>
+<li>Mevcut dosyalar otomatik taşınmaz — migration script gerekir (opsiyonel, rsync/aws-cli)</li>
+</ul>
+<h3 id="im-internal-messaging-slack-tarzı-yönetim-modeli">IM (Internal Messaging) — Slack-tarzı Yönetim Modeli</h3>
+<p>Conversation'lar için 3 seviyeli permission hiyerarşisi:</p>
+<pre><code>Manager (workspace admin)
+  └── Channel Admin (creator + promoted members)
+        └── Member
+</code></pre>
+<p><strong>Permission matrisi:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Aksiyon</th>
+<th align="center">Member</th>
+<th align="center">Channel Admin</th>
+<th align="center">Manager</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mesaj gönder (non-archived)</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>Kendi mesajını sil</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>Başkasının mesajını sil</td>
+<td align="center">✗</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>Üye ekle</td>
+<td align="center">✗</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>Üye çıkar (kick)</td>
+<td align="center">✗</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>Kendisi ayrıl (leave)</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>Member → Admin promote</td>
+<td align="center">✗</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>Admin → Member demote</td>
+<td align="center">✗</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>Archive (read-only + hidden)</td>
+<td align="center">✗</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>Unarchive</td>
+<td align="center">✗</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td><strong>Destroy</strong> (permanent delete)</td>
+<td align="center">✗</td>
+<td align="center">✗</td>
+<td align="center"><strong>✓</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kod yerleri:</strong></p>
+<ul>
+<li>Service: <code>ConversationService::permissionLevel()</code>, <code>canPerform()</code>, <code>archiveConversation()</code>, <code>destroyConversation()</code>, <code>promoteToAdmin()</code>, <code>demoteFromAdmin()</code></li>
+<li>Controller: <code>InternalMessagingController</code> — <code>archive</code>, <code>unarchive</code>, <code>destroy</code>, <code>promoteMember</code>, <code>demoteMember</code></li>
+<li>Routes: <code>POST /im/conversations/{id}/archive|unarchive|destroy</code>, <code>/members/{uid}/promote|demote</code></li>
+<li>UI: <code>resources/views/hub/_partials/internal-conv-panel.blade.php</code> — collapsible settings panel (⚙️ button header'da, sadece group/room için)</li>
+</ul>
+<p><strong>Archive davranışı:</strong></p>
+<ul>
+<li><code>is_archived=true</code> + <code>archived_at=now()</code> + <code>archived_by_user_id=userId</code></li>
+<li><code>send</code> controller'ı <code>abort(403)</code> eder (yeni mesaj engellenir)</li>
+<li><code>UnifiedMessagingHubController::loadInternalData</code> → <code>Conversation::notArchived()</code> scope → liste gizler</li>
+<li>Unarchive geri aktif hale getirir, notArchived scope yeniden dahil eder</li>
+</ul>
+<p><strong>Destroy (permanent delete):</strong></p>
+<ul>
+<li><code>Conversation</code> modeline <code>SoftDeletes</code> trait eklendi — <code>deleted_at</code> kolonu</li>
+<li><code>destroyConversation()</code> sadece soft delete yapar (trashed() ile geri alınabilir)</li>
+<li>Manager/system_admin override ile çağrılır</li>
+<li>Messages tablosu <code>ON DELETE CASCADE</code> FK var, ama soft delete cascade etmez → mesajlar korunur</li>
+<li>UI'de sadece manager'a &quot;Kalıcı Sil&quot; butonu görünür</li>
+</ul>
+<p><strong>Son admin koruması:</strong></p>
+<ul>
+<li><code>demoteFromAdmin()</code> admin sayısı 1 iken false döner</li>
+<li><code>groupRemoveMember</code> içinde aynı kontrol (zaten vardı)</li>
+<li>Kendi kendini çıkarma senaryosunda bu kural <code>isSelf</code> flag ile bypass oluyor — TODO: self-leave da son admin'se engelle</li>
+</ul>
+<p><strong>HTML5 validation:</strong></p>
+<ul>
+<li><code>hubGroupTitle</code> ve <code>hubRoomTitle</code> input'larında <code>required</code> + <code>minlength=&quot;2&quot;</code> var</li>
+<li>Boş submit browser tarafında engellenir, server'a geçersiz istek gitmez</li>
+</ul>
 <hr />
-<h2>6. Temel Servisler</h2>
-<h3>İş Mantığı Servisleri</h3>
+<h3 id="partner-site-çok-template-sistemi-pslug">Partner Site — Çok-Template Sistemi (<code>/p/{slug}</code>)</h3>
+<p>Operasyon partner (<code>b2b_partner</code>) bayileri, kendi kurumsal sitelerini birden fazla hazır
+tasarım arasından seçebilir. Tüm şablonlar <strong>aynı veriyi</strong> kullanır; partner içeriği bir kez
+girer, şablon değişince aynı veriyle dolar.</p>
+<table>
+<thead>
+<tr>
+<th>Parça</th>
+<th>Yer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Veri sözleşmesi</td>
+<td><code>App\Support\PartnerSiteData::forDealer($dealer, $logoUrl)</code> + <code>::icon($key)</code></td>
+</tr>
+<tr>
+<td>Şablon kayıt defteri</td>
+<td><code>App\Support\PartnerTemplates</code> (<code>DEFAULT</code>, <code>resolve/view/isValid/all</code>)</td>
+</tr>
+<tr>
+<td>Şablon blade'leri</td>
+<td><code>resources/views/public/partner-templates/{key}.blade.php</code></td>
+</tr>
+<tr>
+<td>DB alanı</td>
+<td><code>dealers.site_template</code> (nullable → <code>aurora</code>)</td>
+</tr>
+<tr>
+<td>Public render</td>
+<td><code>Public\DealerMiniSiteController@show</code></td>
+</tr>
+<tr>
+<td>Editör</td>
+<td><code>Dealer\DealerMiniSiteController</code> + <code>dealer/mini-site/edit.blade.php</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Yeni şablon eklemek = 2 adım:</strong> (ayrıntılı kontrol listesi: <code>docs/PARTNER_TEMPLATE_EKLEME.md</code>)</p>
+<ol>
+<li><code>_starter.blade.php</code>'yi kopyala → <code>{key}.blade.php</code>, tasarımı üzerine giydir.
+<code>_starter</code> sözleşmenin tamamını kullanan iskelettir; registry'de olmadığı için public render edilmez.</li>
+<li><code>PartnerTemplates::TEMPLATES</code> dizisine bir satır ekle (<code>name</code>, <code>desc</code>, <code>accent</code>).
+Editördeki seçici, validation ve önizleme otomatik çalışır.</li>
+</ol>
+<p><strong>Sözleşme — her zaman dolu:</strong> <code>$heroTitle</code>, <code>$heroSubtitle</code>, <code>$aboutText</code>, <code>$services</code>
+(<code>[title, desc, icon, items[]]</code>, default set var), <code>$applyUrl</code>, <code>$accentColor</code>, <code>$brandName</code>, <code>$showBadge</code>, <code>$dealer</code>.
+<strong>Boş olabilir (bölümü <code>@if(!empty(...))</code> ile gizle):</strong> <code>$stats</code>, <code>$team</code>, <code>$testimonials</code>
+(<code>[text, name, school]</code>), <code>$heroTrust</code> (<code>[value, label]</code>, max 3, <code>$stats</code>'tan türetilir),
+<code>$brandLogoUrl</code>, <code>$phone</code>, <code>$whatsapp</code>, <code>$instagram</code>, <code>$address</code>.</p>
+<p><strong>Önizleme:</strong> <code>/p/{slug}?preview=1&amp;tpl={key}</code> — kaydetmeden başka şablon denemek için.
+Geçersiz key sessizce <code>DEFAULT</code>'a düşer. Önizleme <strong>yetki ister</strong>: sahibi bayi kullanıcısı
+(<code>users.dealer_code === dealers.code</code>) veya <code>User::ADMIN_PANEL_ROLES</code>. Anonim ziyaretçide
+<code>?preview=1</code> yok sayılır — yayına alınmamış site açılmaz, <code>?tpl=</code> çalışmaz.</p>
+<p><strong>⚠ Dört tuzak:</strong></p>
+<ul>
+<li><strong>White-label guard:</strong> <code>AppServiceProvider</code>'daki global <code>View::composer('*')</code> <code>brandName</code>/<code>brandLogoUrl</code>'i
+EZER. Guard <code>public.dealer-landing</code> + <code>public.partner-templates.*</code> view'larını hariç tutar.
+<strong>Yeni public white-label view eklerken guard'a dahil et</strong>, yoksa sayfada hep MentorDE markası görünür.</li>
+<li><strong>JS yok:</strong> Şablonlar CSP nonce'suz public sayfalarda render olur → inline <code>onclick</code> / <code>&lt;script&gt;</code>
+kullanma. 3 şablon + iskelet <code>script=0, onclick=0</code> ile doğrulandı.</li>
+<li><strong>Font sadece lokal:</strong> Google Fonts CDN'e istek atma (DSGVO). <code>public/fonts/local-fonts.css</code>
+içinde Plus Jakarta Sans (variable 200–800) + DM Serif Display var; başka aile gerekiyorsa
+önce woff2'yi indirip <code>@font-face</code> ekle.</li>
+<li><strong>Uydurma veri yok:</strong> Şablonda örnek yorum / hayali rakam yazma. <code>$heroTrust</code> ve
+<code>$testimonials</code> yalnız partnerin girdiği veriden gelir; boşsa bölüm hiç basılmaz.
+Gerçek olmayan rakam, gerçek bir firmanın canlı sayfasında yanıltıcı reklamdır (UWG §5).</li>
+</ul>
+<p><strong>Tier yönlendirmesi:</strong> <code>b2b_partner</code> (tier VEYA rol seti) → template render; diğerleri
+(freelance / lead_generation) → mevcut <code>public.dealer-landing</code> tek sayfa mini-site.</p>
+<hr />
+<h2 id="6-temel-servisler">6. Temel Servisler</h2>
+<h3 id="iş-mantığı-servisleri">İş Mantığı Servisleri</h3>
 <table>
 <thead>
 <tr>
@@ -616,7 +942,7 @@ Senior portal'da: senior'ın atanmış guest'lerini filtreler.</p>
 </tr>
 </tbody>
 </table>
-<h3>AuditTrail Observer</h3>
+<h3 id="audittrail-observer">AuditTrail Observer</h3>
 <p><code>AuditTrail</code> model + <code>AuditTrailObserver</code> → kritik modellerde created/updated/deleted olayları loglanır.</p>
 <pre><code class="language-php">// Model'e eklemek için:
 use App\Observers\AuditTrailObserver;
@@ -625,8 +951,8 @@ protected static function booted(): void {
 }
 </code></pre>
 <hr />
-<h2>7. Queue &amp; Cron</h2>
-<h3>Queue</h3>
+<h2 id="7-queue-cron">7. Queue &amp; Cron</h2>
+<h3 id="queue">Queue</h3>
 <ul>
 <li>Driver: <code>database</code> (<code>.env</code>: <code>QUEUE_CONNECTION=database</code>)</li>
 <li>Tablo: <code>jobs</code>, <code>failed_jobs</code></li>
@@ -638,7 +964,7 @@ protected static function booted(): void {
 <li><code>ProcessDocumentJob</code> — belge işleme</li>
 <li><code>RecalculateLeadScoreJob</code> — lead skor hesaplama</li>
 </ul>
-<h3>Cron (Task Scheduler)</h3>
+<h3 id="cron-task-scheduler">Cron (Task Scheduler)</h3>
 <p><code>app/Console/Kernel.php</code> veya route-based scheduler:</p>
 <table>
 <thead>
@@ -690,8 +1016,8 @@ protected static function booted(): void {
 <pre><code>* * * * * cd /var/www/mentorde &amp;&amp; php artisan schedule:run &gt;&gt; /dev/null 2&gt;&amp;1
 </code></pre>
 <hr />
-<h2>8. Dış Entegrasyonlar</h2>
-<h3>Stripe</h3>
+<h2 id="8-dış-entegrasyonlar">8. Dış Entegrasyonlar</h2>
+<h3 id="stripe">Stripe</h3>
 <pre><code class="language-env">STRIPE_KEY=pk_live_...
 STRIPE_SECRET=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
@@ -704,14 +1030,14 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 <li><code>StudentPayment.status = 'paid'</code>, <code>paid_at = now()</code></li>
 </ol>
 <p><strong>Webhook CSRF muaf:</strong> <code>routes/web.php</code>'de <code>-&gt;withoutMiddleware([VerifyCsrfToken::class])</code></p>
-<h3>WhatsApp</h3>
+<h3 id="whatsapp">WhatsApp</h3>
 <pre><code class="language-env">WHATSAPP_PHONE_NUMBER_ID=...
 WHATSAPP_ACCESS_TOKEN=...
 WHATSAPP_TEMPLATE_NAMESPACE=...
 </code></pre>
 <p><strong>Kullanım:</strong> <code>WhatsAppService::sendTemplateMessage($phone, $templateName, $params)</code>
 Meta Cloud API v19.0 kullanılır.</p>
-<h3>SMTP</h3>
+<h3 id="smtp">SMTP</h3>
 <pre><code class="language-env">MAIL_MAILER=smtp
 MAIL_HOST=...
 MAIL_PORT=587
@@ -721,12 +1047,12 @@ MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=noreply@mentorde.de
 MAIL_FROM_NAME=&quot;MentorDE&quot;
 </code></pre>
-<h3>Google 2FA (TOTP)</h3>
+<h3 id="google-2fa-totp">Google 2FA (TOTP)</h3>
 <p>Kütüphane: <code>pragmarx/google2fa</code> + <code>bacon/bacon-qr-code</code>
 Kullanıcı kendi authenticator uygulamasıyla (Google Auth, Authy) TOTP kurulumu yapar.</p>
 <hr />
-<h2>9. CSS / Frontend Mimarisi</h2>
-<h3>Ana CSS</h3>
+<h2 id="9-css-frontend-mimarisi">9. CSS / Frontend Mimarisi</h2>
+<h3 id="ana-css">Ana CSS</h3>
 <p><code>public/css/portal-unified-v2.css</code> — tüm portallar bu dosyayı kullanır.</p>
 <p><strong>CSS Değişkenleri (namespace: <code>--u-*</code>):</strong></p>
 <pre><code class="language-css">--u-brand   /* Ana mavi */
@@ -748,20 +1074,20 @@ Kullanıcı kendi authenticator uygulamasıyla (Google Auth, Authy) TOTP kurulum
 <li><code>.card</code> — standalone kart</li>
 <li><code>.list &gt; .item</code> — liste satırı (<code>.list &gt; .card</code> YANLIŞ)</li>
 </ul>
-<h3>Tema Sistemi</h3>
+<h3 id="tema-sistemi">Tema Sistemi</h3>
 <ul>
 <li><code>resources/css/premium.css</code> — light mode + <code>[data-theme=&quot;dark&quot;]</code> override</li>
 <li><code>resources/css/minimalist.css</code> — minimalist tema</li>
 <li>Toggle fonksiyonları: <code>__dmToggle()</code>, <code>__designToggle()</code> — layout'un nonce'lu script bloğunda tanımlanır</li>
 </ul>
-<h3>Statik JS</h3>
+<h3 id="statik-js">Statik JS</h3>
 <p><code>public/js/</code> klasöründe 30+ statik JS dosyası.
 Her portal kendi JS dosyasına sahip.</p>
 <p><strong>Vite sadece CSS için:</strong> <code>resources/css/</code> → build → <code>public/build/</code>
 JS dosyaları statik, Vite bundle'ına dahil değil.</p>
 <hr />
-<h2>10. Test Altyapısı</h2>
-<h3>PHPUnit</h3>
+<h2 id="10-test-altyapısı">10. Test Altyapısı</h2>
+<h3 id="phpunit">PHPUnit</h3>
 <pre><code class="language-bash">php artisan test              # Tüm testler
 php artisan test --filter Foo # Belirli test
 </code></pre>
@@ -786,14 +1112,14 @@ $dateDiff = $isSqlite
     ? DB::raw(&quot;CAST(julianday('now') - julianday(created_at) AS INTEGER)&quot;)
     : DB::raw(&quot;DATEDIFF(NOW(), created_at)&quot;);
 </code></pre>
-<h3>Playwright E2E</h3>
+<h3 id="playwright-e2e">Playwright E2E</h3>
 <pre><code class="language-bash">cd tests/e2e
 npx playwright test
 </code></pre>
 <p>7 rol, 6 spec dosyası. <code>.env.testing</code>'de <code>APP_DEBUG=false</code> (PHP 8.4 Ignition bug bypass).</p>
 <hr />
-<h2>11. Deploy &amp; Ortam Değişkenleri</h2>
-<h3>Gerekli <code>.env</code> Değişkenleri</h3>
+<h2 id="11-deploy-ortam-değişkenleri">11. Deploy &amp; Ortam Değişkenleri</h2>
+<h3 id="gerekli-env-değişkenleri">Gerekli <code>.env</code> Değişkenleri</h3>
 <pre><code class="language-env">APP_NAME=&quot;MentorDE&quot;
 APP_ENV=production
 APP_KEY=base64:...
@@ -830,7 +1156,7 @@ WHATSAPP_TEMPLATE_NAMESPACE=...
 
 FILESYSTEM_DISK=local     # veya s3
 </code></pre>
-<h3>Deploy Komutları</h3>
+<h3 id="deploy-komutları">Deploy Komutları</h3>
 <pre><code class="language-bash"># Kod güncelleme
 git pull origin main
 
@@ -850,7 +1176,7 @@ npm ci &amp;&amp; npm run build
 # Queue (systemd veya supervisor ile)
 php artisan queue:restart
 </code></pre>
-<h3>Supervisor Konfigürasyonu</h3>
+<h3 id="supervisor-konfigürasyonu">Supervisor Konfigürasyonu</h3>
 <pre><code class="language-ini">[program:mentorde-worker]
 command=php /var/www/mentorde/artisan queue:work --sleep=3 --tries=3 --max-time=3600
 autostart=true
@@ -861,8 +1187,8 @@ redirect_stderr=true
 stdout_logfile=/var/log/mentorde-worker.log
 </code></pre>
 <hr />
-<h2>12. Sık Yapılan Hatalar</h2>
-<h3>&quot;419 Page Expired&quot; (Production)</h3>
+<h2 id="12-sık-yapılan-hatalar">12. Sık Yapılan Hatalar</h2>
+<h3 id="419-page-expired-production">&quot;419 Page Expired&quot; (Production)</h3>
 <p><strong>Neden:</strong> Session cookie <code>SameSite=Lax</code>, cross-site POST form'ları veya HTTP → HTTPS redirect.</p>
 <p><strong>Çözüm:</strong></p>
 <pre><code class="language-php">// config/session.php
@@ -871,7 +1197,7 @@ stdout_logfile=/var/log/mentorde-worker.log
 'domain'    =&gt; '.mentorde.de',
 </code></pre>
 <p><code>.env</code>'de <code>APP_URL=https://mentorde.de</code> (http değil, https).</p>
-<h3>&quot;Namespace declaration&quot; PHP Hatası</h3>
+<h3 id="namespace-declaration-php-hatası">&quot;Namespace declaration&quot; PHP Hatası</h3>
 <p><strong>Neden:</strong> PowerShell <code>Set-Content</code> UTF-8 BOM ekler → PHP &quot;unexpected namespace&quot; hatası.</p>
 <p><strong>Çözüm:</strong> Node.js ile BOM'u kaldır:</p>
 <pre><code class="language-js">const fs = require('fs');
@@ -879,21 +1205,78 @@ let content = fs.readFileSync('file.php', 'utf8');
 if (content.charCodeAt(0) === 0xFEFF) content = content.slice(1);
 fs.writeFileSync('file.php', content, 'utf8');
 </code></pre>
-<h3>CSP Inline Script Bloğu</h3>
+<h3 id="csp-inline-script-bloğu">CSP Inline Script Bloğu</h3>
 <p><strong>Neden:</strong> SecurityHeaders nonce üretir → <code>unsafe-inline</code> görmezden gelinir → <code>onclick=</code> çalışmaz.</p>
 <p><strong>Çözüm:</strong> Her zaman <code>addEventListener</code> kullan, nonce'lu script bloğu içinde.</p>
-<h3>Queue Job'ları Çalışmıyor</h3>
+<h3 id="queue-jobları-çalışmıyor">Queue Job'ları Çalışmıyor</h3>
 <p><strong>Kontrol:</strong></p>
 <pre><code class="language-bash">php artisan queue:work   # Manual başlat ve logları izle
 php artisan queue:failed # Başarısız job'ları listele
 php artisan queue:retry all
 </code></pre>
-<h3>Edit Tool Cache Geçersizliği</h3>
+<h3 id="edit-tool-cache-geçersizliği">Edit Tool Cache Geçersizliği</h3>
 <p><strong>Neden:</strong> Harici araçla değiştirilmiş dosya → Edit tool önbelleği stale.</p>
 <p><strong>Çözüm:</strong> Önce <code>Read</code> tool ile dosyayı oku, sonra <code>Edit</code> yap.</p>
-<h3>Test: <code>$fillable</code> Kısıtlaması</h3>
+<h3 id="test-fillable-kısıtlaması">Test: <code>$fillable</code> Kısıtlaması</h3>
 <p><strong>Neden:</strong> <code>Model::create([...])</code> <code>$fillable</code>'a dahil olmayan alanları yok sayar → test beklenmedik state'te başlar.</p>
 <p><strong>Çözüm:</strong> Test setup'ında sistem alanları için <code>$model-&gt;forceFill([...])-&gt;save()</code> kullan.</p>
 <hr />
-<p><em>MentorDE Developer Handbook — Güncelleme: Nisan 2026</em></p>
+<h2 id="13-son-teknik-değişiklikler-15-nisan-2026">13. Son Teknik Değişiklikler (15 Nisan 2026)</h2>
+<h3 id="dam-damfoldermanage-izni-seniora-eklendi">DAM — <code>dam.folder.manage</code> izni Senior'a eklendi</h3>
+<p><code>app/Models/User.php::PERMISSIONS</code> içindeki <code>ROLE_SENIOR</code> listesine <code>dam.folder.manage</code> eklendi. Senior artık klasör oluşturabilir/taşıyabilir/silebilir. <code>dam.delete</code> ve <code>dam.admin</code> hâlâ sadece manager'da.</p>
+<h3 id="dam-digitalassetfoldersallowedroles-her-klasörde-düzenlenebilir">DAM — <code>digital_asset_folders.allowed_roles</code> her klasörde düzenlenebilir</h3>
+<p><code>DigitalAssetFolderService::treeForRole()</code> artık tree node'larında <code>description</code> ve <code>allowed_roles</code> alanlarını da taşır. Sidebar tree partial (<code>_folder_tree.blade.php</code>) inline ⚙ butonuyla her klasör için <code>_folder_edit_modal</code> açabilir.</p>
+<h3 id="dam-notify-endpoint-post-upload-mention-için">DAM — <code>notify()</code> endpoint post-upload mention için</h3>
+<p><code>POST {portal}/digital-assets/{asset}/notify</code> — mevcut asset'i belirli user_id'lere veya rol gruplarına duyurmak için. <code>NotificationService::sendToMany()</code> ile <code>in_app</code> kanal, dedup 24h TTL.</p>
+<h3 id="dam-dispatchuploadmentions-rol-grup-resolver">DAM — <code>dispatchUploadMentions()</code> + rol grup resolver</h3>
+<p><code>BusinessContractController::resolveRoleGroupUserIds()</code> benzeri pattern ile <code>mentionGroupDefinitions</code> tek merkezi definisyonu. Dealer alt tipleri <code>dealer_types</code> filtresiyle <code>users.dealer_code → dealers.code → dealers.dealer_type_code</code> üzerinden çözülüyor.</p>
+<h3 id="im-conversationserviceunreadcountforuser-raw-query-düzeltmeleri">IM — <code>ConversationService::unreadCountForUser</code> raw query düzeltmeleri</h3>
+<p>Raw <code>DB::table()</code> sorgularında Eloquent global scope çalışmaz. Manuel filtreler eklendi:</p>
+<ul>
+<li><code>whereNull('c.deleted_at')</code> — silinen konuşmaları sayma</li>
+<li><code>where('c.is_archived', false)</code> — arşivli konuşmaları sayma</li>
+<li><code>where('m.is_system', false)</code> — sistem mesajları sayma</li>
+<li><code>where('m.sender_id', '!=', $userId)</code> — kendi mesajını sayma</li>
+</ul>
+<h3 id="im-destroyconversation-cache-invalidation">IM — <code>destroyConversation</code> cache invalidation</h3>
+<p><code>ConversationService::destroyConversation()</code> önce tüm participant ID'lerini toplar, soft delete sonrası her biri için <code>invalidateUnreadCache()</code> çağrır. Aksi halde stale 60sn cache yüzünden badge düşmüyordu.</p>
+<h3 id="im-bulk-destroy-endpoint">IM — bulk destroy endpoint</h3>
+<p><code>POST /im/conversations/bulk-destroy</code> — max 100 ID, her biri için <code>canPerform('destroy')</code> kontrolü, yetkisizler sessizce atlanır.</p>
+<h3 id="im-archivedestroybulk-redirect-fix">IM — Archive/destroy/bulk redirect fix</h3>
+<p><code>redirect()-&gt;route('im.index', ['tab' =&gt; 'internal'])</code> — <code>tab=internal</code> query param olmadan hub default olarak customer tab'ı açar.</p>
+<h3 id="im-mesaj-baloncuğu-nested-max-width-bugı">IM — Mesaj baloncuğu nested max-width bug'ı</h3>
+<p><code>.hub-bubble { max-width: 95% }</code> + inner wrapper <code>max-width: 95%</code> cascade halinde baloncuğu ~45px genişliğe indiriyordu. Outer wrapper <code>max-width: 78%; min-width: 0</code> + bubble <code>max-width: 100%; overflow-wrap: anywhere</code> ile çözüldü. <code>word-break: break-word</code> yerine modern <code>overflow-wrap</code> kullanılıyor.</p>
+<h3 id="business-contracts-dealercategories-3-kategoriye">Business Contracts — <code>dealer_categories</code> 3 kategoriye</h3>
+<p><code>BusinessContractController::mentionGroupDefinitions()</code> benzeri pattern <code>dealerCategoryLabels</code> — 3 kategori + <code>template</code> alanı:</p>
+<ul>
+<li><code>lead_generation</code> → <code>['lead_generation', 'referrer']</code> → <code>dealer_referral_v1</code></li>
+<li><code>freelance</code>       → <code>['freelance_danisman']</code>          → <code>dealer_referral_v1</code></li>
+<li><code>operational</code>     → <code>['operational', 'b2b_partner']</code>  → <code>dealer_operations_v1</code></li>
+</ul>
+<p>Auto-suggest: dropdown'da bayi seçilince <code>data-suggest-template</code> attribute'u <code>onTemplateChange()</code> tetikler.</p>
+<h3 id="bulletin-or-mantığı-kritik-fix">Bulletin — OR mantığı (kritik fix)</h3>
+<p><code>CompanyBulletin::scopeVisibleToUser</code> AND tabanlıydı: <code>target_departments</code> dolu olan bulletin'ler herkesten gizleniyordu çünkü <code>users.department</code> kolonu yok. OR mantığına çevrildi:</p>
+<ul>
+<li><code>target_roles=null AND target_departments=null</code> → herkese açık</li>
+<li><code>target_roles JSON_CONTAINS role</code> → görür</li>
+<li><code>target_departments JSON_CONTAINS department</code> (varsa) → görür</li>
+</ul>
+<h3 id="genel-türkçe-html5-validation">Genel — Türkçe HTML5 validation</h3>
+<p><code>.hub-modal form</code> elementleri üzerinde <code>setCustomValidity()</code> override'ı. <code>invalid</code> event'te Türkçe mesaj, <code>input</code> event'te temizleme.</p>
+<h3 id="genel-çift-submit-engelleme">Genel — Çift submit engelleme</h3>
+<p><code>hub-modal form</code> submit'te tüm <code>button[type=&quot;submit&quot;]</code> disable edilir + &quot;⏳ Oluşturuluyor...&quot; yazısı, 8sn timeout ile revert (hata durumunda kilit kalmaz).</p>
+<h3 id="yeni-dokümanlar">Yeni dokümanlar</h3>
+<ul>
+<li><code>docs/DEALER_ONBOARDING_PROCESS.md</code> + PDF</li>
+<li><code>docs/USER_CREATION_PROCESS.md</code> + PDF</li>
+</ul>
+<p>PDF üretimi için <code>_tmp_md2pdf.php</code> şablonu: <code>league/commonmark</code> + <code>barryvdh/laravel-dompdf</code>. Tek seferlik script, commit'e dahil değil.</p>
+<h3 id="b5-senior-sidebar-inline-onclick-csp-bloklaması-fix">B5 — Senior sidebar inline onclick CSP bloklaması (fix)</h3>
+<p><code>resources/views/senior/layouts/app.blade.php</code> içindeki 6 <code>nav-section-label</code> accordion başlığında inline <code>onclick=&quot;(function(lbl){...})(this)&quot;</code> kullanılıyordu. SecurityHeaders middleware CSP nonce üretir → Chrome/Firefox CSP Level 3 kuralıyla inline handler'ları reddeder. Accordion çalışmıyordu. Tüm inline handler'lar kaldırıldı, tek <code>addEventListener</code> ile nonce'lu script bloğunda bağlandı.</p>
+<h3 id="gif-picker-boş-fix">GIF picker boş (fix)</h3>
+<p><code>manager.layouts.app</code> ve <code>marketing-admin.layouts.app</code> layout'larında <code>window.__giphyKey</code> inline set'i eksikti. Diğer 5 layout'ta vardı. <code>messaging-hub.js</code> top-level'da <code>_GIPHY_KEY=window.__giphyKey||&quot;&quot;</code> okuduğu için manager/marketing user'larda key boş kalıyordu → Giphy 401 → picker &quot;Yüklenemedi&quot;. Her iki layout'a da <code>@stack('scripts')</code> öncesi nonce'lu <code>window.__giphyKey</code> satırı eklendi.</p>
+<h3 id="bulletins-b3-layout-swap">Bulletins — B3 layout swap</h3>
+<p><code>resources/views/bulletins/index.blade.php</code> statik olarak <code>layouts.staff</code>'ı extend ediyordu → senior/manager panelinden Duyurular'a girince sidebar staff'a düşüyor, &quot;portaldan çıkmış&quot; hissi oluşturuyordu. B3 pattern uygulandı: <code>$layout</code> değişkeni auth role'e göre <code>senior.layouts.app | manager.layouts.app | marketing-admin.layouts.app | layouts.staff</code> seçer.</p>
+<hr />
+<p><em>MentorDE Developer Handbook — Güncelleme: 15 Nisan 2026</em></p>
 <div class="footer">MentorDE Developer Handbook &copy; 2026</div></div></body></html>

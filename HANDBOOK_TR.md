@@ -484,7 +484,9 @@ Klavye kısayollarıyla hızlı inceleme:
 - Yayına alma (`site_enabled`) **manager onayına** bağlıdır
 - Sitedeki tüm CTA'lar `/apply/partner/{code}`'a gider → gelen lead otomatik o bayiye etiketlenir
 - **Operasyon partner (b2b_partner)** için genişletilmiş kurumsal site:
-  - Hizmet kartları, istatistik bandı, ekip kartları, adres bölümleri
+  - Hizmet kartları, istatistik bandı, ekip kartları, öğrenci yorumları, adres bölümleri
+  - İstatistik ve yorum bölümleri **yalnız bayi kendi gerçek verisini girdiğinde** görünür —
+    sistem örnek/uydurma rakam veya yorum göstermez
   - **Site şablonu seçimi** — şu an 3 tasarım: **Aurora** (canlı gradient), **Minimal**
     (sade, bol boşluk), **Bold** (koyu, yüksek kontrast). İçerik aynı kalır, sadece görünüm değişir.
   - Kaydetmeden şablon denemek için: `/p/{slug}?preview=1&tpl={aurora|minimal|bold}`

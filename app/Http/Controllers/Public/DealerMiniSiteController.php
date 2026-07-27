@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dealer;
+use App\Models\User;
 use App\Support\DealerLandingData;
 use App\Support\PartnerSiteData;
 use App\Support\PartnerTemplates;
@@ -15,7 +16,8 @@ use Illuminate\View\View;
  * Bayi white-label mini-site — public /p/{slug}.
  *
  * İki katman (Partner Frontend F1):
- *  • Operasyon partner (b2b_partner) → çok-bölümlü öğrenci-lead sitesi (partner-site.blade).
+ *  • Operasyon partner (b2b_partner) → seçtiği şablonla çok-bölümlü öğrenci-lead sitesi
+ *    (public/partner-templates/{key}.blade — bkz. App\Support\PartnerTemplates).
  *  • Diğer tier'lar (freelance / lead_generation) → mevcut tek-sayfa mini-site (dealer-landing).
  *
  * CTA'lar /apply/partner/{code}'a gider → lead o bayiye etiketlenir.
@@ -32,8 +34,12 @@ class DealerMiniSiteController extends Controller
 
         abort_if(!$dealer, 404);
 
-        // Yayında değilse yalnız sahibi/manager ?preview=1 ile görebilir.
-        if (!$dealer->site_enabled && !$request->boolean('preview')) {
+        // Önizleme yalnız sahibi bayi + manager panelindeki roller için geçerlidir;
+        // ?preview=1 tek başına yetmez (aksi halde yayına alınmamış site herkese açılırdı).
+        $isPreview = $request->boolean('preview') && $this->canPreview($request, $dealer);
+
+        // Yayında değilse sadece yetkili önizleme görebilir.
+        if (!$dealer->site_enabled && !$isPreview) {
             abort(404);
         }
 
@@ -41,9 +47,9 @@ class DealerMiniSiteController extends Controller
 
         // ── Operasyon partner: seçtiği template ile çok-bölümlü öğrenci-odaklı site ──
         if ($this->isOperationPartner($dealer)) {
-            // Sahibi/manager önizlemede ?tpl=KEY ile diğer template'leri deneyebilir.
+            // Yetkili önizlemede ?tpl=KEY ile diğer template'ler kaydetmeden denenebilir.
             $tplKey = $dealer->site_template;
-            if ($request->boolean('preview') && PartnerTemplates::isValid($request->query('tpl'))) {
+            if ($isPreview && PartnerTemplates::isValid($request->query('tpl'))) {
                 $tplKey = $request->query('tpl');
             }
             return view(PartnerTemplates::view($tplKey), PartnerSiteData::forDealer($dealer, $logoUrl));
@@ -61,6 +67,27 @@ class DealerMiniSiteController extends Controller
             'aboutText'     => $dealer->site_about_text ?: null,
             'applyUrl'      => route('apply.partner', $dealer->code),
         ]);
+    }
+
+    /**
+     * Önizleme yetkisi: sitenin sahibi bayi kullanıcısı VEYA manager paneli rolleri.
+     * Giriş yapmamış ziyaretçi için her zaman false → ?preview=1 ile yayınlanmamış
+     * site açılmaz, ?tpl= ile başka şablon denenemez.
+     */
+    private function canPreview(Request $request, Dealer $dealer): bool
+    {
+        $user = $request->user();
+        if (!$user) {
+            return false;
+        }
+
+        if (in_array((string) $user->role, User::ADMIN_PANEL_ROLES, true)) {
+            return true;
+        }
+
+        $userCode = strtoupper(trim((string) ($user->dealer_code ?? '')));
+
+        return $userCode !== '' && $userCode === strtoupper(trim((string) $dealer->code));
     }
 
     /** Primary tier b2b_partner mı? (rol setinde b2b varsa da say.) */

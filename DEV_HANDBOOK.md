@@ -541,23 +541,35 @@ girer, şablon değişince aynı veriyle dolar.
 | Public render | `Public\DealerMiniSiteController@show` |
 | Editör | `Dealer\DealerMiniSiteController` + `dealer/mini-site/edit.blade.php` |
 
-**Yeni şablon eklemek = 2 adım:**
-1. `resources/views/public/partner-templates/{key}.blade.php` oluştur — `PartnerSiteData`
-   sözleşmesindeki değişkenleri kullan (`$services`, `$stats`, `$team`, `$heroTitle`,
-   `$heroSubtitle`, `$aboutText`, `$heroTrust`, `$showBadge`, `$phone/$whatsapp/$instagram/$address`,
-   `$applyUrl`, `$dealer`, `$accentColor`, `$brandName`, `$brandLogoUrl`).
+**Yeni şablon eklemek = 2 adım:** (ayrıntılı kontrol listesi: `docs/PARTNER_TEMPLATE_EKLEME.md`)
+1. `_starter.blade.php`'yi kopyala → `{key}.blade.php`, tasarımı üzerine giydir.
+   `_starter` sözleşmenin tamamını kullanan iskelettir; registry'de olmadığı için public render edilmez.
 2. `PartnerTemplates::TEMPLATES` dizisine bir satır ekle (`name`, `desc`, `accent`).
    Editördeki seçici, validation ve önizleme otomatik çalışır.
 
-**Önizleme:** `/p/{slug}?preview=1&tpl={key}` — kaydetmeden başka şablon denemek için.
-Geçersiz key sessizce `DEFAULT`'a düşer.
+**Sözleşme — her zaman dolu:** `$heroTitle`, `$heroSubtitle`, `$aboutText`, `$services`
+(`[title, desc, icon, items[]]`, default set var), `$applyUrl`, `$accentColor`, `$brandName`, `$showBadge`, `$dealer`.
+**Boş olabilir (bölümü `@if(!empty(...))` ile gizle):** `$stats`, `$team`, `$testimonials`
+(`[text, name, school]`), `$heroTrust` (`[value, label]`, max 3, `$stats`'tan türetilir),
+`$brandLogoUrl`, `$phone`, `$whatsapp`, `$instagram`, `$address`.
 
-**⚠ İki tuzak:**
+**Önizleme:** `/p/{slug}?preview=1&tpl={key}` — kaydetmeden başka şablon denemek için.
+Geçersiz key sessizce `DEFAULT`'a düşer. Önizleme **yetki ister**: sahibi bayi kullanıcısı
+(`users.dealer_code === dealers.code`) veya `User::ADMIN_PANEL_ROLES`. Anonim ziyaretçide
+`?preview=1` yok sayılır — yayına alınmamış site açılmaz, `?tpl=` çalışmaz.
+
+**⚠ Dört tuzak:**
 - **White-label guard:** `AppServiceProvider`'daki global `View::composer('*')` `brandName`/`brandLogoUrl`'i
   EZER. Guard `public.dealer-landing` + `public.partner-templates.*` view'larını hariç tutar.
   **Yeni public white-label view eklerken guard'a dahil et**, yoksa sayfada hep MentorDE markası görünür.
 - **JS yok:** Şablonlar CSP nonce'suz public sayfalarda render olur → inline `onclick` / `<script>`
-  kullanma. Mevcut 3 şablon `script=0, onclick=0` ile doğrulandı.
+  kullanma. 3 şablon + iskelet `script=0, onclick=0` ile doğrulandı.
+- **Font sadece lokal:** Google Fonts CDN'e istek atma (DSGVO). `public/fonts/local-fonts.css`
+  içinde Plus Jakarta Sans (variable 200–800) + DM Serif Display var; başka aile gerekiyorsa
+  önce woff2'yi indirip `@font-face` ekle.
+- **Uydurma veri yok:** Şablonda örnek yorum / hayali rakam yazma. `$heroTrust` ve
+  `$testimonials` yalnız partnerin girdiği veriden gelir; boşsa bölüm hiç basılmaz.
+  Gerçek olmayan rakam, gerçek bir firmanın canlı sayfasında yanıltıcı reklamdır (UWG §5).
 
 **Tier yönlendirmesi:** `b2b_partner` (tier VEYA rol seti) → template render; diğerleri
 (freelance / lead_generation) → mevcut `public.dealer-landing` tek sayfa mini-site.

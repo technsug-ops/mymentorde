@@ -20,16 +20,15 @@
 <meta property="og:title" content="{{ $siteName }} — Almanya Eğitim Danışmanlığı">
 <meta property="og:description" content="{{ Str::limit(strip_tags($heroSubtitle ?? ''), 200) }}">
 <meta property="og:type" content="website">
+{{-- Fontlar SADECE lokal (DSGVO): Google Fonts CDN'e istek atma — bkz. public/fonts/local-fonts.css --}}
 <link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap">
 <style>
 :root{
     --accent:{{ $accent }};
     --accent-d:color-mix(in srgb,{{ $accent }} 78%,#000);
     --dark:#0e0e15; --dark2:#171722; --dark3:#20202e;
     --ink:#12121a; --body:#4a4a56; --muted:#9a9aa6; --line:#e9e8ee; --bg:#f6f6f9;
-    --disp:"Sora","Space Grotesk",-apple-system,sans-serif;
+    --disp:"Plus Jakarta Sans","Space Grotesk",-apple-system,sans-serif;
     --sans:"Space Grotesk","Plus Jakarta Sans",-apple-system,sans-serif;
 }
 *{box-sizing:border-box;}
@@ -213,11 +212,14 @@ footer a{color:#fff;}
                 <a href="{{ $applyUrl }}" class="btn btn-acc" data-track="cta_clicked" data-ph-cta-name="hero_apply" data-ph-location="partner_bold_hero">Ücretsiz Danışmanlık Al {!! $icon('arrow') !!}</a>
                 <a href="#hizmetler" class="btn btn-out">Hizmetlerimiz</a>
             </div>
-            <div class="hero-chips">
-                <div class="hchip"><div class="hv">{{ $heroTrust['students'] }}</div><div class="hl2">Öğrenci</div></div>
-                <div class="hchip"><div class="hv">{{ $heroTrust['success'] }}</div><div class="hl2">Vize Başarısı</div></div>
-                <div class="hchip"><div class="hv">{{ $heroTrust['rating'] }}</div><div class="hl2">Memnuniyet</div></div>
-            </div>
+            @if(!empty($heroTrust))
+                {{-- Sadece partnerin kendi girdiği istatistikler — uydurma rakam yok. --}}
+                <div class="hero-chips">
+                    @foreach($heroTrust as $ht)
+                        <div class="hchip"><div class="hv">{{ $ht['value'] }}</div><div class="hl2">{{ $ht['label'] }}</div></div>
+                    @endforeach
+                </div>
+            @endif
         </div>
         <div>
             @if(!empty($dealer?->site_hero_image_path))
@@ -309,17 +311,30 @@ footer a{color:#fff;}
 </section>
 @endif
 
-{{-- TESTIMONIALS --}}
+{{-- TESTIMONIALS — sadece partnerin girdiği gerçek yorumlar --}}
+@if(!empty($testimonials))
 <section class="sec" style="padding-top:0;">
     <div class="wrap">
         <div class="sec-head c"><span class="kick c">Öğrenci Yorumları</span><h2>Başarı Hikayeleriyle Büyüyoruz</h2></div>
         <div class="q-grid">
-            <div class="qc"><div class="st">★★★★★</div><blockquote>Başvurudan vizeye kadar her adımda yanımdalardı. Süreç o kadar düzenliydi ki hiç stres yaşamadım.</blockquote><div class="who"><div class="av">E</div><div><div class="nm">Elif K.</div><div class="rl">TU München · Mühendislik</div></div></div></div>
-            <div class="qc"><div class="st">★★★★★</div><blockquote>Panelden her aşamayı görebiliyordum, sistemli çalışıyorlar. Vize dosyam ilk seferde onaylandı.</blockquote><div class="who"><div class="av">B</div><div><div class="nm">Burak S.</div><div class="rl">RWTH Aachen · Informatik</div></div></div></div>
-            <div class="qc"><div class="st">★★★★★</div><blockquote>Konaklama ve Anmeldung dahil her şeyde destek oldular. Almanya'da yalnız hissetmedim.</blockquote><div class="who"><div class="av">Z</div><div><div class="nm">Zeynep A.</div><div class="rl">Uni Köln · İşletme</div></div></div></div>
+            @foreach($testimonials as $t)
+                <div class="qc">
+                    <blockquote>{{ $t['text'] }}</blockquote>
+                    @if(($t['name'] ?? '') !== '' || ($t['school'] ?? '') !== '')
+                        <div class="who">
+                            <div class="av">{{ mb_substr($t['name'] !== '' ? $t['name'] : $siteName, 0, 1) }}</div>
+                            <div>
+                                @if(($t['name'] ?? '') !== '')<div class="nm">{{ $t['name'] }}</div>@endif
+                                @if(($t['school'] ?? '') !== '')<div class="rl">{{ $t['school'] }}</div>@endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @endforeach
         </div>
     </div>
 </section>
+@endif
 
 {{-- TRUST --}}
 @if($showBadge)

@@ -20,15 +20,14 @@
 <meta property="og:title" content="{{ $siteName }} — Almanya Eğitim Danışmanlığı">
 <meta property="og:description" content="{{ Str::limit(strip_tags($heroSubtitle ?? ''), 200) }}">
 <meta property="og:type" content="website">
+{{-- Fontlar SADECE lokal (DSGVO): Google Fonts CDN'e istek atma — bkz. public/fonts/local-fonts.css --}}
 <link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap">
 <style>
 :root{
     --accent:{{ $accent }};
     --ink:#141414; --body:#3a3a3a; --muted:#8a8a86; --line:#e6e4df; --line2:#f0efea;
     --paper:#fbfaf7; --card:#ffffff;
-    --serif:"Fraunces",Georgia,"Times New Roman",serif;
+    --serif:"DM Serif Display",Georgia,"Times New Roman",serif;
     --sans:"Space Grotesk","Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,sans-serif;
 }
 *{box-sizing:border-box;}
@@ -45,7 +44,7 @@ svg{width:1em;height:1em;}
 /* NAV */
 .m-nav{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(251,250,247,.9);backdrop-filter:blur(8px);z-index:40;}
 .m-nav .wrap{display:flex;align-items:center;justify-content:space-between;padding:22px 28px;}
-.m-logo{font-family:var(--serif);font-size:24px;color:var(--ink);letter-spacing:-.3px;font-weight:600;}
+.m-logo{font-family:var(--serif);font-size:24px;color:var(--ink);letter-spacing:-.3px;font-weight:400;}
 .m-logo img{max-height:38px;display:block;}
 .m-nav-links{display:flex;gap:32px;font-size:13px;letter-spacing:.04em;}
 .m-nav-links a{color:var(--body);}
@@ -65,7 +64,7 @@ svg{width:1em;height:1em;}
 .hero{padding:96px 0 84px;}
 .hero-grid{display:grid;grid-template-columns:1.25fr .9fr;gap:70px;align-items:end;}
 @media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:44px;}}
-.hero h1{font-family:var(--serif);font-weight:500;font-size:clamp(42px,6vw,72px);line-height:1.04;letter-spacing:-1.5px;color:var(--ink);margin:22px 0 26px;}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(42px,6vw,72px);line-height:1.04;letter-spacing:-1.5px;color:var(--ink);margin:22px 0 26px;}
 .hero h1 em{font-style:italic;color:var(--accent);}
 .hero-lead{font-size:18px;color:var(--body);max-width:520px;margin:0 0 34px;}
 .hero-actions{display:flex;gap:28px;align-items:center;flex-wrap:wrap;}
@@ -80,7 +79,7 @@ svg{width:1em;height:1em;}
 .sec{padding:84px 0;}
 .sec-top{border-top:1px solid var(--line);}
 .sec-head{max-width:640px;margin-bottom:52px;}
-.sec-head h2{font-family:var(--serif);font-weight:500;font-size:clamp(30px,4vw,46px);line-height:1.1;letter-spacing:-.8px;color:var(--ink);margin:16px 0 0;}
+.sec-head h2{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4vw,46px);line-height:1.1;letter-spacing:-.8px;color:var(--ink);margin:16px 0 0;}
 .sec-head p{font-size:17px;color:var(--muted);margin:16px 0 0;}
 
 /* SERVICES — hairline list grid */
@@ -141,7 +140,7 @@ svg{width:1em;height:1em;}
 
 /* CTA */
 .cta{padding:110px 0;text-align:center;border-top:1px solid var(--line);}
-.cta h2{font-family:var(--serif);font-weight:500;font-size:clamp(34px,5vw,58px);line-height:1.06;letter-spacing:-1px;color:var(--ink);margin:0 0 22px;max-width:720px;margin-left:auto;margin-right:auto;}
+.cta h2{font-family:var(--serif);font-weight:400;font-size:clamp(34px,5vw,58px);line-height:1.06;letter-spacing:-1px;color:var(--ink);margin:0 0 22px;max-width:720px;margin-left:auto;margin-right:auto;}
 .cta p{font-size:18px;color:var(--muted);max-width:520px;margin:0 auto 38px;}
 .cta-contacts{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;margin-top:44px;font-size:14px;color:var(--muted);}
 .cta-contacts a{color:var(--ink) !important;border-bottom:1px solid var(--line);}
@@ -172,7 +171,7 @@ footer a{color:var(--ink);}
 
 {{-- HERO --}}
 <section class="hero">
-    <div class="wrap hero-grid">
+    <div class="wrap hero-grid" @if(empty($heroTrust)) style="grid-template-columns:1fr;" @endif>
         <div>
             <span class="eyebrow acc">{{ $siteName }} — Almanya Eğitim Danışmanlığı</span>
             <h1 class="serif">{{ $heroTitle }}</h1>
@@ -182,11 +181,14 @@ footer a{color:var(--ink);}
                 <a href="#hizmetler" class="btn btn-line">Hizmetlerimiz</a>
             </div>
         </div>
-        <div class="hero-side">
-            <div class="hs-item"><div class="hs-v">{{ $heroTrust['students'] }}</div><div class="hs-l">Yönlendirilen öğrenci</div></div>
-            <div class="hs-item"><div class="hs-v">{{ $heroTrust['success'] }}</div><div class="hs-l">Vize başarı oranı</div></div>
-            <div class="hs-item"><div class="hs-v">{{ $heroTrust['rating'] }}</div><div class="hs-l">Öğrenci memnuniyeti</div></div>
-        </div>
+        @if(!empty($heroTrust))
+            {{-- Sadece partnerin kendi girdiği istatistikler — uydurma rakam yok. --}}
+            <div class="hero-side">
+                @foreach($heroTrust as $ht)
+                    <div class="hs-item"><div class="hs-v">{{ $ht['value'] }}</div><div class="hs-l">{{ $ht['label'] }}</div></div>
+                @endforeach
+            </div>
+        @endif
     </div>
 </section>
 
@@ -268,16 +270,28 @@ footer a{color:var(--ink);}
 @endif
 
 {{-- TESTIMONIALS --}}
+{{-- Yorumlar — sadece partnerin girdiği gerçek yorumlar; boşsa bölüm hiç basılmaz. --}}
+@if(!empty($testimonials))
 <section class="sec sec-top">
     <div class="wrap">
         <div class="sec-head"><span class="eyebrow acc">Öğrenci Yorumları</span><h2 class="serif">Başarı hikayeleriyle büyüyoruz</h2></div>
         <div class="q-grid">
-            <div class="q"><div class="qm">"</div><blockquote>Başvurudan vizeye kadar her adımda yanımdalardı. Süreç o kadar düzenliydi ki hiç stres yaşamadım.</blockquote><div class="qw"><b>Elif K.</b> — TU München</div></div>
-            <div class="q"><div class="qm">"</div><blockquote>Her aşamayı görebiliyordum, çok sistemli çalışıyorlar. Vize dosyam ilk seferde onaylandı.</blockquote><div class="qw"><b>Burak S.</b> — RWTH Aachen</div></div>
-            <div class="q"><div class="qm">"</div><blockquote>Konaklama ve Anmeldung dahil her şeyde destek oldular. Almanya'da yalnız hissetmedim.</blockquote><div class="qw"><b>Zeynep A.</b> — Uni Köln</div></div>
+            @foreach($testimonials as $t)
+                <div class="q">
+                    <div class="qm">"</div>
+                    <blockquote>{{ $t['text'] }}</blockquote>
+                    @if(($t['name'] ?? '') !== '' || ($t['school'] ?? '') !== '')
+                        <div class="qw">
+                            @if(($t['name'] ?? '') !== '')<b>{{ $t['name'] }}</b>@endif
+                            @if(($t['school'] ?? '') !== ''){{ ($t['name'] ?? '') !== '' ? ' — ' : '' }}{{ $t['school'] }}@endif
+                        </div>
+                    @endif
+                </div>
+            @endforeach
         </div>
     </div>
 </section>
+@endif
 
 {{-- TRUST --}}
 @if($showBadge)

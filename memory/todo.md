@@ -30,7 +30,25 @@ Partner sitesi tek tasarımdan **şablon seçmeli** sisteme geçti. Partner içe
 editör POST round-trip: boş kartlar düşüyor, `items` newline→dizi, geçersiz template validation ile reddediliyor.
 
 **Sıradaki:** yeni şablonlar (hedef ~10, elde 3 — tasarımlar dışarıda hazırlanıyor) · F3 custom domain (ertelendi).
-Yeni template = 2 adım: blade'i `public/partner-templates/{key}.blade.php`'ye koy + `PartnerTemplates::TEMPLATES`'a satır ekle.
+Yeni template = 2 adım: `_starter.blade.php`'yi kopyala + `PartnerTemplates::TEMPLATES`'a satır ekle.
+Kontrol listesi: `docs/PARTNER_TEMPLATE_EKLEME.md`.
+
+---
+
+## ✅ TAMAM — 27 Tem: partner sistemi eksik kapatma turu
+1. **Önizleme yetkisizdi (güvenlik):** `?preview=1` auth'suzdu → yayına alınmamış (manager onayı
+   bekleyen) site herkese açıktı, `?tpl=` ile şablon değiştirilebiliyordu. `canPreview()` eklendi:
+   sahibi bayi (`users.dealer_code === dealers.code`) veya `User::ADMIN_PANEL_ROLES`. 8 senaryo test edildi.
+2. **Uydurma sosyal kanıt (yasal):** 3 şablon da `4.9/5 memnuniyet`, `1200+ öğrenci`, `%98 vize başarısı`
+   ve isimli sahte yorumlar ("Elif K. — TU München") yayınlıyordu — gerçek firmaların canlı sayfasında.
+   `heroTrust` artık sadece partnerin girdiği stats'tan (boşsa bölüm gizli), yorumlar yeni
+   `dealers.site_testimonials` alanından (editörde 4 slot, boşsa bölüm hiç basılmaz).
+3. **Google Fonts CDN (DSGVO):** minimal (Fraunces) + bold (Sora) Google'dan font çekiyordu →
+   self-hosted ailelere geçirildi (DM Serif Display / Plus Jakarta Sans). 3 şablon + iskelet cdn=0.
+4. **Bayat handbook HTML'leri:** `public/handbooks/*.html` Nisan'dan beri elle üretilmiş ve bayattı →
+   `php artisan handbook:build` komutu (MD tek kaynak, başlık id'leri + `--check` bayatlık denetimi).
+5. **Şablon entegrasyonu mekanikleşti:** `_starter.blade.php` (sözleşmenin tamamı, registry'de yok)
+   + `docs/PARTNER_TEMPLATE_EKLEME.md` kontrol listesi.
 
 ---
 

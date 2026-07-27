@@ -46,6 +46,7 @@ class Dealer extends Model
         'site_services',
         'site_stats',
         'site_team',
+        'site_testimonials',
         'site_address',
         'site_show_badge',
         'site_template',
@@ -67,6 +68,7 @@ class Dealer extends Model
         'site_services' => 'array',
         'site_stats' => 'array',
         'site_team' => 'array',
+        'site_testimonials' => 'array',
         'site_show_badge' => 'boolean',
         'custom_domain_verified_at' => 'datetime',
     ];

@@ -304,14 +304,15 @@ footer .pb{opacity:.6;font-size:12px;margin-top:6px;}
                 <a href="{{ $applyUrl }}" class="btn-primary" data-track="cta_clicked" data-ph-cta-name="hero_apply" data-ph-location="partner_site_hero">Ücretsiz Danışmanlık Al {!! $icon('arrow') !!}</a>
                 <a href="#hizmetler" class="btn-ghost">Hizmetlerimiz</a>
             </div>
-            <div class="hero-trust">
-                <span class="hero-stars">★★★★★</span>
-                <span class="ht-t"><b>{{ $heroTrust['rating'] }}</b> memnuniyet</span>
-                <span class="divd"></span>
-                <span class="ht-t"><b>{{ $heroTrust['students'] }}</b> öğrenci yönlendirildi</span>
-                <span class="divd"></span>
-                <span class="ht-t"><b>{{ $heroTrust['success'] }}</b> vize başarısı</span>
-            </div>
+            @if(!empty($heroTrust))
+                {{-- Sadece partnerin kendi girdiği istatistikler — uydurma rakam yok. --}}
+                <div class="hero-trust">
+                    @foreach($heroTrust as $i => $ht)
+                        @if($i > 0)<span class="divd"></span>@endif
+                        <span class="ht-t"><b>{{ $ht['value'] }}</b> {{ $ht['label'] }}</span>
+                    @endforeach
+                </div>
+            @endif
         </div>
         <div class="hero-visual">
             @if(!empty($dealer?->site_hero_image_path))
@@ -487,7 +488,8 @@ footer .pb{opacity:.6;font-size:12px;margin-top:6px;}
 </section>
 @endif
 
-{{-- ═══ REFERANSLAR / YORUMLAR ═══ --}}
+{{-- ═══ REFERANSLAR / YORUMLAR — sadece partnerin girdiği gerçek yorumlar ═══ --}}
+@if(!empty($testimonials))
 <section class="sec-bg-white">
     <div class="container">
         <div class="sec-head center">
@@ -496,24 +498,24 @@ footer .pb{opacity:.6;font-size:12px;margin-top:6px;}
             <p class="sec-lead">Yolculuğunu bizimle tamamlayan öğrencilerin deneyimleri.</p>
         </div>
         <div class="testi-grid">
-            <div class="testi">
-                <div class="testi-stars">★★★★★</div>
-                <p class="testi-q">"Başvurudan vizeye kadar her adımda yanımdalardı. Süreç o kadar düzenliydi ki hiç stres yaşamadım — şu an Münih'te okuyorum."</p>
-                <div class="testi-who"><div class="testi-av">E</div><div><div class="testi-name">Elif K.</div><div class="testi-role">TU München · Mühendislik</div></div></div>
-            </div>
-            <div class="testi">
-                <div class="testi-stars">★★★★★</div>
-                <p class="testi-q">"Panelden her aşamayı görebiliyordum, sistemli çalışıyorlar. Vize dosyam ilk seferde onaylandı. Kesinlikle tavsiye ederim."</p>
-                <div class="testi-who"><div class="testi-av">B</div><div><div class="testi-name">Burak S.</div><div class="testi-role">RWTH Aachen · Informatik</div></div></div>
-            </div>
-            <div class="testi">
-                <div class="testi-stars">★★★★★</div>
-                <p class="testi-q">"Konaklama ve Anmeldung dahil her şeyde destek oldular. Almanya'ya geldiğimde yalnız hissetmedim. Teşekkürler!"</p>
-                <div class="testi-who"><div class="testi-av">Z</div><div><div class="testi-name">Zeynep A.</div><div class="testi-role">Uni Köln · İşletme</div></div></div>
-            </div>
+            @foreach($testimonials as $t)
+                <div class="testi">
+                    <p class="testi-q">"{{ $t['text'] }}"</p>
+                    @if(($t['name'] ?? '') !== '' || ($t['school'] ?? '') !== '')
+                        <div class="testi-who">
+                            <div class="testi-av">{{ mb_substr($t['name'] !== '' ? $t['name'] : $siteName, 0, 1) }}</div>
+                            <div>
+                                @if(($t['name'] ?? '') !== '')<div class="testi-name">{{ $t['name'] }}</div>@endif
+                                @if(($t['school'] ?? '') !== '')<div class="testi-role">{{ $t['school'] }}</div>@endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @endforeach
         </div>
     </div>
 </section>
+@endif
 
 {{-- ═══ İLETİŞİM / BAŞVURU ═══ --}}
 <section id="iletisim" class="cta">

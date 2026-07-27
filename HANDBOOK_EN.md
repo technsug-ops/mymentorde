@@ -484,7 +484,9 @@ Quick review with keyboard shortcuts:
 - Going live (`site_enabled`) requires **manager approval**
 - All CTAs point to `/apply/partner/{code}` → incoming leads are tagged to that dealer automatically
 - Extended corporate site for **operation partners (b2b_partner)**:
-  - Service cards, statistics band, team cards, address sections
+  - Service cards, statistics band, team cards, student testimonials, address sections
+  - Statistics and testimonial sections appear **only when the dealer enters their own real
+    data** — the system never shows sample or fabricated figures/quotes
   - **Site template selection** — 3 designs today: **Aurora** (vivid gradient), **Minimal**
     (clean, generous whitespace), **Bold** (dark, high contrast). Content stays the same, only the look changes.
   - Try a template without saving: `/p/{slug}?preview=1&tpl={aurora|minimal|bold}`

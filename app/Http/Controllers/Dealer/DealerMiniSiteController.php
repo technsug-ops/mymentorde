@@ -77,6 +77,11 @@ class DealerMiniSiteController extends Controller
             'site_team.*.name'   => ['nullable', 'string', 'max:80'],
             'site_team.*.title'  => ['nullable', 'string', 'max:80'],
             'site_team.*.photo'  => ['nullable', 'url', 'max:500'],
+            // Öğrenci yorumları — partner yalnız GERÇEK yorumlarını girer, boşsa bölüm gizlenir.
+            'site_testimonials'          => ['nullable', 'array', 'max:12'],
+            'site_testimonials.*.text'   => ['nullable', 'string', 'max:600'],
+            'site_testimonials.*.name'   => ['nullable', 'string', 'max:80'],
+            'site_testimonials.*.school' => ['nullable', 'string', 'max:120'],
         ]);
 
         // Slug rezerve kontrolü
@@ -99,6 +104,7 @@ class DealerMiniSiteController extends Controller
             'site_services'      => $this->cleanCards($validated['site_services'] ?? null, ['title', 'desc', 'icon'], ['title', 'desc'], ['items']),
             'site_stats'         => $this->cleanCards($validated['site_stats'] ?? null, ['value', 'label'], ['value', 'label']),
             'site_team'          => $this->cleanCards($validated['site_team'] ?? null, ['name', 'title', 'photo'], ['name']),
+            'site_testimonials'  => $this->cleanCards($validated['site_testimonials'] ?? null, ['text', 'name', 'school'], ['text']),
         ];
 
         if ($request->hasFile('logo')) {

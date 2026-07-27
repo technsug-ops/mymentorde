@@ -7,7 +7,11 @@ use App\Models\Dealer;
 /**
  * Operasyon partner (b2b_partner) çok-bölümlü öğrenci-lead sitesi için view verisi.
  * Partner kendi içeriğini girmediyse mantıklı MentorDE default'ları döner
- * (addon-bağımsız: eksik/boş alan siteyi bozmaz). Bkz. partner-site.blade.php.
+ * (addon-bağımsız: eksik/boş alan siteyi bozmaz).
+ *
+ * TÜM partner template'lerinin paylaştığı veri sözleşmesidir — şablon değişince
+ * partner aynı içerikle dolar. Şablonlar: resources/views/public/partner-templates/,
+ * kayıt defteri: App\Support\PartnerTemplates. Yeni şablon yazarken sözleşme dışına çıkma.
  */
 class PartnerSiteData
 {
@@ -65,6 +69,7 @@ class PartnerSiteData
             'services'     => self::services($dealer),
             'stats'        => self::stats($dealer),
             'team'         => self::team($dealer),
+            'testimonials' => self::testimonials($dealer),
             'heroTrust'    => self::heroTrust($dealer),
             'showBadge'    => $dealer->site_show_badge ?? true,
             'phone'        => $dealer->site_phone ?: ($dealer->phone ?: null),
@@ -76,33 +81,43 @@ class PartnerSiteData
     }
 
     /**
-     * Hero güven satırı rakamları. Partner site_stats girdiyse oradan "öğrenci" ve
-     * "%..." içeren değerleri yakalar; yoksa genel default (uydurma spesifik iddia yok).
-     * @return array{rating:string,students:string,success:string}
+     * Hero güven satırı — SADECE partnerin kendi girdiği istatistiklerden ilk 3'ü.
+     *
+     * Partner istatistik girmediyse boş dizi döner ve şablon bu satırı hiç göstermez.
+     * Uydurma memnuniyet puanı / başarı oranı ÜRETME: gerçek olmayan rakam, gerçek bir
+     * firmanın canlı sayfasında yanıltıcı reklamdır (UWG §5). Aynı ilke [[testimonials]] için de geçerli.
+     *
+     * @return list<array{value:string,label:string}>
      */
     public static function heroTrust(Dealer $dealer): array
     {
-        $students = null;
-        $success  = null;
+        $out = [];
         foreach (self::stats($dealer) as $st) {
-            $label = mb_strtolower($st['label'] ?? '');
-            $value = trim($st['value'] ?? '');
-            if ($value === '') {
+            $value = trim((string) ($st['value'] ?? ''));
+            $label = trim((string) ($st['label'] ?? ''));
+            if ($value === '' || $label === '') {
                 continue;
             }
-            if ($students === null && str_contains($label, 'öğrenci')) {
-                $students = $value;
-            }
-            if ($success === null && (str_contains($label, 'vize') || str_contains($label, 'başarı') || str_contains($value, '%'))) {
-                $success = $value;
+            $out[] = ['value' => $value, 'label' => $label];
+            if (count($out) >= 3) {
+                break;
             }
         }
 
-        return [
-            'rating'   => '4.9/5',
-            'students' => $students ?: '1200+',
-            'success'  => $success ?: '%98',
-        ];
+        return $out;
+    }
+
+    /**
+     * Öğrenci yorumları — partner girmediyse boş (bölüm gizlenir).
+     * Şablonlarda ASLA örnek/uydurma yorum yazma; buradan gelmiyorsa gösterilmez.
+     */
+    public static function testimonials(Dealer $dealer): array
+    {
+        // Yorum metni olmayan satır gösterilmez (sadece isim girilmiş kart anlamsız).
+        return array_values(array_filter(
+            self::sanitizeCards($dealer->site_testimonials, ['text', 'name', 'school']),
+            static fn (array $row): bool => ($row['text'] ?? '') !== ''
+        ));
     }
 
     /**
