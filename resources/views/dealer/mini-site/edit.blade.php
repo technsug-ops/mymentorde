@@ -117,6 +117,10 @@
         $statRows = old('site_stats',        $d?->site_stats ?: []);
         $teamRows = old('site_team',         $d?->site_team ?: []);
         $tstRows  = old('site_testimonials', $d?->site_testimonials ?: []);
+        $pkgRows  = old('site_packages',     $d?->site_packages ?: []);
+        $faqRows  = old('site_faq',          $d?->site_faq ?: []);
+        $uniList  = old('site_universities', $d?->site_universities ?: []);
+        if (is_array($uniList)) { $uniList = implode("\n", $uniList); }
         $inp = 'width:100%;padding:9px 11px;border:1px solid var(--border,#cbd5e1);border-radius:8px;font-size:13px;';
         $sectionBox = 'border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:16px;margin:22px 0;background:var(--surface,#fff);';
         $templates  = \App\Support\PartnerTemplates::all();
@@ -234,6 +238,63 @@
                     </div>
                 </div>
             @endfor
+        </div>
+
+        {{-- Destek paketleri (3 slot) --}}
+        <div style="{{ $sectionBox }}">
+            <div style="font-weight:600;font-size:14px;margin-bottom:4px;">Destek Paketleri</div>
+            <small style="color:var(--muted,#64748b);font-size:12px;">
+                Kendi paketlerinizi yazın (fiyat yazmak zorunda değilsiniz). Boş bırakırsanız paket bölümü
+                sitenizde hiç görünmez — varsayılan paket üretilmez.
+            </small>
+            @for($i = 0; $i < 3; $i++)
+                @php
+                    $p = $pkgRows[$i] ?? [];
+                    $pkgItems = $p['items'] ?? '';
+                    if (is_array($pkgItems)) { $pkgItems = implode("\n", $pkgItems); }
+                @endphp
+                <div style="border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:12px;margin-top:12px;background:var(--bg,#f8fafc);">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                        <input type="text" name="site_packages[{{ $i }}][name]" value="{{ $p['name'] ?? '' }}" maxlength="60" placeholder="Paket adı ({{ $i+1 }}) — örn. Standart" style="{{ $inp }}">
+                        <input type="text" name="site_packages[{{ $i }}][tag]"  value="{{ $p['tag'] ?? '' }}"  maxlength="40" placeholder="Etiket — örn. En çok tercih edilen" style="{{ $inp }}">
+                    </div>
+                    <input type="text" name="site_packages[{{ $i }}][desc]" value="{{ $p['desc'] ?? '' }}" maxlength="400" placeholder="Kısa açıklama" style="{{ $inp }}margin-top:8px;">
+                    <textarea name="site_packages[{{ $i }}][items]" rows="3" maxlength="600" placeholder="Kapsam maddeleri — her satıra bir madde (max 6)" style="{{ $inp }}margin-top:8px;resize:vertical;">{{ $pkgItems }}</textarea>
+                    <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12.5px;cursor:pointer;color:var(--muted,#64748b);">
+                        <input type="checkbox" name="site_packages[{{ $i }}][featured]" value="1" @checked(!empty($p['featured'])) style="width:16px;height:16px;cursor:pointer;">
+                        Bu paketi öne çıkar (vurgulu kart)
+                    </label>
+                </div>
+            @endfor
+            <input type="text" name="site_package_note" value="{{ old('site_package_note', $d?->site_package_note) }}" maxlength="300"
+                   placeholder="Paketlerin altındaki açıklama (opsiyonel)" style="{{ $inp }}margin-top:12px;">
+        </div>
+
+        {{-- S.S.S. (6 slot) --}}
+        <div style="{{ $sectionBox }}">
+            <div style="font-weight:600;font-size:14px;margin-bottom:4px;">Sıkça Sorulan Sorular</div>
+            <small style="color:var(--muted,#64748b);font-size:12px;">
+                Boş bırakırsanız Almanya süreciyle ilgili genel 4 soru gösterilir. Kendi sorularınızı
+                girerseniz yalnız onlar görünür (soru + cevap birlikte dolu olmalı).
+            </small>
+            @for($i = 0; $i < 6; $i++)
+                @php $f = $faqRows[$i] ?? []; @endphp
+                <div style="border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:12px;margin-top:12px;background:var(--bg,#f8fafc);">
+                    <input type="text" name="site_faq[{{ $i }}][q]" value="{{ $f['q'] ?? '' }}" maxlength="200" placeholder="Soru ({{ $i+1 }})" style="{{ $inp }}">
+                    <textarea name="site_faq[{{ $i }}][a]" rows="2" maxlength="1000" placeholder="Cevap" style="{{ $inp }}margin-top:8px;resize:vertical;">{{ $f['a'] ?? '' }}</textarea>
+                </div>
+            @endfor
+        </div>
+
+        {{-- Yerleşilen üniversiteler --}}
+        <div style="{{ $sectionBox }}">
+            <div style="font-weight:600;font-size:14px;margin-bottom:4px;">Öğrencilerinizin Yerleştiği Üniversiteler</div>
+            <small style="color:var(--muted,#64748b);font-size:12px;">
+                Her satıra bir üniversite adı (max 12). Yalnız <b>gerçekten</b> öğrenci yerleştirdiğiniz
+                üniversiteleri yazın. Boşsa bu şerit sitenizde görünmez.
+            </small>
+            <textarea name="site_universities" rows="4" maxlength="600"
+                      placeholder="TU München&#10;RWTH Aachen&#10;Uni Köln" style="{{ $inp }}margin-top:10px;resize:vertical;">{{ $uniList }}</textarea>
         </div>
 
         {{-- MentorDE rozeti aç/kapa --}}

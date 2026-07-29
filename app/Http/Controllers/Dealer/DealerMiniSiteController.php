@@ -82,6 +82,20 @@ class DealerMiniSiteController extends Controller
             'site_testimonials.*.text'   => ['nullable', 'string', 'max:600'],
             'site_testimonials.*.name'   => ['nullable', 'string', 'max:80'],
             'site_testimonials.*.school' => ['nullable', 'string', 'max:120'],
+            // Destek paketleri — partner girmediyse bölüm gizlenir (default paket üretilmez).
+            'site_packages'             => ['nullable', 'array', 'max:4'],
+            'site_packages.*.name'      => ['nullable', 'string', 'max:60'],
+            'site_packages.*.tag'       => ['nullable', 'string', 'max:40'],
+            'site_packages.*.desc'      => ['nullable', 'string', 'max:400'],
+            'site_packages.*.items'     => ['nullable', 'string', 'max:600'],
+            'site_packages.*.featured'  => ['nullable', 'boolean'],
+            'site_package_note'         => ['nullable', 'string', 'max:300'],
+            // S.S.S. — boşsa Almanya süreci hakkında firmadan bağımsız default set gösterilir.
+            'site_faq'                  => ['nullable', 'array', 'max:10'],
+            'site_faq.*.q'              => ['nullable', 'string', 'max:200'],
+            'site_faq.*.a'              => ['nullable', 'string', 'max:1000'],
+            // Öğrencilerin yerleştiği üniversiteler (her satıra bir ad).
+            'site_universities'         => ['nullable', 'string', 'max:600'],
         ]);
 
         // Slug rezerve kontrolü
@@ -105,6 +119,10 @@ class DealerMiniSiteController extends Controller
             'site_stats'         => $this->cleanCards($validated['site_stats'] ?? null, ['value', 'label'], ['value', 'label']),
             'site_team'          => $this->cleanCards($validated['site_team'] ?? null, ['name', 'title', 'photo'], ['name']),
             'site_testimonials'  => $this->cleanCards($validated['site_testimonials'] ?? null, ['text', 'name', 'school'], ['text']),
+            'site_packages'      => $this->cleanCards($validated['site_packages'] ?? null, ['name', 'tag', 'desc', 'featured'], ['name'], ['items']),
+            'site_package_note'  => $validated['site_package_note'] ?? null,
+            'site_faq'           => $this->cleanCards($validated['site_faq'] ?? null, ['q', 'a'], ['q']),
+            'site_universities'  => $this->cleanLines($validated['site_universities'] ?? null, 12),
         ];
 
         if ($request->hasFile('logo')) {
@@ -137,6 +155,30 @@ class DealerMiniSiteController extends Controller
         }
 
         return redirect('/dealer/mini-site')->with('status', $msg);
+    }
+
+    /**
+     * Satır satır girilen metni (textarea) temiz string listesine çevir.
+     * Tamamı boşsa null → DB null → şablon o bölümü hiç basmaz.
+     *
+     * @return list<string>|null
+     */
+    private function cleanLines($raw, int $max): ?array
+    {
+        if (!is_string($raw)) {
+            return null;
+        }
+        $out = [];
+        foreach (preg_split('/\r\n|\r|\n/', $raw) ?: [] as $line) {
+            $v = trim($line);
+            if ($v !== '') {
+                $out[] = $v;
+            }
+            if (count($out) >= $max) {
+                break;
+            }
+        }
+        return $out === [] ? null : $out;
     }
 
     /**

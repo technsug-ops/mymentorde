@@ -1,5 +1,37 @@
 # TODO
 
+## 🔨 DEVAM EDİYOR — 10 dış tasarımın şablona çevrilmesi (29 Tem)
+**Kaynak:** `Desktop/PHP -LARAVEL Mentorde/Fatma Özkan Almanya Danışmanlığı.zip` — DC formatında
+(`<x-dc>`, `sc-for`, `image-slot`, `style-hover`) 10 landing + ortak `fz-data.js` içerik dosyası.
+Pastel: Lavanta ✅ / Şeftali Sabahı / Nane · Canlı: Elektrik / Mercan Enerji / Sedef / Manyeta ·
+Premium: Bulut / Mermer / Ufuk.
+
+**Bu turda yapılan (pilot = Lavanta):**
+1. **Sözleşme genişletildi** — `dealers`: `site_packages`, `site_package_note`, `site_faq`,
+   `site_universities` (hepsi nullable, migration `2026_07_29_100000`). `PartnerSiteData`:
+   `packages/packageNote/faq/universities` (DB) + `steps/whyUs` (firmadan bağımsız kod default'u).
+   Yeni ikonlar: work, pin, phone, wa, instagram.
+2. **Editör** (`/dealer/mini-site`): Destek Paketleri (3 slot + öne çıkar checkbox + not),
+   S.S.S. (6 slot), Yerleşilen Üniversiteler (satır satır) — validation + `cleanLines()` eklendi.
+3. **Fontlar self-host** (DSGVO): Poppins 400–800, Public Sans (variable 400–700),
+   IBM Plex Mono 400/500 → 16 woff2 + `local-fonts.css`. Variable font'ta `font-weight: 400 700`.
+4. **`lavanta.blade.php`** + registry satırı; S.S.S. `<details>` ile (JS yok), tüm renkler
+   `var(--accent)`'ten `color-mix` ile türetiliyor.
+5. Uydurma veri temizliği: tasarımdaki `4.9/5`, `1.200+`, `%98 vize başarısı`, yıldız satırı ve
+   "Vize onaylandı" balonu → partnerin kendi `stats`'ından besleniyor, veri yoksa bölüm basılmıyor.
+
+**Doğrulama (29 Tem):** 45 otomatik kontrol geçti — boş partner (bölümler gizli, default S.S.S./
+süreç/neden-biz var), dolu partner (paket/üniversite/istatistik/yorum var, öne çıkan paket vurgulu),
+rozet kapalı → sayfada "MentorDE" 0 kez; 4 şablon da `script=0`, `cdnfont=0`; editör round-trip
+(boş slot düşüyor, newline→dizi, checkbox→bool, hepsi boş→null).
+Görsel kontrol: `/p/operasyon-partner-demo?preview=1&tpl=lavanta` (manager/sahibi bayi girişiyle).
+
+**Sıradaki:** kalan 9 tasarım aynı kalıpla (`docs/PARTNER_TEMPLATE_EKLEME.md`).
+Atlanan: DC tasarımlarındaki "Almanya'da yaşam / şehir galerisi" bölümü — partnere ait fotoğraf
+yok, lisanslı stok görsel de yok. Şehir foto seti tedarik edilirse ortak bölüm olarak eklenebilir.
+Fontlar: kalan şablonlar Sora / Newsreader / Space Grotesk / Playfair / Manrope / DM Sans /
+IBM Plex Sans isteyecek — her biri kullanılacağı turda self-host edilmeli.
+
 ## ✅ KAPANDI — Aday öğrenci → süreç takibi köprüsü (REDDEDİLDİ)
 **Karar (özet):** Köprü yaklaşımı denendi ve GERİ ALINDI. Aday öğrenciye StudentAssignment
 oluşturma reddedildi.

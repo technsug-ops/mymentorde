@@ -857,10 +857,16 @@ girer, şablon değişince aynı veriyle dolar.</p>
 Editördeki seçici, validation ve önizleme otomatik çalışır.</li>
 </ol>
 <p><strong>Sözleşme — her zaman dolu:</strong> <code>$heroTitle</code>, <code>$heroSubtitle</code>, <code>$aboutText</code>, <code>$services</code>
-(<code>[title, desc, icon, items[]]</code>, default set var), <code>$applyUrl</code>, <code>$accentColor</code>, <code>$brandName</code>, <code>$showBadge</code>, <code>$dealer</code>.
+(<code>[title, desc, icon, items[]]</code>, default set var), <code>$steps</code> (<code>[no, title, desc]</code>, 4 adım),
+<code>$whyUs</code> (<code>[icon, title, desc]</code>, 4 kart), <code>$faq</code> (<code>[q, a]</code>, partner girmezse genel default set),
+<code>$applyUrl</code>, <code>$accentColor</code>, <code>$brandName</code>, <code>$showBadge</code>, <code>$dealer</code>.
 <strong>Boş olabilir (bölümü <code>@if(!empty(...))</code> ile gizle):</strong> <code>$stats</code>, <code>$team</code>, <code>$testimonials</code>
 (<code>[text, name, school]</code>), <code>$heroTrust</code> (<code>[value, label]</code>, max 3, <code>$stats</code>'tan türetilir),
-<code>$brandLogoUrl</code>, <code>$phone</code>, <code>$whatsapp</code>, <code>$instagram</code>, <code>$address</code>.</p>
+<code>$packages</code> (<code>[name, tag, desc, items[], featured]</code>), <code>$packageNote</code> (<code>''</code> ise basma),
+<code>$universities</code> (string listesi), <code>$brandLogoUrl</code>, <code>$phone</code>, <code>$whatsapp</code>, <code>$instagram</code>, <code>$address</code>.</p>
+<p><code>$steps</code> / <code>$whyUs</code> firmadan bağımsızdır (DB alanı YOK, tek kaynak <code>PartnerSiteData</code>);
+<code>$packages</code> / <code>$faq</code> / <code>$universities</code> <code>dealers.site_packages|site_package_note|site_faq|site_universities</code>
+alanlarından gelir ve <code>/dealer/mini-site</code> editöründen girilir.</p>
 <p><strong>Önizleme:</strong> <code>/p/{slug}?preview=1&amp;tpl={key}</code> — kaydetmeden başka şablon denemek için.
 Geçersiz key sessizce <code>DEFAULT</code>'a düşer. Önizleme <strong>yetki ister</strong>: sahibi bayi kullanıcısı
 (<code>users.dealer_code === dealers.code</code>) veya <code>User::ADMIN_PANEL_ROLES</code>. Anonim ziyaretçide
@@ -871,10 +877,13 @@ Geçersiz key sessizce <code>DEFAULT</code>'a düşer. Önizleme <strong>yetki i
 EZER. Guard <code>public.dealer-landing</code> + <code>public.partner-templates.*</code> view'larını hariç tutar.
 <strong>Yeni public white-label view eklerken guard'a dahil et</strong>, yoksa sayfada hep MentorDE markası görünür.</li>
 <li><strong>JS yok:</strong> Şablonlar CSP nonce'suz public sayfalarda render olur → inline <code>onclick</code> / <code>&lt;script&gt;</code>
-kullanma. 3 şablon + iskelet <code>script=0, onclick=0</code> ile doğrulandı.</li>
+kullanma. 4 şablon + iskelet <code>script=0, onclick=0</code> ile doğrulandı. Akordeon gerekiyorsa
+<code>&lt;details&gt;/&lt;summary&gt;</code> kullan (Lavanta S.S.S. böyle çalışır).</li>
 <li><strong>Font sadece lokal:</strong> Google Fonts CDN'e istek atma (DSGVO). <code>public/fonts/local-fonts.css</code>
-içinde Plus Jakarta Sans (variable 200–800) + DM Serif Display var; başka aile gerekiyorsa
-önce woff2'yi indirip <code>@font-face</code> ekle.</li>
+içinde Plus Jakarta Sans (variable 200–800), DM Serif Display, Poppins (400–800),
+Public Sans (variable 400–700), IBM Plex Mono (400/500) var; başka aile gerekiyorsa woff2'yi
+latin + <strong>latin-ext</strong> (Türkçe karakterler) olarak indirip <code>@font-face</code> ekle. Variable font'ta
+<code>font-weight: 400 700;</code> yaz — tek ağırlık yazarsan tarayıcı fake bold üretir.</li>
 <li><strong>Uydurma veri yok:</strong> Şablonda örnek yorum / hayali rakam yazma. <code>$heroTrust</code> ve
 <code>$testimonials</code> yalnız partnerin girdiği veriden gelir; boşsa bölüm hiç basılmaz.
 Gerçek olmayan rakam, gerçek bir firmanın canlı sayfasında yanıltıcı reklamdır (UWG §5).</li>

@@ -44,21 +44,31 @@ Hepsi `App\Support\PartnerSiteData::forDealer()` çıktısıdır.
 | `$team` | list | `[name, title, photo]` — **boş olabilir** |
 | `$testimonials` | list | `[text, name, school]` — **boş olabilir** |
 | `$heroTrust` | list | `[value, label]`, max 3, `$stats`'tan türetilir — **boş olabilir** |
+| `$steps` | list | `[no, title, desc]` — **her zaman 4** (firmadan bağımsız, DB alanı yok) |
+| `$whyUs` | list | `[icon, title, desc]` — **her zaman 4** (firmadan bağımsız, DB alanı yok) |
+| `$packages` | list | `[name, tag, desc, items[], featured]` — **boş olabilir** (default paket ÜRETİLMEZ) |
+| `$packageNote` | string | paket bölümü açıklaması; `''` ise basma (paket yoksa hep `''`) |
+| `$faq` | list | `[q, a]` — **her zaman ≥1** (partner girmezse genel default set) |
+| `$universities` | list | üniversite adları (string) — **boş olabilir** |
 | `$showBadge` | bool | `false` → MentorDE adı sayfada **hiç geçmemeli** |
 | `$phone` `$whatsapp` `$instagram` `$address` | ?string | **boş olabilir** |
 | `$applyUrl` | string | tüm CTA'lar buraya gider (lead o bayiye etiketlenir) |
 
 İkonlar paylaşımlı: `{!! \App\Support\PartnerSiteData::icon('cap') !!}`
-(`cap, passport, coins, home, check, arrow, chart, bolt, shield, gear, users, clock, star, default`)
+(`cap, passport, coins, home, check, arrow, chart, bolt, shield, gear, users, clock, star,
+work, pin, phone, wa, instagram, default`)
 
 ## Kurallar
 
 - **JS yok.** Inline `<script>` / `onclick` kullanma. Public sayfa; etkileşim gerekiyorsa
   CSS ile çöz (`:target`, `details/summary`, checkbox hack).
 - **Font sadece lokal.** Google Fonts CDN'e istek atma — DSGVO (LG München I, 2022).
-  `public/fonts/local-fonts.css` yüklenir; içinde **Plus Jakarta Sans** (variable 200–800)
-  ve **DM Serif Display** (regular + italic) var. Başka aile gerekiyorsa önce woff2'yi
-  `public/fonts/`'a indir ve `local-fonts.css`'e `@font-face` ekle.
+  `public/fonts/local-fonts.css` yüklenir; içinde **Plus Jakarta Sans** (variable 200–800),
+  **DM Serif Display** (regular + italic), **Poppins** (400–800), **Public Sans**
+  (variable 400–700) ve **IBM Plex Mono** (400, 500) var. Başka aile gerekiyorsa önce
+  woff2'yi `public/fonts/`'a indir (latin + **latin-ext** — Türkçe karakterler latin-ext'te)
+  ve `local-fonts.css`'e `@font-face` ekle. Variable font'ta `font-weight: 400 700;` yaz,
+  tek ağırlık yazarsan tarayıcı kalın metni taklit eder (fake bold).
 - **Uydurma veri yok.** Örnek yorum, hayali memnuniyet puanı, "1200+ öğrenci" gibi rakam
   YAZMA. Veri boşsa bölümü hiç basma (`@if(!empty($testimonials))`). Gerçek olmayan rakam,
   gerçek bir firmanın canlı sayfasında yanıltıcı reklamdır.
@@ -83,6 +93,7 @@ Yayına almadan önce kontrol et:
 - [ ] `script=0`, `onclick=0` (kaynağı görüntüle → CSP güvenli)
 - [ ] Sayfada `fonts.googleapis.com` / başka CDN isteği yok
 - [ ] Rozet kapalıyken sayfada "MentorDE" hiç geçmiyor
-- [ ] `$stats` / `$team` / `$testimonials` boşken bölümler görünmüyor, sayfa bozulmuyor
+- [ ] `$stats` / `$team` / `$testimonials` / `$packages` / `$universities` boşken bölümler
+      görünmüyor, sayfa bozulmuyor
 - [ ] Mobil (≤480px) düzen bozulmuyor
 - [ ] Tüm CTA'lar `$applyUrl`'e gidiyor

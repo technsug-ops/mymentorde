@@ -30,9 +30,18 @@
       $team           list     [name, title, photo]          — BOŞ OLABİLİR
       $testimonials   list     [text, name, school]          — BOŞ OLABİLİR
       $heroTrust      list     [value, label] (max 3, $stats'tan) — BOŞ OLABİLİR
+      $steps          list     [no, title, desc]              — her zaman 4 (firmadan bağımsız)
+      $whyUs          list     [icon, title, desc]            — her zaman 4 (firmadan bağımsız)
+      $packages       list     [name, tag, desc, items[], featured] — BOŞ OLABİLİR
+      $packageNote    string   paket bölümü açıklaması ('' ise basma; paket yoksa hep '')
+      $faq            list     [q, a]                         — her zaman ≥1 (default set var)
+      $universities   list     string ("TU München", ...)      — BOŞ OLABİLİR
       $showBadge      bool     false ise MentorDE adı sayfada HİÇ geçmemeli (tam white-label)
       $phone $whatsapp $instagram $address   ?string — BOŞ OLABİLİR
       $applyUrl       string   lead formu (/apply/partner/{code}) — tüm CTA'lar buraya
+
+    İKONLAR: PartnerSiteData::icon() — cap, passport, coins, home, check, arrow, chart, bolt,
+    shield, gear, users, clock, star, work, pin, phone, wa, instagram, default
 --}}
 <!DOCTYPE html>
 <html lang="tr">
@@ -119,6 +128,30 @@ svg{width:1em;height:1em;}
     @endforeach
 </section>
 
+{{-- ═══ ÜNİVERSİTE ŞERİDİ (boşsa hiç basma — uydurma üniversite yazma) ═══ --}}
+@if(!empty($universities))
+<section class="wrap">
+    <span>Öğrencilerimizin yerleştiği üniversiteler</span>
+    @foreach($universities as $u)<span>{{ $u }}</span>@endforeach
+</section>
+@endif
+
+{{-- ═══ SÜREÇ (her zaman dolu) ═══ --}}
+<section id="surec" class="wrap">
+    <h2>Nasıl Çalışır</h2>
+    @foreach($steps as $st)
+        <article><div>{{ $st['no'] }}</div><h3>{{ $st['title'] }}</h3><p>{{ $st['desc'] }}</p></article>
+    @endforeach
+</section>
+
+{{-- ═══ NEDEN BİZ (her zaman dolu) ═══ --}}
+<section class="wrap">
+    <h2>Neden Biz</h2>
+    @foreach($whyUs as $w)
+        <article><div style="color:var(--accent);">{!! $icon($w['icon']) !!}</div><h3>{{ $w['title'] }}</h3><p>{{ $w['desc'] }}</p></article>
+    @endforeach
+</section>
+
 {{-- ═══ HAKKIMIZDA + İSTATİSTİK ═══ --}}
 <section class="wrap">
     <h2>Hakkımızda</h2>
@@ -165,6 +198,35 @@ svg{width:1em;height:1em;}
                 </figcaption>
             @endif
         </figure>
+    @endforeach
+</section>
+@endif
+
+{{-- ═══ PAKETLER (boşsa hiç basma — default paket ÜRETME) ═══ --}}
+@if(!empty($packages))
+<section id="paketler" class="wrap">
+    <h2>Destek Paketleri</h2>
+    @if($packageNote !== '')<p>{{ $packageNote }}</p>@endif
+    @foreach($packages as $p)
+        <article @if(!empty($p['featured'])) style="border:2px solid var(--accent);" @endif>
+            <h3>{{ $p['name'] }}</h3>
+            @if(($p['tag'] ?? '') !== '')<span>{{ $p['tag'] }}</span>@endif
+            @if(($p['desc'] ?? '') !== '')<p>{{ $p['desc'] }}</p>@endif
+            @if(!empty($p['items']))
+                <ul>@foreach($p['items'] as $item)<li>{{ $item }}</li>@endforeach</ul>
+            @endif
+            <a href="{{ $applyUrl }}" data-track="cta_clicked" data-ph-cta-name="package_apply" data-ph-location="partner_starter_packages">Bu paketi görüşelim</a>
+        </article>
+    @endforeach
+</section>
+@endif
+
+{{-- ═══ S.S.S. — JS YOK: <details>/<summary> ile aç/kapa ═══ --}}
+@if(!empty($faq))
+<section id="sss" class="wrap">
+    <h2>Sıkça Sorulan Sorular</h2>
+    @foreach($faq as $f)
+        <details><summary>{{ $f['q'] }}</summary><p>{{ $f['a'] }}</p></details>
     @endforeach
 </section>
 @endif

@@ -33,6 +33,11 @@ class PartnerTemplates
             'desc'   => 'Koyu, iddialı hero + güçlü kontrast. Kurumsal ve etkileyici.',
             'accent' => '#e11d48',
         ],
+        'lavanta' => [
+            'name'   => 'Lavanta',
+            'desc'   => 'Yuvarlak ve samimi; pastel zemin, yumuşak kartlar, paket ve S.S.S. bölümleri.',
+            'accent' => '#8b7fd6',
+        ],
     ];
 
     /** Geçerli template anahtarı mı? */

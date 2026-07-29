@@ -485,11 +485,15 @@ Klavye kısayollarıyla hızlı inceleme:
 - Sitedeki tüm CTA'lar `/apply/partner/{code}`'a gider → gelen lead otomatik o bayiye etiketlenir
 - **Operasyon partner (b2b_partner)** için genişletilmiş kurumsal site:
   - Hizmet kartları, istatistik bandı, ekip kartları, öğrenci yorumları, adres bölümleri
-  - İstatistik ve yorum bölümleri **yalnız bayi kendi gerçek verisini girdiğinde** görünür —
-    sistem örnek/uydurma rakam veya yorum göstermez
-  - **Site şablonu seçimi** — şu an 3 tasarım: **Aurora** (canlı gradient), **Minimal**
-    (sade, bol boşluk), **Bold** (koyu, yüksek kontrast). İçerik aynı kalır, sadece görünüm değişir.
-  - Kaydetmeden şablon denemek için: `/p/{slug}?preview=1&tpl={aurora|minimal|bold}`
+  - **Destek paketleri** (kapsam maddeleri + "öne çıkan paket" vurgusu), **S.S.S.**,
+    **öğrencilerin yerleştiği üniversiteler** şeridi
+  - İstatistik, yorum, paket ve üniversite bölümleri **yalnız bayi kendi gerçek verisini
+    girdiğinde** görünür — sistem örnek/uydurma rakam, yorum veya paket göstermez
+    (S.S.S. boş bırakılırsa Almanya süreciyle ilgili genel 4 soru gösterilir)
+  - **Site şablonu seçimi** — şu an 4 tasarım: **Aurora** (canlı gradient), **Minimal**
+    (sade, bol boşluk), **Bold** (koyu, yüksek kontrast), **Lavanta** (yuvarlak, pastel,
+    samimi). İçerik aynı kalır, sadece görünüm değişir.
+  - Kaydetmeden şablon denemek için: `/p/{slug}?preview=1&tpl={aurora|minimal|bold|lavanta}`
   - **"MentorDE rozeti" aç/kapa** — kapatıldığında sayfada MentorDE markası hiç geçmez (tam white-label)
 - Diğer bayi tipleri (freelance / lead generation) tek sayfalık klasik mini-site alır
 

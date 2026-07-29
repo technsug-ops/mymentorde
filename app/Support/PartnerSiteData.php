@@ -41,6 +41,11 @@ class PartnerSiteData
             'users'    => '<path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm-8 0a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-2.7 0-8 1.34-8 4v3h10v-3c0-.97.36-1.79.95-2.46A13 13 0 0 0 8 13zm8 0c-.34 0-.72.02-1.13.06 1.32.96 2.13 2.24 2.13 3.94v3h7v-3c0-2.66-5.3-4-8-4z"/>',
             'clock'    => '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 11h-5v-2h3V7h2z"/>',
             'star'     => '<path d="m12 17.27 6.18 3.73-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>',
+            'work'     => '<path d="M10 4h4a2 2 0 0 1 2 2v1h4a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h4V6a2 2 0 0 1 2-2zm0 3h4V6h-4v1z"/>',
+            'pin'      => '<path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/>',
+            'phone'    => '<path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.3 0 .7-.2 1l-2.2 2.3z"/>',
+            'wa'       => '<path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3zm0 2a7 7 0 1 1-3.6 13l-.3-.2-2.4.6.6-2.3-.2-.3A7 7 0 0 1 12 5zm3.6 8.3c-.2-.1-1.1-.6-1.3-.6s-.3-.1-.4.1-.5.6-.6.7-.2.2-.4.1a5.6 5.6 0 0 1-2.7-2.4c-.2-.3.2-.3.5-1 .1-.1 0-.3 0-.4l-.6-1.4c-.2-.4-.3-.3-.5-.3h-.4a.8.8 0 0 0-.6.3c-.2.2-.7.8-.7 1.8s.8 2 .9 2.2c.1.1 1.5 2.4 3.7 3.3 1.4.6 1.9.6 2.6.5.4 0 1.1-.5 1.3-.9.2-.5.2-.9.1-1z"/>',
+            'instagram' => '<path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM17.6 6a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4z"/>',
             'default'  => '<path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3zm-1 14-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7z"/>',
         ];
         $path = $svg[$key] ?? $svg['default'];
@@ -71,6 +76,12 @@ class PartnerSiteData
             'team'         => self::team($dealer),
             'testimonials' => self::testimonials($dealer),
             'heroTrust'    => self::heroTrust($dealer),
+            'steps'        => self::steps(),
+            'whyUs'        => self::whyUs(),
+            'packages'     => self::packages($dealer),
+            'packageNote'  => self::packageNote($dealer),
+            'faq'          => self::faq($dealer),
+            'universities' => self::universities($dealer),
             'showBadge'    => $dealer->site_show_badge ?? true,
             'phone'        => $dealer->site_phone ?: ($dealer->phone ?: null),
             'whatsapp'     => $dealer->site_whatsapp ?: ($dealer->whatsapp ?: null),
@@ -104,6 +115,171 @@ class PartnerSiteData
             }
         }
 
+        return $out;
+    }
+
+    /**
+     * Süreç adımları — firmadan bağımsız (Almanya başvuru akışı herkes için aynı),
+     * bu yüzden DB alanı yok, tek kaynak burası. Şablonlarda sabit yazma.
+     *
+     * @return list<array{no:string,title:string,desc:string}>
+     */
+    public static function steps(): array
+    {
+        return [
+            ['no' => '01', 'title' => 'Ücretsiz Değerlendirme',
+             'desc' => 'Hedeflerinizi dinler, size en uygun üniversite ve program seçeneklerini çıkarırız.'],
+            ['no' => '02', 'title' => 'Başvuru & Belgeler',
+             'desc' => 'Üniversite ve dil okulu başvurularınızı, evrak hazırlığınızı uçtan uca yönetiriz.'],
+            ['no' => '03', 'title' => 'Vize & Finans',
+             'desc' => 'Vize randevusu, bloke hesap ve sigorta işlemlerinde adım adım rehberlik ederiz.'],
+            ['no' => '04', 'title' => 'Almanya\'da Yerleşim',
+             'desc' => 'Konaklama, Anmeldung ve günlük yaşam desteğiyle yeni hayatınıza sorunsuz başlarsınız.'],
+        ];
+    }
+
+    /**
+     * "Neden biz" kartları — çalışma biçimini anlatır, ölçülemez iddia (puan/oran) içermez.
+     *
+     * @return list<array{icon:string,title:string,desc:string}>
+     */
+    public static function whyUs(): array
+    {
+        return [
+            ['icon' => 'chart', 'title' => 'Dijital Süreç Takibi',
+             'desc' => 'Her adım panelde anlık izlenir; hiçbir belge ve tarih gözden kaçmaz.'],
+            ['icon' => 'work', 'title' => 'Uçtan Uca Tek Elden',
+             'desc' => 'Başvurudan Almanya\'daki ilk gününüze kadar tek sorumlu, tek takvim.'],
+            ['icon' => 'shield', 'title' => 'Resmi Partner Güvencesi',
+             'desc' => 'Bloke hesap ve sigorta işlemleri resmi partnerler üzerinden kurulur.'],
+            ['icon' => 'home', 'title' => 'Yerinde Yerleşim Desteği',
+             'desc' => 'Almanya\'ya vardığınızda da yanınızdayız — yalnız kalmazsınız.'],
+        ];
+    }
+
+    /**
+     * Destek paketleri — partner girmediyse BOŞ (bölüm gizlenir).
+     *
+     * Paket kapsamı ve fiyat politikası her firmaya özeldir; default paket üretmek
+     * partnerin satmadığı bir hizmeti taahhüt etmek olur. Aynı ilke [[testimonials]] gibi.
+     *
+     * @return list<array{name:string,tag:string,desc:string,items:list<string>,featured:bool}>
+     */
+    public static function packages(Dealer $dealer): array
+    {
+        $raw = $dealer->site_packages;
+        if (!is_array($raw)) {
+            return [];
+        }
+        $out = [];
+        foreach ($raw as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $name = isset($row['name']) && is_scalar($row['name']) ? trim((string) $row['name']) : '';
+            if ($name === '') {
+                continue;
+            }
+            $out[] = [
+                'name'     => $name,
+                'tag'      => isset($row['tag']) && is_scalar($row['tag']) ? trim((string) $row['tag']) : '',
+                'desc'     => isset($row['desc']) && is_scalar($row['desc']) ? trim((string) $row['desc']) : '',
+                'items'    => self::parseItems($row['items'] ?? null),
+                'featured' => (bool) ($row['featured'] ?? false),
+            ];
+            if (count($out) >= 4) {
+                break;
+            }
+        }
+        return $out;
+    }
+
+    /** Paket bölümü açıklaması — paket yoksa boş; partner yazmadıysa nötr default. */
+    public static function packageNote(Dealer $dealer): string
+    {
+        if (self::packages($dealer) === []) {
+            return '';
+        }
+        $note = trim((string) ($dealer->site_package_note ?? ''));
+
+        return $note !== ''
+            ? $note
+            : 'Paket kapsamı ve ücret, ücretsiz ön görüşmede hedeflerinize göre netleşir.';
+    }
+
+    /**
+     * S.S.S. — partner girmediyse Almanya süreciyle ilgili firmadan bağımsız default set.
+     * Default'ta fiyat/oran taahhüdü yok (firmaya özel bilgi uydurulmaz).
+     *
+     * @return list<array{q:string,a:string}>
+     */
+    public static function faq(Dealer $dealer): array
+    {
+        $custom = [];
+        if (is_array($dealer->site_faq)) {
+            foreach ($dealer->site_faq as $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+                $q = isset($row['q']) && is_scalar($row['q']) ? trim((string) $row['q']) : '';
+                $a = isset($row['a']) && is_scalar($row['a']) ? trim((string) $row['a']) : '';
+                if ($q === '' || $a === '') {
+                    continue;
+                }
+                $custom[] = ['q' => $q, 'a' => $a];
+                if (count($custom) >= 10) {
+                    break;
+                }
+            }
+        }
+        if ($custom !== []) {
+            return $custom;
+        }
+
+        return [
+            ['q' => 'Almanca bilmiyorum, yine de başvurabilir miyim?',
+             'a' => 'Evet. Hem İngilizce eğitim veren programlara hem de sıfırdan Almanca öğrenmek isteyenler '
+                  . 'için dil okullarına yönlendirme yapılır. Seviyenize göre en uygun rotayı birlikte belirleriz.'],
+            ['q' => 'Sürecin tamamı ne kadar sürer?',
+             'a' => 'Hedef üniversite, başvuru dönemi ve belge hazırlığınıza göre değişir. İlk görüşmede '
+                  . 'durumunuza özel bir takvim çıkarırız.'],
+            ['q' => 'Hangi belgeler gerekiyor?',
+             'a' => 'Diploma ve transkript çevirileri, dil sertifikası, pasaport, finansal kanıt (bloke hesap) '
+                  . 've programa göre ek belgeler. Size özel kontrol listesini birlikte hazırlarız.'],
+            ['q' => 'Bloke hesap ve sağlık sigortası nasıl açılıyor?',
+             'a' => 'Bu işlemler resmi partner kurumlar üzerinden yürütülür; başvuru adımlarını sizinle '
+                  . 'birlikte tamamlarız.'],
+        ];
+    }
+
+    /**
+     * Öğrencilerin yerleştiği üniversiteler — partner girmediyse BOŞ (şerit gizlenir).
+     * Uydurma üniversite listesi gösterilmez.
+     *
+     * @return list<string>
+     */
+    public static function universities(Dealer $dealer): array
+    {
+        $raw = $dealer->site_universities;
+        if (is_string($raw)) {
+            $raw = preg_split('/\r\n|\r|\n/', $raw) ?: [];
+        }
+        if (!is_array($raw)) {
+            return [];
+        }
+        $out = [];
+        foreach ($raw as $u) {
+            if (!is_scalar($u)) {
+                continue;
+            }
+            $v = trim((string) $u);
+            if ($v !== '') {
+                $out[] = $v;
+            }
+            if (count($out) >= 12) {
+                break;
+            }
+        }
         return $out;
     }
 

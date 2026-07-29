@@ -548,10 +548,17 @@ girer, şablon değişince aynı veriyle dolar.
    Editördeki seçici, validation ve önizleme otomatik çalışır.
 
 **Sözleşme — her zaman dolu:** `$heroTitle`, `$heroSubtitle`, `$aboutText`, `$services`
-(`[title, desc, icon, items[]]`, default set var), `$applyUrl`, `$accentColor`, `$brandName`, `$showBadge`, `$dealer`.
+(`[title, desc, icon, items[]]`, default set var), `$steps` (`[no, title, desc]`, 4 adım),
+`$whyUs` (`[icon, title, desc]`, 4 kart), `$faq` (`[q, a]`, partner girmezse genel default set),
+`$applyUrl`, `$accentColor`, `$brandName`, `$showBadge`, `$dealer`.
 **Boş olabilir (bölümü `@if(!empty(...))` ile gizle):** `$stats`, `$team`, `$testimonials`
 (`[text, name, school]`), `$heroTrust` (`[value, label]`, max 3, `$stats`'tan türetilir),
-`$brandLogoUrl`, `$phone`, `$whatsapp`, `$instagram`, `$address`.
+`$packages` (`[name, tag, desc, items[], featured]`), `$packageNote` (`''` ise basma),
+`$universities` (string listesi), `$brandLogoUrl`, `$phone`, `$whatsapp`, `$instagram`, `$address`.
+
+`$steps` / `$whyUs` firmadan bağımsızdır (DB alanı YOK, tek kaynak `PartnerSiteData`);
+`$packages` / `$faq` / `$universities` `dealers.site_packages|site_package_note|site_faq|site_universities`
+alanlarından gelir ve `/dealer/mini-site` editöründen girilir.
 
 **Önizleme:** `/p/{slug}?preview=1&tpl={key}` — kaydetmeden başka şablon denemek için.
 Geçersiz key sessizce `DEFAULT`'a düşer. Önizleme **yetki ister**: sahibi bayi kullanıcısı
@@ -563,10 +570,13 @@ Geçersiz key sessizce `DEFAULT`'a düşer. Önizleme **yetki ister**: sahibi ba
   EZER. Guard `public.dealer-landing` + `public.partner-templates.*` view'larını hariç tutar.
   **Yeni public white-label view eklerken guard'a dahil et**, yoksa sayfada hep MentorDE markası görünür.
 - **JS yok:** Şablonlar CSP nonce'suz public sayfalarda render olur → inline `onclick` / `<script>`
-  kullanma. 3 şablon + iskelet `script=0, onclick=0` ile doğrulandı.
+  kullanma. 4 şablon + iskelet `script=0, onclick=0` ile doğrulandı. Akordeon gerekiyorsa
+  `<details>/<summary>` kullan (Lavanta S.S.S. böyle çalışır).
 - **Font sadece lokal:** Google Fonts CDN'e istek atma (DSGVO). `public/fonts/local-fonts.css`
-  içinde Plus Jakarta Sans (variable 200–800) + DM Serif Display var; başka aile gerekiyorsa
-  önce woff2'yi indirip `@font-face` ekle.
+  içinde Plus Jakarta Sans (variable 200–800), DM Serif Display, Poppins (400–800),
+  Public Sans (variable 400–700), IBM Plex Mono (400/500) var; başka aile gerekiyorsa woff2'yi
+  latin + **latin-ext** (Türkçe karakterler) olarak indirip `@font-face` ekle. Variable font'ta
+  `font-weight: 400 700;` yaz — tek ağırlık yazarsan tarayıcı fake bold üretir.
 - **Uydurma veri yok:** Şablonda örnek yorum / hayali rakam yazma. `$heroTrust` ve
   `$testimonials` yalnız partnerin girdiği veriden gelir; boşsa bölüm hiç basılmaz.
   Gerçek olmayan rakam, gerçek bir firmanın canlı sayfasında yanıltıcı reklamdır (UWG §5).
