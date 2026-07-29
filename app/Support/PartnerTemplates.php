@@ -54,6 +54,20 @@ class PartnerTemplates
             'modular'  => true,
             'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
         ],
+        'seftali' => [
+            'name'     => 'Şeftali Sabahı',
+            'desc'     => 'Editoryal serif, sıcak şeftali tonları; dergi hissi, sola dayalı başlıklar.',
+            'accent'   => '#e8846a',
+            'modular'  => true,
+            'sections' => ['stats', 'unis', 'services', 'steps', 'about', 'testimonials', 'why', 'packages', 'faq'],
+        ],
+        'nane' => [
+            'name'     => 'Nane',
+            'desc'     => 'Minimal ve ferah: ortalanmış hero, gölgesiz ince çizgiler, bol boşluk.',
+            'accent'   => '#57b98a',
+            'modular'  => true,
+            'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
+        ],
     ];
 
     /** Şablon bölümleri sıralanabilir/kapatılabilir mi? */
