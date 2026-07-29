@@ -829,11 +829,15 @@ girer, şablon değişince aynı veriyle dolar.</p>
 </tr>
 <tr>
 <td>Şablon kayıt defteri</td>
-<td><code>App\Support\PartnerTemplates</code> (<code>DEFAULT</code>, <code>resolve/view/isValid/all</code>)</td>
+<td><code>App\Support\PartnerTemplates</code> (<code>DEFAULT</code>, <code>resolve/view/isValid/all/isModular/sectionsOf</code>)</td>
+</tr>
+<tr>
+<td>Bölüm kayıt defteri</td>
+<td><code>App\Support\PartnerSiteSections</code> (<code>SECTIONS</code>, <code>resolve/enabledKeys/defaultOrder</code>)</td>
 </tr>
 <tr>
 <td>Şablon blade'leri</td>
-<td><code>resources/views/public/partner-templates/{key}.blade.php</code></td>
+<td><code>resources/views/public/partner-templates/{key}.blade.php</code> (+ modülerse <code>{key}/sections/*.blade.php</code>)</td>
 </tr>
 <tr>
 <td>DB alanı</td>
@@ -864,6 +868,18 @@ Editördeki seçici, validation ve önizleme otomatik çalışır.</li>
 (<code>[text, name, school]</code>), <code>$heroTrust</code> (<code>[value, label]</code>, max 3, <code>$stats</code>'tan türetilir),
 <code>$packages</code> (<code>[name, tag, desc, items[], featured]</code>), <code>$packageNote</code> (<code>''</code> ise basma),
 <code>$universities</code> (string listesi), <code>$brandLogoUrl</code>, <code>$phone</code>, <code>$whatsapp</code>, <code>$instagram</code>, <code>$address</code>.</p>
+<p><strong>Modüler bölümler (sıra + aç/kapa):</strong> <code>dealers.site_sections</code> = <code>[{key,on}]</code>.
+<code>PartnerSiteSections::resolve()</code> bilinmeyen/yinelenen key'i düşürür, eksikleri varsayılan
+sırayla sona ekler (açık) → şablon değişse de bozulmaz. Şablon <code>$sections</code> üzerinde döner:
+<code>@includeIf('public.partner-templates.{key}.sections.' . $sectionKey)</code>. Partial'lar ana
+dosyanın <code>@php</code> yerel değişkenlerini otomatik görür. Menü <strong>elle yazılmaz</strong>, <code>$navLinks</code>
+kullanılır (kapalı/boş bölümün linki çıkmaz; bölüm id'leri <code>hizmetler/surec/paketler/sss</code>).
+<code>TEMPLATES[key]['modular'|'sections']</code> editöre yansır: sabit kurgulu şablonda uyarı,
+basılmayan bölümde &quot;… şablonunda yok&quot; etiketi. Şu an modüler: <strong>lavanta</strong> (+ <code>_starter</code> iskeleti).</p>
+<p><strong>Editör kart yönetimi:</strong> <code>dealer/mini-site/_repeat.blade.php</code> + <code>rows/*.blade.php</code>;
+sıra = input adlarındaki index, JS her ekleme/silme/taşımada satırları yeniden numaralar
+(<code>edit.blade.php</code> sonundaki tek nonce'lu blok, <code>[data-repeat]</code>). Yeni kart iskeleti
+<code>&lt;template data-row-tpl&gt;</code> içinde <code>__I__</code> placeholder'ı ile durur.</p>
 <p><code>$steps</code> / <code>$whyUs</code> firmadan bağımsızdır (DB alanı YOK, tek kaynak <code>PartnerSiteData</code>);
 <code>$packages</code> / <code>$faq</code> / <code>$universities</code> <code>dealers.site_packages|site_package_note|site_faq|site_universities</code>
 alanlarından gelir ve <code>/dealer/mini-site</code> editöründen girilir.</p>

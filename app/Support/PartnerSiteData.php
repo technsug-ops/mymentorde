@@ -58,6 +58,8 @@ class PartnerSiteData
      */
     public static function forDealer(Dealer $dealer, ?string $logoUrl): array
     {
+        $sections = PartnerSiteSections::enabledKeys($dealer->site_sections);
+
         return [
             'dealer'       => $dealer,
             'brandName'    => $dealer->name,
@@ -82,6 +84,9 @@ class PartnerSiteData
             'packageNote'  => self::packageNote($dealer),
             'faq'          => self::faq($dealer),
             'universities' => self::universities($dealer),
+            // Bölüm kurgusu: partnerin seçtiği SIRAYLA, sadece açık olanlar.
+            'sections'     => $sections,
+            'navLinks'     => self::navLinks($sections, $dealer),
             'showBadge'    => $dealer->site_show_badge ?? true,
             'phone'        => $dealer->site_phone ?: ($dealer->phone ?: null),
             'whatsapp'     => $dealer->site_whatsapp ?: ($dealer->whatsapp ?: null),
@@ -112,6 +117,39 @@ class PartnerSiteData
             $out[] = ['value' => $value, 'label' => $label];
             if (count($out) >= 3) {
                 break;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Üst menü linkleri — SADECE açık ve içeriği olan bölümler için.
+     *
+     * Kapalı bölümün linki menüde kalırsa ziyaretçi hiçbir yere gitmeyen bir bağlantıya
+     * basar; bu yüzden linkler bölüm kurgusundan türetilir. Şablonlar bölüm id'lerini
+     * BURADAKİ anchor'larla aynı yazmak zorundadır (hizmetler / surec / paketler / sss).
+     *
+     * @param  list<string>  $sections  açık bölümler (sırayla)
+     * @return list<array{href:string,label:string}>
+     */
+    public static function navLinks(array $sections, Dealer $dealer): array
+    {
+        $map = [
+            'services' => ['#hizmetler', 'Hizmetler', true],
+            'steps'    => ['#surec',     'Süreç',     true],
+            'packages' => ['#paketler',  'Paketler',  self::packages($dealer) !== []],
+            'faq'      => ['#sss',       'S.S.S.',    self::faq($dealer) !== []],
+        ];
+
+        $out = [];
+        foreach ($sections as $key) {
+            if (!isset($map[$key])) {
+                continue;
+            }
+            [$href, $label, $hasContent] = $map[$key];
+            if ($hasContent) {
+                $out[] = ['href' => $href, 'label' => $label];
             }
         }
 

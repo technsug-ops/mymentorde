@@ -4,6 +4,30 @@ Operasyon partner (`b2b_partner`) bayileri `/dealer/mini-site` panelinden bir si
 seçer, `/p/{slug}` adresinde o şablonla yayınlanır. Tüm şablonlar **aynı veriyi** kullanır:
 partner içeriğini bir kez girer, şablon değişince aynı veriyle dolar.
 
+## Modüler yapı (bölüm sırası + aç/kapa)
+
+Partner `/dealer/mini-site` → **Sayfa Kurgusu** panelinden bölümleri sıralar ve kapatır
+(`dealers.site_sections`). Şablon bunu desteklemek için bölümlerini **ayrı partial** dosyalara
+koyar ve sırayla include eder:
+
+```blade
+@foreach($sections as $sectionKey)
+    @includeIf('public.partner-templates.{key}.sections.' . $sectionKey)
+@endforeach
+```
+
+- Partial yolu: `resources/views/public/partner-templates/{key}/sections/{sectionKey}.blade.php`
+- Bölüm anahtarları: `App\Support\PartnerSiteSections::SECTIONS`
+  (`unis, services, steps, stats, about, testimonials, why, packages, faq`)
+- `@includeIf` kullan: olmayan partial sayfayı düşürmez (addon-bağımsız).
+- Partial'lar ana dosyanın `@php` bloğundaki `$accent`, `$icon`, `$cols` gibi yerel
+  değişkenlerini otomatik görür (Blade include tüm tanımlı değişkenleri geçirir).
+- Nav linkleri **elle yazılmaz**: `$navLinks` kullan — kapalı/boş bölümün linki menüde çıkmaz.
+  Bölüm id'leri sözleşmeyle aynı olmalı: `hizmetler, surec, paketler, sss, basvuru`.
+- Sabit parçalar (partial'a çıkmaz): nav, hero, başvuru/iletişim kutusu, footer.
+
+Örnek: `lavanta.blade.php` + `lavanta/sections/*.blade.php`.
+
 ## 2 adım
 
 **1. Blade dosyasını oluştur**
@@ -11,23 +35,28 @@ partner içeriğini bir kez girer, şablon değişince aynı veriyle dolar.
 ```bash
 cp resources/views/public/partner-templates/_starter.blade.php \
    resources/views/public/partner-templates/{key}.blade.php
+mkdir -p resources/views/public/partner-templates/{key}/sections
 ```
 
 `_starter.blade.php` sözleşmenin tamamını kullanan iskelettir (kayıtlı değildir, public
-olarak render edilmez). Tasarımın CSS + markup'ını bunun üzerine giydir.
+olarak render edilmez). Tasarımın CSS + markup'ını bunun üzerine giydir, sıralanabilir
+bölümleri partial'lara taşı.
 
 **2. Kayıt defterine satır ekle** — `app/Support/PartnerTemplates.php`
 
 ```php
 '{key}' => [
-    'name'   => 'Görünen Ad',
-    'desc'   => 'Partnerin panelde göreceği kısa tanım.',
-    'accent' => '#0d9488',   // bu tasarıma yakışan varsayılan renk önerisi
+    'name'     => 'Görünen Ad',
+    'desc'     => 'Partnerin panelde göreceği kısa tanım.',
+    'accent'   => '#0d9488',   // bu tasarıma yakışan varsayılan renk önerisi
+    'modular'  => true,        // bölüm sırası/aç-kapa uygulanıyor mu
+    'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
 ],
 ```
 
-Editördeki seçici kartı, kaydetme doğrulaması ve önizleme linki otomatik gelir.
-Başka hiçbir yeri değiştirmen gerekmez.
+`modular`/`sections` editöre yansır: şablonun basmadığı bölüm "… şablonunda yok" etiketiyle,
+`modular: false` şablonlar "sıra bu şablonda uygulanmaz" uyarısıyla gösterilir.
+Seçici kart, kaydetme doğrulaması ve önizleme linki otomatik gelir; başka yeri değiştirmen gerekmez.
 
 ## Veri sözleşmesi
 
@@ -50,6 +79,8 @@ Hepsi `App\Support\PartnerSiteData::forDealer()` çıktısıdır.
 | `$packageNote` | string | paket bölümü açıklaması; `''` ise basma (paket yoksa hep `''`) |
 | `$faq` | list | `[q, a]` — **her zaman ≥1** (partner girmezse genel default set) |
 | `$universities` | list | üniversite adları (string) — **boş olabilir** |
+| `$sections` | list | açık bölüm anahtarları, partnerin seçtiği **sırayla** |
+| `$navLinks` | list | `[href, label]` — sadece açık + içeriği olan bölümler (menüyü buradan bas) |
 | `$showBadge` | bool | `false` → MentorDE adı sayfada **hiç geçmemeli** |
 | `$phone` `$whatsapp` `$instagram` `$address` | ?string | **boş olabilir** |
 | `$applyUrl` | string | tüm CTA'lar buraya gider (lead o bayiye etiketlenir) |
@@ -95,5 +126,7 @@ Yayına almadan önce kontrol et:
 - [ ] Rozet kapalıyken sayfada "MentorDE" hiç geçmiyor
 - [ ] `$stats` / `$team` / `$testimonials` / `$packages` / `$universities` boşken bölümler
       görünmüyor, sayfa bozulmuyor
+- [ ] Bölüm sırası değiştirilince sayfa o sırayla basılıyor, kapatılan bölüm hiç yok
+- [ ] Kapalı bölümün üst menü linki de yok (`$navLinks` kullanıldı mı)
 - [ ] Mobil (≤480px) düzen bozulmuyor
 - [ ] Tüm CTA'lar `$applyUrl`'e gidiyor

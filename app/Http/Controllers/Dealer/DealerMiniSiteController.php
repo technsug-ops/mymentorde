@@ -9,6 +9,7 @@ use App\Rules\ValidFileMagicBytes;
 use App\Services\EventLogService;
 use App\Services\NotificationService;
 use App\Services\TaskAutomationService;
+use App\Support\PartnerSiteSections;
 use App\Support\PartnerTemplates;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -83,7 +84,7 @@ class DealerMiniSiteController extends Controller
             'site_testimonials.*.name'   => ['nullable', 'string', 'max:80'],
             'site_testimonials.*.school' => ['nullable', 'string', 'max:120'],
             // Destek paketleri — partner girmediyse bölüm gizlenir (default paket üretilmez).
-            'site_packages'             => ['nullable', 'array', 'max:4'],
+            'site_packages'             => ['nullable', 'array', 'max:6'],
             'site_packages.*.name'      => ['nullable', 'string', 'max:60'],
             'site_packages.*.tag'       => ['nullable', 'string', 'max:40'],
             'site_packages.*.desc'      => ['nullable', 'string', 'max:400'],
@@ -96,6 +97,10 @@ class DealerMiniSiteController extends Controller
             'site_faq.*.a'              => ['nullable', 'string', 'max:1000'],
             // Öğrencilerin yerleştiği üniversiteler (her satıra bir ad).
             'site_universities'         => ['nullable', 'string', 'max:600'],
+            // Sayfa kurgusu: bölüm sırası + aç/kapa (sıra = dizideki sıra).
+            'site_sections'             => ['nullable', 'array', 'max:30'],
+            'site_sections.*.key'       => ['nullable', 'string', 'max:40'],
+            'site_sections.*.on'        => ['nullable', 'boolean'],
         ]);
 
         // Slug rezerve kontrolü
@@ -123,6 +128,7 @@ class DealerMiniSiteController extends Controller
             'site_package_note'  => $validated['site_package_note'] ?? null,
             'site_faq'           => $this->cleanCards($validated['site_faq'] ?? null, ['q', 'a'], ['q']),
             'site_universities'  => $this->cleanLines($validated['site_universities'] ?? null, 12),
+            'site_sections'      => $this->cleanSections($validated['site_sections'] ?? null),
         ];
 
         if ($request->hasFile('logo')) {
@@ -155,6 +161,34 @@ class DealerMiniSiteController extends Controller
         }
 
         return redirect('/dealer/mini-site')->with('status', $msg);
+    }
+
+    /**
+     * Bölüm kurgusunu (sıra + aç/kapa) temizle. Bilinmeyen/yinelenen key düşer;
+     * eksik bölümler render sırasında `PartnerSiteSections::resolve()` tarafından
+     * varsayılan sırayla sona eklenir. Hiç geçerli satır yoksa null (= varsayılan kurgu).
+     *
+     * @return list<array{key:string,on:bool}>|null
+     */
+    private function cleanSections($rows): ?array
+    {
+        if (!is_array($rows)) {
+            return null;
+        }
+        $out  = [];
+        $seen = [];
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $key = isset($row['key']) && is_scalar($row['key']) ? trim((string) $row['key']) : '';
+            if (!PartnerSiteSections::isValid($key) || isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $out[] = ['key' => $key, 'on' => filter_var($row['on'] ?? false, FILTER_VALIDATE_BOOLEAN)];
+        }
+        return $out === [] ? null : $out;
     }
 
     /**

@@ -26,7 +26,30 @@ rozet kapalı → sayfada "MentorDE" 0 kez; 4 şablon da `script=0`, `cdnfont=0`
 (boş slot düşüyor, newline→dizi, checkbox→bool, hepsi boş→null).
 Görsel kontrol: `/p/operasyon-partner-demo?preview=1&tpl=lavanta` (manager/sahibi bayi girişiyle).
 
-**Sıradaki:** kalan 9 tasarım aynı kalıpla (`docs/PARTNER_TEMPLATE_EKLEME.md`).
+**29 Tem ikinci tur — modülerlik (kullanıcı isteği: "kartlar/modüller sabit olmasın"):**
+- **Kart seviyesi (A):** editörde 6 grup (hizmet/istatistik/ekip/yorum/paket/S.S.S.) artık
+  sabit slot değil → **ekle / sil / ↑ ↓**. Sıra = input index sırası; tek nonce'lu JS
+  (`[data-repeat]`) her değişiklikte satırları yeniden numaralar. Ortak parçalar:
+  `dealer/mini-site/_repeat.blade.php` + `rows/*.blade.php`.
+- **Bölüm seviyesi (B):** `dealers.site_sections` `[{key,on}]` + `App\Support\PartnerSiteSections`
+  (bilinmeyen key düşer, eksik bölüm varsayılan sırayla sona eklenir). Lavanta 9 partial'a
+  ayrıldı (`partner-templates/lavanta/sections/*.blade.php`), `$sections` üzerinde döner.
+  Editörde "Sayfa Kurgusu" paneli (↑↓ + aç/kapa).
+- **Menü artık türetiliyor:** `$navLinks` — kapalı/boş bölümün üst menü linki basılmaz
+  (bulunan bug: sıra/kapatma sonrası ölü anchor kalıyordu).
+- **Şablon yetenek beyanı:** `PartnerTemplates::TEMPLATES[*]['modular'|'sections']`;
+  aurora/minimal/bold sabit kurgulu (modular=false) → editör uyarı + "bu şablonda yok" etiketi.
+  Bu 3 eski şablon paket/S.S.S./üniversite bölümlerini de basmıyor — 10 yeni tasarım
+  tamamlanınca ya modülere çevrilecek ya da kaldırılacak (karar bekliyor).
+- **Kart hizalama:** grid auto-fit → ortalayan flex + satır başına kart sayısı içerikten
+  hesaplanıyor (6 kart artık 4+2 değil 3+3; eksik son sıra ortalanıyor, kartlar şişmiyor).
+- `_starter` iskeleti de modüler kalıba geçti (9 bölüm partial'ı) — kalan 9 tasarım
+  doğrudan bu kalıpla çevrilecek.
+- **Doğrulama:** 30 maddelik uçtan uca test (GET editör → POST → public sayfa: sıra değişti,
+  kapalı bölüm basılmadı, kart eklendi/sıralandı, nav linki kayboldu) + 45 render kontrolü
+  regresyon temiz; 4 şablon `script=0 cdn=0`; 20 blade derleme kontrolü.
+
+**Sıradaki:** kalan 9 tasarım modüler kalıpla (`docs/PARTNER_TEMPLATE_EKLEME.md`).
 Atlanan: DC tasarımlarındaki "Almanya'da yaşam / şehir galerisi" bölümü — partnere ait fotoğraf
 yok, lisanslı stok görsel de yok. Şehir foto seti tedarik edilirse ortak bölüm olarak eklenebilir.
 Fontlar: kalan şablonlar Sora / Newsreader / Space Grotesk / Playfair / Manrope / DM Sans /

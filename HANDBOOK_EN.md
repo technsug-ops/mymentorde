@@ -491,9 +491,17 @@ Quick review with keyboard shortcuts:
     enters their own real data** — the system never shows sample or fabricated figures,
     quotes or packages (if the FAQ is left empty, 4 generic questions about the German
     application process are shown)
+  - **Page layout** — reorder sections with ↑ ↓ and switch off the ones you don't want.
+    A disabled section is never rendered and its nav link disappears too. Orderable
+    sections: university strip, services, process, statistics, about, testimonials,
+    why us + team, packages, FAQ (nav / hero / apply box / footer are fixed)
+  - **Card management** — service, statistics, team, testimonial, package and FAQ cards can
+    be **added, removed and reordered with ↑ ↓**; the site follows the same order
   - **Site template selection** — 4 designs today: **Aurora** (vivid gradient), **Minimal**
     (clean, generous whitespace), **Bold** (dark, high contrast), **Lavanta** (rounded,
-    pastel, friendly). Content stays the same, only the look changes.
+    pastel, friendly). Content stays the same, only the look changes. Section order /
+    on-off currently applies to **Lavanta**; the 3 older templates have a fixed layout
+    (the editor warns about this and labels sections a template does not render).
   - Try a template without saving: `/p/{slug}?preview=1&tpl={aurora|minimal|bold|lavanta}`
   - **"MentorDE badge" toggle** — when off, the MentorDE brand never appears on the page (full white-label)
 - Other dealer types (freelance / lead generation) get the classic single-page mini-site

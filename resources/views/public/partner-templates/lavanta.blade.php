@@ -23,6 +23,18 @@
         : null;
     // Hero'da öne çıkan rozetler: partnerin kendi istatistikleri (yoksa hiç gösterilmez).
     $heroCards = array_slice($heroTrust ?? [], 0, 2);
+
+    /**
+     * Satır başına kart sayısı: sıralar eşit dolsun (6 kart → 4+2 değil 3+3).
+     * Tam bölünen yoksa 3'e düşer; son sıra eksik kalırsa CSS ortalar.
+     */
+    $cols = function (int $n): int {
+        if ($n <= 0)      { return 1; }
+        if ($n <= 3)      { return $n; }
+        if ($n % 4 === 0) { return 4; }
+        if ($n % 3 === 0) { return 3; }
+        return $n % 2 === 0 ? min(intdiv($n, 2), 4) : 3;
+    };
 @endphp
 <title>{{ $siteName }} — Almanya Eğitim Danışmanlığı</title>
 @include('partials.favicon')
@@ -114,13 +126,16 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-.6px;margin:0;}
 .unis-lbl{font:600 11px/1.3 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;max-width:130px;}
 .unis span.u{font:700 17px/1 var(--display);color:color-mix(in srgb, var(--accent) 42%, #fff);}
 
-/* ─── Kart ızgaraları ─── */
-.grid{display:grid;gap:18px;}
-.g-svc{grid-template-columns:repeat(auto-fit,minmax(250px,1fr));}
-.g-step{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;}
-.g-why{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
-.g-team{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;}
-.g-pkg{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:start;}
+/* ─── Kart ızgaraları ───
+   Flex + justify-content:center → son sıra eksik kaldığında kartlar sola yığılmaz, ORTALANIR.
+   Kart genişliği --cols'tan hesaplanır (grow yok) ki 6 kart 4+2 değil 3+3 dizilsin.
+   --cols her bölümde kart sayısına göre Blade'den verilir (bkz. $cols). */
+.grid{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--gap,18px);--cols:3;--min:250px;}
+.grid>*{flex:0 1 calc((100% - (var(--cols) - 1) * var(--gap,18px)) / var(--cols));min-width:min(var(--min),100%);}
+.g-step{--gap:20px;--min:200px;}
+.g-why{--gap:16px;--min:200px;}
+.g-team{--gap:16px;--min:240px;}
+.g-pkg{--min:280px;}
 .card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:28px 26px;display:flex;flex-direction:column;box-shadow:var(--shadow-sm);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;}
 .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--line-2);}
 .card-ic{width:56px;height:56px;border-radius:17px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:28px;}
@@ -245,10 +260,10 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-.6px;margin:0;}
             @endif
         </a>
         <div class="nav-links">
-            <a href="#hizmetler" class="nav-link">Hizmetler</a>
-            <a href="#surec" class="nav-link">Süreç</a>
-            @if(!empty($packages))<a href="#paketler" class="nav-link">Paketler</a>@endif
-            <a href="#sss" class="nav-link">S.S.S.</a>
+            {{-- Linkler bölüm kurgusundan gelir: kapalı/boş bölümün linki menüde çıkmaz --}}
+            @foreach($navLinks as $nl)
+                <a href="{{ $nl['href'] }}" class="nav-link">{{ $nl['label'] }}</a>
+            @endforeach
             <a href="{{ $applyUrl }}" class="nav-cta" data-track="cta_clicked" data-ph-cta-name="nav_apply" data-ph-location="partner_lavanta_nav">Ücretsiz Başvur</a>
         </div>
     </div>
@@ -262,7 +277,7 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-.6px;margin:0;}
         <p>{{ $heroSubtitle }}</p>
         <div class="hero-btns">
             <a href="{{ $applyUrl }}" class="btn btn-primary" data-track="cta_clicked" data-ph-cta-name="hero_apply" data-ph-location="partner_lavanta_hero">Ücretsiz danışmanlık al {!! $icon('arrow') !!}</a>
-            <a href="#hizmetler" class="btn btn-ghost">Hizmetler</a>
+            @if(!empty($navLinks))<a href="{{ $navLinks[0]['href'] }}" class="btn btn-ghost">{{ $navLinks[0]['label'] }}</a>@endif
         </div>
         {{-- Hero görseli yoksa partnerin istatistikleri burada çip olarak görünür (uydurma rakam yok) --}}
         @if(!$heroImg && !empty($heroCards))
@@ -287,210 +302,13 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-.6px;margin:0;}
     @endif
 </div>
 
-{{-- ═══ ÜNİVERSİTE ŞERİDİ (partner girmediyse yok) ═══ --}}
-@if(!empty($universities))
-<div class="wrap" style="padding-bottom:56px;">
-    <div class="unis">
-        <span class="unis-lbl">Öğrencilerimizin yerleştiği üniversiteler</span>
-        @foreach($universities as $u)
-            <span class="u">{{ $u }}</span>
-        @endforeach
-    </div>
-</div>
-@endif
-
-{{-- ═══ HİZMETLER ═══ --}}
-<div id="hizmetler" class="wrap" style="padding-bottom:64px;">
-    <div class="sec-head">
-        <span class="lbl">Hizmetler</span>
-        <h2 class="h2">Sürecin her adımında yanınızdayız</h2>
-        <p class="lead">Başvurudan yerleşime kadar tüm süreci uzman ekibimizle yönetiyoruz.</p>
-    </div>
-    <div class="grid g-svc">
-        @foreach($services as $s)
-            <div class="card">
-                <span class="card-ic">{!! $icon($s['icon'] ?? 'default') !!}</span>
-                <h3>{{ $s['title'] }}</h3>
-                <p>{{ $s['desc'] }}</p>
-                @if(!empty($s['items']))
-                    <ul class="ticks">
-                        @foreach($s['items'] as $item)
-                            <li>{!! $icon('check') !!}{{ $item }}</li>
-                        @endforeach
-                    </ul>
-                @endif
-            </div>
-        @endforeach
-    </div>
-</div>
-
-{{-- ═══ SÜREÇ ═══ --}}
-<div id="surec" class="proc">
-    <div class="wrap sec">
-        <div class="sec-head" style="max-width:560px;margin-bottom:42px;">
-            <span class="lbl">Nasıl çalışır</span>
-            <h2 class="h2" style="margin-bottom:0;">Dört adımda Almanya'ya</h2>
-        </div>
-        <div class="grid g-step">
-            @foreach($steps as $st)
-                <div class="step">
-                    <div class="step-n">{{ $st['no'] }}</div>
-                    <h3>{{ $st['title'] }}</h3>
-                    <p>{{ $st['desc'] }}</p>
-                </div>
-            @endforeach
-        </div>
-    </div>
-</div>
-
-{{-- ═══ İSTATİSTİK BANDI (partner girmediyse yok) ═══ --}}
-@if(!empty($stats))
-<div class="wrap sec">
-    <div class="stats">
-        @foreach($stats as $st)
-            <div>
-                <div class="v">{{ $st['value'] }}</div>
-                <div class="l">{{ $st['label'] }}</div>
-            </div>
-        @endforeach
-    </div>
-</div>
-@endif
-
-{{-- ═══ HAKKIMIZDA ═══ --}}
-<div class="wrap" style="padding:8px 26px 64px;">
-    <div class="card" style="padding:38px 34px;">
-        <span class="lbl">Hakkımızda</span>
-        <h2 class="h2">{{ $siteName }}</h2>
-        <p style="white-space:pre-line;font-size:15.5px;color:var(--muted);margin:0;max-width:760px;">{{ $aboutText }}</p>
-    </div>
-</div>
-
-{{-- ═══ YORUMLAR — yalnız partnerin girdiği gerçek yorumlar ═══ --}}
-@if(!empty($testimonials))
-<div class="wrap" style="padding:0 26px 64px;">
-    <div class="sec-head" style="max-width:560px;">
-        <span class="lbl">Öğrenci yorumları</span>
-        <h2 class="h2" style="margin-bottom:0;">Başarı hikâyeleriyle büyüyoruz</h2>
-    </div>
-    <div class="grid g-svc">
-        @foreach($testimonials as $t)
-            <figure class="quote" style="margin:0;">
-                <p>“{{ $t['text'] }}”</p>
-                @if(($t['name'] ?? '') !== '' || ($t['school'] ?? '') !== '')
-                    <figcaption class="who">
-                        <span class="avatar">{{ mb_strtoupper(mb_substr($t['name'] !== '' ? $t['name'] : $siteName, 0, 1)) }}</span>
-                        <div>
-                            @if(($t['name'] ?? '') !== '')<b>{{ $t['name'] }}</b>@endif
-                            @if(($t['school'] ?? '') !== '')<span>{{ $t['school'] }}</span>@endif
-                        </div>
-                    </figcaption>
-                @endif
-            </figure>
-        @endforeach
-    </div>
-</div>
-@endif
-
-{{-- ═══ NEDEN BİZ + EKİP + ROZET ═══ --}}
-<div class="why-wrap">
-    <div class="wrap sec">
-        <div class="sec-head" style="max-width:560px;">
-            <span class="lbl">Neden biz</span>
-            <h2 class="h2" style="margin-bottom:0;">Farkımız, sistemli çalışmamız</h2>
-        </div>
-        <div class="grid g-why" style="margin-bottom:{{ (!empty($team) || $showBadge) ? '40px' : '0' }};">
-            @foreach($whyUs as $w)
-                <div class="why-card">
-                    <span class="why-ic">{!! $icon($w['icon']) !!}</span>
-                    <h3>{{ $w['title'] }}</h3>
-                    <p>{{ $w['desc'] }}</p>
-                </div>
-            @endforeach
-        </div>
-
-        @if(!empty($team) || $showBadge)
-            <div class="grid g-team">
-                @foreach($team as $m)
-                    <div class="member">
-                        <span class="avatar">
-                            @if(($m['photo'] ?? '') !== '')
-                                <img src="{{ $m['photo'] }}" alt="{{ $m['name'] }}">
-                            @else
-                                {{ mb_strtoupper(mb_substr($m['name'], 0, 1)) }}
-                            @endif
-                        </span>
-                        <div class="who">
-                            <div>
-                                <b>{{ $m['name'] }}</b>
-                                @if(($m['title'] ?? '') !== '')<span>{{ $m['title'] }}</span>@endif
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-
-                {{-- Rozet kapalıysa MentorDE adı sayfada hiç geçmez (tam white-label) --}}
-                @if($showBadge)
-                    <div class="trust">
-                        <span class="trust-ic">{!! $icon('shield') !!}</span>
-                        <div>
-                            <b>{{ config('brand.name', 'MentorDE') }} Yetkili Partneri</b>
-                            <p>Başvuru, vize ve yerleşim süreçleriniz resmi partner ağı ve dijital altyapı üzerinden yürütülür.</p>
-                        </div>
-                    </div>
-                @endif
-            </div>
-        @endif
-    </div>
-</div>
-
-{{-- ═══ PAKETLER (partner girmediyse yok) ═══ --}}
-@if(!empty($packages))
-<div id="paketler" class="wrap sec">
-    <div class="sec-head">
-        <span class="lbl">Paketler</span>
-        <h2 class="h2">Size uygun destek seviyesi</h2>
-        @if($packageNote !== '')<p class="lead">{{ $packageNote }}</p>@endif
-    </div>
-    <div class="grid g-pkg">
-        @foreach($packages as $p)
-            <div class="pkg{{ !empty($p['featured']) ? ' pkg-hi' : '' }}">
-                <div class="pkg-top">
-                    <h3>{{ $p['name'] }}</h3>
-                    @if(($p['tag'] ?? '') !== '')<span class="pkg-tag">{{ $p['tag'] }}</span>@endif
-                </div>
-                @if(($p['desc'] ?? '') !== '')<p>{{ $p['desc'] }}</p>@endif
-                @if(!empty($p['items']))
-                    <ul class="ticks">
-                        @foreach($p['items'] as $item)
-                            <li>{!! $icon('check') !!}{{ $item }}</li>
-                        @endforeach
-                    </ul>
-                @endif
-                <a href="{{ $applyUrl }}" class="pkg-btn" data-track="cta_clicked" data-ph-cta-name="package_apply" data-ph-location="partner_lavanta_packages">Bu paketi görüşelim</a>
-            </div>
-        @endforeach
-    </div>
-</div>
-@endif
-
-{{-- ═══ S.S.S. (JS'siz: <details>) ═══ --}}
-@if(!empty($faq))
-<div id="sss" class="wrap" style="padding:8px 26px 64px;">
-    <div class="sec-head" style="max-width:560px;">
-        <span class="lbl">S.S.S.</span>
-        <h2 class="h2" style="margin-bottom:0;">Aklınızdaki sorular</h2>
-    </div>
-    <div class="faq">
-        @foreach($faq as $i => $f)
-            <details @if($i === 0) open @endif>
-                <summary>{{ $f['q'] }}<span class="ico">+</span></summary>
-                <p>{{ $f['a'] }}</p>
-            </details>
-        @endforeach
-    </div>
-</div>
-@endif
+{{-- ═══ SIRALANABİLİR BÖLÜMLER ═══
+    Sıra ve aç/kapa partnerin seçimi ($sections — App\Support\PartnerSiteSections).
+    Her bölüm: lavanta/sections/{key}.blade.php · veri boşsa partial kendini basmaz.
+    @includeIf: bilinmeyen/eksik partial sayfayı düşürmez (addon-bağımsız). --}}
+@foreach($sections as $sectionKey)
+    @includeIf('public.partner-templates.lavanta.sections.' . $sectionKey)
+@endforeach
 
 {{-- ═══ BAŞVURU / İLETİŞİM ═══ --}}
 <div id="basvuru" class="wrap" style="padding:8px 26px 72px;">

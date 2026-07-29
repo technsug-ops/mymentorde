@@ -6,8 +6,10 @@
     tek bakışta görmek ve hiçbir alanı atlamamak.
 
     Yeni şablon eklemek (2 adım):
-      1) cp _starter.blade.php {key}.blade.php  → içine tasarımın CSS + markup'ını giydir
-      2) App\Support\PartnerTemplates::TEMPLATES dizisine satır ekle: {key} => [name, desc, accent]
+      1) cp _starter.blade.php {key}.blade.php + cp -r _starter/sections {key}/sections
+         → iskelete tasarımın CSS'ini, her bölüm partial'ına markup'ını giydir
+      2) App\Support\PartnerTemplates::TEMPLATES dizisine satır ekle:
+         {key} => [name, desc, accent, modular => true, sections => [...]]
     Detaylı kontrol listesi: docs/PARTNER_TEMPLATE_EKLEME.md
 
     KURALLAR (hepsi zorunlu):
@@ -39,6 +41,8 @@
       $showBadge      bool     false ise MentorDE adı sayfada HİÇ geçmemeli (tam white-label)
       $phone $whatsapp $instagram $address   ?string — BOŞ OLABİLİR
       $applyUrl       string   lead formu (/apply/partner/{code}) — tüm CTA'lar buraya
+      $sections       list     açık bölüm anahtarları — partnerin seçtiği SIRAYLA (partial include et)
+      $navLinks       list     [href, label] — menüyü BURADAN bas (kapalı bölümün linki olmaz)
 
     İKONLAR: PartnerSiteData::icon() — cap, passport, coins, home, check, arrow, chart, bolt,
     shield, gear, users, clock, star, work, pin, phone, wa, instagram, default
@@ -87,6 +91,8 @@ svg{width:1em;height:1em;}
                 {{ $siteName }}
             @endif
         </a>
+        {{-- Menü linkleri SÖZLEŞMEDEN gelir: kapalı/boş bölümün linki çıkmaz --}}
+        @foreach($navLinks as $nl)<a href="{{ $nl['href'] }}">{{ $nl['label'] }}</a>@endforeach
         <a href="{{ $applyUrl }}" data-track="cta_clicked" data-ph-cta-name="nav_apply" data-ph-location="partner_starter_nav">Başvur</a>
     </div>
 </nav>
@@ -111,125 +117,14 @@ svg{width:1em;height:1em;}
     @endif
 </section>
 
-{{-- ═══ HİZMETLER (her zaman dolu) ═══ --}}
-<section id="hizmetler" class="wrap">
-    <h2>Hizmetlerimiz</h2>
-    @foreach($services as $s)
-        <article>
-            <div style="color:var(--accent);">{!! $icon($s['icon'] ?? 'default') !!}</div>
-            <h3>{{ $s['title'] }}</h3>
-            <p>{{ $s['desc'] }}</p>
-            @if(!empty($s['items']))
-                <ul>
-                    @foreach($s['items'] as $item)<li>{{ $item }}</li>@endforeach
-                </ul>
-            @endif
-        </article>
-    @endforeach
-</section>
-
-{{-- ═══ ÜNİVERSİTE ŞERİDİ (boşsa hiç basma — uydurma üniversite yazma) ═══ --}}
-@if(!empty($universities))
-<section class="wrap">
-    <span>Öğrencilerimizin yerleştiği üniversiteler</span>
-    @foreach($universities as $u)<span>{{ $u }}</span>@endforeach
-</section>
-@endif
-
-{{-- ═══ SÜREÇ (her zaman dolu) ═══ --}}
-<section id="surec" class="wrap">
-    <h2>Nasıl Çalışır</h2>
-    @foreach($steps as $st)
-        <article><div>{{ $st['no'] }}</div><h3>{{ $st['title'] }}</h3><p>{{ $st['desc'] }}</p></article>
-    @endforeach
-</section>
-
-{{-- ═══ NEDEN BİZ (her zaman dolu) ═══ --}}
-<section class="wrap">
-    <h2>Neden Biz</h2>
-    @foreach($whyUs as $w)
-        <article><div style="color:var(--accent);">{!! $icon($w['icon']) !!}</div><h3>{{ $w['title'] }}</h3><p>{{ $w['desc'] }}</p></article>
-    @endforeach
-</section>
-
-{{-- ═══ HAKKIMIZDA + İSTATİSTİK ═══ --}}
-<section class="wrap">
-    <h2>Hakkımızda</h2>
-    <p style="white-space:pre-line;">{{ $aboutText }}</p>
-
-    @if(!empty($stats))
-        <div>
-            @foreach($stats as $st)
-                <div><b>{{ $st['value'] }}</b> <span>{{ $st['label'] }}</span></div>
-            @endforeach
-        </div>
-    @endif
-</section>
-
-{{-- ═══ EKİP (boşsa hiç basma) ═══ --}}
-@if(!empty($team))
-<section class="wrap">
-    <h2>Ekibimiz</h2>
-    @foreach($team as $m)
-        <div>
-            @if(($m['photo'] ?? '') !== '')
-                <img src="{{ $m['photo'] }}" alt="{{ $m['name'] }}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;">
-            @else
-                <div style="width:72px;height:72px;border-radius:50%;color:var(--accent);">{{ mb_substr($m['name'], 0, 1) }}</div>
-            @endif
-            <div>{{ $m['name'] }}</div>
-            @if(($m['title'] ?? '') !== '')<div>{{ $m['title'] }}</div>@endif
-        </div>
-    @endforeach
-</section>
-@endif
-
-{{-- ═══ YORUMLAR — sadece partnerin girdiği GERÇEK yorumlar ═══ --}}
-@if(!empty($testimonials))
-<section class="wrap">
-    <h2>Öğrenci Yorumları</h2>
-    @foreach($testimonials as $t)
-        <figure>
-            <blockquote>{{ $t['text'] }}</blockquote>
-            @if(($t['name'] ?? '') !== '' || ($t['school'] ?? '') !== '')
-                <figcaption>
-                    @if(($t['name'] ?? '') !== '')<b>{{ $t['name'] }}</b>@endif
-                    @if(($t['school'] ?? '') !== '') — {{ $t['school'] }}@endif
-                </figcaption>
-            @endif
-        </figure>
-    @endforeach
-</section>
-@endif
-
-{{-- ═══ PAKETLER (boşsa hiç basma — default paket ÜRETME) ═══ --}}
-@if(!empty($packages))
-<section id="paketler" class="wrap">
-    <h2>Destek Paketleri</h2>
-    @if($packageNote !== '')<p>{{ $packageNote }}</p>@endif
-    @foreach($packages as $p)
-        <article @if(!empty($p['featured'])) style="border:2px solid var(--accent);" @endif>
-            <h3>{{ $p['name'] }}</h3>
-            @if(($p['tag'] ?? '') !== '')<span>{{ $p['tag'] }}</span>@endif
-            @if(($p['desc'] ?? '') !== '')<p>{{ $p['desc'] }}</p>@endif
-            @if(!empty($p['items']))
-                <ul>@foreach($p['items'] as $item)<li>{{ $item }}</li>@endforeach</ul>
-            @endif
-            <a href="{{ $applyUrl }}" data-track="cta_clicked" data-ph-cta-name="package_apply" data-ph-location="partner_starter_packages">Bu paketi görüşelim</a>
-        </article>
-    @endforeach
-</section>
-@endif
-
-{{-- ═══ S.S.S. — JS YOK: <details>/<summary> ile aç/kapa ═══ --}}
-@if(!empty($faq))
-<section id="sss" class="wrap">
-    <h2>Sıkça Sorulan Sorular</h2>
-    @foreach($faq as $f)
-        <details><summary>{{ $f['q'] }}</summary><p>{{ $f['a'] }}</p></details>
-    @endforeach
-</section>
-@endif
+{{-- ═══ SIRALANABİLİR BÖLÜMLER ═══
+    Partnerin seçtiği sıra + aç/kapa: $sections (App\Support\PartnerSiteSections).
+    Her bölüm ayrı partial: _starter/sections/{key}.blade.php → kendi şablonunda
+    {key}/sections/*.blade.php olarak kopyala. @includeIf: eksik partial sayfayı düşürmez.
+    Partial'lar buradaki @php değişkenlerini ($icon, $accent, ...) otomatik görür. --}}
+@foreach($sections as $sectionKey)
+    @includeIf('public.partner-templates._starter.sections.' . $sectionKey)
+@endforeach
 
 {{-- ═══ MENTORDE ROZETİ — kapalıysa MentorDE adı sayfada hiç geçmemeli ═══ --}}
 @if($showBadge)

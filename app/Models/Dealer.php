@@ -51,6 +51,7 @@ class Dealer extends Model
         'site_package_note',
         'site_faq',
         'site_universities',
+        'site_sections',
         'site_address',
         'site_show_badge',
         'site_template',
@@ -76,6 +77,7 @@ class Dealer extends Model
         'site_packages' => 'array',
         'site_faq' => 'array',
         'site_universities' => 'array',
+        'site_sections' => 'array',
         'site_show_badge' => 'boolean',
         'custom_domain_verified_at' => 'datetime',
     ];

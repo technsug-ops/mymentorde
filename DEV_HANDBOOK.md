@@ -535,8 +535,9 @@ girer, şablon değişince aynı veriyle dolar.
 | Parça | Yer |
 |-------|-----|
 | Veri sözleşmesi | `App\Support\PartnerSiteData::forDealer($dealer, $logoUrl)` + `::icon($key)` |
-| Şablon kayıt defteri | `App\Support\PartnerTemplates` (`DEFAULT`, `resolve/view/isValid/all`) |
-| Şablon blade'leri | `resources/views/public/partner-templates/{key}.blade.php` |
+| Şablon kayıt defteri | `App\Support\PartnerTemplates` (`DEFAULT`, `resolve/view/isValid/all/isModular/sectionsOf`) |
+| Bölüm kayıt defteri | `App\Support\PartnerSiteSections` (`SECTIONS`, `resolve/enabledKeys/defaultOrder`) |
+| Şablon blade'leri | `resources/views/public/partner-templates/{key}.blade.php` (+ modülerse `{key}/sections/*.blade.php`) |
 | DB alanı | `dealers.site_template` (nullable → `aurora`) |
 | Public render | `Public\DealerMiniSiteController@show` |
 | Editör | `Dealer\DealerMiniSiteController` + `dealer/mini-site/edit.blade.php` |
@@ -555,6 +556,20 @@ girer, şablon değişince aynı veriyle dolar.
 (`[text, name, school]`), `$heroTrust` (`[value, label]`, max 3, `$stats`'tan türetilir),
 `$packages` (`[name, tag, desc, items[], featured]`), `$packageNote` (`''` ise basma),
 `$universities` (string listesi), `$brandLogoUrl`, `$phone`, `$whatsapp`, `$instagram`, `$address`.
+
+**Modüler bölümler (sıra + aç/kapa):** `dealers.site_sections` = `[{key,on}]`.
+`PartnerSiteSections::resolve()` bilinmeyen/yinelenen key'i düşürür, eksikleri varsayılan
+sırayla sona ekler (açık) → şablon değişse de bozulmaz. Şablon `$sections` üzerinde döner:
+`@includeIf('public.partner-templates.{key}.sections.' . $sectionKey)`. Partial'lar ana
+dosyanın `@php` yerel değişkenlerini otomatik görür. Menü **elle yazılmaz**, `$navLinks`
+kullanılır (kapalı/boş bölümün linki çıkmaz; bölüm id'leri `hizmetler/surec/paketler/sss`).
+`TEMPLATES[key]['modular'|'sections']` editöre yansır: sabit kurgulu şablonda uyarı,
+basılmayan bölümde "… şablonunda yok" etiketi. Şu an modüler: **lavanta** (+ `_starter` iskeleti).
+
+**Editör kart yönetimi:** `dealer/mini-site/_repeat.blade.php` + `rows/*.blade.php`;
+sıra = input adlarındaki index, JS her ekleme/silme/taşımada satırları yeniden numaralar
+(`edit.blade.php` sonundaki tek nonce'lu blok, `[data-repeat]`). Yeni kart iskeleti
+`<template data-row-tpl>` içinde `__I__` placeholder'ı ile durur.
 
 `$steps` / `$whyUs` firmadan bağımsızdır (DB alanı YOK, tek kaynak `PartnerSiteData`);
 `$packages` / `$faq` / `$universities` `dealers.site_packages|site_package_note|site_faq|site_universities`

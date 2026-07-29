@@ -109,10 +109,6 @@
     @php
         $isOperationPartner = ($d?->dealer_type_code === 'b2b_partner')
             || ($d && $d->hasRole(\App\Models\Dealer::ROLE_B2B_PARTNER));
-        $iconOptions = [
-            'cap' => 'Mezuniyet / Üniversite', 'passport' => 'Vize / Pasaport',
-            'coins' => 'Finans / Ödeme', 'home' => 'Konaklama / Ev', 'default' => 'Genel (kalkan)',
-        ];
         $svcRows  = old('site_services',     $d?->site_services ?: []);
         $statRows = old('site_stats',        $d?->site_stats ?: []);
         $teamRows = old('site_team',         $d?->site_team ?: []);
@@ -166,125 +162,52 @@
                    placeholder="Örn. Bağdat Cad. No:1, Kadıköy / İstanbul" style="{{ $inp }}">
         </div>
 
-        {{-- Hizmet kartları (6 slot) --}}
-        <div style="{{ $sectionBox }}">
-            <div style="font-weight:600;font-size:14px;margin-bottom:4px;">Hizmet Kartları</div>
-            <small style="color:var(--muted,#64748b);font-size:12px;">Boş bırakırsanız varsayılan 6 hizmet (kapsam maddeleriyle) gösterilir.</small>
-            @for($i = 0; $i < 6; $i++)
-                @php
-                    $s = $svcRows[$i] ?? [];
-                    $svcItems = $s['items'] ?? '';
-                    if (is_array($svcItems)) { $svcItems = implode("\n", $svcItems); }
-                @endphp
-                <div style="border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:12px;margin-top:12px;background:var(--bg,#f8fafc);">
-                    <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:8px;">
-                        <input type="text" name="site_services[{{ $i }}][title]" value="{{ $s['title'] ?? '' }}" maxlength="120" placeholder="Hizmet başlığı ({{ $i+1 }})" style="{{ $inp }}">
-                        <select name="site_services[{{ $i }}][icon]" style="{{ $inp }}">
-                            @foreach($iconOptions as $k => $lbl)
-                                <option value="{{ $k }}" @selected(($s['icon'] ?? 'default') === $k)>{{ $lbl }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <input type="text" name="site_services[{{ $i }}][desc]" value="{{ $s['desc'] ?? '' }}" maxlength="400" placeholder="Kısa açıklama" style="{{ $inp }}margin-top:8px;">
-                    <textarea name="site_services[{{ $i }}][items]" rows="3" maxlength="600" placeholder="Kapsam maddeleri — her satıra bir madde (opsiyonel, max 6)" style="{{ $inp }}margin-top:8px;resize:vertical;">{{ $svcItems }}</textarea>
-                </div>
-            @endfor
-        </div>
+        {{-- Sayfa kurgusu: bölüm sırası + aç/kapa --}}
+        @include('dealer.mini-site._sections')
 
-        {{-- İstatistik rozetleri (4 slot) --}}
-        <div style="{{ $sectionBox }}">
-            <div style="font-weight:600;font-size:14px;margin-bottom:4px;">İstatistikler</div>
-            <small style="color:var(--muted,#64748b);font-size:12px;">Örn. "500+" / "Mutlu Öğrenci". Boşsa bu bölüm gizlenir.</small>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
-                @for($i = 0; $i < 4; $i++)
-                    @php $st = $statRows[$i] ?? []; @endphp
-                    <div style="display:grid;grid-template-columns:.7fr 1.3fr;gap:6px;">
-                        <input type="text" name="site_stats[{{ $i }}][value]" value="{{ $st['value'] ?? '' }}" maxlength="40" placeholder="500+" style="{{ $inp }}">
-                        <input type="text" name="site_stats[{{ $i }}][label]" value="{{ $st['label'] ?? '' }}" maxlength="60" placeholder="Etiket" style="{{ $inp }}">
-                    </div>
-                @endfor
-            </div>
-        </div>
+        {{-- Hizmet kartları --}}
+        @include('dealer.mini-site._repeat', [
+            'name' => 'site_services', 'title' => 'Hizmet Kartları', 'rows' => $svcRows,
+            'rowView' => 'dealer.mini-site.rows.service', 'max' => 12, 'addLabel' => '+ Hizmet ekle',
+            'hint' => 'Sıra sitede aynen görünür. Hepsini boş bırakırsanız varsayılan 6 hizmet gösterilir.',
+        ])
 
-        {{-- Ekip kartları (6 slot) --}}
-        <div style="{{ $sectionBox }}">
-            <div style="font-weight:600;font-size:14px;margin-bottom:4px;">Ekip / Danışmanlar</div>
-            <small style="color:var(--muted,#64748b);font-size:12px;">Fotoğraf yoksa isim baş harfi gösterilir. Tüm satırlar boşsa Ekip bölümü gizlenir.</small>
-            @for($i = 0; $i < 6; $i++)
-                @php $m = $teamRows[$i] ?? []; @endphp
-                <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px;margin-top:10px;">
-                    <input type="text" name="site_team[{{ $i }}][name]"  value="{{ $m['name'] ?? '' }}"  maxlength="80"  placeholder="İsim Soyisim" style="{{ $inp }}">
-                    <input type="text" name="site_team[{{ $i }}][title]" value="{{ $m['title'] ?? '' }}" maxlength="80"  placeholder="Ünvan" style="{{ $inp }}">
-                    <input type="url"  name="site_team[{{ $i }}][photo]" value="{{ $m['photo'] ?? '' }}" maxlength="500" placeholder="Fotoğraf URL (opsiyonel)" style="{{ $inp }}">
-                </div>
-            @endfor
-        </div>
+        {{-- İstatistikler --}}
+        @include('dealer.mini-site._repeat', [
+            'name' => 'site_stats', 'title' => 'İstatistikler', 'rows' => $statRows,
+            'rowView' => 'dealer.mini-site.rows.stat', 'max' => 8, 'addLabel' => '+ İstatistik ekle',
+            'hint' => 'Örn. "500+" / "Mutlu Öğrenci". Boşsa bu bölüm gizlenir; ilk 3 tanesi hero rozetlerinde de görünür.',
+        ])
 
-        {{-- Öğrenci yorumları (4 slot) --}}
-        <div style="{{ $sectionBox }}">
-            <div style="font-weight:600;font-size:14px;margin-bottom:4px;">Öğrenci Yorumları</div>
-            <small style="color:var(--muted,#64748b);font-size:12px;">
-                Yalnız <b>gerçek</b> öğrenci yorumlarınızı girin — yorum onayını aldığınızdan emin olun.
-                Boş bırakırsanız yorumlar bölümü sitenizde hiç görünmez (uydurma örnek yorum gösterilmez).
-            </small>
-            @for($i = 0; $i < 4; $i++)
-                @php $t = $tstRows[$i] ?? []; @endphp
-                <div style="border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:12px;margin-top:12px;background:var(--bg,#f8fafc);">
-                    <textarea name="site_testimonials[{{ $i }}][text]" rows="2" maxlength="600"
-                              placeholder="Yorum metni ({{ $i+1 }})" style="{{ $inp }}resize:vertical;">{{ $t['text'] ?? '' }}</textarea>
-                    <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:8px;">
-                        <input type="text" name="site_testimonials[{{ $i }}][name]"   value="{{ $t['name'] ?? '' }}"   maxlength="80"  placeholder="Öğrenci adı (örn. Elif K.)" style="{{ $inp }}">
-                        <input type="text" name="site_testimonials[{{ $i }}][school]" value="{{ $t['school'] ?? '' }}" maxlength="120" placeholder="Üniversite / program (opsiyonel)" style="{{ $inp }}">
-                    </div>
-                </div>
-            @endfor
-        </div>
+        {{-- Ekip --}}
+        @include('dealer.mini-site._repeat', [
+            'name' => 'site_team', 'title' => 'Ekip / Danışmanlar', 'rows' => $teamRows,
+            'rowView' => 'dealer.mini-site.rows.team', 'max' => 12, 'addLabel' => '+ Kişi ekle',
+            'hint' => 'Fotoğraf yoksa isim baş harfi gösterilir. Hepsi boşsa Ekip bölümü gizlenir.',
+        ])
 
-        {{-- Destek paketleri (3 slot) --}}
-        <div style="{{ $sectionBox }}">
-            <div style="font-weight:600;font-size:14px;margin-bottom:4px;">Destek Paketleri</div>
-            <small style="color:var(--muted,#64748b);font-size:12px;">
-                Kendi paketlerinizi yazın (fiyat yazmak zorunda değilsiniz). Boş bırakırsanız paket bölümü
-                sitenizde hiç görünmez — varsayılan paket üretilmez.
-            </small>
-            @for($i = 0; $i < 3; $i++)
-                @php
-                    $p = $pkgRows[$i] ?? [];
-                    $pkgItems = $p['items'] ?? '';
-                    if (is_array($pkgItems)) { $pkgItems = implode("\n", $pkgItems); }
-                @endphp
-                <div style="border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:12px;margin-top:12px;background:var(--bg,#f8fafc);">
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                        <input type="text" name="site_packages[{{ $i }}][name]" value="{{ $p['name'] ?? '' }}" maxlength="60" placeholder="Paket adı ({{ $i+1 }}) — örn. Standart" style="{{ $inp }}">
-                        <input type="text" name="site_packages[{{ $i }}][tag]"  value="{{ $p['tag'] ?? '' }}"  maxlength="40" placeholder="Etiket — örn. En çok tercih edilen" style="{{ $inp }}">
-                    </div>
-                    <input type="text" name="site_packages[{{ $i }}][desc]" value="{{ $p['desc'] ?? '' }}" maxlength="400" placeholder="Kısa açıklama" style="{{ $inp }}margin-top:8px;">
-                    <textarea name="site_packages[{{ $i }}][items]" rows="3" maxlength="600" placeholder="Kapsam maddeleri — her satıra bir madde (max 6)" style="{{ $inp }}margin-top:8px;resize:vertical;">{{ $pkgItems }}</textarea>
-                    <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12.5px;cursor:pointer;color:var(--muted,#64748b);">
-                        <input type="checkbox" name="site_packages[{{ $i }}][featured]" value="1" @checked(!empty($p['featured'])) style="width:16px;height:16px;cursor:pointer;">
-                        Bu paketi öne çıkar (vurgulu kart)
-                    </label>
-                </div>
-            @endfor
-            <input type="text" name="site_package_note" value="{{ old('site_package_note', $d?->site_package_note) }}" maxlength="300"
-                   placeholder="Paketlerin altındaki açıklama (opsiyonel)" style="{{ $inp }}margin-top:12px;">
-        </div>
+        {{-- Öğrenci yorumları --}}
+        @include('dealer.mini-site._repeat', [
+            'name' => 'site_testimonials', 'title' => 'Öğrenci Yorumları', 'rows' => $tstRows,
+            'rowView' => 'dealer.mini-site.rows.testimonial', 'max' => 12, 'addLabel' => '+ Yorum ekle',
+            'hint' => 'Yalnız GERÇEK yorumları girin ve öğrencinin onayını aldığınızdan emin olun. Boşsa yorum bölümü sitede hiç görünmez.',
+        ])
 
-        {{-- S.S.S. (6 slot) --}}
-        <div style="{{ $sectionBox }}">
-            <div style="font-weight:600;font-size:14px;margin-bottom:4px;">Sıkça Sorulan Sorular</div>
-            <small style="color:var(--muted,#64748b);font-size:12px;">
-                Boş bırakırsanız Almanya süreciyle ilgili genel 4 soru gösterilir. Kendi sorularınızı
-                girerseniz yalnız onlar görünür (soru + cevap birlikte dolu olmalı).
-            </small>
-            @for($i = 0; $i < 6; $i++)
-                @php $f = $faqRows[$i] ?? []; @endphp
-                <div style="border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:12px;margin-top:12px;background:var(--bg,#f8fafc);">
-                    <input type="text" name="site_faq[{{ $i }}][q]" value="{{ $f['q'] ?? '' }}" maxlength="200" placeholder="Soru ({{ $i+1 }})" style="{{ $inp }}">
-                    <textarea name="site_faq[{{ $i }}][a]" rows="2" maxlength="1000" placeholder="Cevap" style="{{ $inp }}margin-top:8px;resize:vertical;">{{ $f['a'] ?? '' }}</textarea>
-                </div>
-            @endfor
-        </div>
+        {{-- Destek paketleri --}}
+        @include('dealer.mini-site._repeat', [
+            'name' => 'site_packages', 'title' => 'Destek Paketleri', 'rows' => $pkgRows,
+            'rowView' => 'dealer.mini-site.rows.package', 'max' => 6, 'addLabel' => '+ Paket ekle',
+            'hint' => 'Kendi paketlerinizi yazın (fiyat zorunlu değil). Boş bırakırsanız paket bölümü hiç görünmez — varsayılan paket üretilmez.',
+        ])
+        <input type="text" name="site_package_note" value="{{ old('site_package_note', $d?->site_package_note) }}" maxlength="300"
+               placeholder="Paketlerin altındaki açıklama (opsiyonel)" style="{{ $inp }}margin:-14px 0 22px;">
+
+        {{-- S.S.S. --}}
+        @include('dealer.mini-site._repeat', [
+            'name' => 'site_faq', 'title' => 'Sıkça Sorulan Sorular', 'rows' => $faqRows,
+            'rowView' => 'dealer.mini-site.rows.faq', 'max' => 10, 'addLabel' => '+ Soru ekle',
+            'hint' => 'Boş bırakırsanız Almanya süreciyle ilgili genel 4 soru gösterilir. Soru ve cevap birlikte dolu olmalı.',
+        ])
 
         {{-- Yerleşilen üniversiteler --}}
         <div style="{{ $sectionBox }}">
@@ -315,3 +238,71 @@
 </form>
 
 @endsection
+
+@push('scripts')
+{{-- Tekrarlanabilir kart grupları: ekle / sil / ↑ ↓. Sıra = input adlarındaki index sırası,
+     bu yüzden her değişiklikten sonra satırlar yeniden numaralanır. CSP: nonce'lu blok. --}}
+<script nonce="{{ $cspNonce ?? '' }}">
+(function () {
+    document.querySelectorAll('[data-repeat]').forEach(function (group) {
+        var prefix = group.dataset.repeat;
+        var max    = parseInt(group.dataset.max || '12', 10);
+        var fixed  = group.hasAttribute('data-fixed');   // bölüm listesi: ekle/sil yok, sadece sırala
+        var list   = group.querySelector('[data-rows]');
+        var tpl    = group.querySelector('[data-row-tpl]');
+        var addBtn = group.querySelector('[data-add]');
+        if (!list) { return; }
+
+        function renumber() {
+            Array.prototype.forEach.call(list.children, function (row, i) {
+                row.querySelectorAll('[name]').forEach(function (el) {
+                    el.name = el.name.replace(/\[(?:\d+|__I__)\]/, '[' + i + ']');
+                });
+                var num = row.querySelector('[data-num]');
+                if (num) { num.textContent = String(i + 1); }
+                var up = row.querySelector('[data-act="up"]');
+                var dn = row.querySelector('[data-act="down"]');
+                if (up) { up.disabled = (i === 0); up.style.opacity = (i === 0) ? '.35' : '1'; }
+                if (dn) {
+                    var last = (i === list.children.length - 1);
+                    dn.disabled = last; dn.style.opacity = last ? '.35' : '1';
+                }
+            });
+            if (addBtn) {
+                var full = list.children.length >= max;
+                addBtn.disabled = full;
+                addBtn.style.opacity = full ? '.45' : '1';
+                addBtn.style.cursor = full ? 'not-allowed' : 'pointer';
+            }
+        }
+
+        group.addEventListener('click', function (e) {
+            var btn = e.target.closest('button');
+            if (!btn || !group.contains(btn)) { return; }
+            var act = btn.hasAttribute('data-add') ? 'add' : btn.dataset.act;
+            if (!act) { return; }
+            var row = btn.closest('[data-row]');
+
+            if (act === 'add' && !fixed && tpl) {
+                if (list.children.length >= max) { return; }
+                var clone = tpl.content ? tpl.content.cloneNode(true) : null;
+                if (!clone) { return; }
+                list.appendChild(clone);
+            } else if (act === 'del' && !fixed && row) {
+                row.remove();
+            } else if (act === 'up' && row && row.previousElementSibling) {
+                list.insertBefore(row, row.previousElementSibling);
+            } else if (act === 'down' && row && row.nextElementSibling) {
+                list.insertBefore(row.nextElementSibling, row);
+            } else {
+                return;
+            }
+            e.preventDefault();
+            renumber();
+        });
+
+        renumber();
+    });
+})();
+</script>
+@endpush
