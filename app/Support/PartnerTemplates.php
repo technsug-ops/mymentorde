@@ -54,6 +54,13 @@ class PartnerTemplates
             'modular'  => true,
             'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
         ],
+        'elektrik' => [
+            'name'     => 'Elektrik',
+            'desc'     => 'Cesur indigo, sıkı tipografi, koyu lacivert paneller; iddialı ve net.',
+            'accent'   => '#3b5bfd',
+            'modular'  => true,
+            'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
+        ],
         'seftali' => [
             'name'     => 'Şeftali Sabahı',
             'desc'     => 'Editoryal serif, sıcak şeftali tonları; dergi hissi, sola dayalı başlıklar.',
