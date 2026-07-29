@@ -62,6 +62,8 @@
     --display:"Poppins","Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,sans-serif;
     --body:"Public Sans","Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,sans-serif;
     --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
+    /* Sayfa genişliği tek yerden: geniş ekranda kenar boşluğu az, dar ekranda akışkan */
+    --maxw:1400px;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;scroll-behavior:smooth;}
@@ -69,7 +71,7 @@ body{background:var(--accent-tint);color:var(--ink);font-family:var(--body);font
 svg{width:1em;height:1em;}
 img{max-width:100%;}
 a{color:var(--accent-deep);}
-.wrap{max-width:1120px;margin:0 auto;padding:0 26px;}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 26px;}
 .lbl{font:600 12px/1 var(--mono);letter-spacing:.1em;color:var(--accent);text-transform:uppercase;}
 h1,h2,h3{font-family:var(--display);letter-spacing:-.6px;margin:0;}
 .h2{font:700 clamp(25px,3.4vw,36px)/1.14 var(--display);letter-spacing:-1px;margin:14px 0 10px;}
@@ -87,7 +89,7 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-.6px;margin:0;}
 
 /* ─── Nav ─── */
 .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb, var(--accent-tint) 88%, transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
-.nav-in{max-width:1120px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:16px 26px;}
+.nav-in{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:16px 26px;}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);}
 .brand-mark{width:34px;height:34px;border-radius:12px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font:800 16px/1 var(--display);flex-shrink:0;}
 .brand-name{font:700 20px/1 var(--display);}
@@ -100,17 +102,17 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-.6px;margin:0;}
 @media(max-width:760px){.nav-links .nav-link{display:none;}}
 
 /* ─── Hero ─── */
-.hero{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:44px;align-items:center;padding:66px 26px 60px;}
+.hero{max-width:var(--maxw);margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:44px;align-items:center;padding:66px 26px 60px;}
 .pill{display:inline-flex;align-items:center;gap:9px;font:600 12px/1 var(--body);color:var(--accent-deep);background:var(--accent-soft);padding:9px 15px;border-radius:30px;}
 .pill i{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;}
 .hero h1{font:700 clamp(32px,5.2vw,52px)/1.08 var(--display);letter-spacing:-1.4px;margin:22px 0 18px;text-wrap:balance;}
-.hero p{font-size:17.5px;color:var(--muted);margin:0 0 30px;max-width:470px;}
+.hero p{font-size:17.5px;color:var(--muted);margin:0 0 30px;max-width:540px;}
 .hero-btns{display:flex;gap:13px;align-items:center;flex-wrap:wrap;}
 .hero-chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px;}
 .chip{background:#fff;border:1px solid var(--line);border-radius:16px;padding:11px 15px;box-shadow:var(--shadow-sm);}
 .chip b{display:block;font:800 18px/1 var(--display);}
 .chip span{font:500 11.5px/1.3 var(--mono);color:var(--muted);}
-.hero-art{position:relative;}
+.hero-art{position:relative;max-width:520px;justify-self:end;width:100%;}
 .hero-art-frame{position:relative;aspect-ratio:4/5;border-radius:32px;overflow:hidden;box-shadow:var(--shadow-md);}
 .hero-art-frame img{width:100%;height:100%;object-fit:cover;display:block;}
 .float{position:absolute;background:#fff;border-radius:18px;padding:13px 16px;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:11px;animation:lvFloat 5s ease-in-out infinite;}
@@ -130,7 +132,7 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-.6px;margin:0;}
    Flex + justify-content:center → son sıra eksik kaldığında kartlar sola yığılmaz, ORTALANIR.
    Kart genişliği --cols'tan hesaplanır (grow yok) ki 6 kart 4+2 değil 3+3 dizilsin.
    --cols her bölümde kart sayısına göre Blade'den verilir (bkz. $cols). */
-.grid{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--gap,18px);--cols:3;--min:250px;}
+.grid{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--gap,18px);--cols:3;--min:280px;}
 .grid>*{flex:0 1 calc((100% - (var(--cols) - 1) * var(--gap,18px)) / var(--cols));min-width:min(var(--min),100%);}
 .g-step{--gap:20px;--min:200px;}
 .g-why{--gap:16px;--min:200px;}
@@ -201,7 +203,7 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-.6px;margin:0;}
 .pkg-hi .pkg-btn{background:var(--accent);color:#fff;}
 
 /* ─── S.S.S. (JS'siz akordeon) ─── */
-.faq{max-width:900px;margin:0 auto;}
+.faq{max-width:1000px;margin:0 auto;}
 .faq details{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:12px;}
 .faq summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 22px;font:600 16px/1.35 var(--body);transition:background .15s ease;}
 .faq summary::-webkit-details-marker{display:none;}
@@ -231,7 +233,7 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-.6px;margin:0;}
 
 /* ─── Footer ─── */
 .foot{background:var(--ink);}
-.foot-in{max-width:1120px;margin:0 auto;padding:34px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+.foot-in{max-width:var(--maxw);margin:0 auto;padding:34px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}
 .foot .brand-name{color:#fff;font-size:16px;}
 .foot-txt{font:500 13px/1.5 var(--mono);color:var(--ink-soft);}
 .foot-dim{font:500 12px/1.5 var(--mono);color:color-mix(in srgb, var(--ink-soft) 62%, var(--ink));}
