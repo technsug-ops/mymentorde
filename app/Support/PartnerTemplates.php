@@ -61,6 +61,13 @@ class PartnerTemplates
             'modular'  => true,
             'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
         ],
+        'mercan' => [
+            'name'     => 'Mercan Enerji',
+            'desc'     => 'Oyunbaz ve enerjik: sticker rozetler, gradient butonlar, kesikli ayraçlar.',
+            'accent'   => '#ff5a5f',
+            'modular'  => true,
+            'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
+        ],
         'seftali' => [
             'name'     => 'Şeftali Sabahı',
             'desc'     => 'Editoryal serif, sıcak şeftali tonları; dergi hissi, sola dayalı başlıklar.',
