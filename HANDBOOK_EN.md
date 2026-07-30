@@ -497,12 +497,14 @@ Quick review with keyboard shortcuts:
     why us + team, packages, FAQ (nav / hero / apply box / footer are fixed)
   - **Card management** — service, statistics, team, testimonial, package and FAQ cards can
     be **added, removed and reordered with ↑ ↓**; the site follows the same order
-  - **Site template selection** — 4 designs today: **Aurora** (vivid gradient), **Minimal**
-    (clean, generous whitespace), **Bold** (dark, high contrast), **Lavanta** (rounded,
-    pastel, friendly). Content stays the same, only the look changes. Section order /
-    on-off currently applies to **Lavanta**; the 3 older templates have a fixed layout
-    (the editor warns about this and labels sections a template does not render).
-  - Try a template without saving: `/p/{slug}?preview=1&tpl={aurora|minimal|bold|lavanta}`
+  - **Site template selection** — **13 designs**. Content stays the same, only the look changes:
+    - *Pastel:* **Lavanta** (rounded, friendly) · **Şeftali Sabahı** (editorial serif) · **Nane** (minimal, hairline)
+    - *Vivid:* **Elektrik** (bold indigo) · **Mercan Enerji** (playful, stickers) · **Sedef** (soft, reassuring) · **Manyeta** (neon dark)
+    - *Premium:* **Bulut** (glass surfaces) · **Mermer** (magazine layout, gold accent) · **Ufuk** (corporate navy/bronze)
+    - *Legacy (fixed layout):* Aurora · Minimal · Bold
+    Section order and on/off apply to the **10 new templates**; the 3 legacy ones have a
+    fixed layout (the editor warns about this and labels sections a template does not render).
+  - Try a template without saving: `/p/{slug}?preview=1&tpl={template-key}`
   - **"MentorDE badge" toggle** — when off, the MentorDE brand never appears on the page (full white-label)
 - Other dealer types (freelance / lead generation) get the classic single-page mini-site
 

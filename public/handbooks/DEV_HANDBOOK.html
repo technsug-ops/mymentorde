@@ -875,7 +875,8 @@ sırayla sona ekler (açık) → şablon değişse de bozulmaz. Şablon <code>$s
 dosyanın <code>@php</code> yerel değişkenlerini otomatik görür. Menü <strong>elle yazılmaz</strong>, <code>$navLinks</code>
 kullanılır (kapalı/boş bölümün linki çıkmaz; bölüm id'leri <code>hizmetler/surec/paketler/sss</code>).
 <code>TEMPLATES[key]['modular'|'sections']</code> editöre yansır: sabit kurgulu şablonda uyarı,
-basılmayan bölümde &quot;… şablonunda yok&quot; etiketi. Şu an modüler: <strong>lavanta</strong> (+ <code>_starter</code> iskeleti).</p>
+basılmayan bölümde &quot;… şablonunda yok&quot; etiketi. Şu an modüler (10): <strong>lavanta, seftali, nane, elektrik, mercan, sedef, manyeta, bulut,
+mermer, ufuk</strong> (+ <code>_starter</code> iskeleti). Sabit kurgulu (3): aurora, minimal, bold.</p>
 <p><strong>Editör kart yönetimi:</strong> <code>dealer/mini-site/_repeat.blade.php</code> + <code>rows/*.blade.php</code>;
 sıra = input adlarındaki index, JS her ekleme/silme/taşımada satırları yeniden numaralar
 (<code>edit.blade.php</code> sonundaki tek nonce'lu blok, <code>[data-repeat]</code>). Yeni kart iskeleti
@@ -893,11 +894,11 @@ Geçersiz key sessizce <code>DEFAULT</code>'a düşer. Önizleme <strong>yetki i
 EZER. Guard <code>public.dealer-landing</code> + <code>public.partner-templates.*</code> view'larını hariç tutar.
 <strong>Yeni public white-label view eklerken guard'a dahil et</strong>, yoksa sayfada hep MentorDE markası görünür.</li>
 <li><strong>JS yok:</strong> Şablonlar CSP nonce'suz public sayfalarda render olur → inline <code>onclick</code> / <code>&lt;script&gt;</code>
-kullanma. 4 şablon + iskelet <code>script=0, onclick=0</code> ile doğrulandı. Akordeon gerekiyorsa
+kullanma. 13 şablon + iskelet <code>script=0, onclick=0</code> ile doğrulandı (113 blade derleme kontrolü). Akordeon gerekiyorsa
 <code>&lt;details&gt;/&lt;summary&gt;</code> kullan (Lavanta S.S.S. böyle çalışır).</li>
 <li><strong>Font sadece lokal:</strong> Google Fonts CDN'e istek atma (DSGVO). <code>public/fonts/local-fonts.css</code>
-içinde Plus Jakarta Sans (variable 200–800), DM Serif Display, Poppins (400–800),
-Public Sans (variable 400–700), IBM Plex Mono (400/500) var; başka aile gerekiyorsa woff2'yi
+içinde 12 aile / 44 face var: Plus Jakarta Sans, DM Serif Display, Poppins, Public Sans,
+IBM Plex Mono, Sora, Newsreader, Space Grotesk, Playfair Display, Manrope, DM Sans, IBM Plex Sans; başka aile gerekiyorsa woff2'yi
 latin + <strong>latin-ext</strong> (Türkçe karakterler) olarak indirip <code>@font-face</code> ekle. Variable font'ta
 <code>font-weight: 400 700;</code> yaz — tek ağırlık yazarsan tarayıcı fake bold üretir.</li>
 <li><strong>Uydurma veri yok:</strong> Şablonda örnek yorum / hayali rakam yazma. <code>$heroTrust</code> ve

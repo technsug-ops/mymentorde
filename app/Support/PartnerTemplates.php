@@ -61,6 +61,27 @@ class PartnerTemplates
             'modular'  => true,
             'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
         ],
+        'bulut' => [
+            'name'     => 'Bulut',
+            'desc'     => 'Ferah cam yüzeyler: yarı saydam kartlar, yumuşak geçişler, serin ton.',
+            'accent'   => '#4a76d4',
+            'modular'  => true,
+            'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
+        ],
+        'mermer' => [
+            'name'     => 'Mermer',
+            'desc'     => 'Rafine dergi düzeni: serif başlıklar, altın vurgu, numaralı hizmet satırları.',
+            'accent'   => '#1f5f4b',
+            'modular'  => true,
+            'sections' => ['stats', 'services', 'testimonials', 'steps', 'unis', 'about', 'why', 'packages', 'faq'],
+        ],
+        'ufuk' => [
+            'name'     => 'Ufuk',
+            'desc'     => 'Kurumsal lacivert + bronz: çerçeveli hizmet tablosu, güven odaklı düzen.',
+            'accent'   => '#14243a',
+            'modular'  => true,
+            'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
+        ],
         'sedef' => [
             'name'     => 'Sedef',
             'desc'     => 'Yumuşak ve güven veren: geniş yuvarlatmalar, çerçevesiz gölgeler, sakin ton.',

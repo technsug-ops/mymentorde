@@ -496,12 +496,14 @@ Klavye kısayollarıyla hızlı inceleme:
     S.S.S. (nav / hero / başvuru kutusu / footer sabittir)
   - **Kart yönetimi** — hizmet, istatistik, ekip, yorum, paket ve S.S.S. kartları
     **eklenebilir, silinebilir ve ↑ ↓ ile sıralanabilir**; sitede aynı sırayla görünür
-  - **Site şablonu seçimi** — şu an 4 tasarım: **Aurora** (canlı gradient), **Minimal**
-    (sade, bol boşluk), **Bold** (koyu, yüksek kontrast), **Lavanta** (yuvarlak, pastel,
-    samimi). İçerik aynı kalır, sadece görünüm değişir. Bölüm sırası/aç-kapa şu an
-    **Lavanta**'da uygulanır; eski 3 şablon sabit kurguludur (editör bunu uyarı olarak
-    gösterir ve şablonun basmadığı bölümü etiketler).
-  - Kaydetmeden şablon denemek için: `/p/{slug}?preview=1&tpl={aurora|minimal|bold|lavanta}`
+  - **Site şablonu seçimi** — **13 tasarım**. İçerik aynı kalır, sadece görünüm değişir:
+    - *Pastel:* **Lavanta** (yuvarlak, samimi) · **Şeftali Sabahı** (editoryal serif) · **Nane** (minimal, ince çizgi)
+    - *Canlı:* **Elektrik** (cesur indigo) · **Mercan Enerji** (oyunbaz, sticker) · **Sedef** (yumuşak, güven veren) · **Manyeta** (neon karanlık)
+    - *Premium:* **Bulut** (cam yüzeyler) · **Mermer** (dergi düzeni, altın vurgu) · **Ufuk** (kurumsal lacivert-bronz)
+    - *Eski (sabit kurgulu):* Aurora · Minimal · Bold
+    Bölüm sırası ve aç/kapa **10 yeni şablonda** uygulanır; eski 3 şablon sabit kurguludur
+    (editör bunu uyarı olarak gösterir ve şablonun basmadığı bölümü etiketler).
+  - Kaydetmeden şablon denemek için: `/p/{slug}?preview=1&tpl={sablon-adi}`
   - **"MentorDE rozeti" aç/kapa** — kapatıldığında sayfada MentorDE markası hiç geçmez (tam white-label)
 - Diğer bayi tipleri (freelance / lead generation) tek sayfalık klasik mini-site alır
 

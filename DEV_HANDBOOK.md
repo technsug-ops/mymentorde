@@ -564,7 +564,8 @@ sırayla sona ekler (açık) → şablon değişse de bozulmaz. Şablon `$sectio
 dosyanın `@php` yerel değişkenlerini otomatik görür. Menü **elle yazılmaz**, `$navLinks`
 kullanılır (kapalı/boş bölümün linki çıkmaz; bölüm id'leri `hizmetler/surec/paketler/sss`).
 `TEMPLATES[key]['modular'|'sections']` editöre yansır: sabit kurgulu şablonda uyarı,
-basılmayan bölümde "… şablonunda yok" etiketi. Şu an modüler: **lavanta** (+ `_starter` iskeleti).
+basılmayan bölümde "… şablonunda yok" etiketi. Şu an modüler (10): **lavanta, seftali, nane, elektrik, mercan, sedef, manyeta, bulut,
+mermer, ufuk** (+ `_starter` iskeleti). Sabit kurgulu (3): aurora, minimal, bold.
 
 **Editör kart yönetimi:** `dealer/mini-site/_repeat.blade.php` + `rows/*.blade.php`;
 sıra = input adlarındaki index, JS her ekleme/silme/taşımada satırları yeniden numaralar
@@ -585,11 +586,11 @@ Geçersiz key sessizce `DEFAULT`'a düşer. Önizleme **yetki ister**: sahibi ba
   EZER. Guard `public.dealer-landing` + `public.partner-templates.*` view'larını hariç tutar.
   **Yeni public white-label view eklerken guard'a dahil et**, yoksa sayfada hep MentorDE markası görünür.
 - **JS yok:** Şablonlar CSP nonce'suz public sayfalarda render olur → inline `onclick` / `<script>`
-  kullanma. 4 şablon + iskelet `script=0, onclick=0` ile doğrulandı. Akordeon gerekiyorsa
+  kullanma. 13 şablon + iskelet `script=0, onclick=0` ile doğrulandı (113 blade derleme kontrolü). Akordeon gerekiyorsa
   `<details>/<summary>` kullan (Lavanta S.S.S. böyle çalışır).
 - **Font sadece lokal:** Google Fonts CDN'e istek atma (DSGVO). `public/fonts/local-fonts.css`
-  içinde Plus Jakarta Sans (variable 200–800), DM Serif Display, Poppins (400–800),
-  Public Sans (variable 400–700), IBM Plex Mono (400/500) var; başka aile gerekiyorsa woff2'yi
+  içinde 12 aile / 44 face var: Plus Jakarta Sans, DM Serif Display, Poppins, Public Sans,
+  IBM Plex Mono, Sora, Newsreader, Space Grotesk, Playfair Display, Manrope, DM Sans, IBM Plex Sans; başka aile gerekiyorsa woff2'yi
   latin + **latin-ext** (Türkçe karakterler) olarak indirip `@font-face` ekle. Variable font'ta
   `font-weight: 400 700;` yaz — tek ağırlık yazarsan tarayıcı fake bold üretir.
 - **Uydurma veri yok:** Şablonda örnek yorum / hayali rakam yazma. `$heroTrust` ve

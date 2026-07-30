@@ -49,7 +49,30 @@ Görsel kontrol: `/p/operasyon-partner-demo?preview=1&tpl=lavanta` (manager/sahi
   kapalı bölüm basılmadı, kart eklendi/sıralandı, nav linki kayboldu) + 45 render kontrolü
   regresyon temiz; 4 şablon `script=0 cdn=0`; 20 blade derleme kontrolü.
 
-**Sıradaki:** kalan 9 tasarım modüler kalıpla (`docs/PARTNER_TEMPLATE_EKLEME.md`).
+**30 Tem — 10 ŞABLONUN TAMAMI ÇEVRİLDİ (modüler kalıp):**
+lavanta · seftali · nane · elektrik · mercan · sedef · manyeta · bulut · mermer · ufuk
+(registry'de 13 şablon: 10 modüler + eski 3 sabit kurgulu aurora/minimal/bold)
+
+Her şablon: ana dosya (head+CSS+nav+hero+CTA+footer) + `{key}/sections/*.blade.php` 9 partial.
+Kimlikler gerçekten farklı — sadece renk kopyası değil:
+- **nane:** hairline ızgara (1px gap = çizgi), ortalanmış hero, gölgesiz
+- **seftali:** editoryal serif (Newsreader), sola dayalı başlık, üst-çizgi kartlar, koyu alıntı bandı
+- **elektrik:** Space Grotesk sıkı tipografi, koyu lacivert panel, tam genişlik accent bandı
+- **mercan:** sticker rozetler (rotate), gradient, dashed ayraç, bento (2 büyük + küçükler)
+- **sedef:** Manrope/DM Sans, 24-32px yuvarlatma, çerçevesiz gölge, büyük beyaz panel
+- **manyeta:** neon karanlık, glow blob, gradient metin, hizmetler NUMARALI SATIR listesi
+- **bulut:** cam (glass) kartlar + blur, yatay hizmet kartı + tag çipleri
+- **mermer:** Playfair + altın vurgu, sticky bölüm başlığı + numaralı satırlar, merkez alıntı
+- **ufuk:** kurumsal lacivert + bronz, çerçeveli hizmet TABLOSU, lacivert bantlar
+Fontlar: 12 aile / 44 face / 1.1 MB, hepsi lokal (Sora, Newsreader, Space Grotesk, Playfair,
+Manrope, DM Sans, IBM Plex Sans + önceki 5).
+
+**Doğrulama (30 Tem):** 113 blade derleme 0 hata · 10 şablon dolu+boş+rozet-kapalı render OK
+(script=0, cdn=0, paket boşta gizli, rozet kapalı → "MentorDE" 0 kez) · 45 render + 30 uçtan
+uca test suite regresyon temiz · 7 yeni font HTTP 200.
+
+**Sıradaki:** görsel gözden geçirme (10 şablonu tarayıcıda karşılaştır) · aurora/minimal/bold
+kararı (modülere çevir veya kaldır) · F3 custom domain.
 Atlanan: DC tasarımlarındaki "Almanya'da yaşam / şehir galerisi" bölümü — partnere ait fotoğraf
 yok, lisanslı stok görsel de yok. Şehir foto seti tedarik edilirse ortak bölüm olarak eklenebilir.
 Fontlar: kalan şablonlar Sora / Newsreader / Space Grotesk / Playfair / Manrope / DM Sans /
