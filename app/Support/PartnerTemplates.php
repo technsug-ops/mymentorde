@@ -61,6 +61,20 @@ class PartnerTemplates
             'modular'  => true,
             'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
         ],
+        'sedef' => [
+            'name'     => 'Sedef',
+            'desc'     => 'Yumuşak ve güven veren: geniş yuvarlatmalar, çerçevesiz gölgeler, sakin ton.',
+            'accent'   => '#4f9188',
+            'modular'  => true,
+            'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
+        ],
+        'manyeta' => [
+            'name'     => 'Manyeta',
+            'desc'     => 'Neon karanlık mod: parlayan gradientler, numaralı hizmet satırları, spot yorum.',
+            'accent'   => '#ff4fbf',
+            'modular'  => true,
+            'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
+        ],
         'mercan' => [
             'name'     => 'Mercan Enerji',
             'desc'     => 'Oyunbaz ve enerjik: sticker rozetler, gradient butonlar, kesikli ayraçlar.',
