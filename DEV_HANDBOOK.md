@@ -808,6 +808,19 @@ npx playwright test
 
 ## 11. Deploy & Ortam Değişkenleri
 
+### Dal Düzeni — hangi dal canlıya gider?
+
+| Dal | Rolü | Push edilince |
+|---|---|---|
+| `develop` | Çalışma dalı — tüm günlük iş | Şimdilik bir şey olmaz |
+| `main` | Yayın dalı | GitHub Actions → `panel.mentorde.com` **canlı deploy** |
+
+`main`'e doğrudan commit `githooks/pre-commit` ile engellenir. Yeni klonda bir kez
+`git config core.hooksPath githooks` çalıştırılmalı — hook'lar repo ile kopyalanmaz.
+
+Yayına alma: `git switch main && git merge develop && git push` → Actions'ı izle.
+Tam akış ve planlanan `test.mentorde.com` staging ortamı: `docs/BRANCH_WORKFLOW.md`.
+
 ### Gerekli `.env` Değişkenleri
 
 ```env

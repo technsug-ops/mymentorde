@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# main dalina dogrudan commit'i engeller.
+#
+# main = YAYIN dali. Ona her push GitHub Actions'i tetikler ve
+# degisiklik ANINDA panel.mentorde.com'a gider (.github/workflows/deploy.yml).
+# Gunluk is develop dalinda yapilir, hazir oldugunda main'e merge edilir.
+#
+# Aktiflestirme:  git config core.hooksPath githooks
+# Ayrinti:        docs/BRANCH_WORKFLOW.md
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$branch" = "main" ]; then
+    echo ""
+    echo "  DUR — main dalindasin."
+    echo ""
+    echo "  main yayin dalidir; buraya push = aninda canli deploy."
+    echo "  Gunluk is develop'ta yapilir:"
+    echo ""
+    echo "      git switch develop"
+    echo ""
+    echo "  Yanlislikla main'de calismaya basladiysan, degisiklikleri"
+    echo "  develop'a tasi (henuz commit etmediysen sadece switch yeter):"
+    echo ""
+    echo "      git stash && git switch develop && git stash pop"
+    echo ""
+    echo "  Gercekten main'e commit etmen gerekiyorsa (acil canli duzeltme):"
+    echo ""
+    echo "      git commit --no-verify -m \"...\""
+    echo ""
+    exit 1
+fi
+
+exit 0

@@ -114,6 +114,7 @@ jobs:
                "memory/*" \
                "docs/*" \
                "scripts/*" \
+               "githooks/*" \
                "storage/logs/*" \
                "storage/app/db-dumps/*" \
                "storage/framework/cache/data/*" \

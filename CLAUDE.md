@@ -59,6 +59,17 @@
 
 ---
 
+## Dal Düzeni (ÖNEMLİ)
+
+- **`develop` = çalışma dalı.** Tüm commit'ler buraya. Varsayılan dal budur.
+- **`main` = yayın dalı.** `main`'e push GitHub Actions'ı tetikler ve değişiklik
+  **anında** `panel.mentorde.com` canlı sitesine gider.
+- **Asla `main`'de commit etme.** Kullanıcı açıkça "yayınla / canlıya al" demedikçe
+  `develop → main` merge'i yapma. `githooks/pre-commit` bunu ayrıca engeller.
+- Ayrıntı ve yayına alma adımları: `docs/BRANCH_WORKFLOW.md`
+
+---
+
 ## Proje Bağlamı
 
 - **Stack:** PHP / Laravel, Blade templates, vanilla CSS (`portal-unified-v2.css`)
