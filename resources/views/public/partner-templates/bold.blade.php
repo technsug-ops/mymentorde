@@ -190,6 +190,64 @@ svg{width:1em;height:1em;}
 footer{background:var(--dark);color:rgba(255,255,255,.55);padding:34px 0;font-size:13px;}
 footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
 footer a{color:#fff;}
+
+/* ── MODÜLER BÖLÜMLER ── */
+/* adım sayısı sözleşmeden geldiği için sütun sayısı dinamik */
+.steps{grid-template-columns:repeat(var(--n,4),1fr);}
+@media(max-width:900px){.steps{grid-template-columns:1fr 1fr;}}
+@media(max-width:520px){.steps{grid-template-columns:1fr;}}
+
+/* NEDEN BİZ — artık bağımsız bölüm (eskiden hakkımızda'nın sağ sütunuydu) */
+.why-grid{display:grid;grid-template-columns:repeat(var(--n,3),1fr);gap:20px;}
+@media(max-width:900px){.why-grid{grid-template-columns:1fr;}}
+
+/* ÜNİVERSİTELER */
+.uni-strip{display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center;}
+.uni-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+.uni{font-family:var(--disp);font-weight:700;font-size:14px;color:var(--ink);background:#fff;
+    border:2px solid var(--line);border-radius:12px;padding:11px 20px;transition:all .2s;}
+.uni:hover{border-color:var(--accent);color:var(--accent);}
+
+/* PAKETLER */
+.pkg-grid{display:grid;grid-template-columns:repeat(var(--n,3),1fr);gap:22px;align-items:stretch;}
+@media(max-width:900px){.pkg-grid{grid-template-columns:1fr;}}
+.pkg{position:relative;display:flex;flex-direction:column;background:#fff;border:2px solid var(--line);
+    border-radius:20px;padding:32px 28px;transition:all .2s;}
+.pkg:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--accent) 45%,transparent);}
+.pkg-hi{background:var(--dark);border-color:var(--dark);color:rgba(255,255,255,.78);}
+.pkg-hi h3,.pkg-hi .pkg-desc{color:#fff;}
+.pkg-hi .pkg-items li{color:rgba(255,255,255,.8);}
+.pkg-flag{position:absolute;top:-13px;left:28px;background:var(--accent);color:#fff;font-family:var(--disp);
+    font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;border-radius:20px;}
+.pkg-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+.pkg-head h3{font-family:var(--disp);font-weight:800;font-size:24px;color:var(--ink);margin:0;letter-spacing:-.6px;}
+.pkg-tag{font-family:var(--disp);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);}
+.pkg-desc{font-size:14px;color:var(--body);margin:0 0 20px;line-height:1.6;}
+.pkg-items{list-style:none;padding:20px 0 0;margin:0 0 26px;border-top:2px solid color-mix(in srgb,var(--line) 60%,transparent);
+    display:flex;flex-direction:column;gap:11px;}
+.pkg-hi .pkg-items{border-top-color:rgba(255,255,255,.16);}
+.pkg-items li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:var(--body);line-height:1.5;}
+.pkg-items li svg{width:17px;height:17px;color:var(--accent);flex-shrink:0;margin-top:2px;}
+.pkg-btn{margin-top:auto;justify-content:center;background:var(--ink);color:#fff !important;padding:14px 24px;font-size:14px;}
+.pkg-btn:hover{background:var(--accent);}
+.pkg-hi .pkg-btn{background:var(--accent);}
+.pkg-hi .pkg-btn:hover{background:#fff;color:var(--ink) !important;}
+
+/* S.S.S. — JS yok, <details> akordeonu */
+.faq{max-width:840px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+.faq-item{background:#fff;border:2px solid var(--line);border-radius:16px;overflow:hidden;transition:all .2s;}
+.faq-item[open]{border-color:var(--accent);}
+.faq-item summary{display:flex;align-items:center;justify-content:space-between;gap:18px;cursor:pointer;list-style:none;
+    padding:22px 26px;font-family:var(--disp);font-weight:700;font-size:16px;color:var(--ink);letter-spacing:-.3px;}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item summary:hover{color:var(--accent);}
+/* +/− işareti: açılınca dikey çizgi kaybolur */
+.faq-sign{position:relative;width:16px;height:16px;flex-shrink:0;}
+.faq-sign::before,.faq-sign::after{content:'';position:absolute;background:var(--accent);border-radius:2px;transition:opacity .2s;}
+.faq-sign::before{left:0;top:7px;width:16px;height:2px;}
+.faq-sign::after{left:7px;top:0;width:2px;height:16px;}
+.faq-item[open] .faq-sign::after{opacity:0;}
+.faq-a{padding:0 26px 24px;font-size:14.5px;color:var(--body);line-height:1.75;white-space:pre-line;}
 </style>
 </head>
 <body>
@@ -198,8 +256,9 @@ footer a{color:#fff;}
 <header class="hero">
     <nav class="b-nav"><div class="wrap">
         <a href="#" class="b-logo">@if($brandLogoUrl)<img src="{{ $brandLogoUrl }}" alt="{{ $siteName }}">@else{{ $siteName }}@endif</a>
+        {{-- Menü SÖZLEŞMEDEN ($navLinks): kapalı/boş bölümün linki basılmaz --}}
         <div class="b-nav-links">
-            <a href="#hizmetler">Hizmetler</a><a href="#hakkimizda">Hakkımızda</a>@if(!empty($team))<a href="#ekip">Ekip</a>@endif<a href="#iletisim">İletişim</a>
+            @foreach($navLinks as $nl)<a href="{{ $nl['href'] }}">{{ $nl['label'] }}</a>@endforeach<a href="#iletisim">İletişim</a>
         </div>
         <a href="{{ $applyUrl }}" class="b-nav-cta" data-track="cta_clicked" data-ph-cta-name="nav_apply" data-ph-location="partner_bold_nav">Başvur →</a>
     </div></nav>
@@ -236,117 +295,13 @@ footer a{color:#fff;}
     </div>
 </header>
 
-{{-- SERVICES --}}
-<section id="hizmetler" class="sec">
-    <div class="wrap">
-        <div class="sec-head c"><span class="kick c">Hizmetler</span><h2>Almanya Eğitim Sürecinin Her Adımında</h2><p>Başvurudan yerleşime kadar tüm süreci profesyonel ekibimizle yönetiyoruz.</p></div>
-        <div class="svc-grid">
-            @foreach($services as $i => $s)
-                <div class="svc">
-                    <span class="svc-n">{{ sprintf('%02d', $i + 1) }}</span>
-                    <div class="svc-ic">{!! $icon($s['icon'] ?? 'default') !!}</div>
-                    <h3>{{ $s['title'] }}</h3>
-                    @if(!empty($s['desc']))<p>{{ $s['desc'] }}</p>@endif
-                    @if(!empty($s['items']))<ul class="svc-items">@foreach($s['items'] as $it)<li>{!! $icon('check') !!} {{ $it }}</li>@endforeach</ul>@endif
-                </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-{{-- PROCESS --}}
-<section class="sec" style="padding-top:0;">
-    <div class="wrap">
-        <div class="sec-head c"><span class="kick c">Nasıl Çalışır</span><h2>Adım Adım Yanınızdayız</h2></div>
-        <div class="steps">
-            <div class="step"><div class="sn">1</div><h3>Ücretsiz Değerlendirme</h3><p>Hedeflerinizi dinler, size en uygun program seçeneklerini çıkarırız.</p></div>
-            <div class="step"><div class="sn">2</div><h3>Başvuru & Belgeler</h3><p>Üniversite ve dil okulu başvurularınızı uçtan uca yönetiriz.</p></div>
-            <div class="step"><div class="sn">3</div><h3>Vize & Finans</h3><p>Randevu, bloke hesap ve sigortada adım adım rehberlik ederiz.</p></div>
-            <div class="step"><div class="sn">4</div><h3>Almanya'da Yerleşim</h3><p>Konaklama ve Anmeldung ile sorunsuz bir başlangıç.</p></div>
-        </div>
-    </div>
-</section>
-
-{{-- STAT BAND --}}
-@if(!empty($stats))
-<section class="band">
-    <div class="wrap">
-        <div class="band-grid" style="--n:{{ min(count($stats), 4) }};">
-            @foreach($stats as $st)<div class="bi"><div class="bv">{{ $st['value'] }}</div><div class="bl">{{ $st['label'] }}</div></div>@endforeach
-        </div>
-    </div>
-</section>
-@endif
-
-{{-- ABOUT + WHY --}}
-<section id="hakkimizda" class="sec">
-    <div class="wrap about-grid">
-        <div>
-            <span class="kick">Hakkımızda</span>
-            <h2 style="font-family:var(--disp);font-weight:800;font-size:clamp(28px,4vw,42px);letter-spacing:-1px;color:var(--ink);margin:16px 0 20px;line-height:1.05;">{{ $siteName }}</h2>
-            <div class="about-text">{{ $aboutText }}</div>
-        </div>
-        <div class="about-why">
-            <div class="wc"><div class="wc-ic">{!! $icon('cap') !!}</div><div><h3>Uçtan Uca Süreç</h3><p>Başvurudan yerleşime kadar tek elden, kesintisiz takip.</p></div></div>
-            <div class="wc"><div class="wc-ic">{!! $icon('users') !!}</div><div><h3>Uzman Ekip</h3><p>Almanya eğitim sistemine hakim, deneyimli danışman kadrosu.</p></div></div>
-            <div class="wc"><div class="wc-ic">{!! $icon('home') !!}</div><div><h3>Yerinde Destek</h3><p>Almanya'ya vardığınızda da yanınızdayız — yalnız kalmazsınız.</p></div></div>
-        </div>
-    </div>
-</section>
-
-{{-- TEAM --}}
-@if(!empty($team))
-<section id="ekip" class="sec" style="padding-top:0;">
-    <div class="wrap">
-        <div class="sec-head c"><span class="kick c">Ekip</span><h2>Danışman Kadromuz</h2></div>
-        <div class="team-grid">
-            @foreach($team as $m)
-                <div class="tm">
-                    @if(!empty($m['photo']))<img class="tm-ph" src="{{ $m['photo'] }}" alt="{{ $m['name'] }}">@else<div class="tm-ph">{{ Str::upper(Str::substr($m['name'], 0, 1)) }}</div>@endif
-                    <h3>{{ $m['name'] }}</h3>@if(!empty($m['title']))<p>{{ $m['title'] }}</p>@endif
-                </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-@endif
-
-{{-- TESTIMONIALS — sadece partnerin girdiği gerçek yorumlar --}}
-@if(!empty($testimonials))
-<section class="sec" style="padding-top:0;">
-    <div class="wrap">
-        <div class="sec-head c"><span class="kick c">Öğrenci Yorumları</span><h2>Başarı Hikayeleriyle Büyüyoruz</h2></div>
-        <div class="q-grid">
-            @foreach($testimonials as $t)
-                <div class="qc">
-                    <blockquote>{{ $t['text'] }}</blockquote>
-                    @if(($t['name'] ?? '') !== '' || ($t['school'] ?? '') !== '')
-                        <div class="who">
-                            <div class="av">{{ mb_substr($t['name'] !== '' ? $t['name'] : $siteName, 0, 1) }}</div>
-                            <div>
-                                @if(($t['name'] ?? '') !== '')<div class="nm">{{ $t['name'] }}</div>@endif
-                                @if(($t['school'] ?? '') !== '')<div class="rl">{{ $t['school'] }}</div>@endif
-                            </div>
-                        </div>
-                    @endif
-                </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-@endif
-
-{{-- TRUST --}}
-@if($showBadge)
-<section class="sec" style="padding-top:0;">
-    <div class="wrap">
-        <div class="trust">
-            <div class="trust-b">{!! $icon('shield') !!}<div><div class="tt">{{ config('brand.name', 'MentorDE') }} Yetkili Partneri</div><div class="ts">Resmi partner ağı üzerinden güvenli süreç</div></div></div>
-            <p>{{ $siteName }}, {{ config('brand.name', 'MentorDE') }} altyapısı ve uzman ekibiyle süreçlerinizi uçtan uca yönetir.</p>
-        </div>
-    </div>
-</section>
-@endif
+{{-- ═══ SIRALANABİLİR BÖLÜMLER ═══
+    Partnerin seçtiği sıra + aç/kapa: $sections (App\Support\PartnerSiteSections).
+    Her bölüm ayrı partial: bold/sections/{key}.blade.php.
+    @includeIf: eksik partial sayfayı düşürmez. --}}
+@foreach($sections as $sectionKey)
+    @includeIf('public.partner-templates.bold.sections.' . $sectionKey)
+@endforeach
 
 {{-- CTA --}}
 <section id="iletisim" class="cta">
