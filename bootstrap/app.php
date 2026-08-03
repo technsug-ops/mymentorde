@@ -46,6 +46,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // Şifre değiştirme zorunluluğu — manager reset sonrası geçici şifrenin tek-kullanımlık olmasını sağlar
         $middleware->append(\App\Http\Middleware\EnsurePasswordChanged::class);
 
+        // Şirket (tenant) bağlamı — TÜM web isteklerinde kurulmalı.
+        // 'company.context' alias'ı route gruplarında ayrıca kullanılıyor ama /login,
+        // /apply, /p/{slug} gibi sayfalar o gruplara dahil değildi; bağlam kurulmadan
+        // çalışan her istek tenant filtresiz sorgu demek. Web grubuna eklemek bu boşluğu
+        // kapatır (middleware idempotent — iki kez çalışması sorun değil).
+        // EnsureTrialActive'den ÖNCE: trial kontrolü şirkete bağlı.
+        $middleware->appendToGroup('web', \App\Http\Middleware\SetCompanyContext::class);
+
         // Trial süresi dolmuş Customer Manager'ları /trial-expired payment wall'a yönlendirir.
         // Web group'a append — session/auth middleware'inden SONRA çalışır.
         // (Global append etmek $request->session() exception fırlatır.)

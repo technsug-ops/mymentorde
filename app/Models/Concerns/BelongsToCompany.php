@@ -2,37 +2,64 @@
 
 namespace App\Models\Concerns;
 
-use App\Models\Company;
+use App\Support\TenantContext;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
+/**
+ * Şirket (tenant) izolasyonu.
+ *
+ * OKUMA:  TenantContext::visibleIds() kümesiyle filtrelenir.
+ *         null dönerse filtre uygulanmaz (bağlam yok ya da platform sahibi).
+ * YAZMA:  company_id boşsa TenantContext::writeId() ile doldurulur — her kayıt
+ *         TEK bir şirkete ait olur, kümeye değil.
+ *
+ * Kapsam dışı bırakmak için: withoutGlobalScope('company') veya
+ * TenantContext::runUnscoped(). Bilinçli olarak paylaşımlı modeller için
+ * App\Models\Concerns\SharedAcrossCompanies işaret trait'ini kullan.
+ */
 trait BelongsToCompany
 {
     protected static function bootBelongsToCompany(): void
     {
         static::addGlobalScope('company', function (Builder $builder): void {
-            if (app()->runningInConsole()) {
+            // Bağlam kurulmamışsa filtreleme (migration, seeder, bazı konsol komutları).
+            // Web isteklerinde SetCompanyContext, kuyrukta AppServiceProvider bağlar.
+            $ids = TenantContext::visibleIds();
+
+            if ($ids === null || $ids === []) {
                 return;
             }
 
-            $companyId = self::resolveCompanyIdForScope();
-            if ($companyId <= 0) {
-                return;
-            }
+            $column = $builder->getModel()->qualifyColumn('company_id');
 
-            $builder->where($builder->getModel()->qualifyColumn('company_id'), $companyId);
+            // Tek şirket → where (index kullanımı whereIn'den net)
+            count($ids) === 1
+                ? $builder->where($column, $ids[0])
+                : $builder->whereIn($column, $ids);
         });
 
         static::creating(function ($model): void {
             if (!empty($model->company_id)) {
                 return;
             }
-            $companyId = self::resolveCompanyIdForScope();
-            if ($companyId > 0) {
+
+            // Bağlam yoksa varsayılan şirkete yaz.
+            //
+            // Bu fallback ŞART: seeder, konsol komutu ve testler bağlam kurmadan kayıt
+            // yaratıyor. Fallback olmadan company_id NULL kalır, sonraki HTTP isteğinde
+            // filtre devreye girince kayıt "kaybolur". Faz 3'te bağlam her yerde garanti
+            // altına alındığında bu fallback daraltılabilir.
+            $companyId = TenantContext::writeId() ?? self::fallbackCompanyId();
+
+            if ($companyId !== null && $companyId > 0) {
                 $model->company_id = $companyId;
             }
         });
     }
 
+    /** Belirli bir şirkete göre sorgula — global scope'u atlar. */
     public function scopeForCompany(Builder $query, int $companyId): Builder
     {
         return $query
@@ -40,16 +67,32 @@ trait BelongsToCompany
             ->where($query->getModel()->qualifyColumn('company_id'), $companyId);
     }
 
-    private static function resolveCompanyIdForScope(): int
+    /**
+     * Bağlam kurulmamışken yazma hedefi: varsayılan (ilk aktif) şirket.
+     * Yalnızca INSERT sırasında kullanılır — okuma filtresini etkilemez.
+     */
+    private static function fallbackCompanyId(): ?int
     {
-        if (app()->bound('current_company_id')) {
-            return (int) app('current_company_id');
+        static $cached = null;
+
+        if ($cached !== null) {
+            return $cached;
         }
 
-        return (int) Company::query()
-            ->where('is_active', true)
-            ->orderBy('id')
-            ->value('id');
+        try {
+            if (!Schema::hasTable('companies')) {
+                return null;
+            }
+
+            $id = (int) DB::table('companies')
+                ->where('is_active', true)
+                ->orderBy('id')
+                ->value('id');
+
+            return $cached = ($id > 0 ? $id : null);
+        } catch (\Throwable) {
+            // Migration sırasında tablo henüz yok olabilir — sessizce geç.
+            return null;
+        }
     }
 }
-

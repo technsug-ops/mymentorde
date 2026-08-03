@@ -10,9 +10,13 @@ use App\Models\MarketingTask;
 use App\Models\StudentPayment;
 use App\Services\TaskFeedbackService;
 use App\Support\PortalTheme;
+use App\Support\TenantContext;
+use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
@@ -59,6 +63,8 @@ class AppServiceProvider extends ServiceProvider
         if (!app()->environment('local')) {
             URL::forceScheme('https');
         }
+
+        $this->bootTenantAwareQueue();
 
         // ── Permission-bazlı Gate fallback ─────────────────────────────────
         // Blade @can('dam.view') vb. çağrıları User::hasPermissionCode'a delege et.
@@ -591,6 +597,48 @@ class AppServiceProvider extends ServiceProvider
 
             // Değişiklik logunu kaydet + contract_updated_at damgasını bas
             $payment->applyContractUpdate($changes);
+        });
+    }
+
+    /**
+     * Kuyruk işlerinin ŞİRKET BAĞLAMINI taşıması.
+     *
+     * SORUN: KAS'ta cronjob hakkı yok, bu yüzden DrainQueueOnTraffic kuyruğu WEB
+     * İSTEĞİNİN İÇİNDE boşaltıyor (terminate fazında `queue:work`). Job o anda
+     * tetikleyen kullanıcının şirket bağlamında çalışır. Yani B firmasının bir
+     * yöneticisi panelde gezinirken A firmasının kuyruktaki maili işlenir ve
+     * BelongsToCompany::creating o kaydı B'nin company_id'siyle yazar.
+     *
+     * ÇÖZÜM: Job kuyruğa girerken dispatch anındaki şirket payload'a yazılır,
+     * çalışmadan hemen önce geri yüklenir, bittiğinde önceki bağlam iade edilir.
+     * Tek noktadan TÜM job'ları kapsar — job sınıflarına dokunulmaz.
+     */
+    private function bootTenantAwareQueue(): void
+    {
+        // 1) Dispatch anındaki şirketi payload'a göm.
+        Queue::createPayloadUsing(static fn (): array => [
+            'tenant_company_id' => TenantContext::writeId(),
+        ]);
+
+        // 2) Job çalışmadan önce o şirketin bağlamına geç, öncekini sakla.
+        $previous = [];
+
+        Queue::before(function (JobProcessing $event) use (&$previous): void {
+            $previous[] = TenantContext::snapshot();
+
+            $payload = $event->job->payload();
+            $companyId = (int) ($payload['tenant_company_id'] ?? 0);
+
+            if ($companyId > 0) {
+                TenantContext::bind($companyId, [$companyId]);
+            }
+        });
+
+        // 3) Bittiğinde önceki bağlamı iade et (web isteği kendi şirketiyle devam etsin).
+        Queue::after(function (JobProcessed $event) use (&$previous): void {
+            if ($previous !== []) {
+                TenantContext::restore(array_pop($previous));
+            }
         });
     }
 }

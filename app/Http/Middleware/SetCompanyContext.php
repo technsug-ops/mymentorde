@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Models\Company;
+use App\Models\User;
+use App\Support\TenantContext;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -10,6 +12,24 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Şirket (tenant) bağlamını her istek için çözer.
+ *
+ * ÖNCELİK SIRASI — veri erişimi ASLA host başlığından gelmez:
+ *   1. impersonating_company_id  (yalnızca platform sahibi)
+ *   2. session current_company_id (yalnızca kullanıcının izinli kümesindeyse)
+ *   3. users.company_id
+ *   4. varsayılan şirket (PRIMARY_COMPANY_CODE, yoksa ilk aktif)
+ *
+ * Host'a göre MARKA seçimi Faz 2'de eklenecek ve bilinçli olarak bundan AYRI
+ * tutulacak: `Host:` başlığı değiştirilerek tenant atlanamasın diye.
+ *
+ * Geçmiş: Bu middleware daha önce marketing alanı dışındaki tüm isteklerde erken
+ * çıkıp bağlamı zorla varsayılan şirkete sabitliyordu ("ERP/CRM alanlarında firma
+ * context her zaman varsayılan firmadır"). Multi-tenant sprint'i iptal edildiğinde
+ * alınmış bilinçli bir sadeleştirmeydi; ikinci şirket eklenince veri karışmasına
+ * yol açacağı için kaldırıldı.
+ */
 class SetCompanyContext
 {
     public function handle(Request $request, Closure $next): Response
@@ -18,68 +38,101 @@ class SetCompanyContext
             return $next($request);
         }
 
-        $defaultCompany = $this->resolveDefaultCompany();
-        if (!$defaultCompany) {
-            return $next($request);
-        }
-
-        // ERP/CRM alanlarinda firma context her zaman varsayilan firmadir.
-        // Coklu firma secimi sadece marketing alaninda aktif kalir.
-        if (!$this->isMarketingArea($request)) {
-            app()->instance('current_company_id', (int) $defaultCompany->id);
-            app()->instance('current_company', $defaultCompany);
-            View::share('currentCompany', $defaultCompany);
+        $default = $this->resolveDefaultCompany();
+        if (!$default) {
             return $next($request);
         }
 
         $user = $request->user();
         $hasSession = $request->hasSession();
 
-        // Platform Owner impersonate aktifse ONCELIK ona: o company'nin context'inde calisir.
-        $impersonatingCompanyId = $hasSession
-            ? (int) $request->session()->get('impersonating_company_id', 0)
-            : 0;
+        $allowed = $this->allowedCompanyIds($user, $default);
 
-        $sessionCompanyId = $hasSession
-            ? (int) $request->session()->get('current_company_id', 0)
-            : 0;
-        $userCompanyId = (int) ($user->company_id ?? 0);
+        // ── Yazma hedefi: TEK şirket ────────────────────────────────────────
+        $companyId = 0;
 
-        $companyId = $impersonatingCompanyId > 0
-            ? $impersonatingCompanyId
-            : ($sessionCompanyId > 0 ? $sessionCompanyId : $userCompanyId);
-        $company = null;
-
-        if ($companyId > 0) {
-            $company = Cache::remember("company:{$companyId}:active", 600, fn () => Company::query()
-                ->where('id', $companyId)
-                ->where('is_active', true)
-                ->first());
+        // 1) Platform sahibi impersonate ediyorsa onun seçtiği şirket
+        if ($hasSession && $this->isPlatformOwner($user)) {
+            $companyId = (int) $request->session()->get('impersonating_company_id', 0);
         }
 
-        if (!$company) {
-            $company = $defaultCompany;
-        }
-
-        if ($company) {
-            if ($hasSession) {
-                $request->session()->put('current_company_id', (int) $company->id);
+        // 2) Session'daki seçim — SADECE izinli kümedeyse (yetkisiz atlamayı engeller)
+        if ($companyId <= 0 && $hasSession) {
+            $sessionId = (int) $request->session()->get('current_company_id', 0);
+            if ($sessionId > 0 && ($allowed === null || in_array($sessionId, $allowed, true))) {
+                $companyId = $sessionId;
             }
-            app()->instance('current_company_id', (int) $company->id);
-            app()->instance('current_company', $company);
-            View::share('currentCompany', $company);
+        }
+
+        // 3) Kullanıcının kendi şirketi
+        if ($companyId <= 0) {
+            $companyId = (int) ($user->company_id ?? 0);
+        }
+
+        // 4) Varsayılan
+        if ($companyId <= 0) {
+            $companyId = (int) $default->id;
+        }
+
+        $company = $this->findActiveCompany($companyId) ?? $default;
+
+        // ── Okuma kümesi ────────────────────────────────────────────────────
+        // Platform sahibi: null (kısıtsız). Diğerleri: izinli küme.
+        $visible = $allowed;
+
+        TenantContext::bind((int) $company->id, $visible);
+
+        // Geriye uyum: currentCompany view'larda kullanılıyor.
+        app()->instance('current_company', $company);
+        View::share('currentCompany', $company);
+
+        if ($hasSession) {
+            $request->session()->put('current_company_id', (int) $company->id);
         }
 
         return $next($request);
     }
 
-    private function isMarketingArea(Request $request): bool
+    /**
+     * Kullanıcının OKUYABİLECEĞİ şirketler.
+     *
+     * Faz 1: platform sahibi → null (hepsi), diğer herkes → kendi şirketi.
+     * Faz 3'te `company_user` pivotu eklenince çok-şirketli personel (bir senior'ın
+     * birden fazla partner firmaya hizmet vermesi) BURADA genişletilecek.
+     *
+     * @return list<int>|null  null = kısıtsız
+     */
+    private function allowedCompanyIds(?User $user, Company $default): ?array
     {
-        return $request->is('mktg-admin')
-            || $request->is('mktg-admin/*')
-            || $request->is('marketing-admin')
-            || $request->is('marketing-admin/*')
-            || $request->is('api/v1/marketing*');
+        if ($this->isPlatformOwner($user)) {
+            return null;
+        }
+
+        $own = (int) ($user->company_id ?? 0);
+
+        if ($own > 0) {
+            return [$own];
+        }
+
+        // Giriş yapmamış ziyaretçi (public sayfalar, /apply, /p/{slug}) → varsayılan şirket.
+        return [(int) $default->id];
+    }
+
+    private function isPlatformOwner(?User $user): bool
+    {
+        return $user !== null && $user->role === User::ROLE_PLATFORM_OWNER;
+    }
+
+    private function findActiveCompany(int $companyId): ?Company
+    {
+        if ($companyId <= 0) {
+            return null;
+        }
+
+        return Cache::remember("company:{$companyId}:active", 600, fn () => Company::query()
+            ->where('id', $companyId)
+            ->where('is_active', true)
+            ->first());
     }
 
     private function resolveDefaultCompany(): ?Company
