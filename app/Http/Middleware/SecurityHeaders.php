@@ -40,6 +40,15 @@ class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
 
+        // ── Test/staging ortami arama motorlarina KAPALI ──
+        // test.mentorde.com canlinin birebir kopyasi; indekslenirse Google'da
+        // canli sayfalarla ayni icerik iki adreste cikar (duplicate content) ve
+        // musteri yanlislikla test ortamina girer. Sadece APP_ENV=staging'de calisir,
+        // production'da bu blok hic tetiklenmez.
+        if (app()->environment('staging')) {
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+        }
+
         // ── Çıkış sonrası "Geri" butonu güvenliği ──
         // Hem auth'lu sayfalar hem de login/password gibi hassas guest sayfaları
         // tarayıcı bfcache'ine alınmasın. Bu sayede:
