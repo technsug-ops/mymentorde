@@ -7,6 +7,7 @@
 @php
     /** Partner Template · AURORA — canlı gradient + cam efektli süreç paneli.
      *  Veri: App\Support\PartnerSiteData::forDealer() (tüm template'lerle paylaşılan sözleşme).
+     *  MODÜLER: bölümler aurora/sections/*.blade.php içinde, sıra/aç-kapa partnerin seçimi ($sections).
      *  İkon: App\Support\PartnerSiteData::icon(). CTA → /apply/partner/{code}. */
     $accent   = \App\Support\PartnerSiteData::accent($accentColor ?? null);
     $siteName = $brandName ?? config('brand.name', 'MentorDE');
@@ -156,15 +157,8 @@ section{padding:64px 0;}
 .svc-items li{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--text);line-height:1.4;}
 .svc-items li svg{width:17px;height:17px;color:var(--primary);flex-shrink:0;margin-top:1px;}
 
-/* ABOUT + STATS */
-.about-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:44px;align-items:center;}
-@media(max-width:860px){.about-grid{grid-template-columns:1fr;gap:28px;}}
+/* ABOUT */
 .about-text{font-size:16px;color:var(--text);line-height:1.7;white-space:pre-line;}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px 20px;text-align:center;position:relative;overflow:hidden;}
-.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--primary-deep));}
-.stat-val{font-size:36px;font-weight:800;color:var(--primary-deep);line-height:1;letter-spacing:-.5px;}
-.stat-lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:8px;}
 
 /* TEAM */
 .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
@@ -215,8 +209,8 @@ section{padding:64px 0;}
 .testi-name{font-weight:700;color:var(--primary-deep);font-size:14px;}
 .testi-role{font-size:12px;color:var(--muted);}
 
-/* PROCESS STEPS */
-.proc{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;counter-reset:step;position:relative;}
+/* PROCESS STEPS — numara $steps['no'] değerinden gelir (CSS counter DEĞİL) */
+.proc{display:grid;grid-template-columns:repeat(var(--n,4),1fr);gap:20px;position:relative;}
 /* bağlayıcı çizgi (masaüstü) */
 .proc::before{content:'';position:absolute;top:26px;left:12%;right:12%;height:2px;
     background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--primary) 40%,transparent) 0 8px,transparent 8px 16px);z-index:0;}
@@ -225,13 +219,12 @@ section{padding:64px 0;}
 .proc-step{position:relative;z-index:1;text-align:center;padding:0 10px;}
 .proc-num{width:54px;height:54px;margin:0 auto 16px;border-radius:50%;background:linear-gradient(140deg,var(--primary),var(--primary-deep));
     color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;
-    box-shadow:0 10px 24px color-mix(in srgb,var(--primary) 34%,transparent);border:4px solid #fff;counter-increment:step;}
-.proc-num::after{content:counter(step);}
+    box-shadow:0 10px 24px color-mix(in srgb,var(--primary) 34%,transparent);border:4px solid #fff;}
 .proc-step h3{margin:0 0 8px;font-size:16px;color:var(--primary-deep);font-weight:700;}
 .proc-step p{margin:0;color:var(--muted);font-size:13px;line-height:1.55;}
 
 /* WHY US */
-.why{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.why{display:grid;grid-template-columns:repeat(var(--n,3),1fr);gap:18px;}
 @media(max-width:860px){.why{grid-template-columns:1fr;}}
 .why-card{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-left:4px solid var(--primary);border-radius:14px;padding:22px;}
 .why-ic{width:44px;height:44px;border-radius:12px;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
@@ -245,6 +238,48 @@ section{padding:64px 0;}
 .stat-band .sb{text-align:center;}
 .stat-band .sb-v{font-size:38px;font-weight:800;line-height:1;letter-spacing:-.5px;}
 .stat-band .sb-l{font-size:12px;opacity:.9;text-transform:uppercase;letter-spacing:.06em;margin-top:8px;}
+
+/* ÜNİVERSİTE ŞERİDİ */
+.unis{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;}
+.unis-lbl{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);}
+.unis-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+.unis .u{display:inline-flex;align-items:center;background:var(--primary-soft);border:1px solid color-mix(in srgb,var(--primary) 18%,transparent);
+    color:var(--primary-deep);border-radius:30px;padding:9px 18px;font-size:13px;font-weight:700;}
+
+/* PAKETLER */
+.pkg-grid{display:grid;grid-template-columns:repeat(var(--n,3),1fr);gap:20px;align-items:stretch;}
+@media(max-width:900px){.pkg-grid{grid-template-columns:1fr;}}
+.pkg{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px 26px;
+    box-shadow:var(--shadow-sm);transition:all .2s;position:relative;}
+.pkg:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:color-mix(in srgb,var(--primary) 28%,transparent);}
+/* öne çıkan paket — gradient çerçeve hissi */
+.pkg-hi{border:2px solid var(--primary);box-shadow:0 18px 40px color-mix(in srgb,var(--primary) 20%,transparent);}
+.pkg-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.pkg-top h3{margin:0;font-size:19px;color:var(--primary-deep);font-weight:700;}
+.pkg-tag{display:inline-flex;align-items:center;background:linear-gradient(120deg,var(--primary),var(--primary-deep));color:#fff;
+    border-radius:30px;padding:5px 12px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;}
+.pkg-desc{margin:0 0 16px;color:var(--muted);font-size:14px;line-height:1.55;}
+.pkg-items{list-style:none;padding:16px 0 0;margin:0 0 22px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px;}
+.pkg-items li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:var(--text);line-height:1.45;}
+.pkg-items li svg{width:17px;height:17px;color:var(--primary);flex-shrink:0;margin-top:2px;}
+.pkg-btn{margin-top:auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;
+    background:var(--primary-soft);color:var(--primary-deep) !important;border:1px solid color-mix(in srgb,var(--primary) 24%,transparent);
+    border-radius:12px;font-size:14px;font-weight:700;transition:all .2s;}
+.pkg-btn:hover{background:linear-gradient(120deg,var(--primary),var(--primary-dark));color:#fff !important;text-decoration:none !important;border-color:transparent;}
+.pkg-hi .pkg-btn{background:linear-gradient(120deg,var(--primary),var(--primary-dark));color:#fff !important;border-color:transparent;}
+
+/* S.S.S. — JS yok, <details> akordeonu */
+.faq{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+.faq-item{background:#fff;border:1px solid var(--line);border-radius:16px;padding:0;overflow:hidden;transition:all .2s;}
+.faq-item[open]{border-color:color-mix(in srgb,var(--primary) 32%,transparent);box-shadow:var(--shadow-md);}
+.faq-item summary{display:flex;align-items:center;justify-content:space-between;gap:14px;cursor:pointer;list-style:none;
+    padding:20px 24px;font-size:15.5px;font-weight:700;color:var(--primary-deep);}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item summary:hover{background:var(--primary-tint);}
+.faq-chev{display:inline-flex;color:var(--primary);flex-shrink:0;transition:transform .2s;}
+.faq-chev svg{width:18px;height:18px;transform:rotate(90deg);}
+.faq-item[open] .faq-chev{transform:rotate(-180deg);}
+.faq-a{padding:0 24px 20px;color:var(--muted);font-size:14.5px;line-height:1.7;white-space:pre-line;}
 
 /* CONTACT / CTA */
 .cta{background:linear-gradient(140deg,var(--primary-deep),var(--primary));color:#fff;padding:92px 0;text-align:center;position:relative;overflow:hidden;}
@@ -271,7 +306,8 @@ footer .pb{opacity:.6;font-size:12px;margin-top:6px;}
 </head>
 <body>
 
-{{-- ═══ NAV ═══ --}}
+{{-- ═══ NAV ═══
+     Menü linkleri SÖZLEŞMEDEN gelir ($navLinks): kapalı/boş bölümün linki basılmaz. --}}
 <nav class="p-nav">
     <div class="p-nav-inner">
         <a href="#" class="p-logo" aria-label="{{ $siteName }}">
@@ -282,9 +318,9 @@ footer .pb{opacity:.6;font-size:12px;margin-top:6px;}
             @endif
         </a>
         <div class="p-nav-links">
-            <a href="#hizmetler">Hizmetler</a>
-            <a href="#hakkimizda">Hakkımızda</a>
-            @if(!empty($team))<a href="#ekip">Ekip</a>@endif
+            @foreach($navLinks as $nl)
+                <a href="{{ $nl['href'] }}">{{ $nl['label'] }}</a>
+            @endforeach
             <a href="#iletisim">İletişim</a>
         </div>
         <a href="{{ $applyUrl }}" class="p-nav-cta" data-track="cta_clicked" data-ph-cta-name="nav_apply" data-ph-location="partner_site_nav">Başvur →</a>
@@ -345,7 +381,7 @@ footer .pb{opacity:.6;font-size:12px;margin-top:6px;}
     </div>
 </section>
 
-{{-- ═══ GÜÇ / TEKNİK ALTYAPI — sistematik & başarı ═══ --}}
+{{-- ═══ GÜÇ / TEKNİK ALTYAPI — Aurora'nın sabit kimlik bölümü (sıralanabilir değil) ═══ --}}
 <section class="power">
     <div class="dots"></div>
     <div class="container">
@@ -362,160 +398,14 @@ footer .pb{opacity:.6;font-size:12px;margin-top:6px;}
     </div>
 </section>
 
-{{-- ═══ HİZMETLER ═══ --}}
-<section id="hizmetler" class="sec-bg-white">
-    <div class="container">
-        <div class="sec-head center">
-            <span class="sec-label">Hizmetler</span>
-            <h2 class="sec-title">Almanya Eğitim Sürecinin Her Adımında</h2>
-            <p class="sec-lead">Başvurudan yerleşime kadar tüm süreci profesyonel ekibimizle yönetiyoruz.</p>
-        </div>
-        <div class="svc-grid">
-            @foreach($services as $s)
-                <div class="svc">
-                    <div class="svc-icon">{!! $icon($s['icon'] ?? 'default') !!}</div>
-                    <h3>{{ $s['title'] }}</h3>
-                    @if(!empty($s['desc']))<p>{{ $s['desc'] }}</p>@endif
-                    @if(!empty($s['items']))
-                        <ul class="svc-items">
-                            @foreach($s['items'] as $it)
-                                <li>{!! $icon('check') !!} {{ $it }}</li>
-                            @endforeach
-                        </ul>
-                    @endif
-                </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-{{-- ═══ SÜREÇ / NASIL ÇALIŞIR ═══ --}}
-<section class="sec-bg-soft">
-    <div class="container">
-        <div class="sec-head center">
-            <span class="sec-label">Nasıl Çalışır</span>
-            <h2 class="sec-title">Başvurudan Almanya'ya, Adım Adım Yanınızdayız</h2>
-            <p class="sec-lead">Süreci sizin için basitleştirdik — siz hedefinize odaklanın, gerisini biz halledelim.</p>
-        </div>
-        <div class="proc">
-            <div class="proc-step"><div class="proc-num"></div><h3>Ücretsiz Değerlendirme</h3><p>Hedeflerinizi dinler, size en uygun üniversite ve program seçeneklerini çıkarırız.</p></div>
-            <div class="proc-step"><div class="proc-num"></div><h3>Başvuru & Belgeler</h3><p>Üniversite ve dil okulu başvurularınızı, evrak hazırlığınızı uçtan uca yönetiriz.</p></div>
-            <div class="proc-step"><div class="proc-num"></div><h3>Vize & Finans</h3><p>Vize randevusu, bloke hesap ve sigorta işlemlerinde adım adım rehberlik ederiz.</p></div>
-            <div class="proc-step"><div class="proc-num"></div><h3>Almanya'da Yerleşim</h3><p>Konaklama, Anmeldung ve günlük yaşam desteğiyle yeni hayatınıza sorunsuz başlarsınız.</p></div>
-        </div>
-    </div>
-</section>
-
-{{-- ═══ HAKKIMIZDA ═══ --}}
-<section id="hakkimizda" class="sec-bg-white">
-    <div class="container">
-        <span class="sec-label">Hakkımızda</span>
-        <h2 class="sec-title">{{ $siteName }}</h2>
-        <div class="about-text" style="max-width:760px;">{{ $aboutText }}</div>
-        @if(!empty($stats))
-            <div class="stat-band" style="--n:{{ min(count($stats), 4) }};margin-top:36px;">
-                @foreach($stats as $st)
-                    <div class="sb">
-                        <div class="sb-v">{{ $st['value'] }}</div>
-                        <div class="sb-l">{{ $st['label'] }}</div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
-    </div>
-</section>
-
-{{-- ═══ NEDEN BİZ ═══ --}}
-<section class="sec-bg-soft">
-    <div class="container">
-        <div class="sec-head center">
-            <span class="sec-label">Neden Biz</span>
-            <h2 class="sec-title">Doğru Rehberle Emin Adımlar</h2>
-            <p class="sec-lead">Sadece başvuru değil, Almanya'daki ilk gününüze kadar güvenilir bir yol arkadaşı.</p>
-        </div>
-        <div class="why">
-            <div class="why-card"><div class="why-ic">{!! $icon('cap') !!}</div><div><h3>Uçtan Uca Süreç</h3><p>Başvurudan yerleşime kadar tek elden, kesintisiz takip.</p></div></div>
-            <div class="why-card"><div class="why-ic">{!! $icon('passport') !!}</div><div><h3>Uzman Ekip</h3><p>Almanya eğitim sistemine hakim, deneyimli danışman kadrosu.</p></div></div>
-            <div class="why-card"><div class="why-ic">{!! $icon('home') !!}</div><div><h3>Yerinde Destek</h3><p>Almanya'ya vardığınızda da yanınızdayız — yalnız kalmazsınız.</p></div></div>
-        </div>
-    </div>
-</section>
-
-{{-- ═══ EKİP (opsiyonel) ═══ --}}
-@if(!empty($team))
-<section id="ekip" class="sec-bg-white">
-    <div class="container">
-        <div class="sec-head center">
-            <span class="sec-label">Ekip</span>
-            <h2 class="sec-title">Danışman Kadromuz</h2>
-            <p class="sec-lead">Alanında uzman, deneyimli ve size özel ilgilenen bir ekip.</p>
-        </div>
-        <div class="team-grid">
-            @foreach($team as $m)
-                <div class="team-card">
-                    @if(!empty($m['photo']))
-                        <img class="team-photo" src="{{ $m['photo'] }}" alt="{{ $m['name'] }}">
-                    @else
-                        <div class="team-photo">{{ Str::upper(Str::substr($m['name'], 0, 1)) }}</div>
-                    @endif
-                    <h3>{{ $m['name'] }}</h3>
-                    @if(!empty($m['title']))<p>{{ $m['title'] }}</p>@endif
-                </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-@endif
-
-{{-- ═══ GÜVEN / ROZET ═══ --}}
-@if($showBadge)
-<section class="sec-bg-soft">
-    <div class="container">
-        <div class="trust">
-            <div class="trust-badge">
-                {!! $icon('default') !!}
-                <div>
-                    <div class="tb-t">MentorDE Yetkili Partneri</div>
-                    <div class="tb-s">Resmi partner ağı üzerinden güvenli süreç</div>
-                </div>
-            </div>
-            <p style="margin:0;color:var(--muted);font-size:15px;max-width:420px;">
-                {{ $siteName }}, {{ config('brand.name', 'MentorDE') }} altyapısı ve uzman ekibiyle
-                başvuru, vize ve yerleşim süreçlerinizi uçtan uca yönetir.
-            </p>
-        </div>
-    </div>
-</section>
-@endif
-
-{{-- ═══ REFERANSLAR / YORUMLAR — sadece partnerin girdiği gerçek yorumlar ═══ --}}
-@if(!empty($testimonials))
-<section class="sec-bg-white">
-    <div class="container">
-        <div class="sec-head center">
-            <span class="sec-label">Öğrenci Yorumları</span>
-            <h2 class="sec-title">Başarı Hikayeleriyle Büyüyoruz</h2>
-            <p class="sec-lead">Yolculuğunu bizimle tamamlayan öğrencilerin deneyimleri.</p>
-        </div>
-        <div class="testi-grid">
-            @foreach($testimonials as $t)
-                <div class="testi">
-                    <p class="testi-q">"{{ $t['text'] }}"</p>
-                    @if(($t['name'] ?? '') !== '' || ($t['school'] ?? '') !== '')
-                        <div class="testi-who">
-                            <div class="testi-av">{{ mb_substr($t['name'] !== '' ? $t['name'] : $siteName, 0, 1) }}</div>
-                            <div>
-                                @if(($t['name'] ?? '') !== '')<div class="testi-name">{{ $t['name'] }}</div>@endif
-                                @if(($t['school'] ?? '') !== '')<div class="testi-role">{{ $t['school'] }}</div>@endif
-                            </div>
-                        </div>
-                    @endif
-                </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-@endif
+{{-- ═══ SIRALANABİLİR BÖLÜMLER ═══
+    Partnerin seçtiği sıra + aç/kapa: $sections (App\Support\PartnerSiteSections).
+    Her bölüm ayrı partial: aurora/sections/{key}.blade.php.
+    @includeIf: eksik partial sayfayı düşürmez. Partial'lar buradaki @php
+    değişkenlerini ($icon, $siteName, $waUrl, ...) otomatik görür. --}}
+@foreach($sections as $sectionKey)
+    @includeIf('public.partner-templates.aurora.sections.' . $sectionKey)
+@endforeach
 
 {{-- ═══ İLETİŞİM / BAŞVURU ═══ --}}
 <section id="iletisim" class="cta">

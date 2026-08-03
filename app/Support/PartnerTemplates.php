@@ -30,8 +30,8 @@ class PartnerTemplates
             'name'     => 'Aurora',
             'desc'     => 'Canlı gradient hero + cam efektli süreç paneli. Modern, sıcak, dinamik.',
             'accent'   => '#0d9488',
-            'modular'  => false,
-            'sections' => ['services', 'steps', 'stats', 'about', 'testimonials', 'why'],
+            'modular'  => true,
+            'sections' => ['unis', 'services', 'steps', 'stats', 'about', 'testimonials', 'why', 'packages', 'faq'],
         ],
         'minimal' => [
             'name'     => 'Minimal',
