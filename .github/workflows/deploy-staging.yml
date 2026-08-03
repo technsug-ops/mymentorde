@@ -1,0 +1,251 @@
+name: Deploy to STAGING (test.mentorde.com)
+
+# Tetikleyiciler:
+#  - develop branch'e push → otomatik TEST deploy
+#  - Actions sekmesinden manuel "Run workflow"
+#
+# Bu workflow CANLI siteye DOKUNMAZ. Ayri subdomain, ayri FTP kullanicisi
+# (/test.mentorde.com/ altina chroot'lu), ayri veritabani.
+# Canli deploy icin: deploy.yml (main branch).
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+# Staging kendi kuyrugunda — canli deploy'u beklemez/engellemez.
+# cancel-in-progress: true → arka arkaya push'ta sadece en yenisi deploy edilir
+# (staging'de her commit'in ayri ayri yayinlanmasi gerekmiyor, hiz onemli).
+concurrency:
+  group: deploy-kasserver-staging
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy (staging)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, gd, fileinfo, zip, curl, openssl, bcmath
+          coverage: none
+          tools: composer:v2
+
+      - name: Ensure Laravel cache directories exist
+        run: |
+          mkdir -p bootstrap/cache
+          mkdir -p storage/framework/cache/data
+          mkdir -p storage/framework/sessions
+          mkdir -p storage/framework/views
+          mkdir -p storage/framework/testing
+          mkdir -p storage/logs
+          mkdir -p storage/app/public
+          chmod -R 775 storage bootstrap/cache
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php8.4-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-php8.4-composer-
+
+      - name: Composer install (production)
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist
+
+      - name: Regenerate Composer autoload classmap
+        run: composer dump-autoload --optimize --no-dev
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: NPM install
+        run: npm ci --no-audit --no-fund
+
+      - name: Vite production build
+        run: npm run build
+
+      - name: Clean deploy artifacts
+        run: |
+          rm -f public/hot
+          rm -rf bootstrap/cache/*.php
+          rm -rf storage/framework/views/*.php
+          rm -rf storage/framework/cache/data/*
+          rm -rf storage/framework/sessions/*
+          rm -f database/database.sqlite database/*.sqlite-*
+          ls -la public/build > /dev/null 2>&1 || { echo "::error::public/build yok — Vite build başarısız!"; exit 1; }
+          echo "Artefakt temizliği tamam"
+
+      # .env DAHIL DEGIL — sunucudaki staging .env korunur (ayri DB, MAIL_MAILER=log).
+      - name: Package source code into single ZIP
+        run: |
+          zip -r -q deploy-bundle.zip . \
+            -x "node_modules/*" \
+               ".git/*" \
+               ".github/*" \
+               "tests/*" \
+               "memory/*" \
+               "docs/*" \
+               "scripts/*" \
+               "githooks/*" \
+               "storage/logs/*" \
+               "storage/app/db-dumps/*" \
+               "storage/framework/cache/data/*" \
+               "storage/framework/sessions/*" \
+               "storage/framework/views/*" \
+               "storage/framework/maintenance.php" \
+               ".vscode/*" \
+               ".idea/*" \
+               ".editorconfig" \
+               ".gitignore" \
+               ".gitattributes" \
+               ".npmrc" \
+               "phpunit.xml" \
+               "playwright.config.js" \
+               ".env" \
+               ".env.example" \
+               ".env.local" \
+               ".env.*" \
+               "CLAUDE.md" \
+               "HANDBOOK_TR.md" \
+               "HANDBOOK_EN.md" \
+               "DEV_HANDBOOK.md" \
+               "README.md" \
+               "*.rar" \
+               "public/build.zip" \
+               "public/build.rar" \
+               "deploy-bundle.zip"
+          ls -lh deploy-bundle.zip
+
+      - name: Prepare upload directories
+        run: |
+          mkdir -p ./upload-webhook
+          cp public/_deploy.php ./upload-webhook/_deploy.php
+          mkdir -p ./upload-bundle
+          mv deploy-bundle.zip ./upload-bundle/
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > ./upload-bundle/.deploy-pulse
+          ls -lh ./upload-webhook/ ./upload-bundle/
+
+      - name: Upload webhook to public/
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_STAGING_HOST }}
+          username: ${{ secrets.FTP_STAGING_USERNAME }}
+          password: ${{ secrets.FTP_STAGING_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./upload-webhook/
+          server-dir: ${{ secrets.FTP_STAGING_SERVER_DIR }}/public/
+          state-name: .ftp-webhook-state.json
+          log-level: standard
+          dangerous-clean-slate: false
+          timeout: 30000
+
+      # KAS FTPS bagi bazen duser (ECONNRESET) — 3 deneme
+      - name: Upload bundle via FTPS (attempt 1)
+        id: ftp1
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_STAGING_HOST }}
+          username: ${{ secrets.FTP_STAGING_USERNAME }}
+          password: ${{ secrets.FTP_STAGING_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./upload-bundle/
+          server-dir: ${{ secrets.FTP_STAGING_SERVER_DIR }}/storage/app/
+          state-name: .ftp-deploy-bundle-state.json
+          log-level: standard
+          dangerous-clean-slate: false
+          timeout: 60000
+
+      - name: Wait before FTPS attempt 2
+        if: steps.ftp1.outcome == 'failure'
+        run: sleep 30
+
+      - name: Upload bundle via FTPS (attempt 2)
+        id: ftp2
+        if: steps.ftp1.outcome == 'failure'
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_STAGING_HOST }}
+          username: ${{ secrets.FTP_STAGING_USERNAME }}
+          password: ${{ secrets.FTP_STAGING_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./upload-bundle/
+          server-dir: ${{ secrets.FTP_STAGING_SERVER_DIR }}/storage/app/
+          state-name: .ftp-deploy-bundle-state.json
+          log-level: standard
+          dangerous-clean-slate: false
+          timeout: 60000
+
+      - name: Wait before FTPS attempt 3
+        if: steps.ftp1.outcome == 'failure' && steps.ftp2.outcome == 'failure'
+        run: sleep 45
+
+      - name: Upload bundle via FTPS (attempt 3 — final)
+        if: steps.ftp1.outcome == 'failure' && steps.ftp2.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_STAGING_HOST }}
+          username: ${{ secrets.FTP_STAGING_USERNAME }}
+          password: ${{ secrets.FTP_STAGING_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./upload-bundle/
+          server-dir: ${{ secrets.FTP_STAGING_SERVER_DIR }}/storage/app/
+          state-name: .ftp-deploy-bundle-state.json
+          log-level: standard
+          dangerous-clean-slate: false
+          timeout: 60000
+
+      - name: Trigger server-side deploy (extract + cache rebuild)
+        run: |
+          set -e
+          MAX_TRIES=3
+          for i in $(seq 1 $MAX_TRIES); do
+            echo "Attempt $i/$MAX_TRIES — calling staging deploy webhook..."
+            HTTP_CODE=$(curl -sS -o /tmp/deploy-response.txt -w "%{http_code}" \
+              --max-time 120 \
+              "https://test.mentorde.com/_deploy.php")
+            RESPONSE=$(cat /tmp/deploy-response.txt)
+            echo "Response: HTTP $HTTP_CODE — $RESPONSE"
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ Staging deploy webhook successful"
+              exit 0
+            elif [ "$HTTP_CODE" = "204" ]; then
+              echo "⚠️  No pulse found on server (FTP upload may not have completed)"
+              sleep 10
+            elif [ "$HTTP_CODE" = "429" ]; then
+              echo "⚠️  Rate limited / lock active, waiting 30s..."
+              sleep 30
+            else
+              echo "❌ Webhook failed with HTTP $HTTP_CODE"
+              sleep 15
+            fi
+          done
+          echo "::error::Staging deploy webhook failed after $MAX_TRIES attempts"
+          exit 1
+
+      - name: Deploy summary
+        if: always()
+        run: |
+          echo "## Staging Deploy Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Test adresi:** https://test.mentorde.com" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> Canlı site etkilenmedi — canlı yayın için develop → main merge gerekir." >> $GITHUB_STEP_SUMMARY
