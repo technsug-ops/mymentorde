@@ -564,8 +564,14 @@ sırayla sona ekler (açık) → şablon değişse de bozulmaz. Şablon `$sectio
 dosyanın `@php` yerel değişkenlerini otomatik görür. Menü **elle yazılmaz**, `$navLinks`
 kullanılır (kapalı/boş bölümün linki çıkmaz; bölüm id'leri `hizmetler/surec/paketler/sss`).
 `TEMPLATES[key]['modular'|'sections']` editöre yansır: sabit kurgulu şablonda uyarı,
-basılmayan bölümde "… şablonunda yok" etiketi. Şu an modüler (10): **lavanta, seftali, nane, elektrik, mercan, sedef, manyeta, bulut,
-mermer, ufuk** (+ `_starter` iskeleti). Sabit kurgulu (3): aurora, minimal, bold.
+basılmayan bölümde "… şablonunda yok" etiketi. Şu an modüler (11): **aurora, lavanta, seftali, nane, elektrik, mercan, sedef, manyeta,
+bulut, mermer, ufuk** (+ `_starter` iskeleti). Sabit kurgulu (2): minimal, bold — aynı kalıpla çevrilecek.
+
+Aurora çevrilirken çıkan ve minimal/bold'da da beklenen noktalar: `steps`/`why` sabit metin
+kullanıyorsa `$steps`/`$whyUs` sözleşmesine bağla · `about`+`stats` tek bölümdeyse ayır · ayrı
+`ekip` bölümü varsa `why` içine taşı (kalıp: "Neden biz + ekip") · menüyü `$navLinks`'e devret ·
+bölüm id'lerini `hizmetler`/`surec`/`paketler`/`sss` yap · numarayı CSS `counter` ile basan
+adım kutuları varsa counter'ı kaldır (sözleşmedeki `no` görünmez olur).
 
 **Editör kart yönetimi:** `dealer/mini-site/_repeat.blade.php` + `rows/*.blade.php`;
 sıra = input adlarındaki index, JS her ekleme/silme/taşımada satırları yeniden numaralar
