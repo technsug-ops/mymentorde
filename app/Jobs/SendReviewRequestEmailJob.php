@@ -75,7 +75,7 @@ class SendReviewRequestEmailJob implements ShouldQueue
             . "Değerlendirme bağlantın:\n{$reviewUrl}\n\n"
             . "Bağlantı 30 gün geçerli. Bu bir kerelik bir hatırlatmadır.\n\n"
             . "Teşekkürler,\n"
-            . "— MentorDE Ekibi";
+            . '— ' . config('brand.name', 'MentorDE') . ' Ekibi';
 
         try {
             Mail::raw($body, function ($m) use ($booking, $seniorName) {

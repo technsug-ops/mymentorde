@@ -47,7 +47,7 @@ class WelcomeNewCompanyMail extends Mailable implements ShouldQueue
                 'dashboardUrl' => url('/manager/dashboard'),
                 'planUrl'      => url('/manager/my-plan'),
                 'brandName'    => config('brand.name', 'MentorDE'),
-                'supportEmail' => 'destek@mentorde.com',
+                'supportEmail' => config('brand.support_email', config('brand.email', 'destek@mentorde.com')),
             ],
         );
     }

@@ -259,47 +259,43 @@ class AppServiceProvider extends ServiceProvider
             if ($vn === 'public.dealer-landing' || str_starts_with($vn, 'public.partner-templates.')) {
                 return;
             }
+            // Marka artık config('brand')'de ÇÖZÜLMÜŞ halde: App\Support\Brand::apply()
+            // SetCompanyContext içinde .env + companies.brand_* + marketing_admin_settings
+            // katmanlarını birleştirip buraya yazıyor. Burada tekrar DB'ye gitmiyoruz —
+            // eskiden her view render'ında auth kullanıcısının şirketi sorgulanıyordu ve
+            // anonim ziyaretçide (login, /apply) daima MentorDE'ye düşüyordu.
+            $name = (string) config('brand.name', 'MentorDE');
+            $logo = (string) (config('brand.logo_url') ?: config('brand.logo_path') ?: '');
+
+            // logo_bg hâlâ panelden ayarlanan bir tercih — marka paketinin parçası değil.
             $cid = (int) (auth()->user()?->company_id ?? 0);
-            $brand = Cache::remember("brand_settings_{$cid}", 300, function () use ($cid): array {
-                $fallbackName = (string) config('brand.name', 'MentorDE');
-                $fallbackLogo = (string) (config('brand.logo_url') ?: config('brand.logo_path') ?: '');
+            $logoBg = Cache::remember("brand_logo_bg_{$cid}", 300, function () use ($cid): string {
                 try {
-                    $name    = MarketingAdminSetting::where('company_id', $cid)
-                                   ->where('setting_key', 'brand_name')
-                                   ->value('setting_value') ?: $fallbackName;
-                    $logoUrl = MarketingAdminSetting::where('company_id', $cid)
-                                   ->where('setting_key', 'brand_logo_url')
-                                   ->value('setting_value') ?: $fallbackLogo;
-                    $logoBg  = MarketingAdminSetting::where('company_id', $cid)
-                                   ->where('setting_key', 'brand_logo_bg')
-                                   ->value('setting_value') ?: 'light';
-                    return ['name' => $name, 'logo_url' => $logoUrl, 'logo_bg' => $logoBg];
+                    return (string) (MarketingAdminSetting::where('company_id', $cid)
+                        ->where('setting_key', 'brand_logo_bg')
+                        ->value('setting_value') ?: 'light');
                 } catch (\Throwable) {
-                    return ['name' => $fallbackName, 'logo_url' => $fallbackLogo, 'logo_bg' => 'light'];
+                    return 'light';
                 }
             });
-            $view->with('brandName',    $brand['name']);
-            $view->with('brandInitial', strtoupper(mb_substr($brand['name'], 0, 1)));
-            $view->with('brandLogoUrl', $brand['logo_url']);
-            $view->with('brandLogoBg',  $brand['logo_bg'] ?? 'light');
+
+            $view->with('brandName',    $name);
+            $view->with('brandInitial', strtoupper(mb_substr($name, 0, 1)));
+            $view->with('brandLogoUrl', $logo);
+            $view->with('brandLogoBg',  $logoBg);
         });
 
         // AI Labs marka adı — tek yerden yönetim
         // marketing_admin_settings.ai_labs_brand_name değiştiğinde sidebar + system prompt + email
         // her yerde otomatik güncellenir. Default: "MentorDE AI Labs"
         View::composer('*', function ($view): void {
-            $cid = (int) (auth()->user()?->company_id ?? 0);
-            $name = Cache::remember("ai_labs_brand_{$cid}", 300, function () use ($cid): string {
-                try {
-                    $val = MarketingAdminSetting::where('company_id', $cid)
-                        ->where('setting_key', 'ai_labs_brand_name')
-                        ->value('setting_value');
-                    return (string) ($val ?: 'MentorDE AI Labs');
-                } catch (\Throwable) {
-                    return 'MentorDE AI Labs';
-                }
-            });
-            $view->with('aiLabsName', $name);
+            // Brand::resolve() ai_labs_brand_name'i config('brand.ai_labs_name')'e taşır.
+            // Tanımlı değilse markanın kendi adından türet — sabit "MentorDE AI Labs"
+            // yazmak white-label tenant'ta marka sızıntısı olurdu.
+            $view->with('aiLabsName', (string) (
+                config('brand.ai_labs_name')
+                    ?: config('brand.name', 'MentorDE') . ' AI Labs'
+            ));
         });
 
         // Guest layout: atanan danışman kartını (chat header) TÜM guest sayfalarında

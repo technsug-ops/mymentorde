@@ -18,6 +18,14 @@ class Company extends Model
         'subscription_renews_at',
         'billing_email',
         'mrr_eur',
+        // Multi-brand (Faz 2) — marka ve domain; bkz. App\Support\Brand
+        'slug',
+        'primary_domain',
+        'domain_aliases',
+        'brand_name',
+        'brand_logo_url',
+        'brand_primary_color',
+        'brand_overrides',
     ];
 
     protected $casts = [
@@ -29,7 +37,19 @@ class Company extends Model
         'trial_ends_at'             => 'date',
         'subscription_renews_at'    => 'date',
         'mrr_eur'                   => 'decimal:2',
+        // Multi-brand
+        'domain_aliases'            => 'array',
+        'brand_overrides'           => 'array',
     ];
+
+    protected static function booted(): void
+    {
+        // Marka değişince çözülmüş paketi ve host eşleşmesini tazele.
+        static::saved(function (self $company): void {
+            \App\Support\Brand::flushCache((int) $company->id);
+            \Illuminate\Support\Facades\Cache::forget("company:{$company->id}:active");
+        });
+    }
 
     /**
      * SaaS subscription tier sabitleri — config/subscription_tiers.php ile senkron.

@@ -52,7 +52,8 @@ class SendNotificationJob implements ShouldQueue
 
             try {
                 Mail::to($recipientEmail)->send(new NotificationMail(
-                    trim((string) ($notification->subject ?: config('app.name', 'MentorDE').' Bildirimi')),
+                    // brand.name (şirkete göre çözülür) — app.name kurulum genelinde sabittir.
+                trim((string) ($notification->subject ?: config('brand.name', config('app.name', 'MentorDE')).' Bildirimi')),
                     (string) ($notification->body ?? ''),
                 ));
             } catch (\Throwable $e) {

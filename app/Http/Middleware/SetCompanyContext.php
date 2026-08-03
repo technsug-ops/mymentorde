@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\Company;
 use App\Models\User;
+use App\Support\Brand;
 use App\Support\TenantContext;
 use Closure;
 use Illuminate\Http\Request;
@@ -82,6 +83,18 @@ class SetCompanyContext
 
         TenantContext::bind((int) $company->id, $visible);
 
+        // ── MARKA — veriden AYRI çözülür ────────────────────────────────────
+        // Giriş yapmış kullanıcı kendi şirketinin markasını görür; anonim ziyaretçi
+        // (login sayfası, /apply, partner mini-site) geldiği DOMAIN'in markasını.
+        //
+        // ⚠ Host YALNIZCA markayı belirler, veri erişimini ASLA. Aksi halde `Host:`
+        // başlığı değiştirilerek başka tenant'ın verisi okunabilirdi.
+        $brandCompany = $user !== null
+            ? $company
+            : ($this->resolveCompanyByHost($request->getHost()) ?? $company);
+
+        Brand::apply($brandCompany);
+
         // Geriye uyum: currentCompany view'larda kullanılıyor.
         app()->instance('current_company', $company);
         View::share('currentCompany', $company);
@@ -121,6 +134,52 @@ class SetCompanyContext
     private function isPlatformOwner(?User $user): bool
     {
         return $user !== null && $user->role === User::ROLE_PLATFORM_OWNER;
+    }
+
+    /**
+     * Host → şirket (YALNIZCA marka için).
+     *
+     * `primary_domain` eşleşmesi, sonra `domain_aliases` içinde arama.
+     * Eşleşme yoksa null → çağıran taraf erişim şirketinin markasına düşer,
+     * yani bugünkü davranış korunur (hiçbir şirkette domain tanımlı değilken).
+     */
+    private function resolveCompanyByHost(string $host): ?Company
+    {
+        $host = strtolower(trim($host));
+
+        if ($host === '' || !Schema::hasColumn('companies', 'primary_domain')) {
+            return null;
+        }
+
+        return Cache::remember("company:by_host:{$host}", 600, function () use ($host): ?Company {
+            $direct = Company::query()
+                ->where('is_active', true)
+                ->whereRaw('lower(primary_domain) = ?', [$host])
+                ->first();
+
+            if ($direct) {
+                return $direct;
+            }
+
+            // Alias listesi JSON — sürücüden bağımsız kalmak için PHP tarafında ara.
+            // Domain tanımlı şirket sayısı çok az olacağı için maliyeti önemsiz.
+            return Company::query()
+                ->where('is_active', true)
+                ->whereNotNull('domain_aliases')
+                ->get()
+                ->first(function (Company $company) use ($host): bool {
+                    $aliases = $company->getAttribute('domain_aliases');
+                    if (is_string($aliases)) {
+                        $aliases = json_decode($aliases, true);
+                    }
+
+                    return is_array($aliases)
+                        && in_array($host, array_map(
+                            static fn ($a): string => strtolower(trim((string) $a)),
+                            $aliases
+                        ), true);
+                });
+        });
     }
 
     private function findActiveCompany(int $companyId): ?Company

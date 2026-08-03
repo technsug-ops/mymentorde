@@ -13,7 +13,10 @@ class WelcomeStudentMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'MentorDE\'ye Hoş Geldiniz! 🎓');
+        // Marka config'den gelir — white-label tenant'ta MentorDE adı geçmemeli.
+        return new Envelope(
+            subject: config('brand.name', 'MentorDE') . '\'ye Hoş Geldiniz! 🎓'
+        );
     }
 
     public function content(): Content
