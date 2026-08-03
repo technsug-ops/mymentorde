@@ -134,13 +134,37 @@ jobs:
           date -u +"%Y-%m-%dT%H:%M:%SZ" > ./upload-bundle/.deploy-pulse
           ls -lh ./upload-webhook/ ./upload-bundle/
 
-      - name: Upload webhook to public/
+      # KAS FTP bagi bazen ECONNRESET verir — webhook adimi da retry'li olmali,
+      # yoksa tek kopukluk butun deploy'u oldurur.
+      - name: Upload webhook to public/ (attempt 1)
+        id: hook1
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_STAGING_HOST }}
           username: ${{ secrets.FTP_STAGING_USERNAME }}
           password: ${{ secrets.FTP_STAGING_PASSWORD }}
-          protocol: ftps
+          protocol: ftp
+          port: 21
+          local-dir: ./upload-webhook/
+          server-dir: ${{ secrets.FTP_STAGING_SERVER_DIR }}/public/
+          state-name: .ftp-webhook-state.json
+          log-level: standard
+          dangerous-clean-slate: false
+          timeout: 30000
+
+      - name: Wait before webhook attempt 2
+        if: steps.hook1.outcome == 'failure'
+        run: sleep 20
+
+      - name: Upload webhook to public/ (attempt 2 — final)
+        if: steps.hook1.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_STAGING_HOST }}
+          username: ${{ secrets.FTP_STAGING_USERNAME }}
+          password: ${{ secrets.FTP_STAGING_PASSWORD }}
+          protocol: ftp
           port: 21
           local-dir: ./upload-webhook/
           server-dir: ${{ secrets.FTP_STAGING_SERVER_DIR }}/public/
@@ -158,7 +182,7 @@ jobs:
           server: ${{ secrets.FTP_STAGING_HOST }}
           username: ${{ secrets.FTP_STAGING_USERNAME }}
           password: ${{ secrets.FTP_STAGING_PASSWORD }}
-          protocol: ftps
+          protocol: ftp
           port: 21
           local-dir: ./upload-bundle/
           server-dir: ${{ secrets.FTP_STAGING_SERVER_DIR }}/storage/app/
@@ -180,7 +204,7 @@ jobs:
           server: ${{ secrets.FTP_STAGING_HOST }}
           username: ${{ secrets.FTP_STAGING_USERNAME }}
           password: ${{ secrets.FTP_STAGING_PASSWORD }}
-          protocol: ftps
+          protocol: ftp
           port: 21
           local-dir: ./upload-bundle/
           server-dir: ${{ secrets.FTP_STAGING_SERVER_DIR }}/storage/app/
@@ -200,7 +224,7 @@ jobs:
           server: ${{ secrets.FTP_STAGING_HOST }}
           username: ${{ secrets.FTP_STAGING_USERNAME }}
           password: ${{ secrets.FTP_STAGING_PASSWORD }}
-          protocol: ftps
+          protocol: ftp
           port: 21
           local-dir: ./upload-bundle/
           server-dir: ${{ secrets.FTP_STAGING_SERVER_DIR }}/storage/app/
