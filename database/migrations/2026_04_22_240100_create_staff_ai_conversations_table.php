@@ -32,8 +32,10 @@ return new class extends Migration
 
             $t->timestamp('created_at')->useCurrent();
 
-            $t->index(['user_id', 'created_at'], 'idx_sac_user_date');
-            $t->index(['company_id', 'role'], 'idx_sac_cid_role');
+            // Index adlari SQLite'ta GLOBAL (MySQL'de tablo bazli). senior_ai_conversations
+            // ayni 'idx_sac_*' adlarini kullandigi icin test DB'sinde cakisiyordu — prefix 'stf_'.
+            $t->index(['user_id', 'created_at'], 'idx_stf_ai_user_date');
+            $t->index(['company_id', 'role'], 'idx_stf_ai_cid_role');
         });
     }
 

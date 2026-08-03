@@ -19,10 +19,11 @@ return new class extends Migration
             }
         });
 
-        // template_id nullable — view_path kullanıldığında zorunlu değil
-        \Illuminate\Support\Facades\DB::statement(
-            'ALTER TABLE email_drip_steps MODIFY template_id BIGINT UNSIGNED NULL'
-        );
+        // template_id nullable — view_path kullanıldığında zorunlu değil.
+        // change() kullaniliyor: ham "MODIFY" SQL'i MySQL'e ozgu, SQLite'ta patliyordu.
+        Schema::table('email_drip_steps', function (Blueprint $table) {
+            $table->unsignedBigInteger('template_id')->nullable()->change();
+        });
     }
 
     public function down(): void

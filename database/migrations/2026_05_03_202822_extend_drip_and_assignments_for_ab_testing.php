@@ -22,9 +22,10 @@ return new class extends Migration
         });
 
         // ab_test_assignments.guest_application_id nullable yap + uni_match_response_id ekle
-        \Illuminate\Support\Facades\DB::statement(
-            'ALTER TABLE ab_test_assignments MODIFY guest_application_id BIGINT UNSIGNED NULL'
-        );
+        // change() kullaniliyor: ham "MODIFY" SQL'i MySQL'e ozgu, SQLite'ta patliyordu.
+        Schema::table('ab_test_assignments', function (Blueprint $table) {
+            $table->unsignedBigInteger('guest_application_id')->nullable()->change();
+        });
 
         Schema::table('ab_test_assignments', function (Blueprint $table) {
             if (! Schema::hasColumn('ab_test_assignments', 'uni_match_response_id')) {

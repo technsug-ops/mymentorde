@@ -13,11 +13,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // 1. guest_application_id nullable yap — bu doctrine/dbal gerekebilir,
-        //    onun yerine ham SQL kullanıyorum (Laravel default'ta change() için DBAL gerek)
-        \Illuminate\Support\Facades\DB::statement(
-            'ALTER TABLE email_drip_enrollments MODIFY guest_application_id BIGINT UNSIGNED NULL'
-        );
+        // 1. guest_application_id nullable yap.
+        //    Laravel 11+ change() icin artik doctrine/dbal gerekmiyor; ham "MODIFY" SQL'i
+        //    MySQL'e ozgu oldugu icin SQLite (test DB) uzerinde tum migration zincirini
+        //    dusuruyordu. change() her iki surucude de calisir.
+        Schema::table('email_drip_enrollments', function (Blueprint $table) {
+            $table->unsignedBigInteger('guest_application_id')->nullable()->change();
+        });
 
         // 2. uni_match_response_id ekle (zaten yoksa)
         Schema::table('email_drip_enrollments', function (Blueprint $table) {
