@@ -256,5 +256,5 @@
 </div>
 
 <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:16px 20px;font-size:13.5px;color:#1e3a8a;line-height:1.55;">
-    <strong>💡 MentorDE önerisi:</strong> Studienkolleg sürecini tek başına yürütmek çok zorlu — özellikle uni-assist + devlet okul başvuru iletişimi. Danışmanlık almak %95 başarı oranına çıkartıyor. <strong>İlk adım: Almanca seviye tespit + hedef bölüm belirleme.</strong>
+    <strong>💡 {{ config('brand.name', 'MentorDE') }} önerisi:</strong> Studienkolleg sürecini tek başına yürütmek çok zorlu — özellikle uni-assist + devlet okul başvuru iletişimi. Danışmanlık almak %95 başarı oranına çıkartıyor. <strong>İlk adım: Almanca seviye tespit + hedef bölüm belirleme.</strong>
 </div>

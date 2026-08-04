@@ -488,7 +488,7 @@
             'storeRoute'  => 'manager.dealer.document-tokens.store',
             'routeParam'  => $dealer->code,
             'targetLabel' => $dealer->name . ' (Bayi · ' . $dealer->code . ')',
-            'sendIntro'   => "Merhaba, MentorDE'den bayilik dosyanız için belge talebimiz var. Lütfen aşağıdaki linke tıklayıp belgeyi yükleyin:",
+            'sendIntro'   => 'Merhaba, ' . config('brand.name', 'MentorDE') . "'den bayilik dosyanız için belge talebimiz var. Lütfen aşağıdaki linke tıklayıp belgeyi yükleyin:",
         ])
     @endcan
 @endmodule

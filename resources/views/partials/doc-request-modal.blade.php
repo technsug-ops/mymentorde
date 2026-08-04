@@ -34,7 +34,10 @@
             $_drIndex   = route($indexRoute, $routeParam);
             $_drStore   = route($storeRoute, $routeParam);
             $_drLabel   = (string) ($targetLabel ?? '');
-            $_drIntro   = (string) ($sendIntro ?? "Merhaba, MentorDE'den belge talebimiz var. Lütfen aşağıdaki linke tıklayıp belgeyi yükleyin:");
+            // ⚠ Bu metin ÖĞRENCİYE WhatsApp/e-posta ile gidiyor — marka sabit
+            // yazılamaz, yoksa white-label partner firmanın öğrencisine "MentorDE"
+            // adı ulaşır. Marka config'den (şirkete göre çözülmüş) gelir.
+            $_drIntro   = (string) ($sendIntro ?? 'Merhaba, ' . config('brand.name', 'MentorDE') . "'den belge talebimiz var. Lütfen aşağıdaki linke tıklayıp belgeyi yükleyin:");
         }
     } catch (\Throwable $_drEx) {
         $_drShow = false;

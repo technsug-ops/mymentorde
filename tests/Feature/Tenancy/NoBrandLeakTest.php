@@ -82,6 +82,36 @@ class NoBrandLeakTest extends TestCase
     }
 
     /**
+     * PANEL İÇİ sızıntı — login sayfası temiz olsa bile kullanıcı içeri girdiğinde
+     * marka sızabilir. Staging'de tam olarak bu yaşandı: B firmasının panelinde
+     * MentorDE adı görünüyordu (doc-request-modal'ın öğrenciye gönderdiği
+     * WhatsApp/e-posta metni ve içerik partial'larındaki sabit ifadeler).
+     */
+    public function test_tenant_panel_pages_do_not_leak_the_platform_brand(): void
+    {
+        $this->setUpTenantBrand();
+
+        $this->companyB->update([
+            'subscription_tier' => 'gold',
+            'enabled_modules' => ['core', 'marketing_admin', 'doc_request'],
+        ]);
+
+        $admin = $this->userFor($this->companyB, User::ROLE_MARKETING_ADMIN);
+
+        $html = $this->actingAs($admin)->get('/mktg-admin/dashboard')->assertOk()->getContent();
+
+        // Teknik anahtarlar (mentorde_dark, mentorde-theme-css, panel.mentorde.com
+        // linki) marka değil — yalnızca kullanıcıya GÖRÜNEN "MentorDE" aranıyor.
+        $visible = preg_replace('/mentorde[_-][a-z-]+|panel\.mentorde\.com/i', '', $html);
+
+        $this->assertStringNotContainsString(
+            'MentorDE',
+            (string) $visible,
+            'Tenant panelinde platform markası görünüyor.'
+        );
+    }
+
+    /**
      * Platform sahibinin KENDİ sayfaları etkilenmemeli — panel.mentorde.com'da
      * MentorDE markası görünmeye devam etmeli. (Regresyon: marka çözümlemesi
      * varsayılan şirketi de bozmasın.)

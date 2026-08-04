@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>MentorDE İçerik Export — {{ now()->format('d.m.Y H:i') }}</title>
+    <title>{{ config('brand.name', 'MentorDE') }} İçerik Export — {{ now()->format('d.m.Y H:i') }}</title>
     <style>
         @page { margin: 1.4cm 1.4cm 1.8cm 1.4cm; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 11pt; line-height: 1.55; color: #1e293b; margin: 0; }
@@ -44,7 +44,7 @@
 </head>
 <body>
     <div class="doc-header">
-        <h1>MentorDE İçerik Arşivi</h1>
+        <h1>{{ config('brand.name', 'MentorDE') }} İçerik Arşivi</h1>
         <div class="doc-meta">
             {{ $rows->count() }} içerik · {{ now()->format('d.m.Y H:i') }} ·
             {{ url('/') }}

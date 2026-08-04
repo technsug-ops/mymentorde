@@ -317,5 +317,5 @@
 </div>
 
 <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:16px 20px;font-size:13.5px;color:#1e3a8a;line-height:1.55;margin-top:20px;">
-    <strong>💡 MentorDE önerisi:</strong> En güvenli yol — <strong>Mawista (vize için)</strong> → Almanya'ya gel → <strong>Anmeldung + Immatrikulation</strong> → <strong>TK'ya geç</strong>. Toplam ekstra maliyet €50-80, başın hiç ağrımıyor.
+    <strong>💡 {{ config('brand.name', 'MentorDE') }} önerisi:</strong> En güvenli yol — <strong>Mawista (vize için)</strong> → Almanya'ya gel → <strong>Anmeldung + Immatrikulation</strong> → <strong>TK'ya geç</strong>. Toplam ekstra maliyet €50-80, başın hiç ağrımıyor.
 </div>
