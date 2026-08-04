@@ -17,10 +17,10 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  * kullanıcının o şirkete erişim hakkı olduğunu doğrulamak ZORUNDA — rol/permission
  * kontrolü tek başına yetmez, çünkü "config.manage" yetkisi her şirkette bulunur.
  *
- * Erişim kuralı (Faz 0): Platform Owner → tüm şirketler, diğer herkes → yalnızca
- * kendi `users.company_id`'si. Çok-şirketli personel (senior'ın birden fazla
- * partner firmaya hizmet vermesi) `company_user` pivotuyla Faz 3'te eklenecek;
- * o zaman genişletilmesi gereken tek yer allowedCompanyIds().
+ * Erişim kuralı: Platform Owner → tüm şirketler. Diğer herkes →
+ * `User::visibleCompanyIds()` (kendi şirketi + company_user pivotu + denetleyici
+ * rolse alt firmalar). Tek yetki kaynağı orasıdır; burada ayrı bir liste tutmak
+ * iki kuralın zamanla ayrışmasına ve sessiz açığa yol açardı.
  */
 class CompanyContextController extends Controller
 {
@@ -132,9 +132,16 @@ class CompanyContextController extends Controller
             return null;
         }
 
-        $own = (int) ($user->company_id ?? 0);
-
-        return $own > 0 ? [$own] : [];
+        // Kendi şirketi + pivottakiler + (denetleyici rolse) ALT firmalar.
+        //
+        // MentorDE personeli partner firmanın öğrencisi üzerinde çalışırken o
+        // firmanın bağlamına geçebilmeli: aksi halde açtığı ticket, görev ve
+        // olay kaydı MentorDE kutusuna yazılır ve partner firma kendi
+        // öğrencisinin gelişmelerini göremez.
+        //
+        // Yetki User::visibleCompanyIds()'den gelir — tek kaynak. Öğrenci,
+        // aday ve bayi rolleri oraya asla girmez.
+        return $user->visibleCompanyIds();
     }
 
     private function assertCanAccess(?User $user, int $companyId): void
