@@ -29,10 +29,24 @@ return new class extends Migration
                 ->orderBy('id')
                 ->chunkById(500, function ($rows): void {
                     foreach ($rows as $row) {
-                        DB::table('users')
-                            ->where('id', $row->converted_student_id)
-                            ->whereNull('phone')
-                            ->update(['phone' => $row->phone]);
+                        // ⚠ converted_student_id HER ZAMAN sayısal user id değil:
+                        // bazı kayıtlarda öğrenci numarası formatında metin tutuluyor
+                        // ("BCS-26-03-SMQQ"). Bunu doğrudan users.id ile eşleştirmek
+                        // MySQL'de "Truncated incorrect INTEGER value" ile PATLAR.
+                        // (Eski INNER JOIN sürümü sessizce eşleşme bulamıyordu.)
+                        $studentRef = $row->converted_student_id;
+
+                        $query = DB::table('users')->whereNull('phone');
+
+                        if (is_numeric($studentRef)) {
+                            $query->where('id', (int) $studentRef);
+                        } elseif (Schema::hasColumn('users', 'student_id')) {
+                            $query->where('student_id', (string) $studentRef);
+                        } else {
+                            continue;
+                        }
+
+                        $query->update(['phone' => $row->phone]);
                     }
                 });
         }
