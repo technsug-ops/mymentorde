@@ -235,6 +235,58 @@ class PlatformController extends Controller
     // TIER UPDATE — modulleri tier'dan otomatik dagit
     // ────────────────────────────────────────────────────────────────────────
 
+    /**
+     * White-label marka bilgilerini güncelle.
+     *
+     * Marka `App\Support\Brand` tarafından üç katmandan çözülür:
+     *   config/brand.php (.env) → companies.brand_* (burası) → marketing_admin_settings
+     * Alan boşaltılırsa şirket bir üst katmana (platform varsayılanı) düşer.
+     */
+    public function updateBranding(Request $request, int $company): RedirectResponse
+    {
+        $companyModel = Company::query()->where('id', $company)->firstOrFail();
+
+        $validator = Validator::make($request->all(), [
+            'brand_name'          => ['nullable', 'string', 'max:120'],
+            'brand_logo_url'      => ['nullable', 'string', 'max:500'],
+            'brand_primary_color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'primary_domain'      => [
+                'nullable', 'string', 'max:190',
+                \Illuminate\Validation\Rule::unique('companies', 'primary_domain')->ignore($companyModel->id),
+            ],
+        ], [
+            'brand_primary_color.regex' => 'Renk #rrggbb formatında olmalı (örn. #0d9488).',
+            'primary_domain.unique'     => 'Bu domain başka bir şirkete tanımlı.',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        // "https://a.firma.com/" gibi girdileri normalize et
+        $domain = strtolower(trim((string) $request->input('primary_domain', '')));
+        $domain = trim((string) preg_replace('#^https?://#', '', $domain), '/');
+
+        $companyModel->brand_name          = trim((string) $request->input('brand_name', '')) ?: null;
+        $companyModel->brand_logo_url      = trim((string) $request->input('brand_logo_url', '')) ?: null;
+        $companyModel->brand_primary_color = trim((string) $request->input('brand_primary_color', '')) ?: null;
+        $companyModel->primary_domain      = $domain !== '' ? $domain : null;
+        $companyModel->save();  // Company::saved observer marka cache'ini temizler
+
+        \App\Models\PlatformAuditLog::record(
+            'platform.company.branding_updated',
+            [
+                'target_type' => 'company',
+                'target_id'   => $companyModel->id,
+                'company'     => $companyModel->name,
+                'brand_name'  => $companyModel->brand_name,
+                'domain'      => $companyModel->primary_domain,
+            ]
+        );
+
+        return back()->with('status', 'Marka bilgileri güncellendi.');
+    }
+
     public function updateTier(Request $request, int $company): RedirectResponse
     {
         $companyModel = Company::query()->where('id', $company)->firstOrFail();
@@ -378,6 +430,17 @@ class PlatformController extends Controller
             'admin_name'        => ['required', 'string', 'max:120'],
             'admin_email'       => ['required', 'email', 'max:190', 'unique:users,email'],
             'admin_password'    => ['required', 'string', 'min:8', 'max:120'],
+            // ── White-label marka (opsiyonel) ──
+            // Boş bırakılırsa şirket platformun varsayılan markasını görür.
+            // primary_domain doluysa o adresten gelen ziyaretçi bu markayı görür
+            // (bkz. App\Support\Brand + SetCompanyContext host çözümlemesi).
+            'brand_name'          => ['nullable', 'string', 'max:120'],
+            'brand_logo_url'      => ['nullable', 'string', 'max:500'],
+            'brand_primary_color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'primary_domain'      => ['nullable', 'string', 'max:190', 'unique:companies,primary_domain'],
+        ], [
+            'brand_primary_color.regex' => 'Renk #rrggbb formatında olmalı (örn. #0d9488).',
+            'primary_domain.unique'     => 'Bu domain başka bir şirkete tanımlı.',
         ]);
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
@@ -410,6 +473,11 @@ class PlatformController extends Controller
 
         $company = null;
         DB::transaction(function () use ($request, $tier, $tierConfig, $code, $trialEnds, $modules, &$company): void {
+            $domain = strtolower(trim((string) $request->input('primary_domain', '')));
+            // Kullanıcı "https://a.firma.com/" yazarsa da doğru kaydet
+            $domain = (string) preg_replace('#^https?://#', '', $domain);
+            $domain = trim($domain, '/');
+
             $company = Company::query()->create([
                 'name'              => $request->input('name'),
                 'code'              => $code,
@@ -417,6 +485,11 @@ class PlatformController extends Controller
                 'enabled_modules'   => $modules,
                 'subscription_tier' => $tier,
                 'trial_ends_at'     => $trialEnds ?: null,
+                // White-label marka — boşsa platformun varsayılanı kullanılır
+                'brand_name'          => trim((string) $request->input('brand_name', '')) ?: null,
+                'brand_logo_url'      => trim((string) $request->input('brand_logo_url', '')) ?: null,
+                'brand_primary_color' => trim((string) $request->input('brand_primary_color', '')) ?: null,
+                'primary_domain'      => $domain !== '' ? $domain : null,
                 'billing_email'     => $request->input('billing_email') ?: null,
                 'mrr_eur'           => (float) ($tierConfig['mrr_eur'] ?? 0),
             ]);

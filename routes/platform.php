@@ -52,6 +52,8 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
         ->name('platform.companies.tier');
 
     // Modul toggle (tier override — manuel)
+    Route::post('/companies/{company}/branding', [PlatformController::class, 'updateBranding'])
+        ->name('platform.companies.branding');
     Route::post('/companies/{company}/modules', [PlatformController::class, 'updateModules'])
         ->whereNumber('company')
         ->middleware('throttle:30,1')

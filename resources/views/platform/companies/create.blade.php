@@ -93,6 +93,54 @@
                 </div>
             </div>
         </div>
+
+        {{-- WHITE-LABEL MARKA (opsiyonel) --}}
+        <div class="plat-card">
+            <h3 class="plat-card-title"><x-icon name="palette" size="16" /> White-label Marka</h3>
+            <p class="plat-card-sub" style="margin-bottom:14px;">
+                Hepsi opsiyonel. Boş bırakılırsa şirket platformun varsayılan markasını görür.
+            </p>
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Marka Adı</label>
+                <input type="text" name="brand_name" class="plat-input" value="{{ old('brand_name') }}"
+                       maxlength="120" placeholder="Örn. A Eğitim Danışmanlık">
+                <small style="font-size:11px;color:var(--plat-muted);">
+                    Panelde, e-postalarda ve öğrenciye giden mesajlarda bu ad geçer.
+                </small>
+            </div>
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Logo URL</label>
+                <input type="text" name="brand_logo_url" class="plat-input" value="{{ old('brand_logo_url') }}"
+                       maxlength="500" placeholder="https://.../logo.svg">
+            </div>
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Ana Renk</label>
+                <input type="text" name="brand_primary_color" class="plat-input" value="{{ old('brand_primary_color') }}"
+                       maxlength="7" placeholder="#0d9488" pattern="^#[0-9a-fA-F]{6}$">
+                <small style="font-size:11px;color:var(--plat-muted);">#rrggbb formatında.</small>
+            </div>
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Kendi Domaini</label>
+                <input type="text" name="primary_domain" class="plat-input" value="{{ old('primary_domain') }}"
+                       maxlength="190" placeholder="a.yourgermanuni.com">
+                <small style="font-size:11px;color:var(--plat-muted);">
+                    Bu adresten gelen ziyaretçi (giriş yapmamış olsa bile) bu markayı görür.
+                    <strong style="color:#fff;">Önce DNS + SSL kurulmuş olmalı.</strong>
+                </small>
+            </div>
+
+            <div style="margin-top:16px;padding:12px;background:var(--plat-panel-2);border-radius:8px;border:1px solid var(--plat-border);">
+                <div style="font-size:12px;color:var(--plat-muted);line-height:1.6;">
+                    Marka <strong style="color:#fff;">domainden</strong>, veri erişimi
+                    <strong style="color:#fff;">kullanıcıdan</strong> belirlenir. Yani başka bir
+                    firmanın adresinden giriş yapan kullanıcı yine yalnızca kendi verisini görür.
+                </div>
+            </div>
+        </div>
     </div>
 
     <div style="display:flex;gap:8px;margin-top:24px;justify-content:flex-end;">

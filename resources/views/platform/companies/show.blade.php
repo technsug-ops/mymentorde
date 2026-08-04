@@ -109,6 +109,58 @@
         </form>
     </div>
 
+    {{-- WHITE-LABEL MARKA --}}
+    <div class="plat-card">
+        <h3 class="plat-card-title"><x-icon name="palette" size="16" /> White-label Marka</h3>
+        <p class="plat-card-sub" style="margin-bottom:14px;">
+            Boş bırakılan alan platformun varsayılanına döner.
+            Marka <strong>domainden</strong>, veri erişimi <strong>kullanıcıdan</strong> belirlenir.
+        </p>
+
+        <form method="POST" action="{{ route('platform.companies.branding', $company->id) }}">
+            @csrf
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Marka Adı</label>
+                <input type="text" name="brand_name" class="plat-input"
+                       value="{{ old('brand_name', $company->brand_name) }}"
+                       maxlength="120" placeholder="{{ config('brand.name', 'MentorDE') }}">
+                <small style="font-size:11px;color:var(--plat-muted);">
+                    Panelde, e-postalarda ve öğrenciye giden mesajlarda görünür.
+                </small>
+            </div>
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Logo URL</label>
+                <input type="text" name="brand_logo_url" class="plat-input"
+                       value="{{ old('brand_logo_url', $company->brand_logo_url) }}"
+                       maxlength="500" placeholder="https://.../logo.svg">
+            </div>
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Ana Renk</label>
+                <input type="text" name="brand_primary_color" class="plat-input"
+                       value="{{ old('brand_primary_color', $company->brand_primary_color) }}"
+                       maxlength="7" placeholder="#0d9488" pattern="^#[0-9a-fA-F]{6}$">
+            </div>
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Kendi Domaini</label>
+                <input type="text" name="primary_domain" class="plat-input"
+                       value="{{ old('primary_domain', $company->primary_domain) }}"
+                       maxlength="190" placeholder="a.yourgermanuni.com">
+                <small style="font-size:11px;color:var(--plat-muted);">
+                    Bu adresten gelen ziyaretçi (giriş yapmamış olsa bile) bu markayı görür.
+                    <strong>Önce DNS + SSL kurulmuş olmalı.</strong>
+                </small>
+            </div>
+
+            <button type="submit" class="plat-btn plat-btn-primary">
+                <x-icon name="check" size="14" /> Markayı Kaydet
+            </button>
+        </form>
+    </div>
+
     <div class="plat-card">
         <h3 class="plat-card-title"><x-icon name="users" size="16" /> Kullanıcılar (Role Bazlı)</h3>
         @php
