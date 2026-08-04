@@ -232,12 +232,19 @@ class GuestApplicationController extends Controller
             ->first(['id', 'company_id']);
 
         if ($emailOwner && $targetCompanyId && (int) $emailOwner->company_id !== (int) $targetCompanyId) {
+            // ⚠ MESAJ BAŞKA KURUMDAN SÖZ ETMEZ.
+            //
+            // "Bu e-posta başka bir kurumda kayıtlı" demek, başvurana o kişinin
+            // RAKİP bir firmanın müşterisi olduğunu söylerdi. Rastgele e-posta
+            // deneyen biri partner firmaların müşteri listesini çıkarabilirdi.
+            // Hesabın var olduğunu söylemek (giriş/şifre sıfırlama akışlarında
+            // zaten olduğu gibi) kabul edilebilir; NEREDE olduğunu söylemek değil.
             return back()
                 ->withInput()
                 ->withErrors([
-                    'email' => 'Bu e-posta adresi başka bir kurumda kayıtlı. '
-                        . 'Zaten hesabınız varsa <a href="/login" style="color:#2563eb;font-weight:700;text-decoration:underline;">giriş yapın</a>, '
-                        . 'aksi halde farklı bir e-posta adresi kullanın.',
+                    'email' => 'Bu e-posta adresiyle daha önce bir hesap oluşturulmuş. '
+                        . '<a href="/login" style="color:#2563eb;font-weight:700;text-decoration:underline;">Giriş yapın</a> '
+                        . 'ya da <a href="/forgot-password" style="color:#2563eb;font-weight:700;text-decoration:underline;">şifrenizi sıfırlayın</a>.',
                 ]);
         }
 

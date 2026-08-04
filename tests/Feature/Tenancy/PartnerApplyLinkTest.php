@@ -245,6 +245,8 @@ class PartnerApplyLinkTest extends TestCase
     /**
      * `users.email` GLOBAL unique. Aynı e-posta ikinci bir firmaya başvurursa
      * INSERT veritabanı seviyesinde patlardı (500). Anlaşılır hata dönmeli.
+     *
+     * ⚠ Hata mesajı BAŞKA KURUMDAN söz ETMEMELİ — bkz. aşağıdaki test.
      */
     public function test_email_registered_in_another_company_is_rejected_cleanly(): void
     {
@@ -266,6 +268,35 @@ class PartnerApplyLinkTest extends TestCase
                 ->where('email', 'cakisan@example.test')->count(),
             'Cakisan e-posta ile ikinci kayit olusturuldu.'
         );
+    }
+
+    /**
+     * Hata mesajı kişinin BAŞKA BİR FİRMANIN müşterisi olduğunu sızdırmamalı.
+     *
+     * Aksi halde rastgele e-posta deneyen biri partner firmaların müşteri
+     * listesini çıkarabilirdi — rekabet ve KVKK açısından ciddi.
+     */
+    public function test_error_message_does_not_reveal_the_other_company(): void
+    {
+        $this->staffFor($this->companyB);
+        $this->companyB->update(['slug' => 'firma-b', 'brand_name' => 'B Egitim']);
+
+        $this->post('/apply', $this->applicationPayload('sizinti@example.test'))->assertRedirect();
+
+        $this->get('/apply/firma-b')->assertOk();
+        $response = $this->post('/apply', $this->applicationPayload('sizinti@example.test'));
+
+        $message = (string) session('errors')?->first('email');
+
+        $this->assertNotSame('', $message, 'Hata mesaji uretilmedi.');
+
+        foreach (['kurum', 'firma', 'şirket', 'sirket', $this->companyA->name] as $leak) {
+            $this->assertStringNotContainsStringIgnoringCase(
+                $leak,
+                $message,
+                "Hata mesaji baska kurumu sizdiriyor: {$message}"
+            );
+        }
     }
 
     // ── Yardımcı ────────────────────────────────────────────────────────────
