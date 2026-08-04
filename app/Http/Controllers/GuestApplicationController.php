@@ -12,6 +12,9 @@ use App\Models\StudentAssignment;
 use App\Models\StudentType;
 use App\Models\User;
 use App\Support\ApplicationCountryCatalog;
+use App\Support\ApplyCompanyResolver;
+use App\Support\Brand;
+use App\Support\TenantContext;
 use App\Services\LeadSourceTrackingService;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
@@ -71,6 +74,34 @@ class GuestApplicationController extends Controller
         ]);
     }
 
+    /**
+     * B2B partner firmanın kendi başvuru sayfası: /apply/{firma-slug}
+     *
+     * Bayi landing'inden (createForPartner) farkı: orada kayıt yine platformun
+     * şirketine yazılır, sadece dealer_code işlenir. Burada kayıt FİRMANIN kendi
+     * tenant'ına düşer — firma yöneticisi öğrencisini kendi panelinde görür.
+     */
+    public function createForCompany(Request $request, string $companySlug)
+    {
+        $company = ApplyCompanyResolver::bySlug($companySlug);
+
+        if (!$company) {
+            abort(404, 'Firma bulunamadı veya başvuru kabul etmiyor.');
+        }
+
+        ApplyCompanyResolver::remember($request, $company);
+
+        // Öğrenci firmanın markasını görsün — nötr portalın markasını değil.
+        Brand::apply($company);
+
+        // Form içeriği de firmanın bağlamından gelsin: kampanyalar, bayi kodu
+        // önerileri, öğrenci tipleri. Aksi halde partner öğrencisine platformun
+        // kampanyaları gösterilirdi.
+        return TenantContext::runFor((int) $company->id, fn () => $this->renderApplyForm([
+            'applyCompany' => $company,
+        ]));
+    }
+
     private function renderApplyForm(array $extra = [])
     {
         $suggestions = $this->buildApplySuggestions(120);
@@ -96,6 +127,7 @@ class GuestApplicationController extends Controller
             'applicationCountries' => ApplicationCountryCatalog::options(),
             'kvkkText' => $this->getApplyKvkkText(),
             'partner' => null,
+            'applyCompany' => null,
             'prefill' => [],
             'interestedProgram' => null,
         ], $extra));
@@ -104,7 +136,7 @@ class GuestApplicationController extends Controller
     public function suggestions(Request $request)
     {
         $limit     = max(20, min(300, (int) $request->query('limit', 120)));
-        $companyId = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
+        $companyId = (int) (TenantContext::writeId() ?? 0);
         $cacheKey  = 'apply.suggestions.'.$companyId.'.'.$limit;
         $payload   = Cache::remember($cacheKey, 180, fn () => $this->buildApplySuggestions($limit));
 
@@ -116,7 +148,26 @@ class GuestApplicationController extends Controller
         return response()->json($this->getLeadSourceOptions());
     }
 
+    /**
+     * Başvuruyu kaydet.
+     *
+     * Firma linkinden gelindiyse (/apply/{firma-slug}) TÜM kayıt zinciri o firmanın
+     * bağlamında çalışır: başvuru, guest kullanıcısı, rıza kaydı ve otomatik danışman
+     * ataması firmanın kendi personelinden seçilir. Aksi halde bugünkü davranış —
+     * kayıt varsayılan şirkete (B2C havuzu) düşer.
+     */
     public function store(Request $request)
+    {
+        $company = ApplyCompanyResolver::fromRequest($request);
+
+        if ($company === null) {
+            return $this->performStore($request);
+        }
+
+        return TenantContext::runFor((int) $company->id, fn () => $this->performStore($request));
+    }
+
+    private function performStore(Request $request)
     {
         $data = $request->validate([
             'first_name' => ['required', 'string', 'max:120'],
@@ -166,6 +217,27 @@ class GuestApplicationController extends Controller
                     'email' => 'Bu e-posta adresiyle zaten bir başvuru bulunmaktadır. '
                         . 'Portala giriş yapmak için <a href="/login" style="color:#2563eb;font-weight:700;text-decoration:underline;">giriş sayfasını</a> kullanın. '
                         . 'Şifrenizi hatırlamıyorsanız <a href="/forgot-password" style="color:#2563eb;font-weight:700;text-decoration:underline;">Şifremi Unuttum</a> bağlantısını kullanabilirsiniz.',
+                ]);
+        }
+
+        // ── Kurumlar arası e-posta çakışması ────────────────────────────────
+        // `users.email` GLOBAL unique. Yukarıdaki duplicate kontrolü yalnızca
+        // görünen şirkette arar; başka bir firmada aynı e-postayla hesap varsa
+        // buraya kadar gelir ve INSERT veritabanı seviyesinde patlardı (500).
+        // Kullanıcıya anlaşılır mesaj ver.
+        $targetCompanyId = TenantContext::writeId();
+        $emailOwner = User::query()
+            ->withoutGlobalScope('company')
+            ->where('email', $existingEmail)
+            ->first(['id', 'company_id']);
+
+        if ($emailOwner && $targetCompanyId && (int) $emailOwner->company_id !== (int) $targetCompanyId) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'email' => 'Bu e-posta adresi başka bir kurumda kayıtlı. '
+                        . 'Zaten hesabınız varsa <a href="/login" style="color:#2563eb;font-weight:700;text-decoration:underline;">giriş yapın</a>, '
+                        . 'aksi halde farklı bir e-posta adresi kullanın.',
                 ]);
         }
 
@@ -319,7 +391,7 @@ class GuestApplicationController extends Controller
 
     private function buildApplySuggestions(int $limit = 120): array
     {
-        $companyId         = app()->bound('current_company_id') ? (int) app('current_company_id') : 0;
+        $companyId         = (int) (TenantContext::writeId() ?? 0);
         $recentWindowStart = now()->subMonths(12);
         $maxRecentRows     = max(200, $limit * 6);
 
@@ -484,8 +556,14 @@ class GuestApplicationController extends Controller
             return $text;
         }
 
+        // Veri sorumlusu, başvurunun yazılacağı FİRMADIR. Sabit "MentorDE" yazmak
+        // partner firmanın öğrencisine hukuken yanlış bilgi vermek olurdu:
+        // verisini işleyen kurum MentorDE değil, kendi danışmanlık firması.
+        $controller = trim((string) (config('brand.legal_name') ?: config('brand.name') ?: ''));
+        $controller = $controller !== '' ? $controller : 'kurumumuz';
+
         return "KVKK AYDINLATMA METNI\n\n"
-            ."Kisisel verileriniz MentorDE tarafindan basvuru surecinin yurutulmesi, iletisim kurulmasi "
+            ."Kisisel verileriniz {$controller} tarafindan basvuru surecinin yurutulmesi, iletisim kurulmasi "
             ."ve ilgili kurumlarla basvuru operasyonlarinin tamamlanmasi amaciyla islenir.\n\n"
             ."Bu metin Config ekranindan manager tarafindan guncellenebilir.";
     }

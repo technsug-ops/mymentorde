@@ -74,6 +74,11 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
     Route::get('/leads', [PlatformPortfolioController::class, 'leads'])->name('platform.leads');
     Route::get('/students', [PlatformPortfolioController::class, 'students'])->name('platform.students');
 
+    // Firma başvuru linkini kullanamadığında adayı elle doğru firmaya taşı.
+    Route::post('/leads/{application}/transfer', [PlatformPortfolioController::class, 'transferLead'])
+        ->whereNumber('application')
+        ->name('platform.leads.transfer');
+
     Route::get('/analytics', [PlatformAnalyticsController::class, 'index'])
         ->name('platform.analytics');
     Route::get('/analytics/export.csv', [PlatformAnalyticsController::class, 'exportCsv'])

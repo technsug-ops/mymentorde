@@ -289,6 +289,38 @@ final class Brand
         return $raw ?? '';
     }
 
+    /**
+     * Çözülmüş markanın anlık görüntüsü.
+     *
+     * Kuyruk işleri web isteğinin İÇİNDE çalışıyor (KAS'ta cron yok). İş, ait
+     * olduğu şirketin markasını uygulayıp bitince isteğin markasını iade etmeli.
+     *
+     * @return array{brand:array<string,mixed>,company_id:int|null}
+     */
+    public static function snapshot(): array
+    {
+        return [
+            'brand' => (array) config('brand', []),
+            'company_id' => app()->bound(self::BRAND_COMPANY_KEY)
+                ? (int) app(self::BRAND_COMPANY_KEY)
+                : null,
+        ];
+    }
+
+    /** @param array{brand:array<string,mixed>,company_id:int|null} $snapshot */
+    public static function restore(array $snapshot): void
+    {
+        config(['brand' => $snapshot['brand'] ?? []]);
+
+        $companyId = $snapshot['company_id'] ?? null;
+
+        if ($companyId !== null) {
+            app()->instance(self::BRAND_COMPANY_KEY, (int) $companyId);
+        } else {
+            app()->forgetInstance(self::BRAND_COMPANY_KEY);
+        }
+    }
+
     public static function cacheKey(int $companyId): string
     {
         return "brand:resolved:{$companyId}";

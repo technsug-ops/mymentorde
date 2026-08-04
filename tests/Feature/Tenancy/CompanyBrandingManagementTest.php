@@ -116,6 +116,45 @@ class CompanyBrandingManagementTest extends TestCase
         $this->assertFalse(Brand::resolve($company)['public_marketing']);
     }
 
+    /**
+     * Şirket detay ekranı gerçekten render olmalı.
+     *
+     * Marka + başvuru linki formları buraya elle eklendi; blade'i yalnızca lint'lemek
+     * yetmez (değişken eksikse lint geçer, sayfa patlar).
+     */
+    public function test_company_detail_page_renders_with_the_apply_link(): void
+    {
+        $this->companyB->update(['slug' => 'firma-b']);
+
+        $this->actingAs($this->owner())
+            ->get('/platform/companies/' . $this->companyB->id)
+            ->assertOk()
+            ->assertSee('/apply/firma-b', false);
+    }
+
+    public function test_owner_can_change_the_apply_link_slug(): void
+    {
+        $this->actingAs($this->owner())
+            ->post('/platform/companies/' . $this->companyB->id . '/branding', [
+                'slug' => 'abc-egitim',
+            ])
+            ->assertRedirect();
+
+        $this->assertSame('abc-egitim', $this->companyB->fresh()->slug);
+    }
+
+    /** /apply/success gibi sistem adresleri slug olarak alınamaz. */
+    public function test_reserved_slugs_are_rejected(): void
+    {
+        $this->actingAs($this->owner())
+            ->post('/platform/companies/' . $this->companyB->id . '/branding', [
+                'slug' => 'success',
+            ])
+            ->assertSessionHasErrors('slug');
+
+        $this->assertNull($this->companyB->fresh()->slug);
+    }
+
     public function test_company_users_cannot_change_branding(): void
     {
         $firmUser = $this->userFor($this->companyB, User::ROLE_MARKETING_ADMIN);

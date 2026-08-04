@@ -332,16 +332,29 @@
 </div>
 <div style="height:42px;"></div>
 @endif
+
+@if(!empty($applyCompany))
+{{-- B2B firma başvurusu: kayıt bu firmaya yazılacak. Öğrenci zaten firmanın
+     markasını görüyor (Brand::apply), band yalnızca teyit amaçlı. --}}
+<div style="position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg, var(--primary-deep), var(--primary));color:#fff;padding:10px 20px;text-align:center;font-size:13px;font-weight:600;z-index:100;box-shadow:0 2px 8px rgba({{ $pt['focus_shadow_rgb'] }},.25);">
+    🎓 <strong>{{ config('brand.name') ?: $applyCompany->name }}</strong> başvuru formu
+</div>
+<div style="height:42px;"></div>
+@endif
 <div class="shell">
 
     {{-- ── SOL MARKA PANELİ ─────────────────────────── --}}
     @php
-        $_hasBrandTable = \Illuminate\Support\Facades\Schema::hasTable('marketing_admin_settings');
-        $brandName   = $_hasBrandTable ? \App\Models\MarketingAdminSetting::getValue('brand_name',        config('brand.name',   'MentorDE')) : config('brand.name',   'MentorDE');
-        $brandAccent = $_hasBrandTable ? \App\Models\MarketingAdminSetting::getValue('brand_accent',      config('brand.accent', 'DE'))       : config('brand.accent', 'DE');
-        $logoUrl     = $_hasBrandTable ? \App\Models\MarketingAdminSetting::getValue('brand_logo_url',    config('brand.logo_url',   ''))     : config('brand.logo_url', '');
-        $logoHeight  = (int) ($_hasBrandTable ? \App\Models\MarketingAdminSetting::getValue('brand_logo_height', config('brand.logo_height', 40)) : config('brand.logo_height', 40));
-        $logoPath    = config('brand.logo_path', '');
+        // Marka DAİMA config('brand')'den — App\Support\Brand katmanı .env +
+        // companies.brand_* + marketing_admin_settings'i ziyaret edilen domainin
+        // (ya da firma başvuru linkinin) şirketi için zaten birleştirdi.
+        // Buradan MarketingAdminSetting'i doğrudan okumak host/firma bazlı markayı
+        // atlıyordu; partner öğrencisi MentorDE logosunu görüyordu.
+        $brandName   = (string) config('brand.name', '');
+        $brandAccent = (string) config('brand.accent', '');
+        $logoUrl     = (string) config('brand.logo_url', '');
+        $logoHeight  = (int) (config('brand.logo_height') ?: 40);
+        $logoPath    = (string) config('brand.logo_path', '');
         $resolvedLogoSrc = $logoUrl !== '' ? $logoUrl
             : ($logoPath !== '' ? asset('storage/' . $logoPath) : '');
     @endphp
@@ -476,6 +489,15 @@
 
         <form method="POST" action="{{ route('apply.store') }}" data-apply-form="1">
             @csrf
+
+            @if(!empty($applyCompany))
+                {{-- Firma bilgisi asıl olarak session'da taşınır; bu alan session
+                     kaybolursa (uzun süre açık kalan sekme, farklı tarayıcı) yedektir.
+                     Kurcalanması veri sızıntısı yaratmaz: kişi yalnızca KENDİ
+                     başvurusunu başka firmaya yazdırabilir, hiçbir şey okuyamaz. --}}
+                <input type="hidden" name="{{ \App\Support\ApplyCompanyResolver::FORM_FIELD }}"
+                       value="{{ $applyCompany->slug ?: $applyCompany->code }}">
+            @endif
 
             @if(! empty($interestedProgram['id']))
                 {{-- Program detay sayfasından geliyorsa: bilgi banner + meta hidden --}}
