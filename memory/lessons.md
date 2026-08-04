@@ -137,3 +137,33 @@ public function leadCaptureSubmit(Request $r): RedirectResponse {
 ```
 
 **Kural:** İki farklı request method'undan aynı business logic'i tetiklemen gerekiyorsa, **HTTP redirect kullanma** — private method'a extract et.
+
+---
+
+## Ders: "Katman kurdum" ≠ "katman kullanılıyor" (2026-08-04)
+
+**Hata:** Faz 2'de `App\Support\Brand` marka çözümleme katmanını kurdum ve
+"artık 313 config('brand.*') çağrısı doğru markayı verir" diye raporladım.
+Ama giriş sayfası markayı config'den değil **doğrudan MarketingAdminSetting'den**
+okuyordu. Yani en kritik sayfa (partner firmanın ilk gördüğü ekran) katmanı
+tamamen atlıyordu. Kullanıcı canlıda yakaladı.
+
+Aynı anda iki sızıntı daha vardı:
+- `Brand::resolve()` boş alanları `.env`'e düşürüyordu → BRAND_LOGO_URL
+  (platformun logosu) partner firmaya miras kalıyordu.
+- `PublicTheme` MARKA şirketini değil VERİ şirketini okuyordu → partner
+  domaininde platformun paleti render ediliyordu.
+
+**Kurallar:**
+1. Bir çözümleme katmanı kurduğunda, o veriyi okuyan **tüm** yerleri gerçekten
+   ara (`grep MarketingAdminSetting::getValue`, `grep config('brand`). Katmanı
+   yazmak yetmez; eski doğrudan okumaları da kapatmak gerekir.
+2. White-label sistemde **fallback yönü** güvenlik kararıdır. "Boşsa varsayılana
+   düş" masum görünür ama varsayılan = platformun kimliği ise her boş alan bir
+   sızıntıdır. Tenant için doğru fallback platform değil, **tenant'ın kendi
+   kaydıdır** (şirket adı).
+3. Runtime'da `config()` üzerine yazan bir katman, kendi çıktısını taban alamaz.
+   `apply()` config'e yazıyorsa, `resolve()` bozulmamış tabanı ayrı tutmalı —
+   aksi halde aynı istekte ikinci çözümleme önceki tenant'ı miras alır.
+4. Test yazarken "X görünüyor mu"nun yanına **"Y görünmüyor mu"** da yaz.
+   Sızıntı testleri assertDontSee ile yakalanır; assertSee ile değil.
