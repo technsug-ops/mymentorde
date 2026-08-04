@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Cache;
  * Şirket başına marka çözümleme.
  *
  * ÜÇ KATMAN (sonraki öncekini ezer):
- *   1. config/brand.php      — .env varsayılanları (son çare)
+ *   1. config/brand.php      — .env varsayılanları (YALNIZCA ana şirket için)
  *   2. companies.brand_*     — şirketin marka paketi (platform sahibi tanımlar)
  *   3. marketing_admin_*     — şirketin panelden değiştirdiği değerler (mevcut sistem)
  *
@@ -19,11 +19,58 @@ use Illuminate\Support\Facades\Cache;
  * PublicTheme ve mail şablonları HİÇ DEĞİŞMEDEN doğru markayı verir.
  * Yeni helper öğrenmek ya da view composer eklemek gerekmez.
  *
+ * ── WHITE-LABEL KURALI ──────────────────────────────────────────────────
+ * `.env`'deki marka değerleri (BRAND_LOGO_URL, BRAND_NAME, banka bilgisi...)
+ * PLATFORM SAHİBİNİN kimliğidir. Bir partner firma bu alanları kendi kaydında
+ * doldurmadıysa alan BOŞ kalır — asla platformun logosuna/adına düşmez.
+ * Aksi halde firma kendi adresinde MentorDE logosu görürdü; white-label sözü
+ * sessizce bozulurdu. Bkz. `stripPlatformIdentity()`.
+ *
  * `config:cache` ile uyumlu: runtime config() set'i yüklü repository'yi değiştirir,
  * önbellek dosyasına dokunmaz.
  */
 final class Brand
 {
+    /** Bu isteğin MARKASINI veren şirket (veri şirketinden farklı olabilir). */
+    public const BRAND_COMPANY_KEY = 'brand_company_id';
+
+    /**
+     * Yalnızca ana şirketin miras alabileceği kimlik alanları.
+     *
+     * `mail_from_address` bilerek DIŞARIDA: SMTP gönderici adresi altyapıdır,
+     * boşalırsa mail gönderimi tamamen kırılır.
+     */
+    private const PLATFORM_IDENTITY_KEYS = [
+        'name', 'legal_name', 'short_name', 'tagline', 'accent',
+        'logo_url', 'logo_path', 'favicon_url',
+        'email', 'support_email', 'phone', 'address', 'website',
+        'mail_from_name',
+        'company_no', 'tax_id', 'kvkk_url', 'terms_url', 'privacy_url',
+    ];
+
+    /** İç içe kimlik blokları — anahtar yapısı korunur, değerler boşaltılır. */
+    private const PLATFORM_IDENTITY_GROUPS = ['banking', 'social'];
+
+    /** `banking.currency` gibi kimlik olmayan teknik alanlar boşaltılmaz. */
+    private const KEEP_IN_GROUPS = ['currency'];
+
+    /**
+     * config/brand.php'nin BOZULMAMIŞ hali.
+     *
+     * `apply()` sonucu `config('brand')`'e yazdığı için, aynı istekte ikinci bir
+     * `resolve()` çağrısı bir önceki şirketin değerlerini taban alırdı — yani
+     * firmalar arası marka sızıntısı. AppServiceProvider açılışta burayı doldurur.
+     *
+     * @var array<string,mixed>|null
+     */
+    private static ?array $platformBase = null;
+
+    /** Uygulama açılışında (herhangi bir apply()'dan ÖNCE) çağrılır. */
+    public static function rememberPlatformBase(): void
+    {
+        self::$platformBase = (array) config('brand', []);
+    }
+
     /** Bu istek için markayı şirkete göre yeniden bağla. */
     public static function apply(?Company $company): void
     {
@@ -32,6 +79,7 @@ final class Brand
         }
 
         config(['brand' => self::resolve($company)]);
+        app()->instance(self::BRAND_COMPANY_KEY, (int) $company->id);
     }
 
     /**
@@ -41,7 +89,11 @@ final class Brand
      */
     public static function resolve(Company $company): array
     {
-        $base = (array) config('brand', []);
+        $base = self::$platformBase ?? (array) config('brand', []);
+
+        if (!self::isPrimary($company)) {
+            $base = self::stripPlatformIdentity($base);
+        }
 
         $resolved = Cache::remember(
             self::cacheKey((int) $company->id),
@@ -55,6 +107,48 @@ final class Brand
         return array_replace_recursive($base, $resolved);
     }
 
+    /** Şirket, platformun kendi şirketi mi (config('app.primary_company_code'))? */
+    public static function isPrimary(Company $company): bool
+    {
+        $primaryCode = strtolower(trim((string) config('app.primary_company_code', 'mentorde')));
+        $code = strtolower(trim((string) $company->getAttribute('code')));
+
+        return $code !== '' && $code === $primaryCode;
+    }
+
+    /**
+     * Platformun kimlik alanlarını taban paketten çıkar.
+     *
+     * Anahtarlar SİLİNMEZ, boşaltılır: blade'lerdeki `config('brand.x')` çağrıları
+     * eksik anahtarda null döner ve ikinci argümandaki "MentorDE" varsayılanına
+     * düşerdi — sızıntı yeniden başlardı. Boş string bunu keser.
+     *
+     * @param  array<string,mixed>  $base
+     * @return array<string,mixed>
+     */
+    private static function stripPlatformIdentity(array $base): array
+    {
+        foreach (self::PLATFORM_IDENTITY_KEYS as $key) {
+            if (array_key_exists($key, $base)) {
+                $base[$key] = '';
+            }
+        }
+
+        foreach (self::PLATFORM_IDENTITY_GROUPS as $group) {
+            if (!is_array($base[$group] ?? null)) {
+                continue;
+            }
+
+            foreach (array_keys($base[$group]) as $key) {
+                if (!in_array($key, self::KEEP_IN_GROUPS, true)) {
+                    $base[$group][$key] = '';
+                }
+            }
+        }
+
+        return $base;
+    }
+
     /**
      * Şirket kaydındaki marka alanları → config/brand.php şekline dönüştür.
      *
@@ -63,6 +157,7 @@ final class Brand
     private static function fromCompany(Company $company): array
     {
         $out = [];
+        $isPrimary = self::isPrimary($company);
 
         // brand_overrides config/brand.php'nin tam şeklini taklit eder (banka, hukuki,
         // sosyal, mail kimliği, ödeme günleri...) — önce o, sonra düz kolonlar biner.
@@ -75,11 +170,19 @@ final class Brand
         }
 
         $name = trim((string) ($company->getAttribute('brand_name') ?? ''));
+
+        // Partner firma marka adını doldurmadıysa KENDİ adını kullanır.
+        // Platformun adına düşmek white-label sözünü bozardı.
+        if ($name === '' && !$isPrimary) {
+            $name = trim((string) ($company->getAttribute('name') ?? ''));
+        }
+
         if ($name !== '') {
             $out['name'] = $name;
             // legal_name/short_name açıkça verilmediyse marka adına düşsün
             $out['legal_name'] ??= $name;
             $out['short_name'] ??= $name;
+            $out['mail_from_name'] ??= $name;
         }
 
         $logo = trim((string) ($company->getAttribute('brand_logo_url') ?? ''));
@@ -90,12 +193,31 @@ final class Brand
         $color = trim((string) ($company->getAttribute('brand_primary_color') ?? ''));
         if ($color !== '') {
             $out['theme']['primary'] = $color;
+            // Şirket rengi AÇIKÇA seçildi mi? config/brand.php'nin env varsayılanı da
+            // bir renk döndürdüğü için "tanımlı mı" sorusu değerden anlaşılamıyor.
+            // Favicon/theme-color gibi yerler platform tonunu koruyabilsin diye ayrı bayrak.
+            $out['theme']['primary_source'] = 'company';
         }
 
         $domain = trim((string) ($company->getAttribute('primary_domain') ?? ''));
         if ($domain !== '') {
             $out['website'] = 'https://' . $domain;
         }
+
+        // İletişim adresi verilmediyse faturalama adresine düş — boş bırakmak
+        // sözleşme/mail şablonlarında görünür boşluk üretir.
+        if (!$isPrimary) {
+            $billing = trim((string) ($company->getAttribute('billing_email') ?? ''));
+            if ($billing !== '') {
+                $out['email'] ??= $billing;
+                $out['support_email'] ??= $billing;
+            }
+        }
+
+        // Public sayfalarda (login, /apply) B2C kazanım içeriği gösterilsin mi?
+        // Kolon henüz yoksa (migration öncesi) varsayılan: göster.
+        $marketing = $company->getAttribute('public_marketing');
+        $out['public_marketing'] = $marketing === null ? true : (bool) $marketing;
 
         return $out;
     }
@@ -112,7 +234,7 @@ final class Brand
             $rows = MarketingAdminSetting::query()
                 ->withoutGlobalScopes()
                 ->where('company_id', $companyId)
-                ->whereIn('setting_key', ['brand_name', 'brand_logo_url', 'ai_labs_brand_name'])
+                ->whereIn('setting_key', ['brand_name', 'brand_logo_url', 'brand_logo_height', 'ai_labs_brand_name'])
                 ->pluck('setting_value', 'setting_key');
         } catch (\Throwable) {
             // Tablo henüz yok (migration) ya da DB erişilemez — sessizce geç.
@@ -121,24 +243,50 @@ final class Brand
 
         $out = [];
 
-        $name = trim((string) ($rows['brand_name'] ?? ''));
+        $name = trim((string) self::settingValue($rows['brand_name'] ?? null));
         if ($name !== '') {
             $out['name'] = $name;
             $out['legal_name'] ??= $name;
             $out['short_name'] ??= $name;
+            $out['mail_from_name'] ??= $name;
         }
 
-        $logo = trim((string) ($rows['brand_logo_url'] ?? ''));
+        $logo = trim((string) self::settingValue($rows['brand_logo_url'] ?? null));
         if ($logo !== '') {
             $out['logo_url'] = $logo;
         }
 
-        $aiLabs = trim((string) ($rows['ai_labs_brand_name'] ?? ''));
+        $height = trim((string) self::settingValue($rows['brand_logo_height'] ?? null));
+        if ($height !== '') {
+            $out['logo_height'] = (int) $height;
+        }
+
+        $aiLabs = trim((string) self::settingValue($rows['ai_labs_brand_name'] ?? null));
         if ($aiLabs !== '') {
             $out['ai_labs_name'] = $aiLabs;
         }
 
         return $out;
+    }
+
+    /**
+     * setting_value JSON kolonu `{"value": "..."}` şeklinde saklanır
+     * (bkz. MarketingAdminSetting::setValue). Düz string de tolere edilir.
+     */
+    private static function settingValue(mixed $raw): mixed
+    {
+        if (is_string($raw)) {
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded)) {
+                $raw = $decoded;
+            }
+        }
+
+        if (is_array($raw)) {
+            return $raw['value'] ?? '';
+        }
+
+        return $raw ?? '';
     }
 
     public static function cacheKey(int $companyId): string

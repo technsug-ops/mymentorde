@@ -80,8 +80,13 @@ class CompanyBrandingManagementTest extends TestCase
             ->assertSessionHasErrors('brand_primary_color');
     }
 
-    /** Alan boşaltılırsa şirket platformun varsayılan markasına döner. */
-    public function test_clearing_brand_name_falls_back_to_platform_default(): void
+    /**
+     * Alan boşaltılırsa şirket KENDİ adına döner — platformun markasına DEĞİL.
+     *
+     * Eskiden platform varsayılanına düşüyordu; canlıda partner domaininde MentorDE
+     * adı/logosu görünmesinin sebeplerinden biri buydu.
+     */
+    public function test_clearing_brand_name_falls_back_to_company_own_name(): void
     {
         $this->companyB->update(['brand_name' => 'Eski Marka']);
 
@@ -92,7 +97,23 @@ class CompanyBrandingManagementTest extends TestCase
         $company = $this->companyB->fresh();
 
         $this->assertNull($company->brand_name);
-        $this->assertSame(config('brand.name'), Brand::resolve($company)['name']);
+        $this->assertSame($company->name, Brand::resolve($company)['name']);
+        $this->assertNotSame(config('brand.name'), Brand::resolve($company)['name']);
+    }
+
+    public function test_owner_can_disable_public_marketing_for_a_company(): void
+    {
+        $this->actingAs($this->owner())
+            ->post('/platform/companies/' . $this->companyB->id . '/branding', [
+                'brand_name'       => 'B2B Partner',
+                'public_marketing' => '0',
+            ])
+            ->assertRedirect();
+
+        $company = $this->companyB->fresh();
+
+        $this->assertFalse((bool) $company->public_marketing);
+        $this->assertFalse(Brand::resolve($company)['public_marketing']);
     }
 
     public function test_company_users_cannot_change_branding(): void

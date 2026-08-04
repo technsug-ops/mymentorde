@@ -98,7 +98,9 @@
         <div class="plat-card">
             <h3 class="plat-card-title"><x-icon name="palette" size="16" /> White-label Marka</h3>
             <p class="plat-card-sub" style="margin-bottom:14px;">
-                Hepsi opsiyonel. Boş bırakılırsa şirket platformun varsayılan markasını görür.
+                Marka adı boş bırakılırsa <strong style="color:#fff;">şirket adı</strong> kullanılır.
+                Platformun markası (MentorDE logosu, adı, banka bilgisi) partner firmaya
+                <strong style="color:#fff;">asla miras kalmaz</strong>.
             </p>
 
             <div class="plat-form-group">
@@ -131,6 +133,20 @@
                     Bu adresten gelen ziyaretçi (giriş yapmamış olsa bile) bu markayı görür.
                     <strong style="color:#fff;">Önce DNS + SSL kurulmuş olmalı.</strong>
                 </small>
+            </div>
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Public Pazarlama İçeriği</label>
+                <input type="hidden" name="public_marketing" value="0">
+                <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--plat-panel-2);border:1px solid var(--plat-border);border-radius:8px;cursor:pointer;">
+                    <input type="checkbox" name="public_marketing" value="1" {{ old('public_marketing') ? 'checked' : '' }} style="accent-color:var(--plat-accent);margin-top:2px;">
+                    <span style="font-size:12px;color:var(--plat-muted);line-height:1.6;">
+                        Giriş sayfasında <strong style="color:#fff;">"Ücretsiz Başvuru"</strong> ve tanıtım
+                        listesi gösterilsin.<br>
+                        B2B partner firmalar için <strong style="color:#fff;">kapalı bırakın</strong> —
+                        onların ziyaretçisi reklam görmemeli.
+                    </span>
+                </label>
             </div>
 
             <div style="margin-top:16px;padding:12px;background:var(--plat-panel-2);border-radius:8px;border:1px solid var(--plat-border);">
