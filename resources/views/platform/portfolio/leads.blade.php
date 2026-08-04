@@ -84,6 +84,7 @@
                         <th>Durum</th>
                         <th>Danışman</th>
                         <th>Kayıt</th>
+                        <th>Devret</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -101,6 +102,24 @@
                             <td style="color:#64748b;font-size:13px;">{{ $row->assigned_senior_email ?: '—' }}</td>
                             <td style="color:#64748b;font-size:13px;">
                                 {{ $row->created_at ? \Illuminate\Support\Carbon::parse($row->created_at)->format('d.m.Y') : '—' }}
+                            </td>
+                            <td>
+                                {{-- Firma başvuru linkini kullandıramadıysa aday buraya düşer;
+                                     doğru firmaya elle taşınır. Bağlı tüm kayıtlar birlikte gider. --}}
+                                <form method="POST" action="{{ route('platform.leads.transfer', $row->id) }}"
+                                      style="display:flex;gap:6px;align-items:center;">
+                                    @csrf
+                                    <select name="company_id" class="plat-select" style="font-size:12px;padding:4px 8px;min-width:150px;">
+                                        <option value="">Firma seç…</option>
+                                        @foreach($companies as $company)
+                                            @continue((int) $company->id === (int) $row->company_id)
+                                            <option value="{{ $company->id }}">{{ $company->brand_name ?: $company->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <button type="submit" class="plat-btn plat-btn-ghost" style="font-size:12px;padding:4px 10px;">
+                                        Devret
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     @endforeach

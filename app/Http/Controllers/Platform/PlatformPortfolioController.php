@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\GuestApplication;
 use App\Models\User;
+use App\Services\LeadTransferService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
@@ -84,6 +86,53 @@ class PlatformPortfolioController extends Controller
             'filters' => $filters,
             'totals' => $this->studentTotalsByCompany(),
         ]);
+    }
+
+    /**
+     * Adayı başka bir firmaya devret.
+     *
+     * Firma kendi başvuru linkini (/apply/{slug}) kullandırmadığında kayıt B2C
+     * havuzuna düşer; platform sahibi buradan doğru firmaya taşır. Bağlı tüm
+     * kayıtlar birlikte taşınır — bkz. LeadTransferService.
+     */
+    public function transferLead(Request $request, LeadTransferService $transfers, int $application): RedirectResponse
+    {
+        $validated = $request->validate([
+            'company_id' => ['required', 'integer', 'exists:companies,id'],
+        ], [
+            'company_id.required' => 'Hedef firma seçilmedi.',
+            'company_id.exists'   => 'Hedef firma bulunamadı.',
+        ]);
+
+        $lead = GuestApplication::withoutGlobalScope('company')
+            ->whereNull('deleted_at')
+            ->where('id', $application)
+            ->firstOrFail();
+
+        $target = Company::query()->findOrFail((int) $validated['company_id']);
+
+        try {
+            $result = $transfers->transfer($lead, $target);
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['company_id' => $e->getMessage()]);
+        }
+
+        \App\Models\PlatformAuditLog::record('platform.lead.transferred', [
+            'target_type'   => 'guest_application',
+            'target_id'     => $lead->id,
+            'company_from'  => $result['company_from'],
+            'company_to'    => $result['company_to'],
+            'tables'        => $result['tables'],
+            // Aday adı/e-postası audit'e YAZILMAZ — tenant kişisel verisi.
+        ]);
+
+        $message = 'Aday ' . ($target->brand_name ?: $target->name) . ' firmasına devredildi.';
+
+        if ($result['senior_cleared']) {
+            $message .= ' Eski danışman ataması kaldırıldı — yeni firma kendi danışmanını atamalı.';
+        }
+
+        return back()->with('status', $message);
     }
 
     /** @return array{company:int,q:string,status:string} */

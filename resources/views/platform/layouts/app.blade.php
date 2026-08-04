@@ -254,6 +254,12 @@
             @if (session('success'))
                 <div class="plat-alert plat-alert-success"><x-icon name="check" size="16" /> {{ session('success') }}</div>
             @endif
+            {{-- Bazı controller'lar Laravel'in yaygın 'status' anahtarını kullanıyor
+                 (marka kaydetme, aday devri). Karşılığı olmadığı için mesajlar sessizce
+                 kayboluyordu — kullanıcı işlemin geçip geçmediğini göremiyordu. --}}
+            @if (session('status'))
+                <div class="plat-alert plat-alert-success"><x-icon name="check" size="16" /> {{ session('status') }}</div>
+            @endif
             @if (session('error'))
                 <div class="plat-alert plat-alert-danger"><x-icon name="circle-alert" size="16" /> {{ session('error') }}</div>
             @endif
