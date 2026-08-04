@@ -122,17 +122,50 @@ final class ApplyCompanyResolver
         }
     }
 
-    /** Firmanın paylaşacağı tam başvuru adresi. */
+    /**
+     * Firmanın öğrencisine vereceği tam başvuru adresi.
+     *
+     * Host sırası:
+     *   1. Firmanın KENDİ domaini — tam white-label
+     *   2. Ortak giriş kapısı (is_public_portal işaretli şirket) — nötr portal
+     *   3. Mevcut host — son çare
+     *
+     * `url()` tek başına kullanılamaz: platform sahibi paneli panel.mentorde.com'da
+     * gezdiği için partnere verilecek adres MentorDE domainiyle üretilirdi. Link
+     * her host'ta çalışır ama PAYLAŞILAN adres markayı taşır.
+     */
     public static function linkFor(Company $company): string
     {
         $slug = trim((string) ($company->slug ?: $company->code));
+        $host = trim((string) ($company->primary_domain ?: '')) ?: self::publicPortalHost();
 
-        return url('/apply/' . $slug);
+        return $host !== ''
+            ? 'https://' . $host . '/apply/' . $slug
+            : url('/apply/' . $slug);
+    }
+
+    /** Partner firmaların ortak giriş kapısının domaini (yourgermanuni.com). */
+    public static function publicPortalHost(): string
+    {
+        return (string) Cache::remember('apply:public_portal_host', 600, static function (): string {
+            try {
+                return (string) (Company::query()
+                    ->where('is_active', true)
+                    ->where('is_public_portal', true)
+                    ->whereNotNull('primary_domain')
+                    ->orderBy('id')
+                    ->value('primary_domain') ?: '');
+            } catch (\Throwable) {
+                // Kolon henüz yok (migration öncesi) — eski davranışa düş.
+                return '';
+            }
+        });
     }
 
     public static function flushCache(Company $company): void
     {
         Cache::forget("apply:company_has_staff:{$company->id}");
+        Cache::forget('apply:public_portal_host');
 
         foreach (array_filter([$company->slug, $company->code]) as $key) {
             Cache::forget('apply:company_by_slug:' . strtolower((string) $key));

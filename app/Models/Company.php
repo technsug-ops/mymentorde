@@ -28,6 +28,7 @@ class Company extends Model
         'brand_primary_color',
         'brand_overrides',
         'public_marketing',
+        'is_public_portal',
     ];
 
     protected $casts = [
@@ -43,6 +44,7 @@ class Company extends Model
         'domain_aliases'            => 'array',
         'brand_overrides'           => 'array',
         'public_marketing'          => 'boolean',
+        'is_public_portal'          => 'boolean',
     ];
 
     protected static function booted(): void

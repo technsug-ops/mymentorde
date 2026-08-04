@@ -318,6 +318,10 @@ class PlatformController extends Controller
             $companyModel->public_marketing = $request->boolean('public_marketing');
         }
 
+        if ($request->has('is_public_portal')) {
+            $companyModel->is_public_portal = $request->boolean('is_public_portal');
+        }
+
         $companyModel->save(); // Company::saved observer marka cache'ini temizler
 
         \App\Models\PlatformAuditLog::record(
