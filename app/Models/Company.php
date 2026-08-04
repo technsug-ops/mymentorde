@@ -50,6 +50,8 @@ class Company extends Model
         static::saved(function (self $company): void {
             \App\Support\Brand::flushCache((int) $company->id);
             \Illuminate\Support\Facades\Cache::forget("company:{$company->id}:active");
+            // slug/code/aktiflik değişti → başvuru linki çözümlemesi tazelensin
+            \App\Support\ApplyCompanyResolver::flushCache($company);
         });
     }
 

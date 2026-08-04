@@ -157,6 +157,26 @@
             </div>
 
             <div class="plat-form-group">
+                <label class="plat-form-label">Başvuru Linki Adresi</label>
+                <input type="text" name="slug" class="plat-input"
+                       value="{{ old('slug', $company->slug) }}"
+                       maxlength="58" placeholder="{{ \Illuminate\Support\Str::slug($company->name, '-') }}">
+                @php
+                    $_applyLink = \App\Support\ApplyCompanyResolver::linkFor($company);
+                    $_acceptsApply = \App\Support\ApplyCompanyResolver::acceptsApplications($company);
+                @endphp
+                <small style="font-size:11px;color:var(--plat-muted);display:block;margin-top:6px;">
+                    Firmanın öğrencisine vereceği adres:
+                    <code style="color:#fff;background:var(--plat-panel-2);padding:2px 6px;border-radius:4px;">{{ $_applyLink }}</code>
+                    <br>Bu linkten gelen başvuru <strong>bu firmaya</strong> yazılır ve yalnızca bu firma görür.
+                    @unless($_acceptsApply)
+                        <br><strong style="color:#f59e0b;">⚠ Bu şirketin aktif personeli yok — link şu an 404 veriyor.</strong>
+                        Lead'e bakacak bir yönetici eklenmeden başvuru kabul edilmez.
+                    @endunless
+                </small>
+            </div>
+
+            <div class="plat-form-group">
                 <label class="plat-form-label">Public Pazarlama İçeriği</label>
                 <input type="hidden" name="public_marketing" value="0">
                 <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--plat-panel-2);border:1px solid var(--plat-border);border-radius:8px;cursor:pointer;">

@@ -257,9 +257,18 @@ class PlatformController extends Controller
                 'nullable', 'string', 'max:190',
                 \Illuminate\Validation\Rule::unique('companies', 'primary_domain')->ignore($companyModel->id),
             ],
+            // Başvuru linkinin adresi: /apply/{slug}
+            'slug' => [
+                'nullable', 'string', 'max:58', 'regex:/^[a-z0-9][a-z0-9_-]{1,57}$/',
+                \Illuminate\Validation\Rule::notIn(['success', 'partner', 'onay', 'suggestions', 'lead-sources']),
+                \Illuminate\Validation\Rule::unique('companies', 'slug')->ignore($companyModel->id),
+            ],
         ], [
             'brand_primary_color.regex' => 'Renk #rrggbb formatında olmalı (örn. #0d9488).',
             'primary_domain.unique'     => 'Bu domain başka bir şirkete tanımlı.',
+            'slug.regex'                => 'Link adresi küçük harf, rakam, tire ve alt çizgiden oluşmalı (örn. abc-egitim).',
+            'slug.unique'               => 'Bu link adresi başka bir şirkete tanımlı.',
+            'slug.not_in'               => 'Bu link adresi sistem tarafından kullanılıyor, başka bir ad seçin.',
         ]);
 
         if ($validator->fails()) {
@@ -274,6 +283,7 @@ class PlatformController extends Controller
         $companyModel->brand_logo_url      = trim((string) $request->input('brand_logo_url', '')) ?: null;
         $companyModel->brand_primary_color = trim((string) $request->input('brand_primary_color', '')) ?: null;
         $companyModel->primary_domain      = $domain !== '' ? $domain : null;
+        $companyModel->slug                = strtolower(trim((string) $request->input('slug', ''))) ?: null;
 
         // Form her zaman gizli 0 + checkbox 1 gönderir. Alan hiç gelmediyse (kısmi
         // güncelleme, API) mevcut değer korunur — boolean() sessizce false yapardı.
@@ -488,9 +498,19 @@ class PlatformController extends Controller
             $domain = (string) preg_replace('#^https?://#', '', $domain);
             $domain = trim($domain, '/');
 
+            // Başvuru linki adresi (/apply/{slug}) — okunabilir olsun diye ad'dan
+            // tire ile üretilir; code alt çizgi kullandığı için ondan ayrı tutulur.
+            $slug = Str::slug((string) $request->input('name'), '-') ?: $code;
+            $slugBase = $slug;
+            $n = 1;
+            while (Company::query()->where('slug', $slug)->exists()) {
+                $slug = $slugBase . '-' . (++$n);
+            }
+
             $company = Company::query()->create([
                 'name'              => $request->input('name'),
                 'code'              => $code,
+                'slug'              => $slug,
                 'is_active'         => true,
                 'enabled_modules'   => $modules,
                 'subscription_tier' => $tier,

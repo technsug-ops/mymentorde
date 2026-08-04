@@ -1271,6 +1271,19 @@ Route::middleware(['company.context'])->group(function () {
         ->where('code', '[A-Za-z0-9_-]{3,64}')
         ->middleware('throttle:60,1')
         ->name('apply.partner');
+
+    // ── B2B partner FİRMA özel landing: /apply/{firma-slug} ──
+    // Firma bu linki kendi öğrencisine verir; gelen başvuru O FİRMAYA yazılır.
+    // Bayi (dealer) landing'inden farkı: orada kayıt yine MentorDE'nin, burada
+    // kayıt firmanın kendi tenant'ına düşer ve firma yöneticisi görebilir.
+    //
+    // EN SONA kayıtlı: /apply/success ve /apply/partner/... önce eşleşsin diye.
+    // Ayrıca rezerve kelimeler regex ile dışlanıyor — ileride /apply/xyz eklenirse
+    // bu rota onu sessizce yutmasın.
+    Route::get('/apply/{companySlug}', [GuestApplicationController::class, 'createForCompany'])
+        ->where('companySlug', '(?!success$|partner$|onay$|suggestions$|lead-sources$)[a-z0-9][a-z0-9_-]{1,58}')
+        ->middleware('throttle:60,1')
+        ->name('apply.company');
 });
 
 // Promo popup: aktif popup'ı JSON döner (tüm portal layout'ları bu endpoint'i çağırır)
