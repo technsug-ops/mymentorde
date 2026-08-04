@@ -53,6 +53,9 @@ class GuestCriticalFlowTest extends TestCase
             'selected_package_code' => 'pkg_basic',
             'selected_package_title' => 'Basic Paket',
             'selected_package_price' => '2000 EUR',
+            // Paket seçimi artık iki aşamalı: seç + KESİNLEŞTİR. Sözleşme talebi
+            // package_selected_at şartına bağlı (GuestContractTrait).
+            'package_selected_at' => now(),
         ])->save();
 
         $this->actingAs($user)
@@ -206,7 +209,13 @@ class GuestCriticalFlowTest extends TestCase
             ]
         );
 
-        $file = UploadedFile::fake()->create('passport.pdf', 256, 'application/pdf');
+        // Yükleme ValidFileMagicBytes kuralından geçiyor: uzantı yetmez, dosyanın
+        // gerçek imzası da PDF olmalı. fake()->create() boş içerik ürettiği için
+        // doğrulama sessizce düşüyordu (redirect back → session'da 'status' yok).
+        $file = UploadedFile::fake()->createWithContent(
+            'passport.pdf',
+            "%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n"
+        );
 
         $this->actingAs($user)
             ->post('/guest/registration/documents/upload', [
@@ -214,7 +223,9 @@ class GuestCriticalFlowTest extends TestCase
                 'file' => $file,
             ])
             ->assertRedirect('/guest/registration/documents')
-            ->assertSessionHas('status');
+            // Zorunlu belgelerin TAMAMI yüklendiğinde controller 'docs_complete'
+            // bayrağını basar; kısmi yüklemede 'status' mesajı döner.
+            ->assertSessionHas('docs_complete');
 
         $guest->refresh();
         $this->assertTrue((bool) $guest->docs_ready);

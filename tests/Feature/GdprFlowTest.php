@@ -78,7 +78,13 @@ class GdprFlowTest extends TestCase
         $response = $this->actingAs($student)->get('/student/gdpr/export');
 
         $response->assertOk();
-        $response->assertHeader('Content-Type', 'application/json');
+
+        // İndirme davranışı Content-Disposition ile sağlanıyor; streamDownload()
+        // Content-Type'ı garanti etmiyor (Symfony prepare() varsayılanı geçiyor).
+        // Önemli olan: dosya olarak inmesi ve içeriğinin geçerli JSON olması.
+        $disposition = (string) $response->headers->get('Content-Disposition');
+        $this->assertStringContainsString('attachment', $disposition);
+        $this->assertStringContainsString('.json', $disposition);
 
         $data = json_decode($response->streamedContent(), true);
         $this->assertIsArray($data);
@@ -107,10 +113,18 @@ class GdprFlowTest extends TestCase
     {
         [$guestUser] = $this->makeGuest('T3');
 
-        $response = $this->actingAs($guestUser)->get('/guest/gdpr/export');
+        // Guest export'unun İKİ formatı var: ?format=html (varsayılan, kullanıcı
+        // dostu döküman) ve ?format=json (ham veri). Bu test ham veriyi doğruluyor.
+        $response = $this->actingAs($guestUser)->get('/guest/gdpr/export?format=json');
 
         $response->assertOk();
-        $response->assertHeader('Content-Type', 'application/json');
+
+        // İndirme davranışı Content-Disposition ile sağlanıyor; streamDownload()
+        // Content-Type'ı garanti etmiyor (Symfony prepare() varsayılanı geçiyor).
+        // Önemli olan: dosya olarak inmesi ve içeriğinin geçerli JSON olması.
+        $disposition = (string) $response->headers->get('Content-Disposition');
+        $this->assertStringContainsString('attachment', $disposition);
+        $this->assertStringContainsString('.json', $disposition);
 
         $data = json_decode($response->streamedContent(), true);
         $this->assertIsArray($data);

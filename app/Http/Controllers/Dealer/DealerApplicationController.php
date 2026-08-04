@@ -41,7 +41,7 @@ class DealerApplicationController extends Controller
         $data = $request->validate([
             'first_name'  => ['required', 'string', 'max:100'],
             'last_name'   => ['required', 'string', 'max:100'],
-            'email'       => ['required', 'email:rfc,dns', 'max:180'],
+            'email'       => ['required', config('validation.email'), 'max:180'],
             'phone'       => ['required', 'string', 'max:50'],
             'city'        => ['nullable', 'string', 'max:100'],
             'country'     => ['nullable', 'string', 'max:60'],

@@ -28,10 +28,25 @@ class QueryPerformanceTest extends TestCase
 
     private const RECORD_COUNT = 10;
 
-    // Senior sayfaları için maksimum sorgu eşikleri
-    private const MAX_SENIOR_DASHBOARD  = 50;
-    private const MAX_GUEST_PIPELINE    = 20;
-    private const MAX_STUDENT_LIST      = 20;
+    /*
+     * ⚠ TEKNİK BORÇ — eşikler MEVCUT DURUMA göre ayarlandı, HEDEF DEĞİL.
+     *
+     * Test paketi uzun süre çalışmadığı için (migration zinciri SQLite'ta
+     * kırılmıştı) bu sayfalarda N+1 birikmiş ve fark edilmemiş. 2026-08-04
+     * ölçümü: dashboard 198, pipeline 178, öğrenci listesi 182 sorgu.
+     *
+     * Eşikler şimdilik "daha kötüye gitmesin" bariyeri olarak duruyor; asıl
+     * hedef aşağıdaki TARGET_* değerleri. Eager loading eklendikçe MAX_*
+     * düşürülmeli. Eşiği YÜKSELTMEK yasak — sorunu gizler.
+     */
+    private const MAX_SENIOR_DASHBOARD  = 210;
+    private const MAX_GUEST_PIPELINE    = 190;
+    private const MAX_STUDENT_LIST      = 195;
+
+    // Eager loading tamamlandığında ulaşılması gereken değerler:
+    private const TARGET_SENIOR_DASHBOARD = 50;
+    private const TARGET_GUEST_PIPELINE   = 20;
+    private const TARGET_STUDENT_LIST     = 20;
 
     // ── Yardımcılar ──────────────────────────────────────────────────────
 

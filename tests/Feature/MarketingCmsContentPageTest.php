@@ -21,9 +21,12 @@ class MarketingCmsContentPageTest extends TestCase
             'email' => 'marketing-admin@mentorde.local',
         ]);
 
+        // /mktg-admin/content artık bir yönlendirme ucu — asıl liste /content/overview.
         $this->actingAs($admin)->get('/mktg-admin/content')
-            ->assertOk()
-            ->assertSee('CMS Icerik Yonetimi');
+            ->assertRedirect('/mktg-admin/content/overview');
+
+        $this->actingAs($admin)->get('/mktg-admin/content/overview')
+            ->assertOk();
 
         $this->actingAs($admin)->post('/mktg-admin/categories', [
             'code' => 'blog',
@@ -47,8 +50,9 @@ class MarketingCmsContentPageTest extends TestCase
             'status' => 'draft',
             'tags' => 'winter,guide',
             'seo_keywords' => 'almanya,egitim',
-        ])->assertRedirect('/mktg-admin/content');
+        ])->assertRedirectContains('/mktg-admin/content/');
 
+        // Yeni içerik oluşturulunca düzenleme sayfasına yönlendirilir (id önceden bilinmez).
         $content = CmsContent::query()->where('slug', 'winter-2026-guide')->first();
         $this->assertNotNull($content);
 
@@ -67,7 +71,7 @@ class MarketingCmsContentPageTest extends TestCase
         ]);
 
         $this->actingAs($admin)->put('/mktg-admin/content/'.$content->id.'/publish')
-            ->assertRedirect('/mktg-admin/content');
+            ->assertRedirect('/mktg-admin/content/overview');
         $this->assertDatabaseHas('cms_contents', [
             'id' => $content->id,
             'status' => 'published',
@@ -77,7 +81,7 @@ class MarketingCmsContentPageTest extends TestCase
             'title_tr' => 'Winter 2026 Rehberi Guncel',
             'content_tr' => 'Guncel metin',
             'change_note' => 'headline update',
-        ])->assertRedirect('/mktg-admin/content');
+        ])->assertRedirect('/mktg-admin/content/overview');
 
         $this->assertDatabaseHas('cms_contents', [
             'id' => $content->id,
@@ -86,7 +90,7 @@ class MarketingCmsContentPageTest extends TestCase
 
         $this->actingAs($admin)->put('/mktg-admin/content/'.$content->id.'/schedule', [
             'scheduled_at' => now()->addDays(2)->toDateTimeString(),
-        ])->assertRedirect('/mktg-admin/content');
+        ])->assertRedirect('/mktg-admin/content/overview');
         $this->assertDatabaseHas('cms_contents', [
             'id' => $content->id,
             'status' => 'scheduled',
@@ -94,7 +98,7 @@ class MarketingCmsContentPageTest extends TestCase
 
         $this->actingAs($admin)->put('/mktg-admin/content/'.$content->id.'/feature', [
             'featured_order' => 5,
-        ])->assertRedirect('/mktg-admin/content');
+        ])->assertRedirect('/mktg-admin/content/overview');
         $this->assertDatabaseHas('cms_contents', [
             'id' => $content->id,
             'is_featured' => true,

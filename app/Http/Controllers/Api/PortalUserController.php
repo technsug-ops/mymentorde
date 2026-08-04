@@ -40,7 +40,7 @@ class PortalUserController extends Controller
     {
         $payload = $request->validate([
             'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email:rfc,dns', 'max:190', 'unique:users,email'],
+            'email' => ['required', config('validation.email'), 'max:190', 'unique:users,email'],
             'role' => ['required', Rule::in([User::ROLE_STUDENT, User::ROLE_DEALER])],
             'student_id' => ['nullable', 'string', 'max:64'],
             'dealer_code' => ['nullable', 'string', 'max:64'],
@@ -96,7 +96,7 @@ class PortalUserController extends Controller
 
         $payload = $request->validate([
             'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email:rfc,dns', 'max:190', Rule::unique('users', 'email')->ignore($user->id)],
+            'email' => ['required', config('validation.email'), 'max:190', Rule::unique('users', 'email')->ignore($user->id)],
             'role' => ['required', Rule::in([User::ROLE_STUDENT, User::ROLE_DEALER])],
             'student_id' => ['nullable', 'string', 'max:64'],
             'dealer_code' => ['nullable', 'string', 'max:64'],

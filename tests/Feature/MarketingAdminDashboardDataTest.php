@@ -61,8 +61,15 @@ class MarketingAdminDashboardDataTest extends TestCase
 
         $response = $this->actingAs($user)->get('/mktg-admin/dashboard');
 
+        // UI'da "guest" terimi "Aday Öğrenci" olarak değiştirildi (marka dili kuralı),
+        // dashboard da yeniden düzenlendi: KPI şeridi + kaynak/UTM bölümleri.
         $response->assertOk()
-            ->assertSee('Yeni Guest')
-            ->assertSee('google', false);
+            ->assertSee('Son 30g Aday Öğrenci', false)
+            ->assertSee('Kaynak Performansı', false)
+            ->assertSee('UTM Kampanya Dağılımı', false);
+
+        // Kaynak kırılımı sunucu tarafında render ediliyor: test verisindeki
+        // kanallar sayfada görünmeli.
+        $response->assertSee('google', false);
     }
 }

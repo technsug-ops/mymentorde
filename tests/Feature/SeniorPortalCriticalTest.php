@@ -43,16 +43,24 @@ class SeniorPortalCriticalTest extends TestCase
 
     private function makeGuest(string $seniorCode, string $token = 'TOK-001'): GuestApplication
     {
+        // Yetki kontrolleri assigned_senior_EMAIL üzerinden yapılıyor (cross-senior
+        // manipülasyonu engellemek için eklenen güvenlik kontrolü); yalnızca kodu
+        // atamak 403'e yol açıyordu. İkisini de senior kaydından türet.
+        $seniorEmail = (string) User::query()
+            ->where('senior_code', $seniorCode)
+            ->value('email');
+
         return GuestApplication::query()->create([
-            'tracking_token'       => $token,
-            'first_name'           => 'Guest',
-            'last_name'            => 'Test',
-            'email'                => "guest_{$token}@test.local",
-            'application_type'     => 'bachelor',
-            'kvkk_consent'         => true,
-            'docs_ready'           => false,
-            'lead_status'          => 'new',
-            'assigned_senior_code' => $seniorCode,
+            'tracking_token'        => $token,
+            'first_name'            => 'Guest',
+            'last_name'             => 'Test',
+            'email'                 => "guest_{$token}@test.local",
+            'application_type'      => 'bachelor',
+            'kvkk_consent'          => true,
+            'docs_ready'            => false,
+            'lead_status'           => 'new',
+            'assigned_senior_code'  => $seniorCode,
+            'assigned_senior_email' => $seniorEmail,
         ]);
     }
 

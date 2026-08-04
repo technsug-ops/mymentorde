@@ -4,6 +4,7 @@ namespace App\Observers\Analytics;
 
 use App\Models\GuestApplication;
 use App\Services\Analytics\AnalyticsService;
+use Illuminate\Support\Carbon;
 
 /**
  * GuestApplication (= lead) lifecycle events → PostHog.
@@ -79,7 +80,7 @@ class GuestApplicationAnalyticsObserver
                 'senior_email'    => $lead->assigned_senior_email ?? null,
                 'tier'            => $lead->lead_score_tier ?? null,
                 'score'           => (int) ($lead->lead_score ?? 0),
-                'days_since_created' => $lead->created_at ? (int) $lead->created_at->diffInDays(now()) : null,
+                'days_since_created' => $this->daysSinceCreated($lead),
                 'company_id'      => $lead->company_id ?? null,
             ], $this->distinctIdFor($lead));
         }
@@ -105,7 +106,7 @@ class GuestApplicationAnalyticsObserver
                 $this->analytics->capture('lead_lost', $base + [
                     'lost_reason'        => $lead->lost_reason ?? null,
                     'lost_note'          => $lead->lost_note ? mb_substr((string) $lead->lost_note, 0, 200) : null,
-                    'days_since_created' => $lead->created_at ? (int) $lead->created_at->diffInDays(now()) : null,
+                    'days_since_created' => $this->daysSinceCreated($lead),
                 ], $this->distinctIdFor($lead));
             }
         }
@@ -150,5 +151,28 @@ class GuestApplicationAnalyticsObserver
             return (string) $lead->converted_student_id;
         }
         return 'lead_' . $lead->id;
+    }
+
+    /**
+     * Lead oluşturulalı kaç gün oldu.
+     *
+     * `created_at` her zaman Carbon değildir: forceFill() ile doldurulup kaydedilen
+     * kayıtlarda ham string kalabiliyor ve `->diffInDays()` "Call to a member
+     * function on string" ile PATLIYORDU. Analytics yan bir iş — lead kaydetmeyi
+     * asla çökertmemeli, o yüzden burada tip varsayımı yapılmıyor.
+     */
+    private function daysSinceCreated(GuestApplication $lead): ?int
+    {
+        $createdAt = $lead->created_at;
+
+        if (empty($createdAt)) {
+            return null;
+        }
+
+        try {
+            return (int) Carbon::parse($createdAt)->diffInDays(now());
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }

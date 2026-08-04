@@ -194,9 +194,9 @@ class GuestViewDataServiceTest extends TestCase
             'application_type'              => 'test_no_docs',
             'kvkk_consent'                  => true,
             'registration_form_submitted_at' => now(),
-            'docs_ready'                    => true,
-            'selected_package_code'         => '',   // 3. adım tamamlanmadı
-            'contract_status'               => 'not_requested', // 4. adım tamamlanmadı
+            'docs_ready'                    => true,          // 2. adım ✓
+            'selected_package_code'         => 'PKG-BASIC',   // 3. adım ✓
+            'contract_status'               => 'not_requested', // 4. adım ✗
         ])->save();
 
         $request = Request::create('/guest/dashboard');
@@ -205,8 +205,33 @@ class GuestViewDataServiceTest extends TestCase
         $guest = GuestApplication::where('email', 'progress_pct@test.local')->first();
         $data  = $this->service->build($request, $guest);
 
-        // 4 aksiyonable adım: kayıt formu ✓, belgeler ✓, paket ✗, sözleşme ✗
+        // Belgeler ✓ + Paket ✓ = 2/4 → %50.
+        //
+        // NOT: "Kayıt Formu" adımı bilinçli olarak sayılmıyor — formCompleted
+        // guest_registration_fields tablosundaki ZORUNLU ALAN tanımlarına bağlı
+        // ($formRequiredTotal > 0 şartı) ve test ortamında o alanlar seed'li değil.
+        // Bu testin amacı zaten form mantığı değil: türetilmiş son adımın
+        // ("Kayıt Tamamlandı") paydaya girmediğini doğrulamak — 2/4 = %50,
+        // 2/5 = %40 DEĞİL.
         $this->assertSame(50, $data['progressPercent'], '2/4 tamamlandı → %50 beklenir, 2/5 (%40) değil.');
+    }
+
+    /**
+     * Level 1 zorunlu alanlarının tamamını dolu gösteren bir taslak üretir.
+     *
+     * `formCompleted` yalnızca "form gönderildi VE tüm zorunlu alanlar dolu"
+     * olduğunda true olur; katalog şirket bağlamına göre yüklenir.
+     *
+     * @return array<string,string>
+     */
+    private function completedRequiredFieldDraft(int $companyId): array
+    {
+        $keys = app(\App\Services\GuestRegistrationFieldSchemaService::class)
+            ->requiredKeysByLevel(1, $companyId);
+
+        return collect($keys)
+            ->mapWithKeys(fn (string $key): array => [$key => 'dolu'])
+            ->all();
     }
 
     /**
@@ -226,6 +251,16 @@ class GuestViewDataServiceTest extends TestCase
             'is_active' => true,
         ]);
 
+        // formCompleted = form gönderildi VE tüm zorunlu alanlar dolu.
+        // Zorunlu alan kataloğu şirket bağlamına göre yükleniyor; bu test
+        // Request::create() ile manuel istek yaptığı için middleware çalışmıyor
+        // ve bağlam kurulmuyordu → katalog boş → formCompleted daima false.
+        $company = \App\Models\Company::query()->where('is_active', true)->orderBy('id')->first()
+            ?? \App\Models\Company::create(['name' => 'Test', 'code' => 'test_co', 'is_active' => true]);
+        \App\Support\TenantContext::bind((int) $company->id, [(int) $company->id]);
+
+        $draft = $this->completedRequiredFieldDraft((int) $company->id);
+
         (new GuestApplication)->forceFill([
             'tracking_token'                => 'TOK-FULL-001',
             'email'                         => 'full_progress@test.local',
@@ -234,6 +269,7 @@ class GuestViewDataServiceTest extends TestCase
             'application_type'              => 'test_no_docs',
             'kvkk_consent'                  => true,
             'registration_form_submitted_at' => now(),
+            'registration_form_draft'       => $draft,
             'docs_ready'                    => true,
             'selected_package_code'         => 'pkg_basic',
             'contract_status'               => 'approved',
@@ -244,6 +280,12 @@ class GuestViewDataServiceTest extends TestCase
 
         $guest = GuestApplication::where('email', 'full_progress@test.local')->first();
         $data  = $this->service->build($request, $guest);
+
+        $this->assertNotSame(
+            [],
+            $draft,
+            'Zorunlu alan kataloğu boş — bu ortamda formCompleted hiçbir zaman true olamaz.'
+        );
 
         // 4/4 aksiyonable adım → 4. adım türetilmiş olmasaydı bu %80 olurdu.
         $this->assertSame(100, $data['progressPercent'], '4/4 tamamlandı → %100 beklenir (5/5=%80 değil).');

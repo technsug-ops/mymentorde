@@ -21,7 +21,10 @@ class DocumentNamingService
         $date          = now()->format('Ymd');
         $ext           = strtolower($extension !== '' ? $extension : 'pdf');
 
-        $initial = mb_strtoupper(mb_substr(trim($firstName), 0, 1)) ?: 'X';
+        // Ad baş harfi de soyad gibi ASCII'ye çevrilir: "Şeyma" → "S".
+        // Aksi halde dosya adı "Ş_Gungor.pdf" gibi karışık olur ve FTP/sunucu
+        // tarafında (KAS) kodlama sorunlarına yol açar.
+        $initial = mb_strtoupper($this->slugify(mb_substr(trim($firstName), 0, 1))) ?: 'X';
         $surname = $this->slugify(trim($lastName)) ?: 'bilinmiyor';
 
         return sprintf('%s_%s_%s_%s_%s.%s', $cleanCategory, $cleanStudent, $date, $initial, $surname, $ext);

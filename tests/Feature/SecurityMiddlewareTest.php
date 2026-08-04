@@ -40,10 +40,10 @@ class SecurityMiddlewareTest extends TestCase
 
     // ── Throttle Tests ───────────────────────────────────────────────────────
 
-    public function test_forgot_password_throttles_after_five_requests(): void
+    /** Rota `throttle:10,1` ile korunuyor: 10 istek geçer, 11. 429 döner. */
+    public function test_forgot_password_throttles_after_limit(): void
     {
-        // throttle:5,1 → 5. istek geçer, 6. istek 429 döner
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $this->post('/forgot-password', ['email' => 'throttle_test@test.local']);
         }
 
@@ -53,8 +53,8 @@ class SecurityMiddlewareTest extends TestCase
 
     public function test_throttle_resets_after_travel_in_time(): void
     {
-        // 5 istek göndererek throttle'ı doldur
-        for ($i = 0; $i < 5; $i++) {
+        // Limiti doldur
+        for ($i = 0; $i < 10; $i++) {
             $this->post('/forgot-password', ['email' => 'throttle_reset@test.local']);
         }
 

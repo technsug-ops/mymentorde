@@ -36,7 +36,7 @@ class TeamController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email:rfc,dns', 'max:255'],
+            'email' => ['required', config('validation.email'), 'max:255'],
             'role' => ['required', 'string', 'in:'.implode(',', $this->roleOptions())],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['string', 'max:120'],
