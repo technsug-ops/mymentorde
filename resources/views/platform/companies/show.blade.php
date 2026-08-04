@@ -124,9 +124,10 @@
                 <label class="plat-form-label">Marka Adı</label>
                 <input type="text" name="brand_name" class="plat-input"
                        value="{{ old('brand_name', $company->brand_name) }}"
-                       maxlength="120" placeholder="{{ config('brand.name', 'MentorDE') }}">
+                       maxlength="120" placeholder="{{ $company->name }}">
                 <small style="font-size:11px;color:var(--plat-muted);">
                     Panelde, e-postalarda ve öğrenciye giden mesajlarda görünür.
+                    Boş bırakılırsa <strong>şirket adı</strong> kullanılır.
                 </small>
             </div>
 
@@ -153,6 +154,20 @@
                     Bu adresten gelen ziyaretçi (giriş yapmamış olsa bile) bu markayı görür.
                     <strong>Önce DNS + SSL kurulmuş olmalı.</strong>
                 </small>
+            </div>
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Public Pazarlama İçeriği</label>
+                <input type="hidden" name="public_marketing" value="0">
+                <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--plat-panel-2);border:1px solid var(--plat-border);border-radius:8px;cursor:pointer;">
+                    <input type="checkbox" name="public_marketing" value="1"
+                           {{ old('public_marketing', $company->public_marketing) ? 'checked' : '' }}
+                           style="accent-color:var(--plat-accent);margin-top:2px;">
+                    <span style="font-size:11px;color:var(--plat-muted);line-height:1.6;">
+                        Giriş sayfasında <strong>"Ücretsiz Başvuru"</strong> ve tanıtım listesi gösterilsin.
+                        B2B partner firmalarda <strong>kapalı</strong> olmalı.
+                    </span>
+                </label>
             </div>
 
             <button type="submit" class="plat-btn plat-btn-primary">

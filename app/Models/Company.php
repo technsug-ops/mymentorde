@@ -26,6 +26,7 @@ class Company extends Model
         'brand_logo_url',
         'brand_primary_color',
         'brand_overrides',
+        'public_marketing',
     ];
 
     protected $casts = [
@@ -40,6 +41,7 @@ class Company extends Model
         // Multi-brand
         'domain_aliases'            => 'array',
         'brand_overrides'           => 'array',
+        'public_marketing'          => 'boolean',
     ];
 
     protected static function booted(): void

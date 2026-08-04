@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('brand.name', 'MentorDE') }} Login</title>
+    <title>{{ trim(config('brand.name', '') . ' Login') }}</title>
     @include('partials.favicon')
     @php $pt = $publicTheme ?? \App\Support\PublicTheme::resolve(); @endphp
     <style>
@@ -263,13 +263,25 @@
 </head>
 <body>
     <div class="shell">
+        @php
+            // B2C kazanım içeriği (özellik listesi + "Ücretsiz Başvuru" CTA'ları)
+            // yalnızca pazarlama yapan markalarda görünür. Partner firmalar ve nötr
+            // portal için kapalıdır — onların ziyaretçisi reklam görmemeli.
+            $_showMarketing = (bool) config('brand.public_marketing', true);
+            $_brandName = (string) config('brand.name', '');
+            $_tagline   = (string) config('brand.tagline', '');
+            $_badge     = trim(implode(' — ', array_filter([$_brandName, $_tagline])));
+        @endphp
         <section class="panel brand" aria-label="Platform bilgisi">
-            <div class="badge">{{ config('brand.name', 'MentorDE') }} — {{ config('brand.tagline', 'Almanya Üniversite Danışmanlığı') }}</div>
+            @if($_badge !== '')
+                <div class="badge">{{ $_badge }}</div>
+            @endif
             <h1>Almanya'da üniversite hayalinizi gerçeğe dönüştürün</h1>
             <p>
                 Doğru üniversite seçiminden vize başvurusuna, barınmadan burs rehberine kadar her adımda yanınızdayız.
             </p>
 
+            @if($_showMarketing)
             <div class="feature-list">
                 <div class="feature-item">
                     <div class="feature-icon">🏛</div>
@@ -296,11 +308,14 @@
                     <div class="feature-icon">✅</div>
                     <div class="feature-text">
                         <div class="ft">Yüzlerce Başarılı Öğrenci</div>
-                        <div class="fd">{{ config('brand.name', 'MentorDE') }} ile Almanya'ya yerleşen öğrenciler arasına siz de katılın.</div>
+                        <div class="fd">{{ $_brandName }} ile Almanya'ya yerleşen öğrenciler arasına siz de katılın.</div>
                     </div>
                 </div>
             </div>
+            @endif
+
             {{-- CTA kartı - apply'dan gelmemiş kullanıcılara --}}
+            @if($_showMarketing)
             @unless(request()->query('from_apply'))
             <a href="/apply" class="cta-card" style="display:block;margin-top:20px;padding:18px 20px;background:linear-gradient(135deg,{{ $pt['primary'] }},{{ $pt['primary_dark'] }});border:1.5px solid rgba(255,255,255,.35);border-radius:14px;text-decoration:none;color:#fff;box-shadow:0 8px 24px rgba({{ $pt['focus_shadow_rgb'] }},.35), 0 0 0 1px rgba(255,255,255,.08);transition:transform .15s,box-shadow .15s,border-color .15s;"
                onmouseover="this.style.borderColor='rgba(255,255,255,.6)';this.style.transform='translateY(-2px)';"
@@ -315,20 +330,21 @@
                 </div>
             </a>
             @endunless
+            @endif
         </section>
 
         <section class="panel auth" aria-label="Giriş formu">
             @php
-                $_authHasBrandTable = \Illuminate\Support\Facades\Schema::hasTable('marketing_admin_settings');
-                $_authBrandName = $_authHasBrandTable
-                    ? \App\Models\MarketingAdminSetting::getValue('brand_name', config('brand.name', 'MentorDE'))
-                    : config('brand.name', 'MentorDE');
-                $_authLogoUrl = $_authHasBrandTable
-                    ? \App\Models\MarketingAdminSetting::getValue('brand_logo_url', config('brand.logo_url', ''))
-                    : config('brand.logo_url', '');
-                $_authLogoHeight = (int) ($_authHasBrandTable
-                    ? \App\Models\MarketingAdminSetting::getValue('brand_logo_height', config('brand.logo_height', 36))
-                    : config('brand.logo_height', 36));
+                // Marka DAİMA config('brand')'den okunur — App\Support\Brand::apply()
+                // .env + companies.brand_* + marketing_admin_settings katmanlarını
+                // ziyaret edilen domainin şirketi için zaten birleştirdi.
+                //
+                // Buradan MarketingAdminSetting'i doğrudan okumak (eski hali) host
+                // bazlı markayı tamamen atlıyordu: partner domaininde bile sorgu
+                // varsayılan şirkete düşüp MentorDE logosunu basıyordu.
+                $_authBrandName  = (string) config('brand.name', '');
+                $_authLogoUrl    = (string) config('brand.logo_url', '');
+                $_authLogoHeight = (int) (config('brand.logo_height') ?: 36);
             @endphp
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
                 @if(!empty($_authLogoUrl))
@@ -336,7 +352,7 @@
                         <img src="{{ $_authLogoUrl }}" alt="{{ $_authBrandName }}" style="height:{{ $_authLogoHeight }}px;width:auto;display:block;">
                     </div>
                 @endif
-                <h2 style="margin:0;">{{ $_authBrandName }} Login</h2>
+                <h2 style="margin:0;">{{ trim($_authBrandName . ' Login') }}</h2>
             </div>
             <p class="sub">Hesabınla giriş yap. Sistem seni rolüne göre ilgili panele yönlendirir.</p>
 
@@ -413,6 +429,7 @@
                 <span>Google ile Devam Et</span>
             </a>
 
+            @if($_showMarketing)
             @unless(request()->query('from_apply'))
             {{-- Ayırıcı --}}
             <div style="display:flex;align-items:center;gap:10px;margin:18px 0 12px;color:#9ca3af;font-size:12px;">
@@ -434,6 +451,7 @@
                 Henüz hesabın yok mu? 3 dakikada başvur!
             </div>
             @endunless
+            @endif
 
             {{-- Yasal Linkler --}}
             <div style="margin-top:22px;padding-top:14px;border-top:1px solid #eef2f7;text-align:center;font-size:12px;color:#9ca3af;">

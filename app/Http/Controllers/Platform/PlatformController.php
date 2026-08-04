@@ -240,7 +240,10 @@ class PlatformController extends Controller
      *
      * Marka `App\Support\Brand` tarafından üç katmandan çözülür:
      *   config/brand.php (.env) → companies.brand_* (burası) → marketing_admin_settings
-     * Alan boşaltılırsa şirket bir üst katmana (platform varsayılanı) düşer.
+     *
+     * DİKKAT: .env katmanı YALNIZCA ana şirkete uygulanır. Partner firma marka adını
+     * boş bırakırsa kendi ŞİRKET ADINA düşer, platformun markasına değil — aksi halde
+     * firma kendi adresinde MentorDE logosunu görürdü.
      */
     public function updateBranding(Request $request, int $company): RedirectResponse
     {
@@ -271,7 +274,14 @@ class PlatformController extends Controller
         $companyModel->brand_logo_url      = trim((string) $request->input('brand_logo_url', '')) ?: null;
         $companyModel->brand_primary_color = trim((string) $request->input('brand_primary_color', '')) ?: null;
         $companyModel->primary_domain      = $domain !== '' ? $domain : null;
-        $companyModel->save();  // Company::saved observer marka cache'ini temizler
+
+        // Form her zaman gizli 0 + checkbox 1 gönderir. Alan hiç gelmediyse (kısmi
+        // güncelleme, API) mevcut değer korunur — boolean() sessizce false yapardı.
+        if ($request->has('public_marketing')) {
+            $companyModel->public_marketing = $request->boolean('public_marketing');
+        }
+
+        $companyModel->save(); // Company::saved observer marka cache'ini temizler
 
         \App\Models\PlatformAuditLog::record(
             'platform.company.branding_updated',
@@ -490,6 +500,9 @@ class PlatformController extends Controller
                 'brand_logo_url'      => trim((string) $request->input('brand_logo_url', '')) ?: null,
                 'brand_primary_color' => trim((string) $request->input('brand_primary_color', '')) ?: null,
                 'primary_domain'      => $domain !== '' ? $domain : null,
+                // B2B firmalar reklam görmemeli — yeni şirkette varsayılan KAPALI.
+                // B2C tarafı (ana şirket) bu kolonu true ile taşıyor, etkilenmez.
+                'public_marketing'    => $request->boolean('public_marketing'),
                 'billing_email'     => $request->input('billing_email') ?: null,
                 'mrr_eur'           => (float) ($tierConfig['mrr_eur'] ?? 0),
             ]);

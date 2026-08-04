@@ -162,7 +162,7 @@
                 <div class="card">
                     <div class="icon">🤝</div>
                     <h2>Partner Bayi</h2>
-                    <p>MentorDE satış ortağı/bayi olarak öğrenci yönlendirmek istiyorum. Başvuru formunu doldurup onay sürecine başlayacağım.</p>
+                    <p>{{ config('brand.name', '') }} satış ortağı/bayi olarak öğrenci yönlendirmek istiyorum. Başvuru formunu doldurup onay sürecine başlayacağım.</p>
                     <button type="submit" class="btn btn-secondary">Partner olarak başvur</button>
                 </div>
             </form>

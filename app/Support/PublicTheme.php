@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Company;
 use App\Models\MarketingAdminSetting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -29,16 +30,29 @@ class PublicTheme
         $cid = $companyId ?? self::currentCompanyId();
 
         $preset = Cache::remember("public_theme_{$cid}", 300, function () use ($cid): string {
+            // Varsayılan palet ŞİRKETE göre değişir: MentorDE moru platformun kendi
+            // kimliğidir. Partner firma bir tercih belirtmediyse nötr palete düşer —
+            // aksi halde kendi adresinde MentorDE renklerini görürdü.
+            $fallback = self::defaultPresetFor($cid);
+
             if (!Schema::hasTable('marketing_admin_settings')) {
-                return 'mentorde';
+                return $fallback;
             }
+
             $v = MarketingAdminSetting::query()
                 ->withoutGlobalScopes()
                 ->where('company_id', $cid)
                 ->where('setting_key', 'public_theme_preset')
                 ->value('setting_value');
-            $v = is_string($v) ? strtolower(trim($v)) : '';
-            return in_array($v, array_keys(self::PRESETS), true) ? $v : 'mentorde';
+
+            // setting_value JSON cast'li: {"value":"navy"} ya da düz string olabilir.
+            if (is_array($v)) {
+                $v = $v['value'] ?? '';
+            }
+
+            $v = is_string($v) ? strtolower(trim($v, " \t\n\r\0\x0B\"")) : '';
+
+            return in_array($v, array_keys(self::PRESETS), true) ? $v : $fallback;
         });
 
         return match ($preset) {
@@ -116,12 +130,39 @@ class PublicTheme
         ];
     }
 
+    /**
+     * Public sayfalarda palet MARKA şirketinden gelir, veri şirketinden değil.
+     *
+     * Anonim ziyaretçi için bu ikisi farklıdır: veri bağlamı daima varsayılan
+     * şirkettir (host ile tenant atlanamasın diye), marka ise ziyaret edilen
+     * domainin şirketidir. Buradan `current_company_id` okumak, partner domaininde
+     * MentorDE paletini render ederdi.
+     */
     private static function currentCompanyId(): int
     {
+        if (app()->bound(Brand::BRAND_COMPANY_KEY)) {
+            return (int) app(Brand::BRAND_COMPANY_KEY);
+        }
         if (app()->bound('current_company_id')) {
             return (int) app('current_company_id');
         }
         return (int) (auth()->user()?->company_id ?? 0);
+    }
+
+    /** Ana şirket → MentorDE moru. Diğer her şirket → nötr palet. */
+    private static function defaultPresetFor(int $companyId): string
+    {
+        if ($companyId <= 0) {
+            return 'mentorde';
+        }
+
+        try {
+            $company = Company::query()->find($companyId);
+        } catch (\Throwable) {
+            return 'mentorde';
+        }
+
+        return ($company && !Brand::isPrimary($company)) ? 'navy' : 'mentorde';
     }
 
     public static function flushCache(int $companyId = 0): void

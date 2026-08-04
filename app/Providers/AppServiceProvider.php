@@ -9,6 +9,7 @@ use App\Models\MarketingAdminSetting;
 use App\Models\MarketingTask;
 use App\Models\StudentPayment;
 use App\Services\TaskFeedbackService;
+use App\Support\Brand;
 use App\Support\PortalTheme;
 use App\Auth\TenantAwareUserProvider;
 use App\Support\TenantContext;
@@ -52,6 +53,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // config/brand.php'nin bozulmamış halini sabitle. Brand::apply() sonucu
+        // config('brand')'e yazdığı için, bundan sonraki her resolve() çağrısı
+        // bir önceki şirketin markasını taban alırdı — firmalar arası sızıntı.
+        Brand::rememberPlatformBase();
+
         // Üretimde dosya yükleme güvenliği için zorunlu PHP eklentisi
         if (app()->isProduction() && !extension_loaded('fileinfo')) {
             throw new \RuntimeException(
