@@ -9,6 +9,7 @@ class Company extends Model
     protected $fillable = [
         'name',
         'code',
+        'parent_company_id',
         'is_active',
         'enabled_modules',
         'doc_request_monthly_limit',
@@ -27,6 +28,7 @@ class Company extends Model
         'brand_primary_color',
         'brand_overrides',
         'public_marketing',
+        'is_public_portal',
     ];
 
     protected $casts = [
@@ -42,6 +44,7 @@ class Company extends Model
         'domain_aliases'            => 'array',
         'brand_overrides'           => 'array',
         'public_marketing'          => 'boolean',
+        'is_public_portal'          => 'boolean',
     ];
 
     protected static function booted(): void
@@ -52,7 +55,103 @@ class Company extends Model
             \Illuminate\Support\Facades\Cache::forget("company:{$company->id}:active");
             // slug/code/aktiflik değişti → başvuru linki çözümlemesi tazelensin
             \App\Support\ApplyCompanyResolver::flushCache($company);
+            // üst firma değişti → görünürlük kümesi yeniden hesaplanmalı
+            self::flushHierarchyCache();
         });
+
+        static::deleted(function (): void {
+            self::flushHierarchyCache();
+        });
+    }
+
+    private const HIERARCHY_CACHE_KEY = 'companies:hierarchy_map';
+
+    public function parentCompany(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_company_id');
+    }
+
+    public function childCompanies(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(self::class, 'parent_company_id');
+    }
+
+    /**
+     * Bu şirketin ALTINDAKİ tüm şirketler (torunlar dahil, kendisi hariç).
+     *
+     * MentorDE partner firmalarının süreçlerini yürüttüğü için onların verisini
+     * görmeli. İzolasyon yataydır: firma firmayı göremez, ama üst firma altını görür.
+     *
+     * @return list<int>
+     */
+    public static function descendantIds(int $companyId): array
+    {
+        if ($companyId <= 0) {
+            return [];
+        }
+
+        $childrenByParent = self::hierarchyMap();
+
+        $out = [];
+        $queue = [$companyId];
+        // Döngü koruması: veri bozulursa (A→B→A) sonsuz döngüye girmesin.
+        $seen = [$companyId => true];
+
+        while ($queue !== []) {
+            $current = array_shift($queue);
+
+            foreach ($childrenByParent[$current] ?? [] as $childId) {
+                if (isset($seen[$childId])) {
+                    continue;
+                }
+
+                $seen[$childId] = true;
+                $out[] = $childId;
+                $queue[] = $childId;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * parent_company_id => [child ids]
+     *
+     * Şirket sayısı çok az; tek sorguyla tamamını alıp bellekte yürümek,
+     * her istekte recursive CTE çalıştırmaktan ucuz ve sürücüden bağımsız.
+     *
+     * @return array<int,list<int>>
+     */
+    private static function hierarchyMap(): array
+    {
+        return \Illuminate\Support\Facades\Cache::remember(
+            self::HIERARCHY_CACHE_KEY,
+            600,
+            static function (): array {
+                $map = [];
+
+                try {
+                    // Schema::hasColumn ile korumak her SOĞUK çağrıda fazladan bir
+                    // şema sorgusu demek; bu yol 5 sn'de bir çalışan poll
+                    // endpoint'inden geçiyor. Migration henüz koşmadıysa sorgu
+                    // zaten hata verir — try/catch bedava.
+                    foreach (\Illuminate\Support\Facades\DB::table('companies')
+                        ->whereNotNull('parent_company_id')
+                        ->get(['id', 'parent_company_id']) as $row) {
+                        $map[(int) $row->parent_company_id][] = (int) $row->id;
+                    }
+                } catch (\Throwable) {
+                    return [];
+                }
+
+                return $map;
+            }
+        );
+    }
+
+    public static function flushHierarchyCache(): void
+    {
+        \Illuminate\Support\Facades\Cache::forget(self::HIERARCHY_CACHE_KEY);
     }
 
     /**

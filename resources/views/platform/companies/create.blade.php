@@ -32,6 +32,26 @@
             </div>
 
             <div class="plat-form-group">
+                <label class="plat-form-label">Üst Firma</label>
+                <select name="parent_company_id" class="plat-select" style="width:100%;">
+                    <option value="">— Yok (bağımsız tenant) —</option>
+                    @foreach($allCompanies ?? [] as $opt)
+                        <option value="{{ $opt->id }}"
+                            {{ (int) old('parent_company_id', $defaultParent ?? 0) === (int) $opt->id ? 'selected' : '' }}>
+                            {{ $opt->brand_name ?: $opt->name }}
+                        </option>
+                    @endforeach
+                </select>
+                <small style="font-size:11px;color:var(--plat-muted);display:block;margin-top:6px;">
+                    Ağacın hangi dalına takılacağını sen seçersin. Üst firmanın
+                    <strong style="color:#fff;">personeli</strong> bu şirketin adaylarını ve öğrencilerini görür,
+                    süreçlerini yürütebilir.
+                    <br>Bir partner firmanın <strong style="color:#fff;">altına</strong> da takabilirsin —
+                    o zaman süreci o firma yürütür, sen yine hepsini görürsün.
+                </small>
+            </div>
+
+            <div class="plat-form-group">
                 <label class="plat-form-label">Faturalama E-postası</label>
                 <input type="email" name="billing_email" class="plat-input" value="{{ old('billing_email') }}" maxlength="190" placeholder="faturalama@example.com">
             </div>

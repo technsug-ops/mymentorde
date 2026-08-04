@@ -157,6 +157,26 @@
             </div>
 
             <div class="plat-form-group">
+                <label class="plat-form-label">Üst Firma</label>
+                <select name="parent_company_id" class="plat-select" style="width:100%;">
+                    <option value="">— Yok (bağımsız) —</option>
+                    @foreach($allCompanies ?? [] as $opt)
+                        @continue((int) $opt->id === (int) $company->id)
+                        <option value="{{ $opt->id }}"
+                            {{ (int) old('parent_company_id', $company->parent_company_id) === (int) $opt->id ? 'selected' : '' }}>
+                            {{ $opt->brand_name ?: $opt->name }}
+                        </option>
+                    @endforeach
+                </select>
+                <small style="font-size:11px;color:var(--plat-muted);display:block;margin-top:6px;">
+                    Üst firmanın <strong>personeli</strong> bu şirketin adaylarını ve öğrencilerini görür,
+                    süreçlerini yürütebilir. Bu şirketin kullanıcıları üst firmayı <strong>göremez</strong> —
+                    izolasyon yataydır.
+                    <br>Öğrenci, aday ve bayi rolleri bu erişime <strong>hiçbir zaman</strong> dahil değildir.
+                </small>
+            </div>
+
+            <div class="plat-form-group">
                 <label class="plat-form-label">Başvuru Linki Adresi</label>
                 <input type="text" name="slug" class="plat-input"
                        value="{{ old('slug', $company->slug) }}"
@@ -164,16 +184,40 @@
                 @php
                     $_applyLink = \App\Support\ApplyCompanyResolver::linkFor($company);
                     $_acceptsApply = \App\Support\ApplyCompanyResolver::acceptsApplications($company);
+                    $_portalHost = \App\Support\ApplyCompanyResolver::publicPortalHost();
                 @endphp
                 <small style="font-size:11px;color:var(--plat-muted);display:block;margin-top:6px;">
                     Firmanın öğrencisine vereceği adres:
                     <code style="color:#fff;background:var(--plat-panel-2);padding:2px 6px;border-radius:4px;">{{ $_applyLink }}</code>
                     <br>Bu linkten gelen başvuru <strong>bu firmaya</strong> yazılır ve yalnızca bu firma görür.
+                    @if(empty($company->primary_domain) && !empty($_portalHost))
+                        <br>Adres ortak giriş kapısı <strong>{{ $_portalHost }}</strong> üzerinden veriliyor.
+                        Firmaya kendi domainini tanımlarsan link o adrese döner.
+                    @elseif(empty($company->primary_domain) && empty($_portalHost))
+                        <br><strong style="color:#f59e0b;">⚠ Ortak giriş kapısı tanımlı değil</strong> —
+                        adres panelin domaini ile üretiliyor. Nötr portal şirketini
+                        "Ortak Giriş Kapısı" olarak işaretle.
+                    @endif
                     @unless($_acceptsApply)
                         <br><strong style="color:#f59e0b;">⚠ Bu şirketin aktif personeli yok — link şu an 404 veriyor.</strong>
                         Lead'e bakacak bir yönetici eklenmeden başvuru kabul edilmez.
                     @endunless
                 </small>
+            </div>
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Ortak Giriş Kapısı</label>
+                <input type="hidden" name="is_public_portal" value="0">
+                <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--plat-panel-2);border:1px solid var(--plat-border);border-radius:8px;cursor:pointer;">
+                    <input type="checkbox" name="is_public_portal" value="1"
+                           {{ old('is_public_portal', $company->is_public_portal) ? 'checked' : '' }}
+                           style="accent-color:var(--plat-accent);margin-top:2px;">
+                    <span style="font-size:11px;color:var(--plat-muted);line-height:1.6;">
+                        Bu şirketin domaini, <strong>kendi domaini olmayan</strong> partner firmaların
+                        başvuru linklerinde kullanılır. Nötr portal (YourGermanUni) için işaretli olmalı;
+                        aksi halde partnere <strong>MentorDE domainli</strong> link verilir.
+                    </span>
+                </label>
             </div>
 
             <div class="plat-form-group">

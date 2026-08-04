@@ -270,6 +270,44 @@ class PartnerApplyLinkTest extends TestCase
 
     // ── Yardımcı ────────────────────────────────────────────────────────────
 
+    /**
+     * Partnere verilecek adres MentorDE domainini TAŞIMAMALI.
+     *
+     * `url()` panelin gezinildiği host'u alıyordu; platform sahibi
+     * panel.mentorde.com'da olduğu için partnere oradan link üretiliyordu —
+     * white-label sözü URL'in kendisinde bozuluyordu.
+     */
+    public function test_link_uses_the_public_portal_host_not_the_panel_host(): void
+    {
+        // Nötr portal migration ile geliyor (seed_yourgermanuni_portal_company)
+        $portalHost = ApplyCompanyResolver::publicPortalHost();
+
+        $this->assertNotSame('', $portalHost, 'Ortak giris kapisi isaretli sirket yok.');
+
+        $this->companyB->update(['slug' => 'firma-b']);
+
+        $link = ApplyCompanyResolver::linkFor($this->companyB->fresh());
+
+        $this->assertSame("https://{$portalHost}/apply/firma-b", $link);
+        $this->assertStringNotContainsString(
+            'mentorde',
+            $link,
+            'Partnere verilecek adres platformun domainini tasiyor.'
+        );
+    }
+
+    /** Firmanın kendi domaini varsa o kazanır — tam white-label. */
+    public function test_company_own_domain_wins_over_the_portal_host(): void
+    {
+        $this->companyB->update(['slug' => 'firma-b', 'primary_domain' => 'basvuru.firma-b.test']);
+        ApplyCompanyResolver::flushCache($this->companyB->fresh());
+
+        $this->assertSame(
+            'https://basvuru.firma-b.test/apply/firma-b',
+            ApplyCompanyResolver::linkFor($this->companyB->fresh())
+        );
+    }
+
     public function test_link_helper_prefers_slug_over_code(): void
     {
         $this->companyB->update(['slug' => 'firma-b']);
