@@ -90,7 +90,7 @@ class ModelScopeCoverageTest extends TestCase
         'StudentVisaApplication',
         'TaskTemplate',
         'TrialExtension',
-        'User',
+        // 'User' → Faz 3'te düzeltildi (BelongsToCompany + tenant_eloquent auth provider)
         'WebhookLog',
     ];
 

@@ -61,7 +61,11 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => 'eloquent',
+            // tenant_eloquent = eloquent + şirket scope'undan muafiyet.
+            // Kimlik doğrulama GLOBAL olmalı (kullanıcı giriş yapmadan şirketi
+            // bilinemez); yetki/veri erişimi giriş sonrası tenant'la sınırlanır.
+            // Bkz. App\Auth\TenantAwareUserProvider
+            'driver' => 'tenant_eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
 

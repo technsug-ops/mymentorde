@@ -109,9 +109,10 @@ class SetCompanyContext
     /**
      * Kullanıcının OKUYABİLECEĞİ şirketler.
      *
-     * Faz 1: platform sahibi → null (hepsi), diğer herkes → kendi şirketi.
-     * Faz 3'te `company_user` pivotu eklenince çok-şirketli personel (bir senior'ın
-     * birden fazla partner firmaya hizmet vermesi) BURADA genişletilecek.
+     *   • Platform sahibi           → null (kısıtsız)
+     *   • Çok-şirketli personel     → kendi şirketi + company_user pivotundakiler
+     *   • Firma kullanıcısı         → yalnızca kendi şirketi (pivotta satırı yok)
+     *   • Giriş yapmamış ziyaretçi  → varsayılan şirket
      *
      * @return list<int>|null  null = kısıtsız
      */
@@ -121,10 +122,12 @@ class SetCompanyContext
             return null;
         }
 
-        $own = (int) ($user->company_id ?? 0);
+        if ($user !== null) {
+            $ids = $user->visibleCompanyIds();
 
-        if ($own > 0) {
-            return [$own];
+            if ($ids !== []) {
+                return $ids;
+            }
         }
 
         // Giriş yapmamış ziyaretçi (public sayfalar, /apply, /p/{slug}) → varsayılan şirket.

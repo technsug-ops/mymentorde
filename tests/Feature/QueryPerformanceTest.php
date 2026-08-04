@@ -197,10 +197,14 @@ class QueryPerformanceTest extends TestCase
         $queryCount = count(DB::getQueryLog());
         DB::disableQueryLog();
 
+        // Eşik 10 → 12: tenant izolasyonu (Faz 3) kullanıcının görünür şirket
+        // kümesini çözmek için company_user pivotuna bakıyor. Bu sorgu prod'da
+        // 5 dakika önbellekleniyor (User::visibleCompanyIds) — testte önbellek
+        // boş başladığı için sayılıyor. Gerçek maliyeti ~0.
         $this->assertLessThan(
-            10,
+            12,
             $queryCount,
-            "Pipeline poll N+1 riski: {$queryCount} sorgu (eşik: 10). " .
+            "Pipeline poll N+1 riski: {$queryCount} sorgu (eşik: 12). " .
             "Bu endpoint her 5 saniyede bir çağrılıyor."
         );
     }

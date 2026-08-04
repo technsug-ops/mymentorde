@@ -2,18 +2,36 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class User extends Authenticatable implements CanResetPasswordContract, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, SoftDeletes, CanResetPassword;
+
+    /**
+     * Şirket izolasyonu.
+     *
+     * ⚠ Kimlik doğrulama bu scope'tan MUAF: config/auth.php `tenant_eloquent`
+     * provider'ı kullanır (App\Auth\TenantAwareUserProvider). Aksi halde login,
+     * şifre sıfırlama ve "beni hatırla" kırılırdı — kullanıcı giriş yapmadan
+     * şirketi bilinemez.
+     *
+     * Giriş sonrası TÜM User sorguları (personel listesi, atama, arama...)
+     * kullanıcının görünür şirket kümesiyle sınırlanır.
+     */
+    use BelongsToCompany;
 
     /**
      * Email verification notification'ı Türkçe + public welcome.verify URL ile gönder.
@@ -53,6 +71,78 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
                 $user->company_id = $companyId;
             }
         });
+    }
+
+    /**
+     * Kullanıcının ERİŞEBİLDİĞİ şirketler (aidiyetten farklı).
+     *
+     * `users.company_id` = aidiyet (tek). Bu pivot = erişim (çok).
+     * MentorDE personeli partner firmalara buradan bağlanır; firma kullanıcılarının
+     * pivotta satırı olmaz, yani yalnızca kendi şirketlerini görürler.
+     */
+    /** @var list<int>|null İstek içi memoization — bkz. visibleCompanyIds() */
+    private ?array $visibleCompanyIdsMemo = null;
+
+    public function accessibleCompanies(): BelongsToMany
+    {
+        return $this->belongsToMany(Company::class, 'company_user')
+            ->withPivot(['role_in_company', 'is_primary'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Görebileceği şirket id'leri: kendi şirketi + pivottakiler.
+     *
+     * Her istekte SetCompanyContext tarafından çağrılıyor; pivot sorgusu ve
+     * Schema::hasTable() kontrolü sıcak yolda ekstra sorgu demek (poll endpoint'i
+     * 5 saniyede bir çağrılıyor). Bu yüzden hem istek içinde memoize edilir hem
+     * de kısa süreli önbelleğe alınır. Pivot değişimi nadirdir; değiştiğinde
+     * forgetVisibleCompanyIds() çağrılmalı.
+     *
+     * @return list<int>
+     */
+    public function visibleCompanyIds(): array
+    {
+        if ($this->visibleCompanyIdsMemo !== null) {
+            return $this->visibleCompanyIdsMemo;
+        }
+
+        $own = (int) ($this->company_id ?? 0);
+
+        $extra = Cache::remember(
+            self::visibleCompaniesCacheKey((int) $this->id),
+            300,
+            function (): array {
+                if (!Schema::hasTable('company_user')) {
+                    return [];
+                }
+
+                return DB::table('company_user')
+                    ->where('user_id', $this->id)
+                    ->pluck('company_id')
+                    ->map(static fn ($id): int => (int) $id)
+                    ->all();
+            }
+        );
+
+        $ids = array_values(array_unique(array_filter(
+            array_merge($own > 0 ? [$own] : [], $extra),
+            static fn (int $id): bool => $id > 0
+        )));
+
+        return $this->visibleCompanyIdsMemo = $ids;
+    }
+
+    public static function visibleCompaniesCacheKey(int $userId): string
+    {
+        return "user:{$userId}:visible_companies";
+    }
+
+    /** Pivot değiştiğinde (şirket atama/çıkarma) çağır. */
+    public function forgetVisibleCompanyIds(): void
+    {
+        $this->visibleCompanyIdsMemo = null;
+        Cache::forget(self::visibleCompaniesCacheKey((int) $this->id));
     }
 
     public const ROLE_MANAGER = 'manager';

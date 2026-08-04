@@ -10,9 +10,11 @@ use App\Models\MarketingTask;
 use App\Models\StudentPayment;
 use App\Services\TaskFeedbackService;
 use App\Support\PortalTheme;
+use App\Auth\TenantAwareUserProvider;
 use App\Support\TenantContext;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
@@ -65,6 +67,12 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->bootTenantAwareQueue();
+
+        // Kimlik doğrulama şirket scope'undan muaf — bkz. TenantAwareUserProvider.
+        Auth::provider('tenant_eloquent', fn ($app, array $config) => new TenantAwareUserProvider(
+            $app['hash'],
+            $config['model']
+        ));
 
         // ── Permission-bazlı Gate fallback ─────────────────────────────────
         // Blade @can('dam.view') vb. çağrıları User::hasPermissionCode'a delege et.
