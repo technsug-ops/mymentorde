@@ -125,8 +125,24 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
             }
         );
 
+        // Üst firmanın PERSONELİ alt firmaların verisini de görür.
+        //
+        // İş modeli: MentorDE, B2B partner firmaların öğrencilerinin sürecini
+        // yürütüyor — lead'i göremezse işi yapamaz. İzolasyon YATAY: firma
+        // firmayı, bayi bayiyi, öğrenci öğrenciyi görmez. Yukarı doğru değil.
+        //
+        // ⚠ Yalnızca DENETLEYİCİ roller. Öğrenci, aday, bayi ve VIP bu kümeye
+        // ASLA girmez — MentorDE'ye kayıtlı bir öğrenci partner firmanın
+        // verisini görürdü. Yeni bir rol eklendiğinde bilinçli olarak
+        // SUPERVISING_ROLES'a eklenmeli; varsayılan erişim YOK.
+        $descendants = [];
+
+        if ($own > 0 && in_array((string) $this->role, self::SUPERVISING_ROLES, true)) {
+            $descendants = Company::descendantIds($own);
+        }
+
         $ids = array_values(array_unique(array_filter(
-            array_merge($own > 0 ? [$own] : [], $extra),
+            array_merge($own > 0 ? [$own] : [], $extra, $descendants),
             static fn (int $id): bool => $id > 0
         )));
 
@@ -179,6 +195,36 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
      * paywallini koruyan tek yetki.
      */
     public const ROLE_PLATFORM_OWNER = 'platform_owner';
+
+    /**
+     * Alt firmaların verisini de görebilen DENETLEYİCİ roller.
+     *
+     * Üst firma (MentorDE) partner firmaların süreçlerini yürüttüğü için
+     * personeli onların lead ve öğrencilerini görmelidir. Ama bu yetki
+     * şirkete değil ROLE bağlıdır: aynı şirkete kayıtlı bir öğrenci, aday
+     * ya da bayi partner verisine ASLA erişemez.
+     *
+     * ALLOWLIST — yeni rol eklendiğinde buraya bilinçli eklenmeli.
+     * Kasten dışarıda: student, guest, dealer, vip.
+     *
+     * @var list<string>
+     */
+    public const SUPERVISING_ROLES = [
+        self::ROLE_MANAGER,
+        self::ROLE_SENIOR,
+        self::ROLE_MENTOR,
+        self::ROLE_FINANCE_ADMIN,
+        self::ROLE_FINANCE_STAFF,
+        self::ROLE_OPERATIONS_ADMIN,
+        self::ROLE_OPERATIONS_STAFF,
+        self::ROLE_SYSTEM_ADMIN,
+        self::ROLE_SYSTEM_STAFF,
+        self::ROLE_MARKETING_ADMIN,
+        self::ROLE_MARKETING_STAFF,
+        self::ROLE_SALES_ADMIN,
+        self::ROLE_SALES_STAFF,
+        self::ROLE_AUDITOR,
+    ];
 
     /**
      * VIP Ortak — owner ile premium (customer manager) arasında üst yetkili.

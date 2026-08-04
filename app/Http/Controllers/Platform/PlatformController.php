@@ -228,6 +228,14 @@ class PlatformController extends Controller
             'studentLimit'        => $studentLimit,
             'studentTotal'        => $studentTotal,
             'studentUsagePct'     => $studentUsagePct,
+            // Üst firma seçici için — kendisi ve alt firmaları hariç (döngü olmasın)
+            'allCompanies'        => Company::query()
+                ->whereNotIn('id', array_merge(
+                    [(int) $companyModel->id],
+                    Company::descendantIds((int) $companyModel->id)
+                ))
+                ->orderBy('name')
+                ->get(['id', 'name', 'brand_name']),
         ]);
     }
 
@@ -257,6 +265,8 @@ class PlatformController extends Controller
                 'nullable', 'string', 'max:190',
                 \Illuminate\Validation\Rule::unique('companies', 'primary_domain')->ignore($companyModel->id),
             ],
+            // Üst firma — personeli bu şirketin verisini de görür (bkz. User::SUPERVISING_ROLES)
+            'parent_company_id' => ['nullable', 'integer', 'exists:companies,id'],
             // Başvuru linkinin adresi: /apply/{slug}
             'slug' => [
                 'nullable', 'string', 'max:58', 'regex:/^[a-z0-9][a-z0-9_-]{1,57}$/',
@@ -274,6 +284,23 @@ class PlatformController extends Controller
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
+
+        // Hiyerarşi döngüsü: A'nın üstü B, B'nin üstü A olursa görünürlük
+        // hesabı kendi kuyruğunda döner ve iki firma birbirinin verisini görür.
+        $parentId = (int) $request->input('parent_company_id', 0) ?: null;
+
+        if ($parentId !== null) {
+            $invalid = $parentId === (int) $companyModel->id
+                || in_array($parentId, Company::descendantIds((int) $companyModel->id), true);
+
+            if ($invalid) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['parent_company_id' => 'Bir şirket kendisinin ya da kendi alt firmasının altına alınamaz.']);
+            }
+        }
+
+        $companyModel->parent_company_id = $parentId;
 
         // "https://a.firma.com/" gibi girdileri normalize et
         $domain = strtolower(trim((string) $request->input('primary_domain', '')));
@@ -433,9 +460,16 @@ class PlatformController extends Controller
 
     public function createCompany(): View
     {
+        $primaryCode = strtolower(trim((string) config('app.primary_company_code', 'mentorde')));
+
         return view('platform.companies.create', [
             'tierLabels' => $this->tierLabels(),
             'tiers'      => config('subscription_tiers'),
+            // Üst firma seçici — ağacın hangi dalına takılacağını platform sahibi seçer.
+            'allCompanies'  => Company::query()->orderBy('name')->get(['id', 'name', 'brand_name', 'code']),
+            'defaultParent' => (int) (Company::query()
+                ->whereRaw('lower(code) = ?', [$primaryCode])
+                ->value('id') ?: 0),
         ]);
     }
 
@@ -450,6 +484,8 @@ class PlatformController extends Controller
             'admin_name'        => ['required', 'string', 'max:120'],
             'admin_email'       => ['required', 'email', 'max:190', 'unique:users,email'],
             'admin_password'    => ['required', 'string', 'min:8', 'max:120'],
+            // Ağaçtaki yeri — platform sahibi seçer, boş = bağımsız tenant
+            'parent_company_id' => ['nullable', 'integer', 'exists:companies,id'],
             // ── White-label marka (opsiyonel) ──
             // Boş bırakılırsa şirket platformun varsayılan markasını görür.
             // primary_domain doluysa o adresten gelen ziyaretçi bu markayı görür
@@ -507,10 +543,17 @@ class PlatformController extends Controller
                 $slug = $slugBase . '-' . (++$n);
             }
 
+            // Üst firmayı platform sahibi SEÇER. Form ana şirketi önceden seçili
+            // getirir (yaygın durum), ama bir partner firmanın altına da takılabilir —
+            // örn. FF firmasıyla anlaşıp onun altına kendi bayi ağacını kurmak.
+            // Boş gönderildiyse bilinçli tercihtir: bağımsız tenant.
+            $parentId = (int) $request->input('parent_company_id', 0);
+
             $company = Company::query()->create([
                 'name'              => $request->input('name'),
                 'code'              => $code,
                 'slug'              => $slug,
+                'parent_company_id' => $parentId > 0 ? $parentId : null,
                 'is_active'         => true,
                 'enabled_modules'   => $modules,
                 'subscription_tier' => $tier,

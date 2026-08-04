@@ -157,6 +157,26 @@
             </div>
 
             <div class="plat-form-group">
+                <label class="plat-form-label">Üst Firma</label>
+                <select name="parent_company_id" class="plat-select" style="width:100%;">
+                    <option value="">— Yok (bağımsız) —</option>
+                    @foreach($allCompanies ?? [] as $opt)
+                        @continue((int) $opt->id === (int) $company->id)
+                        <option value="{{ $opt->id }}"
+                            {{ (int) old('parent_company_id', $company->parent_company_id) === (int) $opt->id ? 'selected' : '' }}>
+                            {{ $opt->brand_name ?: $opt->name }}
+                        </option>
+                    @endforeach
+                </select>
+                <small style="font-size:11px;color:var(--plat-muted);display:block;margin-top:6px;">
+                    Üst firmanın <strong>personeli</strong> bu şirketin adaylarını ve öğrencilerini görür,
+                    süreçlerini yürütebilir. Bu şirketin kullanıcıları üst firmayı <strong>göremez</strong> —
+                    izolasyon yataydır.
+                    <br>Öğrenci, aday ve bayi rolleri bu erişime <strong>hiçbir zaman</strong> dahil değildir.
+                </small>
+            </div>
+
+            <div class="plat-form-group">
                 <label class="plat-form-label">Başvuru Linki Adresi</label>
                 <input type="text" name="slug" class="plat-input"
                        value="{{ old('slug', $company->slug) }}"
