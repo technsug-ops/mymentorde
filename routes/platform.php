@@ -17,6 +17,7 @@ use App\Http\Controllers\Platform\PlatformBillingController;
 use App\Http\Controllers\Platform\PlatformController;
 use App\Http\Controllers\Platform\PlatformInfrastructureController;
 use App\Http\Controllers\Platform\PlatformMRRController;
+use App\Http\Controllers\Platform\PlatformPortfolioController;
 use App\Http\Controllers\Platform\PlatformSecurityController;
 use App\Http\Controllers\Platform\PlatformSettingsController;
 use App\Http\Controllers\Platform\PromoCodeController;
@@ -67,6 +68,10 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
         ->name('platform.stop-impersonating');
 
     // ── Analytics — cross-company KPI'lar, tier dağılım, modül heatmap, top companies, booking funnel
+    // ── Konsolide portföy (Faz 5) — tüm şirketlerin adayları/öğrencileri tek listede ──
+    Route::get('/leads', [PlatformPortfolioController::class, 'leads'])->name('platform.leads');
+    Route::get('/students', [PlatformPortfolioController::class, 'students'])->name('platform.students');
+
     Route::get('/analytics', [PlatformAnalyticsController::class, 'index'])
         ->name('platform.analytics');
     Route::get('/analytics/export.csv', [PlatformAnalyticsController::class, 'exportCsv'])

@@ -172,6 +172,13 @@
             <a href="{{ route('platform.companies') }}" class="{{ request()->routeIs('platform.companies') || request()->routeIs('platform.companies.show') || request()->routeIs('platform.companies.create') ? 'active' : '' }}">
                 <x-icon name="building-2" size="16" /> Şirketler
             </a>
+            {{-- Konsolide portföy: tüm şirketlerin adayları/öğrencileri tek listede --}}
+            <a href="{{ route('platform.leads') }}" class="{{ request()->routeIs('platform.leads') ? 'active' : '' }}">
+                <x-icon name="users" size="16" /> Tüm Adaylar
+            </a>
+            <a href="{{ route('platform.students') }}" class="{{ request()->routeIs('platform.students') ? 'active' : '' }}">
+                <x-icon name="graduation-cap" size="16" /> Tüm Öğrenciler
+            </a>
             <a href="{{ route('platform.customer-health') }}" class="{{ request()->routeIs('platform.customer-health') || request()->routeIs('platform.customer-health.*') ? 'active' : '' }}">
                 <x-icon name="heart" size="16" /> Customer Sağlık
             </a>
