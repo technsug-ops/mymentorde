@@ -108,11 +108,12 @@ class MarketingDealerRelationsPageTest extends TestCase
         // test verisi cache dolduktan sonra eklenirse liste boş görünür.
         \Illuminate\Support\Facades\Cache::flush();
 
-        // Sayfa başlıkları Türkçe karakterli ("İlişkileri", "Performansı") —
-        // testler ASCII karşılıklarını arıyordu.
+        // /mktg-admin/dealers → ManagerPortalController@dealers → "Bayi Yönetimi"
+        // başlıklı sayfayı render ediyor. Test "Bayi Iliskileri" (başka bir view'ın
+        // başlığı) arıyordu.
         $this->actingAs($admin)->get('/mktg-admin/dealers')
             ->assertOk()
-            ->assertSee('Bayi İlişkileri', false)
+            ->assertSee('Bayi Yönetimi', false)
             ->assertSee('OPE-000001');
 
         $this->actingAs($admin)->get('/mktg-admin/dealers/OPE-000001/performance')
