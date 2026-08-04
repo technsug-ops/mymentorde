@@ -633,21 +633,33 @@ class AppServiceProvider extends ServiceProvider
         // 2) Job çalışmadan önce o şirketin bağlamına geç, öncekini sakla.
         $previous = [];
 
-        Queue::before(function (JobProcessing $event) use (&$previous): void {
+        // MARKA da taşınmalı: mail şablonları config('brand')'den okur. Bağlam
+        // taşınıp marka taşınmazsa, A firmasının hoş geldin maili o an panelde
+        // gezinen B firmasının (ya da platformun) markasıyla render edilir ve
+        // öğrenciye yanlış logo/isimle gider. Veri doğru, görünen marka yanlış.
+        $previousBrand = [];
+
+        Queue::before(function (JobProcessing $event) use (&$previous, &$previousBrand): void {
             $previous[] = TenantContext::snapshot();
+            $previousBrand[] = Brand::snapshot();
 
             $payload = $event->job->payload();
             $companyId = (int) ($payload['tenant_company_id'] ?? 0);
 
             if ($companyId > 0) {
                 TenantContext::bind($companyId, [$companyId]);
+                Brand::apply(\App\Models\Company::query()->find($companyId));
             }
         });
 
         // 3) Bittiğinde önceki bağlamı iade et (web isteği kendi şirketiyle devam etsin).
-        Queue::after(function (JobProcessed $event) use (&$previous): void {
+        Queue::after(function (JobProcessed $event) use (&$previous, &$previousBrand): void {
             if ($previous !== []) {
                 TenantContext::restore(array_pop($previous));
+            }
+
+            if ($previousBrand !== []) {
+                Brand::restore(array_pop($previousBrand));
             }
         });
     }

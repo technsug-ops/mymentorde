@@ -556,8 +556,14 @@ class GuestApplicationController extends Controller
             return $text;
         }
 
+        // Veri sorumlusu, başvurunun yazılacağı FİRMADIR. Sabit "MentorDE" yazmak
+        // partner firmanın öğrencisine hukuken yanlış bilgi vermek olurdu:
+        // verisini işleyen kurum MentorDE değil, kendi danışmanlık firması.
+        $controller = trim((string) (config('brand.legal_name') ?: config('brand.name') ?: ''));
+        $controller = $controller !== '' ? $controller : 'kurumumuz';
+
         return "KVKK AYDINLATMA METNI\n\n"
-            ."Kisisel verileriniz MentorDE tarafindan basvuru surecinin yurutulmesi, iletisim kurulmasi "
+            ."Kisisel verileriniz {$controller} tarafindan basvuru surecinin yurutulmesi, iletisim kurulmasi "
             ."ve ilgili kurumlarla basvuru operasyonlarinin tamamlanmasi amaciyla islenir.\n\n"
             ."Bu metin Config ekranindan manager tarafindan guncellenebilir.";
     }

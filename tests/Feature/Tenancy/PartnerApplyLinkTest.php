@@ -67,6 +67,24 @@ class PartnerApplyLinkTest extends TestCase
         $response->assertSee('B Egitim Danismanlik', false);
     }
 
+    /**
+     * KVKK aydınlatma metnindeki VERİ SORUMLUSU firmanın kendisi olmalı.
+     *
+     * Varsayılan metinde "MentorDE" sabit yazılıydı: partner firmanın öğrencisine
+     * verisini MentorDE'nin işlediği söyleniyordu. Kozmetik değil, hukuki hata.
+     */
+    public function test_kvkk_notice_names_the_company_not_the_platform(): void
+    {
+        $this->staffFor($this->companyB);
+        $this->companyB->update(['slug' => 'firma-b', 'brand_name' => 'B Egitim']);
+
+        $response = $this->get('/apply/firma-b');
+
+        $response->assertOk();
+        $response->assertSee('Kisisel verileriniz B Egitim tarafindan', false);
+        $response->assertDontSee('Kisisel verileriniz MentorDE tarafindan', false);
+    }
+
     public function test_unknown_slug_returns_404(): void
     {
         $this->get('/apply/boyle-bir-firma-yok')->assertNotFound();

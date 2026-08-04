@@ -4,11 +4,13 @@ namespace Tests\Feature\Tenancy;
 
 use App\Models\Company;
 use App\Models\SystemEventLog;
+use App\Support\Brand;
 use App\Support\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Tests\Feature\Tenancy\Concerns\MakesCompanies;
+use Tests\Support\Jobs\CapturesBrandJob;
 use Tests\Support\Jobs\WritesTenantScopedRecordJob;
 use Tests\TestCase;
 
@@ -138,6 +140,50 @@ class TenantContextTest extends TestCase
             (int) $this->companyA->id,
             (int) $log->company_id,
             'Kuyruk işi yanlış şirkete yazdı — tenant kontaminasyonu.'
+        );
+    }
+
+    /**
+     * KRİTİK REGRESYON — kuyrukta MARKA kontaminasyonu.
+     *
+     * Bağlam taşınıyordu ama marka taşınmıyordu: A firmasının hoş geldin maili,
+     * o an panelde gezinen B firmasının markasıyla render edilip öğrenciye
+     * yanlış logo/isimle gidiyordu. Veri doğru, görünen marka yanlış.
+     */
+    public function test_queued_job_renders_with_the_brand_of_its_own_company(): void
+    {
+        config(['queue.default' => 'database']);
+
+        $this->companyA->update(['brand_name' => 'A Egitim']);
+        $this->companyB->update(['brand_name' => 'B Danismanlik']);
+
+        // A bağlamında kuyruğa at
+        TenantContext::bind($this->companyA->id, [$this->companyA->id]);
+        CapturesBrandJob::dispatch('marka-testi');
+
+        // Bağlamı ve markayı B'ye çevir — "B'nin kullanıcısı panelde geziniyor"
+        TenantContext::bind($this->companyB->id, [$this->companyB->id]);
+        Brand::apply($this->companyB->fresh());
+        $this->assertSame('B Danismanlik', config('brand.name'), 'Test kurulumu hatali.');
+
+        Artisan::call('queue:work', ['--once' => true, '--no-interaction' => true]);
+
+        $log = SystemEventLog::withoutGlobalScope('company')
+            ->where('event_type', 'tenant.queue.brand')
+            ->first();
+
+        $this->assertNotNull($log, 'Job çalışmadı.');
+        $this->assertSame(
+            'marka-testi|A Egitim',
+            (string) $log->message,
+            'Kuyruk işi yanlış markayla render edildi — marka kontaminasyonu.'
+        );
+
+        // İş bittikten sonra isteğin markası iade edilmeli
+        $this->assertSame(
+            'B Danismanlik',
+            (string) config('brand.name'),
+            'Kuyruk isi bittikten sonra istegin markasi iade edilmedi.'
         );
     }
 
