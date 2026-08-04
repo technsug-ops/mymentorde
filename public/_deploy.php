@@ -165,28 +165,44 @@ if (is_file($projectRoot . '/composer.phar')) {
 }
 $logFn($composerOk ? 'INFO' : 'WARN', 'Composer autoload: ' . implode(' | ', $composerOut));
 
-// ── 7. Laravel cache rebuild ────────────────────────────────────────
+// ── 7. Laravel migration + cache rebuild ────────────────────────────
+//
+// migrate --force BURADA çalışır çünkü KAS'ta SSH yok: tek alternatif
+// /system/post-deploy sayfasına manager olarak girip elle tetiklemekti.
+// Bu adım unutulduğunda kod yeni sürüme geçer ama şema eski kalır — sessiz
+// ve teşhisi zor bir tutarsızlık. Sıra önemli:
+//   config:clear → migrate (güncel .env ile) → optimize (yeni şemayla cache)
+//
+// Hata durumunda deploy DÜŞMEZ: aşağıdaki döngü çıkışı yalnızca WARN loglar,
+// böylece bir migration sorunu tüm siteyi indirmiş olmaz. Sonucu
+// /system/last-error?file=deploy ile görebilirsin.
+// Her eleman: [komut, ...argümanlar] — argümanlar AYRI escape edilmeli.
+// 'migrate --force' tek parça verilseydi escapeshellarg onu tek bir komut ADI
+// gibi tırnaklar ve Laravel "command is not defined" derdi.
 $artisanCmds = [
-    'view:clear',
-    'route:clear',
-    'config:clear',
-    'cache:clear',
-    'event:clear',
-    'optimize',  // route+config+view cache rebuild
+    ['view:clear'],
+    ['route:clear'],
+    ['config:clear'],
+    ['cache:clear'],
+    ['event:clear'],
+    ['migrate', '--force'],
+    ['optimize'],  // route+config+view cache rebuild
 ];
 
 $cacheResults = [];
-foreach ($artisanCmds as $cmd) {
-    $out = [];
+foreach ($artisanCmds as $parts) {
+    $label = implode(' ', $parts);
+    $args  = implode(' ', array_map('escapeshellarg', $parts));
+    $out   = [];
     @exec(
         'cd ' . escapeshellarg($projectRoot)
-        . ' && ' . escapeshellarg($phpBin) . ' artisan ' . escapeshellarg($cmd) . ' 2>&1',
+        . ' && ' . escapeshellarg($phpBin) . ' artisan ' . $args . ' 2>&1',
         $out,
         $code
     );
-    $cacheResults[$cmd] = ($code === 0) ? 'ok' : 'fail';
+    $cacheResults[$label] = ($code === 0) ? 'ok' : 'fail';
     if ($code !== 0) {
-        $logFn('WARN', "artisan {$cmd}: " . implode(' | ', $out));
+        $logFn('WARN', "artisan {$label}: " . implode(' | ', $out));
     }
 }
 $logFn('INFO', 'Artisan cache: ' . json_encode($cacheResults));
