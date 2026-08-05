@@ -13,52 +13,39 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 /**
- * KONSOLİDE PORTFÖY — platform sahibinin "hepsini tek yerde" görünümü.
+ * KOTA VE KAPASİTE — platform sahibinin SaaS görünümü.
  *
- * ⚠ KİŞİSEL VERİ YOK. BİLEREK.
+ * ⚠ İKİ ŞEY BİLEREK YOK:
  *
- * DGmarkt yazılım servisi sağlıyor; müşterilerinin öğrencileri için VERİ
- * SORUMLUSU değil. Ad, e-posta, telefon gibi kişisel veriyi platform
- * konsolunda listelemek KVKK/GDPR açısından savunulamaz — servis sağlayıcının
- * müşterinin müşterisini tanımasını gerektiren bir iş gerekçesi yok.
+ * 1. KİŞİSEL VERİ. DGmarkt yazılım servisi sağlar; müşterilerinin öğrencileri
+ *    için veri sorumlusu değildir. Ad, e-posta, telefon burada listelenmez.
  *
- * Bu ekranlar SAYI gösterir: şirket başına aday/öğrenci adedi, durum dağılımı,
- * son 30 günün hareketi. İş hacmini görmek için yeterli, kişiyi tanımak için değil.
+ * 2. SATIŞ HUNİSİ. "Kaç aday nitelikli, kaçı teklif aşamasında" müşterinin
+ *    kendi operasyonudur; servis sağlayıcıyı ilgilendirmez.
  *
- * Kişi düzeyindeki işler operasyonu YÜRÜTEN şirkete (MentorDE) aittir; onun
- * personeli hiyerarşi sayesinde partner adaylarını kendi ekranlarında görür.
+ * Burada olan tek şey KAPASİTE: firma paketinin sınırına ne kadar yaklaştı,
+ * üst pakete geçmesi gerekiyor mu. SaaS'ın gerçekten bakması gereken soru bu.
  */
 class PlatformPortfolioController extends Controller
 {
-    /** Tüm şirketlerin aday SAYILARI — kişi listesi değil. */
+    /** Sınıra yaklaşma eşiği — bu oranın üstü "üst paket adayı". */
+    private const WARN_THRESHOLD = 80;
+
     public function leads(Request $request): View
     {
-        return view('platform.portfolio.leads', [
-            'companies'    => $this->companyRows(),
-            'statusTotals' => $this->leadStatusTotals(),
-            'statusLabels' => $this->leadStatusOptions(),
-            'grandTotal'   => array_sum($this->leadTotalsByCompany()),
-            'recent30'     => $this->recentLeadCount(),
-        ]);
+        return view('platform.portfolio.leads', $this->quotaData());
     }
 
-    /** Tüm şirketlerin öğrenci SAYILARI — kişi listesi değil. */
     public function students(Request $request): View
     {
-        return view('platform.portfolio.students', [
-            'companies'  => $this->companyRows(),
-            'grandTotal' => array_sum($this->studentTotalsByCompany()),
-        ]);
+        return view('platform.portfolio.students', $this->quotaData());
     }
 
     /**
-     * Adayı başka bir firmaya devret.
+     * Adayı başka bir firmaya devret — kişisel veri göstermeden, numarayla.
      *
-     * Kişisel veri göstermez, ID ile çalışır. Firma başvuru linkini
-     * kullandıramadığında kayıt B2C havuzuna düşer; operasyon ekibi adayı
-     * kendi ekranından bulup buraya ID'siyle gönderir.
-     *
-     * Bağlı tüm kayıtlar birlikte taşınır — bkz. LeadTransferService.
+     * Firma başvuru linkini kullandıramadığında kayıt B2C havuzuna düşer;
+     * operasyon ekibi adayı kendi ekranından bulup numarasını buraya girer.
      */
     public function transferLead(Request $request, LeadTransferService $transfers, int $application): RedirectResponse
     {
@@ -83,11 +70,11 @@ class PlatformPortfolioController extends Controller
         }
 
         \App\Models\PlatformAuditLog::record('platform.lead.transferred', [
-            'target_type'   => 'guest_application',
-            'target_id'     => $lead->id,
-            'company_from'  => $result['company_from'],
-            'company_to'    => $result['company_to'],
-            'tables'        => $result['tables'],
+            'target_type'  => 'guest_application',
+            'target_id'    => $lead->id,
+            'company_from' => $result['company_from'],
+            'company_to'   => $result['company_to'],
+            'tables'       => $result['tables'],
             // Aday adı/e-postası audit'e YAZILMAZ — tenant kişisel verisi.
         ]);
 
@@ -100,31 +87,84 @@ class PlatformPortfolioController extends Controller
         return back()->with('status', $message);
     }
 
+    /** @return array<string,mixed> */
+    private function quotaData(): array
+    {
+        $rows = $this->companyQuotas();
+
+        return [
+            'companies'   => $rows,
+            'atLimit'     => $rows->where('over', true)->count(),
+            'nearLimit'   => $rows->where('near', true)->where('over', false)->count(),
+            'totalLeads'  => $rows->sum('leads'),
+            'totalStuds'  => $rows->sum('students'),
+            'threshold'   => self::WARN_THRESHOLD,
+        ];
+    }
+
     /**
-     * Şirket başına özet satırlar — yalnızca sayı.
+     * Şirket başına kota kullanımı.
      *
      * @return \Illuminate\Support\Collection<int,array<string,mixed>>
      */
-    private function companyRows()
+    private function companyQuotas()
     {
         $leadTotals = $this->leadTotalsByCompany();
         $studentTotals = $this->studentTotalsByCompany();
+        $tierLabels = $this->tierLabels();
 
         return Company::query()
             ->orderBy('name')
-            ->get(['id', 'name', 'brand_name', 'code', 'is_active', 'parent_company_id'])
-            ->map(fn (Company $c): array => [
-                'id'       => (int) $c->id,
-                'name'     => (string) ($c->brand_name ?: $c->name),
-                'code'     => (string) $c->code,
-                'active'   => (bool) $c->is_active,
-                'parent'   => $c->parent_company_id ? (int) $c->parent_company_id : null,
-                'leads'    => (int) ($leadTotals[$c->id] ?? 0),
-                'students' => (int) ($studentTotals[$c->id] ?? 0),
-            ]);
+            ->get(['id', 'name', 'brand_name', 'code', 'is_active', 'subscription_tier', 'parent_company_id'])
+            ->map(function (Company $c) use ($leadTotals, $studentTotals, $tierLabels): array {
+                $tier = (string) ($c->subscription_tier ?: 'trial');
+                $limits = config("subscription_tiers.{$tier}.limits", []);
+
+                $leads = (int) ($leadTotals[$c->id] ?? 0);
+                $students = (int) ($studentTotals[$c->id] ?? 0);
+
+                $leadMax = $limits['leads_max'] ?? null;
+                $studentMax = $limits['students_max'] ?? null;
+
+                $leadPct = $this->usagePct($leads, $leadMax);
+                $studentPct = $this->usagePct($students, $studentMax);
+
+                // En sıkışık kota firmayı temsil eder — biri dolduysa yükseltme gerekir.
+                $worst = max($leadPct ?? 0, $studentPct ?? 0);
+
+                return [
+                    'id'          => (int) $c->id,
+                    'name'        => (string) ($c->brand_name ?: $c->name),
+                    'code'        => (string) $c->code,
+                    'active'      => (bool) $c->is_active,
+                    'parent'      => $c->parent_company_id ? (int) $c->parent_company_id : null,
+                    'tier'        => $tier,
+                    'tierLabel'   => (string) ($tierLabels[$tier] ?? $tier),
+                    'leads'       => $leads,
+                    'leadMax'     => $leadMax,
+                    'leadPct'     => $leadPct,
+                    'students'    => $students,
+                    'studentMax'  => $studentMax,
+                    'studentPct'  => $studentPct,
+                    'worstPct'    => $worst,
+                    'near'        => $worst >= self::WARN_THRESHOLD,
+                    'over'        => $worst >= 100,
+                    'unlimited'   => $leadMax === null && $studentMax === null,
+                ];
+            });
     }
 
-    /** @return array<int,int> company_id => aday sayısı */
+    /** null limit = sınırsız → oran yok. */
+    private function usagePct(int $used, ?int $max): ?int
+    {
+        if ($max === null || $max <= 0) {
+            return null;
+        }
+
+        return (int) round(($used / $max) * 100);
+    }
+
+    /** @return array<int,int> */
     private function leadTotalsByCompany(): array
     {
         return Cache::remember('platform:portfolio:lead_totals', 120, fn (): array => GuestApplication::withoutGlobalScope('company')
@@ -139,7 +179,7 @@ class PlatformPortfolioController extends Controller
             ->all());
     }
 
-    /** @return array<int,int> company_id => öğrenci sayısı */
+    /** @return array<int,int> */
     private function studentTotalsByCompany(): array
     {
         return Cache::remember('platform:portfolio:student_totals', 120, fn (): array => User::withoutGlobalScope('company')
@@ -152,40 +192,15 @@ class PlatformPortfolioController extends Controller
             ->all());
     }
 
-    /** @return array<string,int> durum => adet (şirketten bağımsız toplam) */
-    private function leadStatusTotals(): array
-    {
-        return Cache::remember('platform:portfolio:lead_status_totals', 120, fn (): array => GuestApplication::withoutGlobalScope('company')
-            ->whereNull('deleted_at')
-            ->where(function ($q): void {
-                $q->whereNull('converted_to_student')->orWhere('converted_to_student', false);
-            })
-            ->selectRaw('lead_status, count(*) as total')
-            ->groupBy('lead_status')
-            ->pluck('total', 'lead_status')
-            ->map(fn ($v): int => (int) $v)
-            ->all());
-    }
-
-    private function recentLeadCount(): int
-    {
-        return (int) Cache::remember('platform:portfolio:lead_recent30', 120, fn (): int => GuestApplication::withoutGlobalScope('company')
-            ->whereNull('deleted_at')
-            ->where('created_at', '>=', now()->subDays(30))
-            ->count());
-    }
-
     /** @return array<string,string> */
-    private function leadStatusOptions(): array
+    private function tierLabels(): array
     {
-        return [
-            'new' => 'Yeni',
-            'contacted' => 'İletişime geçildi',
-            'qualified' => 'Nitelikli',
-            'proposal' => 'Teklif',
-            'contract_signed' => 'Sözleşme imzalandı',
-            'won' => 'Kazanıldı',
-            'lost' => 'Kaybedildi',
-        ];
+        $out = [];
+
+        foreach ((array) config('subscription_tiers', []) as $key => $cfg) {
+            $out[(string) $key] = (string) ($cfg['label'] ?? $key);
+        }
+
+        return $out;
     }
 }
