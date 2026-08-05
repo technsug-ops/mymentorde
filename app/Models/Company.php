@@ -159,6 +159,68 @@ class Company extends Model
 
     private const CEILING_CACHE_KEY = 'companies:permission_ceilings';
 
+    private const ADVISOR_CACHE_KEY = 'companies:with_advisors';
+
+    /**
+     * Süreci fiilen YÜRÜTEN şirket — danışmanın alınacağı yer.
+     *
+     * İş modeli: partner firma öğrenciyi devreder, operasyonu biz yürütürüz.
+     * Partner firmanın kendi danışmanı YOKTUR; öğrenciye MentorDE'nin danışmanı
+     * atanır. Bu yüzden danışman aranırken şirket ağacında YUKARI çıkılır:
+     * danışmanı olan ilk şirket operasyon şirketidir.
+     *
+     * Kendi danışmanı olan bir firma (kendi operasyonunu yürüten partner)
+     * kendisini döndürür — kimseye bağlanmaz.
+     */
+    public static function operatingCompanyId(int $companyId): ?int
+    {
+        if ($companyId <= 0) {
+            return null;
+        }
+
+        $withAdvisors = self::companiesWithAdvisors();
+
+        foreach (array_merge([$companyId], self::ancestorIds($companyId)) as $candidate) {
+            if (isset($withAdvisors[$candidate])) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Aktif ve otomatik atamaya açık danışmanı olan şirketler.
+     *
+     * @return array<int,true>
+     */
+    private static function companiesWithAdvisors(): array
+    {
+        return \Illuminate\Support\Facades\Cache::remember(
+            self::ADVISOR_CACHE_KEY,
+            300,
+            static function (): array {
+                try {
+                    return \Illuminate\Support\Facades\DB::table('users')
+                        ->whereIn('role', [User::ROLE_SENIOR, User::ROLE_MENTOR])
+                        ->where('is_active', true)
+                        ->whereNotNull('company_id')
+                        ->distinct()
+                        ->pluck('company_id')
+                        ->mapWithKeys(static fn ($id): array => [(int) $id => true])
+                        ->all();
+                } catch (\Throwable) {
+                    return [];
+                }
+            }
+        );
+    }
+
+    public static function flushAdvisorCache(): void
+    {
+        \Illuminate\Support\Facades\Cache::forget(self::ADVISOR_CACHE_KEY);
+    }
+
     /**
      * Bu şirketin ÜSTÜNDEKİ şirketler (kendisi hariç, köke kadar).
      *

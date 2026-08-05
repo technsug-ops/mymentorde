@@ -568,10 +568,34 @@ class GuestApplicationController extends Controller
             ."Bu metin Config ekranindan manager tarafindan guncellenebilir.";
     }
 
+    /**
+     * Adaya otomatik danışman ata.
+     *
+     * DANIŞMAN OPERASYON ŞİRKETİNDEN GELİR, adayın firmasından değil.
+     *
+     * Partner firma öğrenciyi devrediyor, süreci biz yürütüyoruz — kendi
+     * danışmanı yok. Sorgu şirket kapsamlı kalsaydı partner bağlamında hiç
+     * danışman bulunamaz ve öğrenci ATANMAMIŞ kalırdı (sessizce).
+     *
+     * Ağaçta yukarı çıkıp danışmanı olan ilk şirket bulunur; kendi danışmanı
+     * olan firma kendisini kullanır.
+     */
     private function pickAutoSeniorEmail(string $applicationType = ''): ?string
     {
         $type = strtolower(trim($applicationType));
+
+        $operatingCompanyId = \App\Models\Company::operatingCompanyId(
+            (int) (TenantContext::writeId() ?? 0)
+        );
+
+        if ($operatingCompanyId === null) {
+            return null;
+        }
+
+        // Kapsam dışı: adayın firması operasyon şirketini göremeyebilir.
         $seniors = User::query()
+            ->withoutGlobalScope('company')
+            ->where('company_id', $operatingCompanyId)
             ->whereIn('role', [User::ROLE_SENIOR, User::ROLE_MENTOR])
             ->where('is_active', true)
             ->where('auto_assign_enabled', true)
@@ -595,7 +619,11 @@ class GuestApplicationController extends Controller
             return null;
         }
 
+        // Kapasite danışmanın TOPLAM yüküdür — hangi firmanın öğrencisi olduğu
+        // fark etmez. Kapsamlı sayılsaydı partner bağlamında MentorDE
+        // danışmanının mevcut yükü 0 görünür, dolu danışmana atama yapılırdı.
         $studentLoads = StudentAssignment::query()
+            ->withoutGlobalScope('company')
             ->whereIn('senior_email', $emails)
             ->where('is_archived', false)
             ->selectRaw('senior_email, COUNT(*) as total')
@@ -603,6 +631,7 @@ class GuestApplicationController extends Controller
             ->pluck('total', 'senior_email');
 
         $guestLoads = GuestApplication::query()
+            ->withoutGlobalScope('company')
             ->whereIn('assigned_senior_email', $emails)
             ->where('converted_to_student', false)
             ->where('is_archived', false)
