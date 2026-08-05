@@ -399,7 +399,7 @@ class WizardController extends Controller
             'email'                 => ['nullable', config('validation.email'), 'max:200'],
             'phone'                 => ['nullable', 'string', 'max:30'],
             'consent'               => ['nullable', 'boolean'],
-            'cf_turnstile_response' => ['nullable', 'string', new \App\Rules\TurnstileToken()],
+            'cf_turnstile_response' => \App\Rules\TurnstileToken::rules(),
         ]);
 
         // Email VEYA phone zorunlu (ikisi de boşsa skip'e yönlendir)

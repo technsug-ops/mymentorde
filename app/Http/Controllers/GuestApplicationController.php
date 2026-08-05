@@ -200,7 +200,7 @@ class GuestApplicationController extends Controller
             'docs_ready' => ['nullable', 'boolean'],
             'interested_program_id' => ['nullable', 'integer'],
             'interested_program' => ['nullable', 'string', 'max:200'],
-            'cf_turnstile_response' => ['nullable', 'string', new \App\Rules\TurnstileToken()],
+            'cf_turnstile_response' => \App\Rules\TurnstileToken::rules(),
         ]);
 
         // Aynı e-postayla aktif başvuru varsa yeni kayıt oluşturma
