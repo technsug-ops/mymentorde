@@ -20,6 +20,18 @@
             <span class="plat-badge plat-badge-inactive"><x-icon name="x" size="10" /> Pasif</span>
         @endif
         <span class="plat-badge plat-badge-{{ $company->subscription_tier ?? 'trial' }}">{{ $tierLabels[$company->subscription_tier] ?? $company->subscription_tier }}</span>
+
+        {{-- Askıya alma: test kayıtları ve sözleşmesi biten firmalar için.
+             Ana şirket kapatılamaz — varsayılan şirket çözümlemesi ona bağlı. --}}
+        @unless(\App\Support\Brand::isPrimary($company))
+            <form method="POST" action="{{ route('platform.companies.status', $company->id) }}" style="display:inline;">
+                @csrf
+                <input type="hidden" name="is_active" value="{{ $company->is_active ? 0 : 1 }}">
+                <button type="submit" class="plat-btn plat-btn-ghost" style="font-size:12px;padding:4px 12px;">
+                    {{ $company->is_active ? 'Askıya Al' : 'Yeniden Aç' }}
+                </button>
+            </form>
+        @endunless
     </div>
 </div>
 
