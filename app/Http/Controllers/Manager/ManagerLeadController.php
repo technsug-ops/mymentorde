@@ -71,7 +71,9 @@ class ManagerLeadController extends Controller
         $companyId = (int) (TenantContext::writeId() ?? 0);
 
         $lead = GuestApplication::query()->create([
-            'tracking_token'      => strtoupper(Str::random(12)),
+            // Modeldeki üretici: benzersizlik KAPSAM DIŞI kontrol edilir,
+            // aksi halde başka firmadaki kodla çakışabilirdi.
+            'tracking_token'      => GuestApplication::generateTrackingToken(),
             'first_name'          => trim((string) $data['first_name']),
             'last_name'           => trim((string) $data['last_name']),
             'email'               => $email,

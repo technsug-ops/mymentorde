@@ -365,7 +365,13 @@ class GuestApplicationController extends Controller
         $token = (string) $request->query('token', '');
         abort_if($token === '', 404);
 
-        $row = GuestApplication::query()->where('tracking_token', $token)->firstOrFail();
+        // Kapsam DIŞI arama: başvuran anonimdir, bağlamı varsayılan şirkettir.
+        // Kayıt bir partner firmanın kutusundaysa kapsamlı sorgu onu bulamaz ve
+        // öğrenci kendi başarı sayfasında 404 alırdı. Takip kodu 12 karakterlik
+        // rastgele bir sırdır; onu bilmek yetkinin kendisidir.
+        $row = GuestApplication::findByTrackingToken($token);
+
+        abort_if($row === null, 404);
 
         // Cache'den şifre bilgisini al (ilk gösterimde mevcut, sonra kaybolur)
         $cred = \Cache::pull("apply_password_{$token}");
@@ -379,14 +385,14 @@ class GuestApplicationController extends Controller
     }
 
 
+    /**
+     * Benzersizlik kontrolü modele taşındı: eskiden ŞİRKET KAPSAMLI sorguyla
+     * bakılıyordu, yani başka bir firmadaki aynı kod görülmüyor ve ÇAKIŞAN
+     * takip kodu üretilebiliyordu.
+     */
     private function generateTrackingToken(): string
     {
-        do {
-            $token = strtoupper(Str::random(12));
-            $token = preg_replace('/[^A-Z0-9]/', 'X', $token) ?: strtoupper(Str::random(12));
-        } while (GuestApplication::query()->where('tracking_token', $token)->exists());
-
-        return $token;
+        return GuestApplication::generateTrackingToken();
     }
 
     private function buildApplySuggestions(int $limit = 120): array
