@@ -400,7 +400,7 @@ class WizardController extends Controller
             'phone'                 => ['nullable', 'string', 'max:30'],
             'consent'               => ['nullable', 'boolean'],
             'cf_turnstile_response' => \App\Rules\TurnstileToken::rules(),
-        ]);
+        ], \App\Rules\TurnstileToken::messages());
 
         // Email VEYA phone zorunlu (ikisi de boşsa skip'e yönlendir)
         if (empty($data['email']) && empty($data['phone'])) {

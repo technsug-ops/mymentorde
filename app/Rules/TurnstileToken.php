@@ -53,6 +53,24 @@ class TurnstileToken implements ValidationRule
         return ['required', 'string', new self()];
     }
 
+    /**
+     * `required` için insan diliyle mesaj.
+     *
+     * Varsayılan Laravel mesajı alan adını olduğu gibi yazıyor:
+     * "cf turnstile response alanı zorunludur." Kullanıcı bunun ne demek
+     * olduğunu anlamaz; widget yüklenmediğinde gördüğü tek şey bu olur.
+     *
+     * @return array<string,string>
+     */
+    public static function messages(): array
+    {
+        return [
+            'cf_turnstile_response.required' =>
+                'Güvenlik doğrulaması tamamlanmadı. Sayfayı yenileyip tekrar deneyin; '
+                . 'sorun sürerse reklam engelleyicinizi kapatmayı deneyin.',
+        ];
+    }
+
     /** Turnstile gerçekten devrede mi? */
     public static function isEnforced(): bool
     {

@@ -201,7 +201,7 @@ class GuestApplicationController extends Controller
             'interested_program_id' => ['nullable', 'integer'],
             'interested_program' => ['nullable', 'string', 'max:200'],
             'cf_turnstile_response' => \App\Rules\TurnstileToken::rules(),
-        ]);
+        ], \App\Rules\TurnstileToken::messages());
 
         // Aynı e-postayla aktif başvuru varsa yeni kayıt oluşturma
         $existingEmail = strtolower(trim((string) $data['email']));

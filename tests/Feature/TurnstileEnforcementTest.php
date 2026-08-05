@@ -102,6 +102,25 @@ class TurnstileEnforcementTest extends TestCase
         );
     }
 
+    /**
+     * Hata mesajı insan diliyle olmalı.
+     *
+     * Laravel'in varsayılanı alan adını olduğu gibi yazıyordu:
+     * "cf turnstile response alanı zorunludur." Widget yüklenmediğinde
+     * kullanıcının gördüğü tek şey bu olur ve hiçbir şey anlatmaz.
+     */
+    public function test_error_message_is_human_readable(): void
+    {
+        $this->enableTurnstile();
+
+        $this->post('/apply', $this->applyPayload());
+
+        $message = (string) session('errors')?->first('cf_turnstile_response');
+
+        $this->assertStringNotContainsString('cf turnstile response', mb_strtolower($message));
+        $this->assertStringContainsString('Güvenlik doğrulaması', $message);
+    }
+
     public function test_application_with_a_valid_token_passes(): void
     {
         $this->enableTurnstile();

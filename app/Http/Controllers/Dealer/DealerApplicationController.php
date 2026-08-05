@@ -60,7 +60,7 @@ class DealerApplicationController extends Controller
             'utm_campaign' => ['nullable', 'string', 'max:120'],
             'consent' => ['accepted'], // KVKK/aydınlatma kabul
             'cf_turnstile_response' => \App\Rules\TurnstileToken::rules(),
-        ]);
+        ], \App\Rules\TurnstileToken::messages());
 
         // Aynı email + son 7 gün içinde başvuru varsa duplicate say
         $exists = DealerApplication::where('email', $data['email'])

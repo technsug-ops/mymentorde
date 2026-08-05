@@ -228,6 +228,14 @@ class PlatformController extends Controller
             'studentLimit'        => $studentLimit,
             'studentTotal'        => $studentTotal,
             'studentUsagePct'     => $studentUsagePct,
+            // Firma PANEL kullanıcıları — hesap sahibi olarak bizimle sözleşmeli
+            // taraf. Öğrenci ve aday hesapları BİLEREK yok: onlar müşterinin
+            // müşterisi, kişisel verileri bu konsolda gösterilmez.
+            'staffAccounts'       => User::query()->withoutGlobalScopes()
+                ->where('company_id', $companyModel->id)
+                ->whereIn('role', array_values(array_diff(User::ADMIN_PANEL_ROLES, [User::ROLE_PLATFORM_OWNER])))
+                ->orderBy('role')
+                ->get(['id', 'name', 'email', 'role', 'is_active', 'password_must_change']),
             // Üst firma seçici için — kendisi ve alt firmaları hariç (döngü olmasın)
             'allCompanies'        => Company::query()
                 ->whereNotIn('id', array_merge(
@@ -423,6 +431,67 @@ class PlatformController extends Controller
         return back()->with('status', $denied === []
             ? $companyModel->name . ' için kısıt kaldırıldı — rolünün verdiği tüm yetkiler geçerli.'
             : $companyModel->name . ' için ' . count($denied) . ' yetki kısıtlandı. Alt firmaları da bağlar.');
+    }
+
+    /**
+     * Firma yöneticisinin şifresini sıfırla.
+     *
+     * NEDEN GEREKLİ: firma geçici şifresini kaybederse tek çıkış yolu
+     * /forgot-password idi ve o da ilgili posta kutusuna erişim gerektiriyordu.
+     * Yeni bir partner devreye alınırken bu tıkanma noktası oluyordu.
+     *
+     * ── IMPERSONATION'DAN FARKI ─────────────────────────────────────────
+     * Impersonation bilerek KAPALI: platform sahibi müşterinin verisine
+     * SESSİZCE giremez. Şifre sıfırlama sessiz değildir — eski şifre çalışmaz
+     * olur ve firma bunu hemen fark eder. Hesap kurtarma, servis sağlayıcının
+     * meşru işidir; veriyi gizlice okumak değildir.
+     *
+     * Yeni şifre TEK SEFER gösterilir ve ilk girişte değiştirilmek zorundadır.
+     */
+    public function resetStaffPassword(Request $request, int $company, int $user): RedirectResponse
+    {
+        $companyModel = Company::query()->where('id', $company)->firstOrFail();
+
+        $target = User::query()->withoutGlobalScopes()
+            ->where('id', $user)
+            ->where('company_id', $companyModel->id)
+            ->first();
+
+        if (!$target) {
+            return back()->withErrors(['password' => 'Kullanıcı bu şirkette bulunamadı.']);
+        }
+
+        // Yalnızca PANEL kullanıcıları. Öğrenci ve aday hesaplarının şifresini
+        // platform sahibi sıfırlayamaz — onlar müşterinin müşterisidir ve
+        // hesap ilişkisi bizimle değil firmayladır.
+        $resettable = array_values(array_diff(User::ADMIN_PANEL_ROLES, [User::ROLE_PLATFORM_OWNER]));
+
+        if (!in_array((string) $target->role, $resettable, true)) {
+            return back()->withErrors([
+                'password' => 'Yalnızca firma panel kullanıcılarının şifresi sıfırlanabilir.',
+            ]);
+        }
+
+        $newPassword = Str::password(14, true, true, false, false);
+
+        $target->forceFill([
+            'password' => Hash::make($newPassword),
+            'password_must_change' => true,
+        ])->save();
+
+        \App\Models\PlatformAuditLog::record('platform.company.staff_password_reset', [
+            'target_type' => 'user',
+            'target_id'   => $target->id,
+            'company'     => $companyModel->name,
+            'role'        => (string) $target->role,
+            // Şifre audit'e YAZILMAZ.
+        ]);
+
+        return back()->with('status',
+            $target->email . ' için yeni geçici şifre: ' . $newPassword
+            . ' — bu şifre yalnızca ŞİMDİ gösteriliyor, kaydedin. '
+            . 'Kullanıcı ilk girişte değiştirmek zorunda.'
+        );
     }
 
     public function updateTier(Request $request, int $company): RedirectResponse
