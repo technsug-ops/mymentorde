@@ -669,6 +669,11 @@ class PlatformController extends Controller
                 'role'              => User::ROLE_MANAGER,
                 'is_active'         => true,
                 'email_verified_at' => now(),
+                // Geçici şifre ilk girişte değiştirilmek ZORUNDA. Mekanizma
+                // (EnsurePasswordChanged + /password/change-required) zaten vardı
+                // ama platform panelinden açılan yönetici bayrağı almıyordu:
+                // firmaya e-postayla giden geçici şifre süresiz geçerli kalıyordu.
+                'password_must_change' => true,
             ]);
         });
 

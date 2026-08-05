@@ -187,6 +187,17 @@ class CompanyBrandingManagementTest extends TestCase
         $created = Company::query()->where('code', 'yeni_partner')->first();
 
         $this->assertNotNull($created, 'Şirket oluşturulmadı.');
+
+        // Geçici şifre ilk girişte değiştirilmek zorunda — firmaya e-postayla
+        // giden şifre süresiz geçerli kalmamalı.
+        $admin = User::query()->withoutGlobalScope('company')
+            ->where('email', 'yonetici@yeni-partner.test')->firstOrFail();
+
+        $this->assertTrue(
+            (bool) $admin->password_must_change,
+            'Yeni firma yoneticisi gecici sifreyle sinirsiz devam edebiliyor.'
+        );
+
         $this->assertSame('Yeni Partner', $created->brand_name);
         $this->assertSame('#ff6600', $created->brand_primary_color);
         $this->assertSame('yeni.yourgermanuni.test', $created->primary_domain);
