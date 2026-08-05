@@ -48,6 +48,14 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/dashboard/report-print', [ManagerDashboardController::class, 'reportPrint']);
     Route::view('/config', 'config.index');
     Route::get('/config/export-code/safe', [ProjectExportController::class, 'safe'])->middleware('throttle:3,60');
+
+    // Elle aday girişi — telefonda konuşulan öğrenciyi kaydetmek için.
+    // Kayıt, içinde bulunulan şirket bağlamına yazılır.
+    Route::get('/manager/leads/create', [\App\Http\Controllers\Manager\ManagerLeadController::class, 'create'])
+        ->name('manager.leads.create');
+    Route::post('/manager/leads', [\App\Http\Controllers\Manager\ManagerLeadController::class, 'store'])
+        ->middleware('throttle:60,1')
+        ->name('manager.leads.store');
     Route::get('/config/export-code/full', [ProjectExportController::class, 'full']);
     Route::get('/student-card', [StudentCardController::class, 'index']);
     Route::get('/manager/theme', [ThemeController::class, 'show'])->name('manager.theme.show');

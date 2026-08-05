@@ -571,97 +571,18 @@ class GuestApplicationController extends Controller
     /**
      * Adaya otomatik danışman ata.
      *
-     * DANIŞMAN OPERASYON ŞİRKETİNDEN GELİR, adayın firmasından değil.
-     *
-     * Partner firma öğrenciyi devrediyor, süreci biz yürütüyoruz — kendi
-     * danışmanı yok. Sorgu şirket kapsamlı kalsaydı partner bağlamında hiç
-     * danışman bulunamaz ve öğrenci ATANMAMIŞ kalırdı (sessizce).
-     *
-     * Ağaçta yukarı çıkıp danışmanı olan ilk şirket bulunur; kendi danışmanı
-     * olan firma kendisini kullanır.
+     * Mantık AdvisorAssignmentService'te — aynı kural üç yerden kullanılıyor
+     * (public başvuru, elle aday girişi, dönüşüm) ve kopyalanması hâlinde
+     * biri güncellenip diğerleri unutulurdu.
      */
     private function pickAutoSeniorEmail(string $applicationType = ''): ?string
     {
-        $type = strtolower(trim($applicationType));
-
-        $operatingCompanyId = \App\Models\Company::operatingCompanyId(
-            (int) (TenantContext::writeId() ?? 0)
+        return app(\App\Services\AdvisorAssignmentService::class)->pickFor(
+            (int) (TenantContext::writeId() ?? 0),
+            $applicationType
         );
-
-        if ($operatingCompanyId === null) {
-            return null;
-        }
-
-        // Kapsam dışı: adayın firması operasyon şirketini göremeyebilir.
-        $seniors = User::query()
-            ->withoutGlobalScope('company')
-            ->where('company_id', $operatingCompanyId)
-            ->whereIn('role', [User::ROLE_SENIOR, User::ROLE_MENTOR])
-            ->where('is_active', true)
-            ->where('auto_assign_enabled', true)
-            ->orderBy('id')
-            ->get(['email', 'max_capacity', 'senior_type']);
-
-        if ($seniors->isEmpty()) {
-            return null;
-        }
-
-        $matched = $type === ''
-            ? $seniors
-            : $seniors->filter(function (User $user) use ($type) {
-                $seniorType = strtolower(trim((string) ($user->senior_type ?? '')));
-                return $seniorType === '' || $seniorType === $type;
-            })->values();
-
-        $pool = $matched->isNotEmpty() ? $matched : $seniors;
-        $emails = $pool->pluck('email')->filter()->values();
-        if ($emails->isEmpty()) {
-            return null;
-        }
-
-        // Kapasite danışmanın TOPLAM yüküdür — hangi firmanın öğrencisi olduğu
-        // fark etmez. Kapsamlı sayılsaydı partner bağlamında MentorDE
-        // danışmanının mevcut yükü 0 görünür, dolu danışmana atama yapılırdı.
-        $studentLoads = StudentAssignment::query()
-            ->withoutGlobalScope('company')
-            ->whereIn('senior_email', $emails)
-            ->where('is_archived', false)
-            ->selectRaw('senior_email, COUNT(*) as total')
-            ->groupBy('senior_email')
-            ->pluck('total', 'senior_email');
-
-        $guestLoads = GuestApplication::query()
-            ->withoutGlobalScope('company')
-            ->whereIn('assigned_senior_email', $emails)
-            ->where('converted_to_student', false)
-            ->where('is_archived', false)
-            ->selectRaw('assigned_senior_email, COUNT(*) as total')
-            ->groupBy('assigned_senior_email')
-            ->pluck('total', 'assigned_senior_email');
-
-        $eligible = $pool->filter(function (User $senior) use ($studentLoads, $guestLoads) {
-            $email = (string) ($senior->email ?? '');
-            if ($email === '') {
-                return false;
-            }
-            $load = (int) ($studentLoads[$email] ?? 0) + (int) ($guestLoads[$email] ?? 0);
-            if (!$senior->max_capacity) {
-                return true;
-            }
-            return $load < (int) $senior->max_capacity;
-        })->values();
-
-        if ($eligible->isEmpty()) {
-            return null;
-        }
-
-        $selected = $eligible->sortBy(function (User $senior) use ($studentLoads, $guestLoads) {
-            $email = (string) ($senior->email ?? '');
-            return (int) ($studentLoads[$email] ?? 0) + (int) ($guestLoads[$email] ?? 0);
-        })->first();
-
-        return $selected ? (string) $selected->email : null;
     }
+
 
     /**
      * Adayın bu firmanın portalına erişimini garanti et.
