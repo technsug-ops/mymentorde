@@ -80,10 +80,10 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
     Route::get('/leads', [PlatformPortfolioController::class, 'leads'])->name('platform.leads');
     Route::get('/students', [PlatformPortfolioController::class, 'students'])->name('platform.students');
 
-    // Firma başvuru linkini kullanamadığında adayı elle doğru firmaya taşı.
-    Route::post('/leads/{application}/transfer', [PlatformPortfolioController::class, 'transferLead'])
-        ->whereNumber('application')
-        ->name('platform.leads.transfer');
+    // Aday devri BİLEREK burada değil: kimin adayının hangi firmaya taşınacağı
+    // OPERASYONEL bir karardır ve süreci yürüten firmayı (MentorDE) ilgilendirir.
+    // Yazılım servisi sağlayıcısının müşterisinin adayını taşıması savunulamaz.
+    // Bkz. /manager/leads/transfer
 
     Route::get('/analytics', [PlatformAnalyticsController::class, 'index'])
         ->name('platform.analytics');

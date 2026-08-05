@@ -57,6 +57,13 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
         ->middleware('throttle:60,1')
         ->name('manager.leads.store');
 
+    // Aday devri — operasyonel karar, süreci yürüten firmada.
+    Route::get('/manager/leads/transfer', [\App\Http\Controllers\Manager\ManagerLeadController::class, 'transferForm'])
+        ->name('manager.leads.transfer.form');
+    Route::post('/manager/leads/transfer', [\App\Http\Controllers\Manager\ManagerLeadController::class, 'transfer'])
+        ->middleware('throttle:30,1')
+        ->name('manager.leads.transfer');
+
     // Alt firmaların yetki tavanı — kısıtı koyması gereken taraf ağacın
     // üstündeki firma; partnerle anlaşmayı o yapıyor.
     Route::get('/manager/partners', [\App\Http\Controllers\Manager\PartnerCompanyController::class, 'index'])
