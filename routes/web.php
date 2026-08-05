@@ -1430,6 +1430,12 @@ Route::middleware(['auth'])->group(function (): void {
 
 Route::middleware(['company.context', 'auth'])->group(function (): void {
     Route::match(['GET', 'POST'], '/logout', [AuthController::class, 'logout']);
+
+    // Şirket bağlamı değiştirici. manager.role ile KAPATILMAZ: danışmanın da
+    // partner bağlamına geçmesi gerekiyor. Yetkiyi görünür küme belirler.
+    Route::post('/company-context/switch', [\App\Http\Controllers\CompanyContextSwitchController::class, 'switch'])
+        ->middleware('throttle:30,1')
+        ->name('company-context.switch');
 });
 
 // ── 2FA Web Akışı ─────────────────────────────────────────────────────────────

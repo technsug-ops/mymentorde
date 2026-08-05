@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use App\Models\GuestApplication;
 use App\Models\MessageTemplate;
 use App\Models\NotificationDispatch;
@@ -82,15 +83,20 @@ class GuestApplicationAdminController extends Controller
             );
         }
 
+        // Danışman OPERASYON şirketinden gelir. Partner firmanın kendi danışmanı
+        // yoktur; öğrenciyi devredip süreci bize bırakır. Kural yalnızca adayın
+        // firmasına baksaydı MentorDE danışmanı REDDEDİLİRDİ.
+        $operatingCompanyId = Company::operatingCompanyId($companyId) ?? $companyId;
+
         $data = $request->validate([
             'senior_email' => [
                 'nullable',
                 'email',
-                Rule::exists('users', 'email')->where(function ($q) use ($companyId) {
+                Rule::exists('users', 'email')->where(function ($q) use ($operatingCompanyId) {
                     $q->whereIn('role', ['senior', 'mentor'])
                         ->where('is_active', true);
-                    if ($companyId > 0) {
-                        $q->where('company_id', $companyId);
+                    if ($operatingCompanyId > 0) {
+                        $q->where('company_id', $operatingCompanyId);
                     }
                 }),
             ],
@@ -99,7 +105,22 @@ class GuestApplicationAdminController extends Controller
         ]);
 
         $studentTypeCode = $this->mapApplicationTypeToStudentTypeCode((string) $guestApplication->application_type);
-        $seniorEmail = trim((string) ($data['senior_email'] ?? ''));
+
+        // ── DÖNÜŞÜM partnerin, DANIŞMAN SEÇİMİ operasyon şirketinin ─────────
+        //
+        // Partner firma öğrenciyi kendi tarafında imzalamıştır; adayı öğrenciye
+        // çevirmek onun kararıdır. Ama danışman BİZİM elemanımız — partner ona
+        // dışarıdan görev veremez. Bu yüzden operasyon şirketinin dışından gelen
+        // istekte `senior_email` YOK SAYILIR ve atama otomatik yapılır.
+        //
+        // Yetkiyle değil YAPISAL olarak engelleniyor: iş modelinin değişmezi bu,
+        // bir onay kutusuyla açılıp kapanmamalı.
+        $actorCompanyId = (int) ($request->user()?->company_id ?? 0);
+        $actorRunsOperation = $request->user()?->role === User::ROLE_PLATFORM_OWNER
+            || ($operatingCompanyId > 0 && $actorCompanyId === $operatingCompanyId);
+
+        $seniorEmail = $actorRunsOperation ? trim((string) ($data['senior_email'] ?? '')) : '';
+
         // Adayın ZATEN atanmış danışmanını koru (request'te senior gelmezse) — dönüşen
         // öğrenci, aday aşamasındaki senior'ın (örn. Filiz) "Öğrencilerim"ine düşsün.
         if ($seniorEmail === '') {
@@ -436,10 +457,20 @@ class GuestApplicationAdminController extends Controller
         $user->forgetVisibleCompanyIds();
     }
 
+    /**
+     * Danışman OPERASYON şirketinden seçilir.
+     *
+     * Partner firma öğrenciyi devreder, süreci MentorDE yürütür ve danışmanı
+     * MentorDE atar. Partner firmanın kendi danışmanı yoktur; sorgu adayın
+     * firmasına baksaydı hiç aday bulunamaz ve öğrenci danışmansız kalırdı.
+     */
     private function pickAutoSeniorEmail(int $companyId = 0): ?string
     {
+        $operatingCompanyId = Company::operatingCompanyId($companyId) ?? $companyId;
+
         $seniors = User::query()
-            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->withoutGlobalScope('company')
+            ->when($operatingCompanyId > 0, fn ($q) => $q->where('company_id', $operatingCompanyId))
             ->whereIn('role', ['senior', 'mentor'])
             ->where('is_active', true)
             ->where('auto_assign_enabled', true)
@@ -447,8 +478,11 @@ class GuestApplicationAdminController extends Controller
             ->get(['email', 'max_capacity']);
 
         $emails = $seniors->pluck('email')->filter()->values();
+
+        // Kapasite danışmanın TOPLAM yüküdür — hangi firmanın öğrencisi olduğu
+        // fark etmez. Şirkete göre sayılsaydı dolu danışman boş görünürdü.
         $activeCounts = StudentAssignment::query()
-            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->withoutGlobalScope('company')
             ->whereIn('senior_email', $emails)
             ->where('is_archived', false)
             ->selectRaw('senior_email, COUNT(*) as total')

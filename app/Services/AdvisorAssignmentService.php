@@ -1,0 +1,143 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Company;
+use App\Models\GuestApplication;
+use App\Models\StudentAssignment;
+use App\Models\User;
+
+/**
+ * Otomatik danışman ataması.
+ *
+ * DANIŞMAN OPERASYON ŞİRKETİNDEN GELİR, adayın firmasından değil.
+ *
+ * Partner firma öğrenciyi devrediyor, süreci MentorDE yürütüyor — partnerin
+ * kendi danışmanı yok. Ağaçta yukarı çıkıp danışmanı olan ilk şirket bulunur;
+ * kendi danışmanı olan firma kendisini kullanır.
+ *
+ * Sorgular BİLEREK kapsam dışı: adayın firması operasyon şirketini göremez.
+ */
+class AdvisorAssignmentService
+{
+    private const ADVISOR_ROLES = [User::ROLE_SENIOR, User::ROLE_MENTOR];
+
+    /**
+     * @param  int  $companyId  Adayın/öğrencinin şirketi
+     * @param  string  $applicationType  Uzmanlık eşleşmesi için (boş = hepsi)
+     */
+    public function pickFor(int $companyId, string $applicationType = ''): ?string
+    {
+        $operatingCompanyId = Company::operatingCompanyId($companyId);
+
+        if ($operatingCompanyId === null) {
+            return null;
+        }
+
+        $advisors = User::query()
+            ->withoutGlobalScope('company')
+            ->where('company_id', $operatingCompanyId)
+            ->whereIn('role', self::ADVISOR_ROLES)
+            ->where('is_active', true)
+            ->where('auto_assign_enabled', true)
+            ->orderBy('id')
+            ->get(['email', 'max_capacity', 'senior_type']);
+
+        if ($advisors->isEmpty()) {
+            return null;
+        }
+
+        $pool = $this->matchByType($advisors, $applicationType);
+        $emails = $pool->pluck('email')->filter()->values();
+
+        if ($emails->isEmpty()) {
+            return null;
+        }
+
+        $loads = $this->currentLoads($emails->all());
+
+        $eligible = $pool->filter(function (User $advisor) use ($loads): bool {
+            $email = (string) ($advisor->email ?? '');
+
+            if ($email === '') {
+                return false;
+            }
+
+            if (!$advisor->max_capacity) {
+                return true;
+            }
+
+            return (int) ($loads[$email] ?? 0) < (int) $advisor->max_capacity;
+        })->values();
+
+        if ($eligible->isEmpty()) {
+            return null;
+        }
+
+        // En az yüklü olana ver.
+        return (string) $eligible
+            ->sortBy(fn (User $a): int => (int) ($loads[(string) $a->email] ?? 0))
+            ->first()
+            ->email;
+    }
+
+    /**
+     * Uzmanlığı eşleşenler; hiçbiri eşleşmezse havuzun tamamı.
+     *
+     * @param  \Illuminate\Support\Collection<int,User>  $advisors
+     * @return \Illuminate\Support\Collection<int,User>
+     */
+    private function matchByType($advisors, string $applicationType)
+    {
+        $type = strtolower(trim($applicationType));
+
+        if ($type === '') {
+            return $advisors;
+        }
+
+        $matched = $advisors->filter(function (User $advisor) use ($type): bool {
+            $advisorType = strtolower(trim((string) ($advisor->senior_type ?? '')));
+
+            return $advisorType === '' || $advisorType === $type;
+        })->values();
+
+        return $matched->isNotEmpty() ? $matched : $advisors;
+    }
+
+    /**
+     * Danışmanın TOPLAM yükü — hangi firmanın öğrencisi olduğu fark etmez.
+     *
+     * Şirkete göre sayılsaydı partner bağlamında MentorDE danışmanının mevcut
+     * yükü 0 görünür, kapasitesi dolu danışmana atama yapılırdı.
+     *
+     * @param  list<string>  $emails
+     * @return array<string,int>
+     */
+    private function currentLoads(array $emails): array
+    {
+        $students = StudentAssignment::query()
+            ->withoutGlobalScope('company')
+            ->whereIn('senior_email', $emails)
+            ->where('is_archived', false)
+            ->selectRaw('senior_email, COUNT(*) as total')
+            ->groupBy('senior_email')
+            ->pluck('total', 'senior_email');
+
+        $guests = GuestApplication::query()
+            ->withoutGlobalScope('company')
+            ->whereIn('assigned_senior_email', $emails)
+            ->where('converted_to_student', false)
+            ->where('is_archived', false)
+            ->selectRaw('assigned_senior_email, COUNT(*) as total')
+            ->groupBy('assigned_senior_email')
+            ->pluck('total', 'assigned_senior_email');
+
+        $out = [];
+
+        foreach ($emails as $email) {
+            $out[$email] = (int) ($students[$email] ?? 0) + (int) ($guests[$email] ?? 0);
+        }
+
+        return $out;
+    }
+}

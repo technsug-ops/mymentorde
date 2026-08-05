@@ -568,71 +568,21 @@ class GuestApplicationController extends Controller
             ."Bu metin Config ekranindan manager tarafindan guncellenebilir.";
     }
 
+    /**
+     * Adaya otomatik danışman ata.
+     *
+     * Mantık AdvisorAssignmentService'te — aynı kural üç yerden kullanılıyor
+     * (public başvuru, elle aday girişi, dönüşüm) ve kopyalanması hâlinde
+     * biri güncellenip diğerleri unutulurdu.
+     */
     private function pickAutoSeniorEmail(string $applicationType = ''): ?string
     {
-        $type = strtolower(trim($applicationType));
-        $seniors = User::query()
-            ->whereIn('role', [User::ROLE_SENIOR, User::ROLE_MENTOR])
-            ->where('is_active', true)
-            ->where('auto_assign_enabled', true)
-            ->orderBy('id')
-            ->get(['email', 'max_capacity', 'senior_type']);
-
-        if ($seniors->isEmpty()) {
-            return null;
-        }
-
-        $matched = $type === ''
-            ? $seniors
-            : $seniors->filter(function (User $user) use ($type) {
-                $seniorType = strtolower(trim((string) ($user->senior_type ?? '')));
-                return $seniorType === '' || $seniorType === $type;
-            })->values();
-
-        $pool = $matched->isNotEmpty() ? $matched : $seniors;
-        $emails = $pool->pluck('email')->filter()->values();
-        if ($emails->isEmpty()) {
-            return null;
-        }
-
-        $studentLoads = StudentAssignment::query()
-            ->whereIn('senior_email', $emails)
-            ->where('is_archived', false)
-            ->selectRaw('senior_email, COUNT(*) as total')
-            ->groupBy('senior_email')
-            ->pluck('total', 'senior_email');
-
-        $guestLoads = GuestApplication::query()
-            ->whereIn('assigned_senior_email', $emails)
-            ->where('converted_to_student', false)
-            ->where('is_archived', false)
-            ->selectRaw('assigned_senior_email, COUNT(*) as total')
-            ->groupBy('assigned_senior_email')
-            ->pluck('total', 'assigned_senior_email');
-
-        $eligible = $pool->filter(function (User $senior) use ($studentLoads, $guestLoads) {
-            $email = (string) ($senior->email ?? '');
-            if ($email === '') {
-                return false;
-            }
-            $load = (int) ($studentLoads[$email] ?? 0) + (int) ($guestLoads[$email] ?? 0);
-            if (!$senior->max_capacity) {
-                return true;
-            }
-            return $load < (int) $senior->max_capacity;
-        })->values();
-
-        if ($eligible->isEmpty()) {
-            return null;
-        }
-
-        $selected = $eligible->sortBy(function (User $senior) use ($studentLoads, $guestLoads) {
-            $email = (string) ($senior->email ?? '');
-            return (int) ($studentLoads[$email] ?? 0) + (int) ($guestLoads[$email] ?? 0);
-        })->first();
-
-        return $selected ? (string) $selected->email : null;
+        return app(\App\Services\AdvisorAssignmentService::class)->pickFor(
+            (int) (TenantContext::writeId() ?? 0),
+            $applicationType
+        );
     }
+
 
     /**
      * Adayın bu firmanın portalına erişimini garanti et.

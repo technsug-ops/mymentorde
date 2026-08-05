@@ -338,6 +338,93 @@ class PlatformController extends Controller
         return back()->with('status', 'Marka bilgileri güncellendi.');
     }
 
+    /**
+     * Şirketi askıya al / geri aç.
+     *
+     * Pasif şirket: başvuru linki 404 verir, host'undan marka çözülmez, MRR
+     * toplamına girmez (bkz. dashboard `where('is_active', true)`).
+     *
+     * ANA ŞİRKET ASKIYA ALINAMAZ: varsayılan şirket çözümlemesi ona bağlı;
+     * kapatmak tüm platformu kendi ayağından vurmak olurdu.
+     */
+    public function updateStatus(Request $request, int $company): RedirectResponse
+    {
+        $companyModel = Company::query()->where('id', $company)->firstOrFail();
+
+        $request->validate(['is_active' => ['required', 'boolean']]);
+
+        $makeActive = $request->boolean('is_active');
+
+        if (!$makeActive && \App\Support\Brand::isPrimary($companyModel)) {
+            return back()->withErrors([
+                'is_active' => 'Ana şirket askıya alınamaz — varsayılan şirket çözümlemesi buna bağlı.',
+            ]);
+        }
+
+        $companyModel->is_active = $makeActive;
+        $companyModel->save();
+
+        \App\Models\PlatformAuditLog::record(
+            $makeActive ? 'platform.company.activated' : 'platform.company.suspended',
+            [
+                'target_type' => 'company',
+                'target_id'   => $companyModel->id,
+                'company'     => $companyModel->name,
+            ]
+        );
+
+        $staffCount = User::query()->withoutGlobalScopes()
+            ->where('company_id', $companyModel->id)
+            ->where('is_active', true)
+            ->count();
+
+        $message = $makeActive
+            ? $companyModel->name . ' yeniden aktif.'
+            : $companyModel->name . ' askıya alındı — başvuru linki kapandı, MRR toplamından çıktı.';
+
+        if (!$makeActive && $staffCount > 0) {
+            $message .= ' Dikkat: bu şirkette ' . $staffCount . ' aktif kullanıcı var, panele girebilirler ama veri göremezler.';
+        }
+
+        return back()->with('status', $message);
+    }
+
+    /**
+     * Alt firmanın yetki tavanını ayarla.
+     *
+     * Rol yetkiyi VERİR, tavan DARALTIR. Buraya işaretlenen her yetki o
+     * firmanın (ve altındaki firmaların) kullanıcılarından alınır.
+     */
+    public function updatePermissionCeiling(Request $request, int $company): RedirectResponse
+    {
+        $companyModel = Company::query()->where('id', $company)->firstOrFail();
+
+        if (\App\Support\Brand::isPrimary($companyModel)) {
+            return back()->withErrors([
+                'denied_permission_codes' => 'Ana şirkete yetki kısıtı konulamaz — kendi platformunuzu kilitlersiniz.',
+            ]);
+        }
+
+        $denied = \App\Support\PermissionCeiling::sanitize($request->input('denied_permission_codes', []));
+
+        $companyModel->denied_permission_codes = $denied !== [] ? $denied : null;
+        $companyModel->save();
+
+        // Tavan önbelleği şirket ağacıyla birlikte tutuluyor.
+        Company::flushHierarchyCache();
+
+        \App\Models\PlatformAuditLog::record('platform.company.permission_ceiling_updated', [
+            'target_type' => 'company',
+            'target_id'   => $companyModel->id,
+            'company'     => $companyModel->name,
+            'denied'      => $denied,
+        ]);
+
+        return back()->with('status', $denied === []
+            ? $companyModel->name . ' için kısıt kaldırıldı — rolünün verdiği tüm yetkiler geçerli.'
+            : $companyModel->name . ' için ' . count($denied) . ' yetki kısıtlandı. Alt firmaları da bağlar.');
+    }
+
     public function updateTier(Request $request, int $company): RedirectResponse
     {
         $companyModel = Company::query()->where('id', $company)->firstOrFail();
@@ -582,6 +669,11 @@ class PlatformController extends Controller
                 'role'              => User::ROLE_MANAGER,
                 'is_active'         => true,
                 'email_verified_at' => now(),
+                // Geçici şifre ilk girişte değiştirilmek ZORUNDA. Mekanizma
+                // (EnsurePasswordChanged + /password/change-required) zaten vardı
+                // ama platform panelinden açılan yönetici bayrağı almıyordu:
+                // firmaya e-postayla giden geçici şifre süresiz geçerli kalıyordu.
+                'password_must_change' => true,
             ]);
         });
 

@@ -75,7 +75,23 @@ class SetCompanyContext
             $companyId = (int) $default->id;
         }
 
-        $company = $this->findActiveCompany($companyId) ?? $default;
+        $company = $this->findActiveCompany($companyId);
+
+        if (!$company) {
+            // Şirket pasife çekilmişse VARSAYILANA DÜŞME.
+            //
+            // Düşseydi askıya alınmış bir firmanın kullanıcısı platformun
+            // şirketini yazma hedefi olarak alır ve ürettiği her kayıt
+            // MentorDE kutusuna düşerdi. Okuma kümesi kendi (pasif) şirketi
+            // olduğu için hiçbir şey göremez ama yazdığı yer yanlış olurdu.
+            //
+            // Kendi şirketinde kalsın: göremez, yazamaz, kimseye bulaşmaz.
+            $ownCompanyId = (int) ($user->company_id ?? 0);
+
+            $company = ($ownCompanyId > 0 && $ownCompanyId === $companyId)
+                ? (Company::query()->find($companyId) ?? $default)
+                : $default;
+        }
 
         // ── Okuma kümesi ────────────────────────────────────────────────────
         // Platform sahibi: null (kısıtsız). Diğerleri: izinli küme.

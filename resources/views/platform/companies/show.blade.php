@@ -20,6 +20,18 @@
             <span class="plat-badge plat-badge-inactive"><x-icon name="x" size="10" /> Pasif</span>
         @endif
         <span class="plat-badge plat-badge-{{ $company->subscription_tier ?? 'trial' }}">{{ $tierLabels[$company->subscription_tier] ?? $company->subscription_tier }}</span>
+
+        {{-- Askıya alma: test kayıtları ve sözleşmesi biten firmalar için.
+             Ana şirket kapatılamaz — varsayılan şirket çözümlemesi ona bağlı. --}}
+        @unless(\App\Support\Brand::isPrimary($company))
+            <form method="POST" action="{{ route('platform.companies.status', $company->id) }}" style="display:inline;">
+                @csrf
+                <input type="hidden" name="is_active" value="{{ $company->is_active ? 0 : 1 }}">
+                <button type="submit" class="plat-btn plat-btn-ghost" style="font-size:12px;padding:4px 12px;">
+                    {{ $company->is_active ? 'Askıya Al' : 'Yeniden Aç' }}
+                </button>
+            </form>
+        @endunless
     </div>
 </div>
 
@@ -239,6 +251,59 @@
             </button>
         </form>
     </div>
+
+    {{-- ── YETKİ TAVANI ─────────────────────────────────────────────── --}}
+    @unless(\App\Support\Brand::isPrimary($company))
+    <div class="plat-card">
+        <h3 class="plat-card-title"><x-icon name="shield" size="16" /> Yetki Kısıtları</h3>
+        <p class="plat-card-sub" style="margin-bottom:14px;">
+            Rol yetkiyi <strong>verir</strong>, buradaki işaretler <strong>daraltır</strong>.
+            Hiçbiri işaretli değilse firma rolünün verdiği her şeyi yapabilir.
+            <br>Koyduğun kısıt bu firmanın <strong>altındaki firmaları da</strong> bağlar.
+        </p>
+
+        @php
+            $_own = collect($company->denied_permission_codes ?? []);
+            $_effective = collect(\App\Models\Company::effectiveDeniedPermissions((int) $company->id));
+            $_inherited = $_effective->diff($_own);
+        @endphp
+
+        @if($_inherited->isNotEmpty())
+            <div style="padding:10px 12px;background:var(--plat-panel-2);border:1px solid var(--plat-border);border-radius:8px;margin-bottom:14px;font-size:12px;color:var(--plat-muted);line-height:1.6;">
+                <strong style="color:#f59e0b;">Üst firmadan miras:</strong>
+                {{ $_inherited->map(fn ($c) => \App\Support\PermissionCeiling::RESTRICTABLE[$c]['label'] ?? $c)->implode(', ') }}
+                <br>Bunlar üstteki firmada tanımlı — buradan kaldırılamaz.
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('platform.companies.permissions', $company->id) }}">
+            @csrf
+            <input type="hidden" name="denied_permission_codes[]" value="">
+
+            @foreach(\App\Support\PermissionCeiling::grouped() as $groupName => $items)
+                <div style="font-size:11px;color:var(--plat-accent-2);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;">{{ $groupName }}</div>
+
+                @foreach($items as $code => $meta)
+                    @php $_isInherited = $_inherited->contains($code); @endphp
+                    <label style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--plat-panel-2);border:1px solid var(--plat-border);border-radius:8px;margin-bottom:6px;cursor:{{ $_isInherited ? 'not-allowed' : 'pointer' }};opacity:{{ $_isInherited ? '.6' : '1' }};">
+                        <input type="checkbox" name="denied_permission_codes[]" value="{{ $code }}"
+                               {{ $_own->contains($code) || $_isInherited ? 'checked' : '' }}
+                               {{ $_isInherited ? 'disabled' : '' }}
+                               style="accent-color:var(--plat-accent);margin-top:3px;">
+                        <span style="font-size:12px;line-height:1.5;">
+                            <strong style="color:#fff;">{{ $meta['label'] }}</strong>
+                            <span style="display:block;color:var(--plat-muted);font-size:11px;">{{ $meta['desc'] }}</span>
+                        </span>
+                    </label>
+                @endforeach
+            @endforeach
+
+            <button type="submit" class="plat-btn plat-btn-primary" style="margin-top:14px;">
+                <x-icon name="check" size="14" /> Kısıtları Kaydet
+            </button>
+        </form>
+    </div>
+    @endunless
 
     <div class="plat-card">
         <h3 class="plat-card-title"><x-icon name="users" size="16" /> Kullanıcılar (Role Bazlı)</h3>
