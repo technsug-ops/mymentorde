@@ -60,6 +60,11 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
     // Üst firmanın alt firmaya koyduğu yetki tavanı
     Route::post('/companies/{company}/permissions', [PlatformController::class, 'updatePermissionCeiling'])
         ->name('platform.companies.permissions');
+    // Firma panel kullanıcısının şifresini sıfırla (hesap kurtarma).
+    Route::post('/companies/{company}/staff/{user}/reset-password', [PlatformController::class, 'resetStaffPassword'])
+        ->whereNumber('company')->whereNumber('user')
+        ->middleware('throttle:10,1')
+        ->name('platform.companies.staff.reset-password');
     Route::post('/companies/{company}/modules', [PlatformController::class, 'updateModules'])
         ->whereNumber('company')
         ->middleware('throttle:30,1')

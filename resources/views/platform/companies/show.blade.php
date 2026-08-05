@@ -305,6 +305,52 @@
     </div>
     @endunless
 
+    {{-- ── PANEL KULLANICILARI ──────────────────────────────────────────
+         Yalnızca firmanın PANEL hesapları. Öğrenci ve aday hesapları burada
+         YOK: onlar müşterinin müşterisi, kişisel verileri bu konsolda
+         gösterilmez. Panel kullanıcısı ise bizimle sözleşmeli hesap sahibi. --}}
+    <div class="plat-card">
+        <h3 class="plat-card-title"><x-icon name="key" size="16" /> Panel Hesapları</h3>
+        <p class="plat-card-sub" style="margin-bottom:14px;">
+            Firma şifresini kaybederse buradan sıfırlayabilirsiniz. Yeni şifre
+            <strong style="color:#fff;">tek sefer</strong> gösterilir ve kullanıcı ilk girişte
+            değiştirmek zorundadır.
+        </p>
+
+        @if(empty($staffAccounts) || $staffAccounts->isEmpty())
+            <p style="margin:0;color:var(--plat-muted);font-size:13px;">
+                Bu şirkette panel kullanıcısı yok — başvuru linki de 404 verir.
+            </p>
+        @else
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                @foreach($staffAccounts as $acc)
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 13px;background:var(--plat-panel-2);border:1px solid var(--plat-border);border-radius:8px;">
+                        <div style="flex:1;min-width:200px;">
+                            <div style="font-weight:600;font-size:13px;">{{ $acc->name }}</div>
+                            <div style="font-size:11.5px;color:var(--plat-muted);">
+                                {{ $acc->email }} · {{ $acc->role }}
+                                @unless($acc->is_active) · <span style="color:#f59e0b;">pasif</span> @endunless
+                                @if($acc->password_must_change) · <span style="color:var(--plat-accent-2);">şifre değiştirmeli</span> @endif
+                            </div>
+                        </div>
+
+                        <form method="POST" action="{{ route('platform.companies.staff.reset-password', [$company->id, $acc->id]) }}">
+                            @csrf
+                            <button type="submit" class="plat-btn plat-btn-ghost" style="font-size:12px;padding:5px 12px;">
+                                Şifre Sıfırla
+                            </button>
+                        </form>
+                    </div>
+                @endforeach
+            </div>
+
+            <p style="font-size:11px;color:var(--plat-muted);margin-top:12px;line-height:1.6;">
+                Şifre sıfırlama <strong>sessiz değildir</strong> — eski şifre çalışmaz olur ve firma
+                bunu fark eder. Müşteri verisine gizlice erişim (impersonation) bilinçli olarak kapalıdır.
+            </p>
+        @endif
+    </div>
+
     <div class="plat-card">
         <h3 class="plat-card-title"><x-icon name="users" size="16" /> Kullanıcılar (Role Bazlı)</h3>
         @php
