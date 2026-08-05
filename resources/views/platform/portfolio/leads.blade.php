@@ -1,112 +1,51 @@
 @extends('platform.layouts.app')
 
-@section('title', 'Aday Hacmi — Platform')
+@section('title', 'Aday Kotası — Platform')
 
 @section('content')
 
 <div class="plat-page-header">
     <div>
-        <h1 class="plat-page-title">Aday Hacmi</h1>
-        <p class="plat-page-sub">Şirket başına aday sayıları — kişisel veri gösterilmez</p>
+        <h1 class="plat-page-title">Aday Kotası</h1>
+        <p class="plat-page-sub">Hangi firma paket sınırına dayandı — üst paket sinyali</p>
     </div>
 </div>
 
-{{-- Bu ekranın neden sayı gösterdiği görünür olsun --}}
 <div class="plat-card" style="margin-bottom:18px;border-left:3px solid var(--plat-accent-2);">
     <div style="font-size:12px;color:var(--plat-muted);line-height:1.7;">
-        <strong style="color:#fff;">Neden isim yok:</strong>
-        DGmarkt yazılım servisi sağlar; müşterilerinin öğrencileri için veri sorumlusu değildir.
-        Ad, e-posta ve telefon bu konsolda <strong style="color:#fff;">bilerek gösterilmez</strong>.
-        <br>Kişi düzeyindeki işler operasyonu yürüten şirkete aittir — onun personeli
-        partner adaylarını kendi ekranlarında görür.
+        <strong style="color:#fff;">Bu ekranda ne yok:</strong>
+        kişisel veri (ad, e-posta, telefon) ve satış hunisi (kim hangi aşamada).
+        <br>Birincisi veri sorumluluğu bizde olmadığı için, ikincisi müşterinin kendi
+        operasyonu olduğu için gösterilmez. Burada olan tek şey <strong style="color:#fff;">kapasite</strong>.
     </div>
 </div>
 
-{{-- ÜST ÖZET --}}
 <div class="plat-grid plat-grid-4" style="margin-bottom:24px;">
     <div class="plat-kpi">
+        <div class="plat-kpi-label"><x-icon name="alert-triangle" size="12" /> Limit Doldu</div>
+        <div class="plat-kpi-value" style="{{ $atLimit > 0 ? 'color:#dc2626;' : '' }}">{{ $atLimit }}</div>
+        <div class="plat-kpi-sub">firma · üst pakete geçmeli</div>
+    </div>
+    <div class="plat-kpi">
+        <div class="plat-kpi-label"><x-icon name="trending-up" size="12" /> Sınıra Yakın</div>
+        <div class="plat-kpi-value" style="{{ $nearLimit > 0 ? 'color:#f59e0b;' : '' }}">{{ $nearLimit }}</div>
+        <div class="plat-kpi-sub">%{{ $threshold }} üzeri kullanım</div>
+    </div>
+    <div class="plat-kpi">
         <div class="plat-kpi-label"><x-icon name="users" size="12" /> Toplam Aday</div>
-        <div class="plat-kpi-value">{{ number_format($grandTotal, 0, ',', '.') }}</div>
-        <div class="plat-kpi-sub">dönüşmemiş kayıtlar</div>
+        <div class="plat-kpi-value">{{ number_format($totalLeads, 0, ',', '.') }}</div>
+        <div class="plat-kpi-sub">tüm firmalar</div>
     </div>
     <div class="plat-kpi">
-        <div class="plat-kpi-label"><x-icon name="trending-up" size="12" /> Son 30 Gün</div>
-        <div class="plat-kpi-value">{{ number_format($recent30, 0, ',', '.') }}</div>
-        <div class="plat-kpi-sub">yeni başvuru</div>
-    </div>
-    <div class="plat-kpi">
-        <div class="plat-kpi-label"><x-icon name="building-2" size="12" /> Aday Alan Şirket</div>
-        <div class="plat-kpi-value">{{ $companies->where('leads', '>', 0)->count() }}</div>
-        <div class="plat-kpi-sub">/ {{ $companies->count() }} toplam</div>
-    </div>
-    <div class="plat-kpi">
-        <div class="plat-kpi-label"><x-icon name="check" size="12" /> Nitelikli</div>
-        <div class="plat-kpi-value">{{ number_format((int) ($statusTotals['qualified'] ?? 0), 0, ',', '.') }}</div>
-        <div class="plat-kpi-sub">durum: nitelikli</div>
+        <div class="plat-kpi-label"><x-icon name="building-2" size="12" /> Firma</div>
+        <div class="plat-kpi-value">{{ $companies->count() }}</div>
+        <div class="plat-kpi-sub">{{ $companies->where('active', true)->count() }} aktif</div>
     </div>
 </div>
 
-{{-- ŞİRKET BAZLI --}}
 <div class="plat-card" style="margin-bottom:18px;">
-    <h3 class="plat-card-title"><x-icon name="building-2" size="16" /> Şirket Başına</h3>
-
-    @if($companies->isEmpty())
-        <p style="margin:0;color:var(--plat-muted);">Şirket yok.</p>
-    @else
-        <div style="overflow-x:auto;">
-            <table class="plat-table" style="width:100%;">
-                <thead>
-                    <tr>
-                        <th>Şirket</th>
-                        <th style="text-align:right;">Aday</th>
-                        <th style="text-align:right;">Öğrenci</th>
-                        <th>Durum</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($companies as $c)
-                        <tr>
-                            <td>
-                                <span style="font-weight:600;">{{ $c['name'] }}</span>
-                                <span style="display:block;font-size:11px;color:var(--plat-muted);">
-                                    #{{ $c['id'] }} · {{ $c['code'] }}@if($c['parent']) · üst firma #{{ $c['parent'] }}@endif
-                                </span>
-                            </td>
-                            <td style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600;">
-                                {{ number_format($c['leads'], 0, ',', '.') }}
-                            </td>
-                            <td style="text-align:right;font-variant-numeric:tabular-nums;">
-                                {{ number_format($c['students'], 0, ',', '.') }}
-                            </td>
-                            <td>
-                                @if($c['active'])
-                                    <span class="plat-badge plat-badge-active">Aktif</span>
-                                @else
-                                    <span class="plat-badge plat-badge-inactive">Pasif</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    @endif
-</div>
-
-{{-- DURUM DAĞILIMI --}}
-<div class="plat-card" style="margin-bottom:18px;">
-    <h3 class="plat-card-title"><x-icon name="activity" size="16" /> Durum Dağılımı</h3>
-    <div style="display:flex;flex-wrap:wrap;gap:10px;">
-        @forelse($statusLabels as $key => $label)
-            @php $count = (int) ($statusTotals[$key] ?? 0); @endphp
-            <div style="flex:1 1 150px;padding:12px 16px;background:var(--plat-panel-2);border:1px solid var(--plat-border);border-radius:8px;">
-                <div style="font-size:11px;color:var(--plat-muted);text-transform:uppercase;letter-spacing:.05em;">{{ $label }}</div>
-                <div style="font-size:22px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;">{{ number_format($count, 0, ',', '.') }}</div>
-            </div>
-        @empty
-            <p style="margin:0;color:var(--plat-muted);">Veri yok.</p>
-        @endforelse
-    </div>
+    <h3 class="plat-card-title"><x-icon name="gauge" size="16" /> Kota Kullanımı</h3>
+    @include('platform.portfolio._quota-table')
 </div>
 
 {{-- DEVİR — kişisel veri göstermeden, numara ile --}}

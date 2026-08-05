@@ -81,20 +81,66 @@ class PlatformPortfolioTest extends TestCase
             ->assertDontSee('name="q"', false);
     }
 
-    // ── Sayılar doğru olmalı ────────────────────────────────────────────────
-
-    public function test_lead_page_shows_counts_per_company(): void
+    /**
+     * SATIŞ HUNİSİ de gösterilmemeli.
+     *
+     * "Kaç aday nitelikli, kaçı teklif aşamasında" musterinin kendi
+     * operasyonudur; servis saglayiciyi ilgilendirmez. Platform konsolu
+     * yalnizca KAPASITE gosterir.
+     */
+    public function test_lead_page_shows_no_sales_pipeline(): void
     {
-        $this->seedLead($this->companyA, 'Bir', 'Aday', 'bir@example.test');
-        $this->seedLead($this->companyB, 'Iki', 'Aday', 'iki@example.test');
-        $this->seedLead($this->companyB, 'Uc', 'Aday', 'uc@example.test');
+        $this->seedLead($this->companyA, 'Huni', 'Testi', 'huni@example.test');
 
         $response = $this->actingAs($this->owner())->get('/platform/leads');
 
         $response->assertOk();
-        $response->assertSee($this->companyA->name, false);
+        $response->assertDontSee('Durum Dağılımı', false);
+        $response->assertDontSee('İletişime geçildi', false);
+        $response->assertDontSee('Nitelikli', false);
+    }
+
+    // ── Kota görünümü ───────────────────────────────────────────────────────
+
+    public function test_lead_page_shows_quota_usage(): void
+    {
+        $this->companyB->update(['subscription_tier' => Company::TIER_TRIAL]);
+        $this->seedLead($this->companyB, 'Kota', 'Testi', 'kota@example.test');
+
+        $response = $this->actingAs($this->owner())->get('/platform/leads');
+
+        $response->assertOk();
         $response->assertSee($this->companyB->name, false);
-        $response->assertSee('Toplam Aday', false);
+        $response->assertSee('Kota Kullanımı', false);
+        // Trial paketinin aday limiti
+        $response->assertSee((string) config('subscription_tiers.trial.limits.leads_max'), false);
+    }
+
+    /** Limitine dayanan firma "üst pakete geçmeli" diye işaretlenmeli. */
+    public function test_company_over_its_limit_is_flagged(): void
+    {
+        $this->companyB->update(['subscription_tier' => Company::TIER_TRIAL]);
+
+        $limit = (int) config('subscription_tiers.trial.limits.students_max');
+
+        for ($i = 0; $i < $limit; $i++) {
+            $this->userFor($this->companyB, User::ROLE_STUDENT);
+        }
+
+        $response = $this->actingAs($this->owner())->get('/platform/students');
+
+        $response->assertOk();
+        $response->assertSee('Limit doldu', false);
+    }
+
+    public function test_unlimited_tier_shows_no_percentage(): void
+    {
+        $this->companyB->update(['subscription_tier' => Company::TIER_PREMIUM]);
+
+        $this->actingAs($this->owner())
+            ->get('/platform/students')
+            ->assertOk()
+            ->assertSee('Sınırsız paket', false);
     }
 
     public function test_student_page_shows_company_totals(): void
