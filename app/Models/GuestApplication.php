@@ -5,11 +5,58 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 use App\Models\User;
 
 class GuestApplication extends Model
 {
     use BelongsToCompany, SoftDeletes;
+
+    /**
+     * Benzersiz takip kodu üret.
+     *
+     * ⚠ BENZERSİZLİK KONTROLÜ KAPSAM DIŞI OLMAK ZORUNDA.
+     *
+     * Kapsamlı sorgu yalnızca görünen şirkete bakar; başka bir firmada aynı
+     * kod zaten varsa göremez ve ÇAKIŞAN kod üretir. Takip kodu tüm sistemde
+     * tekil olmalı — başvuran onunla kaydını buluyor.
+     */
+    public static function generateTrackingToken(): string
+    {
+        do {
+            $token = preg_replace('/[^A-Z0-9]/', 'X', strtoupper(Str::random(12)))
+                ?: strtoupper(Str::random(12));
+
+            $exists = self::query()
+                ->withoutGlobalScope('company')
+                ->where('tracking_token', $token)
+                ->exists();
+        } while ($exists);
+
+        return $token;
+    }
+
+    /**
+     * Takip koduyla başvuruyu bul — şirket kapsamı DIŞINDA.
+     *
+     * Kod 12 karakterlik rastgele bir sırdır; onu bilmek yetkinin kendisidir
+     * (imzalı URL mantığı). Kapsamlı arama, partner firmanın adayının kendi
+     * başarı/durum sayfasını 404 yapardı: başvuran anonimdir ve bağlamı
+     * varsayılan şirkettir, kayıt ise partnerin kutusundadır.
+     */
+    public static function findByTrackingToken(string $token): ?self
+    {
+        $token = trim($token);
+
+        if ($token === '') {
+            return null;
+        }
+
+        return self::query()
+            ->withoutGlobalScope('company')
+            ->where('tracking_token', $token)
+            ->first();
+    }
 
     /**
      * fill() ile yazılabilecek alanlar.

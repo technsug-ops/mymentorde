@@ -174,20 +174,35 @@ class PlatformPortfolioTest extends TestCase
         }
     }
 
-    // ── Devir hâlâ çalışmalı ────────────────────────────────────────────────
+    // ── Devir buraya AİT DEĞİL ──────────────────────────────────────────────
 
-    /** Devir kişisel veri göstermeden, ID ile çalışır. */
-    public function test_transfer_still_works_by_id(): void
+    /**
+     * Aday devri operasyonel bir karardır; süreci yürüten firmayı ilgilendirir.
+     * Yazılım servisi sağlayıcısının müşterisinin adayını taşıması savunulamaz.
+     * Konsolda ne formu ne de uç noktası olmamalı.
+     */
+    public function test_transfer_is_not_offered_in_the_console(): void
+    {
+        $this->actingAs($this->owner())
+            ->get('/platform/leads')
+            ->assertOk()
+            ->assertDontSee('Aday Devri', false)
+            ->assertDontSee('Devret', false);
+    }
+
+    public function test_transfer_endpoint_is_gone_from_the_platform(): void
     {
         $lead = $this->seedLead($this->companyA, 'Devir', 'Testi', 'devir@example.test');
 
-        $this->actingAs($this->owner())
-            ->post('/platform/leads/' . $lead->id . '/transfer', ['company_id' => $this->companyB->id])
-            ->assertRedirect();
+        $response = $this->actingAs($this->owner())
+            ->post('/platform/leads/' . $lead->id . '/transfer', ['company_id' => $this->companyB->id]);
+
+        $this->assertContains($response->getStatusCode(), [404, 405]);
 
         $this->assertSame(
-            (int) $this->companyB->id,
-            (int) GuestApplication::withoutGlobalScope('company')->find($lead->id)->company_id
+            (int) $this->companyA->id,
+            (int) GuestApplication::withoutGlobalScope('company')->find($lead->id)->company_id,
+            'Kaldirilmis uc nokta hala calisiyor.'
         );
     }
 

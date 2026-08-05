@@ -57,10 +57,15 @@ class LeadTransferTest extends TestCase
 
     public function test_owner_can_transfer_a_lead_to_another_company(): void
     {
-        $lead = $this->leadIn($this->companyA);
+        $this->companyB->update(['parent_company_id' => $this->companyA->id]);
+        Company::flushHierarchyCache();
 
-        $this->actingAs($this->owner())
-            ->post('/platform/leads/' . $lead->id . '/transfer', [
+        $lead = $this->leadIn($this->companyA);
+        $manager = $this->userFor($this->companyA, User::ROLE_MANAGER);
+
+        $this->asStaff($manager)
+            ->post('/manager/leads/transfer', [
+                'application_id' => $lead->id,
                 'company_id' => $this->companyB->id,
             ])
             ->assertRedirect();
@@ -172,16 +177,29 @@ class LeadTransferTest extends TestCase
 
     // ── Sınırlar ────────────────────────────────────────────────────────────
 
+    /** Üst firma personeli olarak devir yapan aktör. */
+    private function operator(): User
+    {
+        $this->companyB->update(['parent_company_id' => $this->companyA->id]);
+        Company::flushHierarchyCache();
+
+        return $this->userFor($this->companyA, User::ROLE_MANAGER);
+    }
+
     public function test_converted_student_cannot_be_transferred_here(): void
     {
+        $operator = $this->operator();
         $lead = $this->leadIn($this->companyA, 'donusmus@example.test');
 
         GuestApplication::withoutGlobalScope('company')
             ->where('id', $lead->id)
             ->update(['converted_to_student' => true]);
 
-        $this->actingAs($this->owner())
-            ->post('/platform/leads/' . $lead->id . '/transfer', ['company_id' => $this->companyB->id])
+        $this->asStaff($operator)
+            ->post('/manager/leads/transfer', [
+                'application_id' => $lead->id,
+                'company_id' => $this->companyB->id,
+            ])
             ->assertSessionHasErrors('company_id');
 
         $this->assertSame(
@@ -192,47 +210,119 @@ class LeadTransferTest extends TestCase
 
     public function test_transfer_to_the_same_company_is_rejected(): void
     {
+        $operator = $this->operator();
         $lead = $this->leadIn($this->companyA);
 
-        $this->actingAs($this->owner())
-            ->post('/platform/leads/' . $lead->id . '/transfer', ['company_id' => $this->companyA->id])
+        $this->asStaff($operator)
+            ->post('/manager/leads/transfer', [
+                'application_id' => $lead->id,
+                'company_id' => $this->companyA->id,
+            ])
             ->assertSessionHasErrors('company_id');
     }
 
     public function test_transfer_to_inactive_company_is_rejected(): void
     {
+        $operator = $this->operator();
         $lead = $this->leadIn($this->companyA);
         $this->companyB->update(['is_active' => false]);
 
-        $this->actingAs($this->owner())
-            ->post('/platform/leads/' . $lead->id . '/transfer', ['company_id' => $this->companyB->id])
+        $this->asStaff($operator)
+            ->post('/manager/leads/transfer', [
+                'application_id' => $lead->id,
+                'company_id' => $this->companyB->id,
+            ])
             ->assertSessionHasErrors('company_id');
     }
 
-    // ── Yetki ───────────────────────────────────────────────────────────────
+    // ── Operasyon ekranından devir ──────────────────────────────────────────
 
-    public function test_company_users_cannot_transfer_leads(): void
+    /** Manager rotaları `require.2fa` arkasında. */
+    private function asStaff(User $user): self
     {
-        $lead = $this->leadIn($this->companyA);
-        $firmUser = $this->userFor($this->companyB, User::ROLE_MANAGER);
+        return $this->actingAs($user)->withSession(['2fa_passed' => true]);
+    }
 
-        $response = $this->actingAs($firmUser)
-            ->post('/platform/leads/' . $lead->id . '/transfer', ['company_id' => $this->companyB->id]);
+    /** Üst firma personeli kendi gözettiği firmalar arasında devir yapabilir. */
+    public function test_operating_staff_can_transfer_between_visible_companies(): void
+    {
+        $this->companyB->update(['parent_company_id' => $this->companyA->id]);
+        Company::flushHierarchyCache();
 
-        $this->assertContains($response->getStatusCode(), [403, 404, 302]);
+        $lead = $this->leadIn($this->companyA, 'operasyon@example.test');
+        $manager = $this->userFor($this->companyA, User::ROLE_MANAGER);
+
+        $this->asStaff($manager)
+            ->post('/manager/leads/transfer', [
+                'application_id' => $lead->id,
+                'company_id' => $this->companyB->id,
+            ])
+            ->assertRedirect();
+
+        $this->assertSame(
+            (int) $this->companyB->id,
+            (int) GuestApplication::withoutGlobalScope('company')->find($lead->id)->company_id
+        );
+    }
+
+    /** Partner, göremediği firmanın adayını çekemez. */
+    public function test_partner_cannot_pull_a_lead_it_cannot_see(): void
+    {
+        $this->companyB->update(['parent_company_id' => $this->companyA->id]);
+        Company::flushHierarchyCache();
+
+        $lead = $this->leadIn($this->companyA, 'cekilemez@example.test');
+        $partnerManager = $this->userFor($this->companyB, User::ROLE_MANAGER);
+
+        $this->asStaff($partnerManager)
+            ->post('/manager/leads/transfer', [
+                'application_id' => $lead->id,
+                'company_id' => $this->companyB->id,
+            ])
+            ->assertSessionHasErrors('application_id');
 
         $this->assertSame(
             (int) $this->companyA->id,
             (int) GuestApplication::withoutGlobalScope('company')->find($lead->id)->company_id,
-            'Firma kullanicisi aday devredebildi — yetki acigi.'
+            'Partner ust firmanin adayini cekti.'
         );
+    }
+
+    /** Görmediği firmaya itemez. */
+    public function test_staff_cannot_push_to_an_invisible_company(): void
+    {
+        // Hiyerarşi YOK — companyB, companyA'nın altında değil
+        $lead = $this->leadIn($this->companyA, 'itilemez@example.test');
+        $manager = $this->userFor($this->companyA, User::ROLE_MANAGER);
+
+        $this->asStaff($manager)
+            ->post('/manager/leads/transfer', [
+                'application_id' => $lead->id,
+                'company_id' => $this->companyB->id,
+            ])
+            ->assertSessionHasErrors('company_id');
+    }
+
+    public function test_students_cannot_transfer_leads(): void
+    {
+        $lead = $this->leadIn($this->companyA, 'ogrenci-devir@example.test');
+        $student = $this->userFor($this->companyA, User::ROLE_STUDENT);
+
+        $response = $this->asStaff($student)
+            ->post('/manager/leads/transfer', [
+                'application_id' => $lead->id,
+                'company_id' => $this->companyB->id,
+            ]);
+
+        $this->assertContains($response->getStatusCode(), [403, 404, 302]);
     }
 
     public function test_guests_cannot_transfer_leads(): void
     {
-        $lead = $this->leadIn($this->companyA);
+        $lead = $this->leadIn($this->companyA, 'anonim-devir@example.test');
 
-        $response = $this->post('/platform/leads/' . $lead->id . '/transfer', [
+        $response = $this->post('/manager/leads/transfer', [
+            'application_id' => $lead->id,
             'company_id' => $this->companyB->id,
         ]);
 

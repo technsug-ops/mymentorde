@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\GuestApplication;
 use App\Models\User;
-use App\Services\LeadTransferService;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
@@ -39,52 +37,6 @@ class PlatformPortfolioController extends Controller
     public function students(Request $request): View
     {
         return view('platform.portfolio.students', $this->quotaData());
-    }
-
-    /**
-     * Adayı başka bir firmaya devret — kişisel veri göstermeden, numarayla.
-     *
-     * Firma başvuru linkini kullandıramadığında kayıt B2C havuzuna düşer;
-     * operasyon ekibi adayı kendi ekranından bulup numarasını buraya girer.
-     */
-    public function transferLead(Request $request, LeadTransferService $transfers, int $application): RedirectResponse
-    {
-        $validated = $request->validate([
-            'company_id' => ['required', 'integer', 'exists:companies,id'],
-        ], [
-            'company_id.required' => 'Hedef firma seçilmedi.',
-            'company_id.exists'   => 'Hedef firma bulunamadı.',
-        ]);
-
-        $lead = GuestApplication::withoutGlobalScope('company')
-            ->whereNull('deleted_at')
-            ->where('id', $application)
-            ->firstOrFail();
-
-        $target = Company::query()->findOrFail((int) $validated['company_id']);
-
-        try {
-            $result = $transfers->transfer($lead, $target);
-        } catch (\RuntimeException $e) {
-            return back()->withErrors(['company_id' => $e->getMessage()]);
-        }
-
-        \App\Models\PlatformAuditLog::record('platform.lead.transferred', [
-            'target_type'  => 'guest_application',
-            'target_id'    => $lead->id,
-            'company_from' => $result['company_from'],
-            'company_to'   => $result['company_to'],
-            'tables'       => $result['tables'],
-            // Aday adı/e-postası audit'e YAZILMAZ — tenant kişisel verisi.
-        ]);
-
-        $message = 'Aday #' . $lead->id . ' → ' . ($target->brand_name ?: $target->name) . ' devredildi.';
-
-        if ($result['senior_cleared']) {
-            $message .= ' Eski danışman ataması kaldırıldı.';
-        }
-
-        return back()->with('status', $message);
     }
 
     /** @return array<string,mixed> */

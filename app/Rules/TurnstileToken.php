@@ -20,23 +20,56 @@ use Illuminate\Support\Facades\Log;
  *   CAPTCHA fail nedeniyle gerçek kullanıcı engellenmesin)
  *
  * Kullanım:
- *   $request->validate(['cf_turnstile_response' => ['required', new TurnstileToken()]]);
+ *   $request->validate(['cf_turnstile_response' => TurnstileToken::rules()]);
  */
 class TurnstileToken implements ValidationRule
 {
     private const VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    /**
+     * Public formların kullanacağı kural dizisi.
+     *
+     * ── NEDEN `required` DOĞRUDAN YAZILMIYOR ────────────────────────────
+     *
+     * Formlar `['nullable', 'string', new TurnstileToken()]` kullanıyordu.
+     * `nullable` yüzünden alan HİÇ GÖNDERİLMEZSE doğrulama tamamen atlanıyor:
+     * bot alanı boş bırakıp geçebiliyordu. Koruma fiilen dekoratifti.
+     *
+     * Ama `required`'ı sabit yazmak da olmaz: Turnstile kapalıyken (yerel
+     * geliştirme, test ortamı) widget hiç render edilmez, token üretilmez ve
+     * form kilitlenir. Bu yüzden zorunluluk, KORUMANIN AÇIK OLMASINA bağlı.
+     *
+     * Karar tek yerde: dört public form da buradan besleniyor.
+     *
+     * @return list<mixed>
+     */
+    public static function rules(): array
+    {
+        if (! self::isEnforced()) {
+            // Koruma kapalı ya da yapılandırılmamış — alan opsiyonel.
+            return ['nullable', 'string'];
+        }
+
+        return ['required', 'string', new self()];
+    }
+
+    /** Turnstile gerçekten devrede mi? */
+    public static function isEnforced(): bool
     {
         if (! (bool) config('services.turnstile.enabled', false)) {
-            return; // Disabled — pass
+            return false;
+        }
+
+        return trim((string) config('services.turnstile.secret_key', '')) !== '';
+    }
+
+    public function validate(string $attribute, mixed $value, Closure $fail): void
+    {
+        if (! self::isEnforced()) {
+            return; // Kapalı ya da yapılandırılmamış — geç
         }
 
         $secret = (string) config('services.turnstile.secret_key', '');
-        if ($secret === '') {
-            return; // No secret configured — pass (config eksikse engellemiyoruz)
-        }
-
         $token = trim((string) $value);
         if ($token === '') {
             $fail('Lütfen güvenlik doğrulamasını tamamlayın.');
