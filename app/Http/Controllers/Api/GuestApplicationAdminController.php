@@ -105,7 +105,22 @@ class GuestApplicationAdminController extends Controller
         ]);
 
         $studentTypeCode = $this->mapApplicationTypeToStudentTypeCode((string) $guestApplication->application_type);
-        $seniorEmail = trim((string) ($data['senior_email'] ?? ''));
+
+        // ── DÖNÜŞÜM partnerin, DANIŞMAN SEÇİMİ operasyon şirketinin ─────────
+        //
+        // Partner firma öğrenciyi kendi tarafında imzalamıştır; adayı öğrenciye
+        // çevirmek onun kararıdır. Ama danışman BİZİM elemanımız — partner ona
+        // dışarıdan görev veremez. Bu yüzden operasyon şirketinin dışından gelen
+        // istekte `senior_email` YOK SAYILIR ve atama otomatik yapılır.
+        //
+        // Yetkiyle değil YAPISAL olarak engelleniyor: iş modelinin değişmezi bu,
+        // bir onay kutusuyla açılıp kapanmamalı.
+        $actorCompanyId = (int) ($request->user()?->company_id ?? 0);
+        $actorRunsOperation = $request->user()?->role === User::ROLE_PLATFORM_OWNER
+            || ($operatingCompanyId > 0 && $actorCompanyId === $operatingCompanyId);
+
+        $seniorEmail = $actorRunsOperation ? trim((string) ($data['senior_email'] ?? '')) : '';
+
         // Adayın ZATEN atanmış danışmanını koru (request'te senior gelmezse) — dönüşen
         // öğrenci, aday aşamasındaki senior'ın (örn. Filiz) "Öğrencilerim"ine düşsün.
         if ($seniorEmail === '') {

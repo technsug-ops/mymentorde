@@ -168,6 +168,58 @@ class AdvisorAssignmentTest extends TestCase
     // ── Partner atama YAPAMAZ ───────────────────────────────────────────────
 
     /**
+     * DÖNÜŞÜM partnerin, DANIŞMAN SEÇİMİ operasyon şirketinin.
+     *
+     * Partner öğrenciyi kendi tarafında imzalayıp devrediyor; adayı öğrenciye
+     * çevirmek onun kararı. Ama danışman bizim elemanımız — partner istediği
+     * danışmanı SEÇEMEZ. Yetkiyle değil YAPISAL olarak engelleniyor.
+     */
+    public function test_partner_cannot_choose_which_advisor_takes_the_student(): void
+    {
+        $chosenByUs = $this->makeOperatingHierarchy();
+
+        $otherAdvisor = User::create([
+            'name' => 'Baska Danisman',
+            'email' => 'baska@mentorde.test',
+            'password' => bcrypt('gizli-sifre-123'),
+            'role' => User::ROLE_SENIOR,
+            'is_active' => true,
+            'auto_assign_enabled' => false,
+            'company_id' => $this->companyA->id,
+        ]);
+        Company::flushAdvisorCache();
+
+        $lead = TenantContext::runFor((int) $this->companyB->id, fn (): GuestApplication => GuestApplication::create([
+            'tracking_token' => 'tok-' . uniqid(),
+            'first_name' => 'Partner',
+            'last_name' => 'Ogrencisi',
+            'email' => 'secim@example.test',
+            'application_type' => 'bachelor',
+        ]));
+
+        $controller = app(\App\Http\Controllers\Api\GuestApplicationAdminController::class);
+
+        // Partner yöneticisi ISTEDIGI danışmanı göndermeye çalışıyor
+        $partnerManager = $this->userFor($this->companyB, User::ROLE_MANAGER);
+        $this->actingAs($partnerManager);
+
+        $request = \Illuminate\Http\Request::create('/x', 'POST', ['senior_email' => $otherAdvisor->email]);
+        $request->setUserResolver(fn () => $partnerManager);
+
+        $method = new \ReflectionMethod($controller, 'pickAutoSeniorEmail');
+        $method->setAccessible(true);
+        $autoPick = $method->invoke($controller, (int) $this->companyB->id);
+
+        // Partnerin seçtiği danışman otomatik havuzda değil (auto_assign kapalı)
+        $this->assertNotSame(
+            $otherAdvisor->email,
+            $autoPick,
+            'Partnerin sectigi danisman otomatik atamada cikti — test anlamsiz.'
+        );
+        $this->assertSame($chosenByUs->email, $autoPick);
+    }
+
+    /**
      * Partner firma MentorDE'nin danışmanına dışarıdan görev veremez.
      * Yetki tavanı bunu kapatabilmeli.
      */

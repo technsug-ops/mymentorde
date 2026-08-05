@@ -28,8 +28,9 @@ final class PermissionCeiling
     public const RESTRICTABLE = [
         // ── Operasyon ────────────────────────────────────────────────────
         'student.assignment.manage' => [
-            'label' => 'Öğrenciye dönüştürme ve danışman atama',
-            'desc'  => 'Kapatılırsa firma adayı öğrenciye çeviremez, danışman atayamaz — operasyon sizde kalır.',
+            'label' => 'Adayı öğrenciye dönüştürme',
+            'desc'  => 'Partner öğrenciyi kendi tarafında imzalayıp devrediyorsa AÇIK bırakın. '
+                     . 'Danışman seçimi bu yetkiye dahil değildir — o her hâlükârda operasyon şirketindedir.',
             'group' => 'Operasyon',
         ],
         'approval.manage' => [
