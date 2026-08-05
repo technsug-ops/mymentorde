@@ -22,6 +22,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class GuestApplicationController extends Controller
@@ -220,26 +221,20 @@ class GuestApplicationController extends Controller
                 ]);
         }
 
-        // ── Kurumlar arası e-posta çakışması ────────────────────────────────
-        // `users.email` GLOBAL unique. Yukarıdaki duplicate kontrolü yalnızca
-        // görünen şirkette arar; başka bir firmada aynı e-postayla hesap varsa
-        // buraya kadar gelir ve INSERT veritabanı seviyesinde patlardı (500).
-        // Kullanıcıya anlaşılır mesaj ver.
+        // ── Aynı kişi birden fazla firmaya başvurabilir ─────────────────────
+        //
+        // Aday aşamasında kişi birden fazla danışmanlık firmasıyla görüşebilir;
+        // bu doğal. Engellemek yerine MEVCUT HESABI yeniden kullanıyoruz:
+        //   • `users.email` GLOBAL unique — ikinci hesap açılamaz (INSERT patlar)
+        //   • Şifresine, aidiyetine (users.company_id) DOKUNULMAZ
+        //   • Yeni firmaya `company_user` üyeliği eklenir → portalına girebilir
+        //
+        // Firmalar birbirini GÖRMEZ: her başvuru kendi şirketine yazılır, firma
+        // personelinin görünür kümesi kendi şirketiyle sınırlıdır.
+        //
+        // Sözleşme hangi firmada imzalanırsa süreç orada devam eder — o adım
+        // sözleşme akışında ele alınır, başvuru aşamasında değil.
         $targetCompanyId = TenantContext::writeId();
-        $emailOwner = User::query()
-            ->withoutGlobalScope('company')
-            ->where('email', $existingEmail)
-            ->first(['id', 'company_id']);
-
-        if ($emailOwner && $targetCompanyId && (int) $emailOwner->company_id !== (int) $targetCompanyId) {
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'email' => 'Bu e-posta adresi başka bir kurumda kayıtlı. '
-                        . 'Zaten hesabınız varsa <a href="/login" style="color:#2563eb;font-weight:700;text-decoration:underline;">giriş yapın</a>, '
-                        . 'aksi halde farklı bir e-posta adresi kullanın.',
-                ]);
-        }
 
         $token = $this->generateTrackingToken();
         $manualLeadSource = trim((string) ($data['lead_source'] ?? 'organic')) ?: 'organic';
@@ -312,6 +307,11 @@ class GuestApplicationController extends Controller
                 $row->application_meta = $meta;
                 $row->save();
             }
+
+            // Kişi bu firmanın portalına girebilmeli. Hesabı başka bir firmada
+            // açılmış olabilir (aynı e-postayla ikinci firmaya başvuru) —
+            // aidiyeti değişmez, erişim üyelikle verilir.
+            $this->ensurePortalMembership($guestUser, (int) $row->company_id);
 
             return [$guestUser, $generatedPassword, $row];
         });
@@ -635,6 +635,46 @@ class GuestApplicationController extends Controller
     }
 
     /**
+     * Adayın bu firmanın portalına erişimini garanti et.
+     *
+     * AİDİYET ≠ ERİŞİM:
+     *   users.company_id → kişi kime ait (tek, değişmez)
+     *   company_user     → nereye girebilir (çok)
+     *
+     * Kişi ilk başvurduğu firmaya aittir. İkinci bir firmaya başvurduğunda
+     * oraya da girebilmeli — iki başvurusunu da kendi portalında görür.
+     * Firmalar birbirini görmez: her başvuru kendi şirketine yazılıdır ve
+     * firma personelinin görünür kümesi kendi şirketiyle sınırlıdır.
+     *
+     * `role_in_company = 'applicant'`: personel değil, kendi kaydının sahibi.
+     */
+    private function ensurePortalMembership(?User $user, int $companyId): void
+    {
+        if (!$user || $companyId <= 0) {
+            return;
+        }
+
+        // Kendi şirketi zaten görünür kümesinde — pivota yazmaya gerek yok.
+        if ((int) $user->company_id === $companyId) {
+            return;
+        }
+
+        if (!Schema::hasTable('company_user')) {
+            return;
+        }
+
+        DB::table('company_user')->updateOrInsert(
+            ['user_id' => $user->id, 'company_id' => $companyId],
+            ['role_in_company' => 'applicant', 'updated_at' => now(), 'created_at' => now()]
+        );
+
+        // Görünür şirket kümesi 5 dakika önbellekli — hemen tazelensin.
+        if (method_exists($user, 'forgetVisibleCompanyIds')) {
+            $user->forgetVisibleCompanyIds();
+        }
+    }
+
+    /**
      * @return array{0:?User,1:?string}
      */
     private function ensureGuestPortalUser(string $firstName, string $lastName, string $email): array
@@ -648,7 +688,17 @@ class GuestApplicationController extends Controller
         // (Eski kod guest role için şifreyi random yeniliyordu; saldırgan duplicate
         //  başvuruyu arşivlenmiş hale getirip email'le yeni /apply açarak kurbanın
         //  şifresini çalabiliyordu. Şifremi unuttum flow'u /password/reset'te mevcut.)
-        $existing = User::query()->where('email', $email)->first();
+        //
+        // Arama GLOBAL: `users.email` global unique olduğu için kişinin hesabı
+        // BAŞKA bir firmada olabilir. Şirket kapsamıyla arasaydık bulamaz, ikinci
+        // hesap açmaya çalışır ve INSERT veritabanı seviyesinde patlardı (500).
+        // Aidiyeti (users.company_id) DEĞİŞTİRMİYORUZ — kişi ilk firmasına ait
+        // kalır, yeni firmaya `company_user` üyeliğiyle erişir.
+        $existing = User::query()
+            ->withoutGlobalScope('company')
+            ->where('email', $email)
+            ->first();
+
         if ($existing) {
             return [$existing, null];
         }

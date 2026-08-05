@@ -243,29 +243,188 @@ class PartnerApplyLinkTest extends TestCase
     // ── Kurumlar arası e-posta çakışması ────────────────────────────────────
 
     /**
-     * `users.email` GLOBAL unique. Aynı e-posta ikinci bir firmaya başvurursa
-     * INSERT veritabanı seviyesinde patlardı (500). Anlaşılır hata dönmeli.
+     * Aynı kişi ikinci bir firmaya başvurabilmeli — aday aşamasında birden
+     * fazla danışmanlık firmasıyla görüşmek doğal.
+     *
+     * `users.email` GLOBAL unique olduğu için ikinci hesap AÇILMAZ; mevcut
+     * hesap yeniden kullanılır ve yeni firmaya üyelik eklenir.
      */
-    public function test_email_registered_in_another_company_is_rejected_cleanly(): void
+    public function test_same_person_can_apply_to_a_second_company(): void
     {
         $this->staffFor($this->companyB);
         $this->companyB->update(['slug' => 'firma-b']);
 
-        // Önce B2C tarafında kayıt olsun
-        $this->post('/apply', $this->applicationPayload('cakisan@example.test'))->assertRedirect();
+        // Önce B2C tarafında kayıt
+        $this->post('/apply', $this->applicationPayload('cift@example.test'))->assertRedirect();
 
         // Aynı e-posta bu kez Firma B'nin linkinden
         $this->get('/apply/firma-b')->assertOk();
+        $this->post('/apply', $this->applicationPayload('cift@example.test'))
+            ->assertSessionHasNoErrors()
+            ->assertRedirect();
 
-        $this->post('/apply', $this->applicationPayload('cakisan@example.test'))
-            ->assertSessionHasErrors('email');
+        $applications = GuestApplication::query()->withoutGlobalScope('company')
+            ->where('email', 'cift@example.test')->get();
 
-        $this->assertSame(
-            1,
-            GuestApplication::query()->withoutGlobalScope('company')
-                ->where('email', 'cakisan@example.test')->count(),
-            'Cakisan e-posta ile ikinci kayit olusturuldu.'
+        $this->assertCount(2, $applications, 'Ikinci firmaya basvuru olusmadi.');
+        $this->assertEqualsCanonicalizing(
+            [(int) $this->defaultCompany()->id, (int) $this->companyB->id],
+            $applications->pluck('company_id')->map(fn ($id): int => (int) $id)->all(),
+            'Basvurular beklenen sirketlere yazilmadi.'
         );
+    }
+
+    /**
+     * Çoklu üyelik, firmaya BAŞKA bir kapı açmamalı.
+     *
+     * Kişi hem MentorDE hem Firma B'ye üye. Firma B'nin personeli kişinin
+     * MentorDE tarafındaki hesabını, başvurusunu ya da kaydını göremez —
+     * partner firmalar birbirinden haberli değildir.
+     */
+    public function test_membership_does_not_open_a_door_between_companies(): void
+    {
+        $this->staffFor($this->companyB);
+        $this->companyB->update(['slug' => 'firma-b']);
+
+        $this->post('/apply', $this->applicationPayload('kapi@example.test'))->assertRedirect();
+        $this->get('/apply/firma-b')->assertOk();
+        $this->post('/apply', $this->applicationPayload('kapi@example.test'))->assertRedirect();
+
+        $default = $this->defaultCompany();
+
+        $person = User::query()->withoutGlobalScope('company')
+            ->where('email', 'kapi@example.test')->firstOrFail();
+
+        // Kişinin hesabı ilk firmaya ait; B onu göremez
+        $this->assertSame((int) $default->id, (int) $person->company_id);
+
+        [$userSeenByB, $appsSeenByB] = TenantContext::runFor((int) $this->companyB->id, fn (): array => [
+            User::query()->where('email', 'kapi@example.test')->first(),
+            GuestApplication::query()->where('email', 'kapi@example.test')->get(),
+        ]);
+
+        $this->assertNull($userSeenByB, 'Firma B kisinin diger firmadaki hesabini gordu.');
+        $this->assertCount(1, $appsSeenByB, 'Firma B digerinin basvurusunu gordu.');
+        $this->assertSame((int) $this->companyB->id, (int) $appsSeenByB->first()->company_id);
+    }
+
+    /**
+     * Kişinin KENDİSİ iki başvurusunu da görür — kendi verisi.
+     * Firmalar göremez ama kişi kendi portalında ikisini de bulur.
+     */
+    public function test_the_person_sees_both_of_their_own_applications(): void
+    {
+        $this->staffFor($this->companyB);
+        $this->companyB->update(['slug' => 'firma-b']);
+
+        $this->post('/apply', $this->applicationPayload('kendi@example.test'))->assertRedirect();
+        $this->get('/apply/firma-b')->assertOk();
+        $this->post('/apply', $this->applicationPayload('kendi@example.test'))->assertRedirect();
+
+        $person = User::query()->withoutGlobalScope('company')
+            ->where('email', 'kendi@example.test')->firstOrFail();
+
+        $previous = TenantContext::snapshot();
+
+        try {
+            TenantContext::bind((int) $person->company_id, $person->visibleCompanyIds());
+            $mine = GuestApplication::query()->where('email', 'kendi@example.test')->get();
+        } finally {
+            TenantContext::restore($previous);
+        }
+
+        $this->assertCount(2, $mine, 'Kisi kendi basvurularinin ikisini birden goremiyor.');
+    }
+
+    /**
+     * Düz /apply'ın yazdığı varsayılan şirket.
+     *
+     * MakesCompanies'in kurduğu Firma A DEĞİL: `mentorde` şirketini
+     * create_companies migration'ı zaten oluşturuyor ve varsayılan odur.
+     */
+    private function defaultCompany(): Company
+    {
+        return Company::query()->whereRaw('lower(code) = ?', ['mentorde'])->firstOrFail();
+    }
+
+    /** İkinci hesap AÇILMAZ — tek kimlik, tek şifre. */
+    public function test_second_application_reuses_the_same_account(): void
+    {
+        $this->staffFor($this->companyB);
+        $this->companyB->update(['slug' => 'firma-b']);
+
+        $this->post('/apply', $this->applicationPayload('tekhesap@example.test'))->assertRedirect();
+
+        $before = User::query()->withoutGlobalScope('company')
+            ->where('email', 'tekhesap@example.test')->firstOrFail();
+
+        $this->get('/apply/firma-b')->assertOk();
+        $this->post('/apply', $this->applicationPayload('tekhesap@example.test'))->assertRedirect();
+
+        $users = User::query()->withoutGlobalScope('company')
+            ->where('email', 'tekhesap@example.test')->get();
+
+        $this->assertCount(1, $users, 'Ikinci hesap acildi — email global unique, INSERT patlardi.');
+        $this->assertSame(
+            $before->password,
+            $users->first()->password,
+            'Mevcut hesabin sifresi degistirildi.'
+        );
+        $this->assertSame(
+            (int) $before->company_id,
+            (int) $users->first()->company_id,
+            'Kisinin aidiyeti degistirildi — ilk firmasina ait kalmali.'
+        );
+    }
+
+    /** Kişi ikinci firmanın portalına da girebilmeli (üyelik). */
+    public function test_person_gains_portal_access_to_the_second_company(): void
+    {
+        $this->staffFor($this->companyB);
+        $this->companyB->update(['slug' => 'firma-b']);
+
+        $this->post('/apply', $this->applicationPayload('portal2@example.test'))->assertRedirect();
+        $this->get('/apply/firma-b')->assertOk();
+        $this->post('/apply', $this->applicationPayload('portal2@example.test'))->assertRedirect();
+
+        $user = User::query()->withoutGlobalScope('company')
+            ->where('email', 'portal2@example.test')->firstOrFail();
+
+        $this->assertContains(
+            (int) $this->companyB->id,
+            $user->visibleCompanyIds(),
+            'Kisi ikinci firmanin portalina giremiyor.'
+        );
+        $this->assertContains(
+            (int) $this->defaultCompany()->id,
+            $user->visibleCompanyIds(),
+            'Kisi ilk firmasinin portalina erisimini kaybetti.'
+        );
+    }
+
+    /**
+     * EN KRİTİK: firmalar birbirinin başvurusunu GÖRMEMELİ.
+     *
+     * Kişi ikisinde de kayıtlı ama Firma B, kişinin MentorDE başvurusundan
+     * haberdar olmamalı — rakip müşteri bilgisi.
+     */
+    public function test_companies_cannot_see_each_others_application_for_the_same_person(): void
+    {
+        $this->staffFor($this->companyB);
+        $this->companyB->update(['slug' => 'firma-b']);
+
+        $this->post('/apply', $this->applicationPayload('gizlilik@example.test'))->assertRedirect();
+        $this->get('/apply/firma-b')->assertOk();
+        $this->post('/apply', $this->applicationPayload('gizlilik@example.test'))->assertRedirect();
+
+        // Firma B yalnızca KENDİ başvurusunu görmeli
+        $seenByB = TenantContext::runFor(
+            (int) $this->companyB->id,
+            fn () => GuestApplication::query()->where('email', 'gizlilik@example.test')->get()
+        );
+
+        $this->assertCount(1, $seenByB, 'Firma B digerinin basvurusunu da gordu.');
+        $this->assertSame((int) $this->companyB->id, (int) $seenByB->first()->company_id);
     }
 
     // ── Yardımcı ────────────────────────────────────────────────────────────
