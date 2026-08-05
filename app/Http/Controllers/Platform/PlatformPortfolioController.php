@@ -13,87 +13,52 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 /**
- * KONSOLİDE PORTFÖY — platform sahibinin "hepsini tek yerde" görünümü (Faz 5).
+ * KONSOLİDE PORTFÖY — platform sahibinin "hepsini tek yerde" görünümü.
  *
- * Multi-tenant izolasyonu her firmayı kendi verisine hapseder; bu doğru ve
- * gereklidir. Ama platform sahibi (MentorDE) B2C öğrencilerini ve tüm partner
- * firmaların adaylarını TEK listede görmek ister — iş modelinin özü bu.
+ * ⚠ KİŞİSEL VERİ YOK. BİLEREK.
  *
- * Burada global scope bilinçli olarak atlanır (`withoutGlobalScope('company')`)
- * ve her satırda hangi şirkete ait olduğu AÇIKÇA gösterilir. Bu sayfalar
- * yalnızca `platform.owner` middleware'i arkasında; firma kullanıcıları
- * buraya asla erişemez.
+ * DGmarkt yazılım servisi sağlıyor; müşterilerinin öğrencileri için VERİ
+ * SORUMLUSU değil. Ad, e-posta, telefon gibi kişisel veriyi platform
+ * konsolunda listelemek KVKK/GDPR açısından savunulamaz — servis sağlayıcının
+ * müşterinin müşterisini tanımasını gerektiren bir iş gerekçesi yok.
  *
- * ⚠ Bu, tenant izolasyonunun bir istisnası değil — izolasyonun ÜSTÜNDE duran
- * bir yetki katmanı. Firma kullanıcısının sorguları hâlâ kendi şirketiyle sınırlı.
+ * Bu ekranlar SAYI gösterir: şirket başına aday/öğrenci adedi, durum dağılımı,
+ * son 30 günün hareketi. İş hacmini görmek için yeterli, kişiyi tanımak için değil.
+ *
+ * Kişi düzeyindeki işler operasyonu YÜRÜTEN şirkete (MentorDE) aittir; onun
+ * personeli hiyerarşi sayesinde partner adaylarını kendi ekranlarında görür.
  */
 class PlatformPortfolioController extends Controller
 {
-    private const PER_PAGE = 40;
-
-    /** Tüm şirketlerin adayları (henüz öğrenciye dönüşmemiş). */
+    /** Tüm şirketlerin aday SAYILARI — kişi listesi değil. */
     public function leads(Request $request): View
     {
-        $filters = $this->filters($request);
-
-        $query = GuestApplication::withoutGlobalScope('company')
-            ->whereNull('deleted_at')
-            ->where(function ($q): void {
-                $q->whereNull('converted_to_student')->orWhere('converted_to_student', false);
-            });
-
-        $this->applyCompanyFilter($query, $filters['company']);
-        $this->applySearch($query, $filters['q'], ['first_name', 'last_name', 'email', 'phone']);
-
-        if ($filters['status'] !== '') {
-            $query->where('lead_status', $filters['status']);
-        }
-
-        $rows = $query->orderByDesc('created_at')
-            ->paginate(self::PER_PAGE)
-            ->withQueryString();
-
         return view('platform.portfolio.leads', [
-            'rows' => $rows,
-            'companies' => $this->companyOptions(),
-            'companyNames' => $this->companyNames(),
-            'filters' => $filters,
-            'statusOptions' => $this->leadStatusOptions(),
-            'totals' => $this->leadTotalsByCompany(),
+            'companies'    => $this->companyRows(),
+            'statusTotals' => $this->leadStatusTotals(),
+            'statusLabels' => $this->leadStatusOptions(),
+            'grandTotal'   => array_sum($this->leadTotalsByCompany()),
+            'recent30'     => $this->recentLeadCount(),
         ]);
     }
 
-    /** Tüm şirketlerin öğrencileri (dönüşmüş kayıtlar). */
+    /** Tüm şirketlerin öğrenci SAYILARI — kişi listesi değil. */
     public function students(Request $request): View
     {
-        $filters = $this->filters($request);
-
-        $query = User::withoutGlobalScope('company')
-            ->whereNull('deleted_at')
-            ->where('role', User::ROLE_STUDENT);
-
-        $this->applyCompanyFilter($query, $filters['company']);
-        $this->applySearch($query, $filters['q'], ['name', 'email', 'student_id']);
-
-        $rows = $query->orderByDesc('created_at')
-            ->paginate(self::PER_PAGE)
-            ->withQueryString();
-
         return view('platform.portfolio.students', [
-            'rows' => $rows,
-            'companies' => $this->companyOptions(),
-            'companyNames' => $this->companyNames(),
-            'filters' => $filters,
-            'totals' => $this->studentTotalsByCompany(),
+            'companies'  => $this->companyRows(),
+            'grandTotal' => array_sum($this->studentTotalsByCompany()),
         ]);
     }
 
     /**
      * Adayı başka bir firmaya devret.
      *
-     * Firma kendi başvuru linkini (/apply/{slug}) kullandırmadığında kayıt B2C
-     * havuzuna düşer; platform sahibi buradan doğru firmaya taşır. Bağlı tüm
-     * kayıtlar birlikte taşınır — bkz. LeadTransferService.
+     * Kişisel veri göstermez, ID ile çalışır. Firma başvuru linkini
+     * kullandıramadığında kayıt B2C havuzuna düşer; operasyon ekibi adayı
+     * kendi ekranından bulup buraya ID'siyle gönderir.
+     *
+     * Bağlı tüm kayıtlar birlikte taşınır — bkz. LeadTransferService.
      */
     public function transferLead(Request $request, LeadTransferService $transfers, int $application): RedirectResponse
     {
@@ -126,62 +91,37 @@ class PlatformPortfolioController extends Controller
             // Aday adı/e-postası audit'e YAZILMAZ — tenant kişisel verisi.
         ]);
 
-        $message = 'Aday ' . ($target->brand_name ?: $target->name) . ' firmasına devredildi.';
+        $message = 'Aday #' . $lead->id . ' → ' . ($target->brand_name ?: $target->name) . ' devredildi.';
 
         if ($result['senior_cleared']) {
-            $message .= ' Eski danışman ataması kaldırıldı — yeni firma kendi danışmanını atamalı.';
+            $message .= ' Eski danışman ataması kaldırıldı.';
         }
 
         return back()->with('status', $message);
     }
 
-    /** @return array{company:int,q:string,status:string} */
-    private function filters(Request $request): array
+    /**
+     * Şirket başına özet satırlar — yalnızca sayı.
+     *
+     * @return \Illuminate\Support\Collection<int,array<string,mixed>>
+     */
+    private function companyRows()
     {
-        return [
-            'company' => (int) $request->query('company', 0),
-            'q' => trim((string) $request->query('q', '')),
-            'status' => trim((string) $request->query('status', '')),
-        ];
-    }
+        $leadTotals = $this->leadTotalsByCompany();
+        $studentTotals = $this->studentTotalsByCompany();
 
-    private function applyCompanyFilter($query, int $companyId): void
-    {
-        if ($companyId > 0) {
-            $query->where('company_id', $companyId);
-        }
-    }
-
-    /** @param list<string> $columns */
-    private function applySearch($query, string $term, array $columns): void
-    {
-        if ($term === '') {
-            return;
-        }
-
-        $query->where(function ($q) use ($term, $columns): void {
-            foreach ($columns as $i => $column) {
-                $i === 0
-                    ? $q->where($column, 'like', '%' . $term . '%')
-                    : $q->orWhere($column, 'like', '%' . $term . '%');
-            }
-        });
-    }
-
-    /** @return \Illuminate\Support\Collection<int,Company> */
-    private function companyOptions()
-    {
-        return Company::query()->orderBy('name')->get(['id', 'name', 'code', 'brand_name']);
-    }
-
-    /** @return array<int,string> id => görünen ad */
-    private function companyNames(): array
-    {
-        return $this->companyOptions()
-            ->mapWithKeys(fn (Company $c): array => [
-                (int) $c->id => (string) ($c->brand_name ?: $c->name),
-            ])
-            ->all();
+        return Company::query()
+            ->orderBy('name')
+            ->get(['id', 'name', 'brand_name', 'code', 'is_active', 'parent_company_id'])
+            ->map(fn (Company $c): array => [
+                'id'       => (int) $c->id,
+                'name'     => (string) ($c->brand_name ?: $c->name),
+                'code'     => (string) $c->code,
+                'active'   => (bool) $c->is_active,
+                'parent'   => $c->parent_company_id ? (int) $c->parent_company_id : null,
+                'leads'    => (int) ($leadTotals[$c->id] ?? 0),
+                'students' => (int) ($studentTotals[$c->id] ?? 0),
+            ]);
     }
 
     /** @return array<int,int> company_id => aday sayısı */
@@ -212,6 +152,29 @@ class PlatformPortfolioController extends Controller
             ->all());
     }
 
+    /** @return array<string,int> durum => adet (şirketten bağımsız toplam) */
+    private function leadStatusTotals(): array
+    {
+        return Cache::remember('platform:portfolio:lead_status_totals', 120, fn (): array => GuestApplication::withoutGlobalScope('company')
+            ->whereNull('deleted_at')
+            ->where(function ($q): void {
+                $q->whereNull('converted_to_student')->orWhere('converted_to_student', false);
+            })
+            ->selectRaw('lead_status, count(*) as total')
+            ->groupBy('lead_status')
+            ->pluck('total', 'lead_status')
+            ->map(fn ($v): int => (int) $v)
+            ->all());
+    }
+
+    private function recentLeadCount(): int
+    {
+        return (int) Cache::remember('platform:portfolio:lead_recent30', 120, fn (): int => GuestApplication::withoutGlobalScope('company')
+            ->whereNull('deleted_at')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->count());
+    }
+
     /** @return array<string,string> */
     private function leadStatusOptions(): array
     {
@@ -220,6 +183,7 @@ class PlatformPortfolioController extends Controller
             'contacted' => 'İletişime geçildi',
             'qualified' => 'Nitelikli',
             'proposal' => 'Teklif',
+            'contract_signed' => 'Sözleşme imzalandı',
             'won' => 'Kazanıldı',
             'lost' => 'Kaybedildi',
         ];
