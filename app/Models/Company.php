@@ -29,6 +29,7 @@ class Company extends Model
         'brand_overrides',
         'public_marketing',
         'is_public_portal',
+        'denied_permission_codes',
     ];
 
     protected $casts = [
@@ -45,6 +46,7 @@ class Company extends Model
         'brand_overrides'           => 'array',
         'public_marketing'          => 'boolean',
         'is_public_portal'          => 'boolean',
+        'denied_permission_codes'   => 'array',
     ];
 
     protected static function booted(): void
@@ -152,6 +154,110 @@ class Company extends Model
     public static function flushHierarchyCache(): void
     {
         \Illuminate\Support\Facades\Cache::forget(self::HIERARCHY_CACHE_KEY);
+        \Illuminate\Support\Facades\Cache::forget(self::CEILING_CACHE_KEY);
+    }
+
+    private const CEILING_CACHE_KEY = 'companies:permission_ceilings';
+
+    /**
+     * Bu şirketin ÜSTÜNDEKİ şirketler (kendisi hariç, köke kadar).
+     *
+     * @return list<int>
+     */
+    public static function ancestorIds(int $companyId): array
+    {
+        if ($companyId <= 0) {
+            return [];
+        }
+
+        $parents = self::ceilingData()['parents'] ?? [];
+
+        $out = [];
+        $seen = [$companyId => true];
+        $current = $companyId;
+
+        while (isset($parents[$current])) {
+            $parent = (int) $parents[$current];
+
+            // Döngü koruması: veri bozulursa (A→B→A) sonsuza sarmasın.
+            if ($parent <= 0 || isset($seen[$parent])) {
+                break;
+            }
+
+            $seen[$parent] = true;
+            $out[] = $parent;
+            $current = $parent;
+        }
+
+        return $out;
+    }
+
+    /**
+     * Şirkete UYGULANAN yetki kısıtları: kendisininki + tüm üstlerininki.
+     *
+     * Kısıt ağaçtan aşağı birikir — MentorDE YourGermanUni'ye bir kısıt
+     * koyduğunda onun altındaki firmalar da bağlanır.
+     *
+     * @return list<string>
+     */
+    public static function effectiveDeniedPermissions(int $companyId): array
+    {
+        if ($companyId <= 0) {
+            return [];
+        }
+
+        $denials = self::ceilingData()['denials'] ?? [];
+
+        $codes = $denials[$companyId] ?? [];
+
+        foreach (self::ancestorIds($companyId) as $ancestorId) {
+            $codes = array_merge($codes, $denials[$ancestorId] ?? []);
+        }
+
+        return array_values(array_unique(array_filter($codes)));
+    }
+
+    /**
+     * Tek sorguda hem ebeveyn zinciri hem kısıt listeleri.
+     *
+     * @return array{parents:array<int,int>,denials:array<int,list<string>>}
+     */
+    private static function ceilingData(): array
+    {
+        return \Illuminate\Support\Facades\Cache::remember(
+            self::CEILING_CACHE_KEY,
+            600,
+            static function (): array {
+                $parents = [];
+                $denials = [];
+
+                try {
+                    $rows = \Illuminate\Support\Facades\DB::table('companies')
+                        ->get(['id', 'parent_company_id', 'denied_permission_codes']);
+                } catch (\Throwable) {
+                    // Kolon henüz yok (migration öncesi) — kısıt yok say.
+                    return ['parents' => [], 'denials' => []];
+                }
+
+                foreach ($rows as $row) {
+                    $id = (int) $row->id;
+
+                    if (!empty($row->parent_company_id)) {
+                        $parents[$id] = (int) $row->parent_company_id;
+                    }
+
+                    $codes = $row->denied_permission_codes ?? null;
+                    if (is_string($codes)) {
+                        $codes = json_decode($codes, true);
+                    }
+                    if (is_array($codes) && $codes !== []) {
+                        $denials[$id] = array_values(array_map('strval', $codes));
+                    }
+                }
+
+                return ['parents' => $parents, 'denials' => $denials];
+            }
+        );
     }
 
     /**

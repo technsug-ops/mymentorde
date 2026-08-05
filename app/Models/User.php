@@ -539,6 +539,23 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
             $codes['doc_request.use'] = true;
         }
 
+        // ── ŞİRKET YETKİ TAVANI ─────────────────────────────────────────────
+        //
+        // Rol yetkiyi VERİR, şirket tavanı DARALTIR. Partner firmalar öğrenciyi
+        // bize devredip operasyonu bize bırakıyor; hangi firmanın ne kadar
+        // yetkisi olacağını ağacın üstündeki firma belirler.
+        //
+        // Kısıt en SONDA uygulanır: rol şablonu, rol varsayılanı ya da
+        // kişiye özel bir yetki tavanı deleMEZ. Aksi halde kısıtlanan bir
+        // yetki başka bir yoldan geri sızardı.
+        //
+        // Platform sahibi MUAF — kendi platformunu kilitleyemesin.
+        if ($this->role !== self::ROLE_PLATFORM_OWNER) {
+            foreach (Company::effectiveDeniedPermissions((int) ($this->company_id ?? 0)) as $denied) {
+                unset($codes[$denied]);
+            }
+        }
+
         $this->_permissionCodesCache = array_keys($codes);
         return $this->_permissionCodesCache;
     }

@@ -57,6 +57,9 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
     // Şirketi askıya al / geri aç (test kayıtları, sözleşmesi biten firmalar)
     Route::post('/companies/{company}/status', [PlatformController::class, 'updateStatus'])
         ->name('platform.companies.status');
+    // Üst firmanın alt firmaya koyduğu yetki tavanı
+    Route::post('/companies/{company}/permissions', [PlatformController::class, 'updatePermissionCeiling'])
+        ->name('platform.companies.permissions');
     Route::post('/companies/{company}/modules', [PlatformController::class, 'updateModules'])
         ->whereNumber('company')
         ->middleware('throttle:30,1')

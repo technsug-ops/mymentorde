@@ -389,6 +389,42 @@ class PlatformController extends Controller
         return back()->with('status', $message);
     }
 
+    /**
+     * Alt firmanın yetki tavanını ayarla.
+     *
+     * Rol yetkiyi VERİR, tavan DARALTIR. Buraya işaretlenen her yetki o
+     * firmanın (ve altındaki firmaların) kullanıcılarından alınır.
+     */
+    public function updatePermissionCeiling(Request $request, int $company): RedirectResponse
+    {
+        $companyModel = Company::query()->where('id', $company)->firstOrFail();
+
+        if (\App\Support\Brand::isPrimary($companyModel)) {
+            return back()->withErrors([
+                'denied_permission_codes' => 'Ana şirkete yetki kısıtı konulamaz — kendi platformunuzu kilitlersiniz.',
+            ]);
+        }
+
+        $denied = \App\Support\PermissionCeiling::sanitize($request->input('denied_permission_codes', []));
+
+        $companyModel->denied_permission_codes = $denied !== [] ? $denied : null;
+        $companyModel->save();
+
+        // Tavan önbelleği şirket ağacıyla birlikte tutuluyor.
+        Company::flushHierarchyCache();
+
+        \App\Models\PlatformAuditLog::record('platform.company.permission_ceiling_updated', [
+            'target_type' => 'company',
+            'target_id'   => $companyModel->id,
+            'company'     => $companyModel->name,
+            'denied'      => $denied,
+        ]);
+
+        return back()->with('status', $denied === []
+            ? $companyModel->name . ' için kısıt kaldırıldı — rolünün verdiği tüm yetkiler geçerli.'
+            : $companyModel->name . ' için ' . count($denied) . ' yetki kısıtlandı. Alt firmaları da bağlar.');
+    }
+
     public function updateTier(Request $request, int $company): RedirectResponse
     {
         $companyModel = Company::query()->where('id', $company)->firstOrFail();
