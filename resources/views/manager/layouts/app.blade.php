@@ -666,6 +666,7 @@
                 </div>
             </div>
             <div class="topbar-right">
+                @include('partials.company-switcher')
                 @yield('topbar-actions')
                 <button class="icon-btn" onclick="__dmToggle()" id="dm-btn" title="Tema">🌙</button>
                 <button class="icon-btn" onclick="__designToggle()" id="design-btn" title="Tasarım Teması">🎨</button>
