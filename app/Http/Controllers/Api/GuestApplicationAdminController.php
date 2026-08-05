@@ -17,6 +17,8 @@ use App\Services\TaskAutomationService;
 use App\Services\EventLogService;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -173,14 +175,19 @@ class GuestApplicationAdminController extends Controller
             'status_message' => 'Student kaydi acildi: '.$assignment->student_id.($welcomeInfo ? " | {$welcomeInfo}" : ''),
         ])->save();
 
-        // Portal kullanicisi varsa rolunu 'student' yap ve student_id ata
+        // Portal kullanicisi varsa rolunu 'student' yap ve student_id ata.
+        //
+        // ⚠ ARAMA GLOBAL: aday birden fazla firmaya başvurmuş olabilir ve hesabı
+        // BAŞKA bir firmaya ait olabilir (users.email global unique — ikinci hesap
+        // açılmaz, mevcut hesap yeniden kullanılır). Şirket kapsamlı sorgu bu
+        // durumda hiçbir satır bulamaz ve update SESSİZCE hiçbir şey yapmazdı:
+        // kişi 'guest' rolünde kalır, student_id almaz, portalı çalışmazdı.
         if ((int) ($guestApplication->guest_user_id ?? 0) > 0) {
-            User::where('id', $guestApplication->guest_user_id)
-                ->where('role', 'guest')
-                ->update([
-                    'role' => 'student',
-                    'student_id' => $assignment->student_id,
-                ]);
+            $this->promoteGuestToStudent(
+                (int) $guestApplication->guest_user_id,
+                (string) $assignment->student_id,
+                $companyId
+            );
         }
         $createdTasks = $this->taskAutomationService->ensureStudentOnboardingTasks(
             studentId: (string) $assignment->student_id,
@@ -376,6 +383,57 @@ class GuestApplicationAdminController extends Controller
             'student_id' => $candidate,
             'internal_sequence' => $nextSequence,
         ];
+    }
+
+    /**
+     * Adayı öğrenciye yükselt ve SÖZLEŞMENİN İMZALANDIĞI firmaya taşı.
+     *
+     * İş kuralı: kişi aday aşamasında birden fazla danışmanlık firmasıyla
+     * görüşebilir. Sözleşme hangisinde imzalanırsa süreç ORADA devam eder.
+     *
+     * Bu yüzden hesabın AİDİYETİ dönüştüren firmaya geçer; aksi halde firma
+     * kendi öğrencisinin hesabını göremezdi (görünür kümesi kendi şirketi).
+     *
+     * Eski firmadaki ERİŞİM korunur (`company_user` üyeliği): orada lead olarak
+     * kalmasında sakınca yok, kişi eski başvurusunu portalında görmeye devam eder.
+     * Eski firmaya sözleşmenin başka bir kurumda imzalandığı BİLDİRİLMEZ —
+     * partner firmalar birbirinden haberli değildir.
+     */
+    private function promoteGuestToStudent(int $userId, string $studentId, int $companyId): void
+    {
+        $user = User::query()->withoutGlobalScope('company')->find($userId);
+
+        if (!$user) {
+            return;
+        }
+
+        // Yalnızca aday hesabı yükseltilir — hâlihazırda öğrenci/personel olan
+        // bir hesabın rolü ezilmemeli.
+        if ((string) $user->role !== User::ROLE_GUEST) {
+            return;
+        }
+
+        $previousCompanyId = (int) ($user->company_id ?? 0);
+
+        $user->role = User::ROLE_STUDENT;
+        $user->student_id = $studentId;
+
+        if ($companyId > 0 && $previousCompanyId !== $companyId) {
+            $user->company_id = $companyId;
+        }
+
+        $user->save();
+
+        // Eski firmadaki başvurusuna erişimi kaybetmesin.
+        if ($previousCompanyId > 0 && $companyId > 0 && $previousCompanyId !== $companyId
+            && Schema::hasTable('company_user')) {
+            DB::table('company_user')->updateOrInsert(
+                ['user_id' => $user->id, 'company_id' => $previousCompanyId],
+                ['role_in_company' => 'applicant', 'updated_at' => now(), 'created_at' => now()]
+            );
+        }
+
+        $user->forgetVisibleCompanyIds();
     }
 
     private function pickAutoSeniorEmail(int $companyId = 0): ?string
