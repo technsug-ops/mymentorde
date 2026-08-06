@@ -116,6 +116,49 @@ class MailSenderIdentityTest extends TestCase
         $this->assertSame('noreply@yourgermanuni.com', config('mail.from.address'));
     }
 
+    /**
+     * ADRES ÜST FİRMADAN DEVRALINIR.
+     *
+     * İlk sürüm adresi yalnızca firmanın KENDİ ayarından okuyordu; ortak
+     * portalın altındaki firmalar sessizce platformun adresine düşüyordu.
+     * YourGermanUni'ye adres yazılmış olmasına rağmen Novavia'nın maili
+     * noreply@mentorde.com'dan çıkıyordu — canlıda tam olarak bu görüldü.
+     */
+    public function test_address_is_inherited_from_the_portal(): void
+    {
+        $this->buildPortalHierarchy();
+
+        // Adres YALNIZCA portala yazılıyor; partnerde tanımlı değil.
+        $this->companyA->update([
+            'brand_overrides' => ['mail_from_address' => 'account@yourgermanuni.com'],
+        ]);
+        Brand::flushCache((int) $this->companyA->id);
+        Brand::flushCache((int) $this->companyB->id);
+
+        Brand::apply($this->companyB->fresh());
+
+        $this->assertSame(
+            'account@yourgermanuni.com',
+            config('mail.from.address'),
+            'Partner, bagli oldugu portalin adresini devralmadi.'
+        );
+    }
+
+    /** Firmanın kendi adresi portalınkini ezer. */
+    public function test_own_address_overrides_the_portal(): void
+    {
+        $this->buildPortalHierarchy();
+
+        $this->companyA->update(['brand_overrides' => ['mail_from_address' => 'portal@yourgermanuni.com']]);
+        $this->companyB->update(['brand_overrides' => ['mail_from_address' => 'kendi@novavia.com']]);
+        Brand::flushCache((int) $this->companyA->id);
+        Brand::flushCache((int) $this->companyB->id);
+
+        Brand::apply($this->companyB->fresh());
+
+        $this->assertSame('kendi@novavia.com', config('mail.from.address'));
+    }
+
     // ── Kuyruk ──────────────────────────────────────────────────────────────
 
     /**
