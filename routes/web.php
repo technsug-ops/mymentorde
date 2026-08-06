@@ -1241,6 +1241,14 @@ Route::middleware(['company.context'])->group(function () {
     Route::get('/partner',      fn () => redirect()->route('public.dealer-landing'))
         ->middleware('throttle:120,1'); // alias
 
+    // Bayi mini-sitesinin herkese acik ORNEGI — aday bayiye link olarak verilir.
+    // Veritabaninda kaydi yok (bkz. DealerSiteDemoController): sahte bir bayi
+    // eklemek raporlara ve komisyon hesaplarina karisirdi.
+    Route::get('/demo/bayi-sitesi/{template?}', [\App\Http\Controllers\Public\DealerSiteDemoController::class, 'show'])
+        ->where('template', '[a-z0-9-]{2,32}')
+        ->middleware('throttle:120,1')
+        ->name('public.dealer-site-demo');
+
     // Bayi white-label mini-site — /p/{slug}
     Route::get('/p/{slug}', [\App\Http\Controllers\Public\DealerMiniSiteController::class, 'show'])
         ->where('slug', '[a-z0-9-]{3,64}')
