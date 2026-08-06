@@ -139,9 +139,14 @@ section{padding:64px 0;}
 .sec-head.center .sec-lead{margin-left:auto;margin-right:auto;}
 
 /* SERVICES */
-.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
-@media(max-width:860px){.svc-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:540px){.svc-grid{grid-template-columns:1fr;}}
+/* Eksik satır ORTALANIR. Kart sayısı partnerin girdiğine bağlı; 3'lük
+   ızgarada 2 kart kalınca grid boşluğu sağda bırakıp bölümü sola yaslıyordu.
+   Flex + justify-content:center eksik satırı ortalar, tam satır aynı kalır.
+   Genişlik: (100% - (sütun-1)*gap) / sütun */
+.svc-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;}
+.svc-grid>*{flex:0 1 calc((100% - 40px)/3);min-width:240px;}
+@media(max-width:860px){.svc-grid>*{flex-basis:calc((100% - 20px)/2);}}
+@media(max-width:540px){.svc-grid>*{flex-basis:100%;min-width:0;}}
 .svc{background:#fff;border:1px solid var(--line);border-radius:18px;padding:30px 26px;transition:all .2s;
     display:flex;flex-direction:column;position:relative;overflow:hidden;}
 .svc::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--primary),var(--primary-deep));
@@ -161,9 +166,10 @@ section{padding:64px 0;}
 .about-text{font-size:16px;color:var(--text);line-height:1.7;white-space:pre-line;}
 
 /* TEAM */
-.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
-@media(max-width:920px){.team-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:540px){.team-grid{grid-template-columns:1fr;}}
+.team-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:18px;}
+.team-grid>*{flex:0 1 calc((100% - 54px)/4);min-width:200px;}
+@media(max-width:920px){.team-grid>*{flex-basis:calc((100% - 18px)/2);}}
+@media(max-width:540px){.team-grid>*{flex-basis:100%;min-width:0;}}
 .team-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px 20px;text-align:center;transition:all .2s;box-shadow:var(--shadow-sm);}
 .team-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:color-mix(in srgb,var(--primary) 28%,transparent);}
 .team-photo{width:92px;height:92px;border-radius:50%;object-fit:cover;margin:0 auto 15px;
@@ -198,8 +204,9 @@ section{padding:64px 0;}
 .power-card p{margin:0;font-size:13px;opacity:.85;line-height:1.5;}
 
 /* TESTIMONIALS */
-.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
-@media(max-width:860px){.testi-grid{grid-template-columns:1fr;}}
+.testi-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;}
+.testi-grid>*{flex:0 1 calc((100% - 40px)/3);min-width:260px;}
+@media(max-width:860px){.testi-grid>*{flex-basis:100%;min-width:0;}}
 .testi{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:var(--shadow-sm);position:relative;transition:all .2s;}
 .testi:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:color-mix(in srgb,var(--primary) 30%,transparent);}
 .testi-stars{color:var(--amber);font-size:15px;letter-spacing:2px;margin-bottom:12px;}

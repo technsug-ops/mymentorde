@@ -134,6 +134,10 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-.6px;margin:0;}
    --cols her bölümde kart sayısına göre Blade'den verilir (bkz. $cols). */
 .grid{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--gap,18px);--cols:3;--min:280px;}
 .grid>*{flex:0 1 calc((100% - (var(--cols) - 1) * var(--gap,18px)) / var(--cols));min-width:min(var(--min),100%);}
+/* .g-svc hizmetler ve yorumlar bölümlerinde KULLANILIYORDU ama tanımlı
+   değildi; sessizce .grid varsayılanlarına düşüyordu. Kardeşleriyle aynı
+   biçimde açıkça tanımlandı. */
+.g-svc{--gap:20px;--min:260px;}
 .g-step{--gap:20px;--min:200px;}
 .g-why{--gap:16px;--min:200px;}
 .g-team{--gap:16px;--min:240px;}

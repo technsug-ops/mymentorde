@@ -125,9 +125,26 @@ svg{width:1em;height:1em;}
 .why-row p{font-size:13.5px;color:var(--muted);margin:0;line-height:1.6;}
 
 /* TEAM */
-.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;}
-@media(max-width:820px){.team-grid{grid-template-columns:1fr 1fr;}}
-@media(max-width:480px){.team-grid{grid-template-columns:1fr;}}
+/* Eksik satır ORTALANIR — ekip sayısı partnerin girdiğine bağlı.
+   NOT: .svc-grid bilerek grid kaldı; oradaki tasarım nth-child(odd/even)
+   kenarlıklarına dayanıyor, flex'e çevrilse çizgiler bozulurdu. */
+.team-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:28px;}
+.team-grid>*{flex:0 1 calc((100% - 84px)/4);min-width:190px;}
+@media(max-width:820px){.team-grid>*{flex-basis:calc((100% - 28px)/2);}}
+@media(max-width:480px){.team-grid>*{flex-basis:100%;min-width:0;}}
+
+/* ÖĞRENCİ YORUMLARI
+   ⚠ Bu bölümün stili HİÇ YOKTU: bölüm .q-grid/.q/.qm/.qw sınıflarını
+   kullanıyor ama minimal.blade.php'de hiçbiri tanımlı değildi. Minimal
+   şablonunu seçen bayi biçimsiz, üst üste yığılmış bir blok görüyordu. */
+.q-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:32px;}
+.q-grid>*{flex:0 1 calc((100% - 64px)/3);min-width:250px;}
+@media(max-width:820px){.q-grid>*{flex-basis:100%;min-width:0;}}
+.q{border-top:1px solid var(--line);padding-top:22px;}
+.qm{font-family:var(--serif);font-size:38px;line-height:1;color:var(--accent);margin-bottom:6px;}
+.q blockquote{margin:0 0 16px;font-size:14.5px;color:var(--body);line-height:1.75;}
+.qw{font-size:12.5px;color:var(--muted);letter-spacing:.02em;}
+.qw b{color:var(--ink);font-weight:600;}
 .tm{text-align:left;}
 .tm-ph{width:74px;height:74px;border-radius:50%;object-fit:cover;margin-bottom:16px;border:1px solid var(--line);
     display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:26px;color:var(--accent);background:var(--card);}
