@@ -40,7 +40,8 @@ class RestrictPartnerPanel
         'manager/students',          // öğrenciler
         'manager/process-info',      // süreç bilgisi (salt okunur)
         'manager/leads',             // aday ekleme
-        'manager/account',           // hesabım
+        'manager/account',           // hesabım (2FA sıfırlama dahil)
+        'manager/users',             // firma kendi kullanıcılarını yönetir
         'manager/requests',          // destek talepleri
         'manager/bulletins',         // duyurular
         'manager/partner-documents', // belge listesi + belge talepleri

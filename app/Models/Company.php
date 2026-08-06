@@ -435,5 +435,45 @@ class Company extends Model
         if ($limit === null || $limit <= 0) return false;
         return $this->docRequestMonthlyUsage($now) >= $limit;
     }
+
+    // ─── Personel (kullanici) kotasi ────────────────────────────────────────
+
+    /**
+     * Paketin izin verdigi PERSONEL hesabi sayisi. NULL = sinirsiz.
+     *
+     * Ogrenci ve aday bu sayiya girmez — onlar musteri, kullanici degil.
+     */
+    public function userLimit(): ?int
+    {
+        $tier  = (string) ($this->subscription_tier ?: self::TIER_TRIAL);
+        $limit = config("subscription_tiers.{$tier}.limits.users_max");
+
+        return $limit === null ? null : (int) $limit;
+    }
+
+    /**
+     * Firmanin acik personel hesabi sayisi.
+     *
+     * ⚠ Kapsamsiz: sayim, sayan kisinin baglamindan bagimsiz olmali. Aksi
+     * halde ust firma partnerin kotasini sorguladiginda 0 gorurdu.
+     *
+     * Musteri rolleri (ogrenci, aday, VIP) haric — onlar kota tuketmez.
+     */
+    public function staffUserCount(): int
+    {
+        return (int) User::query()
+            ->withoutGlobalScope('company')
+            ->where('company_id', $this->id)
+            ->whereNotIn('role', [User::ROLE_STUDENT, User::ROLE_GUEST, User::ROLE_VIP])
+            ->count();
+    }
+
+    /** Yeni personel hesabi acilabilir mi? */
+    public function canAddStaffUser(): bool
+    {
+        $limit = $this->userLimit();
+
+        return $limit === null || $this->staffUserCount() < $limit;
+    }
 }
 

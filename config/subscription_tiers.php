@@ -7,8 +7,13 @@
  *   - label    : UI'da gosterilen isim (TR)
  *   - mrr_eur  : aylik tekrarlayan gelir (€), 0 = trial/ucretsiz
  *   - modules  : bu tier'in actigi modul listesi VEYA '*' (hepsi acik)
- *   - limits   : kullanim sinirlari (leads_max, students_max, doc_request_monthly)
- *                NULL = sinirsiz
+ *   - limits   : kullanim sinirlari (users_max, leads_max, students_max,
+ *                doc_request_monthly). NULL = sinirsiz
+ *
+ * users_max NEDIR: firmanin acabilecegi PERSONEL hesabi sayisi — ogrenci ve
+ * aday DEGIL. Bir firmada tek yonetici olmasi gercekci degil; birden fazla
+ * kisiyle irtibat gerekebiliyor. Siniri paket belirler, boylece "daha fazla
+ * kullanici" ust pakete gecmek icin dogal bir sebep olur.
  *
  * LIMITLER NE ICIN: platform sahibi (SaaS saglayici) musterinin operasyonuna
  * degil KAPASITESINE bakar. "Bu firma paketinin sinirina dayandi, ust pakete
@@ -30,6 +35,7 @@ return [
         'mrr_eur'  => 0,
         'modules'  => ['core', 'application_guides'],
         'limits'   => [
+            'users_max'            => 2,
             'leads_max'            => 100,
             'students_max'         => 25,
             'doc_request_monthly'  => 10,
@@ -46,6 +52,7 @@ return [
             'manager_password_reset',
         ],
         'limits'   => [
+            'users_max'            => 5,
             'leads_max'            => 400,
             'students_max'         => 100,
             'doc_request_monthly'  => 50,
@@ -70,6 +77,7 @@ return [
             'page_visibility',
         ],
         'limits'   => [
+            'users_max'            => 15,
             'leads_max'            => 2000,
             'students_max'         => 500,
             'doc_request_monthly'  => 250,
@@ -81,9 +89,12 @@ return [
         'mrr_eur'  => 299,
         'modules'  => '*', // tum modullere acik — ModuleAccess::allModules()
         'limits'   => [
+            'users_max'            => null,
             'leads_max'            => null,
             'students_max'         => null,
             'doc_request_monthly'  => null,
         ],
     ],
 ];
+
+

@@ -89,6 +89,11 @@
     </div>
 
     <div class="nav-section">
+        {{-- Firmada tek kişi olması gerçekçi değil; ekibini kendisi yönetir. --}}
+        <a href="/manager/users" class="nav-link {{ $_pnIs('manager/users') ? 'active' : '' }}">
+            <span class="nav-icon">👥</span> Kullanıcılar
+        </a>
+
         <a href="{{ route('manager.account.edit') }}" class="nav-link {{ $_pnIs('manager/account') ? 'active' : '' }}">
             <span class="nav-icon">⚙️</span> Hesabım
         </a>

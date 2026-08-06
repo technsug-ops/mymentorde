@@ -112,6 +112,19 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/students/{studentId}/institution-documents', [ManagerPortalController::class, 'studentInstitutionDocs'])->name('manager.students.institution-docs');
     Route::get('/manager/students/{studentId}/university-applications', [ManagerPortalController::class, 'studentUniversityApplications'])->name('manager.students.university-applications');
 
+    // ─── Firma kullanıcıları (sade) ─────────────────────────────────────────
+    // Bir firmada tek kişi olması gerçekçi değil. Tam personel ekranı partnere
+    // ağır; burası listeleme + ekleme + şifre sıfırlama + pasife alma.
+    $partnerStaff = \App\Http\Controllers\Manager\PartnerStaffController::class;
+    Route::get('/manager/users',                       [$partnerStaff, 'index'])->name('manager.partner-staff.index');
+    Route::post('/manager/users',                      [$partnerStaff, 'store'])->name('manager.partner-staff.store');
+    Route::post('/manager/users/{userId}/reset',       [$partnerStaff, 'resetPassword'])->whereNumber('userId')->name('manager.partner-staff.reset');
+    Route::post('/manager/users/{userId}/toggle',      [$partnerStaff, 'toggle'])->whereNumber('userId')->name('manager.partner-staff.toggle');
+
+    // 2FA sıfırlama — telefon değişiminde tek çıkış yolu (bkz. MyAccountController).
+    Route::post('/manager/account/2fa/reset', [\App\Http\Controllers\Manager\MyAccountController::class, 'resetTwoFactor'])
+        ->name('manager.account.2fa.reset');
+
     // ─── Süreç Bilgisi (partner için salt okunur) ────────────────────────────
     // Operasyonu üst firma yürütüyor; partner burada yalnızca izler. Bilerek
     // sadece GET: bu ekrandan süreci ilerletecek hiçbir yol yok.

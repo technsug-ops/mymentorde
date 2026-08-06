@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Models\UserTwoFactor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -26,9 +27,53 @@ use Illuminate\View\View;
  */
 class MyAccountController extends Controller
 {
-    public function edit(): View
+    public function edit(Request $request): View
     {
-        return view('manager.account.edit');
+        $twoFactor = UserTwoFactor::where('user_id', $request->user()->id)->first();
+
+        return view('manager.account.edit', [
+            'twoFactorEnabled' => (bool) ($twoFactor?->isEnabled()),
+            'twoFactorSince'   => $twoFactor?->enabled_at,
+        ]);
+    }
+
+    /**
+     * 2FA'yı sıfırla — yeni cihazda yeniden kurulur.
+     *
+     * ── NEDEN GEREKLİ ────────────────────────────────────────────────────
+     * 2FA yalnızca Require2FA'nın zorunlu yönlendirmesiyle, BİR KEZ
+     * kurulabiliyordu. Kurulduktan sonra hiçbir ekranda görünmüyordu:
+     * telefonunu değiştiren ya da authenticator'ı silen kullanıcı kendi
+     * hesabına bir daha giremezdi — panelde çıkış yolu yoktu.
+     *
+     * Kaydı silmek yeterli: Require2FA bir sonraki istekte kullanıcıyı
+     * kurulum ekranına götürüyor ve yeni QR üretiliyor.
+     *
+     * ⚠ MEVCUT ŞİFRE ŞART. Aksi halde açık bir oturumu ele geçiren biri
+     * 2FA'yı sıfırlayıp ikinci faktörü tamamen devre dışı bırakabilirdi —
+     * korumanın kendisi saldırı yüzeyi olurdu.
+     */
+    public function resetTwoFactor(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        $request->validate(
+            ['current_password' => ['required', 'string']],
+            ['current_password.required' => 'İşlemi onaylamak için mevcut şifrenizi girin.']
+        );
+
+        if (! Hash::check((string) $request->input('current_password'), (string) $user->password)) {
+            return back()->withErrors(['current_password' => 'Mevcut şifre yanlış.']);
+        }
+
+        UserTwoFactor::where('user_id', $user->id)->delete();
+
+        // Bu oturumun 2FA muafiyeti de kalkmalı, yoksa kurulum ekranına
+        // yönlendirme bir sonraki oturuma kalırdı.
+        $request->session()->forget('2fa_passed');
+
+        return redirect()->route('2fa.setup')
+            ->with('status', 'İki faktörlü doğrulama sıfırlandı. Yeni cihazınızla QR kodu okutun.');
     }
 
     public function update(Request $request): RedirectResponse
