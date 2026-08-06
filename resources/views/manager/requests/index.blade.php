@@ -178,9 +178,12 @@
             'marketing'  => 'marketing',
             default      => 'operations',
         };
-        {{-- Departmana kısıtlı roller (senior/mentor → advisory) başka departman
-            kuyruğuna gidince 403 alır. Onları genel /tasks board'a yönlendir (kendi
-            scope'unu gösterir). Global/yetkili roller departman kuyruğuna gidebilir. --}}
+        // Departmana kısıtlı roller (senior/mentor → advisory) başka departman
+        // kuyruğuna gidince 403 alır. Onları genel /tasks board'a yönlendir (kendi
+        // scope'unu gösterir). Global/yetkili roller departman kuyruğuna gidebilir.
+        //
+        // NOT: burası @php bloğunun İÇİ. Blade yorumu ({{-- --}}) burada yorum
+        // değil, PHP kodu olarak ayrıştırılır ve sayfayı 500'e düşürür.
         $taskDept     = $linkedTask?->department ?: $suggestedDept;
         $viewerScoped = in_array((string) auth()->user()?->role, ['senior', 'mentor'], true);
         $taskLink     = $viewerScoped ? '/tasks' : '/tasks/'.$taskDept;

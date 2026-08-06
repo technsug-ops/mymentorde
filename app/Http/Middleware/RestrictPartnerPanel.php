@@ -36,14 +36,15 @@ class RestrictPartnerPanel
      */
     private const ALLOWED = [
         'manager/dashboard',
-        'manager/guests',            // adaylar
+        'manager/guests',            // aday öğrenciler
         'manager/students',          // öğrenciler
-        'manager/leads',             // aday ekleme / devir
+        'manager/leads',             // aday ekleme
         'manager/account',           // hesabım
         'manager/requests',          // destek talepleri
         'manager/bulletins',         // duyurular
         'manager/document-requests', // belge talepleri
-        'manager/required-documents',
+        'manager/required-documents',// belge listesi
+        'im',                        // öğrenci ve atanan danışmanla yazışma
     ];
 
     /**

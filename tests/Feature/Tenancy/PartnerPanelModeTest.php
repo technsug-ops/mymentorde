@@ -147,7 +147,17 @@ class PartnerPanelModeTest extends TestCase
 
         $html = $this->asStaff($manager)->get('/manager/guests')->getContent();
 
-        foreach (['Adaylar', 'Aday Ekle', 'Öğrenciler', 'Destek Talepleri', 'Hesabım'] as $item) {
+        $expected = [
+            'Aday Öğrenciler',   // aday listesi
+            'Öğrenciler',        // öğrenci listesi
+            'Aday Ekle',
+            'Mesajlar',          // öğrenci ve atanan danışmanla iletişim
+            'Destek Talepleri',
+            'Belge Listesi',
+            'Hesabım',
+        ];
+
+        foreach ($expected as $item) {
             $this->assertStringContainsString($item, $html, "Partner menusunde '{$item}' yok.");
         }
     }
