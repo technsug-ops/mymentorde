@@ -171,11 +171,35 @@ class CompanyMailTransportTest extends TestCase
         $this->assertNull(config('mail.mailers.tenant_runtime'));
     }
 
+    /**
+     * Firma anahtarı PAKETİN OKUDUĞU yere yazılmalı.
+     *
+     * ⚠ Canlıda yaşanan hata: paket anahtarı önce `resend.api_key`'den
+     * okuyor, `services.resend.key` yalnızca o boşsa devreye giriyor. İlk
+     * sürüm sadece ikincisini yazdığı için firma anahtarı HİÇ kullanılmadı;
+     * gönderim platformun hesabından denendi ve "domain is not verified"
+     * hatası alındı. Test iki anahtarı da kontrol ediyor.
+     */
+    public function test_resend_key_is_written_where_the_package_reads_it(): void
+    {
+        $this->buildHierarchy();
+
+        $this->makeSetting($this->companyB, [
+            'driver'  => CompanyMailSetting::DRIVER_RESEND,
+            'api_key' => 'firma-anahtari',
+        ]);
+
+        Brand::apply($this->companyB->fresh());
+
+        $this->assertSame('firma-anahtari', config('resend.api_key'), 'Paketin okudugu anahtar yazilmadi.');
+        $this->assertSame('firma-anahtari', config('services.resend.key'));
+    }
+
     /** Resend anahtarı da iade edilmeli — başka firmanın hesabı kullanılmasın. */
     public function test_snapshot_restores_the_resend_key(): void
     {
         $this->buildHierarchy();
-        config(['services.resend.key' => 'platform-key']);
+        config(['services.resend.key' => 'platform-key', 'resend.api_key' => 'platform-key']);
 
         $this->makeSetting($this->companyB, [
             'driver'  => CompanyMailSetting::DRIVER_RESEND,
@@ -185,11 +209,12 @@ class CompanyMailTransportTest extends TestCase
         $snapshot = Brand::snapshot();
 
         Brand::apply($this->companyB->fresh());
-        $this->assertSame('firma-anahtari', config('services.resend.key'));
+        $this->assertSame('firma-anahtari', config('resend.api_key'));
 
         Brand::restore($snapshot);
 
-        $this->assertSame('platform-key', config('services.resend.key'), 'Firma anahtari sizdi.');
+        $this->assertSame('platform-key', config('resend.api_key'), 'Firma anahtari sizdi.');
+        $this->assertSame('platform-key', config('services.resend.key'));
     }
 
     // ── Risk 3: sırlar ──────────────────────────────────────────────────────
