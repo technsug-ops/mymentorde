@@ -234,6 +234,34 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
+        // Partner paneli direktifi — operasyona ait araçları gizlemek için.
+        // Kullanım: @unlesspartnerPanel ... @endpartnerPanel
+        //
+        // ⚠ TEK BAŞINA YETMEZ. Bu yalnızca butonu gizler; adresi bilen yine
+        // girerdi. Asıl kapı RestrictPartnerPanel::DENIED — bu direktif
+        // kullanıcıya tıklayamayacağı düğmeyi göstermemek içindir.
+        //
+        // Fail-closed: hata olursa partner SAYILMAZ (false). Tersi, bir DB
+        // sorunu yüzünden partnere operasyon aracı açmak olurdu; asıl koruma
+        // zaten middleware'de olduğu için burada güvenli taraf budur.
+        Blade::if('partnerPanel', function (): bool {
+            try {
+                $user = request()->user();
+
+                if (!$user || (string) $user->role === \App\Models\User::ROLE_PLATFORM_OWNER) {
+                    return false;
+                }
+
+                return \App\Models\Company::isPartnerPanel(
+                    (int) (\App\Support\TenantContext::writeId() ?? $user->company_id ?? 0)
+                );
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('@partnerPanel directive error', ['error' => $e->getMessage()]);
+
+                return false;
+            }
+        });
+
         // Sayfa görünürlüğü direktifi — manager rol-bazlı sayfa toggle'ı için.
         // Kullanım: @pageVisible('discover') ... @endpageVisible
         // Exception-safe: DB hatasında sayfa default açık kalsın.
