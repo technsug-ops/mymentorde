@@ -119,6 +119,13 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/process-info',              [$partnerProcess, 'index'])->name('manager.process-info.index');
     Route::get('/manager/process-info/{studentId}',  [$partnerProcess, 'show'])->name('manager.process-info.show');
 
+    // ─── Belge ekranları (partner) ──────────────────────────────────────────
+    // Zorunlu belge TANIMLAMA ekranı ile analiz panosu partnerin işi değil;
+    // partnere lazım olan "kimden ne istendi, ne geldi" bilgisi.
+    $partnerDocs = \App\Http\Controllers\Manager\PartnerDocumentController::class;
+    Route::get('/manager/partner-documents',          [$partnerDocs, 'index'])->name('manager.partner-documents.index');
+    Route::get('/manager/partner-documents/requests', [$partnerDocs, 'requests'])->name('manager.partner-documents.requests');
+
     // ─── Personel (Staff) Yönetimi ───────────────────────────────────────────
     Route::get('/manager/staff',                              [StaffController::class, 'index'])->name('manager.staff.index');
     Route::get('/manager/staff/create',                       [StaffController::class, 'create'])->name('manager.staff.create');

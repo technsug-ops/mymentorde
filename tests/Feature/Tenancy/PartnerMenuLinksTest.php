@@ -49,7 +49,11 @@ class PartnerMenuLinksTest extends TestCase
     {
         $html = $this->asStaff($manager)->get('/manager/guests')->getContent();
 
-        preg_match_all('#href="(/[a-z0-9\-/]+)"#i', $html, $matches);
+        // ⚠ MUTLAK URL'LERİ DE YAKALA. İlk sürüm yalnızca "/..." ile başlayan
+        // href'lere bakıyordu; oysa route() tam URL üretiyor. Sonuç: sidebar
+        // altındaki El Kitabı bağlantısı partnerde 404 verdiği halde test
+        // yeşil kalmıştı — desen onu hiç görmemişti.
+        preg_match_all('#href="(?:https?://[^/"]+)?(/[a-z0-9\-/]*)"#i', $html, $matches);
 
         $links = array_values(array_unique($matches[1] ?? []));
 

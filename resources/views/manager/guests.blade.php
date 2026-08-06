@@ -43,13 +43,18 @@
     ],
 ])
 
-{{-- Action Bar --}}
+{{-- Action Bar
+     Toplu içe aktarma partner panelinde kapalı (RestrictPartnerPanel);
+     butonu göstermek 404'e davet olurdu. Partner tek tek "Aday Ekle"
+     kullanıyor — ihtiyaç olursa adres allowlist'e eklenip burası açılır. --}}
+@unlesspartnerPanel
 <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
     <a href="{{ route('manager.bulk-import.index') }}" class="btn"
        style="background:#16a34a;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:6px;" aria-label="Toplu kayıt içeri aktar">
         <x-icon name="upload" size="15" /> Toplu Kayıt İçeri Aktar
     </a>
 </div>
+@endpartnerPanel
 
 {{-- KPI Strip --}}
 <div class="mgr-kpi-strip">
