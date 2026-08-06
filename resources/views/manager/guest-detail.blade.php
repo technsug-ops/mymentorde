@@ -37,6 +37,10 @@
 
 <div style="margin-bottom:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
     <a class="btn" href="/manager/guests">← Aday Öğrenci Listesi</a>
+    {{-- Başvuru rehberleri operasyonun araçları — partner firma bunları
+         yürütmüyor, öğrenciyi devredip süreci izliyor. Adresler ayrıca
+         RestrictPartnerPanel::DENIED ile kapalı. --}}
+    @unlesspartnerPanel
     <a href="{{ route('manager.uni-assist-guide.show', $guest->id) }}"
        style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:linear-gradient(135deg,#c8102e,#9f1239); color:#fff; border-radius:8px; font-size:13px; font-weight:700; text-decoration:none; margin-left:auto;">
         🎓 Uni-Assist →
@@ -47,6 +51,7 @@
     </a>
     {{-- Application Guides — addon partial, hata olsa bile guest-detail çalışır --}}
     @includeIf('manager.partials.application-guides-buttons', ['guestId' => $guest->id, 'studentId' => null])
+    @endpartnerPanel
 </div>
 
 {{-- Dönüşüm Bandı --}}
@@ -299,9 +304,13 @@
             'idSuffix'    => 'guest' . $guest->id,
         ])
 
-        {{-- Eğitim Danışmanı Atama --}}
+        {{-- Eğitim Danışmanı Atama
+
+             Partner danışmanı GÖRÜR ama ATAYAMAZ: danışman üst firmanın
+             elemanı, partner firma ona dışarıdan görev veremez. Atama formu
+             gizli, adres de RestrictPartnerPanel::DENIED ile kapalı. --}}
         <section class="panel gd-panel">
-            <h2>Eğitim Danışmanı Ataması</h2>
+            <h2>@partnerPanel Eğitim Danışmanı @else Eğitim Danışmanı Ataması @endpartnerPanel</h2>
             @if($guest->assigned_senior_email)
                 <div class="gd-readonly">
                     Mevcut: <strong>{{ $guest->assigned_senior_email }}</strong>
@@ -313,9 +322,12 @@
                     @endif
                 </div>
             @else
-                <div class="gd-readonly muted">Henüz eğitim danışmanı atanmamış.</div>
+                <div class="gd-readonly muted">
+                    Henüz eğitim danışmanı atanmamış.@partnerPanel Atamayı operasyonu yürüten firma yapar.@endpartnerPanel
+                </div>
             @endif
 
+            @unlesspartnerPanel
             <form method="POST" action="/manager/guests/{{ $guest->id }}/assign">
                 @csrf @method('PATCH')
                 <div class="gd-field">
@@ -331,6 +343,7 @@
                     <button class="btn btn-primary">Ata</button>
                 </div>
             </form>
+            @endpartnerPanel
         </section>
 
         {{-- Dönüşen Öğrenci --}}

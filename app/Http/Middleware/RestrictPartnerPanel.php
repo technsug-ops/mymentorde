@@ -46,6 +46,38 @@ class RestrictPartnerPanel
         'manager/document-requests', // belge talepleri
         'manager/required-documents',// belge listesi
         'im',                        // öğrenci ve atanan danışmanla yazışma
+
+        // Partner kendi adayının şifresini sıfırlayabilmeli — hesabı o açtı.
+        // ⚠ quick-admin'in TAMAMI değil yalnızca bu uç: aynı grupta bayi,
+        // senior ve öğrenci SİLME ile rol atama var.
+        'manager/quick-admin/reset-password',
+    ];
+
+    /**
+     * ALLOWED bir ön ek altında kalsa bile KAPALI olan yollar.
+     *
+     * `manager/guests` açık olunca `manager/guests/*` de açılıyor — rehberler
+     * ve danışman ataması oraya dahil. Oysa bunlar operasyonun araçları:
+     * Uni-Assist/vize rehberi işi üst firma yürütür, danışmanı da o atar.
+     * Partner firma MentorDE'nin danışmanına dışarıdan görev veremez.
+     *
+     * DENIED, ALLOWED'dan ÖNCE bakılır.
+     *
+     * @var list<string>
+     */
+    private const DENIED = [
+        'manager/guests/*/uni-assist-rehber',
+        'manager/guests/*/uni-assist-rehber/*',
+        'manager/guests/*/vize-rehber',
+        'manager/guests/*/vize-rehber/*',
+        'manager/guests/*/rehber/*',
+        'manager/guests/*/assign',              // danışman ataması
+        'manager/students/*/uni-assist-rehber',
+        'manager/students/*/uni-assist-rehber/*',
+        'manager/students/*/vize-rehber',
+        'manager/students/*/vize-rehber/*',
+        'manager/students/*/rehber/*',
+        'manager/students/*/update',            // danışman/risk/ödeme — operasyonun değerlendirmesi
     ];
 
     /**
@@ -85,7 +117,12 @@ class RestrictPartnerPanel
             return redirect('/manager/guests');
         }
 
-        if ($this->isAllowed($request)) {
+        // DENIED önce: açık bir ön ekin altında kalan operasyon araçları.
+        if ($this->matches($request, self::DENIED)) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        if ($this->matches($request, self::ALLOWED)) {
             return $next($request);
         }
 
@@ -103,9 +140,17 @@ class RestrictPartnerPanel
         return false;
     }
 
-    private function isAllowed(Request $request): bool
+    /**
+     * İstek verilen desenlerden birine uyuyor mu?
+     *
+     * Desenin kendisi ve alt yolları eşleşir: 'manager/guests' hem listeyi
+     * hem detay sayfalarını kapsar.
+     *
+     * @param list<string> $patterns
+     */
+    private function matches(Request $request, array $patterns): bool
     {
-        foreach (self::ALLOWED as $path) {
+        foreach ($patterns as $path) {
             if ($request->is($path) || $request->is($path . '/*')) {
                 return true;
             }
