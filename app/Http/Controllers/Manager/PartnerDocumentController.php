@@ -127,9 +127,9 @@ class PartnerDocumentController extends Controller
     {
         $cid = $this->companyId();
 
-        return GuestApplication::query()
+        return collect(GuestApplication::query()
             ->when($cid > 0, fn ($b) => $b->where('company_id', $cid))
-            ->get(['id', 'first_name', 'last_name', 'converted_student_id'])
+            ->get(['id', 'first_name', 'last_name', 'converted_student_id']))
             ->mapWithKeys(fn ($g) => [
                 (int) $g->id => trim($g->first_name . ' ' . $g->last_name) ?: ('Aday #' . $g->id),
             ]);
@@ -144,9 +144,12 @@ class PartnerDocumentController extends Controller
     {
         $cid = $this->companyId();
 
-        return StudentAssignment::query()
+        // ⚠ collect(): Eloquent koleksiyonunun merge'i model bekler, değerler
+        // metin. Sarmalanmazsa people() içindeki merge "getKey() on string"
+        // ile patlar — ve taraflardan biri boşken hiç görünmez.
+        return collect(StudentAssignment::query()
             ->when($cid > 0, fn ($b) => $b->where('company_id', $cid))
-            ->get(['student_id', 'display_name'])
+            ->get(['student_id', 'display_name']))
             ->mapWithKeys(fn ($s) => [
                 (string) $s->student_id => (string) ($s->display_name ?: $s->student_id),
             ]);
@@ -165,9 +168,9 @@ class PartnerDocumentController extends Controller
     {
         $cid = $this->companyId();
 
-        $fromGuests = GuestApplication::query()
+        $fromGuests = collect(GuestApplication::query()
             ->when($cid > 0, fn ($b) => $b->where('company_id', $cid))
-            ->get(['id', 'first_name', 'last_name', 'converted_student_id'])
+            ->get(['id', 'first_name', 'last_name', 'converted_student_id']))
             ->mapWithKeys(function ($g) {
                 $ownerId = trim((string) ($g->converted_student_id ?? ''));
 

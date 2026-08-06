@@ -71,6 +71,21 @@
         <a href="/manager/partner-documents/requests" class="nav-link {{ $_pnIs('manager/partner-documents/requests') ? 'active' : '' }}">
             <span class="nav-icon">📨</span> Belge Talepleri
         </a>
+
+        {{-- Operasyonun bizden istedikleri. Bekleyen varsa sayıyla belirt —
+             cevaplanmayan talep sürecin tamamını durdurur. --}}
+        @php
+            $_pnIncoming = \App\Models\PartnerInfoRequest::query()
+                ->incomingFor((int) (\App\Support\TenantContext::writeId() ?? 0))
+                ->where('status', \App\Models\PartnerInfoRequest::STATUS_OPEN)
+                ->count();
+        @endphp
+        <a href="/manager/partner-requests/incoming" class="nav-link {{ $_pnIs('manager/partner-requests') ? 'active' : '' }}">
+            <span class="nav-icon">📥</span> Bizden İstenenler
+            @if($_pnIncoming > 0)
+                <span style="margin-left:6px;background:#d97706;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;">{{ $_pnIncoming }}</span>
+            @endif
+        </a>
     </div>
 
     <div class="nav-section">

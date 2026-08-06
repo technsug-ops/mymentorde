@@ -126,6 +126,19 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/partner-documents',          [$partnerDocs, 'index'])->name('manager.partner-documents.index');
     Route::get('/manager/partner-documents/requests', [$partnerDocs, 'requests'])->name('manager.partner-documents.requests');
 
+    // ─── Bilgi/belge talep zinciri: Operasyon → Partner → Öğrenci ───────────
+    // Eksigi operasyon PARTNERDEN ister, partner de kendi ogrencisinden.
+    // /incoming rotasi {id} kaliplarindan ONCE gelmeli, yoksa "incoming"
+    // parametre olarak yakalanir.
+    $partnerReq = \App\Http\Controllers\Manager\PartnerInfoRequestController::class;
+    Route::get('/manager/partner-requests',          [$partnerReq, 'outgoing'])->name('manager.partner-requests.index');
+    Route::get('/manager/partner-requests/incoming', [$partnerReq, 'incoming'])->name('manager.partner-requests.incoming');
+    Route::get('/manager/partner-requests/create',   [$partnerReq, 'create'])->name('manager.partner-requests.create');
+    Route::post('/manager/partner-requests',         [$partnerReq, 'store'])->name('manager.partner-requests.store');
+    Route::get('/manager/partner-requests/{id}',     [$partnerReq, 'show'])->whereNumber('id')->name('manager.partner-requests.show');
+    Route::post('/manager/partner-requests/{id}/items/{itemId}/respond', [$partnerReq, 'respond'])->whereNumber('id')->whereNumber('itemId')->name('manager.partner-requests.respond');
+    Route::post('/manager/partner-requests/{id}/items/{itemId}/forward', [$partnerReq, 'forward'])->whereNumber('id')->whereNumber('itemId')->name('manager.partner-requests.forward');
+
     // ─── Personel (Staff) Yönetimi ───────────────────────────────────────────
     Route::get('/manager/staff',                              [StaffController::class, 'index'])->name('manager.staff.index');
     Route::get('/manager/staff/create',                       [StaffController::class, 'create'])->name('manager.staff.create');
