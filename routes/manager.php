@@ -57,6 +57,13 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
         ->middleware('throttle:60,1')
         ->name('manager.leads.store');
 
+    // Hesabım — kullanıcı kendi giriş bilgilerini yönetir.
+    Route::get('/manager/account', [\App\Http\Controllers\Manager\MyAccountController::class, 'edit'])
+        ->name('manager.account.edit');
+    Route::post('/manager/account', [\App\Http\Controllers\Manager\MyAccountController::class, 'update'])
+        ->middleware('throttle:20,1')
+        ->name('manager.account.update');
+
     // Aday devri — operasyonel karar, süreci yürüten firmada.
     Route::get('/manager/leads/transfer', [\App\Http\Controllers\Manager\ManagerLeadController::class, 'transferForm'])
         ->name('manager.leads.transfer.form');

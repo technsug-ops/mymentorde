@@ -65,6 +65,11 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
         ->whereNumber('company')->whereNumber('user')
         ->middleware('throttle:10,1')
         ->name('platform.companies.staff.reset-password');
+    // Giriş e-postasını değiştir (hesap yönetimi).
+    Route::post('/companies/{company}/staff/{user}/email', [PlatformController::class, 'updateStaffEmail'])
+        ->whereNumber('company')->whereNumber('user')
+        ->middleware('throttle:20,1')
+        ->name('platform.companies.staff.email');
     Route::post('/companies/{company}/modules', [PlatformController::class, 'updateModules'])
         ->whereNumber('company')
         ->middleware('throttle:30,1')
