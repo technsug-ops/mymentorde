@@ -40,7 +40,10 @@ class LegalController extends Controller
                 ->where('kind', $kind)
                 ->whereNotNull('body')
                 ->whereRaw('LENGTH(body) > 0')
-                ->orderByRaw("FIELD(locale, 'tr', 'de', 'en')")
+                // FIELD() MySQL'e özgü — SQLite'ta yok ve sorgu patlıyordu.
+                // Sonuç: hukuki sayfalar canlıda çalışıyor ama TEST EDİLEMİYORDU.
+                // CASE WHEN her sürücüde aynı sırayı verir.
+                ->orderByRaw("CASE locale WHEN 'tr' THEN 1 WHEN 'de' THEN 2 WHEN 'en' THEN 3 ELSE 4 END")
                 ->first();
         }
 
