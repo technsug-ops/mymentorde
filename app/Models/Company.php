@@ -30,6 +30,7 @@ class Company extends Model
         'public_marketing',
         'is_public_portal',
         'denied_permission_codes',
+        'panel_mode',
     ];
 
     protected $casts = [
@@ -59,6 +60,8 @@ class Company extends Model
             \App\Support\ApplyCompanyResolver::flushCache($company);
             // üst firma değişti → görünürlük kümesi yeniden hesaplanmalı
             self::flushHierarchyCache();
+            // panel modu değişti → menü ve adres kısıtı tazelensin
+            self::flushPanelModeCache();
         });
 
         static::deleted(function (): void {
@@ -219,6 +222,57 @@ class Company extends Model
     public static function flushAdvisorCache(): void
     {
         \Illuminate\Support\Facades\Cache::forget(self::ADVISOR_CACHE_KEY);
+    }
+
+    public const PANEL_FULL = 'full';
+
+    public const PANEL_PARTNER = 'partner';
+
+    private const PANEL_MODE_CACHE_KEY = 'companies:panel_modes';
+
+    /**
+     * Firma sade partner penceresini mi görüyor?
+     *
+     * `partner` modunda menü daralır ve yönetim adresleri kapanır
+     * (bkz. RestrictPartnerPanel). Varsayılan `full` — mevcut şirketler
+     * etkilenmez.
+     */
+    public static function isPartnerPanel(int $companyId): bool
+    {
+        if ($companyId <= 0) {
+            return false;
+        }
+
+        return (self::panelModes()[$companyId] ?? self::PANEL_FULL) === self::PANEL_PARTNER;
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    private static function panelModes(): array
+    {
+        return \Illuminate\Support\Facades\Cache::remember(
+            self::PANEL_MODE_CACHE_KEY,
+            600,
+            static function (): array {
+                try {
+                    return \Illuminate\Support\Facades\DB::table('companies')
+                        ->pluck('panel_mode', 'id')
+                        ->mapWithKeys(static fn ($mode, $id): array => [
+                            (int) $id => (string) ($mode ?: self::PANEL_FULL),
+                        ])
+                        ->all();
+                } catch (\Throwable) {
+                    // Kolon henüz yok (migration öncesi) — herkes tam panel.
+                    return [];
+                }
+            }
+        );
+    }
+
+    public static function flushPanelModeCache(): void
+    {
+        \Illuminate\Support\Facades\Cache::forget(self::PANEL_MODE_CACHE_KEY);
     }
 
     /**

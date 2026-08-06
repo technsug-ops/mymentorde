@@ -330,6 +330,13 @@ class PlatformController extends Controller
             $companyModel->is_public_portal = $request->boolean('is_public_portal');
         }
 
+        // Panel modu: partner firmalar sade takip penceresi görür.
+        if ($request->has('panel_mode')) {
+            $companyModel->panel_mode = $request->input('panel_mode') === Company::PANEL_PARTNER
+                ? Company::PANEL_PARTNER
+                : Company::PANEL_FULL;
+        }
+
         $companyModel->save(); // Company::saved observer marka cache'ini temizler
 
         \App\Models\PlatformAuditLog::record(

@@ -63,6 +63,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // Diğer roller bu middleware'den şeffaf geçer.
         $middleware->appendToGroup('web', \App\Http\Middleware\EnsureReadOnly::class);
 
+        // Partner firmalar sade takip penceresi görür — yönetim adresleri kapalı.
+        // Menüyü gizlemek yetmez, adresi bilen yine girerdi; kısıt istek
+        // seviyesinde. SetCompanyContext'ten SONRA: hangi şirkette çalışıldığı
+        // bilinmeden karar verilemez.
+        $middleware->appendToGroup('web', \App\Http\Middleware\RestrictPartnerPanel::class);
+
         $middleware->alias([
             'platform.owner' => \App\Http\Middleware\EnsurePlatformOwner::class,
             'system.access' => \App\Http\Middleware\EnsureSystemAccess::class,

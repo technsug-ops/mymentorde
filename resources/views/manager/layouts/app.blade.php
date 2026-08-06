@@ -180,6 +180,18 @@
         </div>
 
         {{-- Navigation --}}
+        @php
+            // Partner firmalar sade takip penceresi görür. Adresler zaten
+            // RestrictPartnerPanel ile kapalı; burada menü de daralıyor ki
+            // kullanıcı olmayan kapıları denemesin.
+            $_partnerPanel = \App\Models\Company::isPartnerPanel(
+                (int) (\App\Support\TenantContext::writeId() ?? 0)
+            ) && (string) ($mgrUser->role ?? '') !== \App\Models\User::ROLE_PLATFORM_OWNER;
+        @endphp
+
+        @if($_partnerPanel)
+            @include('manager.layouts._nav-partner')
+        @else
         <nav class="sidebar-nav">
             <div class="nav-section">
                 <a href="/manager/dashboard"
@@ -632,6 +644,7 @@
                 </a>
             </div>
         </nav>
+        @endif
 
         <div class="sidebar-footer">
             <a href="{{ route('manager.handbook') }}" class="nav-link {{ request()->routeIs('manager.handbook') ? 'active' : '' }}" style="margin-bottom:6px;">

@@ -218,6 +218,25 @@
             </div>
 
             <div class="plat-form-group">
+                <label class="plat-form-label">Panel Modu</label>
+                <select name="panel_mode" class="plat-select" style="width:100%;">
+                    <option value="full" {{ ($company->panel_mode ?? 'full') !== 'partner' ? 'selected' : '' }}>
+                        Tam panel — kendi operasyonunu yürüten firma
+                    </option>
+                    <option value="partner" {{ ($company->panel_mode ?? 'full') === 'partner' ? 'selected' : '' }}>
+                        Sade partner penceresi — öğrenci takibi
+                    </option>
+                </select>
+                <small style="font-size:11px;color:var(--plat-muted);display:block;margin-top:6px;">
+                    <strong style="color:#fff;">Sade</strong> modda menü 8 maddeye iner: adaylar, öğrenciler,
+                    aday ekle, belgeler, destek, duyurular, hesap.
+                    <br>İnsan kaynakları, finans, sistem yönetimi, AI Labs, UniMatch ve bayi ağı gibi
+                    alanların <strong style="color:#fff;">adresleri de kapanır</strong> — menüyü gizlemek
+                    tek başına yeterli olmazdı.
+                </small>
+            </div>
+
+            <div class="plat-form-group">
                 <label class="plat-form-label">Ortak Giriş Kapısı</label>
                 <input type="hidden" name="is_public_portal" value="0">
                 <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--plat-panel-2);border:1px solid var(--plat-border);border-radius:8px;cursor:pointer;">
