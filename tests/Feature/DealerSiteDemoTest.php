@@ -64,6 +64,35 @@ class DealerSiteDemoTest extends TestCase
             ->assertSee('Özlem Yurtdışı Danışmanlık', false);
     }
 
+    /** Profilin logosu basılmalı ve dosya gerçekten var olmalı. */
+    public function test_named_profile_shows_its_logo(): void
+    {
+        $this->get('/demo/bayi-sitesi/ozlem')
+            ->assertOk()
+            ->assertSee('img/demo/ozlem-logo.svg', false);
+
+        $this->assertFileExists(public_path('img/demo/ozlem-logo.svg'), 'Logo dosyasi yok — site kirik gorsel basar.');
+    }
+
+    /**
+     * Izgaralar tam satır olmalı.
+     *
+     * Ekip 4'lü, yorumlar 3'lü ızgarada basılıyor. Eksik kalan hücre boşluk
+     * bırakıp bölümü sola yaslıyordu; aday bayi tasarımı bozuk sanardı.
+     */
+    public function test_demo_fills_the_grid_rows(): void
+    {
+        $html = $this->get('/demo/bayi-sitesi')->assertOk()->getContent();
+
+        foreach (['A. Yılmaz', 'B. Kaya', 'C. Demir', 'D. Şahin'] as $member) {
+            $this->assertStringContainsString($member, $html, "Ekipte {$member} yok — 4'lu izgara eksik kaliyor.");
+        }
+
+        foreach (['Elif S.', 'Murat T.', 'Zeynep A.'] as $person) {
+            $this->assertStringContainsString($person, $html, "Yorumlarda {$person} yok — 3'lu izgara eksik kaliyor.");
+        }
+    }
+
     /** Profil ve şablon aynı adreste birlikte seçilebilmeli. */
     public function test_named_profile_accepts_a_template(): void
     {
