@@ -60,6 +60,20 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
     // Üst firmanın alt firmaya koyduğu yetki tavanı
     Route::post('/companies/{company}/permissions', [PlatformController::class, 'updatePermissionCeiling'])
         ->name('platform.companies.permissions');
+    // ── Firmanın kendi mail taşıyıcısı ──────────────────────────────────────
+    // "Kendi sunucumu / kendi Resend hesabımı kullanın" diyen firma için.
+    // Test edilmeden aktiflesmez: yanlis kimlik o firmanin TUM mailini keser.
+    $mailSetting = \App\Http\Controllers\Platform\CompanyMailSettingController::class;
+    Route::post('/companies/{company}/mail-setting', [$mailSetting, 'update'])
+        ->whereNumber('company')->middleware('throttle:20,1')
+        ->name('platform.companies.mail-setting.update');
+    Route::post('/companies/{company}/mail-setting/test', [$mailSetting, 'test'])
+        ->whereNumber('company')->middleware('throttle:10,1')
+        ->name('platform.companies.mail-setting.test');
+    Route::delete('/companies/{company}/mail-setting', [$mailSetting, 'destroy'])
+        ->whereNumber('company')->middleware('throttle:20,1')
+        ->name('platform.companies.mail-setting.destroy');
+
     // Firmaya panel kullanıcısı aç — firma kullanıcısız kalırsa tek giriş yolu.
     Route::post('/companies/{company}/staff', [PlatformController::class, 'storeStaff'])
         ->whereNumber('company')

@@ -236,6 +236,10 @@ class PlatformController extends Controller
                 ->whereIn('role', array_values(array_diff(User::ADMIN_PANEL_ROLES, [User::ROLE_PLATFORM_OWNER])))
                 ->orderBy('role')
                 ->get(['id', 'name', 'email', 'role', 'is_active', 'password_must_change']),
+            // Firmanın kendi mail taşıyıcısı (şifreler görünmez, model gizler)
+            'mailSetting'         => \App\Models\CompanyMailSetting::query()
+                ->where('company_id', $companyModel->id)
+                ->first(),
             // Üst firma seçici için — kendisi ve alt firmaları hariç (döngü olmasın)
             'allCompanies'        => Company::query()
                 ->whereNotIn('id', array_merge(
