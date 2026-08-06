@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 268 56" width="268" height="56" role="img" aria-label="Özlem Yurtdışı Danışmanlık">
+  <!--
+    Demo amaçlı üretilmiş logo. Yatay kilit: sitede <img max-height:40px>
+    olarak basılıyor, o yüzden yükseklik değil GENİŞLİK üzerinden kurgulandı.
+
+    Yazı tipi sistemden geliyor (Arial/Helvetica her yerde var). SVG bir
+    <img> içinde gösterildiği için harici font yüklenemez — özel bir font
+    seçilseydi bazı makinelerde sessizce başka bir yazıyla basılırdı.
+  -->
+  <defs>
+    <linearGradient id="ozlemMark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#0f3d8a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Amblem: mezuniyet kepi — "yurtdışında eğitim" işini tek bakışta anlatır -->
+  <rect x="0" y="4" width="48" height="48" rx="14" fill="url(#ozlemMark)"/>
+  <path d="M11 26.5 L24 20 L37 26.5 L24 33 Z" fill="#ffffff"/>
+  <path d="M30.5 29.5 v6.2 c0 2.4 -2.9 4.3 -6.5 4.3 s-6.5 -1.9 -6.5 -4.3 v-6.2"
+        fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="37" cy="26.5" r="1.9" fill="#ffffff"/>
+  <path d="M37 28.4 v6.4" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Kelime markası -->
+  <text x="62" y="28" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700"
+        fill="#0f2a4a" letter-spacing="0.4">ÖZLEM</text>
+  <text x="63" y="43" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="600"
+        fill="#5b6f8a" letter-spacing="2.1">YURTDIŞI DANIŞMANLIK</text>
+</svg>

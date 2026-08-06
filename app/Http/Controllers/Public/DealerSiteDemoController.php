@@ -34,7 +34,7 @@ class DealerSiteDemoController extends Controller
      * Aday bayiye kendi adıyla bir örnek göstermek satışta işe yarıyor.
      * Profil eklemek için buraya bir satır yeter.
      *
-     * @var array<string,array{name:string,hero:string,about:string,city:string}>
+     * @var array<string,array{name:string,hero:string,about:string,city:string,logo?:string}>
      */
     private const PROFILES = [
         'ozlem' => [
@@ -44,6 +44,7 @@ class DealerSiteDemoController extends Controller
                        . 'buluşturuyoruz. Uni-Assist başvurusundan vize randevusuna, dil kursundan '
                        . 'yerleşime kadar sürecin her adımında yanınızdayız.',
             'city'  => 'İstanbul',
+            'logo'  => 'img/demo/ozlem-logo.svg',
         ],
     ];
 
@@ -66,7 +67,9 @@ class DealerSiteDemoController extends Controller
 
         $dealer = $this->sampleDealer($key, $profileKey);
 
-        $data = PartnerSiteData::forDealer($dealer, null);
+        $logoPath = self::PROFILES[$profileKey]['logo'] ?? null;
+
+        $data = PartnerSiteData::forDealer($dealer, $logoPath ? asset($logoPath) : null);
 
         return response()
             ->view(PartnerTemplates::view($key), $data + [
@@ -138,15 +141,20 @@ class DealerSiteDemoController extends Controller
                 ['title' => 'Yerleşim',             'text' => 'İkamet kaydı, banka hesabı, sigorta işlemleri.'],
             ],
 
+            // ⚠ SAYILAR IZGARAYA GÖRE. Ekip 4'lü, yorumlar 3'lü ızgarada
+            // basılıyor; eksik kalan hücre boşluk bırakıp sayfayı sola yaslıyor.
+            // Demo tam satır göstermeli, aday bayi tasarımı bozuk sanmasın.
             'site_team' => [
                 ['name' => 'A. Yılmaz', 'role' => 'Kurucu Danışman'],
                 ['name' => 'B. Kaya',   'role' => 'Başvuru Uzmanı'],
                 ['name' => 'C. Demir',  'role' => 'Vize Uzmanı'],
+                ['name' => 'D. Şahin',  'role' => 'Yerleşim Danışmanı'],
             ],
 
             'site_testimonials' => [
-                ['name' => 'Elif S.', 'text' => 'Başvurudan vizeye kadar her adımda yanımdaydılar. TU Berlin\'e kabul aldım.'],
-                ['name' => 'Murat T.', 'text' => 'Belgelerimi tek tek kontrol ettiler, hiçbir eksikle karşılaşmadım.'],
+                ['name' => 'Elif S.',  'school' => 'TU Berlin', 'text' => 'Başvurudan vizeye kadar her adımda yanımdaydılar. TU Berlin\'e kabul aldım.'],
+                ['name' => 'Murat T.', 'school' => 'RWTH Aachen', 'text' => 'Belgelerimi tek tek kontrol ettiler, hiçbir eksikle karşılaşmadım.'],
+                ['name' => 'Zeynep A.', 'school' => 'Uni Köln', 'text' => 'Vize randevusuna hazırlıklı gittim; sorulacak soruları önceden çalıştık.'],
             ],
 
             'site_show_badge' => false,
