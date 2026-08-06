@@ -99,9 +99,12 @@ svg{width:1em;height:1em;}
 .sec-head p{font-size:17px;color:var(--muted);margin:16px 0 0;}
 
 /* SERVICES — bold cards */
-.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
-@media(max-width:860px){.svc-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:540px){.svc-grid{grid-template-columns:1fr;}}
+/* Eksik satır ORTALANIR — kart sayısı partnerin girdiğine bağlı.
+   Genişlik: (100% - (sütun-1)*gap) / sütun */
+.svc-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:22px;}
+.svc-grid>*{flex:0 1 calc((100% - 44px)/3);min-width:240px;}
+@media(max-width:860px){.svc-grid>*{flex-basis:calc((100% - 22px)/2);}}
+@media(max-width:540px){.svc-grid>*{flex-basis:100%;min-width:0;}}
 .svc{background:#fff;border-radius:20px;padding:32px 28px;border:1px solid var(--line);position:relative;transition:all .2s;overflow:hidden;}
 .svc:hover{transform:translateY(-6px);box-shadow:0 26px 50px rgba(18,18,26,.1);}
 .svc-n{position:absolute;top:20px;right:26px;font-family:var(--disp);font-weight:800;font-size:44px;color:var(--line);line-height:1;}
@@ -144,9 +147,10 @@ svg{width:1em;height:1em;}
 .wc p{font-size:13px;color:var(--body);margin:0;}
 
 /* TEAM */
-.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
-@media(max-width:820px){.team-grid{grid-template-columns:1fr 1fr;}}
-@media(max-width:480px){.team-grid{grid-template-columns:1fr;}}
+.team-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:22px;}
+.team-grid>*{flex:0 1 calc((100% - 66px)/4);min-width:200px;}
+@media(max-width:820px){.team-grid>*{flex-basis:calc((100% - 22px)/2);}}
+@media(max-width:480px){.team-grid>*{flex-basis:100%;min-width:0;}}
 .tm{background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px;text-align:center;transition:all .2s;}
 .tm:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(18,18,26,.08);}
 .tm-ph{width:88px;height:88px;border-radius:18px;object-fit:cover;margin:0 auto 15px;background:var(--ink);color:#fff;
@@ -155,8 +159,9 @@ svg{width:1em;height:1em;}
 .tm p{font-size:13px;color:var(--muted);margin:0;}
 
 /* TESTIMONIALS */
-.q-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
-@media(max-width:820px){.q-grid{grid-template-columns:1fr;}}
+.q-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:22px;}
+.q-grid>*{flex:0 1 calc((100% - 44px)/3);min-width:260px;}
+@media(max-width:820px){.q-grid>*{flex-basis:100%;min-width:0;}}
 .qc{background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px;}
 .qc .st{color:var(--accent);font-size:16px;letter-spacing:2px;margin-bottom:14px;}
 .qc blockquote{margin:0 0 20px;font-size:15px;line-height:1.7;color:var(--ink);}
