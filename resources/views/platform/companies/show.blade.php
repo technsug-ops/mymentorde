@@ -356,6 +356,31 @@
             değiştirmek zorundadır.
         </p>
 
+        {{-- Yeni hesap açma.
+
+             Konsol mevcut hesapları listeliyor ve şifrelerini sıfırlıyordu ama
+             YENİ hesap açamıyordu. Firma kullanıcısız kalırsa (ilk yönetici
+             silinmişse ya da firma boş kurulmuşsa) şirkete girmenin başka yolu
+             kalmıyordu — başvuru linki de personelsiz firmada 404 veriyor. --}}
+        <form method="POST" action="{{ route('platform.companies.staff.store', $company->id) }}"
+              style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--plat-border);">
+            @csrf
+            <div style="flex:1;min-width:150px;">
+                <label class="plat-form-label">Ad Soyad</label>
+                <input type="text" name="name" class="plat-input" required maxlength="120" value="{{ old('name') }}">
+            </div>
+            <div style="flex:1.4;min-width:200px;">
+                <label class="plat-form-label">E-posta</label>
+                <input type="email" name="email" class="plat-input" required maxlength="190" value="{{ old('email') }}">
+            </div>
+            <button type="submit" class="plat-btn plat-btn-ghost">Yönetici Ekle</button>
+            <p class="plat-card-sub" style="width:100%;margin:2px 0 0;font-size:11.5px;">
+                Rol <strong style="color:#fff;">yönetici</strong> olarak açılır; diğer roller firmanın
+                kendi personel ekranından eklenir. Danışman rolü buradan bilerek açılamaz —
+                bir firmaya danışman eklemek operasyonu o firmaya taşır.
+            </p>
+        </form>
+
         @if(empty($staffAccounts) || $staffAccounts->isEmpty())
             <p style="margin:0;color:var(--plat-muted);font-size:13px;">
                 Bu şirkette panel kullanıcısı yok — başvuru linki de 404 verir.
