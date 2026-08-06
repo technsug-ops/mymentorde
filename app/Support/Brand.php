@@ -177,9 +177,8 @@ final class Brand
             config(['mail.mailers.' . self::TENANT_MAILER => $setting->mailerConfig()]);
             config(['mail.default' => self::TENANT_MAILER]);
 
-            // Resend anahtarı mailer'da değil servis yapılandırmasında durur.
             if ($setting->driver === \App\Models\CompanyMailSetting::DRIVER_RESEND) {
-                config(['services.resend.key' => $setting->api_key]);
+                self::useResendKey((string) $setting->api_key);
             }
 
             // Taşıyıcıya özel gönderen adresi markayı ezer: kimlik bilgisi
@@ -195,6 +194,54 @@ final class Brand
                 'company' => (int) $company->id,
                 'error'   => $e->getMessage(),
             ]);
+        }
+    }
+
+    /**
+     * Resend anahtarını çalışma anında değiştir.
+     *
+     * ── ÜÇ TUZAK BİRDEN ──────────────────────────────────────────────────
+     * 1. Paket anahtarı ÖNCE `resend.api_key`'den okuyor, `services.resend.key`
+     *    yalnızca o boşsa devreye giriyor. İlk sürüm sadece ikincisini
+     *    yazıyordu; .env'den gelen `resend.api_key` dolu olduğu için firma
+     *    anahtarı HİÇ kullanılmıyordu ve gönderim platformun hesabından
+     *    deneniyordu — "domain is not verified" hatasının sebebi buydu.
+     *
+     * 2. Resend istemcisi SINGLETON. Bir kez çözüldükten sonra yapılandırmayı
+     *    değiştirmek işe yaramaz; örneği unutturmak gerekiyor.
+     *
+     * 3. Laravel mailer'ları da adına göre önbelleğe alıyor. Aynı istekte
+     *    iki farklı firmaya mail giderse ikincisi birincinin taşıyıcısını
+     *    kullanırdı.
+     */
+    private static function useResendKey(string $key): void
+    {
+        if ($key === '') {
+            return;
+        }
+
+        config([
+            'resend.api_key'      => $key,
+            'services.resend.key' => $key,
+        ]);
+
+        self::forgetResolvedMailers();
+    }
+
+    /** Çözülmüş Resend istemcisini ve mailer önbelleğini bırak. */
+    private static function forgetResolvedMailers(): void
+    {
+        try {
+            app()->forgetInstance(\Resend\Contracts\Client::class);
+            app()->forgetInstance('resend');
+        } catch (\Throwable $e) {
+            // Paket yoksa (test ortamı) sorun değil.
+        }
+
+        try {
+            \Illuminate\Support\Facades\Mail::forgetMailers();
+        } catch (\Throwable $e) {
+            // Mail yöneticisi henüz kurulmadıysa yapacak bir şey yok.
         }
     }
 
@@ -502,7 +549,9 @@ final class Brand
             // gönderirdi — başka markanın kimliğiyle çıkan mail demek.
             'mail_default'  => config('mail.default'),
             'tenant_mailer' => config('mail.mailers.' . self::TENANT_MAILER),
+            // Paket anahtarı ÖNCE resend.api_key'den okuyor; ikisi de taşınmalı.
             'resend_key'    => config('services.resend.key'),
+            'resend_pkg_key'=> config('resend.api_key'),
             'company_id' => app()->bound(self::BRAND_COMPANY_KEY)
                 ? (int) app(self::BRAND_COMPANY_KEY)
                 : null,
@@ -522,6 +571,11 @@ final class Brand
             config(['mail.default' => $snapshot['mail_default']]);
             config(['mail.mailers.' . self::TENANT_MAILER => $snapshot['tenant_mailer'] ?? null]);
             config(['services.resend.key' => $snapshot['resend_key'] ?? null]);
+            config(['resend.api_key' => $snapshot['resend_pkg_key'] ?? null]);
+
+            // Anahtar geri alındı ama çözülmüş istemci hâlâ eskisini tutuyor
+            // olabilir — bırakılmazsa iade sözde kalır.
+            self::forgetResolvedMailers();
         }
 
         $companyId = $snapshot['company_id'] ?? null;

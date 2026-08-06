@@ -390,14 +390,21 @@
             @csrf
             <div class="plat-form-group">
                 <label class="plat-form-label">Sürücü</label>
-                <select name="driver" class="plat-select" style="width:100%;">
+                <select name="driver" id="mailDriverSelect" class="plat-select" style="width:100%;">
                     @foreach(\App\Models\CompanyMailSetting::DRIVERS as $val => $label)
                         <option value="{{ $val }}" {{ $_driver === $val ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
 
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            {{-- Sürücüye göre alan gösterimi.
+
+                 İlk sürümde iki sürücünün alanları da hep görünüyordu:
+                 Resend seçiliyken SMTP sunucu/kullanıcı/şifre kutuları
+                 duruyordu ve "burayı nasıl dolduracağım" sorusunu doğuruyordu.
+                 Alanlar artık seçime göre gizleniyor; JS çalışmazsa hepsi
+                 görünür kalır — yani en kötü ihtimalde eski davranış. --}}
+            <div class="js-mail-smtp" style="display:flex;gap:10px;flex-wrap:wrap;">
                 <div class="plat-form-group" style="flex:2;min-width:180px;">
                     <label class="plat-form-label">SMTP Sunucu</label>
                     <input type="text" name="host" class="plat-input" maxlength="190"
@@ -417,7 +424,7 @@
                 </div>
             </div>
 
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div class="js-mail-smtp" style="display:flex;gap:10px;flex-wrap:wrap;">
                 <div class="plat-form-group" style="flex:1;min-width:180px;">
                     <label class="plat-form-label">Kullanıcı Adı</label>
                     <input type="text" name="username" class="plat-input" maxlength="190"
@@ -430,13 +437,10 @@
                 </div>
             </div>
 
-            <div class="plat-form-group">
+            <div class="plat-form-group js-mail-resend">
                 <label class="plat-form-label">Resend API Anahtarı</label>
                 <input type="password" name="api_key" class="plat-input" autocomplete="new-password"
                        placeholder="{{ $_hasCred ? '•••••••• (kayıtlı)' : 're_...' }}">
-                <small style="font-size:11px;color:var(--plat-muted);">
-                    Yalnızca sürücü <strong>Resend</strong> ise kullanılır.
-                </small>
             </div>
 
             <div class="plat-form-group">
@@ -456,6 +460,28 @@
 
             <button type="submit" class="plat-btn plat-btn-ghost">Taşıyıcıyı Kaydet</button>
         </form>
+
+        {{-- CSP: inline onchange bloklanır (bkz. CLAUDE.md), olay dinleyici
+             nonce'lu blok içinden bağlanıyor. --}}
+        <script nonce="{{ $cspNonce ?? '' }}">
+        (function () {
+            var select = document.getElementById('mailDriverSelect');
+            if (!select) return;
+
+            function sync() {
+                var isResend = select.value === 'resend';
+                document.querySelectorAll('.js-mail-smtp').forEach(function (el) {
+                    el.style.display = isResend ? 'none' : '';
+                });
+                document.querySelectorAll('.js-mail-resend').forEach(function (el) {
+                    el.style.display = isResend ? '' : 'none';
+                });
+            }
+
+            select.addEventListener('change', sync);
+            sync();
+        })();
+        </script>
 
         @if($_ms)
             <form method="POST" action="{{ route('platform.companies.mail-setting.test', $company->id) }}"
