@@ -56,6 +56,47 @@ class DealerSiteDemoTest extends TestCase
         $this->get('/demo/bayi-sitesi/olmayan-sablon')->assertOk();
     }
 
+    /** İsimli demo profili kendi adıyla açılmalı. */
+    public function test_named_profile_uses_its_own_name(): void
+    {
+        $this->get('/demo/bayi-sitesi/ozlem')
+            ->assertOk()
+            ->assertSee('Özlem Yurtdışı Danışmanlık', false);
+    }
+
+    /** Profil ve şablon aynı adreste birlikte seçilebilmeli. */
+    public function test_named_profile_accepts_a_template(): void
+    {
+        $this->get('/demo/bayi-sitesi/ozlem/minimal')
+            ->assertOk()
+            ->assertSee('Özlem Yurtdışı Danışmanlık', false);
+    }
+
+    /**
+     * GERİYE UYUM: profil eklenmeden önce paylaşılmış şablon bağlantıları
+     * çalışmaya devam etmeli. İlk parça artık profil de olabildiği için bu
+     * ayrım sessizce bozulabilirdi.
+     */
+    public function test_plain_template_links_still_work(): void
+    {
+        $this->get('/demo/bayi-sitesi/minimal')
+            ->assertOk()
+            ->assertSee('Demo Eğitim Danışmanlığı', false);
+    }
+
+    /**
+     * Arama motorlarına kapalı olmalı.
+     *
+     * İsimli demo gerçek bir firmanın adını taşıyor; dizine girerse o
+     * firmanın kendi sitesi sanılabilir. Bağlantı elden paylaşılır.
+     */
+    public function test_demo_is_not_indexable(): void
+    {
+        $this->get('/demo/bayi-sitesi/ozlem')
+            ->assertOk()
+            ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+    }
+
     /**
      * Demo veritabanına HİÇ yazmamalı.
      *

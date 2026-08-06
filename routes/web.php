@@ -1244,8 +1244,13 @@ Route::middleware(['company.context'])->group(function () {
     // Bayi mini-sitesinin herkese acik ORNEGI — aday bayiye link olarak verilir.
     // Veritabaninda kaydi yok (bkz. DealerSiteDemoController): sahte bir bayi
     // eklemek raporlara ve komisyon hesaplarina karisirdi.
-    Route::get('/demo/bayi-sitesi/{template?}', [\App\Http\Controllers\Public\DealerSiteDemoController::class, 'show'])
-        ->where('template', '[a-z0-9-]{2,32}')
+    // Iki serbest parca: /demo/bayi-sitesi/{profil}/{sablon} ya da
+    // /demo/bayi-sitesi/{sablon}. Ayrimi controller yapiyor — ilk parca
+    // taninan bir profilse profildir, degilse sablon. Boylece daha once
+    // paylasilmis /demo/bayi-sitesi/aurora baglantilari calismaya devam eder.
+    Route::get('/demo/bayi-sitesi/{first?}/{second?}', [\App\Http\Controllers\Public\DealerSiteDemoController::class, 'show'])
+        ->where('first', '[a-z0-9-]{2,32}')
+        ->where('second', '[a-z0-9-]{2,32}')
         ->middleware('throttle:120,1')
         ->name('public.dealer-site-demo');
 

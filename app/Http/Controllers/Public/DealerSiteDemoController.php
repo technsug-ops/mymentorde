@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Dealer;
 use App\Support\PartnerSiteData;
 use App\Support\PartnerTemplates;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 /**
  * Bayi mini-sitesinin herkese açık ÖRNEĞİ — aday bayiye gösterilir.
@@ -28,23 +28,58 @@ use Illuminate\Http\Request;
  */
 class DealerSiteDemoController extends Controller
 {
-    /** Şablon seçilebilir: aday bayi hangi tasarımı istediğini görsün. */
-    public function show(Request $request, ?string $template = null): View
+    /**
+     * İsimli demo profilleri.
+     *
+     * Aday bayiye kendi adıyla bir örnek göstermek satışta işe yarıyor.
+     * Profil eklemek için buraya bir satır yeter.
+     *
+     * @var array<string,array{name:string,hero:string,about:string,city:string}>
+     */
+    private const PROFILES = [
+        'ozlem' => [
+            'name'  => 'Özlem Yurtdışı Danışmanlık',
+            'hero'  => 'Almanya\'da Eğitim Yolculuğunuz Özlem Yurtdışı Danışmanlık ile Başlasın',
+            'about' => 'Özlem Yurtdışı Danışmanlık olarak öğrencileri Almanya\'daki üniversitelerle '
+                       . 'buluşturuyoruz. Uni-Assist başvurusundan vize randevusuna, dil kursundan '
+                       . 'yerleşime kadar sürecin her adımında yanınızdayız.',
+            'city'  => 'İstanbul',
+        ],
+    ];
+
+    /**
+     * Şablon ve profil aynı adresten seçilir.
+     *
+     * İki serbest parça var ve sıraları belirsiz olabilirdi. Kural basit:
+     * ilk parça TANINAN BİR PROFİL ise profildir, değilse şablondur. Böylece
+     * daha önce paylaşılmış /demo/bayi-sitesi/aurora gibi bağlantılar
+     * çalışmaya devam ediyor.
+     */
+    public function show(Request $request, ?string $first = null, ?string $second = null): Response
     {
+        $isProfile = $first !== null && isset(self::PROFILES[$first]);
+
+        $profileKey = $isProfile ? $first : null;
         // resolve() geçersiz anahtarı varsayılana düşürür — ziyaretçi adres
         // çubuğuna ne yazarsa yazsın sayfa açılır.
-        $key = PartnerTemplates::resolve($template);
+        $key = PartnerTemplates::resolve($isProfile ? $second : $first);
 
-        $dealer = $this->sampleDealer($key);
+        $dealer = $this->sampleDealer($key, $profileKey);
 
         $data = PartnerSiteData::forDealer($dealer, null);
 
-        return view(PartnerTemplates::view($key), $data + [
-            'isPreview'    => true,
-            'demoMode'     => true,
-            'demoTemplate' => $key,
-            'demoOptions'  => PartnerTemplates::all(),
-        ]);
+        return response()
+            ->view(PartnerTemplates::view($key), $data + [
+                'isPreview'    => true,
+                'demoMode'     => true,
+                'demoTemplate' => $key,
+                'demoProfile'  => $profileKey,
+                'demoOptions'  => PartnerTemplates::all(),
+            ])
+            // ⚠ ARAMA MOTORLARINA KAPALI. İsimli demolar gerçek bir firmanın
+            // adını taşıyor; dizine girerse o firmanın sitesi sanılabilir.
+            // Bağlantı elden paylaşılır, aranarak bulunmaz.
+            ->header('X-Robots-Tag', 'noindex, nofollow');
     }
 
     /**
@@ -54,30 +89,38 @@ class DealerSiteDemoController extends Controller
      * "benim sitem de böyle olabilir" diyebilsin. İsim bilerek uydurma ve
      * "Demo" ibaresi taşıyor: gerçek bir firmayla karıştırılmamalı.
      */
-    private function sampleDealer(string $template): Dealer
+    private function sampleDealer(string $template, ?string $profileKey = null): Dealer
     {
+        $profile = self::PROFILES[$profileKey] ?? null;
+
+        $name = $profile['name'] ?? 'Demo Eğitim Danışmanlığı';
+
         $dealer = new Dealer();
 
         $dealer->forceFill([
             'code'              => 'DEMO',
-            'name'              => 'Demo Eğitim Danışmanlığı',
+            'name'              => $name,
             'public_slug'       => 'demo',
             'site_enabled'      => true,
             'site_template'     => $template,
             'site_accent_color' => '#0f6bdc',
 
-            'site_hero_title'    => 'Almanya\'da Üniversite Hayaliniz İçin Yanınızdayız',
+            'site_hero_title'    => $profile['hero']
+                ?? 'Almanya\'da Üniversite Hayaliniz İçin Yanınızdayız',
             'site_hero_subtitle' => 'Başvurudan vizeye, dil kursundan yerleşime kadar tüm süreci '
                                     . 'sizin adınıza yürütüyoruz. İlk görüşme ücretsiz.',
 
-            'site_about_text' => 'Demo Eğitim Danışmanlığı olarak 2015\'ten bu yana öğrencileri '
-                                 . 'Almanya\'daki üniversitelerle buluşturuyoruz. Uni-Assist '
-                                 . 'başvurusundan vize randevusuna kadar her adımda yanınızdayız.',
+            'site_about_text' => $profile['about']
+                ?? 'Demo Eğitim Danışmanlığı olarak 2015\'ten bu yana öğrencileri '
+                   . 'Almanya\'daki üniversitelerle buluşturuyoruz. Uni-Assist '
+                   . 'başvurusundan vize randevusuna kadar her adımda yanınızdayız.',
 
+            // İletişim bilgileri örnek: gerçek numara/adres yazmak, demoyu
+            // gerçek bir firma sitesi sanan ziyaretçiyi yanlış yere yönlendirir.
             'site_phone'     => '+90 555 000 00 00',
             'site_whatsapp'  => '+90 555 000 00 00',
-            'site_instagram' => 'demo.egitim',
-            'site_address'   => 'Örnek Mah. Demo Cad. No:1, İstanbul',
+            'site_instagram' => 'ornek.danismanlik',
+            'site_address'   => 'Örnek Mah. Demo Cad. No:1, ' . ($profile['city'] ?? 'İstanbul'),
 
             'site_stats' => [
                 ['value' => '850+', 'label' => 'Yerleştirilen Öğrenci'],
