@@ -4,6 +4,7 @@ namespace Tests\Feature\Tenancy;
 
 use App\Models\Concerns\BelongsToCompany;
 use App\Models\Concerns\SharedAcrossCompanies;
+use App\Models\Concerns\SharedBetweenTwoCompanies;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
@@ -103,8 +104,9 @@ class ModelScopeCoverageTest extends TestCase
         $this->assertSame([], $unexpected, sprintf(
             "Bu modellerde `company_id` var ama tenant niyeti bildirilmemiş:\n  %s\n\n"
             . "Düzeltmek için modele şunlardan birini ekle:\n"
-            . "  • use BelongsToCompany;        → veri şirkete ait, filtrelenmeli\n"
-            . "  • use SharedAcrossCompanies;   → bilinçli olarak tüm şirketlerde ortak\n",
+            . "  • use BelongsToCompany;          → veri şirkete ait, filtrelenmeli\n"
+            . "  • use SharedAcrossCompanies;     → bilinçli olarak tüm şirketlerde ortak\n"
+            . "  • use SharedBetweenTwoCompanies; → kaydın iki tarafı var, sınır sorguda kuruluyor\n",
             implode("\n  ", $unexpected)
         ));
     }
@@ -156,7 +158,11 @@ class ModelScopeCoverageTest extends TestCase
             $traits = class_uses_recursive($class);
 
             $declared = in_array(BelongsToCompany::class, $traits, true)
-                || in_array(SharedAcrossCompanies::class, $traits, true);
+                || in_array(SharedAcrossCompanies::class, $traits, true)
+                // İki taraflı kayıt: global kapsam uygulanamaz, sınır
+                // sorgularda elle kuruluyor. Muafiyet değil, farklı bir
+                // koruma biçimi — bkz. SharedBetweenTwoCompanies.
+                || in_array(SharedBetweenTwoCompanies::class, $traits, true);
 
             if (!$declared) {
                 $missing[] = $ref->getShortName();

@@ -288,6 +288,14 @@
                    class="nav-link {{ request()->is('manager/bulk-import*') ? 'active' : '' }}">
                     <span class="nav-icon">📥</span> Toplu İçe Aktar
                 </a>
+                {{-- 8) Partnerden bilgi/belge talebi — yalnızca alt firması olanda.
+                     Bağlı partner yoksa boş bir ekrana bağlantı vermek anlamsız. --}}
+                @if(count(\App\Models\Company::descendantIds((int) (\App\Support\TenantContext::writeId() ?? 0))) > 1)
+                <a href="/manager/partner-requests"
+                   class="nav-link {{ request()->is('manager/partner-requests*') ? 'active' : '' }}">
+                    <span class="nav-icon">📤</span> Partnerden İstenenler
+                </a>
+                @endif
             </div>
 
             <div class="nav-section">
