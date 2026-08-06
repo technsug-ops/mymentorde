@@ -110,21 +110,54 @@ final class Brand
      */
     private static function applyMailIdentity(Company $company): void
     {
-        $senderName = self::mailSenderName($company);
+        $portal = self::isPrimary($company) ? null : self::portalCompany($company);
+
+        $senderName = self::mailSenderName($company, $portal);
 
         if ($senderName !== '') {
             config(['mail.from.name' => $senderName]);
         }
 
-        $address = trim((string) (config('brand.mail_from_address') ?? ''));
-        $platformAddress = trim((string) (
-            (self::$platformBase['mail_from_address'] ?? null) ?: config('mail.from.address')
-        ));
+        // ⚠ ADRES ÜST FİRMADAN DEVRALINIR.
+        //
+        // İlk sürüm adresi yalnızca firmanın KENDİ ayarından okuyordu. Ortak
+        // portalın altındaki firmalarda bu sessizce platformun adresine
+        // düşüyordu: YourGermanUni'ye account@yourgermanuni.com yazılmış olsa
+        // bile Novavia'nın maili noreply@mentorde.com'dan çıkıyordu.
+        //
+        // Doğru sıra: firmanın kendi adresi → bağlı olduğu portalın adresi →
+        // platform varsayılanı. Böylece adres bir kez portala yazılıyor ve
+        // altındaki her firma onu kullanıyor.
+        $address = self::configuredMailAddress($company)
+            ?: ($portal ? self::configuredMailAddress($portal) : null);
 
-        // Yalnızca şirkete ÖZEL bir adres tanımlanmışsa geç.
-        if ($address !== '' && $address !== $platformAddress) {
+        if ($address !== null) {
             config(['mail.from.address' => $address]);
         }
+    }
+
+    /**
+     * Şirket için AÇIKÇA tanımlanmış gönderen adresi — yoksa null.
+     *
+     * `brand_overrides` okunuyor, çözülmüş marka değil: çözülmüş pakette
+     * platformun varsayılan adresi de bulunur ve "tanımlanmış mı" sorusunu
+     * cevaplayamaz.
+     */
+    private static function configuredMailAddress(Company $company): ?string
+    {
+        $overrides = $company->getAttribute('brand_overrides');
+
+        if (is_string($overrides)) {
+            $overrides = json_decode($overrides, true);
+        }
+
+        if (!is_array($overrides)) {
+            return null;
+        }
+
+        $address = trim((string) ($overrides['mail_from_address'] ?? ''));
+
+        return $address !== '' ? $address : null;
     }
 
     /**
@@ -133,15 +166,13 @@ final class Brand
      * Platformun kendi şirketinde sade marka adı kullanılır; alt firmalarda
      * ortak portalın adı öne alınır.
      */
-    private static function mailSenderName(Company $company): string
+    private static function mailSenderName(Company $company, ?Company $portal): string
     {
         $own = trim((string) (config('brand.mail_from_name') ?: config('brand.name') ?: ''));
 
         if (self::isPrimary($company)) {
             return $own;
         }
-
-        $portal = self::portalCompany($company);
 
         if (!$portal || (int) $portal->id === (int) $company->id) {
             return $own;
