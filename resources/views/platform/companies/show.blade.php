@@ -324,20 +324,33 @@
         @else
             <div style="display:flex;flex-direction:column;gap:8px;">
                 @foreach($staffAccounts as $acc)
-                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 13px;background:var(--plat-panel-2);border:1px solid var(--plat-border);border-radius:8px;">
-                        <div style="flex:1;min-width:200px;">
-                            <div style="font-weight:600;font-size:13px;">{{ $acc->name }}</div>
-                            <div style="font-size:11.5px;color:var(--plat-muted);">
-                                {{ $acc->email }} · {{ $acc->role }}
-                                @unless($acc->is_active) · <span style="color:#f59e0b;">pasif</span> @endunless
-                                @if($acc->password_must_change) · <span style="color:var(--plat-accent-2);">şifre değiştirmeli</span> @endif
+                    <div style="padding:12px 13px;background:var(--plat-panel-2);border:1px solid var(--plat-border);border-radius:8px;">
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+                            <div style="flex:1;min-width:180px;">
+                                <span style="font-weight:600;font-size:13px;">{{ $acc->name }}</span>
+                                <span style="display:block;font-size:11.5px;color:var(--plat-muted);">
+                                    {{ $acc->role }}
+                                    @unless($acc->is_active) · <span style="color:#f59e0b;">pasif</span> @endunless
+                                    @if($acc->password_must_change) · <span style="color:var(--plat-accent-2);">şifre değiştirmeli</span> @endif
+                                </span>
                             </div>
+
+                            <form method="POST" action="{{ route('platform.companies.staff.reset-password', [$company->id, $acc->id]) }}">
+                                @csrf
+                                <button type="submit" class="plat-btn plat-btn-ghost" style="font-size:12px;padding:5px 12px;">
+                                    Şifre Sıfırla
+                                </button>
+                            </form>
                         </div>
 
-                        <form method="POST" action="{{ route('platform.companies.staff.reset-password', [$company->id, $acc->id]) }}">
+                        {{-- Giriş e-postası aynı zamanda kimlik; ayrı formda. --}}
+                        <form method="POST" action="{{ route('platform.companies.staff.email', [$company->id, $acc->id]) }}"
+                              style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                             @csrf
+                            <input type="email" name="email" value="{{ $acc->email }}" required maxlength="190"
+                                   class="plat-input" style="flex:1;min-width:220px;font-size:12.5px;height:34px;">
                             <button type="submit" class="plat-btn plat-btn-ghost" style="font-size:12px;padding:5px 12px;">
-                                Şifre Sıfırla
+                                E-postayı Kaydet
                             </button>
                         </form>
                     </div>

@@ -494,6 +494,75 @@ class PlatformController extends Controller
         );
     }
 
+    /**
+     * Firma panel hesabının e-postasını değiştir.
+     *
+     * E-posta aynı zamanda GİRİŞ KİMLİĞİ; değiştirmek hesabı devretmek gibidir.
+     * Bu yüzden yalnızca panel hesapları için ve denetim kaydıyla.
+     *
+     * SENKRON SORUNU YOK: e-posta tek bir yerde (`users.email`) tutuluyor,
+     * kopyası çıkarılmıyor. Firma kendi panelinden değiştirdiğinde burada da
+     * anında değişmiş görünür; ters yönde de öyle.
+     */
+    public function updateStaffEmail(Request $request, int $company, int $user): RedirectResponse
+    {
+        $companyModel = Company::query()->where('id', $company)->firstOrFail();
+
+        $target = User::query()->withoutGlobalScopes()
+            ->where('id', $user)
+            ->where('company_id', $companyModel->id)
+            ->first();
+
+        if (!$target) {
+            return back()->withErrors(['email' => 'Kullanıcı bu şirkette bulunamadı.']);
+        }
+
+        $resettable = array_values(array_diff(User::ADMIN_PANEL_ROLES, [User::ROLE_PLATFORM_OWNER]));
+
+        if (!in_array((string) $target->role, $resettable, true)) {
+            return back()->withErrors([
+                'email' => 'Yalnızca firma panel kullanıcılarının e-postası değiştirilebilir.',
+            ]);
+        }
+
+        $validator = Validator::make($request->all(), [
+            // users.email GLOBAL unique — kapsam dışı kontrol şart, aksi halde
+            // başka şirketteki adresle çakışır ve INSERT/UPDATE patlar.
+            'email' => [
+                'required', 'email', 'max:190',
+                \Illuminate\Validation\Rule::unique('users', 'email')->ignore($target->id),
+            ],
+        ], [
+            'email.unique' => 'Bu e-posta adresi başka bir hesapta kullanılıyor.',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $previous = (string) $target->email;
+        $newEmail = strtolower(trim((string) $request->input('email')));
+
+        if ($previous === $newEmail) {
+            return back()->with('status', 'E-posta zaten bu adres.');
+        }
+
+        $target->forceFill(['email' => $newEmail])->save();
+
+        \App\Models\PlatformAuditLog::record('platform.company.staff_email_changed', [
+            'target_type' => 'user',
+            'target_id'   => $target->id,
+            'company'     => $companyModel->name,
+            'role'        => (string) $target->role,
+            // Adresler denetim kaydına yazılmaz — hesap sahibi kişisel verisi.
+        ]);
+
+        return back()->with('status',
+            'Giriş e-postası güncellendi. Kullanıcı artık ' . $newEmail . ' ile giriş yapmalı; '
+            . 'eski adres çalışmaz. Bilgilendirmeyi siz yapın.'
+        );
+    }
+
     public function updateTier(Request $request, int $company): RedirectResponse
     {
         $companyModel = Company::query()->where('id', $company)->firstOrFail();
