@@ -30,6 +30,11 @@
         <a href="{{ route('manager.leads.create') }}" class="nav-link {{ $_pnIs('manager/leads/create') ? 'active' : '' }}">
             <span class="nav-icon">➕</span> Aday Ekle
         </a>
+
+        {{-- Operasyonu yürüten firmanın yaptığı süreç takibi — salt okunur. --}}
+        <a href="/manager/process-info" class="nav-link {{ $_pnIs('manager/process-info') ? 'active' : '' }}">
+            <span class="nav-icon">🧭</span> Süreç Bilgisi
+        </a>
     </div>
 
     <div class="nav-section">

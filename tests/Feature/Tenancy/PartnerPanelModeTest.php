@@ -151,6 +151,7 @@ class PartnerPanelModeTest extends TestCase
             'Aday Öğrenciler',   // aday listesi
             'Öğrenciler',        // öğrenci listesi
             'Aday Ekle',
+            'Süreç Bilgisi',     // operasyonun yaptığı takip, salt okunur
             'Mesajlar',          // öğrenci ve atanan danışmanla iletişim
             'Destek Talepleri',
             'Belge Listesi',

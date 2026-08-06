@@ -38,6 +38,7 @@ class RestrictPartnerPanel
         'manager/dashboard',
         'manager/guests',            // aday öğrenciler
         'manager/students',          // öğrenciler
+        'manager/process-info',      // süreç bilgisi (salt okunur)
         'manager/leads',             // aday ekleme
         'manager/account',           // hesabım
         'manager/requests',          // destek talepleri
