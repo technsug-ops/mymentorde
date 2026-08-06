@@ -22,15 +22,37 @@
   .small { font-size:13px; color:#64748b; }
 </style>
 </head>
+@php
+    /*
+     * ⚠ MARKA SIZINTISI. Burada üç yerde MentorDE kimliği sabit yazılıydı:
+     * başlıktaki varsayılan, destek adresi (info@panel.mentorde.com) ve
+     * alttaki config('app.url'). Partner firmanın öğrencisine giden mailde
+     * MentorDE görünüyordu — white-label sözü sessizce bozuluyordu.
+     *
+     * config('brand.x', 'varsayilan') YETMEZ: Brand partner firmalarda kimlik
+     * alanlarını BOŞ metne çeviriyor, boş metin de "değer var" sayıldığı için
+     * varsayılan hiç devreye girmiyor. Bu yüzden ?: ile boşluk da eleniyor.
+     */
+    $brandName = config('brand.name') ?: config('app.name');
+
+    // Destek adresi markadan gelmeli. Yoksa cümleyi hiç kurmuyoruz —
+    // başka firmanın adresini vermektense hiç vermemek doğru.
+    $supportEmail = config('brand.support_email') ?: config('brand.email');
+
+    // Giriş adresi isteğin geldiği alan adından üretiliyor ($loginUrl), yani
+    // partner kendi adresini görür. Alt bilgi de aynı kökü kullanmalı —
+    // config('app.url') .env'den gelir ve her zaman platformu gösterirdi.
+    $siteUrl = rtrim(preg_replace('#/login/?$#', '', (string) $loginUrl), '/');
+@endphp
 <body>
 <div class="wrapper">
   <div class="header">
-    <h1>{{ config('brand.name', 'MentorDE') }}</h1>
+    <h1>{{ $brandName }}</h1>
     <p>Şifre Sıfırlama Bildirimi</p>
   </div>
   <div class="body">
     <h2>Merhaba {{ $name }},</h2>
-    <p>{{ config('brand.name', 'MentorDE') }} hesabının şifresi yönetici tarafından sıfırlandı.</p>
+    <p>{{ $brandName }} hesabının şifresi yönetici tarafından sıfırlandı.</p>
 
     <p><strong>Aşağıdaki geçici şifreyle giriş yap:</strong></p>
 
@@ -51,13 +73,17 @@
     <a class="cta" href="{{ $loginUrl }}">Giriş Yap →</a>
 
     <p class="small" style="margin-top:24px;">
-      Eğer bu işlemi sen talep etmediysen, lütfen hemen <a href="mailto:info@panel.mentorde.com">info@panel.mentorde.com</a>
-      adresinden bizimle iletişime geç.
+      Eğer bu işlemi sen talep etmediysen,
+      @if($supportEmail)
+        lütfen hemen <a href="mailto:{{ $supportEmail }}">{{ $supportEmail }}</a> adresinden bizimle iletişime geç.
+      @else
+        lütfen hemen danışmanınla iletişime geç.
+      @endif
     </p>
   </div>
   <div class="footer">
-    Bu e-posta {{ config('brand.name', 'MentorDE') }} platformu tarafından otomatik olarak gönderilmiştir.<br>
-    <a href="{{ config('app.url') }}">{{ config('app.url') }}</a>
+    Bu e-posta {{ $brandName }} tarafından otomatik olarak gönderilmiştir.<br>
+    <a href="{{ $siteUrl }}">{{ $siteUrl }}</a>
   </div>
 </div>
 </body>
