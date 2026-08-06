@@ -54,27 +54,28 @@
         </a>
     </div>
 
+    {{-- Belgeler: partnere ait iki ekran.
+
+         ⚠ Buraya önce hazır sayfalar bağlanmıştı ve ikisi de yanlıştı:
+         /manager/required-documents zorunlu belge TANIMLAMA ekranı
+         (operasyon konfigürasyonu), /manager/document-requests/analytics
+         ise dönüşüm hunisi ve hatırlatma etkinliği ölçen metrik panosu.
+         Partnere lazım olan ikisi de değil: kimden ne istendi, ne geldi. --}}
     <div class="nav-section">
         <div class="nav-section-label">Belgeler</div>
 
-        <a href="/manager/required-documents" class="nav-link {{ $_pnIs('manager/required-documents') ? 'active' : '' }}">
+        <a href="/manager/partner-documents" class="nav-link {{ request()->is('manager/partner-documents') ? 'active' : '' }}">
             <span class="nav-icon">📄</span> Belge Listesi
         </a>
 
-        @module('doc_request')
-        <a href="/manager/document-requests/analytics" class="nav-link {{ $_pnIs('manager/document-requests') ? 'active' : '' }}">
+        <a href="/manager/partner-documents/requests" class="nav-link {{ $_pnIs('manager/partner-documents/requests') ? 'active' : '' }}">
             <span class="nav-icon">📨</span> Belge Talepleri
         </a>
-        @endmodule
     </div>
 
     <div class="nav-section">
         <a href="{{ route('manager.account.edit') }}" class="nav-link {{ $_pnIs('manager/account') ? 'active' : '' }}">
             <span class="nav-icon">⚙️</span> Hesabım
-        </a>
-
-        <a href="/logout" class="nav-link">
-            <span class="nav-icon">🚪</span> Çıkış Yap
         </a>
     </div>
 </nav>

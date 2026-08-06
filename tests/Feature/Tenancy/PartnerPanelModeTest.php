@@ -155,6 +155,7 @@ class PartnerPanelModeTest extends TestCase
             'Mesajlar',          // öğrenci ve atanan danışmanla iletişim
             'Destek Talepleri',
             'Belge Listesi',
+            'Belge Talepleri',
             'Hesabım',
         ];
 

@@ -43,8 +43,7 @@ class RestrictPartnerPanel
         'manager/account',           // hesabım
         'manager/requests',          // destek talepleri
         'manager/bulletins',         // duyurular
-        'manager/document-requests', // belge talepleri
-        'manager/required-documents',// belge listesi
+        'manager/partner-documents', // belge listesi + belge talepleri
         'im',                        // öğrenci ve atanan danışmanla yazışma
 
         // Partner kendi adayının şifresini sıfırlayabilmeli — hesabı o açtı.

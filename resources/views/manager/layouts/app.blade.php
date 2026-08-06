@@ -647,6 +647,11 @@
         @endif
 
         <div class="sidebar-footer">
+            {{-- El Kitabı MentorDE'nin kendi personel kılavuzu ve adresi
+                 partnere zaten kapalı — bağlantıyı göstermek 404'e davet
+                 olurdu. Cache temizleme de sistem bakımı; partnerin işi
+                 değil. İkisi de yalnızca tam panelde. --}}
+            @unlesspartnerPanel
             <a href="{{ route('manager.handbook') }}" class="nav-link {{ request()->routeIs('manager.handbook') ? 'active' : '' }}" style="margin-bottom:6px;">
                 <span class="nav-icon">📖</span> El Kitabı
             </a>
@@ -656,6 +661,7 @@
                     <span class="nav-icon">🗑️</span> Cache Temizle
                 </button>
             </form>
+            @endpartnerPanel
             <a href="/logout" class="nav-link logout">
                 <span class="nav-icon">🚪</span> Çıkış Yap
             </a>
