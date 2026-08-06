@@ -348,6 +348,140 @@
          Yalnızca firmanın PANEL hesapları. Öğrenci ve aday hesapları burada
          YOK: onlar müşterinin müşterisi, kişisel verileri bu konsolda
          gösterilmez. Panel kullanıcısı ise bizimle sözleşmeli hesap sahibi. --}}
+    {{-- ── FİRMANIN KENDİ MAİL TAŞIYICISI ──────────────────────────────────
+         White-label'da gönderim kimliği firmaya ait olmalı. Tanımlanmazsa
+         bağlı olunan portalın, o da yoksa platformun taşıyıcısı kullanılır. --}}
+    <div class="plat-card" style="margin-bottom:16px;">
+        <h3 class="plat-card-title"><x-icon name="mail" size="16" /> Mail Taşıyıcısı</h3>
+
+        @php
+            $_ms      = $mailSetting ?? null;
+            $_driver  = old('driver', $_ms->driver ?? \App\Models\CompanyMailSetting::DRIVER_SMTP);
+            $_hasCred = $_ms && (($_ms->driver === 'resend' && $_ms->api_key) || $_ms->password);
+        @endphp
+
+        <p class="plat-card-sub" style="margin-bottom:14px;">
+            Firma kendi mail sunucusunu ya da kendi Resend hesabını kullanmak isterse buraya girilir.
+            Boş bırakılırsa <strong style="color:#fff;">bağlı olduğu portalın</strong>, o da yoksa
+            platformun taşıyıcısı kullanılır.
+        </p>
+
+        @if($_ms)
+            <div style="padding:10px 12px;border-radius:8px;margin-bottom:14px;
+                        background:{{ $_ms->is_active ? 'rgba(22,163,74,.12)' : 'rgba(217,119,6,.12)' }};
+                        border:1px solid {{ $_ms->is_active ? 'rgba(22,163,74,.4)' : 'rgba(217,119,6,.4)' }};
+                        font-size:12.5px;">
+                @if($_ms->is_active)
+                    <strong style="color:#4ade80;">DEVREDE</strong> —
+                    {{ $_ms->driver === 'resend' ? 'Resend (firma hesabı)' : $_ms->host . ':' . $_ms->port }}
+                    @if($_ms->last_tested_at) · son test {{ $_ms->last_tested_at->format('d.m.Y H:i') }} @endif
+                @else
+                    <strong style="color:#fbbf24;">KAPALI</strong> — test edilmeden kullanılmaz.
+                    @if($_ms->last_test_error)
+                        <div style="margin-top:6px;color:#fca5a5;font-size:11.5px;word-break:break-word;">
+                            Son hata: {{ \Illuminate\Support\Str::limit($_ms->last_test_error, 300) }}
+                        </div>
+                    @endif
+                @endif
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('platform.companies.mail-setting.update', $company->id) }}">
+            @csrf
+            <div class="plat-form-group">
+                <label class="plat-form-label">Sürücü</label>
+                <select name="driver" class="plat-select" style="width:100%;">
+                    @foreach(\App\Models\CompanyMailSetting::DRIVERS as $val => $label)
+                        <option value="{{ $val }}" {{ $_driver === $val ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <div class="plat-form-group" style="flex:2;min-width:180px;">
+                    <label class="plat-form-label">SMTP Sunucu</label>
+                    <input type="text" name="host" class="plat-input" maxlength="190"
+                           value="{{ old('host', $_ms->host ?? '') }}" placeholder="mail.firma.com">
+                </div>
+                <div class="plat-form-group" style="width:110px;">
+                    <label class="plat-form-label">Port</label>
+                    <input type="number" name="port" class="plat-input"
+                           value="{{ old('port', $_ms->port ?? 587) }}" placeholder="587">
+                </div>
+                <div class="plat-form-group" style="width:130px;">
+                    <label class="plat-form-label">Şifreleme</label>
+                    <select name="encryption" class="plat-select">
+                        <option value="">STARTTLS</option>
+                        <option value="ssl" {{ old('encryption', $_ms->encryption ?? '') === 'ssl' ? 'selected' : '' }}>SSL</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <div class="plat-form-group" style="flex:1;min-width:180px;">
+                    <label class="plat-form-label">Kullanıcı Adı</label>
+                    <input type="text" name="username" class="plat-input" maxlength="190"
+                           value="{{ old('username', $_ms->username ?? '') }}">
+                </div>
+                <div class="plat-form-group" style="flex:1;min-width:180px;">
+                    <label class="plat-form-label">Şifre</label>
+                    <input type="password" name="password" class="plat-input" autocomplete="new-password"
+                           placeholder="{{ $_hasCred ? '•••••••• (kayıtlı)' : '' }}">
+                </div>
+            </div>
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Resend API Anahtarı</label>
+                <input type="password" name="api_key" class="plat-input" autocomplete="new-password"
+                       placeholder="{{ $_hasCred ? '•••••••• (kayıtlı)' : 're_...' }}">
+                <small style="font-size:11px;color:var(--plat-muted);">
+                    Yalnızca sürücü <strong>Resend</strong> ise kullanılır.
+                </small>
+            </div>
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Gönderen Adresi (taşıyıcıya ait)</label>
+                <input type="email" name="from_address" class="plat-input" maxlength="190"
+                       value="{{ old('from_address', $_ms->from_address ?? '') }}">
+                <small style="font-size:11px;color:var(--plat-muted);">
+                    Kimlik bilgisi hangi alan adına aitse gönderim de ondan çıkmalı,
+                    yoksa sağlayıcı reddeder. Boşsa markadaki adres kullanılır.
+                </small>
+            </div>
+
+            <small style="display:block;font-size:11px;color:var(--plat-muted);margin-bottom:10px;">
+                Şifre ve anahtar <strong>şifreli</strong> saklanır ve bir daha gösterilmez.
+                Boş bırakırsan mevcut değer korunur.
+            </small>
+
+            <button type="submit" class="plat-btn plat-btn-ghost">Taşıyıcıyı Kaydet</button>
+        </form>
+
+        @if($_ms)
+            <form method="POST" action="{{ route('platform.companies.mail-setting.test', $company->id) }}"
+                  style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--plat-border);">
+                @csrf
+                <div style="flex:1;min-width:200px;">
+                    <label class="plat-form-label">Test Alıcısı</label>
+                    <input type="email" name="to" class="plat-input" required placeholder="kendi@adresin.com">
+                </div>
+                <button type="submit" class="plat-btn plat-btn-ghost">Test Et ve Devreye Al</button>
+            </form>
+            <small style="display:block;font-size:11px;color:var(--plat-muted);margin-top:6px;">
+                Taşıyıcı ancak <strong>başarılı testten sonra</strong> kullanılır — yanlış kimlik bilgisi
+                bu firmanın tüm mailini sessizce keser.
+            </small>
+
+            <form method="POST" action="{{ route('platform.companies.mail-setting.destroy', $company->id) }}"
+                  style="margin-top:12px;" onsubmit="return confirm('Taşıyıcı kaldırılsın mı? Firma platformun taşıyıcısına döner.');">
+                @csrf @method('DELETE')
+                <button type="submit" class="plat-btn plat-btn-ghost" style="color:#fca5a5;border-color:rgba(220,38,38,.4);">
+                    Taşıyıcıyı Kaldır
+                </button>
+            </form>
+        @endif
+    </div>
+
     <div class="plat-card">
         <h3 class="plat-card-title"><x-icon name="key" size="16" /> Panel Hesapları</h3>
         <p class="plat-card-sub" style="margin-bottom:14px;">

@@ -31,6 +31,9 @@ use Illuminate\Support\Facades\Cache;
  */
 final class Brand
 {
+    /** Firmaya özel taşıyıcının çalışma anında yazıldığı mailer adı. */
+    private const TENANT_MAILER = 'tenant_runtime';
+
     /** Bu isteğin MARKASINI veren şirket (veri şirketinden farklı olabilir). */
     public const BRAND_COMPANY_KEY = 'brand_company_id';
 
@@ -133,6 +136,65 @@ final class Brand
 
         if ($address !== null) {
             config(['mail.from.address' => $address]);
+        }
+
+        self::applyMailTransport($company, $portal);
+    }
+
+    /**
+     * Firmanın KENDİ mail taşıyıcısı — varsa platformunkinin yerine geçer.
+     *
+     * ── NEDEN ────────────────────────────────────────────────────────────
+     * White-label platformda gönderim kimliği firmaya ait olmalı. Başka bir
+     * markanın maili platformun adresinden çıkarsa white-label sözü bozulur.
+     * Ayrıca "kendi mail sunucumu kullanın" diyen firmaya verilecek cevap bu.
+     *
+     * Zincir adresle aynı: firma → bağlı olduğu portal → platform. Böylece
+     * taşıyıcı bir kez portala tanımlanıp altındaki tüm firmalarca
+     * kullanılabiliyor; isteyen firma kendi altyapısını getiriyor.
+     *
+     * ⚠ FİRMANIN ALTYAPISI SENİN KONTROLÜNDE DEĞİL. Şifresi değişirse,
+     * kotası dolarsa, sunucusu düşerse o firmanın maili durur. Bu yüzden
+     * yalnızca TEST EDİLİP aktifleştirilmiş kayıtlar kullanılıyor
+     * (`is_active`), ve hata mesajı kayda geçiyor.
+     *
+     * ⚠ Yapılandırma hatası mail gönderimini tamamen kırmamalı: sorun
+     * çıkarsa platformun taşıyıcısına düşülür, log'a yazılır.
+     */
+    private static function applyMailTransport(Company $company, ?Company $portal): void
+    {
+        try {
+            $setting = \App\Models\CompanyMailSetting::activeFor((int) $company->id);
+
+            if (!$setting && $portal) {
+                $setting = \App\Models\CompanyMailSetting::activeFor((int) $portal->id);
+            }
+
+            if (!$setting || !$setting->isComplete()) {
+                return;
+            }
+
+            config(['mail.mailers.' . self::TENANT_MAILER => $setting->mailerConfig()]);
+            config(['mail.default' => self::TENANT_MAILER]);
+
+            // Resend anahtarı mailer'da değil servis yapılandırmasında durur.
+            if ($setting->driver === \App\Models\CompanyMailSetting::DRIVER_RESEND) {
+                config(['services.resend.key' => $setting->api_key]);
+            }
+
+            // Taşıyıcıya özel gönderen adresi markayı ezer: kimlik bilgisi
+            // hangi alan adına aitse gönderim de ondan çıkmalı, yoksa
+            // sağlayıcı reddeder.
+            $from = trim((string) $setting->from_address);
+
+            if ($from !== '') {
+                config(['mail.from.address' => $from]);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Company mail transport not applied', [
+                'company' => (int) $company->id,
+                'error'   => $e->getMessage(),
+            ]);
         }
     }
 
@@ -435,6 +497,12 @@ final class Brand
             // ettiğinde mail "from" bilgisi geride kalırsa sonraki mail
             // yanlış firma adına çıkardı.
             'mail_from' => (array) config('mail.from', []),
+            // ⚠ TAŞIYICI DA TAŞINMALI. Aksi halde bir firmanın kendi mail
+            // sunucusu, aynı istekte işlenen SONRAKİ firmanın mailini de
+            // gönderirdi — başka markanın kimliğiyle çıkan mail demek.
+            'mail_default'  => config('mail.default'),
+            'tenant_mailer' => config('mail.mailers.' . self::TENANT_MAILER),
+            'resend_key'    => config('services.resend.key'),
             'company_id' => app()->bound(self::BRAND_COMPANY_KEY)
                 ? (int) app(self::BRAND_COMPANY_KEY)
                 : null,
@@ -448,6 +516,12 @@ final class Brand
 
         if (isset($snapshot['mail_from'])) {
             config(['mail.from' => $snapshot['mail_from']]);
+        }
+
+        if (array_key_exists('mail_default', $snapshot)) {
+            config(['mail.default' => $snapshot['mail_default']]);
+            config(['mail.mailers.' . self::TENANT_MAILER => $snapshot['tenant_mailer'] ?? null]);
+            config(['services.resend.key' => $snapshot['resend_key'] ?? null]);
         }
 
         $companyId = $snapshot['company_id'] ?? null;
