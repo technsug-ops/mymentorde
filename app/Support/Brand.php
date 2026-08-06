@@ -80,6 +80,105 @@ final class Brand
 
         config(['brand' => self::resolve($company)]);
         app()->instance(self::BRAND_COMPANY_KEY, (int) $company->id);
+
+        self::applyMailIdentity($company);
+    }
+
+    /**
+     * Giden mailin GÖNDERİCİ kimliğini şirkete bağla.
+     *
+     * ── NEDEN GEREKLİYDİ ────────────────────────────────────────────────
+     * Marka katmanı yalnızca `config('brand')`'i değiştiriyordu; Laravel'in
+     * gönderici bilgisi (`config('mail.from')`) .env'den geliyordu. Sonuç:
+     * sayfalar doğru markayı gösteriyor ama HER MAİL "MentorDE" adına
+     * çıkıyordu. Partner firmanın kullanıcısı hesabını etkinleştirmek için
+     * hiç duymadığı bir isimden mail alıyordu.
+     *
+     * ── GÖNDEREN ADI ────────────────────────────────────────────────────
+     * Ortak portalın altındaki firmalar için iki bilgi de gerekli: mail
+     * hangi platformdan geliyor (YourGermanUni) ve hangi firmanın hesabı
+     * (Novavia). Tek başına firma adı "bu da nereden çıktı" hissi verir,
+     * tek başına portal adı hangi hesap olduğunu söylemez.
+     *
+     *      YourGermanUni · Novavia Yurtdışı Danışmanlık
+     *
+     * ⚠ ADRES BİLEREK DEĞİŞTİRİLMİYOR. Gönderici alan adının mail
+     * sağlayıcısında (Resend) DOĞRULANMIŞ olması gerekiyor; doğrulanmamış
+     * bir adrese geçmek o firmanın TÜM mailini sessizce kırardı. Yalnızca
+     * şirket için açıkça `brand_overrides.mail_from_address` tanımlanmışsa
+     * kullanılır — yani alan adı doğrulandıktan sonra bilinçli bir adım.
+     */
+    private static function applyMailIdentity(Company $company): void
+    {
+        $senderName = self::mailSenderName($company);
+
+        if ($senderName !== '') {
+            config(['mail.from.name' => $senderName]);
+        }
+
+        $address = trim((string) (config('brand.mail_from_address') ?? ''));
+        $platformAddress = trim((string) (
+            (self::$platformBase['mail_from_address'] ?? null) ?: config('mail.from.address')
+        ));
+
+        // Yalnızca şirkete ÖZEL bir adres tanımlanmışsa geç.
+        if ($address !== '' && $address !== $platformAddress) {
+            config(['mail.from.address' => $address]);
+        }
+    }
+
+    /**
+     * "Portal · Firma" biçiminde gönderen adı.
+     *
+     * Platformun kendi şirketinde sade marka adı kullanılır; alt firmalarda
+     * ortak portalın adı öne alınır.
+     */
+    private static function mailSenderName(Company $company): string
+    {
+        $own = trim((string) (config('brand.mail_from_name') ?: config('brand.name') ?: ''));
+
+        if (self::isPrimary($company)) {
+            return $own;
+        }
+
+        $portal = self::portalCompany($company);
+
+        if (!$portal || (int) $portal->id === (int) $company->id) {
+            return $own;
+        }
+
+        $portalName = trim((string) ($portal->brand_name ?: $portal->name ?: ''));
+
+        if ($portalName === '' || $own === '' || $portalName === $own) {
+            return $own !== '' ? $own : $portalName;
+        }
+
+        return $portalName . ' · ' . $own;
+    }
+
+    /**
+     * Şirketin bağlı olduğu ortak portal (is_public_portal) — yoksa null.
+     *
+     * Kendisi portal olabilir; değilse en yakın üst firmaya bakılır.
+     */
+    private static function portalCompany(Company $company): ?Company
+    {
+        try {
+            $candidates = array_merge([(int) $company->id], Company::ancestorIds((int) $company->id));
+
+            foreach ($candidates as $id) {
+                $candidate = Company::query()->withoutGlobalScope('company')->find($id);
+
+                if ($candidate && (bool) $candidate->is_public_portal) {
+                    return $candidate;
+                }
+            }
+        } catch (\Throwable $e) {
+            // Marka çözümü mail kimliği yüzünden patlamamalı.
+            \Illuminate\Support\Facades\Log::warning('Brand portal lookup failed', ['error' => $e->getMessage()]);
+        }
+
+        return null;
     }
 
     /**
@@ -301,16 +400,24 @@ final class Brand
     {
         return [
             'brand' => (array) config('brand', []),
+            // Gönderici kimliği de taşınmalı: iş, isteğin markasını iade
+            // ettiğinde mail "from" bilgisi geride kalırsa sonraki mail
+            // yanlış firma adına çıkardı.
+            'mail_from' => (array) config('mail.from', []),
             'company_id' => app()->bound(self::BRAND_COMPANY_KEY)
                 ? (int) app(self::BRAND_COMPANY_KEY)
                 : null,
         ];
     }
 
-    /** @param array{brand:array<string,mixed>,company_id:int|null} $snapshot */
+    /** @param array{brand:array<string,mixed>,mail_from?:array<string,mixed>,company_id:int|null} $snapshot */
     public static function restore(array $snapshot): void
     {
         config(['brand' => $snapshot['brand'] ?? []]);
+
+        if (isset($snapshot['mail_from'])) {
+            config(['mail.from' => $snapshot['mail_from']]);
+        }
 
         $companyId = $snapshot['company_id'] ?? null;
 

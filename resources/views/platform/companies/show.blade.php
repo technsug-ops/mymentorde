@@ -150,6 +150,26 @@
                        maxlength="500" placeholder="https://.../logo.svg">
             </div>
 
+            @php
+                // brand_overrides config/brand.php'nin şeklini taklit eder.
+                $_bo = $company->brand_overrides;
+                if (is_string($_bo)) { $_bo = json_decode($_bo, true); }
+                $_mailFrom = is_array($_bo) ? ($_bo['mail_from_address'] ?? '') : '';
+            @endphp
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Gönderen E-posta Adresi</label>
+                <input type="email" name="mail_from_address" class="plat-input"
+                       value="{{ old('mail_from_address', $_mailFrom) }}"
+                       maxlength="190" placeholder="{{ config('mail.from.address') }}">
+                <small style="font-size:11px;color:var(--plat-muted);">
+                    Bu şirketin mailleri bu adresten çıkar.
+                    <strong>Alan adı mail sağlayıcısında doğrulanmış olmalı</strong> —
+                    doğrulanmamış bir adres bu şirketin tüm mailini keser.
+                    Boş bırakılırsa platformun adresi kullanılır.
+                </small>
+            </div>
+
             <div class="plat-form-group">
                 <label class="plat-form-label">Ana Renk</label>
                 <input type="text" name="brand_primary_color" class="plat-input"

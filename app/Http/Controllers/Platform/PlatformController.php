@@ -269,6 +269,10 @@ class PlatformController extends Controller
             'brand_name'          => ['nullable', 'string', 'max:120'],
             'brand_logo_url'      => ['nullable', 'string', 'max:500'],
             'brand_primary_color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            // Giden mailin gönderen adresi. Alan adı mail sağlayıcısında
+            // DOĞRULANMIŞ olmalı; doğrulanmamış adres bu şirketin tüm
+            // mailini sessizce kırar (bkz. Brand::applyMailIdentity).
+            'mail_from_address'   => ['nullable', 'email', 'max:190'],
             'primary_domain'      => [
                 'nullable', 'string', 'max:190',
                 \Illuminate\Validation\Rule::unique('companies', 'primary_domain')->ignore($companyModel->id),
@@ -319,6 +323,28 @@ class PlatformController extends Controller
         $companyModel->brand_primary_color = trim((string) $request->input('brand_primary_color', '')) ?: null;
         $companyModel->primary_domain      = $domain !== '' ? $domain : null;
         $companyModel->slug                = strtolower(trim((string) $request->input('slug', ''))) ?: null;
+
+        // Gönderen adresi brand_overrides içinde tutuluyor (config/brand.php'nin
+        // şeklini taklit eder). Alan hiç gönderilmediyse mevcut değere dokunma —
+        // kısmi güncelleme adresi sessizce silmemeli.
+        if ($request->has('mail_from_address')) {
+            $overrides = $companyModel->brand_overrides;
+
+            if (is_string($overrides)) {
+                $overrides = json_decode($overrides, true);
+            }
+
+            $overrides = is_array($overrides) ? $overrides : [];
+            $mailFrom  = strtolower(trim((string) $request->input('mail_from_address', '')));
+
+            if ($mailFrom !== '') {
+                $overrides['mail_from_address'] = $mailFrom;
+            } else {
+                unset($overrides['mail_from_address']);
+            }
+
+            $companyModel->brand_overrides = $overrides ?: null;
+        }
 
         // Form her zaman gizli 0 + checkbox 1 gönderir. Alan hiç gelmediyse (kısmi
         // güncelleme, API) mevcut değer korunur — boolean() sessizce false yapardı.
