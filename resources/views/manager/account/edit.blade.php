@@ -63,4 +63,50 @@
     </p>
 </div>
 
+{{-- İki faktörlü doğrulama.
+
+     Bu bölüm yoktu: 2FA yalnızca zorunlu yönlendirmeyle BİR KEZ kuruluyor,
+     sonra hiçbir ekranda görünmüyordu. Telefonunu değiştiren kullanıcının
+     panelde çıkış yolu kalmıyordu. --}}
+<div class="panel" style="max-width:640px;margin-top:16px;">
+    <h2 style="font-size:15px;margin-bottom:4px;">İki Faktörlü Doğrulama</h2>
+    <p style="font-size:12.5px;color:var(--u-muted,#64748b);line-height:1.7;margin-bottom:14px;">
+        @if($twoFactorEnabled)
+            {{-- ⚠ Blade direktifi bitişik yazılmaz: "etkin@if(...)" derlenmez ama
+                 @endif derlenir, eşleşme bozulur ve sayfa 500 verir. --}}
+            Hesabınızda etkin{{ $twoFactorSince ? ' — ' . $twoFactorSince->format('d.m.Y') . ' tarihinden beri' : '' }}.
+            Telefonunuzu değiştirdiyseniz veya authenticator uygulamasını sildiyseniz buradan sıfırlayıp
+            yeni cihazınıza kurabilirsiniz.
+        @else
+            Hesabınızda henüz kurulu değil. Yönetici hesapları için zorunludur;
+            panele girdiğinizde kurulum ekranına yönlendirilirsiniz.
+        @endif
+    </p>
+
+    @if($twoFactorEnabled)
+        <form method="POST" action="{{ route('manager.account.2fa.reset') }}"
+              onsubmit="return confirm('İki faktörlü doğrulama sıfırlanacak ve yeni bir QR kod üretilecek. Devam edilsin mi?');">
+            @csrf
+            <div style="margin-bottom:12px;">
+                <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;">Mevcut Şifreniz</label>
+                <input type="password" name="current_password" required autocomplete="current-password"
+                       style="width:100%;max-width:260px;height:38px;border-radius:9px;border:1px solid var(--u-line,#e5e7eb);padding:0 10px;font-size:13px;">
+                <small style="display:block;font-size:11px;color:var(--u-muted,#64748b);margin-top:4px;">
+                    Açık bir oturumun ikinci faktörü tek başına kaldırmasını engellemek için gerekli.
+                </small>
+            </div>
+
+            <button type="submit"
+                    style="height:38px;padding:0 18px;border-radius:10px;border:1px solid #d97706;background:rgba(217,119,6,.08);color:#b45309;font-size:13px;font-weight:600;cursor:pointer;">
+                Sıfırla ve yeniden kur
+            </button>
+        </form>
+    @else
+        <a href="{{ route('2fa.setup') }}"
+           style="display:inline-block;height:38px;line-height:38px;padding:0 18px;border-radius:10px;background:var(--u-primary,#5b2e91);color:#fff;font-size:13px;font-weight:600;text-decoration:none;">
+            Şimdi kur
+        </a>
+    @endif
+</div>
+
 @endsection
