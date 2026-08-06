@@ -112,6 +112,13 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/students/{studentId}/institution-documents', [ManagerPortalController::class, 'studentInstitutionDocs'])->name('manager.students.institution-docs');
     Route::get('/manager/students/{studentId}/university-applications', [ManagerPortalController::class, 'studentUniversityApplications'])->name('manager.students.university-applications');
 
+    // ─── Süreç Bilgisi (partner için salt okunur) ────────────────────────────
+    // Operasyonu üst firma yürütüyor; partner burada yalnızca izler. Bilerek
+    // sadece GET: bu ekrandan süreci ilerletecek hiçbir yol yok.
+    $partnerProcess = \App\Http\Controllers\Manager\PartnerProcessInfoController::class;
+    Route::get('/manager/process-info',              [$partnerProcess, 'index'])->name('manager.process-info.index');
+    Route::get('/manager/process-info/{studentId}',  [$partnerProcess, 'show'])->name('manager.process-info.show');
+
     // ─── Personel (Staff) Yönetimi ───────────────────────────────────────────
     Route::get('/manager/staff',                              [StaffController::class, 'index'])->name('manager.staff.index');
     Route::get('/manager/staff/create',                       [StaffController::class, 'create'])->name('manager.staff.create');
