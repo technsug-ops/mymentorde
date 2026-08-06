@@ -481,6 +481,72 @@ class PlatformController extends Controller
      *
      * Yeni şifre TEK SEFER gösterilir ve ilk girişte değiştirilmek zorundadır.
      */
+    /**
+     * Firmaya panel kullanıcısı aç.
+     *
+     * ── NEDEN GEREKLİ ────────────────────────────────────────────────────
+     * Platform konsolu mevcut hesapları listeliyor ve şifrelerini
+     * sıfırlayabiliyordu ama YENİ hesap açamıyordu. Firma kurulurken tek
+     * yönetici oluşuyor; o hesap silinirse ya da (YourGermanUni gibi) firma
+     * kullanıcısız kalırsa şirkete girmenin hiçbir yolu kalmıyordu —
+     * başvuru linki de personelsiz firmada 404 veriyor.
+     *
+     * ── YALNIZCA YÖNETİCİ ROLÜ ───────────────────────────────────────────
+     * Burası bir "ilk hesabı aç" kapısı. Danışman, finans, operasyon gibi
+     * roller firmanın kendi personel ekranından açılır. Özellikle danışman:
+     * bir firmaya danışman eklemek operasyonu oraya taşır
+     * (bkz. Company::operatingCompanyId) — bu karar platform konsolundan
+     * yanlışlıkla verilmemeli.
+     */
+    public function storeStaff(Request $request, int $company): RedirectResponse
+    {
+        $companyModel = Company::query()->where('id', $company)->firstOrFail();
+
+        $data = $request->validate([
+            'name'  => ['required', 'string', 'max:120'],
+            // GLOBAL tekil: aynı adres başka bir firmada olsa bile alınamaz.
+            'email' => ['required', 'email', 'max:190', \Illuminate\Validation\Rule::unique('users', 'email')],
+        ], [
+            'email.unique' => 'Bu e-posta adresi başka bir hesapta kullanılıyor.',
+        ]);
+
+        if (! $companyModel->canAddStaffUser()) {
+            return back()->withInput()->withErrors([
+                'staff' => sprintf(
+                    'Bu firmanın paket sınırı dolu (%d kullanıcı). Üst pakete geçirin.',
+                    (int) $companyModel->userLimit()
+                ),
+            ]);
+        }
+
+        $tempPassword = Str::password(14, true, true, false, false);
+
+        $target = User::create([
+            'name'                 => trim($data['name']),
+            'email'                => strtolower(trim($data['email'])),
+            'password'             => Hash::make($tempPassword),
+            'role'                 => User::ROLE_MANAGER,
+            'company_id'           => $companyModel->id,
+            'is_active'            => true,
+            'email_verified_at'    => now(),
+            'password_must_change' => true,
+        ]);
+
+        \App\Models\PlatformAuditLog::record('platform.company.staff_created', [
+            'target_type' => 'user',
+            'target_id'   => $target->id,
+            'company'     => $companyModel->name,
+            'role'        => User::ROLE_MANAGER,
+            // Şifre audit'e YAZILMAZ.
+        ]);
+
+        return back()->with('status',
+            $target->email . ' oluşturuldu. Geçici şifre: ' . $tempPassword
+            . ' — bu şifre yalnızca ŞİMDİ gösteriliyor, kaydedin. '
+            . 'Kullanıcı ilk girişte değiştirmek zorunda.'
+        );
+    }
+
     public function resetStaffPassword(Request $request, int $company, int $user): RedirectResponse
     {
         $companyModel = Company::query()->where('id', $company)->firstOrFail();
