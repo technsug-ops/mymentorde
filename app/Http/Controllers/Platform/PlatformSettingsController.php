@@ -34,6 +34,13 @@ class PlatformSettingsController extends Controller
         return view('platform.settings.index', [
             'rows'   => $rows,
             'map'    => $map,
+            // Test e-postası hangi şirketin kimliğiyle gönderilecek?
+            // Her firmanın gönderen adresi farklı olabiliyor; tek kimlikle
+            // test etmek yanıltıcı olurdu.
+            'companies' => \App\Models\Company::query()
+                ->withoutGlobalScope('company')
+                ->orderBy('name')
+                ->get(['id', 'name']),
         ]);
     }
 
@@ -110,6 +117,18 @@ class PlatformSettingsController extends Controller
     /**
      * E-posta config test — basit ping. Hata varsa flash error.
      */
+    /**
+     * Test e-postası — istenirse BELİRLİ BİR ŞİRKETİN kimliğiyle.
+     *
+     * ── NEDEN ŞİRKET SEÇİMİ ──────────────────────────────────────────────
+     * Her firmanın gönderen adı ve adresi farklı olabiliyor
+     * (bkz. Brand::applyMailIdentity). Test yalnızca platformun kimliğiyle
+     * gönderirse, bir partnerin adresi doğrulanmamış olsa bile test YEŞİL
+     * görünür ve sorun ancak gerçek kullanıcı mail bekleyince ortaya çıkar.
+     *
+     * Sonuç mesajında hangi kimlikle gönderildiği yazıyor: "gitti" demek
+     * yetmez, HANGİ adresten gittiği doğrulanabilmeli.
+     */
     public function testEmail(Request $request): RedirectResponse
     {
         $to = $request->input('to') ?: PlatformSetting::get('platform.support_email', 'support@mentorde.com');
@@ -117,17 +136,51 @@ class PlatformSettingsController extends Controller
             return back()->with('error', 'Geçerli bir e-posta adresi gerekli.');
         }
 
+        $snapshot  = \App\Support\Brand::snapshot();
+        $companyId = (int) $request->input('as_company_id', 0);
+        $company   = null;
+
+        if ($companyId > 0) {
+            $company = \App\Models\Company::query()->withoutGlobalScope('company')->find($companyId);
+
+            if ($company) {
+                \App\Support\Brand::apply($company);
+            }
+        }
+
+        $fromName    = (string) config('mail.from.name');
+        $fromAddress = (string) config('mail.from.address');
+        $label       = $company ? $company->name : 'Platform';
+
         try {
             Mail::raw(
-                "MentorDE Platform Owner Console — SMTP test e-postası.\n\nGönderen: " . config('app.name'),
-                function ($msg) use ($to) {
-                    $msg->to($to)->subject('[MentorDE Platform] SMTP test');
+                "Gönderen kimliği testi.\n\n"
+                . "Şirket: {$label}\n"
+                . "Görünen ad: {$fromName}\n"
+                . "Adres: {$fromAddress}\n\n"
+                . "Bu mail size ulaştıysa bu kimlikle gönderim çalışıyor demektir.",
+                function ($msg) use ($to, $label) {
+                    $msg->to($to)->subject("[Test] Gönderen kimliği — {$label}");
                 }
             );
-            return back()->with('success', "Test e-postası {$to} adresine gönderildi.");
+
+            return back()->with(
+                'success',
+                "Test e-postası {$to} adresine gönderildi. Gönderen: {$fromName} <{$fromAddress}>"
+            );
         } catch (\Throwable $e) {
-            Log::warning('Platform SMTP test failed', ['err' => $e->getMessage()]);
-            return back()->with('error', 'E-posta gönderilemedi: ' . $e->getMessage());
+            Log::warning('Platform SMTP test failed', [
+                'err'     => $e->getMessage(),
+                'from'    => $fromAddress,
+                'company' => $label,
+            ]);
+
+            // Hatanın gövdesi önemli: doğrulanmamış alan adı, kimlik hatası ve
+            // ağ sorunu birbirinden ancak burada ayrılıyor.
+            return back()->with('error', "E-posta gönderilemedi ({$fromAddress}): " . $e->getMessage());
+        } finally {
+            // Test için uygulanan kimlik isteğin geri kalanına sızmamalı.
+            \App\Support\Brand::restore($snapshot);
         }
     }
 

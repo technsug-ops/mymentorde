@@ -173,9 +173,11 @@
 
 {{-- SMTP test — ana form'un dışında bağımsız form --}}
 <div class="plat-card" style="margin-top: 24px;">
-    <h3 class="plat-card-title"><x-icon name="mail" size="16" /> SMTP Test E-postası</h3>
+    <h3 class="plat-card-title"><x-icon name="mail" size="16" /> Gönderim Testi</h3>
     <p class="plat-card-sub" style="margin-bottom: 14px;">
-        Mevcut SMTP ayarları ile bir test mesajı gönderir. Önce yukarıdaki form ile değişikliklerinizi kaydedin.
+        Seçilen şirketin <strong>gönderen kimliğiyle</strong> test mesajı yollar.
+        Her firmanın adresi farklı olabildiği için tek kimlikle test etmek yanıltıcı olur:
+        bir partnerin alan adı doğrulanmamışsa platform testi yeşil görünür ama o firmanın maili gitmez.
     </p>
     <form method="POST" action="{{ route('platform.settings.test-email') }}" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
         @csrf
@@ -184,10 +186,23 @@
             <input type="email" id="test-to" name="to" class="plat-input"
                    placeholder="{{ PlatformSetting::get('platform.support_email', 'support@mentorde.com') }}">
         </div>
+        <div style="min-width:220px;">
+            <label class="plat-form-label" for="test-company">Kimin adına</label>
+            <select id="test-company" name="as_company_id" class="plat-input">
+                <option value="">Platform (varsayılan)</option>
+                @foreach($companies as $c)
+                    <option value="{{ $c->id }}">{{ $c->name }}</option>
+                @endforeach
+            </select>
+        </div>
         <button type="submit" class="plat-btn plat-btn-ghost">
             <x-icon name="mail" size="14" /> Test gönder
         </button>
     </form>
+    <p class="plat-card-sub" style="margin-top:10px;font-size:11.5px;">
+        Sonuç mesajında gönderim yapılan ad ve adres yazar — "gitti" demek yetmez,
+        hangi adresten gittiği görünmeli.
+    </p>
 </div>
 
 @push('scripts')
