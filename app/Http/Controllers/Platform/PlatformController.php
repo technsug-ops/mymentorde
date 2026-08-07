@@ -277,6 +277,9 @@ class PlatformController extends Controller
             // DOĞRULANMIŞ olmalı; doğrulanmamış adres bu şirketin tüm
             // mailini sessizce kırar (bkz. Brand::applyMailIdentity).
             'mail_from_address'   => ['nullable', 'email', 'max:190'],
+            // Öğrenci "Yanıtla" dediğinde ulaşacağı adres. Boşsa firmanın
+            // destek adresine, o da yoksa portalınkine düşer.
+            'reply_to_address'    => ['nullable', 'email', 'max:190'],
             'primary_domain'      => [
                 'nullable', 'string', 'max:190',
                 \Illuminate\Validation\Rule::unique('companies', 'primary_domain')->ignore($companyModel->id),
@@ -331,7 +334,7 @@ class PlatformController extends Controller
         // Gönderen adresi brand_overrides içinde tutuluyor (config/brand.php'nin
         // şeklini taklit eder). Alan hiç gönderilmediyse mevcut değere dokunma —
         // kısmi güncelleme adresi sessizce silmemeli.
-        if ($request->has('mail_from_address')) {
+        if ($request->has('mail_from_address') || $request->has('reply_to_address')) {
             $overrides = $companyModel->brand_overrides;
 
             if (is_string($overrides)) {
@@ -339,12 +342,19 @@ class PlatformController extends Controller
             }
 
             $overrides = is_array($overrides) ? $overrides : [];
-            $mailFrom  = strtolower(trim((string) $request->input('mail_from_address', '')));
 
-            if ($mailFrom !== '') {
-                $overrides['mail_from_address'] = $mailFrom;
-            } else {
-                unset($overrides['mail_from_address']);
+            foreach (['mail_from_address', 'reply_to_address'] as $key) {
+                if (! $request->has($key)) {
+                    continue;
+                }
+
+                $value = strtolower(trim((string) $request->input($key, '')));
+
+                if ($value !== '') {
+                    $overrides[$key] = $value;
+                } else {
+                    unset($overrides[$key]);
+                }
             }
 
             $companyModel->brand_overrides = $overrides ?: null;

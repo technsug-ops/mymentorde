@@ -155,6 +155,7 @@
                 $_bo = $company->brand_overrides;
                 if (is_string($_bo)) { $_bo = json_decode($_bo, true); }
                 $_mailFrom = is_array($_bo) ? ($_bo['mail_from_address'] ?? '') : '';
+                $_replyTo  = is_array($_bo) ? ($_bo['reply_to_address'] ?? '') : '';
             @endphp
 
             <div class="plat-form-group">
@@ -167,6 +168,18 @@
                     <strong>Alan adı mail sağlayıcısında doğrulanmış olmalı</strong> —
                     doğrulanmamış bir adres bu şirketin tüm mailini keser.
                     Boş bırakılırsa platformun adresi kullanılır.
+                </small>
+            </div>
+
+            <div class="plat-form-group">
+                <label class="plat-form-label">Yanıt Adresi (Reply-To)</label>
+                <input type="email" name="reply_to_address" class="plat-input"
+                       value="{{ old('reply_to_address', $_replyTo) }}"
+                       maxlength="190" placeholder="info@firma.com">
+                <small style="font-size:11px;color:var(--plat-muted);">
+                    Öğrenci <strong>"Yanıtla"</strong> dediğinde mail buraya gider — ortak gönderen
+                    kutusuna değil. Boş bırakılırsa firmanın destek adresi, o da yoksa
+                    <strong>bağlı olduğu portalın</strong> adresi kullanılır.
                 </small>
             </div>
 

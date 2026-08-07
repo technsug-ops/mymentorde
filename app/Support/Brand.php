@@ -177,7 +177,80 @@ final class Brand
             config(['mail.from.address' => $address]);
         }
 
+        self::applyReplyTo($company, $portal, $senderName);
         self::applyMailTransport($company, $portal);
+
+        // ⚠ ZORUNLU. Laravel gönderen ve yanıt adreslerini mailer OLUŞTURULURKEN
+        // okuyor (MailManager::setGlobalAddress). Önbellekteki bir mailer varsa
+        // buradaki değişiklikler ona hiç ulaşmaz — aynı istekte ikinci firmaya
+        // giden mail birincinin kimliğiyle çıkardı.
+        self::forgetResolvedMailers();
+    }
+
+    /**
+     * Yanıt adresi — öğrencinin "Yanıtla" dediğinde ulaşacağı yer.
+     *
+     * ── NEDEN GEREKLİ ────────────────────────────────────────────────────
+     * Mailler ortak portalın adresinden çıkıyor (alan adı doğrulaması oraya
+     * bağlı). Reply-To konmazsa TÜM firmaların yanıtları o tek gelen
+     * kutusunda karışır ve hangisinin kime ait olduğu anlaşılmaz.
+     *
+     * "noreply@" yapıp kapatmak çözüm değil: öğrenci yine yanıtlar, sadece
+     * cevabı hiçbir yere ulaşmaz — sessiz kayıp.
+     *
+     * Reply-To gönderenden farklı olabilir; kurumsal maillerde yaygın ve
+     * teslimatı etkilemez. Alan adı doğrulaması istemez, firmanın DNS'ine
+     * dokunmaz.
+     *
+     * ⚠ Başlığı Laravel'in KENDİSİ koyuyor (`mail.reply_to` → MailManager::
+     * setGlobalAddress). Ayrı bir dinleyici yazmaya gerek yok — yazılmıştı,
+     * gereksiz olduğu anlaşılınca kaldırıldı. Kendi yanıt adresini belirten
+     * bir mail olursa iki adres birden taşınır; kayıp olmaz.
+     *
+     * ZİNCİR: firmanın açık yanıt adresi → destek adresi → genel adresi →
+     * portalın aynıları → platformunki. Böylece hiçbir mail cevapsız
+     * kalmıyor, yalnızca muhatabı değişiyor.
+     */
+    private static function applyReplyTo(Company $company, ?Company $portal, string $senderName): void
+    {
+        $address = self::configuredReplyTo($company)
+            ?: ($portal ? self::configuredReplyTo($portal) : null)
+            ?: trim((string) ((self::$platformBase['support_email'] ?? null)
+                ?: (self::$platformBase['email'] ?? null) ?: ''));
+
+        config(['mail.reply_to' => $address !== '' && $address !== null
+            ? ['address' => $address, 'name' => $senderName]
+            : null]);
+    }
+
+    /**
+     * Şirket için tanımlı yanıt adresi — yoksa null.
+     *
+     * Ayrı bir `reply_to_address` varsa o kullanılır; yoksa firmanın zaten
+     * girdiği destek/genel adresi yeterli. Böylece çoğu firma fazladan bir
+     * alan doldurmak zorunda kalmıyor.
+     */
+    private static function configuredReplyTo(Company $company): ?string
+    {
+        $overrides = $company->getAttribute('brand_overrides');
+
+        if (is_string($overrides)) {
+            $overrides = json_decode($overrides, true);
+        }
+
+        if (!is_array($overrides)) {
+            return null;
+        }
+
+        foreach (['reply_to_address', 'support_email', 'email'] as $key) {
+            $value = trim((string) ($overrides[$key] ?? ''));
+
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -591,6 +664,7 @@ final class Brand
             // ettiğinde mail "from" bilgisi geride kalırsa sonraki mail
             // yanlış firma adına çıkardı.
             'mail_from' => (array) config('mail.from', []),
+            'reply_to'  => config('mail.reply_to'),
             // ⚠ TAŞIYICI DA TAŞINMALI. Aksi halde bir firmanın kendi mail
             // sunucusu, aynı istekte işlenen SONRAKİ firmanın mailini de
             // gönderirdi — başka markanın kimliğiyle çıkan mail demek.
@@ -612,6 +686,10 @@ final class Brand
 
         if (isset($snapshot['mail_from'])) {
             config(['mail.from' => $snapshot['mail_from']]);
+        }
+
+        if (array_key_exists('reply_to', $snapshot)) {
+            config(['mail.reply_to' => $snapshot['reply_to']]);
         }
 
         if (array_key_exists('mail_default', $snapshot)) {
