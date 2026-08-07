@@ -31,9 +31,16 @@ class FinanceController extends Controller
      */
     private function contractRevenueData(int $cid): array
     {
+        // ⚠ YALNIZCA SABİTLENMİŞ tutarlar sayılır.
+        //
+        // Tutar sözleşme aşamasında pazarlıkla değişebiliyor. Sabitlenmemiş
+        // bir rakamı toplamak, henüz anlaşılmamış bir fiyatı ciroya yazmak
+        // olurdu. Sabitleme ayrı ve bilinçli bir adım
+        // (bkz. ContractAmountController).
         $base = GuestApplication::query()
             ->whereNotNull('contract_amount_eur')
             ->where('contract_amount_eur', '>', 0)
+            ->whereNotNull('contract_amount_locked_at')
             ->when($cid > 0, fn($q) => $q->where('company_id', $cid));
 
         // Onaylı / tahsil edilmiş (signed + approved = confirmed revenue)
@@ -109,10 +116,12 @@ class FinanceController extends Controller
             ->whereYear('entry_date',$year)->whereMonth('entry_date',$month)->sum('amount');
 
         // Sözleşme geliri — bu ay
+        // Sabitlenmemiş tutar burada da sayılmaz — yukarıdaki kuralın aynısı.
         $contractThisMonth = (float) GuestApplication::query()
             ->whereIn('contract_status', ['signed','approved'])
             ->whereNotNull('contract_amount_eur')
             ->where('contract_amount_eur', '>', 0)
+            ->whereNotNull('contract_amount_locked_at')
             ->when($cid > 0, fn($q) => $q->where('company_id', $cid))
             ->whereYear('contract_signed_at', $year)
             ->whereMonth('contract_signed_at', $month)

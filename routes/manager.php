@@ -99,6 +99,12 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::patch('/manager/guests/{guest}/status',          [ManagerPortalController::class, 'guestUpdateStatus'])->name('manager.guests.status');
     Route::patch('/manager/guests/{guest}/assign',          [ManagerPortalController::class, 'guestAssignSenior'])->name('manager.guests.assign');
 
+    // Sozlesme tutari — finansin saydigi TEK rakam. Paket fiyati baslangic
+    // degeri; pazarlikla degisir, SABITLENINCE finansa girer.
+    $contractAmount = \App\Http\Controllers\Manager\ContractAmountController::class;
+    Route::post('/manager/guests/{guest}/contract-amount',        [$contractAmount, 'store'])->whereNumber('guest')->name('manager.guests.contract-amount');
+    Route::post('/manager/guests/{guest}/contract-amount/unlock', [$contractAmount, 'unlock'])->whereNumber('guest')->name('manager.guests.contract-amount.unlock');
+
     // ─── Lead Pipeline Oversight (gözetim — operasyonel iş Senior'da) ────────
     $leadPipeline = \App\Http\Controllers\Manager\LeadPipelineController::class;
     Route::get('/manager/pipeline/oversight',               [$leadPipeline, 'oversight'])->name('manager.pipeline.oversight');

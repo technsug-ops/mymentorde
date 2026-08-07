@@ -122,6 +122,18 @@
                     <td>{{ $guest->selected_package_title ?: '–' }}</td></tr>
                 <tr><td class="lbl">Paket Fiyatı</td>
                     <td>{{ $guest->selected_package_price ? number_format((float)$guest->selected_package_price, 2, ',', '.') . ' EUR' : '–' }}</td></tr>
+                <tr><td class="lbl">Sözleşme Tutarı</td>
+                    <td>
+                        @if($guest->contract_amount_locked_at)
+                            <strong>{{ number_format((float) $guest->contract_amount_eur, 2, ',', '.') }} EUR</strong>
+                            <span class="badge ok" style="margin-left:6px;">Sabit</span>
+                        @elseif($guest->contract_amount_eur > 0)
+                            {{ number_format((float) $guest->contract_amount_eur, 2, ',', '.') }} EUR
+                            <span class="badge warn" style="margin-left:6px;">Sabitlenmedi</span>
+                        @else
+                            <span class="muted">Belirlenmedi</span>
+                        @endif
+                    </td></tr>
                 @php
                     [$csLbl, $csCls] = match($guest->contract_status ?? '') {
                         'not_requested' => ['Talep Edilmedi', 'badge'],
@@ -303,6 +315,70 @@
             'personLabel' => 'Aday Öğrenci',
             'idSuffix'    => 'guest' . $guest->id,
         ])
+
+        {{-- Sözleşme tutarı — finansın saydığı TEK rakam.
+
+             Paket fiyatı başlangıç değeri; pazarlıkla değişebilir.
+             SABİTLENMEDEN finansa girmez: anlaşılmamış bir rakamın ciroya
+             yazılması engelleniyor.
+
+             Partnere kapalı — fiyat kararı operasyonu yürüten firmanın. --}}
+        @unlesspartnerPanel
+        <section class="panel gd-panel">
+            <h2>Sözleşme Tutarı</h2>
+
+            @if($errors->has('contract_amount'))
+                <div style="margin-bottom:10px;padding:9px 12px;border-radius:8px;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;font-size:12px;">
+                    {{ $errors->first('contract_amount') }}
+                </div>
+            @endif
+
+            @if($guest->contract_amount_locked_at)
+                <div class="gd-readonly">
+                    <strong>{{ number_format((float) $guest->contract_amount_eur, 2, ',', '.') }} EUR</strong> — sabitlendi
+                    <span class="muted">({{ $guest->contract_amount_locked_at->format('d.m.Y H:i') }})</span>
+                    @if($guest->contract_amount_set_by)
+                        <span class="muted"> · {{ $guest->contract_amount_set_by }}</span>
+                    @endif
+                    @if($guest->contract_amount_note)
+                        <div style="margin-top:6px;font-size:12px;">{{ $guest->contract_amount_note }}</div>
+                    @endif
+                </div>
+
+                <div style="font-size:11.5px;color:var(--u-muted,#64748b);margin:8px 0 10px;line-height:1.6;">
+                    Finans bu rakamı sayıyor. Değiştirmek için önce sabitlemeyi kaldırın —
+                    kaldırıldığı sürece bu kayıt <strong>finansa girmez</strong>.
+                </div>
+
+                <form method="POST" action="{{ route('manager.guests.contract-amount.unlock', $guest->id) }}"
+                      onsubmit="return confirm('Sabitleme kaldırılacak ve bu kayıt finanstan düşecek. Devam?');">
+                    @csrf
+                    <button class="btn">Sabitlemeyi Kaldır</button>
+                </form>
+            @else
+                <form method="POST" action="{{ route('manager.guests.contract-amount', $guest->id) }}">
+                    @csrf
+                    <div class="gd-field">
+                        <label>Anlaşılan Tutar (EUR)</label>
+                        <input type="number" name="contract_amount_eur" step="0.01" min="0" required
+                               value="{{ old('contract_amount_eur', $guest->contract_amount_eur ?: (float) $guest->selected_package_price) }}">
+                    </div>
+                    <div class="gd-field">
+                        <label>Not (opsiyonel)</label>
+                        <input type="text" name="contract_amount_note" maxlength="500"
+                               value="{{ old('contract_amount_note', $guest->contract_amount_note) }}"
+                               placeholder="Örn. iki taksit, %10 indirim uygulandı">
+                    </div>
+                    <div style="font-size:11.5px;color:var(--u-muted,#64748b);margin-bottom:10px;line-height:1.6;">
+                        Başlangıç değeri paket fiyatı. Sabitlenmeden <strong>finansa girmez</strong>.
+                    </div>
+                    <div class="gd-actions">
+                        <button class="btn btn-primary">Kaydet ve Sabitle</button>
+                    </div>
+                </form>
+            @endif
+        </section>
+        @endpartnerPanel
 
         {{-- Eğitim Danışmanı Atama
 

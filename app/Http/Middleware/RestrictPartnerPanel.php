@@ -73,6 +73,8 @@ class RestrictPartnerPanel
         'manager/guests/*/vize-rehber/*',
         'manager/guests/*/rehber/*',
         'manager/guests/*/assign',              // danışman ataması
+        'manager/guests/*/contract-amount',     // sözleşme tutarı — fiyat kararı operasyonun
+        'manager/guests/*/contract-amount/*',
         'manager/students/*/uni-assist-rehber',
         'manager/students/*/uni-assist-rehber/*',
         'manager/students/*/vize-rehber',

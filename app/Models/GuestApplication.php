@@ -96,6 +96,12 @@ class GuestApplication extends Model
         'contract_status', 'contract_requested_at',
         'reopen_reason', 'reopen_requested_at',
 
+        // ── Sözleşme tutarı — finansın saydığı TEK rakam.
+        // Paket fiyatı başlangıç değeri; pazarlıkla değişebilir, sabitlenince
+        // finansa girer (bkz. ContractAmountController).
+        'contract_amount_eur', 'contract_amount_locked_at',
+        'contract_amount_set_by', 'contract_amount_note',
+
         // ── Portal Tercihleri & Profil
         'preferred_locale', 'notifications_enabled',
         'notify_email', 'notify_whatsapp', 'notify_inapp',
@@ -167,6 +173,7 @@ class GuestApplication extends Model
         'package_selected_at' => 'datetime',
         'selected_extra_services' => 'array',
         'contract_requested_at' => 'datetime',
+        'contract_amount_locked_at' => 'datetime',
         'contract_signed_at' => 'datetime',
         'contract_approved_at' => 'datetime',
         'contract_generated_at' => 'datetime',
