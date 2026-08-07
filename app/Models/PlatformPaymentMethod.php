@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PlatformOwnedData;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PlatformPaymentMethod extends Model
 {
+    // Firmanin abonelik odeme yontemi — platform tahsilati icin.
+    use PlatformOwnedData;
+
     protected $fillable = [
         'company_id',
         'stripe_payment_method_id',

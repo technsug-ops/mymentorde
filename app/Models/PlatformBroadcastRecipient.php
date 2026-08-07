@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Concerns\PlatformOwnedData;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -14,6 +15,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class PlatformBroadcastRecipient extends Model
 {
+    // Platform duyurusunun kime ulastigi — gonderim kaydi.
+    use PlatformOwnedData;
+
     use HasFactory;
 
     public const STATUS_PENDING = 'pending';

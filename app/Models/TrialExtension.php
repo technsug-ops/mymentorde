@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PlatformOwnedData;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -19,6 +20,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class TrialExtension extends Model
 {
+    // Deneme suresi uzatmasi — platform sahibinin ticari karari.
+    use PlatformOwnedData;
+
     protected $fillable = [
         'company_id',
         'extension_days',
