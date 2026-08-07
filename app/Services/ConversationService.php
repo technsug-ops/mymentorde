@@ -208,14 +208,46 @@ class ConversationService
      * Kullanıcının bir başkasıyla DM başlatıp başlatamayacağını kontrol eder.
      * Kural: aynı şirket içindeki herkes herkesle DM başlatabilir.
      */
+    /**
+     * İki kişi birbirine direkt mesaj atabilir mi?
+     *
+     * Kural aynı şirket olmak. TEK İSTİSNA: partner firmanın kullanıcısı ile
+     * kendi öğrencisine ATANMIŞ danışman.
+     *
+     * ── NEDEN İSTİSNA ────────────────────────────────────────────────────
+     * Danışmanı üst firma atıyor, yani başka şirkette. Katı şirket kuralı
+     * partneri öğrencisiyle ilgilenen kişiden koparıyordu: adını görüyor,
+     * ulaşamıyordu.
+     *
+     * ── İSTİSNANIN SINIRI ────────────────────────────────────────────────
+     * "Üst firmanın herhangi biri" DEĞİL — yalnızca bu firmanın aday veya
+     * öğrencisine atanmış danışman. Partner firmalar birbirinden habersiz
+     * kalmalı ve üst firmanın iç yapısını görmemeli.
+     */
     public function canStartDmWith(User $from, User $to): bool
     {
-        // Farklı şirket
-        if ((int) ($from->company_id ?? 0) !== (int) ($to->company_id ?? 0)) {
+        if ((int) ($from->company_id ?? 0) === (int) ($to->company_id ?? 0)) {
+            return true;
+        }
+
+        return $this->isAssignedAdvisorFor($from, $to)
+            || $this->isAssignedAdvisorFor($to, $from);
+    }
+
+    /** $candidate, $member'ın şirketinin öğrencilerine atanmış bir danışman mı? */
+    private function isAssignedAdvisorFor(User $member, User $candidate): bool
+    {
+        $companyId = (int) ($member->company_id ?? 0);
+
+        if ($companyId <= 0) {
             return false;
         }
 
-        return true;
+        return in_array(
+            (int) $candidate->id,
+            \App\Support\MessagingDirectory::reachableOutsideIds($companyId),
+            true
+        );
     }
 
     private function departmentOf(string $role): string
