@@ -41,7 +41,7 @@ class AdvisorAssignmentService
             ->where('is_active', true)
             ->where('auto_assign_enabled', true)
             ->orderBy('id')
-            ->get(['email', 'max_capacity', 'senior_type']);
+            ->get(['email', 'max_capacity', 'senior_type', 'advisor_specialties']);
 
         if ($advisors->isEmpty()) {
             return null;
@@ -127,6 +127,18 @@ class AdvisorAssignmentService
     /**
      * Uzmanlığı eşleşenler; hiçbiri eşleşmezse havuzun tamamı.
      *
+     * ── ÇOK ETİKET ───────────────────────────────────────────────────────
+     * Bir danışman birden fazla alanda uzman olabilir (Bachelor + Master
+     * gibi). Etiketlerden HERHANGİ BİRİ başvuru türüyle eşleşiyorsa aday
+     * ona atanabilir.
+     *
+     * ETİKETSİZ = GENEL. Hiç etiketi olmayan danışman her başvuruya uygun
+     * sayılır; aksi halde etiketleme başlar başlamaz etiketlenmemiş herkes
+     * havuzdan sessizce düşerdi.
+     *
+     * `senior_type` geriye uyum için hâlâ okunuyor: etiket girilmemiş ama
+     * eski alanı doldurulmuş danışmanlar çalışmaya devam etsin.
+     *
      * @param  \Illuminate\Support\Collection<int,User>  $advisors
      * @return \Illuminate\Support\Collection<int,User>
      */
@@ -139,9 +151,16 @@ class AdvisorAssignmentService
         }
 
         $matched = $advisors->filter(function (User $advisor) use ($type): bool {
-            $advisorType = strtolower(trim((string) ($advisor->senior_type ?? '')));
+            $tags = $advisor->advisorSpecialties();
 
-            return $advisorType === '' || $advisorType === $type;
+            if ($tags !== []) {
+                return in_array($type, $tags, true);
+            }
+
+            // Etiket yok — eski tek değerli alana bak, o da boşsa genel.
+            $legacy = strtolower(trim((string) ($advisor->senior_type ?? '')));
+
+            return $legacy === '' || $legacy === $type;
         })->values();
 
         return $matched->isNotEmpty() ? $matched : $advisors;

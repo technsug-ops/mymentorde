@@ -469,6 +469,54 @@ class ManagerPortalController extends Controller
 
     // ─── SENİOR DETAY ────────────────────────────────────────────────────────
 
+    /**
+     * Danışmanın uzmanlık etiketlerini kaydet.
+     *
+     * ── NEDEN BURADA ─────────────────────────────────────────────────────
+     * `/manager/staff` ekranı danışmanları YÖNETMİYOR — orası sistem,
+     * operasyon, finans, pazarlama ve satış rolleri için (bkz.
+     * StaffController::STAFF_ROLES). Danışmanın yeri bu ekran.
+     *
+     * Etiketler otomatik atamayı etkiliyor: aday başvuru türüyle eşleşen
+     * danışmana gidiyor. Bu yüzden serbest metin değil, bilinen değerler
+     * (bkz. User::ADVISOR_SPECIALTIES).
+     */
+    public function setSeniorSpecialties(Request $request, string $email): RedirectResponse
+    {
+        $cid = $this->companyId();
+
+        $advisor = User::query()
+            ->when($cid > 0, fn ($b) => $b->where('company_id', $cid))
+            ->whereRaw('lower(email) = ?', [strtolower($email)])
+            ->whereIn('role', [User::ROLE_SENIOR, User::ROLE_MENTOR])
+            ->firstOrFail();
+
+        $data = $request->validate([
+            'specialties'   => ['sometimes', 'array'],
+            // ⚠ Rule::in KULLANILMIYOR. Form, "hepsi kaldırıldı" durumunu
+            // ayırt edebilmek için boş bir gizli alan gönderiyor; katı bir
+            // in kuralı onu reddeder ve etiketler HİÇ kaldırılamazdı.
+            // Bilinmeyen değerler aşağıda sessizce eleniyor.
+            'specialties.*' => ['nullable', 'string', 'max:32'],
+        ]);
+
+        $selected = array_values(array_unique(array_intersect(
+            array_map(
+                fn ($v) => strtolower(trim((string) $v)),
+                (array) ($data['specialties'] ?? [])
+            ),
+            array_keys(User::ADVISOR_SPECIALTIES)
+        )));
+
+        $advisor->forceFill([
+            'advisor_specialties' => $selected !== [] ? $selected : null,
+        ])->save();
+
+        return back()->with('status', $selected === []
+            ? 'Uzmanlık etiketleri kaldırıldı — bu danışman her başvuru türüne uygun sayılacak.'
+            : count($selected) . ' uzmanlık etiketi kaydedildi.');
+    }
+
     public function seniorShow(string $email): View
     {
         $cid = $this->companyId();

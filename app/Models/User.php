@@ -397,6 +397,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         'senior_code',
         'senior_internal_sequence',
         'senior_type',
+        'advisor_specialties',
         'max_capacity',
         'auto_assign_enabled',
         'can_view_guest_pool',
@@ -428,6 +429,44 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
      *
      * @return array<string, string>
      */
+    /**
+     * Danışman uzmanlık etiketleri — bir kişide birden fazla olabilir.
+     *
+     * Anahtarlar aday başvuru türleriyle (`application_type`) eşleşecek
+     * şekilde seçildi; otomatik atama bu eşleşmeye bakıyor.
+     *
+     * ⚠ `vize` bir başvuru türü DEĞİL. Otomatik eşleşmede karşılığı yok;
+     * elle atama ve listeleme için bir işaret. Yani vize etiketli bir
+     * danışman, yalnızca bu etiketi varsa hiçbir otomatik atamaya girmez.
+     *
+     * @var array<string,string>
+     */
+    public const ADVISOR_SPECIALTIES = [
+        'bachelor'   => 'Bachelor',
+        'master'     => 'Master',
+        'ausbildung' => 'Ausbildung',
+        'vize'       => 'Vize',
+    ];
+
+    /**
+     * Temizlenmiş uzmanlık listesi — yalnızca bilinen etiketler.
+     *
+     * @return list<string>
+     */
+    public function advisorSpecialties(): array
+    {
+        $raw = $this->advisor_specialties;
+
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        return array_values(array_intersect(
+            array_map(fn ($v) => strtolower(trim((string) $v)), $raw),
+            array_keys(self::ADVISOR_SPECIALTIES)
+        ));
+    }
+
     protected function casts(): array
     {
         return [
@@ -435,6 +474,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
             'password' => 'hashed',
             'company_id' => 'integer',
             'max_capacity' => 'integer',
+            'advisor_specialties' => 'array',
             'auto_assign_enabled' => 'boolean',
             'can_view_guest_pool' => 'boolean',
             'is_active'              => 'boolean',

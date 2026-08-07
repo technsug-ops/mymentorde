@@ -190,6 +190,9 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::get('/manager/seniors/{email}',                  [ManagerPortalController::class, 'seniorShow'])->name('manager.seniors.show')->where('email', '[^/]+');
     Route::get('/manager/senior-leaderboard',               [ManagerPortalController::class, 'seniorLeaderboard'])->name('manager.senior-leaderboard');
     Route::post('/manager/seniors/{email}/targets',         [ManagerPortalController::class, 'setSeniorTargets'])->name('manager.seniors.targets')->where('email', '[^/]+');
+    // Uzmanlık etiketleri — otomatik atamada başvuru türüyle eşleşme.
+    // Danışmanlar /manager/staff ekraninda YOK (orasi back-office rolleri icin).
+    Route::post('/manager/seniors/{email}/specialties',     [ManagerPortalController::class, 'setSeniorSpecialties'])->name('manager.seniors.specialties')->where('email', '[^/]+');
     Route::get('/manager/dealers',                          [ManagerPortalController::class, 'dealers'])->name('manager.dealers.index');
     Route::get('/manager/dealers/{code}',                   [ManagerPortalController::class, 'dealerShow'])->name('manager.dealers.show');
     Route::post('/manager/dealers/{code}/override',         [ManagerPortalController::class, 'updateDealerOverride'])->name('manager.dealers.override');
