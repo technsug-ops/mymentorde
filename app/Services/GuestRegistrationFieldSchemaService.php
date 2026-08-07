@@ -39,7 +39,17 @@ class GuestRegistrationFieldSchemaService
 
         $this->ensureDefaults($companyId);
 
+        // ⚠ KAPSAM DIŞI OKUNUYOR. `GuestRegistrationField` firma kapsamlı;
+        // kapsam açıkken `where('company_id', 0)` ortak şablonu HİÇ bulamaz
+        // (kapsam "yalnızca kendi firman" diye ekliyor). O hâlde firma sabit
+        // PHP kataloğuna düşer ve merkezden yapılan form değişikliği ona
+        // ULAŞMAZ — düzeltmek istediğimiz sorunun ta kendisi.
+        //
+        // Hangi satırların okunacağı zaten aşağıdaki açık `company_id`
+        // koşuluyla belirleniyor; kapsam burada koruma sağlamıyor, engel
+        // oluyor.
         $rows = GuestRegistrationField::query()
+            ->withoutGlobalScope('company')
             ->where('company_id', $companyId > 0 ? $companyId : 0)
             ->where('is_active', true)
             ->orderBy('section_order')
@@ -49,6 +59,7 @@ class GuestRegistrationFieldSchemaService
 
         if ($rows->isEmpty() && $companyId > 0) {
             $rows = GuestRegistrationField::query()
+                ->withoutGlobalScope('company')
                 ->where('company_id', 0)
                 ->where('is_active', true)
                 ->orderBy('section_order')
@@ -381,7 +392,11 @@ class GuestRegistrationFieldSchemaService
         $inserted = 0;
         $skipped = 0;
 
+        // Kapsam dışı: hedef şirket açıkça $cid ile belirtiliyor. Kapsam
+        // açık kalırsa ortak şablon (company_id=0) senkronu boş küme görür
+        // ve var olan alanları yeniden eklemeye çalışır.
         $existing = GuestRegistrationField::query()
+            ->withoutGlobalScope('company')
             ->where('company_id', $cid)
             ->get()
             ->keyBy('field_key');
@@ -440,13 +455,41 @@ class GuestRegistrationFieldSchemaService
         return ['updated' => $updated, 'inserted' => $inserted, 'skipped' => $skipped];
     }
 
+    /**
+     * Varsayılan form tanımını hazırla — YALNIZCA ORTAK ŞABLONA.
+     *
+     * ── NEDEN FİRMAYA KOPYALANMIYOR ──────────────────────────────────────
+     * Eskiden bir firma formu ilk kez açtığında katalogun TAMAMI o firmaya
+     * kopyalanıyordu (100+ satır). Kopya oluştuğu an firma kalıcı olarak
+     * ayrışıyor: merkezden yapılan form değişikliği ona ULAŞMIYOR ve
+     * `groups()` içindeki "ortak şablona düş" yedeği bir daha çalışmıyor.
+     *
+     * Sonuç, fark edilmesi zor bir sessiz sapma: form güncellenir, bazı
+     * firmalar eski formda kalır, kimse anlamaz. Alt firma sayısı arttıkça
+     * hata olasılığı artar.
+     *
+     * Artık tohumlama her zaman `company_id = 0`'a yapılıyor. Firma kendi
+     * satırlarını ancak BİLEREK özelleştirdiğinde (config panelinden alan
+     * ekleyip düzenlediğinde) ediniyor; o zaman da ayrışma kasıtlı oluyor.
+     *
+     * @param  int  $companyId  Geriye uyum için duruyor; tohumlamayı etkilemez.
+     */
     public function ensureDefaults(int $companyId = 0): void
     {
         if (!Schema::hasTable('guest_registration_fields')) {
             return;
         }
-        $cid = $companyId > 0 ? $companyId : 0;
-        $hasAny = GuestRegistrationField::query()->where('company_id', $cid)->exists();
+
+        $cid = 0;
+
+        // ⚠ Kapsam dışı: kapsam açıkken ortak şablon görünmez, "yok" sanılır
+        // ve her istekte yeniden tohumlanmaya çalışılır — tekil anahtar
+        // ihlaliyle sayfa 500 verir.
+        $hasAny = GuestRegistrationField::query()
+            ->withoutGlobalScope('company')
+            ->where('company_id', $cid)
+            ->exists();
+
         if ($hasAny) {
             return;
         }
