@@ -3,6 +3,7 @@
 namespace Tests\Feature\Tenancy;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Concerns\PlatformOwnedData;
 use App\Models\Concerns\SharedAcrossCompanies;
 use App\Models\Concerns\SharedBetweenTwoCompanies;
 use Illuminate\Database\Eloquent\Model;
@@ -54,7 +55,6 @@ class ModelScopeCoverageTest extends TestCase
         'CompanyFinanceEntry',
         'ConsentRecord',
         'Conversation',
-        'CustomerHealthScore',
         'DataRetentionPolicy',
         'DigitalAssetActivityLog',
         'DmThread',
@@ -69,9 +69,6 @@ class ModelScopeCoverageTest extends TestCase
         'NotificationDispatch',
         'NotificationPreference',
         'PayoutSetting',
-        'PlatformBroadcastRecipient',
-        'PlatformInvoice',
-        'PlatformPaymentMethod',
         'PromoCodeRedemption',
         'PromoPopup',
         'ScheduledNotification',
@@ -90,7 +87,6 @@ class ModelScopeCoverageTest extends TestCase
         'StudentUniversityApplication',
         'StudentVisaApplication',
         'TaskTemplate',
-        'TrialExtension',
         // 'User' → Faz 3'te düzeltildi (BelongsToCompany + tenant_eloquent auth provider)
         'WebhookLog',
     ];
@@ -162,7 +158,10 @@ class ModelScopeCoverageTest extends TestCase
                 // İki taraflı kayıt: global kapsam uygulanamaz, sınır
                 // sorgularda elle kuruluyor. Muafiyet değil, farklı bir
                 // koruma biçimi — bkz. SharedBetweenTwoCompanies.
-                || in_array(SharedBetweenTwoCompanies::class, $traits, true);
+                || in_array(SharedBetweenTwoCompanies::class, $traits, true)
+                // Platform sahibinin kendi kaydı: company_id sahipliği değil
+                // konuyu gösteriyor. İzolasyon rotayla — bkz. PlatformOwnedData.
+                || in_array(PlatformOwnedData::class, $traits, true);
 
             if (!$declared) {
                 $missing[] = $ref->getShortName();

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Concerns\PlatformOwnedData;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -14,6 +15,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class CustomerHealthScore extends Model
 {
+    // Musteri saglik skoru — platformun kendi musteri analizi.
+    use PlatformOwnedData;
+
     public const TREND_RISING    = 'rising';
     public const TREND_STABLE    = 'stable';
     public const TREND_DECLINING = 'declining';

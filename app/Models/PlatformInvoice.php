@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PlatformOwnedData;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PlatformInvoice extends Model
 {
+    // Firmanin abonelik faturasi — platform sahibinin gelir kaydi.
+    use PlatformOwnedData;
+
     public const STATUS_DRAFT     = 'draft';
     public const STATUS_SENT      = 'sent';
     public const STATUS_PAID      = 'paid';
