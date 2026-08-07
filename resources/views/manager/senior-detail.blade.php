@@ -94,6 +94,52 @@
     </div>
 </section>
 
+{{-- Uzmanlık etiketleri — OTOMATİK ATAMAYI belirler.
+
+     Aday, başvuru türüyle eşleşen danışmana gidiyor. Bir danışmanda birden
+     fazla etiket olabilir (Bachelor + Master gibi). --}}
+@if($user)
+<section class="panel gd-panel">
+    <h2>Uzmanlık Etiketleri</h2>
+
+    @if(session('status'))
+        <div style="margin-bottom:10px;padding:8px 12px;border-radius:8px;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;font-size:12px;">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    @php $mySpecialties = $user->advisorSpecialties(); @endphp
+
+    <form method="POST" action="{{ route('manager.seniors.specialties', $email) }}">
+        @csrf
+        {{-- Hepsi kaldırılınca da alan gelsin: aksi halde "hiçbiri seçili
+             değil" ile "alan gönderilmedi" ayırt edilemezdi. --}}
+        <input type="hidden" name="specialties[]" value="">
+
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+            @foreach(\App\Models\User::ADVISOR_SPECIALTIES as $code => $label)
+                <label style="display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--u-card,#fff);border:2px solid {{ in_array($code, $mySpecialties, true) ? '#1d4ed8' : 'var(--u-line,#e5e9f0)' }};border-radius:8px;cursor:pointer;">
+                    <input type="checkbox" name="specialties[]" value="{{ $code }}"
+                           {{ in_array($code, $mySpecialties, true) ? 'checked' : '' }}
+                           style="width:16px;height:16px;"
+                           onchange="this.closest('label').style.borderColor=this.checked?'#1d4ed8':'var(--u-line,#e5e9f0)';">
+                    <span style="font-size:13px;font-weight:600;">{{ $label }}</span>
+                </label>
+            @endforeach
+        </div>
+
+        <div style="font-size:11.5px;color:var(--u-muted,#64748b);line-height:1.65;margin-bottom:12px;">
+            Yeni adaylar başvuru türüne göre eşleşen danışmana atanır.
+            <strong>Hiçbiri seçilmezse</strong> bu danışman her başvuru türüne uygun sayılır.
+            <br><strong>Vize</strong> bir başvuru türü değil — otomatik eşleşmede karşılığı yok,
+            elle atama ve listeleme için işaret olarak durur.
+        </div>
+
+        <button type="submit" class="btn" style="padding:7px 16px;font-size:12px;">Etiketleri Kaydet</button>
+    </form>
+</section>
+@endif
+
 <div class="grid2">
 
     {{-- Aktif Öğrenciler --}}
