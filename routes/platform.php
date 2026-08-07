@@ -60,6 +60,14 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
     // Üst firmanın alt firmaya koyduğu yetki tavanı
     Route::post('/companies/{company}/permissions', [PlatformController::class, 'updatePermissionCeiling'])
         ->name('platform.companies.permissions');
+    // ── Form şablonu: tek merkez + iki yönlü sapma denetimi ─────────────────
+    // Konsol erişimi yok (KAS'ta SSH yok), bu yüzden panelde.
+    $formTemplate = \App\Http\Controllers\Platform\FormTemplateController::class;
+    Route::get('/form-template', [$formTemplate, 'index'])->name('platform.form-template');
+    Route::post('/form-template/{company}/reset', [$formTemplate, 'reset'])
+        ->whereNumber('company')->middleware('throttle:20,1')
+        ->name('platform.form-template.reset');
+
     // ── Firmanın kendi mail taşıyıcısı ──────────────────────────────────────
     // "Kendi sunucumu / kendi Resend hesabımı kullanın" diyen firma için.
     // Test edilmeden aktiflesmez: yanlis kimlik o firmanin TUM mailini keser.
