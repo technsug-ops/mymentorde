@@ -195,6 +195,57 @@ class CompanyMailTransportTest extends TestCase
         $this->assertSame('firma-anahtari', config('services.resend.key'));
     }
 
+    /**
+     * PORTALIN Resend hesabı alt firmaya da geçmeli.
+     *
+     * Canlıda görülen: YourGermanUni'nin kendi testi geçti ama Novavia'dan
+     * gönderim platformun anahtarıyla denendi. Adres devralınıyordu,
+     * taşıyıcı devralınmıyordu — bu yol test edilmemişti.
+     */
+    public function test_portal_resend_account_is_inherited(): void
+    {
+        $this->buildHierarchy();
+
+        $this->makeSetting($this->companyA, [
+            'driver'  => CompanyMailSetting::DRIVER_RESEND,
+            'api_key' => 'portal-anahtari',
+            'host'    => null,
+            'port'    => null,
+        ]);
+
+        Brand::apply($this->companyB->fresh());
+
+        $this->assertSame('portal-anahtari', config('resend.api_key'), 'Portalin Resend hesabi devralinmadi.');
+        $this->assertSame('tenant_runtime', config('mail.default'));
+    }
+
+    /**
+     * Alt firmanın KAPALI kaydı, portalın çalışan taşıyıcısını engellememeli.
+     *
+     * Canlıda tam bu durum oluştu: Novavia'ya yarım bir SMTP kaydı girildi
+     * (kapalı), YourGermanUni'nin Resend hesabı devrede. Kapalı kayıt
+     * yüzünden devralma kesilirse firma mailsiz kalır.
+     */
+    public function test_inactive_own_setting_does_not_block_inheritance(): void
+    {
+        $this->buildHierarchy();
+
+        $this->makeSetting($this->companyA, [
+            'driver'  => CompanyMailSetting::DRIVER_RESEND,
+            'api_key' => 'portal-anahtari',
+        ]);
+
+        $this->makeSetting($this->companyB, [
+            'driver'    => CompanyMailSetting::DRIVER_SMTP,
+            'host'      => 'yarim.test',
+            'is_active' => false,
+        ]);
+
+        Brand::apply($this->companyB->fresh());
+
+        $this->assertSame('portal-anahtari', config('resend.api_key'), 'Kapali kayit devralmayi kesti.');
+    }
+
     /** Resend anahtarı da iade edilmeli — başka firmanın hesabı kullanılmasın. */
     public function test_snapshot_restores_the_resend_key(): void
     {

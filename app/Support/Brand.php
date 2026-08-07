@@ -34,6 +34,21 @@ final class Brand
     /** Firmaya özel taşıyıcının çalışma anında yazıldığı mailer adı. */
     private const TENANT_MAILER = 'tenant_runtime';
 
+    /** Kullanılan taşıyıcının kaynağı — teşhis için konteynerde tutulur. */
+    private const MAIL_SOURCE_KEY = 'brand.mail_transport_source';
+
+    /**
+     * Bu istekte hangi firmanın mail taşıyıcısı devrede — yoksa null.
+     *
+     * @return array{company_id:int,driver:string}|null
+     */
+    public static function mailTransportSource(): ?array
+    {
+        return app()->bound(self::MAIL_SOURCE_KEY)
+            ? (array) app(self::MAIL_SOURCE_KEY)
+            : null;
+    }
+
     /** Bu isteğin MARKASINI veren şirket (veri şirketinden farklı olabilir). */
     public const BRAND_COMPANY_KEY = 'brand_company_id';
 
@@ -173,6 +188,14 @@ final class Brand
             if (!$setting || !$setting->isComplete()) {
                 return;
             }
+
+            // Hangi firmanın taşıyıcısı kullanıldı — teşhis için.
+            // "Mail gitmedi" dendiğinde ilk sorulan soru bu; tahmin etmek
+            // yerine ekranda yazsın.
+            app()->instance(self::MAIL_SOURCE_KEY, [
+                'company_id' => (int) $setting->company_id,
+                'driver'     => (string) $setting->driver,
+            ]);
 
             config(['mail.mailers.' . self::TENANT_MAILER => $setting->mailerConfig()]);
             config(['mail.default' => self::TENANT_MAILER]);
