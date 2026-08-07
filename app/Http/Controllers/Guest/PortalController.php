@@ -540,7 +540,9 @@ class PortalController extends Controller
         $guest = $this->resolveGuest($request);
         $data  = $this->viewData->build($request, $guest);
 
-        $rawPackages = collect(config('service_packages.packages', []))->where('is_active', true)->values();
+        // Aday hangi firmanın adayıysa o firmanın kataloğunu ve fiyatlarını görür.
+        $catalogCompanyId = (int) ($guest?->company_id ?? 0);
+        $rawPackages = \App\Support\ServiceCatalog::packages($catalogCompanyId);
 
         $data['packages']            = $rawPackages;
         $data['eurTryRate']          = app(CurrencyRateService::class)->getRate('EUR', 'TRY');
@@ -552,8 +554,8 @@ class PortalController extends Controller
         $data['packageSelectedAt']   = $guest?->package_selected_at;
         $data['contractRequested']   = in_array((string)($guest?->contract_status ?? 'not_requested'), ['requested','signed_uploaded','pending_manager','approved','reopen_requested'], true);
 
-        $allExtras = collect(config('service_packages.extra_services', []))->where('is_active', true);
-        $data['serviceCategories'] = collect(config('service_packages.service_categories', []))
+        $allExtras = \App\Support\ServiceCatalog::extras($catalogCompanyId);
+        $data['serviceCategories'] = \App\Support\ServiceCatalog::categories()
             ->map(fn ($cat) => array_merge($cat, [
                 'services' => $allExtras->where('category', $cat['key'])->sortBy('sort_order')->values()->all(),
             ]))
@@ -562,14 +564,14 @@ class PortalController extends Controller
 
         // Seçili pakette dahil olan ek hizmetler
         $selectedCode = (string) ($guest?->selected_package_code ?? '');
-        $selectedPkg = collect(config('service_packages.packages', []))->firstWhere('code', $selectedCode);
+        $selectedPkg = \App\Support\ServiceCatalog::findPackage($selectedCode, $catalogCompanyId);
         $data['includedExtras'] = is_array($selectedPkg['included_extras'] ?? null) ? $selectedPkg['included_extras'] : [];
 
         // Genel Toplam — paket fiyatı + seçili ek hizmetler
         // (view'da hem "Genel Toplam" kartı hem "Ödeme Talebi Gönder" butonu aynı tutarı gösterir)
         $pkgAmount = (int) ($selectedPkg['price_amount'] ?? 0);
-        $extrasAmount = collect($data['selectedExtras'])->sum(function ($x) {
-            $found = collect(config('service_packages.extra_services', []))->firstWhere('code', $x['code'] ?? '');
+        $extrasAmount = collect($data['selectedExtras'])->sum(function ($x) use ($catalogCompanyId) {
+            $found = \App\Support\ServiceCatalog::findExtra((string) ($x['code'] ?? ''), $catalogCompanyId);
             return (int) ($found['price_amount'] ?? 0);
         });
         $data['packageBaseAmount'] = $pkgAmount;

@@ -53,9 +53,12 @@ return [
         'path' => '/platform',
         'name' => 'Platform Tanıtım (SaaS Satış)',
         'type' => 'marketing',
-        'description' => 'B2B SaaS satış sayfası — eğitim danışmanlık firmalarına platformu satar. 3-tier pricing, 27+ modül, AI Labs vurgusu.',
+        'description' => 'B2B SaaS satış sayfası — eğitim danışmanlık firmalarına platformu satar. 3-tier pricing, 7 portal, 33+ modül, Firma Ağı + AI Labs vurgusu.',
         'edit_route' => null,
-        'edit_notes' => 'resources/views/public/platform-landing.blade.php — yeni feature eklendiğinde modules-grid + 27+ sayısı senkron tut',
+        'edit_notes' => 'resources/views/public/platform-landing.blade.php — yeni feature eklendiğinde SAYAÇLAR SENKRON TUTULMALI: '
+            . 'portal sayısı (hero-trust + stats + #portallar sec-label + footer) ve modül sayısı '
+            . '(hero-trust + stats + #moduller sec-label + "Tamamlayıcı Modüller (N)" etiketi). '
+            . 'Modül toplamı = flagship kart sayısı + pill sayısı. PublicLandingsCoverageTest sayaç tutarlılığını kontrol eder.',
         'is_active' => true,
         'tags' => ['saas', 'b2b', 'pricing'],
         'owner' => 'marketing',

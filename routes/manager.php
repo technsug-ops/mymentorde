@@ -131,6 +131,20 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::post('/manager/account/2fa/reset', [\App\Http\Controllers\Manager\MyAccountController::class, 'resetTwoFactor'])
         ->name('manager.account.2fa.reset');
 
+    // ─── Hizmet kataloğu (firma kendi paketini ve fiyatını tanımlar) ────────
+    // Firma kendi kataloğunu tanımlamadıysa üst firmanınkini kullanır; bkz.
+    // App\Support\ServiceCatalog.
+    $serviceCatalog = \App\Http\Controllers\Manager\ServiceCatalogController::class;
+    Route::get('/manager/services',                    [$serviceCatalog, 'index'])->name('manager.services.index');
+    Route::post('/manager/services/fork',              [$serviceCatalog, 'fork'])->name('manager.services.fork');
+    Route::post('/manager/services/reset',             [$serviceCatalog, 'reset'])->name('manager.services.reset');
+    Route::post('/manager/services/packages',          [$serviceCatalog, 'storePackage'])->name('manager.services.packages.store');
+    Route::patch('/manager/services/packages/{id}',    [$serviceCatalog, 'updatePackage'])->whereNumber('id')->name('manager.services.packages.update');
+    Route::delete('/manager/services/packages/{id}',   [$serviceCatalog, 'destroyPackage'])->whereNumber('id')->name('manager.services.packages.destroy');
+    Route::post('/manager/services/extras',            [$serviceCatalog, 'storeExtra'])->name('manager.services.extras.store');
+    Route::patch('/manager/services/extras/{id}',      [$serviceCatalog, 'updateExtra'])->whereNumber('id')->name('manager.services.extras.update');
+    Route::delete('/manager/services/extras/{id}',     [$serviceCatalog, 'destroyExtra'])->whereNumber('id')->name('manager.services.extras.destroy');
+
     // ─── Süreç Bilgisi (partner için salt okunur) ────────────────────────────
     // Operasyonu üst firma yürütüyor; partner burada yalnızca izler. Bilerek
     // sadece GET: bu ekrandan süreci ilerletecek hiçbir yol yok.

@@ -163,6 +163,11 @@ class PaymentReminderCommand extends Command
      */
     private function resolveAmount(GuestApplication $guest): ?float
     {
+        // Pazarlık sonucu sabitlenmiş tutar varsa her şeyin önünde gelir.
+        if ($guest->contract_amount_locked_at && (float) $guest->contract_amount_eur > 0) {
+            return (float) $guest->contract_amount_eur;
+        }
+
         $latest = GuestPaymentRequest::query()
             ->where('guest_application_id', $guest->id)
             ->orderByDesc('id')
@@ -174,14 +179,11 @@ class PaymentReminderCommand extends Command
         $selCode = (string) ($guest->selected_package_code ?? '');
         if ($selCode === '') return null;
 
-        $pkg = collect(config('service_packages.packages', []))->firstWhere('code', $selCode);
-        $pkgAmount = (int) ($pkg['price_amount'] ?? 0);
-        $extrasArr = is_array($guest->selected_extra_services) ? $guest->selected_extra_services : [];
-        $extrasAmount = collect($extrasArr)->sum(function ($x) {
-            $found = collect(config('service_packages.extra_services', []))->firstWhere('code', $x['code'] ?? '');
-            return (int) ($found['price_amount'] ?? 0);
-        });
-
-        return (float) ($pkgAmount + (int) $extrasAmount);
+        // Komut arka planda çalışıyor: istek bağlamı yok, firma adaydan alınmalı.
+        return \App\Support\ServiceCatalog::quote(
+            $selCode,
+            $guest->selected_extra_services,
+            (int) ($guest->company_id ?? 0)
+        );
     }
 }

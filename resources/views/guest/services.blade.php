@@ -417,10 +417,8 @@
             <div class="card-head" style="background:rgba(22,163,74,.05);padding:10px 16px;">
                 <div class="card-title" style="color:var(--u-ok);font-size:var(--tx-sm);">Seçili Ek Hizmetler</div>
                 @php
-                    $extrasTotal = collect($selectedExtras)->sum(function($x) {
-                        $found = collect(config('service_packages.extra_services', []))->firstWhere('code', $x['code'] ?? '');
-                        return (float)($found['price_amount'] ?? 0);
-                    });
+                    // Controller aynı toplamı adayın firmasının kataloğundan hesaplıyor.
+                    $extrasTotal = (float) ($extrasTotalAmount ?? 0);
                 @endphp
                 <span style="font-size:var(--tx-xs);color:var(--u-ok);font-weight:700;">Toplam: {{ number_format($extrasTotal, 0, ',', '.') }} EUR</span>
             </div>
@@ -479,10 +477,7 @@
         @php
             $customMin = 3;
             $extrasCnt = count($selectedExtras);
-            $customTotal = collect($selectedExtras)->sum(function($x) {
-                $found = collect(config('service_packages.extra_services', []))->firstWhere('code', $x['code'] ?? '');
-                return (int) ($found['price_amount'] ?? 0);
-            });
+            $customTotal = (int) ($extrasTotalAmount ?? 0);
         @endphp
         <div style="background:linear-gradient(135deg,#3730a3,#6d28d9);border-radius:12px;padding:18px 22px;margin-top:14px;">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">

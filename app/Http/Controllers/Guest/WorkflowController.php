@@ -359,9 +359,11 @@ class WorkflowController extends Controller
             );
 
             // Custom seçim: sentetik paket kodu + ek hizmetler toplamından fiyat
-            $extrasConfig = config('service_packages.extra_services', []);
-            $total = collect($extras)->sum(function ($x) use ($extrasConfig) {
-                $found = collect($extrasConfig)->firstWhere('code', $x['code'] ?? '');
+            // Katalog firmaya göre çözülüyor; pasif hizmet de bulunmalı ki
+            // daha önce seçilmiş bir kalem fiyatsız kalmasın.
+            $catalogCompanyId = (int) ($guest->company_id ?? 0);
+            $total = collect($extras)->sum(function ($x) use ($catalogCompanyId) {
+                $found = \App\Support\ServiceCatalog::findExtra((string) ($x['code'] ?? ''), $catalogCompanyId);
                 return (int) ($found['price_amount'] ?? 0);
             });
             $guest->fill([
@@ -391,12 +393,15 @@ class WorkflowController extends Controller
             'extra_code' => ['required', 'string', 'in:vip_meeting,blocked_account_support,visa_file_review,airport_pickup,accommodation_support,uni_dept_selection,uni_assist_apply,uni_application_tracking,visa_consulate_appointment,visa_file_preparation,visa_intent_letter,visa_interview_orient,finance_blocked_account,finance_health_insurance,accom_arrangement,accom_dorm_apply,accom_info,abroad_deutschlandticket,abroad_phone_line,abroad_airport_pickup,abroad_bank_account,abroad_residence_reg,abroad_foreigners_office,abroad_health_activate,abroad_life_seminar'],
         ]);
 
-        $extraOptions = collect($this->extraServiceOptions())->keyBy('code');
+        $extraOptions = collect($this->extraServiceOptions((int) ($guest->company_id ?? 0)))->keyBy('code');
         $extras = is_array($guest->selected_extra_services) ? $guest->selected_extra_services : [];
         $code = trim((string) $data['extra_code']);
 
         // Seçili pakette dahil olan hizmeti tekrar eklemeyi engelle
-        $selectedPkg = collect(config('service_packages.packages', []))->firstWhere('code', $guest->selected_package_code);
+        $selectedPkg = \App\Support\ServiceCatalog::findPackage(
+            (string) $guest->selected_package_code,
+            (int) ($guest->company_id ?? 0)
+        );
         $includedExtras = is_array($selectedPkg['included_extras'] ?? null) ? $selectedPkg['included_extras'] : [];
         if (in_array($code, $includedExtras, true)) {
             return redirect()->route('guest.services')->with('status', 'Bu hizmet sectiginiz pakete zaten dahil.');
@@ -933,15 +938,14 @@ class WorkflowController extends Controller
             'discount_code'  => ['nullable', 'string', 'max:64'],
         ]);
 
-        // View ile aynı config kaynağını kullan (service_packages) — eski config legacy
-        $packagesConfig = config('service_packages.packages', []);
-        $extrasConfig   = config('service_packages.extra_services', []);
-        $selCode        = trim((string) ($guest->selected_package_code ?? ''));
+        // View ile aynı kaynak: adayın firmasının kataloğu (yoksa üst firma → config)
+        $catalogCompanyId = (int) ($guest->company_id ?? 0);
+        $selCode          = trim((string) ($guest->selected_package_code ?? ''));
         abort_if($selCode === '', 422, 'Önce bir paket seçin veya en az 3 hizmet seçin.');
 
-        // G16: Custom (paketsiz) seçimde config'de paket yok; tutar yalnız ek hizmetlerden.
+        // G16: Custom (paketsiz) seçimde katalogda paket yok; tutar yalnız ek hizmetlerden.
         $isCustom = ($selCode === 'pkg_custom');
-        $pkg = $isCustom ? null : collect($packagesConfig)->firstWhere('code', $selCode);
+        $pkg = $isCustom ? null : \App\Support\ServiceCatalog::findPackage($selCode, $catalogCompanyId);
         if (!$isCustom && !$pkg) {
             return redirect()->route('guest.services')->withErrors(['payment' => 'Seçili paket bulunamadı.']);
         }
@@ -949,8 +953,8 @@ class WorkflowController extends Controller
         // Paket fiyatı (numeric) + seçili ek hizmetlerin toplamı = ödeme tutarı
         $pkgAmount    = (int) ($pkg['price_amount'] ?? 0);
         $extrasArr    = is_array($guest->selected_extra_services) ? $guest->selected_extra_services : [];
-        $extrasAmount = collect($extrasArr)->sum(function ($x) use ($extrasConfig) {
-            $found = collect($extrasConfig)->firstWhere('code', $x['code'] ?? '');
+        $extrasAmount = collect($extrasArr)->sum(function ($x) use ($catalogCompanyId) {
+            $found = \App\Support\ServiceCatalog::findExtra((string) ($x['code'] ?? ''), $catalogCompanyId);
             return (int) ($found['price_amount'] ?? 0);
         });
         $amountEur = (float) ($pkgAmount + (int) $extrasAmount);
@@ -1052,17 +1056,16 @@ class WorkflowController extends Controller
             'code' => 'required|string|max:64',
         ]);
 
-        $packagesConfig = config('service_packages.packages', []);
-        $extrasConfig   = config('service_packages.extra_services', []);
-        $selCode        = trim((string) ($guest->selected_package_code ?? ''));
+        $catalogCompanyId = (int) ($guest->company_id ?? 0);
+        $selCode          = trim((string) ($guest->selected_package_code ?? ''));
         if ($selCode === '') {
             return response()->json(['ok' => false, 'error' => 'Önce paket seçmelisiniz.']);
         }
-        $pkg = collect($packagesConfig)->firstWhere('code', $selCode);
+        $pkg = \App\Support\ServiceCatalog::findPackage($selCode, $catalogCompanyId);
         $pkgAmount = (int) ($pkg['price_amount'] ?? 0);
         $extrasArr = is_array($guest->selected_extra_services) ? $guest->selected_extra_services : [];
-        $extrasAmount = collect($extrasArr)->sum(function ($x) use ($extrasConfig) {
-            $found = collect($extrasConfig)->firstWhere('code', $x['code'] ?? '');
+        $extrasAmount = collect($extrasArr)->sum(function ($x) use ($catalogCompanyId) {
+            $found = \App\Support\ServiceCatalog::findExtra((string) ($x['code'] ?? ''), $catalogCompanyId);
             return (int) ($found['price_amount'] ?? 0);
         });
         $amountEur = (float) ($pkgAmount + (int) $extrasAmount);

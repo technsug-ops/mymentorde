@@ -68,7 +68,10 @@ class GuestInfoController extends Controller
         $cityData = $cities[$city] ?? $cities['other'];
 
         $packagePrice = 0.0;
-        $selectedPkg  = collect(config('service_packages.packages', []))->firstWhere('code', $guest?->selected_package_code);
+        $selectedPkg  = \App\Support\ServiceCatalog::findPackage(
+            (string) ($guest?->selected_package_code ?? ''),
+            (int) ($guest?->company_id ?? 0)
+        );
         if ($selectedPkg) {
             $packagePrice = (float) ($selectedPkg['price_amount'] ?? 0);
         }

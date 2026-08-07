@@ -70,7 +70,6 @@ class PredictiveService
             ])->sum('total_earned'),
         ]);
 
-        $packages = config('service_packages.packages', []);
         $stageWeights = config('pipeline_mapping.stage_weights', [
             'new' => 0.15, 'contacted' => 0.25, 'docs_pending' => 0.40,
             'evaluating' => 0.55, 'offer_sent' => 0.70, 'contract_signed' => 0.90,
@@ -78,8 +77,13 @@ class PredictiveService
 
         $pipelineExpected = GuestApplication::whereIn('contract_status', ['requested', 'pending_manager', 'signed_uploaded'])
             ->get()
-            ->sum(function ($g) use ($packages, $stageWeights) {
-                $pkg = collect($packages)->firstWhere('code', $g->selected_package_code);
+            ->sum(function ($g) use ($stageWeights) {
+                // Paket fiyatı adayın kendi firmasının kataloğundan — projeksiyon
+                // birden çok firmayı kapsayabildiği için tek fiyat listesi yanlış olurdu.
+                $pkg = \App\Support\ServiceCatalog::findPackage(
+                    (string) $g->selected_package_code,
+                    (int) ($g->company_id ?? 0)
+                );
                 $weight = $stageWeights[$g->lead_status ?? 'new'] ?? 0.15;
                 return ((float) ($pkg['price_amount'] ?? 0)) * $weight;
             });

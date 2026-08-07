@@ -2,37 +2,39 @@
 
 namespace App\Http\Controllers\Concerns;
 
+use App\Support\ServiceCatalog;
+
+/**
+ * Hizmet paketlerine erişim.
+ *
+ * Paketler eskiden config'ten okunuyordu; artık firma bazlı katalogdan
+ * geliyor (bkz. App\Support\ServiceCatalog). Bu trait'in imzası bilerek
+ * DEĞİŞMEDİ — kullanan onlarca yer aynı diziyi almaya devam ediyor.
+ *
+ * @see \App\Support\ServiceCatalog miras zinciri ve neden tek kapı olduğu
+ */
 trait UsesServicePackages
 {
-    private function servicePackages(): array
+    /** @return list<array<string,mixed>> */
+    private function servicePackages(?int $companyId = null): array
     {
-        return collect(config('service_packages.packages', []))
-            ->where('is_active', true)
-            ->sortBy('sort_order')
-            ->values()
-            ->all();
+        return ServiceCatalog::packages($companyId)->all();
     }
 
-    private function extraServiceOptions(): array
+    /** @return list<array<string,mixed>> */
+    private function extraServiceOptions(?int $companyId = null): array
     {
-        return collect(config('service_packages.extra_services', []))
-            ->where('is_active', true)
-            ->sortBy('sort_order')
-            ->values()
-            ->all();
+        return ServiceCatalog::extras($companyId)->all();
     }
 
-    private function findPackageByCode(string $code): ?array
+    /** Pasif paketler de bulunur — geçmiş seçimleri çözmek için. */
+    private function findPackageByCode(string $code, ?int $companyId = null): ?array
     {
-        return collect(config('service_packages.packages', []))
-            ->where('is_active', true)
-            ->firstWhere('code', $code);
+        return ServiceCatalog::findPackage($code, $companyId);
     }
 
-    private function findExtraServiceByCode(string $code): ?array
+    private function findExtraServiceByCode(string $code, ?int $companyId = null): ?array
     {
-        return collect(config('service_packages.extra_services', []))
-            ->where('is_active', true)
-            ->firstWhere('code', $code);
+        return ServiceCatalog::findExtra($code, $companyId);
     }
 }
