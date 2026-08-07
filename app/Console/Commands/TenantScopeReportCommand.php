@@ -2,108 +2,69 @@
 
 namespace App\Console\Commands;
 
+use App\Support\TenantScopeReport;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 /**
- * Tenant dönüşümü hazırlık raporu.
+ * Tenant dönüşümü hazırlık raporu — konsol yüzü.
  *
- * ── NE İÇİN ─────────────────────────────────────────────────────────────
- * Bir modele `BelongsToCompany` eklemek, okumayı `company_id`'ye göre
- * filtrelemeye başlar. `company_id` boş kalmış satır varsa o kayıtlar
- * ekranlardan sessizce kaybolur.
- *
- * Bu komut, trait eklemeden ÖNCE her tabloda kaç satırın sahipsiz kaldığını
- * söyler. Sayı sıfır değilse o modele trait EKLENMEZ — önce geri-doldurma
- * (bkz. 2026_08_08_090000_backfill_company_id_for_tenant_conversion)
- * çalıştırılır, sonra bu rapor tekrar alınır.
+ * Ölçümün kendisi App\Support\TenantScopeReport'ta; aynı sayıları
+ * `/platform/tenant-scope` ekranı da gösteriyor. Canlıda SSH olmadığı için
+ * asıl ölçüm panelden alınıyor, bu komut yerel/CI içindir.
  *
  *     php artisan tenant:scope-report
  *
- * Çıkış kodu: sahipsiz satır varsa 1 — dağıtım betiğinde kapı olarak
- * kullanılabilir.
+ * Çıkış kodu: sahibi bilinmeyen satır varsa 1 — dağıtım betiğinde kapı
+ * olarak kullanılabilir.
  */
 class TenantScopeReportCommand extends Command
 {
-    protected $signature = 'tenant:scope-report {--table= : Yalnızca bu tabloyu raporla}';
+    protected $signature = 'tenant:scope-report {--table=* : Yalnızca bu tabloları raporla}';
 
     protected $description = 'company_id boş kalmış satırları tablo tablo raporlar (tenant dönüşümü öncesi kontrol)';
 
-    /**
-     * Dönüşüm sırası bekleyen tablolar — bekçi testindeki listeyle aynı iş.
-     *
-     * @var list<string>
-     */
-    private const PENDING_TABLES = [
-        'student_accommodations', 'student_appointments', 'student_checklists',
-        'student_feedback', 'student_institution_documents', 'student_language_courses',
-        'student_material_reads', 'student_payments', 'student_shipments',
-        'student_university_applications', 'student_visa_applications',
-        'dm_threads', 'conversations', 'notification_dispatches', 'notification_preferences',
-        'guest_feedback', 'audit_trails', 'business_contracts', 'business_contract_templates',
-        'consent_records', 'digital_asset_activity_log', 'marketing_teams', 'staff_kpi_targets',
-        'company_bulletins', 'company_finance_entries', 'payout_settings',
-        'ab_tests', 'automation_workflows', 'promo_popups', 'promo_code_redemptions',
-        'scheduled_notifications', 'manager_alert_rules', 'manager_reports',
-        'manager_scheduled_reports', 'manager_performance_targets',
-        'senior_performance_targets', 'senior_response_templates',
-        'ai_labs_settings', 'ai_labs_response_cache', 'document_builder_templates',
-        'data_retention_policies', 'ip_access_rules', 'task_templates', 'webhook_logs',
-    ];
-
-    public function handle(): int
+    public function handle(TenantScopeReport $report): int
     {
-        $only = $this->option('table');
-        $tables = $only ? [$only] : self::PENDING_TABLES;
+        $only = (array) $this->option('table');
 
-        $rows = [];
-        $totalOrphans = 0;
-        $skipped = [];
+        $result = $report->run($only !== [] ? $only : null);
 
-        foreach ($tables as $table) {
-            if (! Schema::hasTable($table) || ! Schema::hasColumn($table, 'company_id')) {
-                $skipped[] = $table;
-                continue;
-            }
+        $this->table(
+            ['Tablo', 'Satır', 'Sahipsiz', 'Fabrika', 'Durum'],
+            array_map(static fn (array $row): array => [
+                $row['table'],
+                number_format($row['total'], 0, ',', '.'),
+                $row['unowned'] > 0 ? number_format($row['unowned'], 0, ',', '.') : '—',
+                $row['factory'] > 0 ? number_format($row['factory'], 0, ',', '.') : '—',
+                $row['status'],
+            ], $result['rows'])
+        );
 
-            $total = (int) DB::table($table)->count();
-
-            $orphans = (int) DB::table($table)
-                ->where(fn ($q) => $q->whereNull('company_id')->orWhere('company_id', 0))
-                ->count();
-
-            $totalOrphans += $orphans;
-
-            $rows[] = [
-                $table,
-                number_format($total, 0, ',', '.'),
-                $orphans > 0 ? number_format($orphans, 0, ',', '.') : '—',
-                $orphans === 0 ? 'HAZIR' : 'BEKLE',
-            ];
+        if ($result['skipped'] !== []) {
+            $this->line('Atlandı (tablo ya da kolon yok): ' . implode(', ', $result['skipped']));
         }
 
-        // Sorunlu olanlar üstte — uzun listede gözden kaçmasın.
-        usort($rows, fn ($a, $b) => ($a[3] === 'BEKLE' ? 0 : 1) <=> ($b[3] === 'BEKLE' ? 0 : 1));
-
-        $this->table(['Tablo', 'Satır', 'Sahipsiz', 'Durum'], $rows);
-
-        if ($skipped !== []) {
-            $this->line('Atlandı (tablo ya da kolon yok): ' . implode(', ', $skipped));
+        if ($result['factory'] > 0) {
+            $this->newLine();
+            $this->line(sprintf(
+                '%s fabrika satırı (company_id = 0) — beyan edilmiş, miras yolundan okunuyor.',
+                number_format($result['factory'], 0, ',', '.')
+            ));
         }
 
-        if ($totalOrphans === 0) {
-            $this->info('Sahipsiz satır yok — bu tablolara BelongsToCompany eklenebilir.');
+        if ($result['unowned'] === 0) {
+            $this->newLine();
+            $this->info('Sahibi bilinmeyen satır yok — bu tablolara BelongsToCompany eklenebilir.');
 
             return self::SUCCESS;
         }
 
         $this->newLine();
         $this->error(sprintf(
-            '%s sahipsiz satır var. Trait EKLEMEYİN — eklenirse bu kayıtlar ekranlardan kaybolur.',
-            number_format($totalOrphans, 0, ',', '.')
+            '%s satırın sahibi bilinmiyor. Trait EKLEMEYİN — eklenirse bu kayıtlar ekranlardan kaybolur.',
+            number_format($result['unowned'], 0, ',', '.')
         ));
-        $this->line('Önce: php artisan migrate --force   (geri-doldurma migration\'ı)');
+        $this->line('Önce: php artisan migrate --force   (geri-doldurma migration\'ları)');
         $this->line('Sonra bu raporu tekrar alın.');
 
         return self::FAILURE;

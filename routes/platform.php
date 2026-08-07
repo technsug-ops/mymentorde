@@ -68,6 +68,12 @@ Route::middleware(['auth', 'platform.owner'])->prefix('platform')->group(functio
         ->whereNumber('company')->middleware('throttle:20,1')
         ->name('platform.form-template.reset');
 
+    // ── Tenant kapsam raporu: izolasyon açılmadan önceki ölçüm ──────────────
+    // Salt okunur. Konsol erişimi yok (KAS'ta SSH yok) ve asıl sayı canlı
+    // veride — yereldeki tablolar boş olduğu için karar oradan verilemiyor.
+    Route::get('/tenant-scope', [\App\Http\Controllers\Platform\TenantScopeController::class, 'index'])
+        ->name('platform.tenant-scope');
+
     // ── Firmanın kendi mail taşıyıcısı ──────────────────────────────────────
     // "Kendi sunucumu / kendi Resend hesabımı kullanın" diyen firma için.
     // Test edilmeden aktiflesmez: yanlis kimlik o firmanin TUM mailini keser.

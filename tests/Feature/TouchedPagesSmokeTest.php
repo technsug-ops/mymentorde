@@ -46,6 +46,7 @@ class TouchedPagesSmokeTest extends TestCase
             '/platform/companies/' . $this->companyB->id,
             '/platform/settings',
             '/platform/form-template',
+            '/platform/tenant-scope',
         ];
 
         foreach ($pages as $page) {

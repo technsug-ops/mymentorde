@@ -214,6 +214,10 @@
             <a href="{{ route('platform.form-template') }}" class="{{ request()->routeIs('platform.form-template*') ? 'active' : '' }}">
                 <x-icon name="file-text" size="16" /> Form Şablonu
             </a>
+            {{-- İzolasyon açılmadan önce: sahibi belli olmayan satır kaldı mı? --}}
+            <a href="{{ route('platform.tenant-scope') }}" class="{{ request()->routeIs('platform.tenant-scope') ? 'active' : '' }}">
+                <x-icon name="shield" size="16" /> Tenant Kapsamı
+            </a>
             <a href="{{ route('platform.backups.index') }}" class="{{ request()->routeIs('platform.backups.*') ? 'active' : '' }}">
                 <x-icon name="database" size="16" /> Yedekler
             </a>
