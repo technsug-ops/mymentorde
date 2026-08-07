@@ -210,6 +210,10 @@
             <a href="{{ route('platform.infrastructure') }}" class="{{ request()->routeIs('platform.infrastructure') || request()->routeIs('platform.infrastructure.*') ? 'active' : '' }}">
                 <x-icon name="server" size="16" /> Altyapı
             </a>
+            {{-- Form tek merkezden yönetiliyor; sapan firma buradan görünür. --}}
+            <a href="{{ route('platform.form-template') }}" class="{{ request()->routeIs('platform.form-template*') ? 'active' : '' }}">
+                <x-icon name="file-text" size="16" /> Form Şablonu
+            </a>
             <a href="{{ route('platform.backups.index') }}" class="{{ request()->routeIs('platform.backups.*') ? 'active' : '' }}">
                 <x-icon name="database" size="16" /> Yedekler
             </a>
