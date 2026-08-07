@@ -31,6 +31,87 @@ class GuestRegistrationFieldSchemaService
     /**
      * @return array<int,array<string,mixed>>
      */
+    /**
+     * Bir firmanın kullanacağı form satırları — MİRAS ZİNCİRİYLE.
+     *
+     * ── NEDEN ZİNCİR ─────────────────────────────────────────────────────
+     * Merkez, şirketsiz bir "fabrika şablonu" (company_id = 0) değil;
+     * operasyonu yürüten firmadır. MentorDE formu düzenlediğinde kendi
+     * satırlarını düzenliyor — o düzenleme partnerlere ULAŞMALI.
+     *
+     * Sıra: firmanın kendi satırları → üst firmaların satırları (yakından
+     * uzağa) → fabrika şablonu. Sistemdeki diğer miraslarla aynı desen
+     * (mail taşıyıcısı, gönderen adresi, portal çözümü).
+     *
+     * @return \Illuminate\Support\Collection<int,GuestRegistrationField>
+     */
+    private function rowsFor(int $companyId)
+    {
+        $candidates = [$companyId];
+
+        if ($companyId > 0) {
+            try {
+                $candidates = array_merge($candidates, \App\Models\Company::ancestorIds($companyId));
+            } catch (\Throwable $e) {
+                // Hiyerarşi okunamazsa kendi satırlarıyla devam — form açılsın.
+            }
+        }
+
+        foreach ($candidates as $candidate) {
+            $rows = GuestRegistrationField::query()
+                ->withoutGlobalScope('company')
+                ->where('company_id', (int) $candidate)
+                ->where('is_active', true)
+                ->orderBy('section_order')
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            if ($rows->isNotEmpty()) {
+                return $rows;
+            }
+        }
+
+        return collect();
+    }
+
+    /**
+     * Firma kendi satırları OLMASAYDI hangi tanımı kullanırdı?
+     *
+     * Sapma raporu bunu kullanıyor: "kendi satırların var" demek tek başına
+     * sorun değil, sorun MİRAS ALACAĞINDAN FARKLI olması.
+     *
+     * @return \Illuminate\Support\Collection<int,GuestRegistrationField>
+     */
+    public function inheritedRowsFor(int $companyId)
+    {
+        if ($companyId <= 0) {
+            return collect();
+        }
+
+        try {
+            foreach (\App\Models\Company::ancestorIds($companyId) as $ancestor) {
+                $rows = GuestRegistrationField::query()
+                    ->withoutGlobalScope('company')
+                    ->where('company_id', (int) $ancestor)
+                    ->where('is_active', true)
+                    ->get();
+
+                if ($rows->isNotEmpty()) {
+                    return $rows;
+                }
+            }
+        } catch (\Throwable $e) {
+            // yut — aşağıdaki fabrika şablonuna düşülür
+        }
+
+        return GuestRegistrationField::query()
+            ->withoutGlobalScope('company')
+            ->where('company_id', 0)
+            ->where('is_active', true)
+            ->get();
+    }
+
     public function groups(int $companyId = 0): array
     {
         if (!Schema::hasTable('guest_registration_fields')) {
@@ -48,14 +129,7 @@ class GuestRegistrationFieldSchemaService
         // Hangi satırların okunacağı zaten aşağıdaki açık `company_id`
         // koşuluyla belirleniyor; kapsam burada koruma sağlamıyor, engel
         // oluyor.
-        $rows = GuestRegistrationField::query()
-            ->withoutGlobalScope('company')
-            ->where('company_id', $companyId > 0 ? $companyId : 0)
-            ->where('is_active', true)
-            ->orderBy('section_order')
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
+        $rows = $this->rowsFor($companyId > 0 ? $companyId : 0);
 
         if ($rows->isEmpty() && $companyId > 0) {
             $rows = GuestRegistrationField::query()

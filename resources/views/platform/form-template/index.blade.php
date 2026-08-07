@@ -18,21 +18,38 @@
 
 <div class="plat-card" style="margin-bottom:16px;">
     <h3 class="plat-card-title">Merkezî Tanım</h3>
-    <div style="font-size:26px;font-weight:800;color:#4ade80;">{{ $centralCount }}</div>
-    <div class="plat-card-sub">alan — tüm firmalar bunu kullanır</div>
+
+    @if($master && $masterCount > 0)
+        <div style="font-size:26px;font-weight:800;color:#4ade80;">{{ $masterCount }}</div>
+        <div class="plat-card-sub">
+            alan — <strong style="color:#fff;">{{ $master->name }}</strong> tanımı.
+            Alt firmalar bunu miras alır.
+        </div>
+    @else
+        <div style="font-size:26px;font-weight:800;color:#4ade80;">{{ $factoryCount }}</div>
+        <div class="plat-card-sub">
+            alan — fabrika şablonu. Ana firmanın kendi tanımı yok, herkes bunu kullanıyor.
+        </div>
+    @endif
+
+    <div class="plat-card-sub" style="margin-top:10px;line-height:1.6;">
+        Miras sırası: firmanın kendi tanımı → <strong>üst firmalar</strong> → fabrika şablonu.
+        Bir firma kendi satırlarını edinmedikçe merkezî değişiklik ona <strong>anında</strong> yansır.
+    </div>
 </div>
 
 @if($diverged->isEmpty())
     <div class="plat-card" style="border-color:rgba(22,163,74,.4);background:rgba(22,163,74,.06);">
         <strong style="color:#4ade80;">Sapma yok.</strong>
-        Tüm firmalar merkezî şablonu kullanıyor — formu değiştirdiğinizde
-        değişiklik hepsine <strong>anında</strong> yansır.
+        Hiçbir firmanın tanımı miras aldığından farklı değil — formu
+        değiştirdiğinizde değişiklik hepsine <strong>anında</strong> yansır.
     </div>
 @else
     <div class="plat-card" style="border-color:rgba(217,119,6,.45);background:rgba(217,119,6,.08);margin-bottom:16px;">
-        <strong style="color:#fbbf24;">{{ $diverged->count() }} firma merkezden kopmuş.</strong>
-        Bu firmalar kendi form kopyalarını kullanıyor; merkezde yaptığınız
-        değişiklikler onlara <strong>ULAŞMAZ</strong>.
+        <strong style="color:#fbbf24;">{{ $diverged->count() }} firmanın tanımı farklı.</strong>
+        Bu firmalar kendi form satırlarını kullanıyor ve miras aldıklarından
+        ayrışmış durumdalar; merkezde yaptığınız değişiklikler onlara
+        <strong>ULAŞMAZ</strong>.
     </div>
 
     @foreach($diverged as $row)
