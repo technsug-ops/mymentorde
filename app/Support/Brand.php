@@ -37,6 +37,22 @@ final class Brand
     /** Kullanılan taşıyıcının kaynağı — teşhis için konteynerde tutulur. */
     private const MAIL_SOURCE_KEY = 'brand.mail_transport_source';
 
+    /** Çözülen ortak portal — teşhis için. */
+    private const PORTAL_KEY = 'brand.resolved_portal';
+
+    /**
+     * Bu istekte hangi ortak portal çözüldü — yoksa null.
+     *
+     * Gönderen adı, adres ve taşıyıcı üçü de buna bağlı; yanlış çıktığında
+     * ilk bakılacak yer burasıdır.
+     *
+     * @return array{id:int,name:string,self:bool}|null
+     */
+    public static function resolvedPortal(): ?array
+    {
+        return app()->bound(self::PORTAL_KEY) ? app(self::PORTAL_KEY) : null;
+    }
+
     /**
      * Bu istekte hangi firmanın mail taşıyıcısı devrede — yoksa null.
      *
@@ -129,6 +145,14 @@ final class Brand
     private static function applyMailIdentity(Company $company): void
     {
         $portal = self::isPrimary($company) ? null : self::portalCompany($company);
+
+        // Teşhis: hangi portal çözüldü? Gönderen adı, adres ve taşıyıcı —
+        // üçü de buna bağlı. Yanlış çıktığında ilk bakılacak yer burası.
+        app()->instance(self::PORTAL_KEY, $portal ? [
+            'id'   => (int) $portal->id,
+            'name' => (string) ($portal->brand_name ?: $portal->name),
+            'self' => (int) $portal->id === (int) $company->id,
+        ] : null);
 
         $senderName = self::mailSenderName($company, $portal);
 
