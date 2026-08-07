@@ -181,9 +181,11 @@ class UnifiedMessagingHubController extends Controller
             return ['conversations' => collect(), 'selected' => null, 'messages' => collect(), 'dmableUsers' => collect(), 'unreadMap' => [], 'archivedCount' => 0, 'showArchived' => false];
         }
 
+        // Katılımcı olduğun konuşma HER ZAMAN görünür — firma filtresi
+        // katılımcılığın üstüne güvenlik katmıyor, yalnızca firmalar arası
+        // yazışmayı gizliyordu (partner yöneticisi ↔ üst firmanın danışmanı).
         $baseQuery = Conversation::query()
-            ->forUser((int) $user->id)
-            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId));
+            ->forUser((int) $user->id);
 
         // Archived count — UI'de "Arşivli Göster (N)" linki için
         $archivedCount = (clone $baseQuery)->where('is_archived', true)->count();
@@ -216,9 +218,24 @@ class UnifiedMessagingHubController extends Controller
         }
 
         // Rehber: aynı company'deki tüm IM-access'li ekip
+        //
+        // EK OLARAK: bu firmanın öğrencilerine atanmış danışmanlar. Danışmanı
+        // üst firma atıyor, yani başka şirkette; firma kapsamlı rehber onu
+        // hiç göstermiyordu ve partner, öğrencisiyle ilgilenen kişiye
+        // yazamıyordu. Üst firmanın TÜM personeli değil — yalnızca kendi
+        // öğrencisinin danışmanı (bkz. MessagingDirectory).
+        $outsideIds = \App\Support\MessagingDirectory::reachableOutsideIds($companyId);
+
         $dmableQuery = User::query()
+            ->withoutGlobalScope('company')
             ->where('id', '!=', $user->id)
-            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->when($companyId > 0, fn ($q) => $q->where(function ($x) use ($companyId, $outsideIds) {
+                $x->where('company_id', $companyId);
+
+                if ($outsideIds !== []) {
+                    $x->orWhereIn('id', $outsideIds);
+                }
+            }))
             ->where('is_active', true);
 
         // Senior istisnası: kendi aday/öğrencilerini de (guest rolü) rehbere dahil et.

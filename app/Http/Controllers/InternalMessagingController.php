@@ -43,10 +43,16 @@ class InternalMessagingController extends Controller
         $companyId = $this->companyId();
         $selectedId = (int) ($request->query('conv') ?: 0);
 
+        // Katılımcı olduğun konuşma HER ZAMAN görünür.
+        //
+        // Önceden üstüne bir de firma filtresi biniyordu. Katılımcılık zaten
+        // yetkinin kendisi olduğu için o filtre güvenlik katmıyor, yalnızca
+        // FIRMALAR ARASI konuşmaları gizliyordu: partner firmanın yöneticisi
+        // ile üst firmanın danışmanı arasındaki yazışma iki tarafta da
+        // görünmezdi.
         $conversations = Conversation::query()
             ->forUser((int) $user->id)
             ->notArchived()
-            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
             ->with(['participantUsers:id,name,role', 'participants' => fn ($q) => $q->where('user_id', $user->id)])
             ->orderByRaw('(SELECT is_pinned FROM conversation_participants WHERE conversation_id = conversations.id AND user_id = ? LIMIT 1) DESC', [$user->id])
             ->orderByDesc('last_message_at')
@@ -71,9 +77,23 @@ class InternalMessagingController extends Controller
         }
 
         // DM başlatılabilecek kullanıcı listesi — rehber (telefon rehberi mantığı)
+        //
+        // Kendi firmasına EK OLARAK: bu firmanın öğrencilerine atanmış
+        // danışmanlar. Danışmanı üst firma atıyor, yani başka şirkette;
+        // firma kapsamlı rehber onu hiç göstermiyordu ve partner öğrencisiyle
+        // ilgilenen kişiye yazamıyordu (bkz. MessagingDirectory).
+        $outsideIds = \App\Support\MessagingDirectory::reachableOutsideIds($companyId);
+
         $dmableQuery = User::query()
+            ->withoutGlobalScope('company')
             ->where('id', '!=', $user->id)
-            ->when($companyId > 0, fn ($q) => $q->where('company_id', $companyId))
+            ->when($companyId > 0, fn ($q) => $q->where(function ($x) use ($companyId, $outsideIds) {
+                $x->where('company_id', $companyId);
+
+                if ($outsideIds !== []) {
+                    $x->orWhereIn('id', $outsideIds);
+                }
+            }))
             ->where('is_active', true);
 
         // Senior istisnası: kendi aday/öğrencileri (guest rolü) de listede
@@ -129,7 +149,9 @@ class InternalMessagingController extends Controller
         $user = $request->user();
         abort_if(!in_array((string) $user->role, self::ALLOWED_ROLES, true), 403);
 
-        $target = User::query()->findOrFail($targetUserId);
+        // Kapsamsız: hedef başka şirketteki atanmış danışman olabilir; firma
+        // kapsamlı sorgu onu bulamaz ve 404 verirdi. Yetki kontrolü aşağıda.
+        $target = User::query()->withoutGlobalScope('company')->findOrFail($targetUserId);
 
         if (!$this->service->canStartDmWith($user, $target)) {
             return back()->withErrors(['dm' => 'Bu kullanıcıyla direkt mesaj başlatma yetkiniz yok.']);
