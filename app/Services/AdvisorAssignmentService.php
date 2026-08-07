@@ -74,11 +74,54 @@ class AdvisorAssignmentService
             return null;
         }
 
+        // ÜST FİRMANIN SEÇTİĞİ danışman varsa o öncelikli.
+        //
+        // Otomatik dağıtım en az yüklü kişiyi seçiyor; yükler eşitken sıralama
+        // hep aynı kişiyi öne çıkarıyor ve pratikte her yeni aday ona düşüyor.
+        // Üst firma "bu partnerin işlerine şu danışman baksın" diyebilmeli.
+        //
+        // Seçilen kişi havuzda ve UYGUN olmalı: pasifse, otomatik atamaya
+        // kapalıysa ya da kapasitesi dolduysa yok sayılır ve normal dağıtıma
+        // düşülür — aksi halde seçim, kapasite kuralını sessizce delerdi.
+        $preferred = $this->preferredAdvisor($companyId);
+
+        if ($preferred !== null) {
+            $match = $eligible->first(
+                fn (User $a): bool => strtolower((string) $a->email) === $preferred
+            );
+
+            if ($match !== null) {
+                return (string) $match->email;
+            }
+        }
+
         // En az yüklü olana ver.
         return (string) $eligible
             ->sortBy(fn (User $a): int => (int) ($loads[(string) $a->email] ?? 0))
             ->first()
             ->email;
+    }
+
+    /**
+     * Firma için seçilmiş varsayılan danışmanın e-postası — yoksa null.
+     *
+     * ⚠ Kapsamsız: adayın firması kendi kaydını firma kapsamlı sorguyla
+     * okuyamayabilir; bu servis zaten operasyon şirketi adına çalışıyor.
+     */
+    private function preferredAdvisor(int $companyId): ?string
+    {
+        if ($companyId <= 0) {
+            return null;
+        }
+
+        $email = Company::query()
+            ->withoutGlobalScope('company')
+            ->whereKey($companyId)
+            ->value('default_advisor_email');
+
+        $email = strtolower(trim((string) $email));
+
+        return $email !== '' ? $email : null;
     }
 
     /**

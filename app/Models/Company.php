@@ -10,6 +10,7 @@ class Company extends Model
         'name',
         'code',
         'parent_company_id',
+        'default_advisor_email',
         'is_active',
         'enabled_modules',
         'doc_request_monthly_limit',
