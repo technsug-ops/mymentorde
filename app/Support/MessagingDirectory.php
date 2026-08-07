@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Company;
 use App\Models\GuestApplication;
 use App\Models\StudentAssignment;
 use App\Models\User;
@@ -18,13 +19,17 @@ use Illuminate\Support\Collection;
  * ulaşamıyordu.
  *
  * ── ÇÖZÜM VE SINIRI ──────────────────────────────────────────────────────
- * Firma sınırı KALDIRILMADI. Yalnızca şu kişiler ekleniyor: partnerin KENDİ
- * aday ve öğrencilerine atanmış danışmanlar. Yani "üst firmanın tüm
- * personeli" değil, "benim öğrencimle ilgilenen kişi".
+ * Firma sınırı KALDIRILMADI. Yalnızca iki grup ekleniyor:
  *
- * Bu ayrım önemli: partner firmalar birbirinden habersiz kalmalı ve üst
- * firmanın iç yapısını görmemeli. Atanmış danışman ise zaten partnerin
- * muhatabı — öğrencisinin sürecini o yürütüyor.
+ *   1. Firmanın KENDİ aday/öğrencilerine atanmış danışmanlar
+ *      → "üst firmanın tüm personeli" değil, "benim öğrencimle ilgilenen kişi"
+ *
+ *   2. Hiyerarşide bağlı firmaların YÖNETİCİLERİ (üst ve alt)
+ *      → sözleşmeli iş ortakları birbirine yazabilmeli
+ *
+ * ⚠ KARDEŞ FİRMALAR HER İKİ GRUPTA DA YOK. İki partner birbirini görmez;
+ * aynı üst firmaya bağlı olmaları onları birbirinin muhatabı yapmaz.
+ * Partner firmalar birbirinden habersiz kalmalı.
  */
 final class MessagingDirectory
 {
@@ -71,12 +76,76 @@ final class MessagingDirectory
     }
 
     /**
+     * Hiyerarşide bağlı firmaların YÖNETİCİLERİ.
+     *
+     * Partner ile üst firması sözleşmeli iş ortağı; birbirlerine panelden
+     * yazabilmeliler. Yön iki taraflı: üst firma alt firmaların, alt firma
+     * üstündekilerin yöneticilerini görür.
+     *
+     * ⚠ KARDEŞ FİRMALAR DAHİL DEĞİL. İki partner birbirini görmemeli —
+     * aynı üst firmaya bağlı olmaları onları birbirinin muhatabı yapmaz.
+     * Yalnızca ÜST ve ALT firmalar; yan taraftakiler görünmez.
+     *
+     * ⚠ Yalnızca yönetici rolü. Bir firmanın tüm personelini diğerine açmak
+     * gereğinden fazlası olurdu.
+     *
+     * @return Collection<int,User>
+     */
+    public static function hierarchyManagers(int $companyId): Collection
+    {
+        if ($companyId <= 0) {
+            return collect();
+        }
+
+        $related = array_merge(
+            Company::ancestorIds($companyId),
+            Company::descendantIds($companyId)
+        );
+
+        $related = array_values(array_unique(array_filter(
+            $related,
+            static fn ($id): bool => (int) $id !== $companyId
+        )));
+
+        if ($related === []) {
+            return collect();
+        }
+
+        return User::query()
+            ->withoutGlobalScope('company')
+            ->whereIn('company_id', $related)
+            ->where('role', User::ROLE_MANAGER)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'role', 'email', 'company_id']);
+    }
+
+    /**
      * Rehbere eklenecek dış kişilerin id'leri.
+     *
+     * İki kaynak:
+     *   • öğrencilerine atanmış danışmanlar — herkese görünür
+     *   • dikey ilişkideki firmaların yöneticileri — YALNIZCA yöneticilere
+     *
+     * ⚠ Rehber ile izin kuralı aynı şeyi söylemeli. Aksi halde tıklanınca
+     * "yetkiniz yok" diyen bir isim listelenirdi (bkz.
+     * ConversationService::canStartDmWith).
      *
      * @return list<int>
      */
-    public static function reachableOutsideIds(int $companyId): array
+    public static function reachableOutsideIds(int $companyId, ?string $viewerRole = null): array
     {
-        return self::assignedAdvisors($companyId)->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $people = self::assignedAdvisors($companyId);
+
+        if ($viewerRole === User::ROLE_MANAGER) {
+            $people = $people->merge(self::hierarchyManagers($companyId));
+        }
+
+        return $people
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
     }
 }

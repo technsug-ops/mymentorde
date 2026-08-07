@@ -64,7 +64,7 @@ class PartnerAdvisorMessagingTest extends TestCase
         $this->linkPartner();
         $advisor = $this->assignAdvisor();
 
-        $ids = MessagingDirectory::reachableOutsideIds((int) $this->companyB->id);
+        $ids = MessagingDirectory::reachableOutsideIds((int) $this->companyB->id, User::ROLE_MANAGER);
 
         $this->assertContains((int) $advisor->id, $ids, 'Atanmis danisman rehberde yok.');
     }
@@ -82,7 +82,7 @@ class PartnerAdvisorMessagingTest extends TestCase
 
         $stranger = $this->userFor($this->companyA, User::ROLE_SENIOR);
 
-        $ids = MessagingDirectory::reachableOutsideIds((int) $this->companyB->id);
+        $ids = MessagingDirectory::reachableOutsideIds((int) $this->companyB->id, User::ROLE_MANAGER);
 
         $this->assertNotContains((int) $stranger->id, $ids, 'Atanmamis personel partnere gorunuyor.');
     }
@@ -102,9 +102,107 @@ class PartnerAdvisorMessagingTest extends TestCase
             'is_archived'  => false,
         ]);
 
-        $ids = MessagingDirectory::reachableOutsideIds((int) $this->companyB->id);
+        $ids = MessagingDirectory::reachableOutsideIds((int) $this->companyB->id, User::ROLE_MANAGER);
 
         $this->assertNotContains((int) $otherAdvisor->id, $ids);
+    }
+
+    // ── Yönetici ↔ yönetici (dikey) ─────────────────────────────────────────
+
+    /** Alt firmanın yöneticisi üst firmanınkini görür. */
+    public function test_partner_manager_sees_the_parent_manager(): void
+    {
+        $this->linkPartner();
+        $parentManager = $this->userFor($this->companyA, User::ROLE_MANAGER);
+
+        $ids = MessagingDirectory::reachableOutsideIds((int) $this->companyB->id, User::ROLE_MANAGER);
+
+        $this->assertContains((int) $parentManager->id, $ids, 'Ust firmanin yoneticisi gorunmuyor.');
+    }
+
+    /** Üst firmanın yöneticisi alt firmanınkini görür — ilişki iki yönlü. */
+    public function test_parent_manager_sees_the_partner_manager(): void
+    {
+        $this->linkPartner();
+        $partnerManager = $this->userFor($this->companyB, User::ROLE_MANAGER);
+
+        $ids = MessagingDirectory::reachableOutsideIds((int) $this->companyA->id, User::ROLE_MANAGER);
+
+        $this->assertContains((int) $partnerManager->id, $ids, 'Alt firmanin yoneticisi gorunmuyor.');
+    }
+
+    /**
+     * Yönetici olmayan, karşı firmanın yöneticisini GÖRMEZ.
+     *
+     * İstisna yönetici↔yönetici. İlk sürümde yalnızca hedefe bakıyordum;
+     * o hâlde üst firmanın danışmanı da alt firmanın yöneticisine
+     * yazabiliyordu — istisna niyetlenenden genişti.
+     */
+    public function test_non_manager_does_not_see_the_other_companys_manager(): void
+    {
+        $this->linkPartner();
+        $partnerManager = $this->userFor($this->companyB, User::ROLE_MANAGER);
+
+        $ids = MessagingDirectory::reachableOutsideIds((int) $this->companyA->id, User::ROLE_SENIOR);
+
+        $this->assertNotContains((int) $partnerManager->id, $ids);
+    }
+
+    /**
+     * YATAY İLİŞKİ KAPALI: iki partner birbirini görmez.
+     *
+     * Aynı üst firmaya bağlı olmaları onları birbirinin muhatabı yapmaz.
+     * Partner firmalar birbirinden habersiz kalmalı.
+     */
+    public function test_sibling_partners_cannot_see_each_other(): void
+    {
+        $this->linkPartner();
+
+        $sibling = Company::create([
+            'name' => 'Kardes Partner', 'code' => 'kardes', 'is_active' => true,
+            'parent_company_id' => $this->companyA->id,
+        ]);
+        Company::flushHierarchyCache();
+
+        $siblingManager = $this->userFor($sibling, User::ROLE_MANAGER);
+
+        $ids = MessagingDirectory::reachableOutsideIds((int) $this->companyB->id, User::ROLE_MANAGER);
+
+        $this->assertNotContains((int) $siblingManager->id, $ids, 'Kardes partnerin yoneticisi gorunuyor.');
+    }
+
+    /** Yatay ilişkide DM de açılamaz — rehberde olmasa bile adres denenebilir. */
+    public function test_sibling_partners_cannot_start_a_dm(): void
+    {
+        $this->linkPartner();
+
+        $sibling = Company::create([
+            'name' => 'Kardes Partner', 'code' => 'kardes2', 'is_active' => true,
+            'parent_company_id' => $this->companyA->id,
+        ]);
+        Company::flushHierarchyCache();
+
+        $mine    = $this->userFor($this->companyB, User::ROLE_MANAGER);
+        $theirs  = $this->userFor($sibling, User::ROLE_MANAGER);
+
+        $this->assertFalse(
+            app(ConversationService::class)->canStartDmWith($mine, $theirs),
+            'Kardes partnerler yazisabiliyor.'
+        );
+    }
+
+    /** Üst–alt yöneticiler gerçekten yazışabilmeli. */
+    public function test_vertical_managers_can_message_each_other(): void
+    {
+        $this->linkPartner();
+
+        $parentManager  = $this->userFor($this->companyA, User::ROLE_MANAGER);
+        $partnerManager = $this->userFor($this->companyB, User::ROLE_MANAGER);
+
+        $service = app(ConversationService::class);
+
+        $this->assertTrue($service->canStartDmWith($partnerManager, $parentManager));
+        $this->assertTrue($service->canStartDmWith($parentManager, $partnerManager));
     }
 
     // ── DM izni ─────────────────────────────────────────────────────────────
@@ -185,3 +283,4 @@ class PartnerAdvisorMessagingTest extends TestCase
         );
     }
 }
+

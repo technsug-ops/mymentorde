@@ -224,7 +224,7 @@ class UnifiedMessagingHubController extends Controller
         // hiç göstermiyordu ve partner, öğrencisiyle ilgilenen kişiye
         // yazamıyordu. Üst firmanın TÜM personeli değil — yalnızca kendi
         // öğrencisinin danışmanı (bkz. MessagingDirectory).
-        $outsideIds = \App\Support\MessagingDirectory::reachableOutsideIds($companyId);
+        $outsideIds = \App\Support\MessagingDirectory::reachableOutsideIds($companyId, (string) $user->role);
 
         $dmableQuery = User::query()
             ->withoutGlobalScope('company')
@@ -323,3 +323,4 @@ class UnifiedMessagingHubController extends Controller
         ];
     }
 }
+
