@@ -230,8 +230,39 @@ class ConversationService
             return true;
         }
 
-        return $this->isAssignedAdvisorFor($from, $to)
-            || $this->isAssignedAdvisorFor($to, $from);
+        // İstisna 1 — atanmış danışman ilişkisi (iki yönde de geçerli).
+        if ($this->isAssignedAdvisorFor($from, $to) || $this->isAssignedAdvisorFor($to, $from)) {
+            return true;
+        }
+
+        // İstisna 2 — dikey ilişkideki İKİ YÖNETİCİ.
+        //
+        // ⚠ İKİ TARAF DA yönetici olmalı. Önce yalnızca hedefe bakıyordum;
+        // o hâlde üst firmanın DANIŞMANI da alt firmanın yöneticisine
+        // yazabiliyordu — istisna niyetlenenden genişti, test yakaladı.
+        $bothManagers = (string) $from->role === User::ROLE_MANAGER
+            && (string) $to->role === User::ROLE_MANAGER;
+
+        return $bothManagers && $this->isVerticallyRelated(
+            (int) ($from->company_id ?? 0),
+            (int) ($to->company_id ?? 0)
+        );
+    }
+
+    /**
+     * İki firma alt–üst ilişkisinde mi?
+     *
+     * ⚠ YATAY İLİŞKİ DEĞİL. Aynı üst firmaya bağlı iki partner birbirinin
+     * muhatabı değildir; kardeş firmalar birbirini görmemeli.
+     */
+    private function isVerticallyRelated(int $a, int $b): bool
+    {
+        if ($a <= 0 || $b <= 0 || $a === $b) {
+            return false;
+        }
+
+        return in_array($b, \App\Models\Company::ancestorIds($a), true)
+            || in_array($b, \App\Models\Company::descendantIds($a), true);
     }
 
     /** $candidate, $member'ın şirketinin öğrencilerine atanmış bir danışman mı? */
@@ -243,11 +274,8 @@ class ConversationService
             return false;
         }
 
-        return in_array(
-            (int) $candidate->id,
-            \App\Support\MessagingDirectory::reachableOutsideIds($companyId),
-            true
-        );
+        return \App\Support\MessagingDirectory::assignedAdvisors($companyId)
+            ->contains(fn ($advisor) => (int) $advisor->id === (int) $candidate->id);
     }
 
     private function departmentOf(string $role): string

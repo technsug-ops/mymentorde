@@ -82,7 +82,7 @@ class InternalMessagingController extends Controller
         // danışmanlar. Danışmanı üst firma atıyor, yani başka şirkette;
         // firma kapsamlı rehber onu hiç göstermiyordu ve partner öğrencisiyle
         // ilgilenen kişiye yazamıyordu (bkz. MessagingDirectory).
-        $outsideIds = \App\Support\MessagingDirectory::reachableOutsideIds($companyId);
+        $outsideIds = \App\Support\MessagingDirectory::reachableOutsideIds($companyId, (string) $user->role);
 
         $dmableQuery = User::query()
             ->withoutGlobalScope('company')
@@ -867,3 +867,4 @@ class InternalMessagingController extends Controller
         return response()->json(['ok' => true, 'summary' => trim((string) $summary)]);
     }
 }
+
