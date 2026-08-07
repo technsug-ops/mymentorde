@@ -152,12 +152,23 @@ class PlatformSettingsController extends Controller
         $fromAddress = (string) config('mail.from.address');
         $label       = $company ? $company->name : 'Platform';
 
+        // Hangi taşıyıcı devrede? "Mail gitmedi" dendiğinde ilk sorulan soru
+        // bu; tahmin yerine sonuç mesajında yazsın.
+        $source    = \App\Support\Brand::mailTransportSource();
+        $transport = 'Platform (varsayılan)';
+
+        if ($source) {
+            $owner     = \App\Models\Company::query()->withoutGlobalScope('company')->find($source['company_id']);
+            $transport = ($owner->name ?? ('#' . $source['company_id'])) . ' · ' . $source['driver'];
+        }
+
         try {
             Mail::raw(
                 "Gönderen kimliği testi.\n\n"
                 . "Şirket: {$label}\n"
                 . "Görünen ad: {$fromName}\n"
-                . "Adres: {$fromAddress}\n\n"
+                . "Adres: {$fromAddress}\n"
+                . "Taşıyıcı: {$transport}\n\n"
                 . "Bu mail size ulaştıysa bu kimlikle gönderim çalışıyor demektir.",
                 function ($msg) use ($to, $label) {
                     $msg->to($to)->subject("[Test] Gönderen kimliği — {$label}");
@@ -166,7 +177,7 @@ class PlatformSettingsController extends Controller
 
             return back()->with(
                 'success',
-                "Test e-postası {$to} adresine gönderildi. Gönderen: {$fromName} <{$fromAddress}>"
+                "Test e-postası {$to} adresine gönderildi. Gönderen: {$fromName} <{$fromAddress}> · Taşıyıcı: {$transport}"
             );
         } catch (\Throwable $e) {
             Log::warning('Platform SMTP test failed', [
@@ -177,7 +188,7 @@ class PlatformSettingsController extends Controller
 
             // Hatanın gövdesi önemli: doğrulanmamış alan adı, kimlik hatası ve
             // ağ sorunu birbirinden ancak burada ayrılıyor.
-            return back()->with('error', "E-posta gönderilemedi ({$fromAddress}): " . $e->getMessage());
+            return back()->with('error', "E-posta gönderilemedi ({$fromAddress} · taşıyıcı: {$transport}): " . $e->getMessage());
         } finally {
             // Test için uygulanan kimlik isteğin geri kalanına sızmamalı.
             \App\Support\Brand::restore($snapshot);
@@ -236,3 +247,4 @@ class PlatformSettingsController extends Controller
         ]);
     }
 }
+
