@@ -366,6 +366,40 @@ section { padding:90px 0; position:relative; }
 .portal-features { list-style:none; padding:0; margin:0; }
 .portal-features li { padding:6px 0 6px 22px; position:relative; font-size:13px; color:var(--text); line-height:1.5; }
 .portal-features li::before { content:'→'; position:absolute; left:0; color:var(--primary); font-weight:800; }
+.portal-icon-wrap.partner { background:linear-gradient(140deg, #0f766e, #134e4a); }
+/* 7. portal en yeni ve en ayirt edici olan — tam genislik alarak vurgulaniyor. */
+.portal.portal-wide { grid-column:1 / -1; display:grid; grid-template-columns:1.15fr 1fr; gap:28px; align-items:center; border-color:#0f766e; }
+.portal.portal-wide:hover { border-color:#0f766e; }
+@media(max-width:900px) { .portal.portal-wide { grid-template-columns:1fr; } }
+.portal-new-tag { display:inline-block; font-size:10px; font-weight:800; letter-spacing:.06em; background:#0f766e; color:#fff; padding:3px 8px; border-radius:5px; vertical-align:middle; margin-left:6px; }
+
+/* === FIRMA AGI (cok kiracili) === */
+.net-wrap { display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:start; }
+@media(max-width:900px) { .net-wrap { grid-template-columns:1fr; } }
+.net-tree { background:#fff; border:2px solid var(--line); border-radius:20px; padding:28px 24px; }
+.net-row { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.net-node {
+    background:var(--primary-soft); border:2px solid var(--primary-mid); border-radius:12px;
+    padding:10px 18px; font-size:14px; font-weight:700; color:var(--primary-deep); text-align:center; line-height:1.35;
+}
+.net-node small { display:block; font-size:11px; font-weight:500; color:var(--muted); }
+.net-node.op { background:linear-gradient(140deg,#5b2e91,#3d1c67); border-color:#3d1c67; color:#fff; }
+.net-node.op small { color:rgba(255,255,255,.75); }
+.net-node.leaf { background:#e6f4f2; border-color:#0f766e; color:#134e4a; }
+.net-stem { width:2px; height:18px; background:var(--primary-mid); }
+.net-leaves { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+.net-block { display:flex; align-items:center; gap:10px; margin-top:14px; padding:10px 14px; border-radius:10px; font-size:12.5px; font-weight:600; }
+.net-block.stop { background:#fdeced; color:#9c2c26; border:1px dashed #d98a86; }
+.net-lists { display:flex; flex-direction:column; gap:20px; }
+.net-list { background:#fff; border:2px solid var(--line); border-radius:16px; padding:22px 24px; }
+.net-list.down { border-left:4px solid #16a34a; }
+.net-list.iso { border-left:4px solid #dc2626; }
+.net-list h4 { margin:0 0 4px; font-size:17px; color:var(--primary-deep); }
+.net-list > p { margin:0 0 12px; font-size:13px; color:var(--muted); line-height:1.5; }
+.net-list ul { list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:8px; }
+.net-list li { font-size:12.5px; font-weight:600; padding:5px 11px; border-radius:20px; background:var(--bg); color:var(--text); }
+.net-list.down li { background:#e8f5ec; color:#166534; }
+.net-list.iso li { background:#fdeced; color:#9c2c26; }
 
 /* === MODULES === */
 .modules-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:20px; }
@@ -760,6 +794,7 @@ footer a:hover { color:#fff; }
         </a>
         <div class="p-nav-links">
             <a href="#portallar">Portallar</a>
+            <a href="#firma-agi">Firma Ağı</a>
             <a href="#moduller">Modüller</a>
             <a href="#ai">AI Asistan</a>
             <a href="/randevu">Uzmanlar</a>
@@ -806,11 +841,11 @@ footer a:hover { color:#fff; }
             </div>
             <div class="hero-trust">
                 <div class="hero-trust-item">
-                    <strong>6</strong>
+                    <strong>7</strong>
                     Ayrı Portal
                 </div>
                 <div class="hero-trust-item">
-                    <strong>28+</strong>
+                    <strong>33+</strong>
                     Modül
                 </div>
                 <div class="hero-trust-item">
@@ -856,12 +891,12 @@ footer a:hover { color:#fff; }
         <div class="stats-grid">
             <div class="stat">
                 <div class="stat-icon"><x-icon name="target" size="28" aria-label="Portallar" /></div>
-                <div class="stat-num">6 <span>portal</span></div>
-                <div class="stat-lbl">Aday · Öğrenci · Senior · Bayi · Manager · Marketing</div>
+                <div class="stat-num">7 <span>portal</span></div>
+                <div class="stat-lbl">Aday · Öğrenci · Senior · Bayi · Manager · Marketing · Partner Firma</div>
             </div>
             <div class="stat">
                 <div class="stat-icon"><x-icon name="zap" size="28" aria-label="Modüller" /></div>
-                <div class="stat-num">28+</div>
+                <div class="stat-num">33+</div>
                 <div class="stat-lbl">Hazır Modül + Genişleyebilir Mimari</div>
             </div>
             <div class="stat">
@@ -1028,9 +1063,9 @@ footer a:hover { color:#fff; }
 {{-- ═══ 6 PORTAL ═══ --}}
 <section id="portallar" class="sec-bg-white">
     <div class="container">
-        <span class="sec-label">6 Portal Mimarisi</span>
+        <span class="sec-label">7 Portal Mimarisi</span>
         <h2 class="sec-title">Her rol için optimize edilmiş ayrı çalışma alanları.</h2>
-        <p class="sec-lead">Aday, öğrenci, senior, bayi, yönetici, pazarlama — her biri kendi UX'ine sahip ama tek veriden besleniyor. Permission-based erişim + multi-tenant izolasyon.</p>
+        <p class="sec-lead">Aday, öğrenci, senior, bayi, yönetici, pazarlama — her biri kendi UX'ine sahip ama tek veriden besleniyor. Yedincisi rol değil <strong>firma</strong> ayrımı: partner firmalar kendi markalarıyla, kendi verileriyle çalışır.</p>
 
         <div class="portals-grid">
             <div class="portal">
@@ -1116,6 +1151,126 @@ footer a:hover { color:#fff; }
                     <li>GDPR + audit + güvenlik kontrol</li>
                 </ul>
             </div>
+
+            {{-- 7. portal: kurumsal partner firma.
+                 Diğer altılar ROL ayrımı; bu FİRMA ayrımı — o yüzden ayrı
+                 vurguda. Yüzeyi bilerek dar: operasyon araçları kapalı. --}}
+            <div class="portal portal-wide">
+                <div>
+                    <div class="portal-icon-wrap partner"><x-icon name="building-2" size="32" aria-label="Partner Firma" /></div>
+                    <div class="portal-name">Portal 7</div>
+                    <h3>Kurumsal Partner Firma <span class="portal-new-tag">YENİ</span></h3>
+                    <p>
+                        Öğrencisini sana devreden danışmanlık firmalarının kendi paneli — <strong>kendi markası,
+                        kendi alan adı, kendi ekibi.</strong> Kendi öğrencilerinden başkasını görmez;
+                        senin operasyon araçların ona hiç açılmaz.
+                    </p>
+                </div>
+                <ul class="portal-features">
+                    <li>Kendi adaylarını ekler, süreci salt okunur izler</li>
+                    <li>Kendi hizmet paketlerini ve fiyatlarını belirler</li>
+                    <li>Kendi kullanıcılarını açar, şifre sıfırlar</li>
+                    <li>Operasyondan gelen belge taleplerini öğrencisine iletir</li>
+                    <li>Atanan danışmanla ve üst firmayla yazışır</li>
+                    <li>Kardeş firmaları göremez — hiçbir ekranda, hiçbir sorguda</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ═══ FIRMA AĞI / ÇOK KİRACILILIK ═══ --}}
+<section id="firma-agi" class="sec-bg-soft">
+    <div class="container">
+        <span class="sec-label">Firma Ağı Mimarisi</span>
+        <h2 class="sec-title">Tek kurulum. Onlarca firma. Hiçbiri diğerini görmüyor.</h2>
+        <p class="sec-lead">
+            Kendi öğrencilerini yönetirken partner firmalara da kendi markalarıyla panel verebilirsin.
+            Ayrı kurulum, ayrı sunucu, ayrı fatura yok — <strong>tek sistem, tek yerden yönetim.</strong>
+            Kural basit: <em>dikey miras, yatay izolasyon.</em>
+        </p>
+
+        <div class="net-wrap">
+            <div class="net-tree">
+                <div class="net-row">
+                    <div class="net-node op">Operasyonu yürüten firma<small>senin ana panelin</small></div>
+                    <div class="net-stem"></div>
+                    <div class="net-node">B2B markan<small>kendi alan adı · kendi logosu</small></div>
+                    <div class="net-stem"></div>
+                    <div class="net-leaves">
+                        <div class="net-node leaf">Partner A</div>
+                        <div class="net-node leaf">Partner B</div>
+                        <div class="net-node leaf">Partner C</div>
+                    </div>
+                </div>
+                <div class="net-block stop">
+                    <x-icon name="x" size="16" aria-label="Görmez" />
+                    Partner A ↔ Partner B: birbirini <strong>hiç göremez</strong>
+                </div>
+            </div>
+
+            <div class="net-lists">
+                <div class="net-list down">
+                    <h4>▼ Yukarıdan aşağı akan</h4>
+                    <p>Üst firmada tanımlarsın, tüm alt firmalarda anında geçerli olur — alt firma kendi tanımını yapana kadar.</p>
+                    <ul>
+                        <li>Marka kimliği</li>
+                        <li>Mail göndericisi</li>
+                        <li>Mail taşıyıcısı</li>
+                        <li>Kayıt formu</li>
+                        <li>Hizmet kataloğu</li>
+                        <li>Fiyatlar</li>
+                        <li>Modül izinleri</li>
+                    </ul>
+                </div>
+                <div class="net-list iso">
+                    <h4>✕ Asla yatay geçmeyen</h4>
+                    <p>Veritabanı seviyesinde filtreleniyor. "Göstermeyi unutmak" diye bir ihtimal yok — otomatik testler her sürümde kontrol ediyor.</p>
+                    <ul>
+                        <li>Aday ve öğrenci</li>
+                        <li>Belge</li>
+                        <li>Sözleşme ve tutar</li>
+                        <li>Mesajlaşma</li>
+                        <li>Finans</li>
+                        <li>Kullanıcılar</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        {{-- Somut kabiliyetler — soyut mimari anlatısını yere indiriyor. --}}
+        <div class="hl-section-tag" style="margin-top:48px;">Firma ağı ne getiriyor</div>
+        <div class="hl-modules-grid">
+            <div class="hl-module">
+                <div class="hl-module-icon"><x-icon name="palette" size="32" aria-label="Marka" /></div>
+                <h4>Her firma kendi markasını görür</h4>
+                <p>Kendi alan adı, logosu, renkleri. Panelin hiçbir yerinde senin markan geçmez — öğrencisi partnerin markasını, partner ise senin B2B markanı görür.</p>
+            </div>
+            <div class="hl-module">
+                <div class="hl-module-icon"><x-icon name="mail" size="32" aria-label="Mail" /></div>
+                <h4>Firma başına mail kimliği ve sunucusu</h4>
+                <p>Mail partnerin adıyla gider, cevap doğru firmaya düşer. Firma isterse <strong>kendi mail hesabını</strong> bağlar — API anahtarını verir, gönderim onun sunucusundan çıkar.</p>
+            </div>
+            <div class="hl-module" style="border-left:3px solid var(--primary);">
+                <div class="hl-module-icon"><x-icon name="tag" size="32" aria-label="Fiyat" /></div>
+                <h4>Firma kendi paketini ve fiyatını belirler <span style="font-size:10px; background:var(--primary); color:#fff; padding:2px 6px; border-radius:4px; vertical-align:middle; margin-left:4px;">YENİ</span></h4>
+                <p>Sadece fiyat değil <strong>paket içeriği de</strong> firmanın kararı. Tanımlamayan firma üst firmanın listesini kullanır. Sözleşme aşamasında tutar tek tek pazarlıkla düzeltilip sabitlenir — finans yalnızca sabitlenmiş tutarı sayar.</p>
+            </div>
+            <div class="hl-module">
+                <div class="hl-module-icon"><x-icon name="clipboard-list" size="32" aria-label="Form" /></div>
+                <h4>Merkezî form tanımı + sapma tespiti</h4>
+                <p>Başvuru formunu bir kez merkezde değiştir, tüm alt firmalarda değişsin. Uçta merkezde karşılığı olmayan bir alan kalırsa sistem uyarır — unutmaya açık değil.</p>
+            </div>
+            <div class="hl-module">
+                <div class="hl-module-icon"><x-icon name="file-text" size="32" aria-label="Talep zinciri" /></div>
+                <h4>Belge talep zinciri: Operasyon → Partner → Öğrenci</h4>
+                <p>Eksik belgeyi öğrenciye doğrudan sormazsın. Müşteri ilişkisi partnerde: operasyon partnerden ister, partner kendi öğrencisinden. Zincirin her halkası kendi ekranından takip eder.</p>
+            </div>
+            <div class="hl-module">
+                <div class="hl-module-icon"><x-icon name="user-tie" size="32" aria-label="Danışman" /></div>
+                <h4>Uzmanlık etiketli danışman ataması</h4>
+                <p>Danışmanları <strong>bachelor · master · ausbildung · vize</strong> etiketleriyle işaretle; aday tipine göre doğru kişi otomatik atansın. Üst firma varsayılan danışmanı da seçebilir.</p>
+            </div>
         </div>
     </div>
 </section>
@@ -1123,7 +1278,7 @@ footer a:hover { color:#fff; }
 {{-- ═══ MODULES === --}}
 <section id="moduller" class="sec-bg-soft">
     <div class="container">
-        <span class="sec-label">28+ Hazır Modül</span>
+        <span class="sec-label">33+ Hazır Modül</span>
         <h2 class="sec-title">Eğitim danışmanlığının her iş süreci için modül.</h2>
         <p class="sec-lead">Hiçbir modülü baştan yazmana gerek yok — hepsi kutudan çıkar çıkmaz çalışıyor.</p>
 
@@ -1183,10 +1338,22 @@ footer a:hover { color:#fff; }
                 <h4>Analytics Hub (16+ Dashboard)</h4>
                 <p>Lead funnel · senior performans · revenue · NPS · GDPR · kampanya ROI · scheduled snapshots. BI-ready, export edilebilir.</p>
             </div>
+            <div class="hl-module" style="border-left:3px solid #0f766e;">
+                <div class="hl-module-icon"><x-icon name="building-2" size="32" aria-label="Firma Ağı" /></div>
+                <h4>Firma Ağı &amp; White-label <span style="font-size:10px; background:#0f766e; color:#fff; padding:2px 6px; border-radius:4px; vertical-align:middle; margin-left:4px;">YENİ</span></h4>
+                <p>Partner firmalara kendi markalarıyla panel ver. Dikey miras · yatay izolasyon · firma başına mail sunucusu · firma bazlı fiyatlandırma. Tek kurulum, onlarca firma.</p>
+                <a href="#firma-agi"
+                   style="display:inline-block; margin-top:10px; font-size:12px; color:#0f766e; font-weight:600; text-decoration:none; border-bottom:1px solid #0f766e;"
+                   data-track="cta_clicked"
+                   data-ph-cta-name="modules_firma_agi"
+                   data-ph-location="platform_modules">
+                    → Nasıl çalıştığını gör
+                </a>
+            </div>
         </div>
 
         {{-- ── Tamamlayıcı Modüller (kompakt pill) ────────────── --}}
-        <div class="hl-section-tag" style="margin-top:60px;">+ Tamamlayıcı Modüller (19)</div>
+        <div class="hl-section-tag" style="margin-top:60px;">+ Tamamlayıcı Modüller (23)</div>
         <p class="hl-section-sub">Çekirdek operasyonu tamamlayan iş akışı modülleri — hepsi dahil, ayrıca yapılandırma gerekmez.</p>
         <div class="modules-pills">
             <div class="m-pill"><span class="m-pill-icon"><x-icon name="landmark" size="18" aria-label="Üniversite" /></span><span><strong>Üniversite Belge Haritası</strong> · 500+ üni + DAAD</span></div>
@@ -1208,6 +1375,10 @@ footer a:hover { color:#fff; }
             <div class="m-pill"><span class="m-pill-icon"><x-icon name="map-pin" size="18" aria-label="Monitor" /></span><span><strong>Sessizlik Monitörü</strong> · auto check-in</span></div>
             <div class="m-pill"><span class="m-pill-icon"><x-icon name="tag" size="18" aria-label="İndirim" /></span><span><strong>İndirim Kodları</strong> · 5 template + AI</span></div>
             <div class="m-pill"><span class="m-pill-icon"><x-icon name="clock" size="18" aria-label="Hatırlatma" /></span><span><strong>Ödeme Hatırlatma</strong> · 4+1 kademeli</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="tag" size="18" aria-label="Hizmet Kataloğu" /></span><span><strong>Hizmet Kataloğu</strong> · firma bazlı fiyat + içerik</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="scroll" size="18" aria-label="Sözleşme Tutarı" /></span><span><strong>Sözleşme Tutarı</strong> · pazarlık + sabitleme</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="user-tie" size="18" aria-label="Uzmanlık" /></span><span><strong>Danışman Uzmanlığı</strong> · 4 etiketli atama</span></div>
+            <div class="m-pill"><span class="m-pill-icon"><x-icon name="mail" size="18" aria-label="Mail Taşıyıcı" /></span><span><strong>Firma Mail Sunucusu</strong> · kendi SMTP/API</span></div>
         </div>
     </div>
 </section>
@@ -1560,6 +1731,9 @@ footer a:hover { color:#fff; }
                 <div class="tier-yearly">veya €9.590/yıl <small>(%20 indirim)</small></div>
                 <ul class="tier-features">
                     <li><strong>Büyüyen'deki her şey +</strong></li>
+                    <li><strong>Firma ağı</strong> — sınırsız alt firma paneli</li>
+                    <li>Firma başına marka, alan adı, mail sunucusu</li>
+                    <li>Firma bazlı paket ve fiyatlandırma</li>
                     <li>Dealer Network modülü + komisyon</li>
                     <li>White-label + custom domain</li>
                     <li>DAM (Dijital Varlık Yönetimi)</li>
@@ -1920,9 +2094,13 @@ footer a:hover { color:#fff; }
         <div class="enterprise-callout">
             <div>
                 <span class="sec-label" style="background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.28);">Enterprise / White-label</span>
-                <h3 style="margin:10px 0 8px; font-size:24px; color:#fff;">Çok şubeli, marka olarak satmak isteyen firmalar için</h3>
+                <h3 style="margin:10px 0 8px; font-size:24px; color:#fff;">Altında firma ağı kurmak isteyenler için</h3>
                 <p style="margin:0; color:rgba(255,255,255,.85); font-size:14px;">
-                    Sınırsız kullanıcı · Multi-tenant (çok şirket/şube) · White-label (kendi domain + logo + tema) · Custom modül geliştirme · Dedicated CSM · On-premise opsiyonu
+                    Sınırsız kullanıcı · Sınırsız alt firma · Her firmaya kendi alan adı, logosu ve mail sunucusu ·
+                    Firma bazlı paket ve fiyatlandırma · Merkezden form ve kural yönetimi · Dedicated CSM
+                </p>
+                <p style="margin:8px 0 0; color:rgba(255,255,255,.7); font-size:12.5px;">
+                    <a href="#firma-agi" style="color:#fff; border-bottom:1px solid rgba(255,255,255,.5);">→ Firma ağı nasıl çalışıyor?</a>
                 </p>
             </div>
             <a href="#cta" class="btn-gold"
@@ -2015,6 +2193,18 @@ footer a:hover { color:#fff; }
                 <div class="faq-a">Evet. {{ $brand }} multi-tenant mimaride çalışır — her firma kendi izole verisi, kendi kullanıcıları, kendi marka kimliği ile sistemi kullanır. Gold + Premium planlarda white-label (kendi domain + logo + tema) tam destekli.</div>
             </div>
             <div class="faq-item">
+                <button type="button" class="faq-q">Kendi altımdaki danışmanlık firmalarına da panel verebilir miyim? <span class="faq-icon">+</span></button>
+                <div class="faq-a">Evet, Premium planın çekirdek özelliği bu. Her partner firma kendi alan adı, logosu ve renkleriyle giriş yapar; panelde senin markan hiçbir yerde görünmez. Firma kendi kullanıcılarını açar, kendi hizmet paketlerini ve fiyatlarını belirler, isterse kendi mail sunucusunu bağlar. Sen hepsini tek panelden yönetmeye devam edersin.</div>
+            </div>
+            <div class="faq-item">
+                <button type="button" class="faq-q">Partner firmalar birbirinin öğrencisini görebilir mi? <span class="faq-icon">+</span></button>
+                <div class="faq-a">Hayır. Kural şu: <strong>dikey miras, yatay izolasyon.</strong> Üst firma alt firmanın kaydını görür (operasyonu yürüttüğü için görmek zorunda), ama kardeş firmalar birbirini hiçbir ekranda ve hiçbir sorguda göremez. Bu, arayüzde gizlemeyle değil veritabanı seviyesinde filtreyle sağlanıyor; her sürümde otomatik sızıntı testleri çalışıyor.</div>
+            </div>
+            <div class="faq-item">
+                <button type="button" class="faq-q">Alt firmalarımın fiyatlarını ben mi belirlerim, onlar mı? <span class="faq-icon">+</span></button>
+                <div class="faq-a">İkisi de mümkün. Varsayılan olarak alt firma senin paket ve fiyatlarını miras alır — sen değiştirdiğinde onlarda da anında değişir. Firma kendi kataloğunu oluşturmayı seçerse hem fiyatı hem paket içeriğini kendi belirler. Ayrıca her sözleşmede tutar pazarlıkla tek tek düzeltilip sabitlenebilir; finans yalnızca sabitlenmiş tutarı ciroya sayar.</div>
+            </div>
+            <div class="faq-item">
                 <button type="button" class="faq-q">Verilerimiz nerede saklanıyor? <span class="faq-icon">+</span></button>
                 <div class="faq-a">Tüm production datası Almanya/Frankfurt EU bölgesinde. PostgreSQL/MySQL + günlük backup + 30 gün retention. GDPR + KVKK + EU data residency tam uyumlu.</div>
             </div>
@@ -2097,7 +2287,8 @@ footer a:hover { color:#fff; }
         <div>
             <h5>Ürün</h5>
             <ul>
-                <li><a href="#portallar">6 Portal</a></li>
+                <li><a href="#portallar">7 Portal</a></li>
+                <li><a href="#firma-agi">Firma Ağı</a></li>
                 <li><a href="#moduller">Modüller</a></li>
                 <li><a href="#ai">AI Asistan</a></li>
                 <li><a href="#fiyat">Fiyatlandırma</a></li>
