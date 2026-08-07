@@ -46,6 +46,11 @@ class RestrictPartnerPanel
         'manager/bulletins',         // duyurular
         'manager/partner-documents', // belge listesi + belge talepleri
         'manager/partner-requests',  // operasyondan gelen bilgi/belge talepleri
+
+        // Firma kendi hizmet paketlerini ve fiyatlarını tanımlar. Sözleşme
+        // bazındaki tutar pazarlığı KAPALI (bkz. DENIED contract-amount):
+        // liste fiyatı firmanın kararı, tek tek sözleşme tutarı operasyonun.
+        'manager/services',
         'im',                        // öğrenci ve atanan danışmanla yazışma
 
         // Partner kendi adayının şifresini sıfırlayabilmeli — hesabı o açtı.

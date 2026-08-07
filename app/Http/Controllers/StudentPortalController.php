@@ -294,10 +294,11 @@ class StudentPortalController extends Controller
     {
         $base      = $this->baseData($request, 'services', 'Servisler', 'Paket, ek servisler ve değişiklik talepleri.');
         $guest     = $this->resolveStudentGuest($request);
-        $packages  = collect($this->servicePackages());
-        $allExtras = collect(config('service_packages.extra_services', []))->where('is_active', true);
+        $catalogCompanyId = (int) ($guest->company_id ?? 0);
+        $packages  = \App\Support\ServiceCatalog::packages($catalogCompanyId);
+        $allExtras = \App\Support\ServiceCatalog::extras($catalogCompanyId);
 
-        $serviceCategories = collect(config('service_packages.service_categories', []))
+        $serviceCategories = \App\Support\ServiceCatalog::categories()
             ->map(fn ($cat) => array_merge($cat, [
                 'services' => $allExtras->where('category', $cat['key'])->sortBy('sort_order')->values()->all(),
             ]))
@@ -308,12 +309,18 @@ class StudentPortalController extends Controller
         return view('student.services', array_merge($base, [
             'guestApplication'    => $guest,
             'packages'            => $packages,
-            'extraServiceOptions' => collect($this->extraServiceOptions()),
+            'extraServiceOptions' => $allExtras,
             'serviceCategories'   => $serviceCategories,
             'selectedPackageCode' => (string) ($guest?->selected_package_code ?? ''),
             'selectedPackageTitle'=> (string) ($guest?->selected_package_title ?? ''),
             'selectedPackagePrice'=> (string) ($guest?->selected_package_price ?? ''),
             'selectedExtras'      => is_array($guest?->selected_extra_services) ? $guest->selected_extra_services : [],
+            // Toplamı controller hesaplıyor: blade'in katalog kaynağını bilmesi gerekmesin.
+            'extrasTotalAmount'   => \App\Support\ServiceCatalog::quote(
+                null,
+                $guest?->selected_extra_services,
+                $catalogCompanyId
+            ),
         ]));
     }
 

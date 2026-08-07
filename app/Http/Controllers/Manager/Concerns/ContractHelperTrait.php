@@ -159,30 +159,40 @@ trait ContractHelperTrait
         $portalUrl     = url('/guest/contract');
 
         // ── Ödeme bilgisi (sözleşme onayında zorunlu havale yönlendirmesi) ──
-        // Tutar: önce mevcut GuestPaymentRequest kaydından, yoksa paket + ek hizmetler toplamından.
+        // Tutar önceliği — yukarıdan aşağıya, ilk bulunan kazanır:
+        //   1) Sözleşmede elle sabitlenmiş tutar (pazarlık sonucu; finans da bunu alır)
+        //   2) Daha önce oluşturulmuş ödeme talebi
+        //   3) Katalogdan paket + ek hizmetler toplamı
         $bankInfo = (array) config('brand.banking', []);
         $paymentAmountText = null;
         $paymentReference  = null;
         if (! empty($bankInfo['iban'] ?? '')) {
             $currency = (string) ($bankInfo['currency'] ?? 'EUR');
 
-            $latestPayment = \App\Models\GuestPaymentRequest::query()
-                ->where('guest_application_id', $guest->id)
-                ->orderByDesc('id')
-                ->first();
+            $amount = null;
 
-            $amount = $latestPayment ? (float) $latestPayment->amount_eur : null;
+            // Sabitlenmemiş tutar taslak sayılır; sözleşme metnine yazılmaz.
+            if ($guest->contract_amount_locked_at && (float) $guest->contract_amount_eur > 0) {
+                $amount = (float) $guest->contract_amount_eur;
+            }
+
+            if ($amount === null) {
+                $latestPayment = \App\Models\GuestPaymentRequest::query()
+                    ->where('guest_application_id', $guest->id)
+                    ->orderByDesc('id')
+                    ->first();
+
+                $amount = $latestPayment ? (float) $latestPayment->amount_eur : null;
+            }
+
             if ($amount === null) {
                 $selCode = (string) ($guest->selected_package_code ?? '');
                 if ($selCode !== '') {
-                    $pkg = collect(config('service_packages.packages', []))->firstWhere('code', $selCode);
-                    $pkgAmount = (int) ($pkg['price_amount'] ?? 0);
-                    $extrasArr = is_array($guest->selected_extra_services) ? $guest->selected_extra_services : [];
-                    $extrasAmount = collect($extrasArr)->sum(function ($x) {
-                        $found = collect(config('service_packages.extra_services', []))->firstWhere('code', $x['code'] ?? '');
-                        return (int) ($found['price_amount'] ?? 0);
-                    });
-                    $amount = (float) ($pkgAmount + (int) $extrasAmount);
+                    $amount = \App\Support\ServiceCatalog::quote(
+                        $selCode,
+                        $guest->selected_extra_services,
+                        (int) ($guest->company_id ?? 0)
+                    );
                 }
             }
 

@@ -89,6 +89,12 @@
     </div>
 
     <div class="nav-section">
+        {{-- Firma kendi paketlerini ve fiyatlarını buradan belirler.
+             Tanımlamadığı sürece üst firmanın listesi geçerli. --}}
+        <a href="/manager/services" class="nav-link {{ $_pnIs('manager/services') ? 'active' : '' }}">
+            <span class="nav-icon">🏷️</span> Hizmetler ve Fiyatlar
+        </a>
+
         {{-- Firmada tek kişi olması gerçekçi değil; ekibini kendisi yönetir. --}}
         <a href="/manager/users" class="nav-link {{ $_pnIs('manager/users') ? 'active' : '' }}">
             <span class="nav-icon">👥</span> Kullanıcılar

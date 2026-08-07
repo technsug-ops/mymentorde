@@ -806,16 +806,20 @@ class SeniorPortalController extends Controller
     }
 
     /**
-     * Paket kodu → içerdiği kategori + hizmetler haritası (config/service_packages).
+     * Paket kodu → içerdiği kategori + hizmetler haritası.
      * Sözleşme listesinde pakete tıklayınca içindeki hizmetler açılsın diye (#17).
+     *
+     * Katalog firmaya göre değiştiği için harita da firmaya bağlı. Liste birden
+     * çok firmanın sözleşmesini gösterebildiğinden burada bakan kişinin firması
+     * kullanılıyor — bu sadece açılır içerik özeti, tutar hesabı buradan gelmiyor.
      */
-    private function buildPackageServiceMap(): array
+    private function buildPackageServiceMap(?int $companyId = null): array
     {
-        $extraCfg = collect(config('service_packages.extra_services', []))->keyBy('code');
-        $catCfg   = collect(config('service_packages.service_categories', []))->keyBy('key');
+        $extraCfg = \App\Support\ServiceCatalog::extras($companyId)->keyBy('code');
+        $catCfg   = \App\Support\ServiceCatalog::categories()->keyBy('key');
 
         $map = [];
-        foreach (config('service_packages.packages', []) as $p) {
+        foreach (\App\Support\ServiceCatalog::packages($companyId) as $p) {
             $code = (string) ($p['code'] ?? '');
             if ($code === '') {
                 continue;
@@ -906,9 +910,9 @@ class SeniorPortalController extends Controller
                     'selected_package_code', 'selected_package_title', 'selected_extra_services',
                 ]);
 
-        $packages          = collect(config('service_packages.packages', []))->where('is_active', true)->sortBy('sort_order')->values();
-        $allExtras         = collect(config('service_packages.extra_services', []))->where('is_active', true);
-        $serviceCategories = collect(config('service_packages.service_categories', []))
+        $packages          = \App\Support\ServiceCatalog::packages();
+        $allExtras         = \App\Support\ServiceCatalog::extras();
+        $serviceCategories = \App\Support\ServiceCatalog::categories()
             ->map(fn ($cat) => array_merge($cat, [
                 'services' => $allExtras->where('category', $cat['key'])->sortBy('sort_order')->values()->all(),
             ]))

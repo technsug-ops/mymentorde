@@ -158,10 +158,8 @@
     $hasPackage = !empty($selectedPackageTitle);
     $hasExtras  = !empty($selectedExtras);
     $selectedExtraCodes = collect($selectedExtras ?? [])->pluck('code')->map(fn($c)=>(string)$c)->all();
-    $extrasTotal = collect($selectedExtras ?? [])->sum(function($x) {
-        $f = collect(config('service_packages.extra_services', []))->firstWhere('code', $x['code'] ?? '');
-        return (float)($f['price_amount'] ?? 0);
-    });
+    // Katalog firmaya göre değişiyor; toplamı controller çözüyor.
+    $extrasTotal = (float) ($extrasTotalAmount ?? 0);
     $popularIdx = 1;
 @endphp
 
