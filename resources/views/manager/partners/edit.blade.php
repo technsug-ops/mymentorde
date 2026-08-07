@@ -29,6 +29,35 @@
         @csrf
         <input type="hidden" name="denied_permission_codes[]" value="">
 
+        {{-- Varsayılan danışman.
+
+             Otomatik dağıtım en az yüklü kişiyi seçiyor; yükler eşitken hep
+             aynı kişi öne çıkıyor ve pratikte her yeni aday ona düşüyordu.
+             Burada seçilen kişi öncelikli olur. --}}
+        <div style="padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--u-line,#e5e7eb);">
+            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">
+                Varsayılan Eğitim Danışmanı
+            </label>
+
+            @if($advisors->isEmpty())
+                <div style="font-size:12.5px;color:var(--u-muted,#64748b);">
+                    Operasyonu yürüten firmada aktif danışman yok.
+                </div>
+            @else
+                <select name="default_advisor_email" style="width:100%;max-width:420px;height:38px;border-radius:9px;border:1px solid var(--u-line,#e5e7eb);padding:0 10px;font-size:13px;">
+                    <option value="">— Otomatik (en az yüklü danışman) —</option>
+                    @foreach($advisors as $email => $label)
+                        <option value="{{ $email }}" @selected($company->default_advisor_email === $email)>{{ $label }}</option>
+                    @endforeach
+                </select>
+                <small style="display:block;font-size:11.5px;color:var(--u-muted,#64748b);margin-top:6px;line-height:1.6;">
+                    Bu firmadan gelen <strong>yeni adaylar</strong> önce bu danışmana atanır.
+                    Danışman pasifse, otomatik atamaya kapalıysa ya da <strong>kapasitesi doluysa</strong>
+                    sistem otomatik dağıtıma döner — seçim kapasite kuralını delmez.
+                </small>
+            @endif
+        </div>
+
         @foreach($groups as $groupName => $items)
             <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--u-muted,#64748b);margin:{{ $loop->first ? '0' : '20px' }} 0 10px;">
                 {{ $groupName }}
