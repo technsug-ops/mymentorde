@@ -95,6 +95,41 @@ class FormTemplateSharingTest extends TestCase
         $this->assertContains('MERKEZDEN DEGISTI', $labels, 'Merkezi degisiklik firmaya ulasmadi.');
     }
 
+    /**
+     * ÜST FİRMANIN tanımı alt firmaya iner.
+     *
+     * Merkez, şirketsiz bir fabrika şablonu değil; operasyonu yürüten
+     * firmadır. MentorDE formu düzenlediğinde kendi satırlarını düzenliyor
+     * ve o düzenleme partnerlere ULAŞMALI. Önce böyle değildi: alt firma
+     * fabrika şablonuna düşüyordu, üst firmanın tanımını hiç görmüyordu.
+     */
+    public function test_parent_definition_reaches_the_child(): void
+    {
+        $this->service()->ensureDefaults();
+
+        $this->companyB->update(['parent_company_id' => $this->companyA->id]);
+        \App\Models\Company::flushHierarchyCache();
+
+        GuestRegistrationField::query()->create([
+            'company_id'    => $this->companyA->id,
+            'section_key'   => 'ust',
+            'section_title' => 'Ust Firma Bolumu',
+            'section_order' => 5,
+            'field_key'     => 'ust_firma_alani',
+            'label'         => 'UST FIRMADAN GELDI',
+            'type'          => 'text',
+            'is_required'   => false,
+            'sort_order'    => 1,
+            'is_active'     => true,
+        ]);
+
+        $labels = collect($this->service()->groups((int) $this->companyB->id))
+            ->flatMap(fn ($group) => collect($group['fields'] ?? [])->pluck('label'))
+            ->all();
+
+        $this->assertContains('UST FIRMADAN GELDI', $labels, 'Ust firmanin tanimi alta inmedi.');
+    }
+
     /** Bilerek özelleştiren firma kendi satırlarını kullanır. */
     public function test_deliberate_customisation_still_wins(): void
     {

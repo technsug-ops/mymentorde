@@ -25,42 +25,62 @@ use Illuminate\Http\RedirectResponse;
  */
 class FormTemplateController extends Controller
 {
-    public function index(): View
+    public function index(\App\Services\GuestRegistrationFieldSchemaService $schema): View
     {
-        $central = GuestRegistrationField::query()
+        // Merkez = operasyonu yürüten ANA FİRMA. `company_id = 0` yalnızca
+        // fabrika şablonu; ana firma kendi tanımını yaptıysa merkez odur.
+        $master = Company::query()
             ->withoutGlobalScope('company')
-            ->where('company_id', 0)
-            ->get(['field_key', 'label', 'section_key', 'is_active']);
+            ->get()
+            ->first(fn (Company $c) => \App\Support\Brand::isPrimary($c));
 
-        $centralKeys = $central->pluck('field_key')->map(fn ($k) => (string) $k);
+        $masterCount = $master
+            ? GuestRegistrationField::query()->withoutGlobalScope('company')
+                ->where('company_id', $master->id)->where('is_active', true)->count()
+            : 0;
+
+        $factoryCount = GuestRegistrationField::query()->withoutGlobalScope('company')
+            ->where('company_id', 0)->where('is_active', true)->count();
 
         $companyIds = GuestRegistrationField::query()
             ->withoutGlobalScope('company')
             ->where('company_id', '>', 0)
+            ->when($master, fn ($q) => $q->where('company_id', '!=', $master->id))
             ->distinct()
             ->pluck('company_id');
 
-        $diverged = $companyIds->map(function ($companyId) use ($centralKeys) {
+        // ⚠ "Kendi satırların var" TEK BAŞINA sapma değil. Sapma, miras
+        // alacağın tanımdan FARKLI olmak. Ana firma zaten merkez olduğu için
+        // listeye hiç girmiyor.
+        $diverged = $companyIds->map(function ($companyId) use ($schema) {
             $own = GuestRegistrationField::query()
                 ->withoutGlobalScope('company')
                 ->where('company_id', $companyId)
-                ->get(['field_key', 'label']);
+                ->where('is_active', true)
+                ->get(['field_key']);
 
             $ownKeys = $own->pluck('field_key')->map(fn ($k) => (string) $k);
+            $inherited = $schema->inheritedRowsFor((int) $companyId)
+                ->pluck('field_key')->map(fn ($k) => (string) $k);
 
             return [
-                'company'      => Company::query()->withoutGlobalScope('company')->find($companyId),
-                'company_id'   => (int) $companyId,
-                'total'        => $own->count(),
-                // Merkezde var, firmada YOK → firma yeni alanı hiç sormuyor.
-                'missing'      => $centralKeys->diff($ownKeys)->values(),
-                // Firmada var, merkezde YOK → merkezde karşılığı olmayan veri.
-                'extra'        => $ownKeys->diff($centralKeys)->values(),
+                'company'    => Company::query()->withoutGlobalScope('company')->find($companyId),
+                'company_id' => (int) $companyId,
+                'total'      => $own->count(),
+                // Merkezde var, firmada YOK → firma o alanı hiç sormuyor.
+                'missing'    => $inherited->diff($ownKeys)->values(),
+                // Firmada var, merkezde YOK → karşılığı olmayan veri.
+                'extra'      => $ownKeys->diff($inherited)->values(),
             ];
-        })->values();
+        })
+        // Farkı olmayanı gösterme: gürültü yapar, gerçek sapmayı gizler.
+        ->filter(fn ($row) => $row['missing']->isNotEmpty() || $row['extra']->isNotEmpty())
+        ->values();
 
         return view('platform.form-template.index', [
-            'centralCount' => $central->count(),
+            'master'       => $master,
+            'masterCount'  => $masterCount,
+            'factoryCount' => $factoryCount,
             'diverged'     => $diverged,
         ]);
     }
