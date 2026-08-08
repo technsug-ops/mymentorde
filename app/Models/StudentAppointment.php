@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\OwnedBySubjectCompany;
+use App\Models\Contracts\ResolvesOwnCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class StudentAppointment extends Model
+class StudentAppointment extends Model implements ResolvesOwnCompany
 {
+    use OwnedBySubjectCompany;
+
     protected $fillable = [
         'company_id',
         'student_id',

@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class AiLabsSettings extends Model
 {
+    use BelongsToCompany;
     use HasFactory;
 
     protected $table = 'ai_labs_settings';

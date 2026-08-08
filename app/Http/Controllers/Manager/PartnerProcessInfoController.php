@@ -28,9 +28,11 @@ use Illuminate\Http\Request;
  *    kapsamsız okuyoruz (aşağıda `resolveAdvisor`).
  *
  * 2) SÜREÇ KAYITLARI. Üniversite başvurusu / vize / kurum belgesi kayıtları
- *    operasyonu yapan firmanın bağlamında oluşuyor. Bu modellerde global
- *    kapsam yok, o yüzden student_id ile okumak doğru sonucu veriyor —
- *    yetki sınırı öğrencinin partnere ait olması (aşağıdaki firstOrFail).
+ *    operasyonu yapan firmanın bağlamında oluşabiliyor. Bu modellere tenant
+ *    kapsamı EKLENDİ (2026-08-08); artık kapsamlı okunursa partner, üst
+ *    firmanın açtığı kaydı göremez ve ekran sessizce boş gelir. Bu yüzden
+ *    student_id ile KAPSAMSIZ okunuyorlar — yetki sınırı öğrencinin partnere
+ *    ait olması (aşağıdaki firstOrFail).
  *
  * GÖRÜNÜRLÜK: partner üçüncü taraf. Bayi portalındaki `is_visible_to_dealer`
  * bayrağı aynen geçerli. ProcessOutcome'da öyle bir bayrak yok; orada
@@ -124,7 +126,11 @@ class PartnerProcessInfoController extends Controller
             ->where('is_visible_to_student', false)
             ->count();
 
+        // ⚠ KAPSAMSIZ — kayıt operasyonu yürüten üst firmanın kutusunda
+        // olabilir. Yetki sınırı yukarıdaki firstOrFail; burada kapsam koruma
+        // sağlamaz, partneri kendi öğrencisinden koparır.
         $uniApplications = StudentUniversityApplication::query()
+            ->withoutGlobalScope('company')
             ->forStudent($studentId)
             ->where('is_visible_to_dealer', true)
             ->orderBy('priority')
@@ -132,6 +138,7 @@ class PartnerProcessInfoController extends Controller
                    'semester', 'status', 'priority', 'deadline', 'submitted_at', 'result_at']);
 
         $institutionDocs = StudentInstitutionDocument::query()
+            ->withoutGlobalScope('company')
             ->forStudent($studentId)
             ->visibleToDealer()
             ->latest('id')
@@ -139,6 +146,7 @@ class PartnerProcessInfoController extends Controller
                    'received_date', 'status', 'created_at']);
 
         $visa = StudentVisaApplication::query()
+            ->withoutGlobalScope('company')
             ->where('student_id', $studentId)
             ->where('is_visible_to_student', true)
             ->latest('id')

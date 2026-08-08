@@ -270,7 +270,10 @@ class DealerLeadController extends Controller
             })
             ->latest('id')->limit(50)->get();
 
+        // ⚠ KAPSAMSIZ — bildirimi gönderen taraf operasyon firması olabilir.
+        // Sınır lead sahipliği (yukarıda doğrulandı), kapsam değil.
         $notifications = NotificationDispatch::query()
+            ->withoutGlobalScope('company')
             ->where('source_type', 'dealer_lead')
             ->where('source_id', (string) $lead->id)
             ->latest('id')->limit(50)
@@ -318,7 +321,11 @@ class DealerLeadController extends Controller
         $institutionDocs    = collect();
         $convertedStudentId = (string) ($lead->converted_student_id ?? '');
         if ($convertedStudentId !== '' && $canViewDocuments) {
+            // ⚠ KAPSAMSIZ — süreci yürüten firma kaydı kendi kutusuna yazmış
+            // olabilir; kapsamlı okunursa bayi kendi lead'inin belgesini
+            // sessizce göremez. Yetki sınırı yukarıdaki lead sahipliği.
             $institutionDocs = StudentInstitutionDocument::query()
+                ->withoutGlobalScope('company')
                 ->forStudent($convertedStudentId)->visibleToDealer()->latest()
                 ->get(['id', 'institution_category', 'document_type_label', 'institution_name', 'received_date', 'status', 'notes', 'file_id', 'created_at']);
         }
@@ -326,6 +333,7 @@ class DealerLeadController extends Controller
         $dealerUniApps = collect();
         if ($convertedStudentId !== '' && $canViewProcessDetails) {
             $dealerUniApps = StudentUniversityApplication::query()
+                ->withoutGlobalScope('company')
                 ->forStudent($convertedStudentId)->where('is_visible_to_dealer', true)->orderBy('priority')
                 ->get(['id', 'university_name', 'city', 'department_name', 'degree_type', 'semester', 'application_portal', 'status', 'priority', 'deadline', 'submitted_at', 'result_at']);
         }

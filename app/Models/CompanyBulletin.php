@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class CompanyBulletin extends Model
 {
+    use BelongsToCompany;
+
     protected $table = 'company_bulletins';
 
     protected $fillable = [

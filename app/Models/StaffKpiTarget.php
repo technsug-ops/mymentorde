@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class StaffKpiTarget extends Model
 {
+    use BelongsToCompany;
+
     protected $fillable = [
         'company_id', 'user_id', 'period',
         'target_tasks_done', 'target_tickets_resolved', 'target_hours_logged',

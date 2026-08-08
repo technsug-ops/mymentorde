@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\OwnedBySubjectCompany;
+use App\Models\Contracts\ResolvesOwnCompany;
 use Illuminate\Database\Eloquent\Model;
 
-class StudentFeedback extends Model
+class StudentFeedback extends Model implements ResolvesOwnCompany
 {
+    use OwnedBySubjectCompany;
+
     public $timestamps = false;
 
     protected $fillable = [

@@ -11,11 +11,14 @@ class SeniorTemplateController extends Controller
 
     public function responseTemplates(Request $request)
     {
-        $companyId = (int) optional($request->user())->company_id;
-        $category  = trim((string) $request->query('category', ''));
+        $category = trim((string) $request->query('category', ''));
 
+        // Firma filtresi artık global kapsamdan geliyor (BelongsToCompany):
+        // kendi firmasının şablonları + fabrika şablonları (company_id = 0).
+        // Buradaki elle yazılmış `whereNull('company_id')` koşulu kaldırıldı;
+        // NULL "sahibi bilinmiyor" demek ve şablonu paylaşımlı saymak için
+        // yanlış işaretti — fabrika işareti 0.
         $query = \App\Models\SeniorResponseTemplate::where('is_active', true)
-            ->where(fn ($q) => $q->whereNull('company_id')->orWhere('company_id', $companyId))
             ->where(fn ($q) => $q->whereNull('owner_user_id')->orWhere('owner_user_id', (int) $request->user()?->id));
 
         if ($category) {
@@ -55,6 +58,11 @@ class SeniorTemplateController extends Controller
 
     public function responseTemplateUpdate(Request $request, \App\Models\SeniorResponseTemplate $template): \Illuminate\Http\JsonResponse
     {
+        // Fabrika şablonu TÜM firmalarda görünüyor; düzenlenmesine izin
+        // verilseydi bir firmanın danışmanı diğer firmaların da gördüğü metni
+        // değiştirirdi. Eski `owner_user_id` kontrolü buna açıktı: fabrika
+        // satırında owner_user_id boş olduğu için koşul hiç tetiklenmiyordu.
+        abort_if($template->isFactoryRow(), 403, 'Fabrika şablonu düzenlenemez.');
         abort_if($template->owner_user_id && $template->owner_user_id !== (int) $request->user()?->id, 403);
 
         $data = $request->validate([
@@ -71,6 +79,7 @@ class SeniorTemplateController extends Controller
 
     public function responseTemplateDelete(Request $request, \App\Models\SeniorResponseTemplate $template): \Illuminate\Http\JsonResponse
     {
+        abort_if($template->isFactoryRow(), 403, 'Fabrika şablonu silinemez.');
         abort_if($template->owner_user_id && $template->owner_user_id !== (int) $request->user()?->id, 403);
         $template->delete();
         return response()->json(['ok' => true]);
@@ -78,6 +87,13 @@ class SeniorTemplateController extends Controller
 
     public function responseTemplateUse(\App\Models\SeniorResponseTemplate $template): \Illuminate\Http\JsonResponse
     {
+        // Fabrika satırında sayaç paylaşımlı; firmalar arası bir yazma
+        // olmasın diye artırılmıyor. Kullanım engellenmiyor, yalnızca
+        // istatistik tutulmuyor.
+        if ($template->isFactoryRow()) {
+            return response()->json(['ok' => true, 'usage_count' => (int) $template->usage_count]);
+        }
+
         $template->increment('usage_count');
         return response()->json(['ok' => true, 'usage_count' => $template->usage_count]);
     }

@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\OwnedBySubjectCompany;
+use App\Models\Contracts\ResolvesOwnCompany;
 use Illuminate\Database\Eloquent\Model;
 
-class NotificationDispatch extends Model
+class NotificationDispatch extends Model implements ResolvesOwnCompany
 {
+    use OwnedBySubjectCompany;
+
     protected $fillable = [
         'user_id',
         'company_id',

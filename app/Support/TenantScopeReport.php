@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -25,9 +26,10 @@ use Illuminate\Support\Facades\Schema;
  * yanlış alarm üretirdi.
  *
  *   NULL → sahibi BİLİNMİYOR. Gerçek risk; trait eklenmeden doldurulmalı.
- *   0    → fabrika satırı. Kapsam yine gizler, ama modelin miras yolu varsa
- *          okuma oradan geçer. Bu yüzden ayrı sayılıyor ve tablo listesinde
- *          açıkça beyan ediliyor (FACTORY_TABLES).
+ *   0    → fabrika satırı. Modelin kapsamı onları bilerek görünür tutuyor.
+ *          Bu yüzden ayrı sayılıyor — ama yalnızca model AÇIKÇA beyan
+ *          etmişse (`tenantIncludesFactoryRows()`). Beyan edilmemiş tabloda
+ *          0 görülürse rapor onu sahipsiz sayar.
  */
 final class TenantScopeReport
 {
@@ -53,23 +55,6 @@ final class TenantScopeReport
         'data_retention_policies', 'ip_access_rules', 'task_templates', 'webhook_logs',
     ];
 
-    /**
-     * `company_id = 0` satırı BEKLENEN tablolar — fabrika şablonu tutuyorlar.
-     *
-     * Buraya bir tablo eklemek "kapsam bunları gizleyecek, okuma miras
-     * yolundan geçiyor" beyanıdır. Beyan edilmemiş bir tabloda 0 görülürse
-     * rapor onu sahipsiz sayar — sessiz kaybolma böyle yakalanır.
-     *
-     * @var list<string>
-     */
-    public const FACTORY_TABLES = [
-        'business_contract_templates',
-        'senior_response_templates',
-        'automation_workflows',
-        'data_retention_policies',
-        'document_builder_templates',
-    ];
-
     public const STATUS_READY   = 'HAZIR';
     public const STATUS_BLOCKED = 'BEKLE';
     public const STATUS_FACTORY = 'FABRIKA';
@@ -89,6 +74,7 @@ final class TenantScopeReport
         $skipped = [];
         $unownedTotal = 0;
         $factoryTotal = 0;
+        $factoryTables = $this->declaredFactoryTables();
 
         foreach ($tables ?? self::PENDING_TABLES as $table) {
             if (! Schema::hasTable($table) || ! Schema::hasColumn($table, 'company_id')) {
@@ -100,7 +86,7 @@ final class TenantScopeReport
             $nulls   = (int) DB::table($table)->whereNull('company_id')->count();
             $zeros   = (int) DB::table($table)->where('company_id', 0)->count();
 
-            $declaredFactory = in_array($table, self::FACTORY_TABLES, true);
+            $declaredFactory = in_array($table, $factoryTables, true);
 
             // Beyan edilmemiş tabloda 0, NULL kadar tehlikeli: kapsam onu da gizler
             // ve kimse miras yolunun kurulduğunu söylememiş.
@@ -140,5 +126,39 @@ final class TenantScopeReport
             'factory' => $factoryTotal,
             'skipped' => $skipped,
         ];
+    }
+
+    /**
+     * Fabrika satırı tutan tablolar — MODELLERDEN türetiliyor.
+     *
+     * Ayrı bir liste tutulsaydı iki gerçek olurdu: modelin kapsamı 0'ı
+     * gösterirken raporun listesi güncellenmemiş olabilirdi (ya da tersi).
+     * Tek beyan noktası modelin `tenantIncludesFactoryRows()` metodudur.
+     *
+     * @return list<string>
+     */
+    private function declaredFactoryTables(): array
+    {
+        $tables = [];
+
+        foreach (glob(app_path('Models/*.php')) ?: [] as $file) {
+            $class = 'App\\Models\\' . basename($file, '.php');
+
+            if (! class_exists($class) || ! method_exists($class, 'tenantIncludesFactoryRows')) {
+                continue;
+            }
+
+            $reflection = new \ReflectionClass($class);
+
+            if ($reflection->isAbstract() || ! $reflection->isSubclassOf(Model::class)) {
+                continue;
+            }
+
+            if ($class::tenantIncludesFactoryRows()) {
+                $tables[] = (new $class())->getTable();
+            }
+        }
+
+        return $tables;
     }
 }

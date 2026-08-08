@@ -2,12 +2,23 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Pazarlama otomasyon akışı.
+ *
+ * ⚠ Şablon DEĞİL, işleyen bir nesne: durumu, onayı ve kayıtlı adayları var.
+ * Bu yüzden `company_id = 0` (fabrika) kalıbı buraya uymuyor — paylaşımlı
+ * olsaydı bir firmanın "aktifleştir" tıklaması diğerlerini de etkilerdi.
+ * Sahibi belirlenemeyen tohum akışları operasyonu yürüten ANA FİRMAYA
+ * yazılıyor; bkz. 2026_08_08_120000 migration'ı.
+ */
 class AutomationWorkflow extends Model
 {
+    use BelongsToCompany;
     use SoftDeletes;
 
     protected $fillable = [

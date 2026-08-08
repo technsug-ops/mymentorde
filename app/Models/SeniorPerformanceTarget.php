@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class SeniorPerformanceTarget extends Model
 {
+    use BelongsToCompany;
+
     protected $table = 'senior_performance_targets';
 
     protected $fillable = [

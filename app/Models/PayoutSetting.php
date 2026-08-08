@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Cache;
  */
 class PayoutSetting extends Model
 {
+    use BelongsToCompany;
+
     protected $table = 'payout_settings';
 
     protected $fillable = [

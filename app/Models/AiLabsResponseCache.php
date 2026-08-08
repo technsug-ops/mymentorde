@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class AiLabsResponseCache extends Model
 {
+    use BelongsToCompany;
+
     protected $table = 'ai_labs_response_cache';
 
     protected $fillable = [

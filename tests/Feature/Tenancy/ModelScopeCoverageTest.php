@@ -34,62 +34,27 @@ class ModelScopeCoverageTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Devralınan eksikler (2026-08-04 · 50 model).
+     * Devralınan eksikler — BOŞ.
      *
-     * Sıra: Faz 3 → User, Conversation, DmThread, Student* (kimlik + öğrenci verisi)
-     *       Faz 6 → StudentPayment, BusinessContract*, CompanyFinanceEntry, PayoutSetting
-     *       Faz 7 → Student* süreç modelleri, GuestFeedback
-     *       Faz 9 → Manager*, Notification*, Task*, AiLabs*, ABTest, Automation*
+     * Liste 2026-08-04'te 50 modelle açıldı ve kurulduğu günden 2026-08-08'e
+     * kadar hiç küçülmemişti; izolasyon Faz 3 dışında açılmamıştı. Bu boşluk
+     * iki adımda kapandı:
+     *
+     *   1. Ölçüm ve geri-doldurma (2026_08_08_090000 + _120000): her kaydın
+     *      firması üst kaydından türetildi, türetilemeyenler tek tek
+     *      incelendi. Sahibi hiç olmayan şablon satırları `company_id = 0`
+     *      fabrika işaretine çekildi.
+     *   2. Kalan 44 modele trait eklendi. Öğrenci/aday süreci modelleri
+     *      `OwnedBySubjectCompany` kullanıyor: kayıt işlemi YAPANIN değil,
+     *      konusunun şirketine yazılıyor — aksi halde MentorDE personelinin
+     *      partner öğrencisi için açtığı kayıt partnerin kutusuna hiç düşmez.
+     *
+     * ⚠ Bu liste bir daha DOLMAMALI. Boş kalması, `company_id` kolonu olan
+     * her modelin tenant niyetini açıkça bildirdiği anlamına geliyor.
      *
      * @var list<class-string>
      */
-    private const BASELINE_MISSING = [
-        'ABTest',
-        'AiLabsResponseCache',
-        'AiLabsSettings',
-        'AuditTrail',
-        'AutomationWorkflow',
-        'BusinessContract',
-        'BusinessContractTemplate',
-        'CompanyBulletin',
-        'CompanyFinanceEntry',
-        'ConsentRecord',
-        'Conversation',
-        'DataRetentionPolicy',
-        'DigitalAssetActivityLog',
-        'DmThread',
-        'DocumentBuilderTemplate',
-        'GuestFeedback',
-        'IpAccessRule',
-        'ManagerAlertRule',
-        'ManagerPerformanceTarget',
-        'ManagerReport',
-        'ManagerScheduledReport',
-        'MarketingTeam',
-        'NotificationDispatch',
-        'NotificationPreference',
-        'PayoutSetting',
-        'PromoCodeRedemption',
-        'PromoPopup',
-        'ScheduledNotification',
-        'SeniorPerformanceTarget',
-        'SeniorResponseTemplate',
-        'StaffKpiTarget',
-        'StudentAccommodation',
-        'StudentAppointment',
-        'StudentChecklist',
-        'StudentFeedback',
-        'StudentInstitutionDocument',
-        'StudentLanguageCourse',
-        'StudentMaterialRead',
-        'StudentPayment',
-        'StudentShipment',
-        'StudentUniversityApplication',
-        'StudentVisaApplication',
-        'TaskTemplate',
-        // 'User' → Faz 3'te düzeltildi (BelongsToCompany + tenant_eloquent auth provider)
-        'WebhookLog',
-    ];
+    private const BASELINE_MISSING = [];
 
     public function test_no_new_model_skips_tenant_scope_declaration(): void
     {

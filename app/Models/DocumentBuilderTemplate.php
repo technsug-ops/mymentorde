@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DocumentBuilderTemplate extends Model
 {
+    use BelongsToCompany;
+
     protected $table = 'document_builder_templates';
 
     protected $fillable = [
@@ -38,6 +41,18 @@ class DocumentBuilderTemplate extends Model
         'sperrkonto'   => 'Sperrkonto-Antrag',
         'housing'      => 'Wohnheimsantrag',
     ];
+
+    /** Fabrika belge şablonları (`company_id = 0`) her firmada görünür. */
+    public static function tenantIncludesFactoryRows(): bool
+    {
+        return true;
+    }
+
+    /** Fabrika satırı: hiçbir firmaya ait değil, düzenlenemez/silinemez. */
+    public function isFactoryRow(): bool
+    {
+        return (int) $this->company_id === 0;
+    }
 
     public function company(): BelongsTo
     {

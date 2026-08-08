@@ -38,11 +38,18 @@ class PersonalDataExportService
             ->with('category:id,code')
             ->get(['id', 'category_id', 'original_file_name', 'status', 'created_at']);
 
+        // ⚠ KAPSAMSIZ — GDPR Madde 20 TAM paket istiyor. Firma kapsamı burada
+        // koruma sağlamaz, yalnızca kişinin kendi verisini eksik gösterir:
+        // kayıt başka firmanın kutusundaysa sessizce dışarıda kalırdı ve
+        // veri sahibine eksik cevap verilmiş olurdu. Sınır zaten kişinin
+        // kendi kimliği (student_id / user_id).
         $appointments = StudentAppointment::query()
+            ->withoutGlobalScope('company')
             ->where('student_id', $studentId)
             ->get(['id', 'title', 'scheduled_at', 'status', 'created_at']);
 
         $consents = ConsentRecord::query()
+            ->withoutGlobalScope('company')
             ->where('user_id', $user->id)
             ->orWhere('application_id', $guestApp?->id)
             ->orderBy('accepted_at')
@@ -113,7 +120,9 @@ class PersonalDataExportService
             ->with('category:id,code')
             ->get(['id', 'category_id', 'original_file_name', 'status', 'created_at']);
 
+        // ⚠ KAPSAMSIZ — gerekçe exportForStudent'takiyle aynı (GDPR Madde 20).
         $consents = ConsentRecord::query()
+            ->withoutGlobalScope('company')
             ->where(fn ($q) => $q->where('user_id', $user->id)->orWhere('application_id', $app->id))
             ->orderBy('accepted_at')
             ->get(['consent_type', 'version', 'accepted_at']);

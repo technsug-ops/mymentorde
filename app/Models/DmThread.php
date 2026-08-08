@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\OwnedBySubjectCompany;
+use App\Models\Contracts\ResolvesOwnCompany;
 use Illuminate\Database\Eloquent\Model;
 
-class DmThread extends Model
+class DmThread extends Model implements ResolvesOwnCompany
 {
+    use OwnedBySubjectCompany;
+
     protected $table = 'dm_threads';
 
     protected $fillable = [

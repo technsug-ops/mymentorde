@@ -27,7 +27,15 @@ class SendNotificationJob implements ShouldQueue
 
     public function handle(): void
     {
-        $notification = NotificationDispatch::query()->find($this->notificationId);
+        // ⚠ KAPSAMSIZ. Job, DISPATCH anındaki şirketin bağlamında çalışıyor
+        // (AppServiceProvider::bootTenantAwareQueue). Bildirim kaydı ise
+        // KONUSUNUN şirketine yazılıyor: MentorDE personeli partnerin
+        // öğrencisine mail tetiklediğinde kayıt partnerin kutusunda oluyor.
+        // Kapsamlı okunsaydı `find()` null döner, mail sessizce hiç gitmezdi.
+        // Sınır zaten job'a verilen id.
+        $notification = NotificationDispatch::query()
+            ->withoutGlobalScope('company')
+            ->find($this->notificationId);
 
         if (!$notification) {
             return;
@@ -118,7 +126,10 @@ class SendNotificationJob implements ShouldQueue
 
     public function failed(\Throwable $e): void
     {
+        // Kapsamsız — gerekçe handle()'daki ile aynı. Kapsamlı kalsaydı
+        // başarısızlık hiç işaretlenmez, kayıt sonsuza dek "queued" görünürdü.
         NotificationDispatch::query()
+            ->withoutGlobalScope('company')
             ->where('id', $this->notificationId)
             ->update([
                 'status' => 'failed',

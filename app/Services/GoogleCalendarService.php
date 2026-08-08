@@ -212,7 +212,13 @@ class GoogleCalendarService
 
         // Local'de bu event'i hangi randevu tutuyor? Sadece aynı senior'un randevuları.
         $seniorEmail = \App\Models\User::where('id', $conn->user_id)->value('email');
-        $apt = StudentAppointment::where('google_event_id', $googleEventId)
+        // ⚠ KAPSAMSIZ — danışman kendi firmasında, randevu ise ÖĞRENCİNİN
+        // firmasında. Kapsamlı okunsaydı senkron eşleşmeyi bulamaz ve Google
+        // tarafındaki değişiklik panele hiç yansımazdı. Sınır iki koşulun
+        // birlikteliği: event kimliği + randevunun danışmanı.
+        $apt = StudentAppointment::query()
+            ->withoutGlobalScope('company')
+            ->where('google_event_id', $googleEventId)
             ->where('senior_email', $seniorEmail)
             ->first();
 

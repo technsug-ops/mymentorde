@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\OwnedBySubjectCompany;
+use App\Models\Contracts\ResolvesOwnCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
-class StudentPayment extends Model
+class StudentPayment extends Model implements ResolvesOwnCompany
 {
+    use OwnedBySubjectCompany;
+
     protected $fillable = [
         'company_id',
         'student_id',

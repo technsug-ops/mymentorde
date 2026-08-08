@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\OwnedBySubjectCompany;
+use App\Models\Contracts\ResolvesOwnCompany;
 use Illuminate\Database\Eloquent\Model;
 
-class GuestFeedback extends Model
+class GuestFeedback extends Model implements ResolvesOwnCompany
 {
+    use OwnedBySubjectCompany;
+
     public $timestamps = false;
 
     protected $table = 'guest_feedback';
