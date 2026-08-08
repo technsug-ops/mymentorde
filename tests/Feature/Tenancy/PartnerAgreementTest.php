@@ -286,6 +286,85 @@ class PartnerAgreementTest extends TestCase
         $this->assertFalse((bool) $lead->fresh()->converted_to_student);
     }
 
+    // ── MentorDE'nin kuralı DEĞİŞMEDİ ───────────────────────────────────────
+
+    /**
+     * ⚠ BU TESTİN TEK İŞİ: gevşetmenin partnere ÖZEL kaldığını sabitlemek.
+     *
+     * Dört şart (ön kayıt formu, belgeler, paket, sözleşme onayı) operasyonu
+     * kendi yürüten firmanın kontrol listesi ve öyle kalmalı. Partner muafiyeti
+     * yanlışlıkla genele yayılırsa MentorDE sözleşmesiz öğrenci açmaya başlar
+     * ve bunu kimse fark etmez — dönüşüm hata vermez, sadece izin verir.
+     */
+    public function test_the_four_checks_still_apply_to_the_operating_company(): void
+    {
+        $this->makeHierarchy();
+
+        $manager = $this->operationManager();
+
+        $guest = TenantContext::runFor((int) $this->companyA->id, fn () => GuestApplication::create([
+            'tracking_token'                 => 'tok-' . uniqid(),
+            'first_name'                     => 'MentorDE',
+            'last_name'                      => 'Adayi',
+            'email'                          => 'mentorde-' . uniqid() . '@example.test',
+            'application_type'               => 'bachelor',
+            'docs_ready'                     => false,
+            'contract_status'                => 'requested',
+            'selected_package_code'          => null,
+            'registration_form_submitted_at' => null,
+        ]));
+
+        $this->actingAs($manager)
+            ->getJson('/api/v1/config/guest-applications/' . $guest->id . '/conversion-readiness')
+            ->assertOk()
+            ->assertJsonPath('ready', false)
+            ->assertJsonPath('checks.registration_form_submitted', false)
+            ->assertJsonPath('checks.documents_ready', false)
+            ->assertJsonPath('checks.package_selected', false)
+            ->assertJsonPath('checks.contract_approved', false);
+    }
+
+    /**
+     * Partner tarafında ise tek şart var — aynı uç, farklı kontrol listesi.
+     *
+     * Sorgu PARTNER kullanıcısıyla yapılıyor: bu uç adayın şirketiyle bağlamın
+     * BİREBİR eşleşmesini istiyor, üst firma partnerin adayı için çağırınca
+     * 403 alıyor. (Bu ucun eski davranışı, bu değişiklikle ilgisi yok.)
+     */
+    public function test_partner_guest_is_measured_by_the_agreement_only(): void
+    {
+        $this->makeHierarchy();
+
+        $lead = $this->partnerLead();
+
+        $this->actingAs($this->partnerManager())
+            ->getJson('/api/v1/config/guest-applications/' . $lead->id . '/conversion-readiness')
+            ->assertOk()
+            ->assertJsonPath('ready', false)
+            ->assertJsonPath('checks.partner_agreement_accepted', false)
+            ->assertJsonMissingPath('checks.contract_approved');
+    }
+
+    /** Partner kestirmesi operasyon firmasına kapalı — rota seviyesinde. */
+    public function test_the_partner_conversion_route_is_closed_to_the_operating_company(): void
+    {
+        $this->makeHierarchy();
+
+        $guest = TenantContext::runFor((int) $this->companyA->id, fn () => GuestApplication::create([
+            'tracking_token'   => 'tok-' . uniqid(),
+            'first_name'       => 'MentorDE',
+            'last_name'        => 'Adayi',
+            'email'            => 'mentorde-' . uniqid() . '@example.test',
+            'application_type' => 'bachelor',
+        ]));
+
+        $this->asStaff($this->operationManager())
+            ->post('/manager/guests/' . $guest->id . '/partner-convert')
+            ->assertForbidden();
+
+        $this->assertFalse((bool) $guest->fresh()->converted_to_student);
+    }
+
     /**
      * Öğrenci sözleşmesi İSTEĞE BAĞLI — kaydedilmemesi dönüşümü engellememeli.
      * (Yukarıdaki dönüşüm testi zaten sözleşmesiz geçiyor; burada tutarsız
