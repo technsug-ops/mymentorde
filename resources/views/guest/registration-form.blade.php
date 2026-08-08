@@ -324,17 +324,43 @@
 .jm-minimalist .grf-card { box-shadow: none; border: 1px solid var(--u-line); }
 .jm-minimalist .grf-step-why { border-left-color: var(--u-text); }
 
-/* ── Eksik alanlar özet barı + scroll-to-field highlight ── */
-.grf-missing-bar { background:linear-gradient(135deg,#fef2f2,#fff7ed); border:1px solid #fed7aa; border-left:4px solid #f97316; border-radius:10px; padding:12px 16px; margin:14px auto; max-width:1080px; }
-.grf-missing-bar-head { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
-.grf-missing-bar-icon { font-size:18px; }
-.grf-missing-bar-title { font-size:13px; font-weight:800; color:#9a3412; flex:1; }
-.grf-missing-bar-count { font-size:11px; font-weight:700; color:#fff; background:#f97316; padding:2px 8px; border-radius:999px; }
-.grf-missing-chips { display:flex; flex-wrap:wrap; gap:6px; }
-.grf-missing-chip { display:inline-flex; align-items:center; gap:5px; padding:5px 10px 5px 8px; border-radius:999px; background:#fff; border:1px solid #fed7aa; color:#9a3412; font-size:11.5px; font-weight:600; cursor:pointer; transition:all .15s; text-decoration:none; }
-.grf-missing-chip:hover { background:#fff7ed; border-color:#f97316; color:#7c2d12; transform:translateY(-1px); }
-.grf-missing-chip .dot { width:6px; height:6px; border-radius:50%; background:#f97316; flex-shrink:0; }
-.grf-missing-collapse { background:none; border:none; font-size:11px; color:#9a3412; cursor:pointer; font-weight:600; margin-left:8px; }
+/* ── Eksik alanlar özeti ────────────────────────────────────────────
+   Eskiden formun üstünde 12 kırmızı çipten oluşan bir duvar duruyordu:
+   turuncu gradyan, kalın sol şerit, hepsi açık. Ekran forma değil bir
+   HATA LİSTESİNE benziyordu; oysa kullanıcı henüz yanlış bir şey
+   yapmadı, sadece daha doldurmadı.
+
+   Yeni hâli tek satırlık bir özet ve VARSAYILAN KAPALI: kaç alan
+   kaldığını ve ne kadarının bittiğini söylüyor, listeyi isteyen açıyor.
+   İlerleme çubuğu bilerek var — "12 eksik" cezalandırıcı, "27/39
+   tamamlandı" teşvik edici.
+
+   Renkler tasarım değişkenlerinden geliyor; sabit #fff yazılsaydı koyu
+   temada beyaz bir kutu olarak patlardı. Kehribar vurgu rgba ile
+   veriliyor, iki temada da oturuyor. */
+.grf-missing { max-width:1080px; margin:14px auto; background:var(--u-card,#fff); border:1px solid var(--u-line,#e2e8f0); border-radius:12px; overflow:hidden; }
+.grf-missing-head { display:flex; align-items:center; gap:12px; width:100%; padding:11px 14px; background:none; border:0; font:inherit; color:inherit; text-align:left; cursor:pointer; transition:background .15s; }
+.grf-missing-head:hover { background:rgba(245,158,11,.07); }
+.grf-missing-head:focus-visible { outline:2px solid rgba(245,158,11,.55); outline-offset:-2px; }
+.grf-missing-badge { flex-shrink:0; min-width:24px; height:24px; padding:0 7px; display:inline-flex; align-items:center; justify-content:center; border-radius:999px; background:rgba(245,158,11,.16); color:#b45309; font-size:12px; font-weight:800; }
+.grf-missing-text { flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; }
+.grf-missing-title { font-size:13px; font-weight:700; color:var(--u-text,#0f172a); }
+.grf-missing-meter { display:block; height:4px; border-radius:999px; background:var(--u-line,#e2e8f0); overflow:hidden; }
+.grf-missing-meter > span { display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,#f59e0b,#22c55e); transition:width .4s ease; }
+.grf-missing-ratio { flex-shrink:0; font-size:11.5px; font-weight:700; color:var(--u-muted,#64748b); font-variant-numeric:tabular-nums; }
+.grf-missing-caret { flex-shrink:0; font-size:11px; color:var(--u-muted,#64748b); transition:transform .2s; }
+.grf-missing.is-open .grf-missing-caret { transform:rotate(180deg); }
+.grf-missing-chips { display:flex; flex-wrap:wrap; gap:6px; padding:12px 14px 13px; border-top:1px solid var(--u-line,#e2e8f0); }
+/* `hidden` niteliği display:flex tarafından ezilir — açıkça geri alınıyor. */
+.grf-missing-chips[hidden] { display:none; }
+/* Koyu temada kehribar rozet okunmaz hâle geliyor: tonu açıyoruz. */
+[data-theme="dark"] .grf-missing-badge { color:#fbbf24; }
+.grf-missing-chip { display:inline-flex; align-items:center; gap:6px; padding:5px 11px 5px 9px; border-radius:999px; background:var(--u-bg,#f8fafc); border:1px solid var(--u-line,#e2e8f0); color:var(--u-text,#334155); font-size:11.5px; font-weight:600; text-decoration:none; transition:border-color .15s, background .15s, transform .15s; }
+.grf-missing-chip:hover { background:rgba(245,158,11,.09); border-color:rgba(245,158,11,.5); transform:translateY(-1px); }
+.grf-missing-chip .dot { width:6px; height:6px; border-radius:50%; background:#f59e0b; flex-shrink:0; }
+@media (max-width:640px) {
+    .grf-missing-ratio { display:none; }
+}
 
 /* Sarı pulse — focus edilen field için 3 saniye vurgu */
 @keyframes grfFieldFlash {
@@ -426,17 +452,42 @@
     </div>
 </div>
 
-{{-- ── Eksik Alanlar Özet Barı ── --}}
-@php $formMissing = collect($formMissingItems ?? []); @endphp
+{{-- ── Eksik Alanlar Özeti ──
+     VARSAYILAN KAPALI. Açık hâli formun üstünü kaplıyor ve ekranı bir hata
+     listesine çeviriyordu; oysa kullanıcı yanlış bir şey yapmış değil,
+     henüz doldurmamış. Özet satırı kaç alan kaldığını söylüyor, ayrıntı
+     bir tık uzakta. Tercih hatırlanıyor: çipe tıklayınca sayfa yeniden
+     yükleniyor, her seferinde kapanması sinir bozucu olurdu. --}}
+@php
+    $formMissing   = collect($formMissingItems ?? []);
+    $missReqTotal  = (int) ($formRequiredTotal ?? 0);
+    $missReqFilled = (int) ($formRequiredFilled ?? 0);
+    $missReqPct    = $missReqTotal > 0 ? (int) round($missReqFilled / $missReqTotal * 100) : 0;
+@endphp
 @if($formMissing->isNotEmpty())
-<div class="grf-missing-bar" id="grfMissingBar">
-    <div class="grf-missing-bar-head">
-        <span class="grf-missing-bar-icon">⚠</span>
-        <span class="grf-missing-bar-title">Sözleşmeye geçmek için bu zorunlu alanları tamamla</span>
-        <span class="grf-missing-bar-count">{{ $formMissing->count() }}</span>
-        <button type="button" class="grf-missing-collapse" data-collapse-toggle>Gizle</button>
-    </div>
-    <div class="grf-missing-chips" data-collapse-target>
+<div class="grf-missing" id="grfMissingBar">
+    {{-- Başlığın kendisi düğme: tıklama alanı satırın tamamı olsun. --}}
+    <button type="button" class="grf-missing-head" data-collapse-toggle
+            aria-expanded="false" aria-controls="grfMissingList">
+        <span class="grf-missing-badge">{{ $formMissing->count() }}</span>
+        <span class="grf-missing-text">
+            <span class="grf-missing-title">
+                Sözleşmeye geçmek için {{ $formMissing->count() }} alan kaldı
+            </span>
+            @if($missReqTotal > 0)
+                <span class="grf-missing-meter" role="presentation">
+                    <span style="width:{{ $missReqPct }}%"></span>
+                </span>
+            @endif
+        </span>
+        @if($missReqTotal > 0)
+            <span class="grf-missing-ratio">{{ $missReqFilled }}/{{ $missReqTotal }} tamam</span>
+        @endif
+        <span class="grf-missing-caret" aria-hidden="true">▾</span>
+    </button>
+
+    {{-- `hidden` niteliği: JS çalışmasa bile varsayılan kapalı kalır. --}}
+    <div class="grf-missing-chips" id="grfMissingList" data-collapse-target hidden>
         @foreach($formMissing as $miss)
             @php
                 $missKey   = is_array($miss) ? (string) ($miss['key'] ?? '')   : '';
@@ -1876,14 +1927,32 @@
         });
     });
 
-    // 3) Eksik özet barı gizle/göster
-    var collapseBtn = document.querySelector('[data-collapse-toggle]');
-    var collapseTarget = document.querySelector('[data-collapse-target]');
-    if(collapseBtn && collapseTarget){
-        collapseBtn.addEventListener('click', function(){
-            var hidden = collapseTarget.style.display === 'none';
-            collapseTarget.style.display = hidden ? 'flex' : 'none';
-            this.textContent = hidden ? 'Gizle' : 'Göster';
+    // 3) Eksik alan özeti — aç/kapa
+    //
+    // Varsayılan KAPALI (markup'ta `hidden`). Kullanıcı açtıysa tercihi
+    // hatırlanıyor: çipe tıklamak ?focus ile sayfayı yeniden yüklüyor,
+    // liste her seferinde kapansa ikinci alana geçmek için tekrar açmak
+    // gerekirdi.
+    var missBox = document.getElementById('grfMissingBar');
+    if (missBox) {
+        var missBtn  = missBox.querySelector('[data-collapse-toggle]');
+        var missList = missBox.querySelector('[data-collapse-target]');
+        var MISS_KEY = 'mentorde_missing_open';
+
+        var applyMissState = function (open) {
+            missList.hidden = !open;
+            missBox.classList.toggle('is-open', open);
+            missBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        };
+
+        var storedMiss = null;
+        try { storedMiss = localStorage.getItem(MISS_KEY); } catch (e) {}
+        applyMissState(storedMiss === '1');
+
+        missBtn.addEventListener('click', function () {
+            var next = missList.hidden;
+            applyMissState(next);
+            try { localStorage.setItem(MISS_KEY, next ? '1' : '0'); } catch (e) {}
         });
     }
 })();
