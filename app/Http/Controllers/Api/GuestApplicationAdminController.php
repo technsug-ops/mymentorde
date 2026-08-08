@@ -593,6 +593,31 @@ class GuestApplicationAdminController extends Controller
 
     private function conversionReadinessDetails(GuestApplication $guestApplication): array
     {
+        // ── PARTNER FİRMA: TEK ŞART, PARTNER ANLAŞMASI ──────────────────────
+        //
+        // Aşağıdaki dört şart operasyonu KENDİ yürüten firmanın kontrol
+        // listesi: formu o topluyor, belgeyi o istiyor, paketi o satıyor,
+        // sözleşmeyi o imzalatıyor.
+        //
+        // Partner firmada bunların hiçbiri sistemin içinde olmuyor. Öğrenciyi
+        // portal white-label takip ediyor; partnerin öğrencisiyle ne kadara
+        // anlaştığı ve sözleşmesinin metni bu sistemin konusu değil (isterse
+        // kaydeder, zorunlu değil). O şartları partnere dayatmak, olmayan bir
+        // süreci taklit ettirmek ve dönüşümü sonsuza dek kilitlemek olurdu.
+        //
+        // Partner için netleşmesi gereken tek şey PARA: bu öğrenci için
+        // portala ne ödeyecek. Kapı o.
+        if (Company::isPartnerPanel((int) ($guestApplication->company_id ?? 0))) {
+            $settled = \App\Models\PartnerStudentAgreement::isSettledForGuest((int) $guestApplication->id);
+
+            return [
+                'guest_id' => (int) $guestApplication->id,
+                'ready'    => $settled,
+                'checks'   => ['partner_agreement_accepted' => $settled],
+                'missing'  => $settled ? [] : ['partner_anlasmasi'],
+            ];
+        }
+
         $formDone = !empty($guestApplication->registration_form_submitted_at);
         $docsDone = (bool) $guestApplication->docs_ready;
         $packageDone = trim((string) ($guestApplication->selected_package_code ?? '')) !== '';
