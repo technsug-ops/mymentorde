@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class ScheduledNotification extends Model
 {
+    use BelongsToCompany;
+
     protected $fillable = [
         'name', 'channel', 'category', 'subject', 'body_template',
         'target_role', 'target_email', 'source_type', 'company_id',

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DigitalAssetActivityLog extends Model
 {
+    use BelongsToCompany;
+
     protected $table = 'digital_asset_activity_log';
 
     public const UPDATED_AT = null; // sadece created_at kullanılıyor

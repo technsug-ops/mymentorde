@@ -17,9 +17,12 @@ class DocTemplateController extends Controller
     public function index(Request $request)
     {
         $docType = $request->query('doc_type', '');
-        $cid     = $this->cid();
 
-        $templates = DocumentBuilderTemplate::where(fn($q) => $q->whereNull('company_id')->orWhere('company_id', $cid))
+        // Firma filtresi global kapsamdan geliyor (BelongsToCompany): kendi
+        // şablonları + fabrika şablonları (company_id = 0). Elle yazılmış
+        // `whereNull('company_id')` kaldırıldı — NULL "sahibi bilinmiyor"
+        // demek, paylaşımlı şablon işareti değil.
+        $templates = DocumentBuilderTemplate::query()
             ->when($docType !== '', fn($q) => $q->where('doc_type', $docType))
             ->orderBy('doc_type')
             ->orderByDesc('is_default')
@@ -58,6 +61,10 @@ class DocTemplateController extends Controller
 
     public function update(Request $request, DocumentBuilderTemplate $tpl)
     {
+        // Fabrika şablonu tüm firmalarda görünüyor — bir firmanın yöneticisi
+        // düzenlerse diğerlerinin metni de değişirdi.
+        abort_if($tpl->isFactoryRow(), 403, 'Fabrika şablonu düzenlenemez. Kopyasını oluşturun.');
+
         $data = $this->validated($request);
         $data['version'] = $tpl->version + 1;
 
@@ -72,12 +79,18 @@ class DocTemplateController extends Controller
 
     public function destroy(DocumentBuilderTemplate $tpl)
     {
+        abort_if($tpl->isFactoryRow(), 403, 'Fabrika şablonu silinemez.');
+
         $tpl->delete();
         return back()->with('status', 'Şablon silindi.');
     }
 
     public function setDefault(DocumentBuilderTemplate $tpl)
     {
+        // Varsayılanlık firmaya özgü bir tercih; fabrika satırında saklanamaz
+        // (tek satır, tüm firmalar). Firma önce kendi kopyasını oluşturmalı.
+        abort_if($tpl->isFactoryRow(), 403, 'Fabrika şablonu varsayılan yapılamaz. Önce kopyasını oluşturun.');
+
         $this->clearOtherDefaults($tpl->id, $tpl->doc_type, $tpl->language);
         $tpl->update(['is_default' => true]);
 
@@ -269,10 +282,12 @@ class DocTemplateController extends Controller
     /** Aynı tip/dil için diğer varsayılanları kaldır */
     private function clearOtherDefaults(int $excludeId, string $docType, string $lang): void
     {
-        $cid = $this->cid();
+        // ⚠ Fabrika satırları HARİÇ. Global kapsam onları okumada görünür
+        // tutuyor; bu bir UPDATE ve kapsam aynı şekilde davranırsa bir firmanın
+        // "varsayılan yap" tıklaması TÜM firmaların fabrika şablonunu kapatırdı.
         DocumentBuilderTemplate::where('doc_type', $docType)
             ->where('language', $lang)
-            ->where(fn($q) => $q->whereNull('company_id')->orWhere('company_id', $cid))
+            ->where('company_id', '>', 0)
             ->where('id', '!=', $excludeId)
             ->update(['is_default' => false]);
     }

@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class DataRetentionPolicy extends Model
 {
+    use BelongsToCompany;
+
     protected $fillable = [
         'company_id',
         'entity_type',
@@ -13,6 +16,22 @@ class DataRetentionPolicy extends Model
         'is_active',
         'notes',
     ];
+
+    /**
+     * Platformun varsayılan saklama süreleri (`company_id = 0`) her firmada
+     * görünür; firma kendi politikasını yazdığında o satır kendi şirketine
+     * ait olur.
+     */
+    public static function tenantIncludesFactoryRows(): bool
+    {
+        return true;
+    }
+
+    /** Fabrika satırı: hiçbir firmaya ait değil, düzenlenemez/silinemez. */
+    public function isFactoryRow(): bool
+    {
+        return (int) $this->company_id === 0;
+    }
 
     protected function casts(): array
     {

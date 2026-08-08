@@ -66,7 +66,13 @@ class NotificationService
         $sourceId   = (string) ($params['source_id']   ?? '');
 
         if ($sourceType !== '' && $sourceId !== '') {
+            // ⚠ KAPSAMSIZ. Aynı kişiye giden bildirim, tetikleyen tarafa göre
+            // farklı firmanın kutusunda olabilir (kayıt konunun şirketine
+            // yazılıyor). Kapsamlı arasaydık önceki gönderimi bulamaz ve aynı
+            // maili İKİNCİ KEZ gönderirdik. Sorgu yalnızca varlık kontrolü —
+            // içerik okunmuyor, sınır zaten aynı alıcı + aynı kaynak kaydı.
             $deduplicateQuery = NotificationDispatch::query()
+                ->withoutGlobalScope('company')
                 ->where('category', $category)
                 ->where('source_type', $sourceType)
                 ->where('source_id', $sourceId)

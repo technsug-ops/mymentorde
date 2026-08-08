@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class PromoPopup extends Model
 {
+    use BelongsToCompany;
+
     protected $fillable = [
         'company_id', 'title', 'video_url', 'video_type', 'description',
         'target_pages', 'target_roles', 'delay_seconds', 'frequency',

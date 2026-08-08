@@ -142,11 +142,63 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         }
 
         $ids = array_values(array_unique(array_filter(
-            array_merge($own > 0 ? [$own] : [], $extra, $descendants),
+            array_merge($own > 0 ? [$own] : [], $extra, $descendants, $this->ownRecordCompanyIds()),
             static fn (int $id): bool => $id > 0
         )));
 
         return $this->visibleCompanyIdsMemo = $ids;
+    }
+
+    /**
+     * Öğrencinin/adayın KENDİ kaydını tutan şirket.
+     *
+     * `users.company_id` kullanıcının kaydolduğu şirket; süreç kaydı ise
+     * öğrenciyi getiren firmaya ait olabilir (ortak giriş kapısından kaydolup
+     * partner firmaya bağlanan öğrenci tam olarak bu durumda). İkisi
+     * ayrıştığında öğrenci KENDİ vizesini, ödemesini, konaklamasını göremez —
+     * hata da almaz, ekran boş gelir.
+     *
+     * ⚠ Yalnızca ÖĞRENCİ ve ADAY için, yalnızca KENDİ kaydının şirketi.
+     * Personel rolleri buraya girmez: onların erişimi pivot ve hiyerarşi
+     * üzerinden kuruluyor.
+     *
+     * @return list<int>
+     */
+    private function ownRecordCompanyIds(): array
+    {
+        if (! in_array((string) $this->role, [self::ROLE_STUDENT, self::ROLE_GUEST], true)) {
+            return [];
+        }
+
+        return Cache::remember(
+            self::visibleCompaniesCacheKey((int) $this->id) . ':own_record',
+            300,
+            function (): array {
+                $ids = [];
+
+                try {
+                    $studentId = trim((string) ($this->student_id ?? ''));
+
+                    if ($studentId !== '' && Schema::hasTable('student_assignments')) {
+                        $ids[] = (int) DB::table('student_assignments')
+                            ->where('student_id', $studentId)
+                            ->where('company_id', '>', 0)
+                            ->value('company_id');
+                    }
+
+                    if (Schema::hasTable('guest_applications')) {
+                        $ids[] = (int) DB::table('guest_applications')
+                            ->where('email', (string) $this->email)
+                            ->where('company_id', '>', 0)
+                            ->value('company_id');
+                    }
+                } catch (\Throwable) {
+                    return [];
+                }
+
+                return array_values(array_filter($ids, static fn (int $id): bool => $id > 0));
+            }
+        );
     }
 
     public static function visibleCompaniesCacheKey(int $userId): string
@@ -159,6 +211,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
     {
         $this->visibleCompanyIdsMemo = null;
         Cache::forget(self::visibleCompaniesCacheKey((int) $this->id));
+        Cache::forget(self::visibleCompaniesCacheKey((int) $this->id) . ':own_record');
     }
 
     public const ROLE_MANAGER = 'manager';

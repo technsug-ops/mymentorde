@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class ManagerReport extends Model
 {
+    use BelongsToCompany;
+
     protected $fillable = [
         'company_id',
         'report_type',

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\OwnedBySubjectCompany;
+use App\Models\Contracts\ResolvesOwnCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class StudentShipment extends Model
+class StudentShipment extends Model implements ResolvesOwnCompany
 {
+    use OwnedBySubjectCompany;
     use SoftDeletes;
 
     protected $fillable = [

@@ -1,10 +1,13 @@
 <?php
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class CompanyFinanceEntry extends Model
 {
+    use BelongsToCompany;
+
     protected $table = 'company_finance_entries';
 
     protected $fillable = [
