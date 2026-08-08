@@ -61,11 +61,19 @@ return new class extends Migration
                 continue;
             }
 
-            // ⚠ Yalnızca NULL. `= 0` fabrika işareti olabilir; beyanı olmayan
-            // tabloda da 0 görülürse ona dokunmak yerine raporun BEKLE demesi
-            // doğru — orada karar verilmemiş bir şey var demektir.
+            // NULL ve 0'ın İKİSİ de süpürülüyor.
+            //
+            // ⚠ Bu tablolarda sahipsizlik her zaman NULL ile gösterilmiyor:
+            // 16 tabloda `company_id` NOT NULL, çoğunda DEFAULT 0. Orada
+            // "sahibi belirlenmemiş" satırın değeri 0'dır. Yalnızca NULL
+            // süpürülseydi o satırlar sahipsiz kalır, izolasyon açıkken
+            // ekranlardan kaybolmaya devam ederdi.
+            //
+            // 0'ın "fabrika şablonu" anlamı YALNIZCA beyan eden modellerde
+            // geçerli; o tablolar yukarıda tümüyle atlandı. Kapsam raporu da
+            // tam olarak bu ayrımı yapıyor (TenantScopeReport).
             DB::table($table)
-                ->whereNull('company_id')
+                ->where(fn ($q) => $q->whereNull('company_id')->orWhere('company_id', 0))
                 ->update(['company_id' => $primaryId]);
         }
     }

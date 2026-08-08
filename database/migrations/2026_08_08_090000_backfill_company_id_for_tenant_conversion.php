@@ -74,12 +74,27 @@ return new class extends Migration
                 continue;
             }
 
+            // ⚠ EXISTS ŞART. Alt sorgu eşleşme bulamazsa NULL döner ve bu
+            // değer yazılmaya çalışılır. 16 tabloda `company_id` NOT NULL —
+            // orada migration "Column 'company_id' cannot be null" ile
+            // PATLAR ve kendinden sonraki hiçbir tablo işlenmez.
+            //
+            // Yerelde görünmedi: o tablolar boştu, hiçbir satır eşleşmedi.
+            // Canlıda 2026-08-08'de dm_threads'te patladı.
+            //
+            // EXISTS, sahibi türetilebilen satırları seçiyor; türetilemeyen
+            // satır BOŞ BIRAKILIYOR (bilerek — bkz. sınıf başlığı) ve son
+            // süpürme migration'ı (140000) onları ana firmaya yazıyor.
             DB::statement(sprintf(
                 'UPDATE %1$s SET company_id = ('
                 . ' SELECT p.company_id FROM %2$s p'
                 . ' WHERE p.%3$s = %1$s.%4$s AND p.company_id IS NOT NULL AND p.company_id > 0'
                 . ' LIMIT 1'
-                . ') WHERE (company_id IS NULL OR company_id = 0) AND %4$s IS NOT NULL',
+                . ') WHERE (company_id IS NULL OR company_id = 0) AND %4$s IS NOT NULL'
+                . ' AND EXISTS ('
+                . ' SELECT 1 FROM %2$s q'
+                . ' WHERE q.%3$s = %1$s.%4$s AND q.company_id IS NOT NULL AND q.company_id > 0'
+                . ')',
                 $table,
                 $parentTable,
                 $parentColumn,
