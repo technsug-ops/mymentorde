@@ -100,12 +100,18 @@ return new class extends Migration
                     continue;
                 }
 
+                // ⚠ EXISTS ŞART — gerekçe 090000'deki ile aynı: eşleşme yoksa
+                // alt sorgu NULL döner, NOT NULL kolonda migration patlar.
                 DB::statement(sprintf(
                     'UPDATE %1$s SET company_id = ('
                     . ' SELECT p.company_id FROM %2$s p'
                     . ' WHERE p.%3$s = %1$s.%4$s AND p.company_id IS NOT NULL AND p.company_id > 0'
                     . ' LIMIT 1'
-                    . ') WHERE (company_id IS NULL OR company_id = 0) AND %4$s IS NOT NULL',
+                    . ') WHERE (company_id IS NULL OR company_id = 0) AND %4$s IS NOT NULL'
+                    . ' AND EXISTS ('
+                    . ' SELECT 1 FROM %2$s q'
+                    . ' WHERE q.%3$s = %1$s.%4$s AND q.company_id IS NOT NULL AND q.company_id > 0'
+                    . ')',
                     $table,
                     $parentTable,
                     $parentColumn,
@@ -189,6 +195,7 @@ return new class extends Migration
             return;
         }
 
+        // ⚠ EXISTS ŞART — gerekçe yukarıdakiyle aynı.
         DB::statement(
             'UPDATE notification_dispatches SET company_id = ('
             . ' SELECT g.company_id FROM guest_applications g'
@@ -197,6 +204,11 @@ return new class extends Migration
             . ' LIMIT 1'
             . ') WHERE (company_id IS NULL OR company_id = 0)'
             . " AND source_type = 'guest_application' AND source_id IS NOT NULL"
+            . ' AND EXISTS ('
+            . ' SELECT 1 FROM guest_applications h'
+            . ' WHERE CAST(h.id AS CHAR) = notification_dispatches.source_id'
+            . ' AND h.company_id IS NOT NULL AND h.company_id > 0'
+            . ')'
         );
     }
 
