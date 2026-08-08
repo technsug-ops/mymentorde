@@ -638,6 +638,12 @@
                    class="nav-link {{ request()->is('manager/theme*') ? 'active' : '' }}">
                     <span class="nav-icon">🎨</span> Tema Yönetimi
                 </a>
+                {{-- Partner firmalarla yapılan çerçeve anlaşmalar (öğrenci
+                     sözleşmesi DEĞİL — iki firma arasındaki iş anlaşması). --}}
+                <a href="{{ route('manager.partner-agreements') }}"
+                   class="nav-link {{ request()->is('manager/partner-agreements*') ? 'active' : '' }}">
+                    <span class="nav-icon">🤝</span> Partner Anlaşmaları
+                </a>
                 <a href="/manager/brand"
                    class="nav-link {{ request()->is('manager/brand*') ? 'active' : '' }}">
                     <span class="nav-icon">🏷</span> Marka Ayarları

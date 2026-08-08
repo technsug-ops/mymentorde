@@ -99,6 +99,41 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::patch('/manager/guests/{guest}/status',          [ManagerPortalController::class, 'guestUpdateStatus'])->name('manager.guests.status');
     Route::patch('/manager/guests/{guest}/assign',          [ManagerPortalController::class, 'guestAssignSenior'])->name('manager.guests.assign');
 
+    // ── Portal ↔ partner anlaşmaları ────────────────────────────────────────
+    //
+    // ⚠ Öğrenciyle yapılan sözleşmeyle KARIŞTIRMA. Burası iki firma arasındaki
+    // iş anlaşması: çerçeve (genel) + öğrenci bazlı bedel. Dönüşümün kapısı
+    // öğrenci bazlı anlaşmadır; partnerin kendi müşteri sözleşmesi değil.
+    $partnerAgreement = \App\Http\Controllers\Manager\PartnerAgreementController::class;
+    Route::get('/manager/partner-agreements', [$partnerAgreement, 'index'])->name('manager.partner-agreements');
+    Route::post('/manager/partner-agreements', [$partnerAgreement, 'store'])
+        ->middleware('throttle:20,1')->name('manager.partner-agreements.store');
+    Route::post('/manager/partner-agreements/{agreement}/send', [$partnerAgreement, 'send'])
+        ->whereNumber('agreement')->middleware('throttle:20,1')->name('manager.partner-agreements.send');
+    Route::post('/manager/partner-agreements/{agreement}/sign', [$partnerAgreement, 'sign'])
+        ->whereNumber('agreement')->middleware('throttle:20,1')->name('manager.partner-agreements.sign');
+    Route::post('/manager/partner-agreements/{agreement}/terminate', [$partnerAgreement, 'terminate'])
+        ->whereNumber('agreement')->middleware('throttle:20,1')->name('manager.partner-agreements.terminate');
+
+    // Öğrenci bazlı anlaşma — partnerin portala ödeyeceği bedel.
+    $studentAgreement = \App\Http\Controllers\Manager\PartnerStudentAgreementController::class;
+    Route::post('/manager/guests/{guest}/partner-agreement/settle', [$studentAgreement, 'settleAtStandardFee'])
+        ->whereNumber('guest')->middleware('throttle:20,1')->name('manager.partner-agreement.settle');
+    Route::post('/manager/guests/{guest}/partner-agreement/propose', [$studentAgreement, 'propose'])
+        ->whereNumber('guest')->middleware('throttle:20,1')->name('manager.partner-agreement.propose');
+    Route::post('/manager/partner-agreement/{studentAgreement}/accept', [$studentAgreement, 'accept'])
+        ->whereNumber('studentAgreement')->middleware('throttle:20,1')->name('manager.partner-agreement.accept');
+    Route::post('/manager/partner-agreement/{studentAgreement}/reject', [$studentAgreement, 'reject'])
+        ->whereNumber('studentAgreement')->middleware('throttle:20,1')->name('manager.partner-agreement.reject');
+
+    // Partnerin ÖĞRENCİYLE yaptığı sözleşme — isteğe bağlı kayıt, dönüşümü
+    // kilitlemez. Ve manuel dönüşüm.
+    $partnerContract = \App\Http\Controllers\Manager\PartnerContractController::class;
+    Route::post('/manager/guests/{guest}/partner-contract', [$partnerContract, 'close'])
+        ->whereNumber('guest')->middleware('throttle:20,1')->name('manager.partner-contract.close');
+    Route::post('/manager/guests/{guest}/partner-convert', [$partnerContract, 'convert'])
+        ->whereNumber('guest')->middleware('throttle:10,1')->name('manager.partner-contract.convert');
+
     // Sozlesme tutari — finansin saydigi TEK rakam. Paket fiyati baslangic
     // degeri; pazarlikla degisir, SABITLENINCE finansa girer.
     $contractAmount = \App\Http\Controllers\Manager\ContractAmountController::class;

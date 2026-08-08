@@ -89,6 +89,22 @@
     </div>
 
     <div class="nav-section">
+        {{-- Portal ile yapılan çerçeve anlaşma. Öğrenci başı standart bedel
+             oradan gelir; imzalanmadan öğrenci bazlı anlaşma kapatılamaz.
+             ⚠ Bu, firmanın ÖĞRENCİYLE yaptığı sözleşme değil. --}}
+        @php
+            $_pnUnsigned = \App\Models\PartnerAgreement::query()
+                ->forPartner((int) (\App\Support\TenantContext::writeId() ?? 0))
+                ->where('status', \App\Models\PartnerAgreement::STATUS_SENT)
+                ->count();
+        @endphp
+        <a href="{{ route('manager.partner-agreements') }}" class="nav-link {{ $_pnIs('manager/partner-agreements') ? 'active' : '' }}">
+            <span class="nav-icon">🤝</span> Anlaşmalarım
+            @if($_pnUnsigned > 0)
+                <span style="margin-left:6px;background:#d97706;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;">{{ $_pnUnsigned }}</span>
+            @endif
+        </a>
+
         {{-- Firma kendi paketlerini ve fiyatlarını buradan belirler.
              Tanımlamadığı sürece üst firmanın listesi geçerli. --}}
         <a href="/manager/services" class="nav-link {{ $_pnIs('manager/services') ? 'active' : '' }}">

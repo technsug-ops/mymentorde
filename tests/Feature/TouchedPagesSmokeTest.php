@@ -72,6 +72,7 @@ class TouchedPagesSmokeTest extends TestCase
             '/manager/seniors/' . urlencode($advisor->email),
             '/manager/users',
             '/manager/account',
+            '/manager/partner-agreements',
         ];
 
         foreach ($pages as $page) {
@@ -101,6 +102,7 @@ class TouchedPagesSmokeTest extends TestCase
             '/manager/partner-documents',
             '/manager/partner-documents/requests',
             '/manager/partner-requests/incoming',
+            '/manager/partner-agreements',
             '/manager/users',
             '/manager/account',
             '/im',

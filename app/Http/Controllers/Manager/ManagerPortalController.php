@@ -192,7 +192,35 @@ class ManagerPortalController extends Controller
             ? User::query()->where('email', strtolower(trim($guest->email)))->first()
             : null;
 
-        return view('manager.guest-detail', compact('guest', 'seniorOptions', 'student', 'scoreBreakdown', 'scoreTotal', 'guestUser'));
+        // ── Portal ↔ partner anlaşması ──────────────────────────────────────
+        //
+        // ⚠ Adayın kendi sözleşmesiyle karıştırma. Bu, adayı getiren firmanın
+        // portala ödeyeceği bedel ve partner için DÖNÜŞÜMÜN KAPISI.
+        //
+        // Kayıt iki sahipli (SharedBetweenTwoCompanies) → global kapsam yok,
+        // sınır burada elle kuruluyor: yalnızca bu adayın anlaşması.
+        $partnerAgreement = \App\Models\PartnerStudentAgreement::query()
+            ->where('guest_application_id', $guest->id)
+            ->whereIn('status', [
+                \App\Models\PartnerStudentAgreement::STATUS_PROPOSED,
+                \App\Models\PartnerStudentAgreement::STATUS_ACCEPTED,
+            ])
+            ->latest('id')
+            ->first();
+
+        // Partner tarafında "tek tıkla kapat" ancak imzalı çerçevede standart
+        // bedel varsa mümkün; yoksa ekran operasyondan teklif istemeli.
+        $frameworkFee = \App\Models\PartnerAgreement::query()
+            ->active()
+            ->forPartner((int) ($guest->company_id ?? 0))
+            ->latest('signed_at')
+            ->first()
+            ?->standardFee();
+
+        return view('manager.guest-detail', compact(
+            'guest', 'seniorOptions', 'student', 'scoreBreakdown', 'scoreTotal', 'guestUser',
+            'partnerAgreement', 'frameworkFee'
+        ));
     }
 
     public function guestUpdateStatus(Request $request, GuestApplication $guest): RedirectResponse

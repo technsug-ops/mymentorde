@@ -51,6 +51,15 @@ class RestrictPartnerPanel
         // bazındaki tutar pazarlığı KAPALI (bkz. DENIED contract-amount):
         // liste fiyatı firmanın kararı, tek tek sözleşme tutarı operasyonun.
         'manager/services',
+
+        // Portal ile yaptığı çerçeve anlaşma — okur ve İMZALAR.
+        'manager/partner-agreements',
+        // Öğrenci bazlı anlaşma (portala ödeyeceği bedel) + kendi müşteri
+        // sözleşmesinin isteğe bağlı kaydı + adayı öğrenciye çevirme.
+        // ⚠ `manager/guests/*` zaten açık; bu satırlar rota adlarının
+        // okunabilirliği için değil, DENIED'a takılmasınlar diye burada.
+        'manager/partner-agreement',
+
         'im',                        // öğrenci ve atanan danışmanla yazışma
 
         // Partner kendi adayının şifresini sıfırlayabilmeli — hesabı o açtı.

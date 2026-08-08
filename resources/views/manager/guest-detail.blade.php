@@ -179,6 +179,149 @@
             </table>
         </section>
 
+        {{-- ── Portal ↔ partner anlaşması + dönüşüm ────────────────────────
+             ⚠ Yukarıdaki "Paket & Sözleşme" adayın KENDİ sözleşmesi. Burası
+             adayı getiren firmanın portala ödeyeceği bedel — partner için
+             dönüşümün kapısı. İkisi ayrı şeyler. --}}
+        @php
+            $gdIsPartnerGuest = \App\Models\Company::isPartnerPanel((int) ($guest->company_id ?? 0));
+            $gdSettled = $partnerAgreement && $partnerAgreement->isAccepted();
+        @endphp
+
+        @if($gdIsPartnerGuest && !$guest->converted_to_student)
+        <section class="panel gd-panel">
+            <h2>Partner Anlaşması</h2>
+
+            <table class="gd-table">
+                <tr><td class="lbl">Durum</td>
+                    <td>
+                        @if($gdSettled)
+                            <span class="badge ok">Anlaşıldı</span>
+                        @elseif($partnerAgreement)
+                            <span class="badge warn">Teklif bekliyor</span>
+                        @else
+                            <span class="badge">Yapılmadı</span>
+                        @endif
+                    </td></tr>
+                @if($partnerAgreement)
+                    <tr><td class="lbl">Portala ödenecek</td>
+                        <td><strong>{{ number_format((float) $partnerAgreement->fee_eur, 2, ',', '.') }} EUR</strong></td></tr>
+                    @if($partnerAgreement->note)
+                        <tr><td class="lbl">Not</td><td>{{ $partnerAgreement->note }}</td></tr>
+                    @endif
+                @endif
+            </table>
+
+            @partnerPanel
+                {{-- PARTNER TARAFI --}}
+                @if(!$gdSettled)
+                    @if($partnerAgreement)
+                        {{-- Operasyon farklı bir tutar teklif etmiş --}}
+                        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                            <form method="POST" action="{{ route('manager.partner-agreement.accept', $partnerAgreement->id) }}">
+                                @csrf
+                                <button type="submit" class="btn btn-primary">Teklifi kabul et</button>
+                            </form>
+                            <form method="POST" action="{{ route('manager.partner-agreement.reject', $partnerAgreement->id) }}">
+                                @csrf
+                                <button type="submit" class="btn" style="color:#dc2626;border-color:#fecaca;">Reddet</button>
+                            </form>
+                        </div>
+                    @elseif($frameworkFee !== null)
+                        {{-- Çerçevede peşinen anlaşılmış bedel → tek adım --}}
+                        <form method="POST" action="{{ route('manager.partner-agreement.settle', $guest->id) }}" style="margin-top:12px;">
+                            @csrf
+                            <button type="submit" class="btn btn-primary">
+                                Anlaşmayı kapat — {{ number_format($frameworkFee, 2, ',', '.') }} EUR
+                            </button>
+                            <div style="font-size:11.5px;color:#64748b;margin-top:6px;">
+                                Çerçeve anlaşmanızdaki öğrenci başı standart bedel.
+                            </div>
+                        </form>
+                    @else
+                        <div style="margin-top:12px;font-size:13px;color:#b45309;">
+                            Yürürlükte standart bedelli bir çerçeve anlaşmanız yok.
+                            <a href="{{ route('manager.partner-agreements') }}" style="font-weight:600;">Anlaşmalarım</a>
+                            sayfasına bakın ya da operasyondan bu öğrenci için teklif isteyin.
+                        </div>
+                    @endif
+                @endif
+            @endpartnerPanel
+
+            @unlesspartnerPanel
+                {{-- OPERASYON TARAFI: standarttan farklı bedel teklif et --}}
+                <form method="POST" action="{{ route('manager.partner-agreement.propose', $guest->id) }}"
+                      style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:end;">
+                    @csrf
+                    <label style="font-size:12px;font-weight:600;">Bu öğrenci için bedel (EUR)
+                        <input type="number" name="fee_eur" step="0.01" min="0" required
+                               value="{{ $partnerAgreement->fee_eur ?? $frameworkFee }}"
+                               style="display:block;margin-top:4px;padding:7px;border:1px solid #cbd5e1;border-radius:7px;width:150px;">
+                    </label>
+                    <input type="text" name="note" maxlength="500" placeholder="Not (ops.)"
+                           style="padding:7px;border:1px solid #cbd5e1;border-radius:7px;font-size:12.5px;">
+                    <button type="submit" class="btn btn-primary">Teklif et</button>
+                </form>
+                @if($gdSettled)
+                    <div style="font-size:11.5px;color:#64748b;margin-top:6px;">
+                        Anlaşma kabul edilmiş. Yeni teklif vermek mevcut anlaşmayı değiştirmez.
+                    </div>
+                @endif
+            @endpartnerPanel
+        </section>
+        @endif
+
+        @partnerPanel
+        @if(!$guest->converted_to_student)
+        <section class="panel gd-panel">
+            <h2>Öğrenciye Dönüştür</h2>
+
+            @if($gdSettled)
+                <p style="font-size:13px;color:#334155;margin:0 0 12px;line-height:1.6;">
+                    Anlaşma kapandı. Dönüştürdüğünüzde öğrenci kaydı açılır, danışman
+                    ataması operasyon tarafından yapılır.
+                </p>
+                <form method="POST" action="{{ route('manager.partner-contract.convert', $guest->id) }}"
+                      onsubmit="return confirm('{{ trim(($guest->first_name ?? '').' '.($guest->last_name ?? '')) }} öğrenciye dönüştürülecek. Devam?');">
+                    @csrf
+                    <button type="submit" class="btn btn-primary">Öğrenciye dönüştür</button>
+                </form>
+            @else
+                <p style="font-size:13px;color:#b45309;margin:0;line-height:1.6;">
+                    Önce partner anlaşmasının kapanması gerekiyor. Para tarafı
+                    netleşmeden öğrenci kaydı açılmıyor.
+                </p>
+            @endif
+
+            {{-- Öğrenciyle yapılan sözleşme: İSTEĞE BAĞLI kayıt. Dönüşümü
+                 kilitlemez — partnerin öğrencisinden ne aldığı bu sistemin
+                 konusu değil, yeri olsun diye duruyor. --}}
+            <details style="margin-top:16px;">
+                <summary style="cursor:pointer;font-size:13px;font-weight:600;">
+                    Öğrenciyle yaptığınız sözleşmeyi kaydedin (opsiyonel)
+                </summary>
+                <form method="POST" action="{{ route('manager.partner-contract.close', $guest->id) }}"
+                      enctype="multipart/form-data" style="margin-top:12px;display:grid;gap:10px;max-width:460px;">
+                    @csrf
+                    <label style="font-size:12px;font-weight:600;">İmza tarihi
+                        <input type="date" name="contract_signed_on" max="{{ now()->toDateString() }}"
+                               style="display:block;margin-top:4px;padding:7px;border:1px solid #cbd5e1;border-radius:7px;">
+                    </label>
+                    <label style="font-size:12px;font-weight:600;">Tutar (EUR) — isterseniz
+                        <input type="number" name="contract_amount_eur" step="0.01" min="0"
+                               style="display:block;margin-top:4px;padding:7px;border:1px solid #cbd5e1;border-radius:7px;">
+                    </label>
+                    <label style="font-size:12px;font-weight:600;">İmzalı belge (PDF/JPG/PNG)
+                        <input type="file" name="signed_file" accept=".pdf,.jpg,.jpeg,.png"
+                               style="display:block;margin-top:4px;font-size:12px;">
+                    </label>
+                    <div><button type="submit" class="btn">Kaydet</button></div>
+                </form>
+            </details>
+        </section>
+        @endif
+        @endpartnerPanel
+
         <section class="panel gd-panel">
             <h2>UTM / Kaynak İzleme</h2>
             <table class="gd-table">
