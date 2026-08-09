@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\GuestRegistrationField;
 use App\Support\ApplicationCountryCatalog;
+use App\Support\ApplicationTypes;
 use App\Support\GuestRegistrationFormCatalog;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
@@ -11,6 +12,12 @@ use Illuminate\Support\Facades\Schema;
 
 class GuestRegistrationFieldSchemaService
 {
+    /**
+     * Çözülmüş başvuru türü. `false` = henüz bakılmadı (null geçerli bir
+     * cevap olduğu için ayırt edici bir başlangıç değeri gerekiyor).
+     */
+    private string|null|false $resolvedApplicationType = false;
+
     /**
      * Level filtreli grup listesi.
      *
@@ -22,10 +29,117 @@ class GuestRegistrationFieldSchemaService
      */
     public function groupsByLevel(int $level, int $companyId = 0): array
     {
-        if ($level <= 1) {
-            return GuestRegistrationFormCatalog::groupsByLevel(1);
+        $groups = $level <= 1
+            ? GuestRegistrationFormCatalog::groupsByLevel(1)
+            : $this->groups($companyId);
+
+        return $this->filterByApplicationType($groups);
+    }
+
+    /**
+     * Başvuru türüne uymayan alanları çıkar — TEK SÜZME NOKTASI.
+     *
+     * ⚠ Buranın tek nokta olması kasıtlı. `flatFieldsByLevel`,
+     * `sanitizePayloadByLevel` ve zorunlu alan listesi hepsi bu metodun
+     * çıktısından türüyor. Süzme her çağrı yerine ayrı ayrı eklenseydi
+     * birinde unutulur ve alan EKRANDA görünüp KAYITTA reddedilirdi (ya da
+     * tersi) — bu projedeki en pahalı hata sınıfı: sessiz tutarsızlık.
+     *
+     * Bölüm tamamen boşalırsa bölümün kendisi de düşer; başlığı olup içi
+     * olmayan bir adım kullanıcıya boş bir sayfa gösterirdi.
+     *
+     * @param  array<int,array<string,mixed>> $groups
+     * @return array<int,array<string,mixed>>
+     */
+    private function filterByApplicationType(array $groups): array
+    {
+        $type = $this->resolveApplicationType();
+
+        if ($type === null) {
+            return $groups;
         }
-        return $this->groups($companyId);
+
+        return collect($groups)
+            ->map(function (array $group) use ($type): array {
+                $group['fields'] = collect($group['fields'] ?? [])
+                    ->filter(fn (array $f) => ApplicationTypes::applies($f['types'] ?? null, $type))
+                    ->values()
+                    ->all();
+
+                return $group;
+            })
+            ->filter(fn (array $group) => ! empty($group['fields']))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * İçinde bulunulan başvuru türü — istek başına bir kez çözülür.
+     *
+     * ── NEDEN PARAMETRE DEĞİL ───────────────────────────────────────────
+     * Tür 15'ten fazla çağrı yerine parametre olarak taşınacaktı. Birinde
+     * unutulmak, formun gösterdiğiyle kaydettiğinin ayrışması demekti.
+     * Burada tek bir yerden çözülüyor; gösterim ve kayıt aynı cevabı
+     * aldığı için ayrışamıyorlar.
+     *
+     * ⚠ Personel/konsol bağlamında null döner: yönetim ekranları, PDF ve
+     * şablon karşılaştırması TÜM alanları görmeli. Filtre yalnızca gerçek
+     * bir adayın/öğrencinin oturumunda daraltır.
+     */
+    private function resolveApplicationType(): ?string
+    {
+        if ($this->resolvedApplicationType !== false) {
+            return $this->resolvedApplicationType;
+        }
+
+        return $this->resolvedApplicationType = $this->lookupApplicationType();
+    }
+
+    private function lookupApplicationType(): ?string
+    {
+        try {
+            $user = auth()->user();
+
+            if (! $user) {
+                return null;
+            }
+
+            $role = (string) ($user->role ?? '');
+
+            if ($role === \App\Models\User::ROLE_GUEST) {
+                // Aday: kendi başvurusundaki tür.
+                $raw = \App\Models\GuestApplication::query()
+                    ->withoutGlobalScope('company')
+                    ->where(fn ($q) => $q->where('guest_user_id', $user->id)
+                        ->orWhere('email', (string) $user->email))
+                    ->latest('id')
+                    ->value('application_type');
+
+                return ApplicationTypes::normalize($raw);
+            }
+
+            if ($role === \App\Models\User::ROLE_STUDENT) {
+                // Öğrenci: dönüşümde belirlenen tür.
+                $studentId = trim((string) ($user->student_id ?? ''));
+
+                if ($studentId === '') {
+                    return null;
+                }
+
+                $raw = \App\Models\StudentAssignment::query()
+                    ->withoutGlobalScope('company')
+                    ->where('student_id', $studentId)
+                    ->value('student_type');
+
+                return ApplicationTypes::normalize($raw);
+            }
+
+            return null;
+        } catch (\Throwable) {
+            // Tür çözülemezse SÜZME. Yanlış tarafa düşmek alanları
+            // kaybettirir; geniş tarafa düşmek yalnızca fazla alan gösterir.
+            return null;
+        }
     }
 
     /**
@@ -163,6 +277,8 @@ class GuestRegistrationFieldSchemaService
                         'help_text' => (string) ($row->help_text ?? ''),
                         'sort_order' => (int) ($row->sort_order ?? 100),
                         'options' => $this->resolveFieldOptions($row),
+                        // Başvuru türü etiketi — boş/null = her türde görünür.
+                        'types' => ApplicationTypes::sanitizeList($row->applicable_types ?? null),
                     ])->values()->all(),
                 ];
             })

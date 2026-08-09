@@ -52,6 +52,10 @@ class GuestRegistrationFieldController extends Controller
             'help_text' => ['nullable', 'string', 'max:500'],
             'options_json' => ['nullable'],
             'is_active' => ['nullable', 'boolean'],
+            // Hangi başvuru türlerinde görünsün. Boş/gönderilmemiş = hepsi.
+            // Ayrı form açmak yerine tek merkezî tanım + alan etiketi.
+            'applicable_types' => ['nullable', 'array'],
+            'applicable_types.*' => ['string', Rule::in(\App\Support\ApplicationTypes::all())],
         ]);
 
         $companyId = $this->currentCompanyId();
@@ -68,6 +72,8 @@ class GuestRegistrationFieldController extends Controller
         $data['is_active'] = (bool) ($data['is_active'] ?? true);
         $data['is_system'] = false;
         $data['options_json'] = $this->normalizeOptions($data['options_json'] ?? null);
+        // Üçü de seçiliyse kısıt yok sayılır; bkz. ApplicationTypes.
+        $data['applicable_types'] = \App\Support\ApplicationTypes::sanitizeList($data['applicable_types'] ?? null) ?: null;
 
         $exists = GuestRegistrationField::query()
             ->where('company_id', $data['company_id'])
@@ -97,6 +103,10 @@ class GuestRegistrationFieldController extends Controller
             'help_text' => ['nullable', 'string', 'max:500'],
             'options_json' => ['nullable'],
             'is_active' => ['nullable', 'boolean'],
+            // Hangi başvuru türlerinde görünsün. Boş/gönderilmemiş = hepsi.
+            // Ayrı form açmak yerine tek merkezî tanım + alan etiketi.
+            'applicable_types' => ['nullable', 'array'],
+            'applicable_types.*' => ['string', Rule::in(\App\Support\ApplicationTypes::all())],
         ]);
 
         if (array_key_exists('section_key', $data)) {
@@ -119,6 +129,11 @@ class GuestRegistrationFieldController extends Controller
         }
         if (array_key_exists('options_json', $data)) {
             $data['options_json'] = $this->normalizeOptions($data['options_json']);
+        }
+        // ⚠ Yalnızca GÖNDERİLDİYSE dokunuluyor. Koşulsuz yazılsaydı, alanı
+        // başka bir sebeple güncelleyen her istek etiketi sessizce silerdi.
+        if (array_key_exists('applicable_types', $data)) {
+            $data['applicable_types'] = \App\Support\ApplicationTypes::sanitizeList($data['applicable_types']) ?: null;
         }
 
         $nextFieldKey = (string) ($data['field_key'] ?? $guestRegistrationField->field_key);
