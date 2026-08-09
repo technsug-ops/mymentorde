@@ -173,6 +173,32 @@
                     <div class="row">
                         <input id="grfOptionsJson" placeholder='select için options (JSON veya virgullu): [{"value":"a1","label":"A1"}]'>
                     </div>
+
+                    {{-- ── Başvuru türü etiketi ──
+                         Master/Ausbildung için AYRI FORM açmak yerine alan
+                         bazında etiket: tek merkezî tanım kalıyor, alan hangi
+                         türlerde görüneceğini kendisi söylüyor. Ayrı form,
+                         merkezde yapılan bir değişikliği üç yerde tekrarlamayı
+                         gerektirir ve biri unutulduğunda fark edilmez.
+
+                         ⚠ Hiçbiri seçili değilse alan HER türde görünür.
+                         Varsayılanın "hepsi" olması kasıtlı: etiketlemek
+                         bilinçli bir eylem, yan etki değil. --}}
+                    <div class="row row-wrap" style="align-items:center;gap:14px;">
+                        <span class="meta" style="min-width:100%;">
+                            Hangi başvuru türlerinde görünsün?
+                            <strong>Hiçbiri seçili değilse hepsinde görünür.</strong>
+                        </span>
+                        <label style="display:inline-flex;align-items:center;gap:5px;">
+                            <input type="checkbox" id="grfTypeBachelor" value="bachelor"> Bachelor
+                        </label>
+                        <label style="display:inline-flex;align-items:center;gap:5px;">
+                            <input type="checkbox" id="grfTypeMaster" value="master"> Master
+                        </label>
+                        <label style="display:inline-flex;align-items:center;gap:5px;">
+                            <input type="checkbox" id="grfTypeAusbildung" value="ausbildung"> Ausbildung
+                        </label>
+                    </div>
                     <div class="row">
                         <select id="grfActive">
                             <option value="1" selected>Durum: aktif</option>
