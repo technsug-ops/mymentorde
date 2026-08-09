@@ -52,6 +52,23 @@ class ApplicationTypeFieldTest extends TestCase
         ]);
     }
 
+    /**
+     * Firmanın KENDİ alanı.
+     *
+     * ⚠ Panelden düzenlenen budur. `company_id = 0` yalnızca fabrika yedeği;
+     * merkezî tanım operasyonu yürüten ana firmanın satırlarında durur
+     * (bkz. Platform\FormTemplateController) ve API başka firmanın satırını
+     * düzenlemeye izin vermez.
+     */
+    private function companyField(string $key, ?array $types = null): GuestRegistrationField
+    {
+        $field = $this->field($key, $types);
+
+        $field->forceFill(['company_id' => $this->companyA->id])->save();
+
+        return $field->fresh();
+    }
+
     /** Verilen türde bir aday olarak oturum aç. */
     private function actingAsApplicant(string $applicationType): User
     {
@@ -179,5 +196,51 @@ class ApplicationTypeFieldTest extends TestCase
     public function test_selecting_every_type_means_no_restriction(): void
     {
         $this->assertSame([], ApplicationTypes::sanitizeList(ApplicationTypes::all()));
+    }
+
+    // ── Panelden etiketleme ─────────────────────────────────────────────────
+
+    /** Panel kutucukları bu uca yazıyor; uç çalışmazsa ekran da çalışmaz. */
+    public function test_the_api_persists_type_tags(): void
+    {
+        $field = $this->companyField('lisans_ortalama');
+
+        $this->actingAs($this->userFor($this->companyA, User::ROLE_MANAGER))
+            ->putJson('/api/v1/config/guest-registration-fields/' . $field->id, [
+                'applicable_types' => [ApplicationTypes::MASTER],
+            ])
+            ->assertOk();
+
+        $this->assertSame([ApplicationTypes::MASTER], $field->fresh()->applicable_types);
+    }
+
+    /**
+     * ⚠ Etiket YALNIZCA gönderildiğinde değişmeli. Koşulsuz yazılsaydı,
+     * alanın etiketiyle ilgisi olmayan her güncelleme (etiket alanını
+     * göndermeyen eski bir ekran, bir betik) etiketi sessizce silerdi.
+     */
+    public function test_updating_another_attribute_keeps_the_tags(): void
+    {
+        $field = $this->companyField('lisans_ortalama', [ApplicationTypes::MASTER]);
+
+        $this->actingAs($this->userFor($this->companyA, User::ROLE_MANAGER))
+            ->putJson('/api/v1/config/guest-registration-fields/' . $field->id, [
+                'label' => 'Lisans mezuniyet ortalamaniz',
+            ])
+            ->assertOk();
+
+        $this->assertSame([ApplicationTypes::MASTER], $field->fresh()->applicable_types);
+    }
+
+    /** Tanınmayan tür API'de reddedilmeli — kayıttan önce yakalansın. */
+    public function test_the_api_rejects_an_unknown_type(): void
+    {
+        $field = $this->companyField('bir_alan');
+
+        $this->actingAs($this->userFor($this->companyA, User::ROLE_MANAGER))
+            ->putJson('/api/v1/config/guest-registration-fields/' . $field->id, [
+                'applicable_types' => ['yukseklisans'],
+            ])
+            ->assertStatus(422);
     }
 }
