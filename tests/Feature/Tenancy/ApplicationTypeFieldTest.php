@@ -198,6 +198,77 @@ class ApplicationTypeFieldTest extends TestCase
         $this->assertSame([], ApplicationTypes::sanitizeList(ApplicationTypes::all()));
     }
 
+    // ── Toplu işaretleme ekranı ─────────────────────────────────────────────
+
+    public function test_the_bulk_screen_saves_tags_in_one_go(): void
+    {
+        $a = $this->companyField('lise_ortalama');
+        $b = $this->companyField('lisans_ortalama');
+
+        $this->actingAs($this->userFor($this->companyA, User::ROLE_MANAGER))
+            ->withSession(['2fa_passed' => true])
+            ->post('/manager/form-field-types', [
+                'types' => [
+                    $a->id => [ApplicationTypes::BACHELOR],
+                    $b->id => [ApplicationTypes::MASTER, ApplicationTypes::AUSBILDUNG],
+                ],
+            ])
+            ->assertRedirect();
+
+        $this->assertSame([ApplicationTypes::BACHELOR], $a->fresh()->applicable_types);
+        $this->assertSame(
+            [ApplicationTypes::MASTER, ApplicationTypes::AUSBILDUNG],
+            $b->fresh()->applicable_types
+        );
+    }
+
+    /**
+     * ⚠ Gönderilmeyen alan "hiçbir tür seçilmemiş" demek — kutusu boş olan
+     * satır tarayıcıda hiç gönderilmez. Ekran tüm alanları listelediği için
+     * bu, etiketi KALDIRMANIN tek yolu. "Dokunma" olarak yorumlansaydı bir
+     * etiket bir daha asla silinemezdi.
+     */
+    public function test_omitting_a_field_clears_its_tags(): void
+    {
+        $field = $this->companyField('lise_ortalama', [ApplicationTypes::BACHELOR]);
+
+        $this->actingAs($this->userFor($this->companyA, User::ROLE_MANAGER))
+            ->withSession(['2fa_passed' => true])
+            ->post('/manager/form-field-types', ['types' => []])
+            ->assertRedirect();
+
+        $this->assertNull($field->fresh()->applicable_types);
+    }
+
+    /** Ekran başka firmanın alanını listelemediği için onu değiştiremez de. */
+    public function test_the_bulk_screen_cannot_touch_another_companys_field(): void
+    {
+        $foreign = $this->field('yabanci_alan', null);
+        $foreign->forceFill(['company_id' => $this->companyB->id])->save();
+
+        $this->companyField('kendi_alanim');
+
+        $this->actingAs($this->userFor($this->companyA, User::ROLE_MANAGER))
+            ->withSession(['2fa_passed' => true])
+            ->post('/manager/form-field-types', [
+                'types' => [$foreign->id => [ApplicationTypes::MASTER]],
+            ])
+            ->assertRedirect();
+
+        $this->assertNull($foreign->fresh()->applicable_types, 'Baska firmanin alani degistirildi.');
+    }
+
+    public function test_the_bulk_screen_renders(): void
+    {
+        $this->companyField('lise_ortalama');
+
+        $this->actingAs($this->userFor($this->companyA, User::ROLE_MANAGER))
+            ->withSession(['2fa_passed' => true])
+            ->get('/manager/form-field-types')
+            ->assertOk()
+            ->assertSee('lise_ortalama');
+    }
+
     // ── Panelden etiketleme ─────────────────────────────────────────────────
 
     /** Panel kutucukları bu uca yazıyor; uç çalışmazsa ekran da çalışmaz. */
