@@ -99,6 +99,14 @@ Route::middleware(['company.context', 'auth', 'verified', 'manager.role', 'requi
     Route::patch('/manager/guests/{guest}/status',          [ManagerPortalController::class, 'guestUpdateStatus'])->name('manager.guests.status');
     Route::patch('/manager/guests/{guest}/assign',          [ManagerPortalController::class, 'guestAssignSenior'])->name('manager.guests.assign');
 
+    // ── Başvuru türüne göre alan görünürlüğü (toplu işaretleme) ─────────────
+    // Etiket /config'deki alan düzenleyicisinde de var; orada tek tek, burada
+    // hepsi tek sayfada ve tek kaydetmede.
+    $fieldTypes = \App\Http\Controllers\Manager\FormFieldTypeController::class;
+    Route::get('/manager/form-field-types', [$fieldTypes, 'index'])->name('manager.form-field-types');
+    Route::post('/manager/form-field-types', [$fieldTypes, 'update'])
+        ->middleware('throttle:20,1')->name('manager.form-field-types.update');
+
     // ── Portal ↔ partner anlaşmaları ────────────────────────────────────────
     //
     // ⚠ Öğrenciyle yapılan sözleşmeyle KARIŞTIRMA. Burası iki firma arasındaki

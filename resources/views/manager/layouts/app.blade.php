@@ -638,6 +638,11 @@
                    class="nav-link {{ request()->is('manager/theme*') ? 'active' : '' }}">
                     <span class="nav-icon">🎨</span> Tema Yönetimi
                 </a>
+                {{-- Hangi form alanı hangi başvuru türünde görünsün. --}}
+                <a href="{{ route('manager.form-field-types') }}"
+                   class="nav-link {{ request()->is('manager/form-field-types*') ? 'active' : '' }}">
+                    <span class="nav-icon">🎚</span> Form Alanı Türleri
+                </a>
                 {{-- Partner firmalarla yapılan çerçeve anlaşmalar (öğrenci
                      sözleşmesi DEĞİL — iki firma arasındaki iş anlaşması). --}}
                 <a href="{{ route('manager.partner-agreements') }}"
