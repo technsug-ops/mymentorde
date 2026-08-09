@@ -288,6 +288,84 @@ class GuestRegistrationFieldSchemaService
     }
 
     /**
+     * Firma kendi satırlarını edinsin — miras alınan kümenin TAMAMI kopyalanır.
+     *
+     * ── NEDEN ŞART ──────────────────────────────────────────────────────
+     * `rowsFor()` ilk BOŞ OLMAYAN kümede duruyor: firmanın kendi satırları →
+     * üst firmalar → fabrika. Firma tek bir alan edindiği anda kendi kümesi
+     * "boş değil" hâle geliyor ve zincir orada kesiliyor.
+     *
+     * Yani panelden TEK alan eklemek, formu 114 alandan 1 alana düşürüyordu.
+     * Sessiz değil, yıkıcı: aday formu açtığında tek soru görüyordu.
+     *
+     * Doğru davranış "kısmen kendi satırın olsun" değil — öyle bir şey yok.
+     * Ya tamamen miras alırsın ya tamamen kendi kümen olur. Bu metot ikinciye
+     * geçişi bütün hâlinde yapıyor.
+     *
+     * Idempotent: firmanın zaten satırı varsa hiçbir şey yapmaz.
+     *
+     * @return int  Kopyalanan satır sayısı (0 = zaten kendi kümesi vardı).
+     */
+    public function materializeForCompany(int $companyId): int
+    {
+        if ($companyId <= 0 || ! Schema::hasTable('guest_registration_fields')) {
+            return 0;
+        }
+
+        $ownCount = GuestRegistrationField::query()
+            ->withoutGlobalScope('company')
+            ->where('company_id', $companyId)
+            ->count();
+
+        if ($ownCount > 0) {
+            return 0;
+        }
+
+        // ⚠ `rowsFor()` fabrika satırlarına DÜŞMÜYOR — o yedek `groups()`
+        // içinde duruyor. Kopyalama okumayla aynı zinciri izlemezse firma
+        // "miras aldığı" formdan farklı bir kümeyle başlar.
+        $inherited = $this->rowsFor($companyId);
+
+        if ($inherited->isEmpty()) {
+            $inherited = GuestRegistrationField::query()
+                ->withoutGlobalScope('company')
+                ->where('company_id', 0)
+                ->where('is_active', true)
+                ->orderBy('section_order')->orderBy('sort_order')->orderBy('id')
+                ->get();
+        }
+
+        if ($inherited->isEmpty()) {
+            return 0;
+        }
+
+        $now = CarbonImmutable::now();
+
+        $copies = $inherited->map(function (GuestRegistrationField $row) use ($companyId, $now): array {
+            $data = $row->only([
+                'section_key', 'section_title', 'section_order',
+                'field_key', 'label', 'type', 'is_required', 'sort_order',
+                'max_length', 'placeholder', 'help_text', 'is_active', 'is_system',
+            ]);
+
+            // JSON kolonlar ham hâlleriyle taşınmalı; cast edilmiş dizi
+            // doğrudan insert'e verilemez.
+            $data['options_json'] = $row->getRawOriginal('options_json');
+            $data['applicable_types'] = $row->getRawOriginal('applicable_types');
+
+            $data['company_id'] = $companyId;
+            $data['created_at'] = $now;
+            $data['updated_at'] = $now;
+
+            return $data;
+        })->all();
+
+        GuestRegistrationField::query()->insert($copies);
+
+        return count($copies);
+    }
+
+    /**
      * @return array<int,array<string,mixed>>
      */
     public function flatFields(int $companyId = 0): array

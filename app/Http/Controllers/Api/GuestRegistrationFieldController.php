@@ -75,6 +75,15 @@ class GuestRegistrationFieldController extends Controller
         // Üçü de seçiliyse kısıt yok sayılır; bkz. ApplicationTypes.
         $data['applicable_types'] = \App\Support\ApplicationTypes::sanitizeList($data['applicable_types'] ?? null) ?: null;
 
+        // ⚠ Firma miras alıyorsa ÖNCE kendi kümesini edinsin.
+        //
+        // Form satırları zincirle okunuyor ve zincir ilk boş olmayan kümede
+        // duruyor. Firma tek alan edindiği anda kendi kümesi "boş değil"
+        // oluyor ve miras kesiliyor: form 114 alandan 1 alana düşüyordu.
+        // Kısmen kendi satırın olması diye bir şey yok — ya tamamen miras
+        // ya tamamen kendi kümen.
+        $this->schemaService->materializeForCompany((int) $data['company_id']);
+
         $exists = GuestRegistrationField::query()
             ->where('company_id', $data['company_id'])
             ->where('field_key', $data['field_key'])
