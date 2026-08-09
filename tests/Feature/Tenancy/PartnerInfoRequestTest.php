@@ -211,6 +211,79 @@ class PartnerInfoRequestTest extends TestCase
         $this->assertNotNull($item->fresh()->forwarded_at);
     }
 
+    // ── 4. halka: öğrenci yükler → kalem kapanır ────────────────────────────
+
+    /**
+     * ZİNCİRİN KOPUK OLDUĞU YER BURASIYDI.
+     *
+     * `forward()` jetonu kaleme bağlıyordu (`forwarded_token_id`) ama yükleme
+     * tarafında kimse geri bakmıyordu: belge geliyor, kalem "bekliyor"
+     * kalıyordu. Partner elle "sağlandı" işaretlemeyi unuttuğu anda operasyon
+     * bekleyen bir talep görüyordu — oysa belge gelmişti. Sessiz tutarsızlık.
+     *
+     * Eşleşme jeton kimliğiyle kuruluyor: "aynı öğrencinin aynı kategoride
+     * belgesi var" gibi bir çıkarımla kapatılsaydı, eski ve alakasız bir
+     * yükleme kalemi yanlışlıkla kapatabilirdi.
+     */
+    public function test_student_upload_settles_the_forwarded_item(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('local');
+
+        $this->linkPartner();
+        $this->enableDocRequestModule();
+        $req = $this->makeRequest();
+
+        $item = $req->items()->where('kind', PartnerInfoRequestItem::KIND_DOCUMENT)->firstOrFail();
+
+        $this->asStaff($this->userFor($this->companyB, User::ROLE_MANAGER))
+            ->post("/manager/partner-requests/{$req->id}/items/{$item->id}/forward")
+            ->assertRedirect();
+
+        $token = DocumentUploadToken::withoutGlobalScope('company')->latest('id')->firstOrFail();
+
+        // Öğrenci linke tıklayıp yüklüyor — giriş yok, jeton yetki kanıtı.
+        $this->post('/u/' . $token->token, [
+            'file' => \Illuminate\Http\UploadedFile::fake()->create('pasaport.pdf', 120, 'application/pdf'),
+        ])->assertOk();
+
+        $item->refresh();
+
+        $this->assertSame(
+            PartnerInfoRequestItem::STATUS_PROVIDED,
+            $item->status,
+            'Ogrenci belgeyi yukledi ama kalem hala bekliyor — zincir kopuk.'
+        );
+        $this->assertNotNull($item->document_id, 'Kapanan kalem hangi belgeyle kapandigini tutmuyor.');
+        $this->assertNotNull($item->provided_at);
+    }
+
+    /** Bilgi kalemi açık kaldığı için talep başlığı kapanmamalı. */
+    public function test_upload_does_not_close_the_request_while_info_items_remain(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('local');
+
+        $this->linkPartner();
+        $this->enableDocRequestModule();
+        $req = $this->makeRequest();
+
+        $item = $req->items()->where('kind', PartnerInfoRequestItem::KIND_DOCUMENT)->firstOrFail();
+
+        $this->asStaff($this->userFor($this->companyB, User::ROLE_MANAGER))
+            ->post("/manager/partner-requests/{$req->id}/items/{$item->id}/forward");
+
+        $token = DocumentUploadToken::withoutGlobalScope('company')->latest('id')->firstOrFail();
+
+        $this->post('/u/' . $token->token, [
+            'file' => \Illuminate\Http\UploadedFile::fake()->create('pasaport.pdf', 120, 'application/pdf'),
+        ]);
+
+        $this->assertSame(
+            PartnerInfoRequest::STATUS_OPEN,
+            $req->fresh()->status,
+            'Bilgi kalemi hala bekliyorken talep kapandi.'
+        );
+    }
+
     // ── Başlık durumu ───────────────────────────────────────────────────────
 
     /** Son kalem de gelince talep kendiliğinden kapanmalı. */
@@ -233,6 +306,20 @@ class PartnerInfoRequestTest extends TestCase
     }
 
     // ── Yardımcı ────────────────────────────────────────────────────────────
+
+    /**
+     * Public yükleme ekranı `doc_request` modülüne bağlı (premium); kapalıysa
+     * 404 döner. Test şirketlerinde modül listesi boş olduğu için açıkça
+     * açılıyor.
+     */
+    private function enableDocRequestModule(): void
+    {
+        $this->companyB->forceFill([
+            'enabled_modules' => ['core', 'doc_request'],
+        ])->save();
+
+        \Illuminate\Support\Facades\Cache::forget("company:{$this->companyB->id}:enabled_modules");
+    }
 
     private function makeRequest(): PartnerInfoRequest
     {

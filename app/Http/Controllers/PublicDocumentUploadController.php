@@ -13,6 +13,7 @@ use App\Services\DocumentOcrSchemas;
 use App\Support\ModuleAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Public belge yükleme — premium "Belge Talep Linki" özelliği.
@@ -146,10 +147,26 @@ class PublicDocumentUploadController extends Controller
             'uploaded_by'        => 'public:token:' . substr($row->token, 0, 8),
             'extraction_status'  => $ocrSupported ? 'pending' : null,
         ]);
-        $doc->forceFill([
+        // ⚠ `documents` tablosunda `company_id` KOLONU YOK — belge sahipliği
+        // `student_id` üzerinden kuruluyor, tenant kapsamı bu modelde
+        // uygulanmıyor (bekçi testinde de yer almaması bu yüzden).
+        //
+        // Buraya koşulsuz yazılıyordu ve her public yükleme "Unknown column
+        // 'company_id'" ile 500 veriyordu: dosya diske iniyor, Document satırı
+        // açılıyor, ARDINDAN update patlıyor. Öğrenci hata ekranı görüyor,
+        // belge ise yarım kaydedilmiş oluyordu.
+        //
+        // Kolon ileride eklenirse doldurulsun diye varlık kontrolüyle
+        // korunuyor; yoksa atlanıyor.
+        $docAttributes = [
             'document_id' => 'DOC-PUB-' . str_pad((string) $doc->id, 6, '0', STR_PAD_LEFT),
-            'company_id'  => $row->company_id,
-        ])->save();
+        ];
+
+        if (Schema::hasColumn($doc->getTable(), 'company_id')) {
+            $docAttributes['company_id'] = $row->company_id;
+        }
+
+        $doc->forceFill($docAttributes)->save();
 
         // OCR uygunsa async extract'a yolla — yükleme cevabını bloklamasın
         if ($ocrSupported) {
@@ -171,6 +188,21 @@ class PublicDocumentUploadController extends Controller
             categoryCode: $useCategoryCode, // D5: multi-doc'da uploaded listesini artırır
         );
         $row->refresh();
+
+        // Bu jeton bir partner belge talebinden doğduysa kalemi kapat.
+        //
+        // ⚠ ADDON — yüklemeyi bozmamalı. Öğrenci belgesini yükledi; arka
+        // plandaki talep muhasebesi patladı diye ona hata göstermek yanlış
+        // olurdu. Servis kendi içinde de yutuyor, burada ikinci kemer.
+        try {
+            app(\App\Services\PartnerInfoRequestSettlementService::class)
+                ->settleFromToken($row, $doc);
+        } catch (\Throwable $e) {
+            Log::warning('public.document-upload: partner request settle failed (non-fatal)', [
+                'token_id' => $row->id,
+                'error'    => $e->getMessage(),
+            ]);
+        }
 
         Log::info('public.document-upload: success', [
             'token_id'    => $row->id,
