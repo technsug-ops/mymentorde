@@ -790,7 +790,8 @@ class ManagerPortalController extends Controller
     }
 
     /**
-     * Bayi mini-site moderasyonu: slug atama + yayına alma (site_enabled).
+     * Bayi mini-site moderasyonu: slug atama + yayına alma (site_enabled)
+     * + kurumsal (şablonlu) site yetkisi (site_mode).
      */
     public function updateDealerMiniSite(Request $request, string $code): \Illuminate\Http\RedirectResponse
     {
@@ -801,10 +802,15 @@ class ManagerPortalController extends Controller
 
         $reserved = ['admin','api','manager','dealer','apply','p','satis-ortagi','platform','kayit','fiyatlar','pricing','login','randevu','uzman','go','promo','share','brand','partner','signup','sss','uni-match'];
 
+        // Kullanicinin yazdigini once hizala: "/p/Yigit Danismanlık" -> "yigit-danismanlik".
+        // Dogrulama normalize edilmis deger uzerinde calisir.
+        $request->merge(['public_slug' => \App\Support\DealerSlug::normalize($request->input('public_slug'))]);
+
         $validated = $request->validate([
             'public_slug'  => ['nullable', 'string', 'min:3', 'max:64', 'regex:/^[a-z0-9-]+$/',
                                \Illuminate\Validation\Rule::unique('dealers', 'public_slug')->ignore($dealer->id)],
             'site_enabled' => ['nullable', 'boolean'],
+            'site_mode'    => ['nullable', \Illuminate\Validation\Rule::in([Dealer::SITE_MODE_PARTNER])],
         ]);
 
         if (!empty($validated['public_slug']) && in_array($validated['public_slug'], $reserved, true)) {
@@ -818,10 +824,23 @@ class ManagerPortalController extends Controller
             return back()->withErrors(['public_slug' => 'Yayına almak için önce bir slug atayın.']);
         }
 
-        $dealer->update([
+        $payload = [
             'public_slug'  => $slug,
             'site_enabled' => $enable,
-        ]);
+        ];
+
+        // Kurumsal site yetkisi YALNIZCA denetimi taşıyan ekran gönderdiğinde değişir.
+        // Kutucuk işaretsizken tarayıcı hiçbir şey göndermez; "gönderilmedi = kapat"
+        // demek, denetimi hiç basmayan bir istekte (ör. tipi gereği yetkili bayide
+        // kutucuk render edilmez) yetkiyi sessizce silerdi. Hidden alan "bu ekranda
+        // karar verildi" demektir.
+        if ($request->boolean('site_mode_present')) {
+            $payload['site_mode'] = ($validated['site_mode'] ?? null) === Dealer::SITE_MODE_PARTNER
+                ? Dealer::SITE_MODE_PARTNER
+                : null;
+        }
+
+        $dealer->update($payload);
 
         return back()->with('status', $enable ? "Mini-site yayına alındı: /p/{$slug}" : 'Mini-site ayarı güncellendi (yayında değil).');
     }

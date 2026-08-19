@@ -51,6 +51,10 @@ class DealerMiniSiteController extends Controller
         $dealer = $data['dealer'];
         abort_if(!$dealer instanceof Dealer, 403, 'Dealer not found');
 
+        // Girdiyi once hizala (bkz. App\Support\DealerSlug) — "/p/" oneki, tam URL,
+        // buyuk harf ve Turkce harf yazan kullanici duvara toslamasin.
+        $request->merge(['public_slug' => \App\Support\DealerSlug::normalize($request->input('public_slug'))]);
+
         $validated = $request->validate([
             'public_slug'        => ['nullable', 'string', 'min:3', 'max:64', 'regex:/^[a-z0-9-]+$/',
                                      Rule::unique('dealers', 'public_slug')->ignore($dealer->id)],

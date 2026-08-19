@@ -875,8 +875,14 @@ sırayla sona ekler (açık) → şablon değişse de bozulmaz. Şablon <code>$s
 dosyanın <code>@php</code> yerel değişkenlerini otomatik görür. Menü <strong>elle yazılmaz</strong>, <code>$navLinks</code>
 kullanılır (kapalı/boş bölümün linki çıkmaz; bölüm id'leri <code>hizmetler/surec/paketler/sss</code>).
 <code>TEMPLATES[key]['modular'|'sections']</code> editöre yansır: sabit kurgulu şablonda uyarı,
-basılmayan bölümde &quot;… şablonunda yok&quot; etiketi. Şu an modüler (10): <strong>lavanta, seftali, nane, elektrik, mercan, sedef, manyeta, bulut,
-mermer, ufuk</strong> (+ <code>_starter</code> iskeleti). Sabit kurgulu (3): aurora, minimal, bold.</p>
+basılmayan bölümde &quot;… şablonunda yok&quot; etiketi. <strong>3 Ağustos itibarıyla 13 şablonun TAMAMI modüler</strong>
+(+ <code>_starter</code> iskeleti) — sabit kurgulu şablon kalmadı, hepsi paket/S.S.S./üniversite basıyor ve
+partnerin sıra/aç-kapa seçimini uyguluyor.</p>
+<p>Eski üçlüyü (aurora, minimal, bold) çevirirken çıkan ve yeni şablon yazarken de geçerli olan noktalar:
+<code>steps</code>/<code>why</code> sabit metin kullanıyorsa <code>$steps</code>/<code>$whyUs</code> sözleşmesine bağla · <code>about</code>+<code>stats</code> (veya
+<code>about</code>+<code>why</code>) tek bölümdeyse ayır · ayrı <code>ekip</code> bölümü varsa <code>why</code> içine taşı (kalıp: &quot;Neden biz +
+ekip&quot;) · menüyü <code>$navLinks</code>'e devret · bölüm id'lerini <code>hizmetler</code>/<code>surec</code>/<code>paketler</code>/<code>sss</code> yap ·
+numarayı CSS <code>counter</code> ile basan adım kutuları varsa counter'ı kaldır (sözleşmedeki <code>no</code> görünmez olur).</p>
 <p><strong>Editör kart yönetimi:</strong> <code>dealer/mini-site/_repeat.blade.php</code> + <code>rows/*.blade.php</code>;
 sıra = input adlarındaki index, JS her ekleme/silme/taşımada satırları yeniden numaralar
 (<code>edit.blade.php</code> sonundaki tek nonce'lu blok, <code>[data-repeat]</code>). Yeni kart iskeleti
@@ -905,8 +911,24 @@ latin + <strong>latin-ext</strong> (Türkçe karakterler) olarak indirip <code>@
 <code>$testimonials</code> yalnız partnerin girdiği veriden gelir; boşsa bölüm hiç basılmaz.
 Gerçek olmayan rakam, gerçek bir firmanın canlı sayfasında yanıltıcı reklamdır (UWG §5).</li>
 </ul>
-<p><strong>Tier yönlendirmesi:</strong> <code>b2b_partner</code> (tier VEYA rol seti) → template render; diğerleri
-(freelance / lead_generation) → mevcut <code>public.dealer-landing</code> tek sayfa mini-site.</p>
+<p><strong>Yönlendirme — tek karar noktası <code>Dealer::usesPartnerSite()</code>:</strong> true → template render,
+false → <code>public.dealer-landing</code> tek sayfa mini-site. Hem public controller hem
+<code>/dealer/mini-site</code> editörü bu metodu sorar; ikisine ayrı kopya mantık YAZMA (biri
+güncellenip diğeri unutulursa bayi kartları doldurur ama sitesi basmaz).</p>
+<p>Yetki iki yoldan gelir:</p>
+<ul>
+<li><code>dealer_type_code === 'b2b_partner'</code> veya rol setinde <code>b2b_partner</code> → otomatik</li>
+<li><code>dealers.site_mode === 'partner'</code> → tipten BAĞIMSIZ, manager panelinden verilir
+(<code>/manager/dealers/{code}</code> → Mini-Site kartı → &quot;Kurumsal site&quot;)</li>
+</ul>
+<p>⚠ <strong><code>dealer_type_code</code>'u site açmak için değiştirme.</strong> O kolon komisyon kademelerini
+(<code>dealer_commission_tiers</code>), sözleşme kategorisini (<code>BusinessContractController</code>), KPI
+gruplarını ve alt-bayi kod üretimini besliyor — tipi çevirmek bayinin kazancını da çevirir.
+<code>site_mode</code> tam bu yüzden ayrı bir kolon.</p>
+<p>⚠ Manager formu <code>site_mode</code>'u <strong>yalnızca <code>site_mode_present</code> hidden alanıyla birlikte</strong>
+gönderildiğinde yazar. İşaretsiz checkbox tarayıcıda hiç gönderilmez; &quot;gönderilmedi =
+kapat&quot; deseydik denetimi basmayan her istek (b2b bayide kutucuk render edilmiyor) yetkiyi
+sessizce silerdi.</p>
 <hr />
 <h2 id="6-temel-servisler">6. Temel Servisler</h2>
 <h3 id="iş-mantığı-servisleri">İş Mantığı Servisleri</h3>
@@ -1145,6 +1167,32 @@ npx playwright test
 <p>7 rol, 6 spec dosyası. <code>.env.testing</code>'de <code>APP_DEBUG=false</code> (PHP 8.4 Ignition bug bypass).</p>
 <hr />
 <h2 id="11-deploy-ortam-değişkenleri">11. Deploy &amp; Ortam Değişkenleri</h2>
+<h3 id="dal-düzeni-hangi-dal-canlıya-gider">Dal Düzeni — hangi dal canlıya gider?</h3>
+<table>
+<thead>
+<tr>
+<th>Dal</th>
+<th>Rolü</th>
+<th>Push edilince</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>develop</code></td>
+<td>Çalışma dalı — tüm günlük iş</td>
+<td>Şimdilik bir şey olmaz</td>
+</tr>
+<tr>
+<td><code>main</code></td>
+<td>Yayın dalı</td>
+<td>GitHub Actions → <code>panel.mentorde.com</code> <strong>canlı deploy</strong></td>
+</tr>
+</tbody>
+</table>
+<p><code>main</code>'e doğrudan commit <code>githooks/pre-commit</code> ile engellenir. Yeni klonda bir kez
+<code>git config core.hooksPath githooks</code> çalıştırılmalı — hook'lar repo ile kopyalanmaz.</p>
+<p>Yayına alma: <code>git switch main &amp;&amp; git merge develop &amp;&amp; git push</code> → Actions'ı izle.
+Tam akış ve planlanan <code>test.mentorde.com</code> staging ortamı: <code>docs/BRANCH_WORKFLOW.md</code>.</p>
 <h3 id="gerekli-env-değişkenleri">Gerekli <code>.env</code> Değişkenleri</h3>
 <pre><code class="language-env">APP_NAME=&quot;MentorDE&quot;
 APP_ENV=production

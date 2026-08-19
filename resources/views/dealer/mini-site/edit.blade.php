@@ -46,10 +46,10 @@
         <div style="display:flex;align-items:center;gap:4px;">
             <span style="color:var(--muted,#64748b);font-size:14px;">/p/</span>
             <input type="text" name="public_slug" value="{{ old('public_slug', $d?->public_slug) }}" maxlength="64"
-                   placeholder="ornek-bayi" pattern="[a-z0-9\-]+"
+                   placeholder="ornek-bayi"
                    style="flex:1;padding:10px 12px;border:1px solid var(--border,#cbd5e1);border-radius:8px;font-size:14px;font-family:ui-monospace,monospace;">
         </div>
-        <small style="color:var(--muted,#64748b);font-size:12px;">Sadece küçük harf, rakam ve tire. Benzersiz olmalı.</small>
+        <small style="color:var(--muted,#64748b);font-size:12px;">Küçük harf, rakam ve tire. Türkçe harf ve boşluk otomatik çevrilir. Benzersiz olmalı.</small>
     </div>
 
     <div style="margin-bottom:16px;">
@@ -107,8 +107,8 @@
     </div>
 
     @php
-        $isOperationPartner = ($d?->dealer_type_code === 'b2b_partner')
-            || ($d && $d->hasRole(\App\Models\Dealer::ROLE_B2B_PARTNER));
+        // Kararın tek kaynağı model — bkz. Dealer::usesPartnerSite().
+        $isOperationPartner = (bool) $d?->usesPartnerSite();
         $svcRows  = old('site_services',     $d?->site_services ?: []);
         $statRows = old('site_stats',        $d?->site_stats ?: []);
         $teamRows = old('site_team',         $d?->site_team ?: []);
@@ -126,7 +126,7 @@
     @if($isOperationPartner)
         <div style="border-top:2px solid var(--border,#e2e8f0);margin:26px 0 4px;padding-top:6px;">
             <div style="font-size:12px;font-weight:700;color:var(--theme-accent-dealer,#1E3D6B);text-transform:uppercase;letter-spacing:.08em;">
-                Operasyon Partner — Kurumsal Site Bölümleri
+                Kurumsal Site Bölümleri
             </div>
             <small style="color:var(--muted,#64748b);font-size:12px;">Bu alanları doldurdukça siteniz zenginleşir. Boş bıraktığınız kartlar sitede görünmez.</small>
         </div>
