@@ -55,6 +55,7 @@ class Dealer extends Model
         'site_address',
         'site_show_badge',
         'site_template',
+        'site_mode',
         'custom_domain',
         'custom_domain_verified_at',
         'custom_domain_token',
@@ -134,6 +135,30 @@ class Dealer extends Model
         if (in_array(self::ROLE_FREELANCE, $roles, true))        return 'freelance_danisman';
         if (in_array(self::ROLE_LEAD_GENERATION, $roles, true))  return 'lead_generation';
         return 'lead_generation';
+    }
+
+    // ── Kurumsal (şablonlu) site yetkisi ──────────────────────
+
+    /** site_mode değeri: tipi ne olursa olsun çok-bölümlü şablon sitesi. */
+    public const SITE_MODE_PARTNER = 'partner';
+
+    /**
+     * Bu bayi /p/{slug} adresinde çok-bölümlü ŞABLON sitesini mi alır?
+     *
+     * Kararın TEK kaynağı burasıdır — public site de, /dealer/mini-site
+     * editörü de bunu sorar. İkisi ayrı kopya mantık taşısaydı biri
+     * güncellenip diğeri unutulduğunda bayi kartları doldurur ama sitesi
+     * basmazdı (ya da tersi).
+     *
+     * b2b_partner otomatik dahil; `site_mode` yalnızca EK yetkidir, böylece
+     * bir freelance danışmana site açmak için dealer_type_code'a — dolayısıyla
+     * komisyon kademesine ve sözleşme kategorisine — dokunmak gerekmez.
+     */
+    public function usesPartnerSite(): bool
+    {
+        return $this->site_mode === self::SITE_MODE_PARTNER
+            || $this->dealer_type_code === 'b2b_partner'
+            || $this->hasRole(self::ROLE_B2B_PARTNER);
     }
 
     // ── Hiyerarşi (2 seviye: bölge → alt bayi) ────────────────

@@ -16,9 +16,10 @@ use Illuminate\View\View;
  * Bayi white-label mini-site — public /p/{slug}.
  *
  * İki katman (Partner Frontend F1):
- *  • Operasyon partner (b2b_partner) → seçtiği şablonla çok-bölümlü öğrenci-lead sitesi
- *    (public/partner-templates/{key}.blade — bkz. App\Support\PartnerTemplates).
- *  • Diğer tier'lar (freelance / lead_generation) → mevcut tek-sayfa mini-site (dealer-landing).
+ *  • Kurumsal site yetkisi olan bayi (Dealer::usesPartnerSite) → seçtiği şablonla
+ *    çok-bölümlü öğrenci-lead sitesi (public/partner-templates/{key}.blade).
+ *    b2b_partner otomatik dahil; diğer tier'lara `site_mode` ile elle açılır.
+ *  • Yetkisi olmayan → mevcut tek-sayfa mini-site (dealer-landing).
  *
  * CTA'lar /apply/partner/{code}'a gider → lead o bayiye etiketlenir.
  */
@@ -46,7 +47,7 @@ class DealerMiniSiteController extends Controller
         $logoUrl = $dealer->site_logo_path ? Storage::disk('public')->url($dealer->site_logo_path) : null;
 
         // ── Operasyon partner: seçtiği template ile çok-bölümlü öğrenci-odaklı site ──
-        if ($this->isOperationPartner($dealer)) {
+        if ($dealer->usesPartnerSite()) {
             // Yetkili önizlemede ?tpl=KEY ile diğer template'ler kaydetmeden denenebilir.
             $tplKey = $dealer->site_template;
             if ($isPreview && PartnerTemplates::isValid($request->query('tpl'))) {
@@ -88,12 +89,5 @@ class DealerMiniSiteController extends Controller
         $userCode = strtoupper(trim((string) ($user->dealer_code ?? '')));
 
         return $userCode !== '' && $userCode === strtoupper(trim((string) $dealer->code));
-    }
-
-    /** Primary tier b2b_partner mı? (rol setinde b2b varsa da say.) */
-    private function isOperationPartner(Dealer $dealer): bool
-    {
-        return $dealer->dealer_type_code === 'b2b_partner'
-            || $dealer->hasRole(Dealer::ROLE_B2B_PARTNER);
     }
 }

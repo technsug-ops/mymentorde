@@ -698,7 +698,8 @@ Student                         → Kabul edilmiş öğrenci
 <li>Bayi kendi logo / marka rengi / hero metni / iletişim bilgilerini girer</li>
 <li>Yayına alma (<code>site_enabled</code>) <strong>manager onayına</strong> bağlıdır</li>
 <li>Sitedeki tüm CTA'lar <code>/apply/partner/{code}</code>'a gider → gelen lead otomatik o bayiye etiketlenir</li>
-<li><strong>Operasyon partner (b2b_partner)</strong> için genişletilmiş kurumsal site:
+<li><strong>Kurumsal site yetkisi olan bayi</strong> için genişletilmiş site (operasyon partner tipi
+otomatik yetkilidir; diğer tipler manager panelinden elle açılır — aşağı bkz.):
 <ul>
 <li>Hizmet kartları, istatistik bandı, ekip kartları, öğrenci yorumları, adres bölümleri</li>
 <li><strong>Destek paketleri</strong> (kapsam maddeleri + &quot;öne çıkan paket&quot; vurgusu), <strong>S.S.S.</strong>,
@@ -726,7 +727,15 @@ Bölüm sırası ve aç/kapa <strong>10 yeni şablonda</strong> uygulanır; eski
 <li><strong>&quot;MentorDE rozeti&quot; aç/kapa</strong> — kapatıldığında sayfada MentorDE markası hiç geçmez (tam white-label)</li>
 </ul>
 </li>
-<li>Diğer bayi tipleri (freelance / lead generation) tek sayfalık klasik mini-site alır</li>
+<li><strong>Kurumsal site yetkisi (manager)</strong> — <code>/manager/dealers/{kod}</code> → Mini-Site kartı →
+<strong>&quot;Kurumsal site&quot;</strong> kutucuğu. İşaretlendiğinde bayi tipi ne olursa olsun (freelance /
+lead generation) şablonlu çok-bölümlü siteyi alır ve editörde şablon seçici + kart
+bölümleri açılır.
+⚠ Bu kutucuk <strong>bayi tipini değiştirmez</strong> — komisyon kademesi, sözleşme kategorisi ve
+raporlardaki grubu aynı kalır. (Eskiden site yalnız tipi b2b_partner olan bayiye
+açılabiliyordu; tipi değiştirmek kazancı da değiştirirdi.)
+Operasyon partner tipindeki bayide kutucuk yerine &quot;tipi gereği açık&quot; bilgisi görünür.</li>
+<li>Yetkisi olmayan bayi tek sayfalık klasik mini-site alır (varsayılan davranış)</li>
 </ul>
 <hr />
 <h3 id="36-marketing-admin-portalı">3.6 Marketing Admin Portalı</h3>

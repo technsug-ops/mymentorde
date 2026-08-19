@@ -483,7 +483,8 @@ Quick review with keyboard shortcuts:
 - Dealer sets their own logo / brand color / hero copy / contact details
 - Going live (`site_enabled`) requires **manager approval**
 - All CTAs point to `/apply/partner/{code}` → incoming leads are tagged to that dealer automatically
-- Extended corporate site for **operation partners (b2b_partner)**:
+- Extended site for **dealers with the corporate-site entitlement** (operation partners
+  are entitled automatically; other types are granted from the manager panel — see below):
   - Service cards, statistics band, team cards, student testimonials, address sections
   - **Support packages** (scope bullets + "featured package" highlight), **FAQ**, and a
     **universities our students were placed at** strip
@@ -506,7 +507,15 @@ Quick review with keyboard shortcuts:
     fixed layout (the editor warns about this and labels sections a template does not render).
   - Try a template without saving: `/p/{slug}?preview=1&tpl={template-key}`
   - **"MentorDE badge" toggle** — when off, the MentorDE brand never appears on the page (full white-label)
-- Other dealer types (freelance / lead generation) get the classic single-page mini-site
+- **Corporate-site entitlement (manager)** — `/manager/dealers/{code}` → Mini-Site card →
+  **"Kurumsal site"** checkbox. Once ticked, the dealer gets the multi-section template
+  site regardless of type (freelance / lead generation), and the editor reveals the
+  template picker and card sections.
+  ⚠ This checkbox **does not change the dealer type** — commission tier, contract category
+  and reporting group stay the same. (Previously the site was tied to the b2b_partner type;
+  switching type would have moved the dealer's earnings too.)
+  For operation-partner dealers a "granted by type" note is shown instead of the checkbox.
+- Dealers without the entitlement get the classic single-page mini-site (default behaviour)
 
 ---
 

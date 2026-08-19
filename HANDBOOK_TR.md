@@ -483,7 +483,8 @@ Klavye kısayollarıyla hızlı inceleme:
 - Bayi kendi logo / marka rengi / hero metni / iletişim bilgilerini girer
 - Yayına alma (`site_enabled`) **manager onayına** bağlıdır
 - Sitedeki tüm CTA'lar `/apply/partner/{code}`'a gider → gelen lead otomatik o bayiye etiketlenir
-- **Operasyon partner (b2b_partner)** için genişletilmiş kurumsal site:
+- **Kurumsal site yetkisi olan bayi** için genişletilmiş site (operasyon partner tipi
+  otomatik yetkilidir; diğer tipler manager panelinden elle açılır — aşağı bkz.):
   - Hizmet kartları, istatistik bandı, ekip kartları, öğrenci yorumları, adres bölümleri
   - **Destek paketleri** (kapsam maddeleri + "öne çıkan paket" vurgusu), **S.S.S.**,
     **öğrencilerin yerleştiği üniversiteler** şeridi
@@ -505,7 +506,15 @@ Klavye kısayollarıyla hızlı inceleme:
     (editör bunu uyarı olarak gösterir ve şablonun basmadığı bölümü etiketler).
   - Kaydetmeden şablon denemek için: `/p/{slug}?preview=1&tpl={sablon-adi}`
   - **"MentorDE rozeti" aç/kapa** — kapatıldığında sayfada MentorDE markası hiç geçmez (tam white-label)
-- Diğer bayi tipleri (freelance / lead generation) tek sayfalık klasik mini-site alır
+- **Kurumsal site yetkisi (manager)** — `/manager/dealers/{kod}` → Mini-Site kartı →
+  **"Kurumsal site"** kutucuğu. İşaretlendiğinde bayi tipi ne olursa olsun (freelance /
+  lead generation) şablonlu çok-bölümlü siteyi alır ve editörde şablon seçici + kart
+  bölümleri açılır.
+  ⚠ Bu kutucuk **bayi tipini değiştirmez** — komisyon kademesi, sözleşme kategorisi ve
+  raporlardaki grubu aynı kalır. (Eskiden site yalnız tipi b2b_partner olan bayiye
+  açılabiliyordu; tipi değiştirmek kazancı da değiştirirdi.)
+  Operasyon partner tipindeki bayide kutucuk yerine "tipi gereği açık" bilgisi görünür.
+- Yetkisi olmayan bayi tek sayfalık klasik mini-site alır (varsayılan davranış)
 
 ---
 

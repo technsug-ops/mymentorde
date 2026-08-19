@@ -259,6 +259,26 @@
                 <input type="checkbox" name="site_enabled" value="1" {{ $dealer->site_enabled ? 'checked' : '' }}>
                 Yayında
             </label>
+
+            {{-- Kurumsal (şablonlu) site yetkisi. Tipi gereği yetkili bayide karar
+                 yok, durum bildirimi var — kutucuk basmıyoruz ki "kapalı" sanılmasın. --}}
+            @php
+                $typeGrantsSite = $dealer->dealer_type_code === 'b2b_partner'
+                    || $dealer->hasRole(\App\Models\Dealer::ROLE_B2B_PARTNER);
+            @endphp
+            @if($typeGrantsSite)
+                <div style="font-size:12px;color:#15803d;padding-bottom:8px;">
+                    ✓ Kurumsal site (tipi gereği açık)
+                </div>
+            @else
+                <input type="hidden" name="site_mode_present" value="1">
+                <label style="display:flex;gap:6px;align-items:center;font-size:13px;color:#475569;cursor:pointer;"
+                       title="Şablonlu çok-bölümlü site. Bayi tipini ve komisyon kademesini DEĞİŞTİRMEZ.">
+                    <input type="checkbox" name="site_mode" value="{{ \App\Models\Dealer::SITE_MODE_PARTNER }}"
+                           {{ $dealer->site_mode === \App\Models\Dealer::SITE_MODE_PARTNER ? 'checked' : '' }}>
+                    Kurumsal site
+                </label>
+            @endif
             <button type="submit" class="btn" style="font-size:12px;padding:8px 16px;background:#15803d;color:#fff;border:none;border-radius:6px;cursor:pointer;">Kaydet</button>
         </form>
     </div>

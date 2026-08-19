@@ -604,8 +604,25 @@ Geçersiz key sessizce `DEFAULT`'a düşer. Önizleme **yetki ister**: sahibi ba
   `$testimonials` yalnız partnerin girdiği veriden gelir; boşsa bölüm hiç basılmaz.
   Gerçek olmayan rakam, gerçek bir firmanın canlı sayfasında yanıltıcı reklamdır (UWG §5).
 
-**Tier yönlendirmesi:** `b2b_partner` (tier VEYA rol seti) → template render; diğerleri
-(freelance / lead_generation) → mevcut `public.dealer-landing` tek sayfa mini-site.
+**Yönlendirme — tek karar noktası `Dealer::usesPartnerSite()`:** true → template render,
+false → `public.dealer-landing` tek sayfa mini-site. Hem public controller hem
+`/dealer/mini-site` editörü bu metodu sorar; ikisine ayrı kopya mantık YAZMA (biri
+güncellenip diğeri unutulursa bayi kartları doldurur ama sitesi basmaz).
+
+Yetki iki yoldan gelir:
+- `dealer_type_code === 'b2b_partner'` veya rol setinde `b2b_partner` → otomatik
+- `dealers.site_mode === 'partner'` → tipten BAĞIMSIZ, manager panelinden verilir
+  (`/manager/dealers/{code}` → Mini-Site kartı → "Kurumsal site")
+
+⚠ **`dealer_type_code`'u site açmak için değiştirme.** O kolon komisyon kademelerini
+(`dealer_commission_tiers`), sözleşme kategorisini (`BusinessContractController`), KPI
+gruplarını ve alt-bayi kod üretimini besliyor — tipi çevirmek bayinin kazancını da çevirir.
+`site_mode` tam bu yüzden ayrı bir kolon.
+
+⚠ Manager formu `site_mode`'u **yalnızca `site_mode_present` hidden alanıyla birlikte**
+gönderildiğinde yazar. İşaretsiz checkbox tarayıcıda hiç gönderilmez; "gönderilmedi =
+kapat" deseydik denetimi basmayan her istek (b2b bayide kutucuk render edilmiyor) yetkiyi
+sessizce silerdi.
 
 ---
 
