@@ -251,9 +251,16 @@
         <form method="POST" action="/manager/dealers/{{ $dealer->code }}/mini-site" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
             @csrf
             <div>
-                <label style="display:block;font-size:11px;color:var(--u-muted);margin-bottom:3px;">Slug (/p/...)</label>
-                <input type="text" name="public_slug" value="{{ $dealer->public_slug }}" pattern="[a-z0-9\-]+" maxlength="64"
-                       style="width:200px;padding:7px 10px;border:1px solid var(--u-line,#cbd5e1);border-radius:6px;font-size:13px;font-family:monospace;">
+                <label style="display:block;font-size:11px;color:var(--u-muted);margin-bottom:3px;">Sayfa adresi</label>
+                {{-- "/p/" kutunun DISINDA: etiketin icine yazilinca kullanici onu da
+                     yaziyor ve tarayicinin kendi dilinde pattern hatasi aliyordu.
+                     Girdi ayrica sunucuda hizalaniyor (App\Support\DealerSlug). --}}
+                <div style="display:flex;align-items:center;gap:3px;">
+                    <span style="font-size:13px;color:var(--u-muted);font-family:monospace;">/p/</span>
+                    <input type="text" name="public_slug" value="{{ $dealer->public_slug }}" maxlength="64"
+                           placeholder="ornek-bayi"
+                           style="width:180px;padding:7px 10px;border:1px solid var(--u-line,#cbd5e1);border-radius:6px;font-size:13px;font-family:monospace;">
+                </div>
             </div>
             <label style="display:flex;gap:6px;align-items:center;font-size:13px;color:#475569;cursor:pointer;">
                 <input type="checkbox" name="site_enabled" value="1" {{ $dealer->site_enabled ? 'checked' : '' }}>

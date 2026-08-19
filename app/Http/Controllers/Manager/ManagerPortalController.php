@@ -802,6 +802,10 @@ class ManagerPortalController extends Controller
 
         $reserved = ['admin','api','manager','dealer','apply','p','satis-ortagi','platform','kayit','fiyatlar','pricing','login','randevu','uzman','go','promo','share','brand','partner','signup','sss','uni-match'];
 
+        // Kullanicinin yazdigini once hizala: "/p/Yigit Danismanlık" -> "yigit-danismanlik".
+        // Dogrulama normalize edilmis deger uzerinde calisir.
+        $request->merge(['public_slug' => \App\Support\DealerSlug::normalize($request->input('public_slug'))]);
+
         $validated = $request->validate([
             'public_slug'  => ['nullable', 'string', 'min:3', 'max:64', 'regex:/^[a-z0-9-]+$/',
                                \Illuminate\Validation\Rule::unique('dealers', 'public_slug')->ignore($dealer->id)],

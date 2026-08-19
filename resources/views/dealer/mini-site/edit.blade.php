@@ -46,10 +46,10 @@
         <div style="display:flex;align-items:center;gap:4px;">
             <span style="color:var(--muted,#64748b);font-size:14px;">/p/</span>
             <input type="text" name="public_slug" value="{{ old('public_slug', $d?->public_slug) }}" maxlength="64"
-                   placeholder="ornek-bayi" pattern="[a-z0-9\-]+"
+                   placeholder="ornek-bayi"
                    style="flex:1;padding:10px 12px;border:1px solid var(--border,#cbd5e1);border-radius:8px;font-size:14px;font-family:ui-monospace,monospace;">
         </div>
-        <small style="color:var(--muted,#64748b);font-size:12px;">Sadece küçük harf, rakam ve tire. Benzersiz olmalı.</small>
+        <small style="color:var(--muted,#64748b);font-size:12px;">Küçük harf, rakam ve tire. Türkçe harf ve boşluk otomatik çevrilir. Benzersiz olmalı.</small>
     </div>
 
     <div style="margin-bottom:16px;">
