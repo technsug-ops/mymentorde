@@ -611,6 +611,7 @@
     </div>
     <div class="d-footer-bottom container" style="display:block;">
         © {{ date('Y') }} MentörDE — Tüm hakları saklıdır.
+        · @include('partials.vendor-credit')
     </div>
 </footer>
 

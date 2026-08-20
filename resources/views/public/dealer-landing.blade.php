@@ -1581,7 +1581,8 @@ footer a { color:var(--accent); }
  <div class="container">
  © {{ date('Y') }} {{ $dlBrandName }} · Almanya eğitim danışmanlığında uzman platform ·
  <a href="/legal/terms">Kullanım Koşulları</a> ·
- <a href="/legal/privacy">Gizlilik</a>
+ <a href="/legal/privacy">Gizlilik</a> ·
+ @include('partials.vendor-credit')
  </div>
 </footer>
 

@@ -171,7 +171,8 @@
     © {{ date('Y') }} {{ config('brand.name', 'MentorDE') }} —
     <a href="/">Anasayfa</a> ·
     <a href="{{ route('public.faq') }}">SSS</a> ·
-    <a href="/iletisim">İletişim</a>
+    <a href="/iletisim">İletişim</a> ·
+    @include('partials.vendor-credit')
 </footer>
 
 <script>

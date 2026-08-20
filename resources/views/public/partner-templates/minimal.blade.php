@@ -278,7 +278,7 @@ footer a{color:var(--ink);}
 <footer>
     <div class="wrap">
         <span>© {{ now()->year }} {{ $siteName }}</span>
-        @if($showBadge)<span>Powered by <a href="https://panel.mentorde.com" target="_blank" rel="noopener">{{ config('brand.name', 'MentorDE') }}</a></span>@endif
+        @if($showBadge)<span>@include('partials.vendor-credit')</span>@endif
     </div>
 </footer>
 

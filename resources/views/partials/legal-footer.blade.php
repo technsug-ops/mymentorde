@@ -69,6 +69,7 @@
     <div class="lf-inner">
         <div class="lf-copy">
             © {{ date('Y') }} {{ config('brand.name', 'MentorDE') }}. Tüm hakları saklıdır.
+            · @include('partials.vendor-credit')
         </div>
         <nav class="lf-links" aria-label="Yasal bilgiler">
             <a href="{{ route('legal.imprint') }}">Impressum</a>

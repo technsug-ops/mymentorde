@@ -548,7 +548,8 @@
         <div style="margin-top:8px;">
             <a href="/randevu">Tüm Uzmanlar</a> ·
             <a href="/platform">Platform</a> ·
-            <a href="/sss">SSS</a>
+            <a href="/sss">SSS</a> ·
+            @include('partials.vendor-credit')
         </div>
     </div>
 </footer>

@@ -2315,6 +2315,7 @@ footer a:hover { color:#fff; }
     </div>
     <div class="footer-bottom container" style="display:block;">
         © {{ date('Y') }} {{ $brand }} · Almanya eğitim danışmanlığında uzman SaaS platformu.
+        · @include('partials.vendor-credit')
     </div>
 </footer>
 

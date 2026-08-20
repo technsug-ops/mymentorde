@@ -603,6 +603,12 @@ Geçersiz key sessizce `DEFAULT`'a düşer. Önizleme **yetki ister**: sahibi ba
 - **Uydurma veri yok:** Şablonda örnek yorum / hayali rakam yazma. `$heroTrust` ve
   `$testimonials` yalnız partnerin girdiği veriden gelir; boşsa bölüm hiç basılmaz.
   Gerçek olmayan rakam, gerçek bir firmanın canlı sayfasında yanıltıcı reklamdır (UWG §5).
+- **Sağlayıcı künyesi sabit metin DEĞİL:** "Powered by techNSUG" satırı
+  `resources/views/partials/vendor-credit.blade.php` ile basılır, ad/adres
+  `config('brand.vendor')`'dan okunur. 26 public sayfada geçiyor — şablona elle
+  yazarsan sağlayıcı adı değiştiğinde sayfalar arasında iki farklı isim kalır.
+  Yeni şablonda künyeyi `$showBadge` koşulunun **içine** koy: rozet kapalıyken
+  hiçbir üçüncü taraf markası basılmamalı, kendi künyemiz de istisna değil.
 
 **Yönlendirme — tek karar noktası `Dealer::usesPartnerSite()`:** true → template render,
 false → `public.dealer-landing` tek sayfa mini-site. Hem public controller hem

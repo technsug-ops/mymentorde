@@ -21,6 +21,19 @@ return [
     'tagline'      => env('BRAND_TAGLINE', 'Almanya Eğitim Danışmanlığı'),
     'accent'       => env('BRAND_ACCENT', 'DE'),
 
+    // ── Yazilim saglayici (vendor) ────────────────────────────────────
+    // MARKA DEGIL. `name` yukarisi kiracinin markasidir (MentorDE,
+    // YourGermanUni, partner firma...); burasi yazilimi YAPAN taraftir.
+    // Varsayilani tum kiracilarda AYNI kalir: Brand::stripPlatformIdentity()
+    // white-label'da bu grubu temizlemez (temizleseydi kunye kaybolurdu).
+    // Yine de platform sahibi isterse sirket bazinda companies.brand_overrides
+    // icinde 'vendor' anahtariyla ezebilir — bayi/partner kendi ezemez.
+    // Public sayfalarin altindaki "Powered by" satiri buradan okunur.
+    'vendor' => [
+        'name' => env('BRAND_VENDOR_NAME', 'techNSUG'),
+        'url'  => env('BRAND_VENDOR_URL', 'https://www.techns.de'),
+    ],
+
     // ── Katalog istatistikleri (UniMatch + landing'de tek kaynak) ────────
     // Yeni programlar eklendikçe sadece bu degerleri guncelle (veya env override).
     // Format ornegi: '15K+' rozet, '15.000+' tam yazi.

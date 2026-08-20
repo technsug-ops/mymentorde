@@ -506,7 +506,8 @@ Quick review with keyboard shortcuts:
     Section order and on/off apply to the **10 new templates**; the 3 legacy ones have a
     fixed layout (the editor warns about this and labels sections a template does not render).
   - Try a template without saving: `/p/{slug}?preview=1&tpl={template-key}`
-  - **"MentorDE badge" toggle** — when off, the MentorDE brand never appears on the page (full white-label)
+  - **"MentorDE badge" toggle** — when off, neither the MentorDE brand nor the software
+    vendor credit ("Powered by techNSUG") appears on the page: full white-label
 - **Corporate-site entitlement (manager)** — `/manager/dealers/{code}` → Mini-Site card →
   **"Kurumsal site"** checkbox. Once ticked, the dealer gets the multi-section template
   site regardless of type (freelance / lead generation), and the editor reveals the
