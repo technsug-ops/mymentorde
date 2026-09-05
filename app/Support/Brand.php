@@ -115,6 +115,17 @@ final class Brand
         config(['brand' => self::resolve($company)]);
         app()->instance(self::BRAND_COMPANY_KEY, (int) $company->id);
 
+        // app.name DE markaya bağlanır. Laravel'in vendor mail şablonları
+        // (MailMessage bildirimleri: e-posta doğrulama, şifre sıfırlama...)
+        // başlık ve alt bilgide config('app.name') okur — bağlanmazsa partner
+        // maili doğru konu/imzayla ama "MentorDE" başlığıyla çıkar. 2FA
+        // issuer adı da buradan gelir; partner kullanıcısının authenticator'ında
+        // kendi markasını görmesi white-label'ın gereği.
+        $brandName = trim((string) config('brand.name', ''));
+        if ($brandName !== '') {
+            config(['app.name' => $brandName]);
+        }
+
         self::applyMailIdentity($company);
     }
 
@@ -660,6 +671,9 @@ final class Brand
     {
         return [
             'brand' => (array) config('brand', []),
+            // app.name apply()'da markaya bağlanıyor — taşınmazsa kuyruk işi
+            // iade ederken bir önceki firmanın adı vendor mail başlığında kalırdı.
+            'app_name' => config('app.name'),
             // Gönderici kimliği de taşınmalı: iş, isteğin markasını iade
             // ettiğinde mail "from" bilgisi geride kalırsa sonraki mail
             // yanlış firma adına çıkardı.
@@ -683,6 +697,10 @@ final class Brand
     public static function restore(array $snapshot): void
     {
         config(['brand' => $snapshot['brand'] ?? []]);
+
+        if (array_key_exists('app_name', $snapshot)) {
+            config(['app.name' => $snapshot['app_name']]);
+        }
 
         if (isset($snapshot['mail_from'])) {
             config(['mail.from' => $snapshot['mail_from']]);

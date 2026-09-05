@@ -682,8 +682,12 @@ class GuestApplicationController extends Controller
 
     private function queueOnRegisterNotifications(GuestApplication $row, ?string $seniorEmail, ?string $generatedPassword): void
     {
+        // Marka config'den — white-label tenant'ta "MentorDE" geçmemeli
+        // (bkz. App\Support\Brand). "ailesine" eki her marka adıyla uyumlu.
+        $brandName = trim((string) config('brand.name', '')) ?: 'MentorDE';
+
         $guestBody  = "Merhaba {$row->first_name},\n\n";
-        $guestBody .= "MentorDE'ye hoş geldiniz! Başvurunuz başarıyla alındı.\n\n";
+        $guestBody .= "{$brandName} ailesine hoş geldiniz! Başvurunuz başarıyla alındı.\n\n";
         $guestBody .= "Takip kodunuz: {$row->tracking_token}\n\n";
 
         if ($generatedPassword) {
@@ -710,9 +714,14 @@ class GuestApplicationController extends Controller
                 $guestBody .= "(Bağlantı 7 gün geçerli. Şifrenizi güvenli tutun, ilk girişte değiştirmeniz önerilir.)\n";
             }
         } else {
+            // Bu e-postayla kayıtlı hesap ZATEN VAR → yeni şifre üretilmez
+            // (güvenlik: re-apply mevcut şifreyi sıfırlamamalı, bkz. resolveGuestUser).
+            // Bunu söylemezsek kullanıcı "şifrem/aktivasyonum gelmedi" diye bekler.
+            $guestBody .= "Bu e-posta adresiyle daha önce oluşturulmuş bir hesabınız var; mevcut şifrenizle giriş yapabilirsiniz.\n";
+            $guestBody .= "Şifrenizi hatırlamıyorsanız buradan yeni şifre belirleyebilirsiniz: ".url('/forgot-password')."\n\n";
             $guestBody .= "Portal girişi: ".url('/login')."\n";
         }
-        $guestBody .= "\nMentorDE Ekibi";
+        $guestBody .= "\n{$brandName} Ekibi";
 
         $this->notificationService->send([
             'channel'         => 'email',
@@ -720,7 +729,7 @@ class GuestApplicationController extends Controller
             'recipient_email' => (string) $row->email,
             'recipient_phone' => (string) ($row->phone ?? ''),
             'recipient_name'  => trim((string) ($row->first_name.' '.$row->last_name)),
-            'subject'         => 'MentorDE — Başvurunuz Alındı',
+            'subject'         => $brandName.' — Başvurunuz Alındı',
             'body'            => $guestBody,
             'variables'       => [
                 'tracking_token' => (string) $row->tracking_token,

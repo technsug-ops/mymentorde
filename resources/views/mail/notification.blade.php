@@ -25,8 +25,13 @@
     {!! nl2br(e($mailBody)) !!}
   </div>
   <div class="footer">
+    @php
+        // app.url platformun sabit adresi (panel.mentorde.com) — partner mailinde
+        // basılırsa marka sızıntısı. Markanın kendi sitesi varsa o kullanılır.
+        $footerUrl = trim((string) config('brand.website', '')) ?: config('app.url');
+    @endphp
     Bu e-posta {{ config('brand.name', 'MentorDE') }} platformu tarafından otomatik olarak gönderilmiştir.<br>
-    <a href="{{ config('app.url') }}">{{ config('app.url') }}</a>
+    <a href="{{ $footerUrl }}">{{ $footerUrl }}</a>
   </div>
 </div>
 </body>

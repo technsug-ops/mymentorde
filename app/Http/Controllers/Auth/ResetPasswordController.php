@@ -49,6 +49,15 @@ class ResetPasswordController extends Controller
             return redirect('/login')->with('status', 'Şifreniz belirlendi. Şimdi giriş yapabilirsiniz.');
         }
 
-        return back()->withErrors(['email' => __($status)]);
+        // lang/ klasörü yok → __($status) İngilizce framework metnini basıyordu
+        // ("This password reset token is invalid."). Token ve kullanıcı hatası
+        // aynı mesajı alır: form e-posta alanını da içerdiği için "kullanıcı
+        // bulunamadı" demek e-posta varlığını sızdırırdı.
+        return back()->withErrors(['email' => match ($status) {
+            Password::INVALID_TOKEN,
+            Password::INVALID_USER => 'Şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş. Lütfen giriş sayfasından yeni bir bağlantı isteyin.',
+            Password::RESET_THROTTLED => 'Çok sık denediniz. Lütfen bir dakika bekleyip tekrar deneyin.',
+            default => 'Şifre belirlenemedi, lütfen tekrar deneyin.',
+        }]);
     }
 }
