@@ -768,6 +768,7 @@
         </div>
         <div class="l-foot-bottom">
             © {{ date('Y') }} {{ $brandName ?? 'MentorDE' }} · Tüm hakları saklıdır
+            · @include('partials.vendor-credit')
         </div>
     </div>
 </footer>

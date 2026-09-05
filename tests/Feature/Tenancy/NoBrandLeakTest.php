@@ -60,6 +60,139 @@ class NoBrandLeakTest extends TestCase
         $this->assertStringContainsString('YourGermanUni', $html);
     }
 
+    /**
+     * ŞİFRE AKIŞI SAYFALARI — canlıda yakalanan sızıntı: yourgermanuni.com/
+     * forgot-password sabit "MentorDE" logosu basıyordu (logo yoksa @else dalı
+     * hardcode'a düşüyordu). Reset sayfasında logo tamamen sabitti.
+     */
+    public function test_tenant_password_pages_do_not_leak_the_platform_brand(): void
+    {
+        $this->setUpTenantBrand();
+
+        $pages = [
+            'http://yourgermanuni.test/forgot-password',
+            'http://yourgermanuni.test/reset-password/fake-token-abc123',
+        ];
+
+        foreach ($pages as $url) {
+            $html = $this->get($url)->assertOk()->getContent();
+
+            foreach (self::LEAK_PATTERNS as $needle) {
+                $this->assertStringNotContainsString(
+                    $needle,
+                    $html,
+                    "Tenant şifre sayfasında platform markası sızdı ({$url}): '{$needle}'"
+                );
+            }
+
+            $this->assertStringContainsString('YourGermanUni', $html, "Tenant markası basılmadı: {$url}");
+        }
+    }
+
+    /**
+     * Şifre sıfırlama MAİLİ tenant markasıyla çıkmalı. Default Laravel
+     * ResetPassword İngilizce + platform adıyla çıkıyordu; ResetPasswordTr
+     * config('brand.name') okur, vendor şablon başlığı da app.name üzerinden
+     * markaya bağlandı (Brand::apply).
+     */
+    public function test_password_reset_mail_uses_the_tenant_brand(): void
+    {
+        $this->setUpTenantBrand();
+
+        Brand::apply($this->companyB->fresh());
+
+        $user = User::create([
+            'name' => 'Reset Kullanıcı',
+            'email' => 'reset@yourgermanuni.test',
+            'password' => Hash::make('secret-password'),
+            'role' => User::ROLE_STUDENT,
+            'company_id' => $this->companyB->id,
+        ]);
+
+        $mail = (new \App\Notifications\ResetPasswordTr('fake-token'))->toMail($user);
+
+        $this->assertStringContainsString('YourGermanUni', (string) $mail->subject);
+        $this->assertStringNotContainsString('MentorDE', (string) $mail->subject);
+        $this->assertStringNotContainsString('MentorDE', (string) $mail->salutation);
+
+        // Vendor mail şablonunun başlık/alt bilgisi app.name okur — o da markaya
+        // bağlanmış olmalı, yoksa konu doğru ama başlık "MentorDE" çıkar.
+        $this->assertSame('YourGermanUni', config('app.name'));
+    }
+
+    /**
+     * Reset maili KULLANICININ FİRMASININ markasıyla çıkmalı — isteğin geldiği
+     * host'un markasıyla değil. Canlıda yakalandı: ortak portal domaininden
+     * (yourgermanuni.com) istenince alt firmanın kullanıcısına portalın (hatta
+     * stock bildirimde platformun) kimliğiyle mail gidiyordu.
+     *
+     * Burada tersi kurgulanır: platform host'undan istek, companyB kullanıcısı →
+     * mail yine companyB markasıyla çıkmalı. Event üzerinden GERÇEK gönderilen
+     * mesaj denetlenir (array transport'un mesaj listesi Brand::restore'un
+     * forgetMailers çağrısıyla düştüğü için oradan okunamaz).
+     */
+    public function test_password_reset_mail_is_branded_for_the_users_own_company(): void
+    {
+        $this->setUpTenantBrand();
+
+        $user = User::create([
+            'name' => 'Firma Kullanıcısı',
+            'email' => 'firma-reset@yourgermanuni.test',
+            'password' => Hash::make('secret-password'),
+            'role' => User::ROLE_STUDENT,
+            'company_id' => $this->companyB->id,
+        ]);
+
+        \Illuminate\Support\Facades\Event::fake([\Illuminate\Mail\Events\MessageSent::class]);
+
+        // Platform host'undan istek — marka bağlamı kasıtlı olarak YANLIŞ şirkette.
+        $this->post('/forgot-password', ['email' => $user->email])->assertRedirect();
+
+        \Illuminate\Support\Facades\Event::assertDispatched(
+            \Illuminate\Mail\Events\MessageSent::class,
+            function ($event): bool {
+                $message = $event->sent->getOriginalMessage();
+                $subject = (string) $message->getSubject();
+                $html    = (string) $message->getHtmlBody();
+
+                return str_contains($subject, 'YourGermanUni')
+                    && !str_contains($subject, 'MentorDE')
+                    && str_contains($html, 'YourGermanUni')
+                    && !str_contains($html, 'MentorDE');
+            }
+        );
+
+        // İade kontrolü: istek platform markasıyla sürmeli, firma markası kalmamalı.
+        $this->assertNotSame('YourGermanUni', config('brand.name'));
+    }
+
+    /**
+     * NotificationMail şablonu (başvuru alındı, belge talebi... tüm sistem
+     * mailleri) — alt bilgideki link config('app.url') basıyordu, yani partner
+     * mailinin altında panel.mentorde.com çıkıyordu.
+     */
+    public function test_notification_mail_template_does_not_leak_the_platform_brand(): void
+    {
+        $this->setUpTenantBrand();
+
+        Brand::apply($this->companyB->fresh());
+
+        $html = view('mail.notification', [
+            'mailSubject' => 'Test Konu',
+            'mailBody'    => 'Test gövde metni.',
+        ])->render();
+
+        foreach (self::LEAK_PATTERNS as $needle) {
+            $this->assertStringNotContainsString(
+                $needle,
+                $html,
+                "Tenant sistem mailinde platform markası sızdı: '{$needle}'"
+            );
+        }
+
+        $this->assertStringContainsString('YourGermanUni', $html);
+    }
+
     public function test_welcome_mail_subject_uses_the_tenant_brand(): void
     {
         $this->setUpTenantBrand();

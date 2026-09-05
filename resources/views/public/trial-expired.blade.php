@@ -181,7 +181,8 @@ h1 {
     © {{ date('Y') }} {{ $brandName }} ·
     <a href="/fiyatlar">Planlar</a> ·
     <a href="/legal/privacy">Gizlilik</a> ·
-    <a href="/durum">Sistem Durumu</a>
+    <a href="/durum">Sistem Durumu</a> ·
+    @include('partials.vendor-credit')
 </footer>
 
 </body>

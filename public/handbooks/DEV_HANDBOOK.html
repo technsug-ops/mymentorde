@@ -910,6 +910,12 @@ latin + <strong>latin-ext</strong> (Türkçe karakterler) olarak indirip <code>@
 <li><strong>Uydurma veri yok:</strong> Şablonda örnek yorum / hayali rakam yazma. <code>$heroTrust</code> ve
 <code>$testimonials</code> yalnız partnerin girdiği veriden gelir; boşsa bölüm hiç basılmaz.
 Gerçek olmayan rakam, gerçek bir firmanın canlı sayfasında yanıltıcı reklamdır (UWG §5).</li>
+<li><strong>Sağlayıcı künyesi sabit metin DEĞİL:</strong> &quot;Powered by techNSUG&quot; satırı
+<code>resources/views/partials/vendor-credit.blade.php</code> ile basılır, ad/adres
+<code>config('brand.vendor')</code>'dan okunur. 26 public sayfada geçiyor — şablona elle
+yazarsan sağlayıcı adı değiştiğinde sayfalar arasında iki farklı isim kalır.
+Yeni şablonda künyeyi <code>$showBadge</code> koşulunun <strong>içine</strong> koy: rozet kapalıyken
+hiçbir üçüncü taraf markası basılmamalı, kendi künyemiz de istisna değil.</li>
 </ul>
 <p><strong>Yönlendirme — tek karar noktası <code>Dealer::usesPartnerSite()</code>:</strong> true → template render,
 false → <code>public.dealer-landing</code> tek sayfa mini-site. Hem public controller hem

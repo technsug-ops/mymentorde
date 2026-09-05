@@ -306,7 +306,7 @@ h1,h2,h3{margin:0;}
         <span class="foot-dim">
             © {{ now()->year }} {{ $siteName }}
             @if($showBadge)
-                · Powered by <a href="https://panel.mentorde.com" target="_blank" rel="noopener">{{ config('brand.name', 'MentorDE') }}</a>
+                · @include('partials.vendor-credit')
             @endif
         </span>
         @if($instagram)

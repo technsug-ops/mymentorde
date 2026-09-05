@@ -54,7 +54,7 @@
 <div class="card">
     @php
         $fpBrand   = $brandName ?? config('brand.name', 'MentorDE');
-        $fpLogoUrl = $brandLogoUrl ?? '';
+        $fpLogoUrl = $brandLogoUrl ?? (string) config('brand.logo_url', '');
         $fpLogoBg  = $brandLogoBg ?? 'light';
         $fpLogoBgStyle = match($fpLogoBg) {
             'dark'        => 'background:#1a1a2e;padding:8px 12px;border-radius:8px;',
@@ -67,8 +67,10 @@
             <div style="display:inline-block;{{ $fpLogoBgStyle }}">
                 <img src="{{ $fpLogoUrl }}" alt="{{ $fpBrand }}" style="height:40px;width:auto;max-width:160px;object-fit:contain;display:block;">
             </div>
-        @else
+        @elseif($fpBrand === 'MentorDE')
             Mentor<span>DE</span>
+        @else
+            {{ $fpBrand }}
         @endif
     </div>
     <h1>Şifremi Unuttum</h1>

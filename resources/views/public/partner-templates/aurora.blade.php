@@ -446,7 +446,7 @@ footer .pb{opacity:.6;font-size:12px;margin-top:6px;}
     <div class="container">
         © {{ now()->year }} {{ $siteName }} — Tüm hakları saklıdır.
         @if($showBadge)
-            <div class="pb">Powered by <a href="https://panel.mentorde.com" target="_blank" rel="noopener">{{ config('brand.name', 'MentorDE') }}</a></div>
+            <div class="pb">@include('partials.vendor-credit')</div>
         @endif
     </div>
 </footer>

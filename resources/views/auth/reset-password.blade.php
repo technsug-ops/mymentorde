@@ -62,7 +62,23 @@
 </head>
 <body>
 <div class="card">
-    <div class="logo">Mentor<span>DE</span></div>
+    @php
+        // Marka DAİMA config('brand')'den — sabit "MentorDE" yazmak partner
+        // domaininde (white-label) platform markasını sızdırır.
+        $rpBrand   = config('brand.name', 'MentorDE');
+        $rpLogoUrl = (string) config('brand.logo_url', '');
+    @endphp
+    <div class="logo">
+        @if($rpLogoUrl !== '')
+            <div style="display:inline-block;background:#fff;padding:8px 12px;border-radius:8px;">
+                <img src="{{ $rpLogoUrl }}" alt="{{ $rpBrand }}" style="height:40px;width:auto;max-width:160px;object-fit:contain;display:block;">
+            </div>
+        @elseif($rpBrand === 'MentorDE')
+            Mentor<span>DE</span>
+        @else
+            {{ $rpBrand }}
+        @endif
+    </div>
     <h1>Yeni Şifre Belirle</h1>
 
     @if ($errors->any())

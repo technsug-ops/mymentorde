@@ -43,6 +43,36 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         $this->notify(new \App\Notifications\VerifyEmailTr());
     }
 
+    /**
+     * Şifre sıfırlama bildirimi Türkçe + KULLANICININ FİRMASININ markasıyla gönderilir.
+     * Default Laravel ResetPassword İngilizce ve platform adıyla çıkardı —
+     * partner domaininde (white-label) marka sızıntısıydı.
+     *
+     * ⚠ İsteğin markası YETMEZ: talep ortak portal domaininden gelir
+     * (yourgermanuni.com) ve oradaki marka portalın kendisidir. Alt firmanın
+     * kullanıcısı maili kendi firmasının kimliğiyle almalı — Brand::apply
+     * gönderen adını "Portal · Firma" yapar, firmanın taşıyıcısı varsa onu
+     * kullanır. finally ile isteğin markası her koşulda iade edilir.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $snapshot = \App\Support\Brand::snapshot();
+
+        try {
+            $company = Company::query()
+                ->withoutGlobalScope('company')
+                ->find($this->company_id);
+
+            if ($company) {
+                \App\Support\Brand::apply($company);
+            }
+
+            $this->notify(new \App\Notifications\ResetPasswordTr($token));
+        } finally {
+            \App\Support\Brand::restore($snapshot);
+        }
+    }
+
     protected static function booted(): void
     {
         static::creating(function (User $user): void {

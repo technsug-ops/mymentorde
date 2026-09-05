@@ -143,12 +143,12 @@
                 <a href="{{ $profileUrl }}" class="rf-state-link">{{ $seniorName }} Profilini Gör</a>
             @endif
         </div>
-        <div class="rf-footer">© {{ date('Y') }} MentörDE</div>
+        <div class="rf-footer">© {{ date('Y') }} MentörDE · @include('partials.vendor-credit')</div>
 
     @elseif($state === 'not_eligible')
         <h1 class="rf-h1">Görüşme bulunamadı</h1>
         <p class="rf-sub">Bu randevu henüz tamamlanmamış veya iptal edilmiş. Yorumun ancak görüşme tamamlandıktan sonra yazılabilir.</p>
-        <div class="rf-footer">© {{ date('Y') }} MentörDE</div>
+        <div class="rf-footer">© {{ date('Y') }} MentörDE · @include('partials.vendor-credit')</div>
 
     @else
         <h1 class="rf-h1">Görüşmeni Değerlendir</h1>

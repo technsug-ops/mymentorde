@@ -193,6 +193,7 @@
 
 <footer class="footer">
     © {{ date('Y') }} {{ $brandName ?? 'MentorDE' }} — <a href="/">Anasayfa</a>
+    · @include('partials.vendor-credit')
 </footer>
 
 <script>

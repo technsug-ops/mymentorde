@@ -386,7 +386,7 @@ a { color:var(--primary); text-decoration:none; }
 
 {{-- FOOT --}}
 <footer class="p-foot">
-    <p>© {{ date('Y') }} {{ $brand }} · <a href="/platform">Platform</a> · <a href="/sss">SSS</a> · <a href="/legal/privacy">Gizlilik</a> · <a href="/legal/imprint">Künye</a></p>
+    <p>© {{ date('Y') }} {{ $brand }} · <a href="/platform">Platform</a> · <a href="/sss">SSS</a> · <a href="/legal/privacy">Gizlilik</a> · <a href="/legal/imprint">Künye</a> · @include('partials.vendor-credit')</p>
 </footer>
 
 </body>

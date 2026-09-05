@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\ResetPasswordTr;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -41,8 +41,8 @@ class PasswordResetFlowTest extends TestCase
             ->assertRedirect()
             ->assertSessionHas('status');
 
-        // Şifre sıfırlama bildirimi gönderildi mi?
-        Notification::assertSentTo($user, ResetPassword::class);
+        // Şifre sıfırlama bildirimi gönderildi mi? (Türkçe + marka-duyarlı sürüm)
+        Notification::assertSentTo($user, ResetPasswordTr::class);
     }
 
     public function test_send_reset_link_with_unknown_email_returns_same_generic_status(): void

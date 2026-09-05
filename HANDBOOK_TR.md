@@ -505,7 +505,8 @@ Klavye kısayollarıyla hızlı inceleme:
     Bölüm sırası ve aç/kapa **10 yeni şablonda** uygulanır; eski 3 şablon sabit kurguludur
     (editör bunu uyarı olarak gösterir ve şablonun basmadığı bölümü etiketler).
   - Kaydetmeden şablon denemek için: `/p/{slug}?preview=1&tpl={sablon-adi}`
-  - **"MentorDE rozeti" aç/kapa** — kapatıldığında sayfada MentorDE markası hiç geçmez (tam white-label)
+  - **"MentorDE rozeti" aç/kapa** — kapatıldığında sayfada ne MentorDE markası ne de
+    yazılım sağlayıcı künyesi ("Powered by techNSUG") geçer: tam white-label
 - **Kurumsal site yetkisi (manager)** — `/manager/dealers/{kod}` → Mini-Site kartı →
   **"Kurumsal site"** kutucuğu. İşaretlendiğinde bayi tipi ne olursa olsun (freelance /
   lead generation) şablonlu çok-bölümlü siteyi alır ve editörde şablon seçici + kart
