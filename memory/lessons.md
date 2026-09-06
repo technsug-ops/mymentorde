@@ -5,6 +5,31 @@ Aynı hatayı bir daha yapmamak için her seansın başında gözden geçirilmel
 
 ---
 
+## 5-6 Eylül 2026 — White-label marka sızıntısı: "istek markası" her zaman doğru marka değil
+
+**Olay:** yourgermanuni.com'da (B2B portal) 3 ayrı sızıntı: (1) başvuru mailinde sabit
+"MentorDE'ye hoş geldiniz / MentorDE Ekibi" metni, (2) forgot/reset-password sayfalarında
+logo yoksa sabit `Mentor<span>DE</span>` fallback'i, (3) şifre sıfırlama maili stock Laravel
+ResetPassword (İngilizce + vendor şablon başlığında `app.name`=MentorDE). Kullanıcı ikinci
+turda ayrıca düzeltmelerin canlıda görünmediğini bildirdi — commit edilmemişti, canlı eski koddu.
+
+**Kurallar:**
+1. **Kullanıcıya görünen hiçbir string'e "MentorDE" sabit yazma** — daima `config('brand.name')`.
+   Aynısı `config('app.url')` için geçerli (mail footer'da panel.mentorde.com sızdı → `brand.website`).
+2. **Mail markası, isteğin değil KONUNUN markasıdır.** Ortak portal domaininden gelen şifre
+   sıfırlama isteğinde kullanıcının FİRMASININ markası basılmalı → `Brand::snapshot/apply/restore`
+   sarmalı (bkz. `User::sendPasswordResetNotification`).
+3. **Vendor şablonlar da sızdırır:** MailMessage bildirimleri başlık/altbilgide `config('app.name')`
+   okur — `Brand::apply` artık app.name'i de bağlıyor; yeni MailMessage bildirimi eklerken
+   İngilizce default'u Türkçe + marka-duyarlı override et (VerifyEmailTr / ResetPasswordTr deseni).
+4. **`lang/` klasörü yok** — `__($status)` framework metinlerini İngilizce basar; auth akışı
+   mesajlarını controller'da Türkçe map'le.
+5. **Sızıntı düzeltmesi = bekçi test:** her düzeltme `NoBrandLeakTest`'e davranış testi olarak
+   eklenir (sayfa + mail render'ı, LEAK_PATTERNS ile).
+6. **"Düzelttim" demeden önce nerede olduğunu söyle:** lokalde geçen test canlıyı değiştirmez;
+   kullanıcı canlıda test ediyorsa commit + deploy durumunu açıkça raporla.
+
+---
 ## 19 Haziran 2026 — Admin kayıt yönetimi: list+generate yetmez, CRUD tam olmalı
 
 **Olay:** Platform Owner Faturalama modülü smoke test'inde kullanıcı uyardı: "fatura yanlış kesildiğinde silme veya değiştirme opsiyonumuz olmalı". Modül sadece generate/send/mark-paid içeriyordu; düzenle/iptal/sil yoktu.
@@ -167,3 +192,4 @@ Aynı anda iki sızıntı daha vardı:
    aksi halde aynı istekte ikinci çözümleme önceki tenant'ı miras alır.
 4. Test yazarken "X görünüyor mu"nun yanına **"Y görünmüyor mu"** da yaz.
    Sızıntı testleri assertDontSee ile yakalanır; assertSee ile değil.
+
