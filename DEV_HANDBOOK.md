@@ -586,7 +586,8 @@ alanlarından gelir ve `/dealer/mini-site` editöründen girilir.
 **Görünen ad / etiket:** `$brandName` = `Dealer::siteBrandName()` (`site_brand_name` ?: `name`),
 `$tagline` = `site_tagline` ?: "Almanya Eğitim Danışmanlığı". Şablonlar `$siteTagline` kullanır.
 `dealers.name` kayıt adıdır (rapor/komisyon/sözleşme) — site adı için onu DEĞİŞTİRME,
-sitede ad basan her yer `siteBrandName()`'i sormalı.
+sitede ad basan her yer `siteBrandName()`'i sormalı. Şu an soranlar: partner şablonları,
+`public.dealer-landing`, `dealer/layouts/app` sol menü + avatar, `apply/create` partner şeridi.
 
 **Önizleme:** `/p/{slug}?preview=1&tpl={key}` — kaydetmeden başka şablon denemek için.
 Geçersiz key sessizce `DEFAULT`'a düşer. Önizleme **yetki ister**: sahibi bayi kullanıcısı

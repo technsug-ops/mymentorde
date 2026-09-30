@@ -111,7 +111,6 @@
         {{-- Sidebar Header (merged brand + user) --}}
         @php
             $dealerUser     = auth()->user();
-            $dealerInitials = strtoupper(substr(preg_replace('/\s+/', '', ($dealerUser?->name ?? 'DE')), 0, 2));
             $dealerPhoto    = $dealerUser?->photo_url ? \Illuminate\Support\Facades\Storage::disk('public')->url($dealerUser->photo_url) : null;
             // $__sidebarDealer her zaman tanımlı olsun (satır ~192 isRegional kontrolü +
             // manager preview için null-safe). tierPerms controller'dan gelmemişse türet.
@@ -119,6 +118,10 @@
             if (!isset($tierPerms)) {
                 $tierPerms = \App\Support\DealerTierPermissions::for($__sidebarDealer);
             }
+            // Görünen ad: partnerin Mini-Site'ta girdiği ad (Dealer::siteBrandName()),
+            // bayi kaydı yoksa (manager önizleme) kullanıcı adı.
+            $dealerDisplayName = $__sidebarDealer?->siteBrandName() ?: ($dealerUser?->name ?? 'Bayi');
+            $dealerInitials    = mb_strtoupper(mb_substr(preg_replace('/\s+/u', '', $dealerDisplayName), 0, 2));
         @endphp
         @php
             $dlBrandName    = $brandName ?? config('brand.name', 'MentorDE');
@@ -152,7 +155,7 @@
             <div style="display:flex;align-items:center;gap:10px;">
                 <div class="avatar" style="width:42px;height:42px;font-size:15px;flex-shrink:0;overflow:hidden;">@if($dealerPhoto)<img src="{{ $dealerPhoto }}" alt="Profil" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">@else{{ $dealerInitials }}@endif</div>
                 <div style="flex:1;min-width:0;">
-                    <div class="user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $dealerUser?->name ?? 'Bayi' }}</div>
+                    <div class="user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $dealerDisplayName }}</div>
                     <div class="user-role">
                         <span style="display:inline-block;padding:1px 7px;border-radius:4px;font-size:9px;font-weight:800;background:{{ $tierPerms->tierColor() }};color:#fff;letter-spacing:.04em;">
                             T{{ $tierPerms->tier() }}
@@ -323,7 +326,7 @@
                 @yield('topbar-actions')
                 <button class="icon-btn" id="dm-btn" title="Tema" aria-label="Karanlık moda geç"><x-icon name="moon" size="18" /></button>
                 <button class="icon-btn" id="design-btn" title="Tasarım Teması" aria-label="Tasarım temasını değiştir"><x-icon name="palette" size="18" /></button>
-                <div class="avatar" style="width:36px;height:36px;font-size:13px;overflow:hidden;" title="{{ $dealerUser?->name ?? 'Bayi' }}">
+                <div class="avatar" style="width:36px;height:36px;font-size:13px;overflow:hidden;" title="{{ $dealerDisplayName }}">
                     @if($dealerPhoto)<img src="{{ $dealerPhoto }}" alt="Profil" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">@else{{ $dealerInitials }}@endif
                 </div>
             </div>
