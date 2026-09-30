@@ -893,7 +893,8 @@ alanlarından gelir ve <code>/dealer/mini-site</code> editöründen girilir.</p>
 <p><strong>Görünen ad / etiket:</strong> <code>$brandName</code> = <code>Dealer::siteBrandName()</code> (<code>site_brand_name</code> ?: <code>name</code>),
 <code>$tagline</code> = <code>site_tagline</code> ?: &quot;Almanya Eğitim Danışmanlığı&quot;. Şablonlar <code>$siteTagline</code> kullanır.
 <code>dealers.name</code> kayıt adıdır (rapor/komisyon/sözleşme) — site adı için onu DEĞİŞTİRME,
-sitede ad basan her yer <code>siteBrandName()</code>'i sormalı.</p>
+sitede ad basan her yer <code>siteBrandName()</code>'i sormalı. Şu an soranlar: partner şablonları,
+<code>public.dealer-landing</code>, <code>dealer/layouts/app</code> sol menü + avatar, <code>apply/create</code> partner şeridi.</p>
 <p><strong>Önizleme:</strong> <code>/p/{slug}?preview=1&amp;tpl={key}</code> — kaydetmeden başka şablon denemek için.
 Geçersiz key sessizce <code>DEFAULT</code>'a düşer. Önizleme <strong>yetki ister</strong>: sahibi bayi kullanıcısı
 (<code>users.dealer_code === dealers.code</code>) veya <code>User::ADMIN_PANEL_ROLES</code>. Anonim ziyaretçide

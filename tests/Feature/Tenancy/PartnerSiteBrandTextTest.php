@@ -96,5 +96,22 @@ class PartnerSiteBrandTextTest extends TestCase
         $this->assertSame('Parlak Akademi', $dealer->site_brand_name);
         $this->assertSame('Yeni Slogan', $dealer->site_tagline);
         $this->assertSame('Kayit Adi Ltd', $dealer->name, 'Kayit adi degismemeliydi');
+
+        // Bayi panelinin sol menüsü de görünen adı basar (kullanıcı adını değil).
+        $this->actingAs($user)->withSession(['2fa_passed' => true])
+            ->get('/dealer/mini-site')
+            ->assertOk()
+            ->assertSee('text-overflow:ellipsis;">Parlak Akademi</div>', false);
+    }
+
+    /** Öğrencinin gördüğü başvuru formu şeridi de görünen adı kullanır. */
+    public function test_apply_form_banner_uses_the_display_name(): void
+    {
+        $this->partner(['site_brand_name' => 'Parlak Akademi']);
+
+        $this->get('/apply/partner/OPE-26-09-0001')
+            ->assertOk()
+            ->assertSee('<strong>Parlak Akademi</strong> ile işbirliği başvurusu', false)
+            ->assertDontSee('Kayit Adi Ltd');
     }
 }

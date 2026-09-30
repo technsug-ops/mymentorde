@@ -327,7 +327,7 @@
 <body>
 @if(!empty($partner))
 <div style="position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg, var(--primary-deep), var(--primary));color:#fff;padding:10px 20px;text-align:center;font-size:13px;font-weight:600;z-index:100;box-shadow:0 2px 8px rgba({{ $pt['focus_shadow_rgb'] }},.25);">
-    🤝 <strong>{{ $partner->name }}</strong> ile işbirliği başvurusu
+    🤝 <strong>{{ $partner->siteBrandName() }}</strong> ile işbirliği başvurusu
     <span style="opacity:.85;margin-left:10px;font-weight:400;">· Bayi Kodu: {{ $partner->code }}</span>
 </div>
 <div style="height:42px;"></div>
