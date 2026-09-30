@@ -62,7 +62,8 @@ class PartnerSiteData
 
         return [
             'dealer'       => $dealer,
-            'brandName'    => $dealer->name,
+            'brandName'    => $dealer->siteBrandName(),
+            'tagline'      => trim((string) $dealer->site_tagline) ?: 'Almanya Eğitim Danışmanlığı',
             'brandLogoUrl' => $logoUrl,
             'accentColor'  => self::accent($dealer->site_accent_color),
             'heroTitle'    => $dealer->site_hero_title ?: 'Almanya\'da Eğitim Yolculuğunuz Burada Başlıyor',
@@ -70,7 +71,7 @@ class PartnerSiteData
                 ?: 'Üniversite başvurusundan vizeye, konaklamadan yerleşime — Almanya eğitim sürecinizin '
                     . 'her adımında yanınızdayız. Ücretsiz danışmanlık için hemen başvurun.',
             'aboutText'    => $dealer->site_about_text
-                ?: ($dealer->name . ' olarak, Almanya\'da eğitim almak isteyen öğrencilere uçtan uca '
+                ?: ($dealer->siteBrandName() . ' olarak, Almanya\'da eğitim almak isteyen öğrencilere uçtan uca '
                     . 'rehberlik ediyoruz. Deneyimli ekibimizle başvuru, vize ve yerleşim süreçlerinizi '
                     . 'sizin adınıza titizlikle yönetiyoruz.'),
             'services'     => self::services($dealer),

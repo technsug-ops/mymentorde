@@ -57,15 +57,16 @@
     /** Partner Template · STARTER — tasarımını buraya giydir. */
     $accent   = \App\Support\PartnerSiteData::accent($accentColor ?? null);
     $siteName = $brandName ?? config('brand.name', 'MentorDE');
+    $siteTagline = $tagline ?? 'Almanya Eğitim Danışmanlığı';
     $icon     = fn (string $k) => \App\Support\PartnerSiteData::icon($k);
     $waDigits = $whatsapp ? preg_replace('/\D+/', '', $whatsapp) : '';
     $waUrl    = $waDigits !== '' ? 'https://wa.me/' . $waDigits : null;
 @endphp
-<title>{{ $siteName }} — Almanya Eğitim Danışmanlığı</title>
+<title>{{ $siteName }} — {{ $siteTagline }}</title>
 @include('partials.favicon')
 <meta name="description" content="{{ Str::limit(strip_tags($heroSubtitle ?? ''), 155) }}">
 <meta name="robots" content="index, follow">
-<meta property="og:title" content="{{ $siteName }} — Almanya Eğitim Danışmanlığı">
+<meta property="og:title" content="{{ $siteName }} — {{ $siteTagline }}">
 <meta property="og:description" content="{{ Str::limit(strip_tags($heroSubtitle ?? ''), 200) }}">
 <meta property="og:type" content="website">
 {{-- Fontlar SADECE lokal (DSGVO): Google Fonts CDN'e istek atma --}}

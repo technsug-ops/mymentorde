@@ -481,6 +481,9 @@ Klavye kısayollarıyla hızlı inceleme:
 `/dealer/mini-site` → yayında: `/p/{slug}`
 
 - Bayi kendi logo / marka rengi / hero metni / iletişim bilgilerini girer
+- **Sitede Görünen Ad** ve **Etiket / Slogan** partnerin elindedir: kayıtlı bayi adı
+  (rapor, komisyon, sözleşme) değişmez, sitede partnerin yazdığı ad görünür. Boşsa kayıtlı ad
+  ve "Almanya Eğitim Danışmanlığı" gösterilir
 - Yayına alma (`site_enabled`) **manager onayına** bağlıdır
 - Sitedeki tüm CTA'lar `/apply/partner/{code}`'a gider → gelen lead otomatik o bayiye etiketlenir
 - **Kurumsal site yetkisi olan bayi** için genişletilmiş site (operasyon partner tipi

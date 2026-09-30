@@ -583,6 +583,11 @@ sıra = input adlarındaki index, JS her ekleme/silme/taşımada satırları yen
 `$packages` / `$faq` / `$universities` `dealers.site_packages|site_package_note|site_faq|site_universities`
 alanlarından gelir ve `/dealer/mini-site` editöründen girilir.
 
+**Görünen ad / etiket:** `$brandName` = `Dealer::siteBrandName()` (`site_brand_name` ?: `name`),
+`$tagline` = `site_tagline` ?: "Almanya Eğitim Danışmanlığı". Şablonlar `$siteTagline` kullanır.
+`dealers.name` kayıt adıdır (rapor/komisyon/sözleşme) — site adı için onu DEĞİŞTİRME,
+sitede ad basan her yer `siteBrandName()`'i sormalı.
+
 **Önizleme:** `/p/{slug}?preview=1&tpl={key}` — kaydetmeden başka şablon denemek için.
 Geçersiz key sessizce `DEFAULT`'a düşer. Önizleme **yetki ister**: sahibi bayi kullanıcısı
 (`users.dealer_code === dealers.code`) veya `User::ADMIN_PANEL_ROLES`. Anonim ziyaretçide

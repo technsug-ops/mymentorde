@@ -36,6 +36,8 @@ class Dealer extends Model
         'site_enabled',
         'site_logo_path',
         'site_accent_color',
+        'site_brand_name',
+        'site_tagline',
         'site_hero_title',
         'site_hero_subtitle',
         'site_hero_image_path',
@@ -159,6 +161,15 @@ class Dealer extends Model
         return $this->site_mode === self::SITE_MODE_PARTNER
             || $this->dealer_type_code === 'b2b_partner'
             || $this->hasRole(self::ROLE_B2B_PARTNER);
+    }
+
+    /**
+     * Sitede görünen ad: partnerin girdiği ticari ad, yoksa kayıt adı.
+     * `name` rapor/komisyon/sözleşme kaydıdır — site adı için onu değiştirme.
+     */
+    public function siteBrandName(): string
+    {
+        return trim((string) $this->site_brand_name) ?: (string) $this->name;
     }
 
     // ── Hiyerarşi (2 seviye: bölge → alt bayi) ────────────────

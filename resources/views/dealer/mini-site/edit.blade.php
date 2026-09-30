@@ -53,6 +53,24 @@
     </div>
 
     <div style="margin-bottom:16px;">
+        <label style="display:block;font-weight:600;margin-bottom:6px;font-size:14px;">Sitede Görünen Ad</label>
+        <input type="text" name="site_brand_name" value="{{ old('site_brand_name', $d?->site_brand_name) }}" maxlength="120"
+               placeholder="{{ $d?->name }}"
+               style="width:100%;padding:10px 12px;border:1px solid var(--border,#cbd5e1);border-radius:8px;font-size:14px;">
+        <small style="color:var(--muted,#64748b);font-size:12px;">Logo yoksa sol üstte ve sayfa başlığında bu ad görünür. Boş bırakırsanız kayıtlı adınız (<strong>{{ $d?->name }}</strong>) kullanılır.</small>
+    </div>
+
+    @if($d?->usesPartnerSite())
+    <div style="margin-bottom:16px;">
+        <label style="display:block;font-weight:600;margin-bottom:6px;font-size:14px;">Etiket / Slogan</label>
+        <input type="text" name="site_tagline" value="{{ old('site_tagline', $d?->site_tagline) }}" maxlength="120"
+               placeholder="Almanya Eğitim Danışmanlığı"
+               style="width:100%;padding:10px 12px;border:1px solid var(--border,#cbd5e1);border-radius:8px;font-size:14px;">
+        <small style="color:var(--muted,#64748b);font-size:12px;">Ana başlığın üstündeki küçük etikette ve tarayıcı sekmesinde görünür. Boşsa "Almanya Eğitim Danışmanlığı" yazar.</small>
+    </div>
+    @endif
+
+    <div style="margin-bottom:16px;">
         <label style="display:block;font-weight:600;margin-bottom:6px;font-size:14px;">Logo (PNG/JPG/WEBP, max 2MB)</label>
         @if($d?->site_logo_path)
             <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($d->site_logo_path) }}" alt="logo" style="height:48px;margin-bottom:8px;display:block;">
