@@ -481,6 +481,9 @@ Quick review with keyboard shortcuts:
 `/dealer/mini-site` → published at `/p/{slug}`
 
 - Dealer sets their own logo / brand color / hero copy / contact details
+- **Display name** and **tagline** are up to the partner: the registered dealer name
+  (reports, commission, contracts) stays unchanged, the site shows the name the partner typed.
+  If empty, the registered name and "Almanya Eğitim Danışmanlığı" are shown
 - Going live (`site_enabled`) requires **manager approval**
 - All CTAs point to `/apply/partner/{code}` → incoming leads are tagged to that dealer automatically
 - Extended site for **dealers with the corporate-site entitlement** (operation partners

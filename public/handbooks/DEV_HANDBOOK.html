@@ -890,6 +890,10 @@ sıra = input adlarındaki index, JS her ekleme/silme/taşımada satırları yen
 <p><code>$steps</code> / <code>$whyUs</code> firmadan bağımsızdır (DB alanı YOK, tek kaynak <code>PartnerSiteData</code>);
 <code>$packages</code> / <code>$faq</code> / <code>$universities</code> <code>dealers.site_packages|site_package_note|site_faq|site_universities</code>
 alanlarından gelir ve <code>/dealer/mini-site</code> editöründen girilir.</p>
+<p><strong>Görünen ad / etiket:</strong> <code>$brandName</code> = <code>Dealer::siteBrandName()</code> (<code>site_brand_name</code> ?: <code>name</code>),
+<code>$tagline</code> = <code>site_tagline</code> ?: &quot;Almanya Eğitim Danışmanlığı&quot;. Şablonlar <code>$siteTagline</code> kullanır.
+<code>dealers.name</code> kayıt adıdır (rapor/komisyon/sözleşme) — site adı için onu DEĞİŞTİRME,
+sitede ad basan her yer <code>siteBrandName()</code>'i sormalı.</p>
 <p><strong>Önizleme:</strong> <code>/p/{slug}?preview=1&amp;tpl={key}</code> — kaydetmeden başka şablon denemek için.
 Geçersiz key sessizce <code>DEFAULT</code>'a düşer. Önizleme <strong>yetki ister</strong>: sahibi bayi kullanıcısı
 (<code>users.dealer_code === dealers.code</code>) veya <code>User::ADMIN_PANEL_ROLES</code>. Anonim ziyaretçide

@@ -61,7 +61,7 @@ class DealerMiniSiteController extends Controller
             'counters'      => DealerLandingData::counters(),
             'managerAccent' => $dealer->site_accent_color ?: '#1e40af',
             'accentColor'   => $dealer->site_accent_color ?: null,
-            'brandName'     => $dealer->name,
+            'brandName'     => $dealer->siteBrandName(),
             'brandLogoUrl'  => $logoUrl,
             'heroTitle'     => $dealer->site_hero_title ?: null,
             'heroSubtitle'  => $dealer->site_hero_subtitle ?: null,

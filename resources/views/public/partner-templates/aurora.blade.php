@@ -11,17 +11,18 @@
      *  İkon: App\Support\PartnerSiteData::icon(). CTA → /apply/partner/{code}. */
     $accent   = \App\Support\PartnerSiteData::accent($accentColor ?? null);
     $siteName = $brandName ?? config('brand.name', 'MentorDE');
+    $siteTagline = $tagline ?? 'Almanya Eğitim Danışmanlığı';
     $icon     = fn (string $k) => \App\Support\PartnerSiteData::icon($k);
 
     // WhatsApp → wa.me (sadece rakam). Boşsa null.
     $waDigits = $whatsapp ? preg_replace('/\D+/', '', $whatsapp) : '';
     $waUrl    = $waDigits !== '' ? 'https://wa.me/' . $waDigits : null;
 @endphp
-<title>{{ $siteName }} — Almanya Eğitim Danışmanlığı</title>
+<title>{{ $siteName }} — {{ $siteTagline }}</title>
 @include('partials.favicon')
 <meta name="description" content="{{ Str::limit(strip_tags($heroSubtitle ?? ''), 155) }}">
 <meta name="robots" content="index, follow">
-<meta property="og:title" content="{{ $siteName }} — Almanya Eğitim Danışmanlığı">
+<meta property="og:title" content="{{ $siteName }} — {{ $siteTagline }}">
 <meta property="og:description" content="{{ Str::limit(strip_tags($heroSubtitle ?? ''), 200) }}">
 <meta property="og:type" content="website">
 <link rel="stylesheet" href="{{ asset('fonts/local-fonts.css') }}">
@@ -340,7 +341,7 @@ footer .pb{opacity:.6;font-size:12px;margin-top:6px;}
     <div class="dots"></div>
     <div class="container hero-grid">
         <div>
-            <span class="hero-badge"><span class="pd"></span> {{ $siteName }} · Almanya Eğitim Danışmanlığı</span>
+            <span class="hero-badge"><span class="pd"></span> {{ $siteName }} · {{ $siteTagline }}</span>
             <h1>{{ $heroTitle }}</h1>
             <p class="hero-lead">{{ $heroSubtitle }}</p>
             <div class="hero-ctas">

@@ -59,6 +59,8 @@ class DealerMiniSiteController extends Controller
             'public_slug'        => ['nullable', 'string', 'min:3', 'max:64', 'regex:/^[a-z0-9-]+$/',
                                      Rule::unique('dealers', 'public_slug')->ignore($dealer->id)],
             'site_accent_color'  => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'site_brand_name'    => ['nullable', 'string', 'max:120'],
+            'site_tagline'       => ['nullable', 'string', 'max:120'],
             'site_hero_title'    => ['nullable', 'string', 'max:160'],
             'site_hero_subtitle' => ['nullable', 'string', 'max:300'],
             'site_about_text'    => ['nullable', 'string', 'max:4000'],
@@ -115,6 +117,8 @@ class DealerMiniSiteController extends Controller
         $payload = [
             'public_slug'        => $validated['public_slug'] ?: $dealer->public_slug,
             'site_accent_color'  => $validated['site_accent_color'] ?? null,
+            'site_brand_name'    => $validated['site_brand_name'] ?? null,
+            'site_tagline'       => $validated['site_tagline'] ?? null,
             'site_hero_title'    => $validated['site_hero_title'] ?? null,
             'site_hero_subtitle' => $validated['site_hero_subtitle'] ?? null,
             'site_about_text'    => $validated['site_about_text'] ?? null,
